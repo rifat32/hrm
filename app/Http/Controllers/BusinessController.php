@@ -207,10 +207,7 @@ class BusinessController extends Controller
                     array_push($images,("/".$location."/".$new_file_name));
 
 
-                    // BusinessGallery::create([
-                    //     "image" => ("/".$location."/".$new_file_name),
-                    //     "business_id" => $business_id
-                    // ]);
+                 
 
                 }
             }
@@ -351,7 +348,7 @@ if(!$user->hasRole('business_owner')) {
 
         $insertableData['business']['status'] = "pending";
 
-        $insertableData['business']['created_by'] = $request->user()->id;
+        // $insertableData['business']['created_by'] = $request->user()->id;
         $insertableData['business']['is_active'] = true;
         $business =  Business::create($insertableData['business']);
 
@@ -521,7 +518,7 @@ if(!$user->hasRole('business_owner')) {
 
         $insertableData['business']['status'] = "pending";
         $insertableData['business']['owner_id'] = $user->id;
-        $insertableData['business']['created_by'] = $request->user()->id;
+        // $insertableData['business']['created_by'] = $request->user()->id;
         $insertableData['business']['is_active'] = true;
         $business =  Business::create($insertableData['business']);
 
@@ -674,7 +671,7 @@ if(!$user->hasRole('business_owner')) {
        ]);
        if(!$request->user()->hasRole('superadmin')) {
         $userPrev  = $userPrev->where(function ($query) {
-            $query->where('created_by', auth()->user()->id)
+            $query->where('business_id', auth()->user()->business_id)
                   ->orWhere('id', auth()->user()->id);
         });
     }
@@ -877,7 +874,7 @@ if(!$user->hasRole('business_owner')) {
             $businessQuery  = Business::where(["id" => $updatableData["id"]]);
             if(!auth()->user()->hasRole('superadmin')) {
                 $businessQuery = $businessQuery->where(function ($query) {
-                    $query->where('created_by', auth()->user()->id);
+                    $query->where('id', auth()->user()->business_id);
                 });
             }
 
@@ -1210,8 +1207,10 @@ if(!$user->hasRole('business_owner')) {
 
             if(!$request->user()->hasRole('superadmin')) {
                 $businessesQuery = $businessesQuery->where(function ($query) use ($request) {
-                    $query->where('created_by', $request->user()->id)
-                          ->orWhere('owner_id', $request->user()->id);
+                    // $query->where('created_by', $request->user()->id)
+                    //       ->orWhere('owner_id', $request->user()->id);
+                    $query->where('owner_id', $request->user()->id)
+                      ->orWhere('id', $request->user()->business_id);
                 });
             }
 
@@ -1433,7 +1432,7 @@ if(!$user->hasRole('business_owner')) {
            ]);
            if(!$request->user()->hasRole('superadmin')) {
             $businessesQuery =    $businessesQuery->where([
-                "created_by" =>$request->user()->id
+                "business_id" =>$request->user()->business_id
             ]);
         }
 
