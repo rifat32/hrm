@@ -201,13 +201,22 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                  ],401);
             }
+            $business_id = $request->user()->business_id;
 
             $insertableData = $request->validated();
 
             $insertableData['password'] = Hash::make($request['password']);
             $insertableData['is_active'] = true;
             $insertableData['remember_token'] = Str::random(10);
+
+
+            if(!empty($business_id)) {
+                $insertableData['business_id'] = $business_id;
+            }
+
+
             $user =  User::create($insertableData);
+
 
             $user->assignRole($insertableData['role']);
 
@@ -230,284 +239,7 @@ class UserManagementController extends Controller
     }
 
 
-      /**
-     *
-     * @OA\Put(
-     *      path="/v1.0/customer-users",
-     *      operationId="createOrUpdateCustomerUser",
-     *      tags={"customer_management"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *      summary="This method is to upsert customer user",
-     *      description="This method is to upsert customer user",
-     *
-     *  @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode"},
-     *    @OA\Property(property="id", type="number", format="number",example="1"),
-     *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
-     *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
-     *            @OA\Property(property="email", type="string", format="string",example="rifat@g.c"),
-     *  * *  @OA\Property(property="phone", type="string", format="string",example="01771034383"),
-     *  * *  @OA\Property(property="address_line_1", type="string", format="string",example="dhaka"),
-     *  * *  @OA\Property(property="address_line_2", type="string", format="string",example="dinajpur"),
-     *  * *  @OA\Property(property="country", type="string", format="string",example="bangladesh"),
-     *  * *  @OA\Property(property="city", type="string", format="string",example="dhaka"),
-     *  * *  @OA\Property(property="postcode", type="string", format="string",example="1207"),
-     *      *  * *  @OA\Property(property="lat", type="string", format="string",example="1207"),
-     *      *  * *  @OA\Property(property="long", type="string", format="string",example="1207"),
-     *
-     *         ),
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
 
-    public function createOrUpdateCustomerUser(GuestUserRegisterRequest $request)
-    {
-        try {
-            $this->storeActivity($request,"");
-            $insertableData = $request->validated();
-
-            $insertableData['password'] = Hash::make(Str::random(8));
-            $insertableData['remember_token'] = Str::random(10);
-
-            // if (empty($insertableData['email'])) {
-            //     $insertableData['email'] = "guest_" . '@example.com';
-            //     $counter = 1;
-
-            //     while (User::where('email', $insertableData['email'])->exists()) {
-            //         $insertableData['email'] = "guest_" . $counter . '@example.com';
-            //         $counter++;
-            //     }
-            // }
-
-            $phone_existsQuery =  User::where([
-                "phone" => $insertableData["phone"]
-            ])
-
-            ->whereHas('roles', function ($query) {
-             return $query->where('name','=', 'customer');
-                });
-
-                if(!empty($insertableData["id"])) {
-                    $phone_existsQuery  =     $phone_existsQuery->where('id', '!=', $insertableData["id"]);
-                }
-
-                $phone_exists =   $phone_existsQuery->first();
-
-            if($phone_exists) {
-                    $error =  [
-                  "message" => "The given data was invalid.",
-                  "errors" => ["phone"=>["phone number already taken"]]
-                    ];
-                       throw new Exception(json_encode($error),422);
-
-            }
-
-            if (empty($insertableData['email']) && empty($insertableData['id'])) {
-                $maxCounterUser = User::where('email', 'LIKE', 'guest_%')->orderByRaw('SUBSTRING_INDEX(email, "_", -1) + 0 DESC')->first();
-
-                if ($maxCounterUser) {
-                    $counter = intval(substr($maxCounterUser->email, strpos($maxCounterUser->email, "_") + 1)) + 1;
-                } else {
-                    $counter = 1;
-                }
-
-                $insertableData['email'] = "guest_" . $counter . '@example.com';
-            }
-
-
-            if(!empty($insertableData["id"])) {
-             $user =  User::where([
-                    "id" => $insertableData["id"]
-                ])
-                ->whereHas('roles', function ($query) {
-                    return $query->where('name','=', 'customer');
-                       })
-                ->first();
-
-                if(!$user) {
-                    return response()->json(["message" => "user not found",404]);
-                }
-                if(!$user->email_verified_at) {
-                    return response()->json(["message" => "you can not update an active user",404]);
-                }
-                $user->update(collect($insertableData)->only([
-                    'first_Name',
-                    'last_Name',
-                    'email',
-                    'phone',
-                    'image',
-                    'address_line_1',
-                    'address_line_2',
-                    'country',
-                    'city',
-                    'postcode',
-                    'lat',
-                    'long',
-                ])->toArray());
-
-                // Optional: If you need to retrieve the updated user with relationships
-                $user = $user->fresh();
-
-
-            }
-            else {
-                $user =  User::create($insertableData);
-
-                // verify email starts
-                $email_token = Str::random(30);
-                $user->email_verify_token = $email_token;
-                $user->email_verify_token_expires = Carbon::now()->subDays(-1);
-                $user->save();
-
-
-               $user->assignRole("customer");
-
-
-
-
-              if(env("SEND_EMAIL") == true) {
-                  Mail::to($user->email)->send(new VerifyMail($user));
-              }
-            }
-
-
-
-
-// verify email ends
-
-            return response($user, 201);
-        } catch (Exception $e) {
-
-            return $this->sendError($e, 500,$request);
-        }
-    }
-    /**
-        *
-     * @OA\Get(
-     *      path="/v1.0/customer-users/get-by-phone/{phone}",
-     *      operationId="getCustomerUserByPhone",
-     *      tags={"customer_management"},
-    *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *              @OA\Parameter(
-     *         name="phone",
-     *         in="path",
-     *         description="phone",
-     *         required=true,
-     *  example="01771034383"
-     *      ),
-
-     *      summary="This method is to get customer user by phone",
-     *      description="This method is to get customer user by phone",
-     *
-
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-     public function getCustomerUserByPhone($phone,Request $request) {
-        try{
-            $this->storeActivity($request,"");
-
-            $user = User::where([
-                "phone" => $phone
-            ])
-            ->whereHas('roles', function ($query) {
-             return $query->where('name','=', 'customer');
-                })
-            ->first();
-
-            if(!$user) {
-                return response()->json([
-                    "message" => "no user found"
-                ],404);
-            }
-            $booking = Booking::with("automobile_make","automobile_model")->where([
-              "customer_id" => $user->id
-            ])
-            ->select(
-            "automobile_make_id",
-            "automobile_model_id",
-            "car_registration_no",
-            "car_registration_year",
-            "fuel",
-            "transmission",)
-            ->first();
-            $user->booking = $booking;
-
-            return response()->json([$user], 200);
-        } catch(Exception $e){
-
-        return $this->sendError($e,500,$request);
-        }
-
-    }
  /**
         *
      * @OA\Put(
@@ -592,12 +324,17 @@ class UserManagementController extends Controller
             "id" => $request["id"]
        ]);
 
-            if($userQuery->first()->hasRole("superadmin") && $request["role"] != "superadmin"){
+              $updatableUser = $userQuery->first();
+            if($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin"){
                 return response()->json([
                    "message" => "You can not change the role of super admin"
                 ],401);
            }
-
+           if(!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id) {
+            return response()->json([
+                "message" => "You can not update this user"
+             ],401);
+        }
 
 
             $updatableData = $request->validated();
@@ -610,7 +347,11 @@ class UserManagementController extends Controller
             }
             $updatableData['is_active'] = true;
             $updatableData['remember_token'] = Str::random(10);
-            $user  =  tap(User::where(["id" => $updatableData["id"]]))->update(collect($updatableData)->only([
+            $userQueryTerms = [
+                "id" => $updatableData["id"],
+            ];
+
+            $user  =  tap(User::where($userQueryTerms))->update(collect($updatableData)->only([
                 'first_Name' ,
                 'last_Name',
                 'password',
@@ -719,7 +460,8 @@ class UserManagementController extends Controller
             $userQuery  = User::where(["id" => $updatableData["id"]]);
             if(!auth()->user()->hasRole('superadmin')) {
                 $userQuery = $userQuery->where(function ($query) {
-                    $query->where('created_by', auth()->user()->id);
+                    // $query->where('created_by', auth()->user()->id);
+                    $query->where('business_id', auth()->user()->business_id);
                 });
             }
 
@@ -963,6 +705,12 @@ class UserManagementController extends Controller
            }
 
             $usersQuery = User::with("roles");
+            // $query->where('business_id', auth()->user()->business_id);
+            if(!$request->user()->hasRole('superadmin')) {
+                $usersQuery =    $usersQuery->where([
+                    "business_id" =>$request->user()->business_id
+                ]);
+            }
             // ->whereHas('roles', function ($query) {
             //     // return $query->where('name','!=', 'customer');
             // });
@@ -1061,7 +809,15 @@ class UserManagementController extends Controller
             ->where([
                 "id" => $id
             ])
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                $query->where('business_id', $request->user()->business_id);
+            })
             ->first();
+            if(!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ],404);
+            }
             // ->whereHas('roles', function ($query) {
             //     // return $query->where('name','!=', 'customer');
             // });
@@ -1137,16 +893,24 @@ class UserManagementController extends Controller
                    "message" => "You can not perform this action"
                 ],401);
            }
-           $userQuery = User::where([
+           $user = User::where([
             "id" => $id
-       ]);
-           if($userQuery->first()->hasRole("superadmin")){
+       ])->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+        $query->where('business_id', $request->user()->business_id);
+    })
+    ->first();
+
+    if(!$user) {
+        return response()->json([
+            "message" => "no user found"
+        ],404);
+    }
+           if($user->hasRole("superadmin")){
             return response()->json([
                "message" => "superadmin can not be deleted"
             ],401);
        }
-
-           $userQuery
+           $user
            ->delete();
 
             return response()->json(["ok" => true], 200);

@@ -35,7 +35,7 @@ class AuthController extends Controller
      *
      * @OA\Post(
      *      path="/v1.0/register",
-     *      operationId="register",
+     *      operationId="z.unused",
      *      tags={"auth"},
      *       security={
      *           {"bearerAuth": {}}

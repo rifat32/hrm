@@ -33,6 +33,7 @@ class User extends Authenticatable
         "long",
         'email',
         'password',
+        'business_id',
         "created_by",
          'is_active'
     ];

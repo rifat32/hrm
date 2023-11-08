@@ -48,6 +48,11 @@ class CreateUsersTable extends Migration
 
             $table->string("background_image")->nullable();
 
+
+
+            $table->unsignedBigInteger("business_id")->nullable(true);
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();

@@ -133,8 +133,8 @@ Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
 
 
 
-Route::put('/v1.0/customer-users', [UserManagementController::class, "createOrUpdateCustomerUser"]);
-Route::get('/v1.0/customer-users/get-by-phone/{phone}', [UserManagementController::class, "getCustomerUserByPhone"]);
+
+
 
 
 

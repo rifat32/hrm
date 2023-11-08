@@ -312,7 +312,7 @@ class BusinessController extends Controller
      *     )
      */
     public function createBusiness(BusinessCreateRequest $request) {
-
+// this is business create by super admin
         try{
             $this->storeActivity($request,"");
      return  DB::transaction(function ()use (&$request) {
@@ -511,8 +511,6 @@ if(!$user->hasRole('business_owner')) {
     $insertableData['user']['long'] = $insertableData['business']['long'];
 
     $user =  User::create($insertableData['user']);
-    $user->email_verified_at = now();
-    $user->save();
 
     $user->assignRole('business_owner');
    // end user info ##############
@@ -528,6 +526,9 @@ if(!$user->hasRole('business_owner')) {
         $business =  Business::create($insertableData['business']);
 
 
+        $user->email_verified_at = now();
+        $user->business_id = $business->id;
+        $user->save();
 
 
 
@@ -735,12 +736,12 @@ if(!$user->hasRole('business_owner')) {
             ->first();
             if(!$user) {
                 return response()->json([
-                    "message" => "no user found"
-                    ],404);
+                    "message" => "something went wrong."
+                    ],500);
 
         }
 
-        $user->syncRoles(["business_owner"]);
+        // $user->syncRoles(["business_owner"]);
 
 
 
@@ -780,8 +781,8 @@ if(!$user->hasRole('business_owner')) {
             ->first();
             if(!$business) {
                 return response()->json([
-                    "massage" => "no business found"
-                ],404);
+                    "massage" => "something went wrong"
+                ],500);
 
             }
 
@@ -1204,8 +1205,6 @@ if(!$user->hasRole('business_owner')) {
 
             $businessesQuery = Business::with(
                 "owner",
-
-
             );
 
 
