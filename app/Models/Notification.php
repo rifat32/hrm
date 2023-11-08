@@ -13,11 +13,11 @@ class Notification extends Model
         "sender_id",
         "receiver_id",
         "customer_id",
-        "garage_id",
-        "bid_id",
-        "pre_booking_id",
-        "booking_id",
-        "job_id",
+        "business_id",
+
+
+
+      
         "notification_template_id",
         "status",
 
@@ -32,12 +32,10 @@ class Notification extends Model
     public function customer(){
         return $this->belongsTo(User::class,'customer_id', 'id')->withTrashed();
     }
-    public function garage(){
-        return $this->belongsTo(Garage::class,'garage_id', 'id')->withTrashed();
+    public function business(){
+        return $this->belongsTo(Business::class,'business_id', 'id')->withTrashed();
     }
 
-    public function booking(){
-        return $this->belongsTo(Booking::class,'booking_id', 'id')->withTrashed();
-    }
+
 
 }

@@ -11,8 +11,8 @@ use Illuminate\Routing\Controller as BaseController;
 /**
      * @OA\Info(
      *      version="1.0.0",
-     *      title="Laravel Garage Management Documentation",
-     *      description="L5 Swagger OpenApi description for garage project",
+     *      title="Laravel HRM Documentation",
+     *      description="L5 Swagger OpenApi description for hrm project",
      *      @OA\Contact(
      *          email="drrifatalashwad0@gmail.com"
      *      ),
@@ -37,8 +37,8 @@ use Illuminate\Routing\Controller as BaseController;
 
      *
      * @OA\Tag(
-     *     name="Garages",
-     *     description="API Endpoints of Garages"
+     *     name="HRM",
+     *     description="API Endpoints of HRM Project"
      * )
      */
 class Controller extends BaseController

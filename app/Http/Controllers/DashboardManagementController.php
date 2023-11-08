@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Utils\ErrorUtil;
-use App\Http\Utils\GarageUtil;
+use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Affiliation;
 use App\Models\Booking;
 use App\Models\FuelStation;
-use App\Models\Garage;
-use App\Models\GarageAffiliation;
+use App\Models\Business;
+use App\Models\BusinessAffiliation;
 use App\Models\Job;
 use App\Models\PreBooking;
 use App\Models\Service;
@@ -21,21 +21,21 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardManagementController extends Controller
 {
-    use ErrorUtil, GarageUtil,UserActivityUtil;
+    use ErrorUtil, BusinessUtil,UserActivityUtil;
 
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/jobs-in-area/{garage_id}",
-     *      operationId="getGarageOwnerDashboardDataJobList",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/jobs-in-area/{business_id}",
+     *      operationId="getBusinessOwnerDashboardDataJobList",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -53,8 +53,8 @@ class DashboardManagementController extends Controller
      * required=true,
      * example="2019-06-29"
      * ),
-     *      summary="This should return list of jobs posted by drivers within same city and which are still not finalised and this garage owner have not applied yet.",
-     *      description="This should return list of jobs posted by drivers within same city and which are still not finalised and this garage owner have not applied yet.",
+     *      summary="This should return list of jobs posted by drivers within same city and which are still not finalised and this business owner have not applied yet.",
+     *      description="This should return list of jobs posted by drivers within same city and which are still not finalised and this business owner have not applied yet.",
      *
 
      *      @OA\Response(
@@ -91,27 +91,27 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardDataJobList($garage_id, Request $request)
+    public function getBusinessOwnerDashboardDataJobList($business_id, Request $request)
     {
         try{
             $this->storeActivity($request,"");
-            $garage = Garage::where([
-                "id" => $garage_id,
+            $business = Business::where([
+                "id" => $business_id,
                 "owner_id" => $request->user()->id
             ])
                 ->first();
-            if (!$garage) {
+            if (!$business) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the request garage does not exits"
+                    "message" => "you are not the owner of the business or the request business does not exits"
                 ], 404);
             }
 
             $prebookingQuery = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
             ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
                 ->where([
-                    "users.city" => $garage->city
+                    "users.city" => $business->city
                 ])
-                ->whereNotIn('job_bids.garage_id', [$garage->id])
+                ->whereNotIn('job_bids.business_id', [$business->id])
                 ->where('pre_bookings.status', "pending");
 
 
@@ -130,9 +130,9 @@ class DashboardManagementController extends Controller
         WHERE
         job_bids.pre_booking_id = pre_bookings.id
         AND
-        job_bids.garage_id = ' . $garage->id . '
+        job_bids.business_id = ' . $business->id . '
 
-        ) AS garage_applied')
+        ) AS business_applied')
 
                 )
                 ->havingRaw('(SELECT COUNT(job_bids.id) FROM job_bids WHERE job_bids.pre_booking_id = pre_bookings.id)  < 4')
@@ -150,21 +150,21 @@ class DashboardManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/jobs-application/{garage_id}",
-     *      operationId="getGarageOwnerDashboardDataJobApplications",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/jobs-application/{business_id}",
+     *      operationId="getBusinessOwnerDashboardDataJobApplications",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
-     *      summary="Total number of Jobs in the area and out of which total number of jobs this garage owner have applied",
-     *      description="Total number of Jobs in the area and out of which total number of jobs this garage owner have applied",
+     *      summary="Total number of Jobs in the area and out of which total number of jobs this business owner have applied",
+     *      description="Total number of Jobs in the area and out of which total number of jobs this business owner have applied",
      *
 
      *      @OA\Response(
@@ -201,26 +201,26 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardDataJobApplications($garage_id, Request $request)
+    public function getBusinessOwnerDashboardDataJobApplications($business_id, Request $request)
     {
         try{
         $this->storeActivity($request,"");
-        $garage = Garage::where([
-            "id" => $garage_id,
+        $business = Business::where([
+            "id" => $business_id,
             "owner_id" => $request->user()->id
         ])
             ->first();
-        if (!$garage) {
+        if (!$business) {
             return response()->json([
-                "message" => "you are not the owner of the garage or the request garage does not exits"
+                "message" => "you are not the owner of the business or the request business does not exits"
             ], 404);
         }
 
         $data["total_jobs"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
-            //  ->whereNotIn('job_bids.garage_id', [$garage->id])
+            //  ->whereNotIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->groupBy("pre_bookings.id")
 
@@ -229,18 +229,18 @@ class DashboardManagementController extends Controller
 
         $data["weekly_jobs"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
-            //  ->whereNotIn('job_bids.garage_id', [$garage->id])
+            //  ->whereNotIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
             ->groupBy("pre_bookings.id")
             ->count();
         $data["monthly_jobs"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
-            //  ->whereNotIn('job_bids.garage_id', [$garage->id])
+            //  ->whereNotIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
             ->groupBy("pre_bookings.id")
@@ -252,9 +252,9 @@ class DashboardManagementController extends Controller
         $data["applied_total_jobs"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->groupBy("pre_bookings.id")
 
@@ -262,9 +262,9 @@ class DashboardManagementController extends Controller
         $data["applied_weekly_jobs"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
             ->groupBy("pre_bookings.id")
@@ -273,9 +273,9 @@ class DashboardManagementController extends Controller
         $data["applied_monthly_jobs"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
             ->groupBy("pre_bookings.id")
@@ -292,21 +292,21 @@ class DashboardManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/winned-jobs-application/{garage_id}",
-     *      operationId="getGarageOwnerDashboardDataWinnedJobApplications",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/winned-jobs-application/{business_id}",
+     *      operationId="getBusinessOwnerDashboardDataWinnedJobApplications",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
-     *      summary="Total Job Won( Total job User have selcted this garage )",
-     *      description="Total Job Won( Total job User have selcted this garage )",
+     *      summary="Total Job Won( Total job User have selcted this business )",
+     *      description="Total Job Won( Total job User have selcted this business )",
      *
 
      *      @OA\Response(
@@ -343,24 +343,24 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardDataWinnedJobApplications($garage_id, Request $request)
+    public function getBusinessOwnerDashboardDataWinnedJobApplications($business_id, Request $request)
     {
         try{
             $this->storeActivity($request,"");
-            $garage = Garage::where([
-                "id" => $garage_id,
+            $business = Business::where([
+                "id" => $business_id,
                 "owner_id" => $request->user()->id
             ])
                 ->first();
-            if (!$garage) {
+            if (!$business) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the request garage does not exits"
+                    "message" => "you are not the owner of the business or the request business does not exits"
                 ], 404);
             }
 
             $data["total"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
                 ->where([
-                    "bookings.garage_id" => $garage->id
+                    "bookings.business_id" => $business->id
                 ])
 
                 ->where('pre_bookings.status', "booked")
@@ -369,7 +369,7 @@ class DashboardManagementController extends Controller
 
             $data["weekly"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
                 ->where([
-                    "bookings.garage_id" => $garage->id
+                    "bookings.business_id" => $business->id
                 ])
                 ->where('pre_bookings.status', "booked")
                 ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
@@ -378,7 +378,7 @@ class DashboardManagementController extends Controller
 
             $data["monthly"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
                 ->where([
-                    "bookings.garage_id" => $garage->id
+                    "bookings.business_id" => $business->id
                 ])
 
                 ->where('pre_bookings.status', "booked")
@@ -399,21 +399,21 @@ class DashboardManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/completed-bookings/{garage_id}",
-     *      operationId="getGarageOwnerDashboardDataCompletedBookings",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/completed-bookings/{business_id}",
+     *      operationId="getBusinessOwnerDashboardDataCompletedBookings",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
-     *      summary="Total completed Bookings Total Bookings completed by this garage owner",
-     *      description="Total completed Bookings Total Bookings completed by this garage owner",
+     *      summary="Total completed Bookings Total Bookings completed by this business owner",
+     *      description="Total completed Bookings Total Bookings completed by this business owner",
      *
 
      *      @OA\Response(
@@ -450,37 +450,37 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardDataCompletedBookings($garage_id, Request $request)
+    public function getBusinessOwnerDashboardDataCompletedBookings($business_id, Request $request)
     {
         try{
             $this->storeActivity($request,"");
-            $garage = Garage::where([
-                "id" => $garage_id,
+            $business = Business::where([
+                "id" => $business_id,
                 "owner_id" => $request->user()->id
             ])
                 ->first();
-            if (!$garage) {
+            if (!$business) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the request garage does not exits"
+                    "message" => "you are not the owner of the business or the request business does not exits"
                 ], 404);
             }
 
             $data["total"] = Booking::where([
                 "bookings.status" => "converted_to_job",
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
 
             ])
                 ->count();
             $data["weekly"] = Booking::where([
                 "bookings.status" => "converted_to_job",
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
 
             ])
                 ->whereBetween('bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
                 ->count();
             $data["monthly"] = Booking::where([
                 "bookings.status" => "converted_to_job",
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
 
             ])
                 ->whereBetween('bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
@@ -502,16 +502,16 @@ class DashboardManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/upcoming-jobs/{garage_id}/{duration}",
-     *      operationId="getGarageOwnerDashboardDataUpcomingJobs",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/upcoming-jobs/{business_id}/{duration}",
+     *      operationId="getBusinessOwnerDashboardDataUpcomingJobs",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -522,8 +522,8 @@ class DashboardManagementController extends Controller
      *         required=true,
      *  example="7"
      *      ),
-     *      summary="Total completed Bookings Total Bookings completed by this garage owner",
-     *      description="Total completed Bookings Total Bookings completed by this garage owner",
+     *      summary="Total completed Bookings Total Bookings completed by this business owner",
+     *      description="Total completed Bookings Total Bookings completed by this business owner",
      *
 
      *      @OA\Response(
@@ -560,18 +560,18 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardDataUpcomingJobs($garage_id, $duration, Request $request)
+    public function getBusinessOwnerDashboardDataUpcomingJobs($business_id, $duration, Request $request)
     {
         try{
             $this->storeActivity($request,"");
-            $garage = Garage::where([
-                "id" => $garage_id,
+            $business = Business::where([
+                "id" => $business_id,
                 "owner_id" => $request->user()->id
             ])
                 ->first();
-            if (!$garage) {
+            if (!$business) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the request garage does not exits"
+                    "message" => "you are not the owner of the business or the request business does not exits"
                 ], 404);
             }
             $startDate = now();
@@ -580,7 +580,7 @@ class DashboardManagementController extends Controller
 
             $data = Job::where([
                 "jobs.status" => "pending",
-                "jobs.garage_id" => $garage->id
+                "jobs.business_id" => $business->id
 
             ])
                 ->whereBetween('jobs.job_start_date', [$startDate, $endDate])
@@ -602,16 +602,16 @@ class DashboardManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/expiring-affiliations/{garage_id}/{duration}",
-     *      operationId="getGarageOwnerDashboardDataExpiringAffiliations",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/expiring-affiliations/{business_id}/{duration}",
+     *      operationId="getBusinessOwnerDashboardDataExpiringAffiliations",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -622,8 +622,8 @@ class DashboardManagementController extends Controller
      *         required=true,
      *  example="7"
      *      ),
-     *      summary="Total completed Bookings Total Bookings completed by this garage owner",
-     *      description="Total completed Bookings Total Bookings completed by this garage owner",
+     *      summary="Total completed Bookings Total Bookings completed by this business owner",
+     *      description="Total completed Bookings Total Bookings completed by this business owner",
      *
 
      *      @OA\Response(
@@ -660,26 +660,26 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardDataExpiringAffiliations($garage_id, $duration, Request $request)
+    public function getBusinessOwnerDashboardDataExpiringAffiliations($business_id, $duration, Request $request)
     {
         try{
             $this->storeActivity($request,"");
-            $garage = Garage::where([
-                "id" => $garage_id,
+            $business = Business::where([
+                "id" => $business_id,
                 "owner_id" => $request->user()->id
             ])
                 ->first();
-            if (!$garage) {
+            if (!$business) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the request garage does not exits"
+                    "message" => "you are not the owner of the business or the request business does not exits"
                 ], 404);
             }
             $startDate = now();
             $endDate = $startDate->copy()->addDays($duration);
 
 
-            $data = GarageAffiliation::with("affiliation")
-                ->where('garage_affiliations.end_date', "<",  $endDate)
+            $data = BusinessAffiliation::with("affiliation")
+                ->where('business_affiliations.end_date', "<",  $endDate)
                 ->count();
 
 
@@ -694,7 +694,7 @@ class DashboardManagementController extends Controller
 
 
 
-    public function applied_jobs($garage)
+    public function applied_jobs($business)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
@@ -709,9 +709,9 @@ class DashboardManagementController extends Controller
         $data["total_count"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->groupBy("pre_bookings.id")
             ->count();
@@ -723,9 +723,9 @@ class DashboardManagementController extends Controller
         $data["this_week_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
 
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
@@ -736,9 +736,9 @@ class DashboardManagementController extends Controller
         $data["previous_week_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
 
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
@@ -751,9 +751,9 @@ class DashboardManagementController extends Controller
         $data["this_month_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
             ->groupBy("pre_bookings.id")
@@ -763,9 +763,9 @@ class DashboardManagementController extends Controller
         $data["previous_month_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
-                "users.city" => $garage->city
+                "users.city" => $business->city
             ])
-            ->whereIn('job_bids.garage_id', [$garage->id])
+            ->whereIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
             ->groupBy("pre_bookings.id")
@@ -779,7 +779,7 @@ class DashboardManagementController extends Controller
 
         return $data;
     }
-    public function pre_bookings($garage)
+    public function pre_bookings($business)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
@@ -794,9 +794,9 @@ class DashboardManagementController extends Controller
         $data["total_count"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
 
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
-            //  ->whereNotIn('job_bids.garage_id', [$garage->id])
+            //  ->whereNotIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->count();
 
@@ -805,7 +805,7 @@ class DashboardManagementController extends Controller
         $data["this_week_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
 
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
 
             ->where('pre_bookings.status', "pending")
@@ -815,7 +815,7 @@ class DashboardManagementController extends Controller
 
         $data["previous_week_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
 
             ->where('pre_bookings.status', "pending")
@@ -827,7 +827,7 @@ class DashboardManagementController extends Controller
 
         $data["this_month_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
 
             ->where('pre_bookings.status', "pending")
@@ -837,7 +837,7 @@ class DashboardManagementController extends Controller
 
         $data["previous_month_data"] = PreBooking::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
         ->where([
-            "users.city" => $garage->city
+            "users.city" => $business->city
         ])
 
             ->where('pre_bookings.status', "pending")
@@ -854,7 +854,7 @@ class DashboardManagementController extends Controller
         return $data;
     }
 
-    public function winned_jobs($garage)
+    public function winned_jobs($business)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
@@ -867,7 +867,7 @@ class DashboardManagementController extends Controller
         $endDateOfPreviousWeek = Carbon::now()->endOfWeek()->subWeek(1);
         $data["total_data_count"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
             ->where([
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
             ])
 
             ->where('pre_bookings.status', "booked")
@@ -882,7 +882,7 @@ class DashboardManagementController extends Controller
 
         $data["this_week_data"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
             ->where([
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
             ])
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
@@ -891,7 +891,7 @@ class DashboardManagementController extends Controller
             ->get();
         $data["previous_week_data"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
             ->where([
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
             ])
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
@@ -903,7 +903,7 @@ class DashboardManagementController extends Controller
 
         $data["this_month_data"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
             ->where([
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
             ])
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
@@ -913,7 +913,7 @@ class DashboardManagementController extends Controller
 
         $data["previous_month_data"] = PreBooking::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
             ->where([
-                "bookings.garage_id" => $garage->id
+                "bookings.business_id" => $business->id
             ])
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
@@ -930,7 +930,7 @@ class DashboardManagementController extends Controller
     }
 
 
-    public function completed_bookings($garage)
+    public function completed_bookings($business)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
@@ -944,7 +944,7 @@ class DashboardManagementController extends Controller
 
         $data["total_data_count"] = Booking::where([
             "bookings.status" => "converted_to_job",
-            "bookings.garage_id" => $garage->id
+            "bookings.business_id" => $business->id
 
         ])
             ->count();
@@ -956,7 +956,7 @@ class DashboardManagementController extends Controller
 
         $data["this_week_data"] = Booking::where([
             "bookings.status" => "converted_to_job",
-            "bookings.garage_id" => $garage->id
+            "bookings.business_id" => $business->id
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
@@ -964,7 +964,7 @@ class DashboardManagementController extends Controller
             ->get();
         $data["previous_week_data"] = Booking::where([
             "bookings.status" => "converted_to_job",
-            "bookings.garage_id" => $garage->id
+            "bookings.business_id" => $business->id
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
@@ -975,7 +975,7 @@ class DashboardManagementController extends Controller
 
         $data["this_month_data"] = Booking::where([
             "bookings.status" => "converted_to_job",
-            "bookings.garage_id" => $garage->id
+            "bookings.business_id" => $business->id
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
@@ -983,7 +983,7 @@ class DashboardManagementController extends Controller
             ->get();
         $data["previous_month_data"] = Booking::where([
             "bookings.status" => "converted_to_job",
-            "bookings.garage_id" => $garage->id
+            "bookings.business_id" => $business->id
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
@@ -997,7 +997,7 @@ class DashboardManagementController extends Controller
         return $data;
     }
 
-    public function upcoming_jobs($garage)
+    public function upcoming_jobs($business)
     {
         $startDate = now();
 
@@ -1027,7 +1027,7 @@ class DashboardManagementController extends Controller
 
         $data["total_data_count"] = Job::where([
             "jobs.status" => "pending",
-            "jobs.garage_id" => $garage->id
+            "jobs.business_id" => $business->id
 
         ])
             ->count();
@@ -1035,14 +1035,14 @@ class DashboardManagementController extends Controller
 
         $data["this_week_data"] = Job::where([
             "jobs.status" => "pending",
-            "jobs.garage_id" => $garage->id
+            "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDate, $endDateOfThisWeek])
         ->select("jobs.id","jobs.created_at","jobs.updated_at")
             ->get();
         $data["next_week_data"] = Job::where([
             "jobs.status" => "pending",
-            "jobs.garage_id" => $garage->id
+            "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDateOfNextWeek, $endDateOfNextWeek])
         ->select("jobs.id","jobs.created_at","jobs.updated_at")
@@ -1050,14 +1050,14 @@ class DashboardManagementController extends Controller
 
         $data["this_month_data"] = Job::where([
             "jobs.status" => "pending",
-            "jobs.garage_id" => $garage->id
+            "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDate, $endDateOfThisMonth])
         ->select("jobs.id","jobs.created_at","jobs.updated_at")
             ->get();
         $data["next_month_data"] = Job::where([
             "jobs.status" => "pending",
-            "jobs.garage_id" => $garage->id
+            "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDateOfNextMonth, $endDateOfNextMonth])
         ->select("jobs.id","jobs.created_at","jobs.updated_at")
@@ -1071,7 +1071,7 @@ class DashboardManagementController extends Controller
 
         return $data;
     }
-    public function affiliation_expirings($garage)
+    public function affiliation_expirings($business)
     {
         $startDate = now();
 
@@ -1086,39 +1086,39 @@ class DashboardManagementController extends Controller
         $endDateOfNextWeek = Carbon::now()->endOfWeek()->addWeek(1);
 
 
-        $data["total_data_count"] = GarageAffiliation::where([
-            "garage_affiliations.garage_id"=>$garage->id
+        $data["total_data_count"] = BusinessAffiliation::where([
+            "business_affiliations.business_id"=>$business->id
         ])
         ->count();
 
 
-        $data["this_week_data"] = GarageAffiliation::where([
-            "garage_affiliations.garage_id"=>$garage->id
+        $data["this_week_data"] = BusinessAffiliation::where([
+            "business_affiliations.business_id"=>$business->id
         ])
-        ->whereBetween('garage_affiliations.end_date', [$startDate, $endDateOfThisWeek])
+        ->whereBetween('business_affiliations.end_date', [$startDate, $endDateOfThisWeek])
 
-        ->select("garage_affiliations.id","garage_affiliations.created_at","garage_affiliations.updated_at")
+        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
             ->get();
-        $data["next_week_data"] = GarageAffiliation::where([
-            "garage_affiliations.garage_id"=>$garage->id
+        $data["next_week_data"] = BusinessAffiliation::where([
+            "business_affiliations.business_id"=>$business->id
         ])
-        ->whereBetween('garage_affiliations.end_date', [$startDateOfNextWeek, $endDateOfNextWeek])
+        ->whereBetween('business_affiliations.end_date', [$startDateOfNextWeek, $endDateOfNextWeek])
 
-        ->select("garage_affiliations.id","garage_affiliations.created_at","garage_affiliations.updated_at")
-            ->get();
-
-        $data["this_month_data"] = GarageAffiliation::where([
-            "garage_affiliations.garage_id"=>$garage->id
-        ])
-        ->whereBetween('garage_affiliations.end_date', [$startDate, $endDateOfThisMonth])
-        ->select("garage_affiliations.id","garage_affiliations.created_at","garage_affiliations.updated_at")
+        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
             ->get();
 
-        $data["next_month_data"] = GarageAffiliation::where([
-            "garage_affiliations.garage_id"=>$garage->id
+        $data["this_month_data"] = BusinessAffiliation::where([
+            "business_affiliations.business_id"=>$business->id
         ])
-        ->whereBetween('garage_affiliations.end_date', [$startDateOfNextMonth, $endDateOfNextMonth])
-        ->select("garage_affiliations.id","garage_affiliations.created_at","garage_affiliations.updated_at")
+        ->whereBetween('business_affiliations.end_date', [$startDate, $endDateOfThisMonth])
+        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
+            ->get();
+
+        $data["next_month_data"] = BusinessAffiliation::where([
+            "business_affiliations.business_id"=>$business->id
+        ])
+        ->whereBetween('business_affiliations.end_date', [$startDateOfNextMonth, $endDateOfNextMonth])
+        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
             ->get();
 
             $data["this_week_data_count"] = $data["this_week_data"]->count();
@@ -1133,16 +1133,16 @@ class DashboardManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/garage-owner-dashboard/{garage_id}",
-     *      operationId="getGarageOwnerDashboardData",
-     *      tags={"dashboard_management.garage_owner"},
+     *      path="/v1.0/business-owner-dashboard/{business_id}",
+     *      operationId="getBusinessOwnerDashboardData",
+     *      tags={"dashboard_management.business_owner"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -1185,52 +1185,52 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getGarageOwnerDashboardData($garage_id, Request $request)
+    public function getBusinessOwnerDashboardData($business_id, Request $request)
     {
 
         try{
             $this->storeActivity($request,"");
-            if (!$request->user()->hasRole('garage_owner')) {
+            if (!$request->user()->hasRole('business_owner')) {
                 return response()->json([
-                    "message" => "You are not a garage owner"
+                    "message" => "You are not a business owner"
                 ], 401);
             }
-            $garage = Garage::where([
-                "id" => $garage_id,
+            $business = Business::where([
+                "id" => $business_id,
                 "owner_id" => $request->user()->id
             ])
                 ->first();
-            if (!$garage) {
+            if (!$business) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the request garage does not exits"
+                    "message" => "you are not the owner of the business or the request business does not exits"
                 ], 404);
             }
 
 
             // affiliation expiry
-            $data["affiliation_expirings"] = $this->affiliation_expirings($garage);
+            $data["affiliation_expirings"] = $this->affiliation_expirings($business);
 
             //    end affiliation expiry
             //   upcoming_jobs
-            $data["upcoming_jobs"] = $this->upcoming_jobs($garage);
+            $data["upcoming_jobs"] = $this->upcoming_jobs($business);
 
             //  end  upcoming_jobs
 
             // completed bookings
-            $data["completed_bookings"] = $this->completed_bookings($garage);
+            $data["completed_bookings"] = $this->completed_bookings($business);
             // end completed bookings
 
             // winned jobs
-            $data["winned_jobs"] = $this->winned_jobs($garage);
+            $data["winned_jobs"] = $this->winned_jobs($business);
             // end winned jobs
 
             //   jobs
-            $data["pre_bookings"] = $this->pre_bookings($garage);
+            $data["pre_bookings"] = $this->pre_bookings($business);
             // end jobs
 
 
             // applied jobs
-            $data["applied_jobs"] = $this->applied_jobs($garage);
+            $data["applied_jobs"] = $this->applied_jobs($business);
             // end applied jobs
 
 
@@ -1240,7 +1240,7 @@ class DashboardManagementController extends Controller
         }
 
     }
-    public function garages($created_by_filter=0)
+    public function businesses($created_by_filter=0)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
@@ -1254,7 +1254,7 @@ class DashboardManagementController extends Controller
 
 
 
-        $total_data_count_query = new Garage();
+        $total_data_count_query = new businesses();
         if($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
                 "created_by" =>auth()->user()->id
@@ -1265,7 +1265,7 @@ class DashboardManagementController extends Controller
 
 
 
-        $this_week_data_query = Garage::whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
+        $this_week_data_query = Business::whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
 
         if($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
@@ -1277,7 +1277,7 @@ class DashboardManagementController extends Controller
 
 
 
-        $previous_week_data_query = Garage::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
+        $previous_week_data_query = Business::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
         ;
 
         if($created_by_filter) {
@@ -1291,7 +1291,7 @@ class DashboardManagementController extends Controller
 
 
 
-        $this_month_data_query =Garage::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
+        $this_month_data_query =Business::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
 
         if($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
@@ -1303,7 +1303,7 @@ class DashboardManagementController extends Controller
 
 
 
-        $previous_month_data_query =Garage::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
+        $previous_month_data_query =Business::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
 
         if($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
@@ -1495,21 +1495,21 @@ class DashboardManagementController extends Controller
         $endDateOfPreviousWeek = Carbon::now()->endOfWeek()->subWeek(1);
 
 
-        $total_data_count_query =  Booking::leftJoin('garages', 'garages.id', '=', 'bookings.garage_id');
+        $total_data_count_query =  Booking::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id');
         if($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["total_data_count"] = $total_data_count_query->count();
 
 
 
-        $this_week_data_query =  Booking::leftJoin('garages', 'garages.id', '=', 'bookings.garage_id')
+        $this_week_data_query =  Booking::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
         ->whereBetween('bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
         if($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["this_week_data"] = $this_week_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
@@ -1518,11 +1518,11 @@ class DashboardManagementController extends Controller
 
 
 
-        $previous_week_data_query =  Booking::leftJoin('garages', 'garages.id', '=', 'bookings.garage_id')
+        $previous_week_data_query =  Booking::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
         ->whereBetween('bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
         if($created_by_filter) {
             $previous_week_data_query =  $previous_week_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["previous_week_data"] = $previous_week_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
@@ -1533,22 +1533,22 @@ class DashboardManagementController extends Controller
 
 
 
-        $this_month_data_query =  Booking::leftJoin('garages', 'garages.id', '=', 'bookings.garage_id')
+        $this_month_data_query =  Booking::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
         ->whereBetween('bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
         if($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["this_month_data"] = $this_month_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
         ->get();
 
 
-        $previous_month_data_query =  Booking::leftJoin('garages', 'garages.id', '=', 'bookings.garage_id')
+        $previous_month_data_query =  Booking::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
         ->whereBetween('bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
         if($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["previous_month_data"] = $previous_month_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
@@ -1575,10 +1575,10 @@ class DashboardManagementController extends Controller
         $endDateOfPreviousWeek = Carbon::now()->endOfWeek()->subWeek(1);
 
 
-        $total_data_count_query =  Job::leftJoin('garages', 'garages.id', '=', 'jobs.garage_id');
+        $total_data_count_query =  Job::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id');
         if($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["total_data_count"] = $total_data_count_query->count();
@@ -1587,11 +1587,11 @@ class DashboardManagementController extends Controller
 
 
 
-        $this_week_data_query =  Job::leftJoin('garages', 'garages.id', '=', 'jobs.garage_id')
+        $this_week_data_query =  Job::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
         ->whereBetween('jobs.created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
         if($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["this_week_data"] = $this_week_data_query
@@ -1601,11 +1601,11 @@ class DashboardManagementController extends Controller
 
 
 
-        $previous_week_data_query =  Job::leftJoin('garages', 'garages.id', '=', 'jobs.garage_id')
+        $previous_week_data_query =  Job::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
         ->whereBetween('jobs.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
         if($created_by_filter) {
             $previous_week_data_query =  $previous_week_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["previous_week_data"] = $previous_week_data_query
@@ -1616,11 +1616,11 @@ class DashboardManagementController extends Controller
 
 
 
-        $this_month_data_query =  Job::leftJoin('garages', 'garages.id', '=', 'jobs.garage_id')
+        $this_month_data_query =  Job::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
         ->whereBetween('jobs.created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
         if($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["this_month_data"] = $this_month_data_query
@@ -1629,11 +1629,11 @@ class DashboardManagementController extends Controller
 
 
 
-        $previous_month_data_query =  Job::leftJoin('garages', 'garages.id', '=', 'jobs.garage_id')
+        $previous_month_data_query =  Job::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
         ->whereBetween('jobs.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
         if($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
-                "garages.created_by" =>auth()->user()->id
+                "businesses.created_by" =>auth()->user()->id
             ]);
         }
         $data["previous_month_data"] = $previous_month_data_query
@@ -1749,7 +1749,7 @@ class DashboardManagementController extends Controller
                 ], 401);
             }
 
-            $data["garages"] = $this->garages();
+            $data["businesses"] = $this->businesses();
 
             $data["fuel_stations"] = $this->fuel_stations();
 
@@ -1835,7 +1835,7 @@ class DashboardManagementController extends Controller
                  ], 401);
              }
 
-             $data["garages"] = $this->garages(1);
+             $data["businesses"] = $this->businesses(1);
 
              $data["fuel_stations"] = $this->fuel_stations(1);
 

@@ -50,9 +50,9 @@ class DynamicMail extends Mailable
         $html_content =  str_replace("[customer_FullName]", ($this->data->customer->first_Name. " " .$this->data->customer->last_Name), $html_content );
 
 
-        $html_content =  str_replace("[garage_owner_FirstName]", $this->data->garage->owner->first_Name, $html_content );
-        $html_content =  str_replace("[garage_owner_LastName]", $this->data->garage->owner->last_Name, $html_content );
-        $html_content =  str_replace("[garage_owner_FullName]", ($this->data->garage->owner->first_Name. " " .$this->data->garage->owner->last_Name), $html_content );
+        $html_content =  str_replace("[business_owner_FirstName]", $this->data->business->owner->first_Name, $html_content );
+        $html_content =  str_replace("[business_owner_LastName]", $this->data->business->owner->last_Name, $html_content );
+        $html_content =  str_replace("[business_owner_FullName]", ($this->data->business->owner->first_Name. " " .$this->data->business->owner->last_Name), $html_content );
 
     $html_content =  str_replace("[automobile_make]", $this->data->automobile_make->name, $html_content );
 

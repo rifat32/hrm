@@ -128,7 +128,7 @@ class EmailTemplateController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *  description="use [FirstName],[LastName],[FullName],[AccountVerificationLink],[ForgotPasswordLink]
-     * [customer_FirstName],[customer_LastName],[customer_FullName],[garage_owner_FirstName],[garage_owner_LastName],[garage_owner_FullName],[automobile_make],[automobile_model],[car_registration_no],[car_registration_year],[status],[payment_status],[additional_information],[discount_type],[discount_amount],[price],[job_start_date],[job_start_time],[job_end_time],[coupon_code],[fuel],[transmission]
+     * [customer_FirstName],[customer_LastName],[customer_FullName],[business_owner_FirstName],[business_owner_LastName],[business_owner_FullName],[automobile_make],[automobile_model],[car_registration_no],[car_registration_year],[status],[payment_status],[additional_information],[discount_type],[discount_amount],[price],[job_start_date],[job_start_time],[job_end_time],[coupon_code],[fuel],[transmission]
      *  in the template",
      *         @OA\JsonContent(
      *            required={"id","template","is_active"},
@@ -478,11 +478,11 @@ $types = [
     "forget_password_mail",
     "welcome_message",
 
-    "booking_updated_by_garage_owner",
-    "booking_status_changed_by_garage_owner",
-    "booking_confirmed_by_garage_owner",
-    "booking_deleted_by_garage_owner",
-     "booking_rejected_by_garage_owner",
+    "booking_updated_by_business_owner",
+    "booking_status_changed_by_business_owner",
+    "booking_confirmed_by_business_owner",
+    "booking_deleted_by_business_owner",
+     "booking_rejected_by_business_owner",
 
     "booking_created_by_client",
     "booking_updated_by_client",
@@ -491,10 +491,10 @@ $types = [
     "booking_rejected_by_client",
 
 
-    "job_created_by_garage_owner",
-    "job_updated_by_garage_owner",
-    "job_status_changed_by_garage_owner",
-    "job_deleted_by_garage_owner",
+    "job_created_by_business_owner",
+    "job_updated_by_business_owner",
+    "job_status_changed_by_business_owner",
+    "job_deleted_by_business_owner",
 
 
 ];

@@ -28,8 +28,8 @@ class NotificationTemplateController extends Controller
      *
      *  @OA\RequestBody(
      *         required=true,
-     *  description="use [customer_name],[garage_owner_name],[garage_name],
-     *  in the template and use [customer_id], [pre_booking_id],[booking_id],[job_id],[garage_id],[bid_id] in link",
+     *  description="use [customer_name],[business_owner_name],[business_name],
+     *  in the template and use [customer_id], [pre_booking_id],[booking_id],[job_id],[business_id],[bid_id] in link",
      *         @OA\JsonContent(
      *            required={"id","template","is_active"},
      *    @OA\Property(property="id", type="number", format="number", example="1"),
@@ -381,17 +381,17 @@ class NotificationTemplateController extends Controller
             }
 $types = [
 
-    "bid_created_by_garage_owner",
-    "bid_updated_by_garage_owner",
+    "bid_created_by_business_owner",
+    "bid_updated_by_business_owner",
     "bid_accepted_by_client",
     "bid_rejected_by_client",
 
-    "booking_created_by_garage_owner",
-    "booking_updated_by_garage_owner",
-    "booking_status_changed_by_garage_owner",
-    "booking_confirmed_by_garage_owner",
-    "booking_deleted_by_garage_owner",
-     "booking_rejected_by_garage_owner",
+    "booking_created_by_business_owner",
+    "booking_updated_by_business_owner",
+    "booking_status_changed_by_business_owner",
+    "booking_confirmed_by_business_owner",
+    "booking_deleted_by_business_owner",
+     "booking_rejected_by_business_owner",
 
     "booking_created_by_client",
     "booking_updated_by_client",
@@ -400,10 +400,10 @@ $types = [
     "booking_rejected_by_client",
 
 
-    "job_created_by_garage_owner",
-    "job_updated_by_garage_owner",
-    "job_status_changed_by_garage_owner",
-    "job_deleted_by_garage_owner",
+    "job_created_by_business_owner",
+    "job_updated_by_business_owner",
+    "job_status_changed_by_business_owner",
+    "job_deleted_by_business_owner",
 ];
 
 return response()->json($types, 200);

@@ -44,7 +44,6 @@ class ProductLinkRequest extends FormRequest
 
 
         "product_variations" => "required_if:type,variable|array",
-        "product_variations.*.automobile_make_id"  => "required_if:type,variable|numeric",
         "product_variations.*.price"  => "required_if:type,variable|not_in:0,0",
         "product_variations.*.quantity"  => "required_if:type,variable|numeric",
 

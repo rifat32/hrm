@@ -6,7 +6,7 @@ use App\Http\Requests\ProductCreateRequest;
 use App\Http\Requests\ProductLinkRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Http\Utils\ErrorUtil;
-use App\Http\Utils\ShopUtil;
+
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Product;
 use App\Models\ProductGallery;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    use ErrorUtil, ShopUtil,UserActivityUtil;
+    use ErrorUtil,UserActivityUtil;
      /**
      *
   * @OA\Post(

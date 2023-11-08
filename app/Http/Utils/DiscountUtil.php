@@ -9,11 +9,11 @@ use Exception;
 trait DiscountUtil
 {
     // this function do all the task and returns transaction id or -1
-    public function getCouponDiscount($garage_id,$code,$amount)
+    public function getCouponDiscount($business_id,$code,$amount)
     {
 
      $coupon =  Coupon::where([
-        "garage_id" => $garage_id,
+        "business_id" => $business_id,
             "code" => $code,
             "is_active" => 1,
 

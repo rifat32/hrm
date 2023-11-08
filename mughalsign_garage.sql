@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `mughalsign_garage`
+-- Database: `mughalsign_business`
 --
 
 -- --------------------------------------------------------
@@ -2437,7 +2437,7 @@ INSERT INTO `automobile_model_variants` (`id`, `name`, `description`, `automobil
 CREATE TABLE `bookings` (
   `id` bigint UNSIGNED NOT NULL,
   `pre_booking_id` bigint UNSIGNED DEFAULT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `customer_id` bigint UNSIGNED NOT NULL,
   `automobile_make_id` bigint UNSIGNED NOT NULL,
   `automobile_model_id` bigint UNSIGNED NOT NULL,
@@ -2453,7 +2453,7 @@ CREATE TABLE `bookings` (
   `job_start_date` date DEFAULT NULL,
   `job_start_time` time DEFAULT NULL,
   `job_end_time` time DEFAULT NULL,
-  `status` enum('pending','confirmed','rejected_by_client','rejected_by_garage_owner','converted_to_job') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('pending','confirmed','rejected_by_client','rejected_by_business_owner','converted_to_job') COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2462,7 +2462,7 @@ CREATE TABLE `bookings` (
 -- Dumping data for table `bookings`
 --
 
-INSERT INTO `bookings` (`id`, `pre_booking_id`, `garage_id`, `customer_id`, `automobile_make_id`, `automobile_model_id`, `car_registration_no`, `car_registration_year`, `additional_information`, `coupon_discount_type`, `coupon_discount_amount`, `price`, `coupon_code`, `fuel`, `transmission`, `job_start_date`, `job_start_time`, `job_end_time`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `bookings` (`id`, `pre_booking_id`, `business_id`, `customer_id`, `automobile_make_id`, `automobile_model_id`, `car_registration_no`, `car_registration_year`, `additional_information`, `coupon_discount_type`, `coupon_discount_amount`, `price`, `coupon_code`, `fuel`, `transmission`, `job_start_date`, `job_start_time`, `job_end_time`, `status`, `created_at`, `updated_at`) VALUES
 (1, NULL, 10, 16, 5, 202, 'ref-234567', NULL, 'dfb nm', 'fixed', 0, 0, '123456', 'Fuel', 'transmission', '2023-04-19', '23:03:00', NULL, 'pending', '2023-04-19 16:12:30', '2023-04-19 16:12:30'),
 (2, NULL, 10, 18, 5, 202, 'ref-234567', NULL, 'sacdfv', 'fixed', 0, 0, '123456', 'Fuel', 'transmission', '2023-04-19', '23:53:00', NULL, 'pending', '2023-04-19 16:55:01', '2023-04-19 16:55:01'),
 (3, NULL, 10, 22, 5, 202, 'ref-234567', NULL, 'cgvhbjnm', 'fixed', 0, 0, '123456', 'Fuel', 'transmission', '2023-04-20', '00:36:00', NULL, 'pending', '2023-04-19 17:40:09', '2023-04-19 17:40:09');
@@ -2476,7 +2476,7 @@ INSERT INTO `bookings` (`id`, `pre_booking_id`, `garage_id`, `customer_id`, `aut
 CREATE TABLE `booking_packages` (
   `id` bigint UNSIGNED NOT NULL,
   `booking_id` bigint UNSIGNED NOT NULL,
-  `garage_package_id` bigint UNSIGNED NOT NULL,
+  `business_package_id` bigint UNSIGNED NOT NULL,
   `price` double NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -2514,7 +2514,7 @@ INSERT INTO `booking_sub_services` (`id`, `booking_id`, `sub_service_id`, `price
 
 CREATE TABLE `coupons` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `discount_type` enum('fixed','percentage') COLLATE utf8mb4_unicode_ci DEFAULT 'fixed',
@@ -2715,10 +2715,10 @@ INSERT INTO `fuel_station_services` (`id`, `name`, `icon`, `is_active`, `created
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garages`
+-- Table structure for table `businesses`
 --
 
-CREATE TABLE `garages` (
+CREATE TABLE `businesses` (
   `id` bigint UNSIGNED NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `about` text COLLATE utf8mb4_unicode_ci,
@@ -2736,7 +2736,7 @@ CREATE TABLE `garages` (
   `logo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `is_active` tinyint(1) NOT NULL DEFAULT '0',
-  `is_mobile_garage` tinyint(1) NOT NULL DEFAULT '0',
+  `is_mobile_business` tinyint(1) NOT NULL DEFAULT '0',
   `wifi_available` tinyint(1) NOT NULL DEFAULT '0',
   `labour_rate` bigint UNSIGNED DEFAULT NULL,
   `owner_id` bigint UNSIGNED NOT NULL,
@@ -2748,21 +2748,21 @@ CREATE TABLE `garages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `garages`
+-- Dumping data for table `businesses`
 --
 
-INSERT INTO `garages` (`id`, `name`, `about`, `web_page`, `phone`, `email`, `additional_information`, `address_line_1`, `address_line_2`, `lat`, `long`, `country`, `city`, `postcode`, `logo`, `status`, `is_active`, `is_mobile_garage`, `wifi_available`, `labour_rate`, `owner_id`, `created_by`, `deleted_at`, `created_at`, `updated_at`, `image`) VALUES
-(1, 'Vision Garage', NULL, NULL, '019999999999', 'vision@gmail.com', NULL, 'Arts Faculty, Dhaka 1205, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1205', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681378965_attachment_110839242.png', 'pending', 0, 1, 1, NULL, 2, 1, NULL, '2023-04-13 08:42:46', '2023-04-13 08:45:23', NULL),
-(2, 'Epiurean Garage', NULL, NULL, '0189999209', 'epiurean.garage@gmail.com', NULL, 'Mohakhali, Dhaka 1212, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1212', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681379088_Modern-Garage-No-Background.png', 'pending', 0, 1, 1, NULL, 3, 1, NULL, '2023-04-13 08:44:49', '2023-04-13 08:44:49', NULL),
-(3, 'Hot Rod Garage', NULL, NULL, '017777777777', 'hotrod@gmail.com', NULL, 'Dhanmondi 13, Dhaka 1205, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1205', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681379256_Modern-Garage-PNG-Image-HD.png', 'pending', 0, 1, 1, NULL, 4, 1, NULL, '2023-04-13 08:47:38', '2023-04-13 08:47:38', NULL),
-(4, 'Senate Garage', NULL, NULL, '01333333333', 'senate@gmail.com', NULL, 'New Polton Ln, Dhaka 1205, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1205', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681379371_Modern-Garage-PNG-Images.png', 'pending', 0, 1, 1, NULL, 5, 1, NULL, '2023-04-13 08:49:32', '2023-04-13 08:49:32', NULL),
-(5, 'Workshop Garage', NULL, NULL, '01239029388', 'wg13332@gmail.com', NULL, 'Farmgate, Dhaka 1215, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1215', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681379470_pngtree-garage-logo-gear-element-automotive-modern-technology-engine-technical-transportation-image_321715.jpg', 'pending', 0, 1, 1, NULL, 6, 1, NULL, '2023-04-13 08:51:12', '2023-04-13 08:51:12', NULL),
+INSERT INTO `businesses` (`id`, `name`, `about`, `web_page`, `phone`, `email`, `additional_information`, `address_line_1`, `address_line_2`, `lat`, `long`, `country`, `city`, `postcode`, `logo`, `status`, `is_active`, `is_mobile_business`, `wifi_available`, `labour_rate`, `owner_id`, `created_by`, `deleted_at`, `created_at`, `updated_at`, `image`) VALUES
+(1, 'Vision businesses', NULL, NULL, '019999999999', 'vision@gmail.com', NULL, 'Arts Faculty, Dhaka 1205, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1205', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681378965_attachment_110839242.png', 'pending', 0, 1, 1, NULL, 2, 1, NULL, '2023-04-13 08:42:46', '2023-04-13 08:45:23', NULL),
+(2, 'Epiurean businesses', NULL, NULL, '0189999209', 'epiurean.business@gmail.com', NULL, 'Mohakhali, Dhaka 1212, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1212', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681379088_Modern-businesses-No-Background.png', 'pending', 0, 1, 1, NULL, 3, 1, NULL, '2023-04-13 08:44:49', '2023-04-13 08:44:49', NULL),
+(3, 'Hot Rod businesses', NULL, NULL, '017777777777', 'hotrod@gmail.com', NULL, 'Dhanmondi 13, Dhaka 1205, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1205', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681379256_Modern-businesses-PNG-Image-HD.png', 'pending', 0, 1, 1, NULL, 4, 1, NULL, '2023-04-13 08:47:38', '2023-04-13 08:47:38', NULL),
+(4, 'Senate businesses', NULL, NULL, '01333333333', 'senate@gmail.com', NULL, 'New Polton Ln, Dhaka 1205, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1205', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681379371_Modern-businesses-PNG-Images.png', 'pending', 0, 1, 1, NULL, 5, 1, NULL, '2023-04-13 08:49:32', '2023-04-13 08:49:32', NULL),
+(5, 'Workshop businesses', NULL, NULL, '01239029388', 'wg13332@gmail.com', NULL, 'Farmgate, Dhaka 1215, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1215', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681379470_pngtree-business-logo-gear-element-automotive-modern-technology-engine-technical-transportation-image_321715.jpg', 'pending', 0, 1, 1, NULL, 6, 1, NULL, '2023-04-13 08:51:12', '2023-04-13 08:51:12', NULL),
 (6, 'Gd', NULL, NULL, '711781', 'gd@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', NULL, 'pending', 0, 1, 1, NULL, 7, NULL, NULL, '2023-04-13 15:06:09', '2023-04-13 15:06:09', NULL),
 (7, 'Auto Mobile', NULL, NULL, '01707172137', 'kamruzzamankazi3@gmail.com', NULL, 'Dhaka, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1332', NULL, 'pending', 0, 1, 1, NULL, 8, NULL, NULL, '2023-04-13 17:06:16', '2023-04-13 17:06:16', NULL),
-(8, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 9, NULL, NULL, '2023-04-13 19:22:15', '2023-04-13 19:22:15', NULL),
-(9, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalasghwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 11, NULL, NULL, '2023-04-15 13:07:16', '2023-04-15 13:07:16', NULL),
-(10, 'Test Garage 1', NULL, NULL, '01707172137', 'tejime4835@gam1fy.com', NULL, '123 William St, New York, NY 10038, USA', NULL, NULL, NULL, 'US', 'New York City', '10038', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681745214_logo192.png', 'pending', 0, 1, 1, NULL, 12, NULL, NULL, '2023-04-17 14:26:57', '2023-04-17 14:26:57', NULL),
-(11, 'gm', NULL, NULL, NULL, 'gm@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1681974008_Screenshot_11.png', 'pending', 0, 1, 1, NULL, 23, 1, NULL, '2023-04-20 06:00:10', '2023-04-20 06:00:10', NULL),
+(8, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 9, NULL, NULL, '2023-04-13 19:22:15', '2023-04-13 19:22:15', NULL),
+(9, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalasghwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 11, NULL, NULL, '2023-04-15 13:07:16', '2023-04-15 13:07:16', NULL),
+(10, 'Test businesses 1', NULL, NULL, '01707172137', 'tejime4835@gam1fy.com', NULL, '123 William St, New York, NY 10038, USA', NULL, NULL, NULL, 'US', 'New York City', '10038', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681745214_logo192.png', 'pending', 0, 1, 1, NULL, 12, NULL, NULL, '2023-04-17 14:26:57', '2023-04-17 14:26:57', NULL),
+(11, 'gm', NULL, NULL, NULL, 'gm@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1681974008_Screenshot_11.png', 'pending', 0, 1, 1, NULL, 23, 1, NULL, '2023-04-20 06:00:10', '2023-04-20 06:00:10', NULL),
 (12, 'asd', 'asd', 'sad', '234234', 'md.anwar@gmail.com', 'asd', '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', NULL, 'pending', 0, 0, 0, 234, 25, 1, '2023-04-25 05:25:23', '2023-04-25 05:23:17', '2023-04-25 05:25:23', NULL),
 (13, 'asfsdf', NULL, NULL, NULL, 'sdgggsdf@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', NULL, 'pending', 0, 1, 1, NULL, 26, 1, NULL, '2023-04-25 06:08:31', '2023-04-25 06:08:31', NULL),
 (14, 'asssdf', NULL, NULL, NULL, 'www@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', NULL, 'pending', 0, 1, 1, NULL, 27, 1, NULL, '2023-04-25 06:44:43', '2023-04-25 06:44:43', NULL),
@@ -2771,14 +2771,14 @@ INSERT INTO `garages` (`id`, `name`, `about`, `web_page`, `phone`, `email`, `add
 (17, 'asssdf3', NULL, NULL, NULL, 'www32212@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', NULL, 'pending', 0, 1, 1, NULL, 30, 1, NULL, '2023-04-25 06:51:11', '2023-04-25 06:51:11', NULL),
 (18, 'asssdf3', NULL, NULL, NULL, 'www32s212@gmail.com', NULL, '123 Queen St W, Toronto, ON M5H 3M9, Canada', NULL, NULL, NULL, 'CA', 'Toronto', 'M5H 3M9', NULL, 'pending', 0, 1, 1, NULL, 31, 1, NULL, '2023-04-25 06:55:48', '2023-04-25 06:55:48', NULL),
 (19, 'dsafgfh', NULL, NULL, '01707172137', 'kamruzzamankazi908@gmail.com', NULL, 'Dhaka, Bangladesh', NULL, NULL, NULL, 'BD', 'Dhaka', '1332', NULL, 'pending', 0, 1, 1, NULL, 39, NULL, NULL, '2023-05-04 18:05:24', '2023-05-04 18:05:24', NULL),
-(20, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashwaqad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 40, NULL, NULL, '2023-05-04 18:33:49', '2023-05-04 18:33:49', NULL),
-(27, 'strh', 'sth', NULL, 'serherh', 'asjadtariqdrrser@gmail.com', 'hshsh', 'Amsterdam, Netherlands', NULL, NULL, NULL, 'BD', 'Amsterdam', '1207', 'https://mughalsignandprint.co.uk/garage-management/garage_gallery/1683308532_Screenshot 2023-04-16 104501.png', 'pending', 0, 1, 1, NULL, 49, NULL, NULL, '2023-05-05 16:42:15', '2023-05-05 16:42:15', NULL),
-(28, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifataasgsglashwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 50, NULL, NULL, '2023-05-05 16:45:56', '2023-05-05 16:45:56', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
-(29, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifasdfgtalashwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'N/A', 'pending', 0, 1, 1, NULL, 51, NULL, NULL, '2023-05-05 16:48:03', '2023-05-05 16:48:03', 'N/A'),
-(30, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifataladftjshwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 52, NULL, NULL, '2023-05-06 13:25:37', '2023-05-06 13:25:37', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
-(31, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashfgnhjmkwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 53, NULL, NULL, '2023-05-07 03:06:48', '2023-05-07 03:06:48', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
-(32, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashfgnhertyjmkwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 54, NULL, NULL, '2023-05-07 03:07:27', '2023-05-07 03:07:27', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
-(33, 'ABCD Garage', 'Best Garage in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashsrdgtfhfgnhertyjmkwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', NULL, 'pending', 0, 1, 1, 500, 55, NULL, NULL, '2023-05-07 03:07:54', '2023-05-07 03:07:54', NULL),
+(20, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashwaqad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 40, NULL, NULL, '2023-05-04 18:33:49', '2023-05-04 18:33:49', NULL),
+(27, 'strh', 'sth', NULL, 'serherh', 'asjadtariqdrrser@gmail.com', 'hshsh', 'Amsterdam, Netherlands', NULL, NULL, NULL, 'BD', 'Amsterdam', '1207', 'https://mughalsignandprint.co.uk/business-management/business_gallery/1683308532_Screenshot 2023-04-16 104501.png', 'pending', 0, 1, 1, NULL, 49, NULL, NULL, '2023-05-05 16:42:15', '2023-05-05 16:42:15', NULL),
+(28, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifataasgsglashwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 50, NULL, NULL, '2023-05-05 16:45:56', '2023-05-05 16:45:56', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
+(29, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifasdfgtalashwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'N/A', 'pending', 0, 1, 1, NULL, 51, NULL, NULL, '2023-05-05 16:48:03', '2023-05-05 16:48:03', 'N/A'),
+(30, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifataladftjshwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 52, NULL, NULL, '2023-05-06 13:25:37', '2023-05-06 13:25:37', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
+(31, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashfgnhjmkwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 53, NULL, NULL, '2023-05-07 03:06:48', '2023-05-07 03:06:48', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
+(32, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashfgnhertyjmkwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', 'pending', 0, 1, 1, 500, 54, NULL, NULL, '2023-05-07 03:07:27', '2023-05-07 03:07:27', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'),
+(33, 'ABCD businesses', 'Best businesses in Dhaka', 'https://www.facebook.com/', '01771034383', 'rifatalashsrdgtfhfgnhertyjmkwad@gmail.com', 'No Additional Information', 'Dhaka', 'Dinajpur', '23.704263332849386', '90.44707059805279', 'Bangladesh', 'Dhaka', 'Dinajpur', NULL, 'pending', 0, 1, 1, 500, 55, NULL, NULL, '2023-05-07 03:07:54', '2023-05-07 03:07:54', NULL),
 (34, 'desf', NULL, 'http://localhost:3000/signup', '1707172135', 'kamruzzamankazi2@gmail.com', NULL, 'Dhaka, Bangladesh', 'Dhaka, Bangladesh', NULL, NULL, 'BD', 'Dhaka', '1332', NULL, 'pending', 0, 1, 1, 3, 57, NULL, NULL, '2023-05-07 17:45:05', '2023-05-07 17:45:05', NULL),
 (35, 'hjgfvghj', NULL, 'http://localhost:3000/signup', '01707172137', 'mhgfoin12@gmail.com', NULL, 'Dhaka, Bangladesh', 'Dhaka, Bangladesh', NULL, NULL, 'BD', 'Dhaka', '1332', NULL, 'pending', 0, 1, 1, 6, 58, NULL, NULL, '2023-05-07 18:40:02', '2023-05-07 18:40:02', NULL),
 (36, 'dsad', NULL, 'http://localhost:3000/signup', '01707172137', 'mhgfoindas12@gmail.com', NULL, 'Dhaka, Bangladesh', 'Dhaka, Bangladesh', NULL, NULL, 'BD', 'Dhaka', '1332', NULL, 'pending', 0, 1, 1, 43, 59, NULL, NULL, '2023-05-07 18:41:45', '2023-05-07 18:41:45', NULL),
@@ -2787,12 +2787,12 @@ INSERT INTO `garages` (`id`, `name`, `about`, `web_page`, `phone`, `email`, `add
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_affiliations`
+-- Table structure for table `business_affiliations`
 --
 
-CREATE TABLE `garage_affiliations` (
+CREATE TABLE `business_affiliations` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `affiliation_id` bigint UNSIGNED NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
@@ -2803,12 +2803,12 @@ CREATE TABLE `garage_affiliations` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_automobile_makes`
+-- Table structure for table `business_automobile_makes`
 --
 
-CREATE TABLE `garage_automobile_makes` (
+CREATE TABLE `business_automobile_makes` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `automobile_make_id` bigint UNSIGNED NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
@@ -2816,10 +2816,10 @@ CREATE TABLE `garage_automobile_makes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `garage_automobile_makes`
+-- Dumping data for table `business_automobile_makes`
 --
 
-INSERT INTO `garage_automobile_makes` (`id`, `garage_id`, `automobile_make_id`, `is_active`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_makes` (`id`, `business_id`, `automobile_make_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (63, 2, 5, 1, '2023-04-13 08:44:50', '2023-04-13 08:44:50'),
 (64, 2, 6, 1, '2023-04-13 08:44:50', '2023-04-13 08:44:50'),
 (65, 2, 7, 1, '2023-04-13 08:44:50', '2023-04-13 08:44:50'),
@@ -3634,7 +3634,7 @@ INSERT INTO `garage_automobile_makes` (`id`, `garage_id`, `automobile_make_id`, 
 (874, 15, 22, 1, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (875, 15, 19, 1, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (876, 15, 23, 1, '2023-04-25 06:47:14', '2023-04-25 06:47:14');
-INSERT INTO `garage_automobile_makes` (`id`, `garage_id`, `automobile_make_id`, `is_active`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_makes` (`id`, `business_id`, `automobile_make_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (877, 15, 24, 1, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (878, 15, 25, 1, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (879, 15, 26, 1, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
@@ -4296,22 +4296,22 @@ INSERT INTO `garage_automobile_makes` (`id`, `garage_id`, `automobile_make_id`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_automobile_models`
+-- Table structure for table `business_automobile_models`
 --
 
-CREATE TABLE `garage_automobile_models` (
+CREATE TABLE `business_automobile_models` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_automobile_make_id` bigint UNSIGNED NOT NULL,
+  `business_automobile_make_id` bigint UNSIGNED NOT NULL,
   `automobile_model_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `garage_automobile_models`
+-- Dumping data for table `business_automobile_models`
 --
 
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (567, 63, 202, '2023-04-13 08:44:50', '2023-04-13 08:44:50'),
 (568, 63, 203, '2023-04-13 08:44:50', '2023-04-13 08:44:50'),
 (569, 64, 204, '2023-04-13 08:44:50', '2023-04-13 08:44:50'),
@@ -5128,7 +5128,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (1380, 164, 420, '2023-04-13 08:45:23', '2023-04-13 08:45:23'),
 (1381, 164, 421, '2023-04-13 08:45:23', '2023-04-13 08:45:23'),
 (1382, 164, 422, '2023-04-13 08:45:23', '2023-04-13 08:45:23');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (1383, 164, 423, '2023-04-13 08:45:23', '2023-04-13 08:45:23'),
 (1384, 164, 424, '2023-04-13 08:45:23', '2023-04-13 08:45:23'),
 (1385, 164, 425, '2023-04-13 08:45:23', '2023-04-13 08:45:23'),
@@ -5935,7 +5935,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (2186, 247, 36, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (2187, 247, 37, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (2188, 247, 38, '2023-04-13 08:47:38', '2023-04-13 08:47:38');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (2189, 247, 39, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (2190, 247, 40, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (2191, 247, 41, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
@@ -6742,7 +6742,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (2992, 347, 142, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (2993, 347, 143, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (2994, 347, 144, '2023-04-13 08:51:12', '2023-04-13 08:51:12');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (2995, 347, 145, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (2996, 347, 146, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (2997, 347, 147, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
@@ -7549,7 +7549,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (3798, 435, 508, '2023-04-13 15:06:10', '2023-04-13 15:06:10'),
 (3799, 435, 509, '2023-04-13 15:06:10', '2023-04-13 15:06:10'),
 (3800, 435, 510, '2023-04-13 15:06:10', '2023-04-13 15:06:10');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (3801, 435, 511, '2023-04-13 15:06:10', '2023-04-13 15:06:10'),
 (3802, 435, 512, '2023-04-13 15:06:10', '2023-04-13 15:06:10'),
 (3803, 435, 513, '2023-04-13 15:06:10', '2023-04-13 15:06:10'),
@@ -8358,7 +8358,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (4606, 520, 12, '2023-04-13 19:22:15', '2023-04-13 19:22:15'),
 (4607, 520, 13, '2023-04-13 19:22:15', '2023-04-13 19:22:15'),
 (4608, 520, 14, '2023-04-13 19:22:15', '2023-04-13 19:22:15');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (4609, 520, 15, '2023-04-13 19:22:15', '2023-04-13 19:22:15'),
 (4610, 520, 16, '2023-04-13 19:22:15', '2023-04-13 19:22:15'),
 (4611, 520, 17, '2023-04-13 19:22:15', '2023-04-13 19:22:15'),
@@ -9167,7 +9167,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (5414, 598, 254, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (5415, 598, 255, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (5416, 599, 256, '2023-04-20 06:00:10', '2023-04-20 06:00:10');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (5417, 599, 257, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (5418, 599, 258, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (5419, 599, 259, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
@@ -9974,7 +9974,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (6220, 698, 417, '2023-04-25 05:23:17', '2023-04-25 05:23:17'),
 (6221, 698, 418, '2023-04-25 05:23:17', '2023-04-25 05:23:17'),
 (6222, 698, 419, '2023-04-25 05:23:17', '2023-04-25 05:23:17');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (6223, 698, 420, '2023-04-25 05:23:17', '2023-04-25 05:23:17'),
 (6224, 698, 421, '2023-04-25 05:23:17', '2023-04-25 05:23:17'),
 (6225, 698, 422, '2023-04-25 05:23:17', '2023-04-25 05:23:17'),
@@ -10781,7 +10781,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (7026, 785, 14, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (7027, 785, 15, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (7028, 785, 16, '2023-04-25 06:08:31', '2023-04-25 06:08:31');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (7029, 785, 17, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (7030, 785, 18, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (7031, 785, 19, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
@@ -11589,7 +11589,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (7833, 880, 305, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (7834, 880, 306, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (7835, 880, 307, '2023-04-25 06:47:14', '2023-04-25 06:47:14');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (7836, 880, 308, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (7837, 880, 309, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
 (7838, 880, 310, '2023-04-25 06:47:14', '2023-04-25 06:47:14'),
@@ -12396,7 +12396,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (8639, 971, 487, '2023-04-25 06:49:00', '2023-04-25 06:49:00'),
 (8640, 972, 488, '2023-04-25 06:49:00', '2023-04-25 06:49:00'),
 (8641, 973, 489, '2023-04-25 06:49:00', '2023-04-25 06:49:00');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (8642, 973, 490, '2023-04-25 06:49:00', '2023-04-25 06:49:00'),
 (8643, 973, 491, '2023-04-25 06:49:00', '2023-04-25 06:49:00'),
 (8644, 973, 492, '2023-04-25 06:49:00', '2023-04-25 06:49:00'),
@@ -13196,7 +13196,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (9438, 1053, 86, '2023-04-25 06:51:11', '2023-04-25 06:51:11'),
 (9439, 1053, 87, '2023-04-25 06:51:11', '2023-04-25 06:51:11'),
 (9440, 1053, 88, '2023-04-25 06:51:11', '2023-04-25 06:51:11');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (9441, 1053, 89, '2023-04-25 06:51:11', '2023-04-25 06:51:11'),
 (9442, 1053, 90, '2023-04-25 06:51:11', '2023-04-25 06:51:11'),
 (9443, 1053, 91, '2023-04-25 06:51:11', '2023-04-25 06:51:11'),
@@ -13986,7 +13986,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (10227, 1154, 320, '2023-05-04 18:05:25', '2023-05-04 18:05:25'),
 (10228, 1155, 321, '2023-05-04 18:05:25', '2023-05-04 18:05:25'),
 (10229, 1155, 322, '2023-05-04 18:05:25', '2023-05-04 18:05:25');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (10230, 1155, 323, '2023-05-04 18:05:25', '2023-05-04 18:05:25'),
 (10231, 1155, 324, '2023-05-04 18:05:25', '2023-05-04 18:05:25'),
 (10232, 1155, 325, '2023-05-04 18:05:25', '2023-05-04 18:05:25'),
@@ -14769,7 +14769,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (11009, 1236, 435, '2023-05-05 16:42:16', '2023-05-05 16:42:16'),
 (11010, 1236, 436, '2023-05-05 16:42:16', '2023-05-05 16:42:16'),
 (11011, 1236, 437, '2023-05-05 16:42:16', '2023-05-05 16:42:16');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (11012, 1236, 438, '2023-05-05 16:42:16', '2023-05-05 16:42:16'),
 (11013, 1236, 439, '2023-05-05 16:42:16', '2023-05-05 16:42:16'),
 (11014, 1236, 440, '2023-05-05 16:42:16', '2023-05-05 16:42:16'),
@@ -15559,7 +15559,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (11798, 1265, 41, '2023-05-07 03:07:54', '2023-05-07 03:07:54'),
 (11799, 1265, 42, '2023-05-07 03:07:54', '2023-05-07 03:07:54'),
 (11800, 1265, 43, '2023-05-07 03:07:54', '2023-05-07 03:07:54');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (11801, 1265, 44, '2023-05-07 03:07:54', '2023-05-07 03:07:54'),
 (11802, 1265, 45, '2023-05-07 03:07:54', '2023-05-07 03:07:54'),
 (11803, 1265, 46, '2023-05-07 03:07:54', '2023-05-07 03:07:54'),
@@ -16341,7 +16341,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (12579, 1361, 135, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (12580, 1361, 136, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (12581, 1361, 137, '2023-05-07 18:40:02', '2023-05-07 18:40:02');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (12582, 1361, 138, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (12583, 1361, 139, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (12584, 1361, 140, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
@@ -17122,7 +17122,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (13359, 1446, 475, '2023-05-07 18:41:46', '2023-05-07 18:41:46'),
 (13360, 1446, 476, '2023-05-07 18:41:46', '2023-05-07 18:41:46'),
 (13361, 1446, 477, '2023-05-07 18:41:46', '2023-05-07 18:41:46');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (13362, 1446, 478, '2023-05-07 18:41:46', '2023-05-07 18:41:46'),
 (13363, 1446, 479, '2023-05-07 18:41:46', '2023-05-07 18:41:46'),
 (13364, 1446, 480, '2023-05-07 18:41:46', '2023-05-07 18:41:46'),
@@ -17905,7 +17905,7 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 (14141, 1529, 57, '2023-05-07 19:11:29', '2023-05-07 19:11:29'),
 (14142, 1529, 58, '2023-05-07 19:11:29', '2023-05-07 19:11:29'),
 (14143, 1529, 59, '2023-05-07 19:11:29', '2023-05-07 19:11:29');
-INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_automobile_models` (`id`, `business_automobile_make_id`, `automobile_model_id`, `created_at`, `updated_at`) VALUES
 (14144, 1529, 60, '2023-05-07 19:11:29', '2023-05-07 19:11:29'),
 (14145, 1529, 61, '2023-05-07 19:11:29', '2023-05-07 19:11:29'),
 (14146, 1529, 62, '2023-05-07 19:11:29', '2023-05-07 19:11:29'),
@@ -17955,50 +17955,50 @@ INSERT INTO `garage_automobile_models` (`id`, `garage_automobile_make_id`, `auto
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_galleries`
+-- Table structure for table `business_galleries`
 --
 
-CREATE TABLE `garage_galleries` (
+CREATE TABLE `business_galleries` (
   `id` bigint UNSIGNED NOT NULL,
   `image` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `garage_galleries`
+-- Dumping data for table `business_galleries`
 --
 
-INSERT INTO `garage_galleries` (`id`, `image`, `garage_id`, `created_at`, `updated_at`) VALUES
-(1, '/garage_gallery/1681946280_attachment_110839242.png', 8, '2023-04-19 22:18:00', '2023-04-19 22:18:00'),
-(2, '/garage_gallery/1681946353_Modern-Garage-PNG-Images.png', 8, '2023-04-19 22:19:13', '2023-04-19 22:19:13'),
-(3, '/garage_gallery/1681946353_pngtree-garage-logo-gear-element-automotive-modern-technology-engine-technical-transportation-image_321715.jpg', 8, '2023-04-19 22:19:13', '2023-04-19 22:19:13'),
-(4, '/garage_gallery/1681946386_1920x1080_damselfly.png', 8, '2023-04-19 22:19:46', '2023-04-19 22:19:46'),
-(5, '/garage_gallery/1681946386_2560x1600_tamarin.png', 8, '2023-04-19 22:19:46', '2023-04-19 22:19:46'),
-(6, '/garage_gallery/1681946438_1920x1080_damselfly.png', 8, '2023-04-19 22:20:38', '2023-04-19 22:20:38'),
-(7, '/garage_gallery/1681946438_2560x1600_tamarin.png', 8, '2023-04-19 22:20:38', '2023-04-19 22:20:38'),
-(8, '/garage_gallery/1681946649_New Project.png', 8, '2023-04-19 22:24:09', '2023-04-19 22:24:09'),
-(9, '/garage_gallery/1681960658_FZJqYonWAAc1ju4.jpg', 9, '2023-04-20 02:17:38', '2023-04-20 02:17:38'),
-(10, '/garage_gallery/1681960658_about-visual.jpeg', 9, '2023-04-20 02:17:38', '2023-04-20 02:17:38'),
-(12, '/garage_gallery/1681962845_2560x1600_tamarin.png', 10, '2023-04-20 02:54:05', '2023-04-20 02:54:05'),
-(13, '/garage_gallery/1681962845_attachment_110839242.png', 10, '2023-04-20 02:54:05', '2023-04-20 02:54:05'),
-(18, '/garage_gallery/1681963558_Screenshot_14.png', 10, '2023-04-20 03:05:58', '2023-04-20 03:05:58'),
-(19, '/garage_gallery/1681963558_Screenshot_43.png', 10, '2023-04-20 03:05:58', '2023-04-20 03:05:58'),
-(20, '/garage_gallery/1681979953_Screenshot_5.png', 11, '2023-04-20 07:39:13', '2023-04-20 07:39:13');
+INSERT INTO `business_galleries` (`id`, `image`, `business_id`, `created_at`, `updated_at`) VALUES
+(1, '/business_gallery/1681946280_attachment_110839242.png', 8, '2023-04-19 22:18:00', '2023-04-19 22:18:00'),
+(2, '/business_gallery/1681946353_Modern-businesses-PNG-Images.png', 8, '2023-04-19 22:19:13', '2023-04-19 22:19:13'),
+(3, '/business_gallery/1681946353_pngtree-business-logo-gear-element-automotive-modern-technology-engine-technical-transportation-image_321715.jpg', 8, '2023-04-19 22:19:13', '2023-04-19 22:19:13'),
+(4, '/business_gallery/1681946386_1920x1080_damselfly.png', 8, '2023-04-19 22:19:46', '2023-04-19 22:19:46'),
+(5, '/business_gallery/1681946386_2560x1600_tamarin.png', 8, '2023-04-19 22:19:46', '2023-04-19 22:19:46'),
+(6, '/business_gallery/1681946438_1920x1080_damselfly.png', 8, '2023-04-19 22:20:38', '2023-04-19 22:20:38'),
+(7, '/business_gallery/1681946438_2560x1600_tamarin.png', 8, '2023-04-19 22:20:38', '2023-04-19 22:20:38'),
+(8, '/business_gallery/1681946649_New Project.png', 8, '2023-04-19 22:24:09', '2023-04-19 22:24:09'),
+(9, '/business_gallery/1681960658_FZJqYonWAAc1ju4.jpg', 9, '2023-04-20 02:17:38', '2023-04-20 02:17:38'),
+(10, '/business_gallery/1681960658_about-visual.jpeg', 9, '2023-04-20 02:17:38', '2023-04-20 02:17:38'),
+(12, '/business_gallery/1681962845_2560x1600_tamarin.png', 10, '2023-04-20 02:54:05', '2023-04-20 02:54:05'),
+(13, '/business_gallery/1681962845_attachment_110839242.png', 10, '2023-04-20 02:54:05', '2023-04-20 02:54:05'),
+(18, '/business_gallery/1681963558_Screenshot_14.png', 10, '2023-04-20 03:05:58', '2023-04-20 03:05:58'),
+(19, '/business_gallery/1681963558_Screenshot_43.png', 10, '2023-04-20 03:05:58', '2023-04-20 03:05:58'),
+(20, '/business_gallery/1681979953_Screenshot_5.png', 11, '2023-04-20 07:39:13', '2023-04-20 07:39:13');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_packages`
+-- Table structure for table `business_packages`
 --
 
-CREATE TABLE `garage_packages` (
+CREATE TABLE `business_packages` (
   `id` bigint UNSIGNED NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `price` double NOT NULL DEFAULT '0',
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -18007,13 +18007,13 @@ CREATE TABLE `garage_packages` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_package_sub_services`
+-- Table structure for table `business_package_sub_services`
 --
 
-CREATE TABLE `garage_package_sub_services` (
+CREATE TABLE `business_package_sub_services` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_sub_service_id` bigint UNSIGNED NOT NULL,
-  `garage_package_id` bigint UNSIGNED NOT NULL,
+  `business_sub_service_id` bigint UNSIGNED NOT NULL,
+  `business_package_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -18021,12 +18021,12 @@ CREATE TABLE `garage_package_sub_services` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_rules`
+-- Table structure for table `business_rules`
 --
 
-CREATE TABLE `garage_rules` (
+CREATE TABLE `business_rules` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `standard_lead_time` int DEFAULT NULL,
   `booking_accept_start_time` time DEFAULT NULL,
   `booking_accept_end_time` time DEFAULT NULL,
@@ -18040,12 +18040,12 @@ CREATE TABLE `garage_rules` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_services`
+-- Table structure for table `business_services`
 --
 
-CREATE TABLE `garage_services` (
+CREATE TABLE `business_services` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `service_id` bigint UNSIGNED NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
@@ -18053,10 +18053,10 @@ CREATE TABLE `garage_services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `garage_services`
+-- Dumping data for table `business_services`
 --
 
-INSERT INTO `garage_services` (`id`, `garage_id`, `service_id`, `is_active`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_services` (`id`, `business_id`, `service_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (19, 2, 23, 1, '2023-04-13 08:44:49', '2023-04-13 08:44:49'),
 (20, 2, 22, 1, '2023-04-13 08:44:49', '2023-04-13 08:44:49'),
 (21, 2, 21, 1, '2023-04-13 08:44:49', '2023-04-13 08:44:49'),
@@ -18568,22 +18568,22 @@ INSERT INTO `garage_services` (`id`, `garage_id`, `service_id`, `is_active`, `cr
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_sub_services`
+-- Table structure for table `business_sub_services`
 --
 
-CREATE TABLE `garage_sub_services` (
+CREATE TABLE `business_sub_services` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_service_id` bigint UNSIGNED NOT NULL,
+  `business_service_id` bigint UNSIGNED NOT NULL,
   `sub_service_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `garage_sub_services`
+-- Dumping data for table `business_sub_services`
 --
 
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (299, 19, 365, '2023-04-13 08:44:49', '2023-04-13 08:44:49'),
 (300, 19, 366, '2023-04-13 08:44:49', '2023-04-13 08:44:49'),
 (301, 19, 367, '2023-04-13 08:44:49', '2023-04-13 08:44:49'),
@@ -19417,7 +19417,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (1129, 70, 233, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (1130, 70, 234, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (1131, 70, 235, '2023-04-13 08:47:38', '2023-04-13 08:47:38');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (1132, 70, 236, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (1133, 70, 237, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
 (1134, 70, 238, '2023-04-13 08:47:38', '2023-04-13 08:47:38'),
@@ -20234,7 +20234,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (1945, 118, 173, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (1946, 118, 174, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (1947, 118, 175, '2023-04-13 08:51:12', '2023-04-13 08:51:12');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (1948, 118, 176, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (1949, 118, 177, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
 (1950, 118, 178, '2023-04-13 08:51:12', '2023-04-13 08:51:12'),
@@ -21043,7 +21043,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (2753, 166, 97, '2023-04-13 17:06:16', '2023-04-13 17:06:16'),
 (2754, 166, 98, '2023-04-13 17:06:16', '2023-04-13 17:06:16'),
 (2755, 166, 99, '2023-04-13 17:06:16', '2023-04-13 17:06:16');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (2756, 166, 100, '2023-04-13 17:06:16', '2023-04-13 17:06:16'),
 (2757, 166, 101, '2023-04-13 17:06:16', '2023-04-13 17:06:16'),
 (2758, 166, 102, '2023-04-13 17:06:16', '2023-04-13 17:06:16'),
@@ -21852,7 +21852,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (3567, 215, 24, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (3568, 216, 59, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (3569, 216, 60, '2023-04-20 06:00:10', '2023-04-20 06:00:10');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (3570, 216, 61, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (3571, 216, 62, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
 (3572, 216, 63, '2023-04-20 06:00:10', '2023-04-20 06:00:10'),
@@ -22662,7 +22662,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (4376, 265, 12, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (4377, 265, 13, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (4378, 265, 14, '2023-04-25 06:08:31', '2023-04-25 06:08:31');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (4379, 266, 1, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (4380, 266, 2, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
 (4381, 266, 3, '2023-04-25 06:08:31', '2023-04-25 06:08:31'),
@@ -23471,7 +23471,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (5184, 315, 343, '2023-04-25 06:48:59', '2023-04-25 06:48:59'),
 (5185, 315, 344, '2023-04-25 06:48:59', '2023-04-25 06:48:59'),
 (5186, 315, 345, '2023-04-25 06:48:59', '2023-04-25 06:48:59');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (5187, 315, 346, '2023-04-25 06:48:59', '2023-04-25 06:48:59'),
 (5188, 315, 347, '2023-04-25 06:48:59', '2023-04-25 06:48:59'),
 (5189, 315, 348, '2023-04-25 06:48:59', '2023-04-25 06:48:59'),
@@ -24280,7 +24280,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (5992, 363, 301, '2023-04-25 06:55:48', '2023-04-25 06:55:48'),
 (5993, 364, 266, '2023-04-25 06:55:48', '2023-04-25 06:55:48'),
 (5994, 364, 267, '2023-04-25 06:55:48', '2023-04-25 06:55:48');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (5995, 364, 268, '2023-04-25 06:55:48', '2023-04-25 06:55:48'),
 (5996, 364, 269, '2023-04-25 06:55:48', '2023-04-25 06:55:48'),
 (5997, 364, 270, '2023-04-25 06:55:48', '2023-04-25 06:55:48'),
@@ -25089,7 +25089,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (6800, 416, 209, '2023-05-05 16:42:15', '2023-05-05 16:42:15'),
 (6801, 416, 210, '2023-05-05 16:42:15', '2023-05-05 16:42:15'),
 (6802, 416, 211, '2023-05-05 16:42:15', '2023-05-05 16:42:15');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (6803, 416, 212, '2023-05-05 16:42:15', '2023-05-05 16:42:15'),
 (6804, 416, 213, '2023-05-05 16:42:15', '2023-05-05 16:42:15'),
 (6805, 416, 214, '2023-05-05 16:42:15', '2023-05-05 16:42:15'),
@@ -25898,7 +25898,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (7608, 471, 153, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (7609, 471, 154, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (7610, 471, 155, '2023-05-07 18:40:02', '2023-05-07 18:40:02');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (7611, 471, 156, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (7612, 471, 157, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
 (7613, 471, 158, '2023-05-07 18:40:02', '2023-05-07 18:40:02'),
@@ -26707,7 +26707,7 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 (8416, 518, 133, '2023-05-07 19:11:28', '2023-05-07 19:11:28'),
 (8417, 518, 134, '2023-05-07 19:11:28', '2023-05-07 19:11:28'),
 (8418, 518, 135, '2023-05-07 19:11:28', '2023-05-07 19:11:28');
-INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `business_sub_services` (`id`, `business_service_id`, `sub_service_id`, `created_at`, `updated_at`) VALUES
 (8419, 518, 136, '2023-05-07 19:11:28', '2023-05-07 19:11:28'),
 (8420, 518, 137, '2023-05-07 19:11:28', '2023-05-07 19:11:28'),
 (8421, 518, 138, '2023-05-07 19:11:28', '2023-05-07 19:11:28'),
@@ -26810,12 +26810,12 @@ INSERT INTO `garage_sub_services` (`id`, `garage_service_id`, `sub_service_id`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_sub_service_prices`
+-- Table structure for table `business_sub_service_prices`
 --
 
-CREATE TABLE `garage_sub_service_prices` (
+CREATE TABLE `business_sub_service_prices` (
   `id` bigint UNSIGNED NOT NULL,
-  `garage_sub_service_id` bigint UNSIGNED NOT NULL,
+  `business_sub_service_id` bigint UNSIGNED NOT NULL,
   `automobile_make_id` bigint UNSIGNED DEFAULT NULL,
   `price` double NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
@@ -26825,16 +26825,16 @@ CREATE TABLE `garage_sub_service_prices` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `garage_times`
+-- Table structure for table `business_times`
 --
 
-CREATE TABLE `garage_times` (
+CREATE TABLE `business_times` (
   `id` bigint UNSIGNED NOT NULL,
   `day` int NOT NULL,
   `opening_time` time NOT NULL,
   `closing_time` time NOT NULL,
   `is_closed` tinyint(1) NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -26848,7 +26848,7 @@ CREATE TABLE `garage_times` (
 CREATE TABLE `jobs` (
   `id` bigint UNSIGNED NOT NULL,
   `booking_id` bigint UNSIGNED DEFAULT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `customer_id` bigint UNSIGNED NOT NULL,
   `automobile_make_id` bigint UNSIGNED NOT NULL,
   `automobile_model_id` bigint UNSIGNED NOT NULL,
@@ -26882,7 +26882,7 @@ CREATE TABLE `jobs` (
 CREATE TABLE `job_bids` (
   `id` bigint UNSIGNED NOT NULL,
   `pre_booking_id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED NOT NULL,
+  `business_id` bigint UNSIGNED NOT NULL,
   `price` double NOT NULL,
   `offer_template` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `job_start_date` date DEFAULT NULL,
@@ -26897,7 +26897,7 @@ CREATE TABLE `job_bids` (
 -- Dumping data for table `job_bids`
 --
 
-INSERT INTO `job_bids` (`id`, `pre_booking_id`, `garage_id`, `price`, `offer_template`, `job_start_date`, `job_start_time`, `job_end_time`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `job_bids` (`id`, `pre_booking_id`, `business_id`, `price`, `offer_template`, `job_start_date`, `job_start_time`, `job_end_time`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 7, 1223, 'safdasf', '2023-04-24', '00:45:00', '00:30:00', NULL, '2023-04-24 07:05:08', '2023-04-24 07:05:08');
 
 -- --------------------------------------------------------
@@ -26909,7 +26909,7 @@ INSERT INTO `job_bids` (`id`, `pre_booking_id`, `garage_id`, `price`, `offer_tem
 CREATE TABLE `job_packages` (
   `id` bigint UNSIGNED NOT NULL,
   `job_id` bigint UNSIGNED NOT NULL,
-  `garage_package_id` bigint UNSIGNED NOT NULL,
+  `business_package_id` bigint UNSIGNED NOT NULL,
   `price` double NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -26968,7 +26968,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (4, '2019_12_14_000001_create_personal_access_tokens_table', 1),
 (5, '2022_12_08_144847_create_permission_tables', 1),
 (6, '2022_12_20_061924_payment_type', 1),
-(7, '2022_12_20_061926_create_garages_table', 1),
+(7, '2022_12_20_061926_create_businesses_table', 1),
 (8, '2022_12_20_061927_create_coupons_table', 1),
 (9, '2022_12_20_121705_create_statuses_table', 1),
 (10, '2022_12_28_081413_create_automobile_categories_table', 1),
@@ -26978,17 +26978,17 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (14, '2023_01_15_143506_create_automobile_fuel_types_table', 1),
 (15, '2023_01_17_111032_create_services_table', 1),
 (16, '2023_01_26_144225_create_sub_services_table', 1),
-(17, '2023_02_07_135517_create_garage_services_table', 1),
-(18, '2023_02_07_135737_create_garage_sub_services_table', 1),
-(19, '2023_02_07_145711_create_garage_automobile_makes_table', 1),
-(20, '2023_02_07_145723_create_garage_automobile_models_table', 1),
+(17, '2023_02_07_135517_create_business_services_table', 1),
+(18, '2023_02_07_135737_create_business_sub_services_table', 1),
+(19, '2023_02_07_145711_create_business_automobile_makes_table', 1),
+(20, '2023_02_07_145723_create_business_automobile_models_table', 1),
 (21, '2023_02_10_134937_create_fuel_station_services_table', 1),
 (22, '2023_02_10_134938_create_fuel_stations_table', 1),
 (23, '2023_02_10_134939_create_fuel_station_options_table', 1),
 (24, '2023_02_13_063107_create_email_template_wrappers_table', 1),
 (25, '2023_02_13_063108_create_email_templates_table', 1),
-(26, '2023_02_14_131249_create_garage_times_table', 1),
-(27, '2023_02_16_123242_create_garage_galleries_table', 1),
+(26, '2023_02_14_131249_create_business_times_table', 1),
+(27, '2023_02_16_123242_create_business_galleries_table', 1),
 (28, '2023_02_19_131530_create_pre_bookings_table', 1),
 (29, '2023_02_19_131531_create_pre_booking_sub_services_table', 1),
 (30, '2023_02_19_131544_create_bookings_table', 1),
@@ -26997,14 +26997,14 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (33, '2023_02_21_142636_create_job_sub_services_table', 1),
 (34, '2023_02_23_152345_create_job_payments_table', 1),
 (35, '2023_02_28_164929_create_affiliations_table', 1),
-(36, '2023_02_28_165124_create_garage_affiliations_table', 1),
-(37, '2023_03_02_125207_create_garage_sub_service_prices_table', 1),
+(36, '2023_02_28_165124_create_business_affiliations_table', 1),
+(37, '2023_03_02_125207_create_business_sub_service_prices_table', 1),
 (38, '2023_03_22_074837_create_job_bids_table', 1),
-(39, '2023_03_24_103731_create_garage_packages_table', 1),
-(40, '2023_03_24_103749_create_garage_package_sub_services_table', 1),
+(39, '2023_03_24_103731_create_business_packages_table', 1),
+(40, '2023_03_24_103749_create_business_package_sub_services_table', 1),
 (41, '2023_03_29_065853_create_booking_packages_table', 1),
 (42, '2023_03_29_073805_create_job_packages_table', 1),
-(43, '2023_03_31_112951_create_garage_rules_table', 1),
+(43, '2023_03_31_112951_create_business_rules_table', 1),
 (44, '2023_04_05_090921_create_questions_table', 1),
 (45, '2023_04_05_091110_create_qusetion_stars_table', 1),
 (46, '2023_04_05_091223_create_stars_table', 1),
@@ -27133,7 +27133,7 @@ CREATE TABLE `notifications` (
   `sender_id` bigint UNSIGNED NOT NULL,
   `receiver_id` bigint UNSIGNED NOT NULL,
   `customer_id` bigint UNSIGNED NOT NULL,
-  `garage_id` bigint UNSIGNED DEFAULT NULL,
+  `business_id` bigint UNSIGNED DEFAULT NULL,
   `bid_id` bigint UNSIGNED DEFAULT NULL,
   `pre_booking_id` bigint UNSIGNED DEFAULT NULL,
   `booking_id` bigint UNSIGNED DEFAULT NULL,
@@ -27148,7 +27148,7 @@ CREATE TABLE `notifications` (
 -- Dumping data for table `notifications`
 --
 
-INSERT INTO `notifications` (`id`, `sender_id`, `receiver_id`, `customer_id`, `garage_id`, `bid_id`, `pre_booking_id`, `booking_id`, `job_id`, `notification_template_id`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `notifications` (`id`, `sender_id`, `receiver_id`, `customer_id`, `business_id`, `bid_id`, `pre_booking_id`, `booking_id`, `job_id`, `notification_template_id`, `status`, `created_at`, `updated_at`) VALUES
 (1, 16, 12, 16, 10, NULL, NULL, 1, NULL, 10, 'unread', '2023-04-19 16:12:30', '2023-04-19 16:12:30'),
 (2, 18, 12, 18, 10, NULL, NULL, 2, NULL, 10, 'unread', '2023-04-19 16:55:01', '2023-04-19 16:55:01'),
 (3, 22, 12, 22, 10, NULL, NULL, 3, NULL, 10, 'unread', '2023-04-19 17:40:09', '2023-04-19 17:40:09'),
@@ -27176,24 +27176,24 @@ CREATE TABLE `notification_templates` (
 --
 
 INSERT INTO `notification_templates` (`id`, `name`, `type`, `template`, `link`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, NULL, 'bid_created_by_garage_owner', '\"A garage named [garage_name] posted a bid. its owner is\"', '\"\\/[garage_id]\\/[bid_id]\"', 1, NULL, NULL),
-(2, NULL, 'bid_updated_by_garage_owner', '\"A garage named [garage_name] updated their bid. its owner is\"', '\"\\/[garage_id]\\/[bid_id]\"', 1, NULL, NULL),
+(1, NULL, 'bid_created_by_business_owner', '\"A business named [business_name] posted a bid. its owner is\"', '\"\\/[business_id]\\/[bid_id]\"', 1, NULL, NULL),
+(2, NULL, 'bid_updated_by_business_owner', '\"A business named [business_name] updated their bid. its owner is\"', '\"\\/[business_id]\\/[bid_id]\"', 1, NULL, NULL),
 (3, NULL, 'bid_accepted_by_client', '\"A client named [customer_name] accepted your bid.\"', '\"\\/[customer_id]\\/[pre_booking_id]\"', 1, NULL, NULL),
 (4, NULL, 'bid_rejected_by_client', '\"A client named [customer_name] rejected your bid.\"', '\"\\/[customer_id]\\/[pre_booking_id]\"', 1, NULL, NULL),
-(5, NULL, 'booking_updated_by_garage_owner', '\"hello [customer_name]! your booking is updated by the garage named[garage_owner_name],[garage_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(6, NULL, 'booking_status_changed_by_garage_owner', '\"hello [customer_name]! your booking status updated by the garage named[garage_owner_name],[garage_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(7, NULL, 'booking_confirmed_by_garage_owner', '\"hello [customer_name]! your booking confirmed by the garage named[garage_owner_name],[garage_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(8, NULL, 'booking_deleted_by_garage_owner', '\"hello [customer_name]! your booking deleted by the garage named[garage_owner_name],[garage_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(9, NULL, 'booking_rejected_by_garage_owner', '\"hello [customer_name]! your booking rejected by the garage named[garage_owner_name],[garage_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(10, NULL, 'booking_created_by_client', '\"hello [garage_owner_name]!  booking created by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(11, NULL, 'booking_updated_by_client', '\"hello [garage_owner_name]!  booking updated by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(12, NULL, 'booking_deleted_by_client', '\"hello [garage_owner_name]!  booking deleted by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(13, NULL, 'booking_accepted_by_client', '\"hello [garage_owner_name]!  booking accepted by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(14, NULL, 'booking_rejected_by_client', '\"hello [garage_owner_name]!  booking rejected by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(15, NULL, 'job_created_by_garage_owner', '\"hello [customer_name]!  job created  by [garage_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(16, NULL, 'job_updated_by_garage_owner', '\"hello [customer_name]!  job updated  by [garage_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(17, NULL, 'job_status_changed_by_garage_owner', '\"hello [customer_name]!  job status changed  by [garage_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
-(18, NULL, 'job_deleted_by_garage_owner', '\"hello [customer_name]!  job deleted changed  by [garage_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL);
+(5, NULL, 'booking_updated_by_business_owner', '\"hello [customer_name]! your booking is updated by the business named[business_owner_name],[business_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(6, NULL, 'booking_status_changed_by_business_owner', '\"hello [customer_name]! your booking status updated by the business named[business_owner_name],[business_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(7, NULL, 'booking_confirmed_by_business_owner', '\"hello [customer_name]! your booking confirmed by the business named[business_owner_name],[business_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(8, NULL, 'booking_deleted_by_business_owner', '\"hello [customer_name]! your booking deleted by the business named[business_owner_name],[business_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(9, NULL, 'booking_rejected_by_business_owner', '\"hello [customer_name]! your booking rejected by the business named[business_owner_name],[business_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(10, NULL, 'booking_created_by_client', '\"hello [business_owner_name]!  booking created by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(11, NULL, 'booking_updated_by_client', '\"hello [business_owner_name]!  booking updated by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(12, NULL, 'booking_deleted_by_client', '\"hello [business_owner_name]!  booking deleted by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(13, NULL, 'booking_accepted_by_client', '\"hello [business_owner_name]!  booking accepted by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(14, NULL, 'booking_rejected_by_client', '\"hello [business_owner_name]!  booking rejected by [customer_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(15, NULL, 'job_created_by_business_owner', '\"hello [customer_name]!  job created  by [business_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(16, NULL, 'job_updated_by_business_owner', '\"hello [customer_name]!  job updated  by [business_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(17, NULL, 'job_status_changed_by_business_owner', '\"hello [customer_name]!  job status changed  by [business_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL),
+(18, NULL, 'job_deleted_by_business_owner', '\"hello [customer_name]!  job deleted changed  by [business_owner_name] \"', '\"\\/[customer_id]\\/[booking_id]\"', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -27550,10 +27550,10 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 (6, 'role_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (7, 'role_view', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (8, 'role_delete', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
-(9, 'garage_create', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
-(10, 'garage_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
-(11, 'garage_view', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
-(12, 'garage_delete', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
+(9, 'business_create', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
+(10, 'business_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
+(11, 'business_view', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
+(12, 'business_delete', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (13, 'automobile_create', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (14, 'automobile_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (15, 'automobile_view', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
@@ -27574,17 +27574,17 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 (30, 'template_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (31, 'template_view', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
 (32, 'template_delete', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
-(33, 'garage_times_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
-(34, 'garage_times_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(35, 'garage_rules_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(36, 'garage_rules_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(37, 'garage_gallery_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(38, 'garage_gallery_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(39, 'garage_gallery_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(40, 'garage_services_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(41, 'garage_services_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(42, 'garage_services_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(43, 'garage_services_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(33, 'business_times_update', 'api', '2023-04-19 06:12:13', '2023-04-19 06:12:13'),
+(34, 'business_times_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(35, 'business_rules_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(36, 'business_rules_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(37, 'business_gallery_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(38, 'business_gallery_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(39, 'business_gallery_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(40, 'business_services_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(41, 'business_services_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(42, 'business_services_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(43, 'business_services_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (44, 'payment_type_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (45, 'payment_type_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (46, 'payment_type_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
@@ -27604,18 +27604,18 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 (60, 'affiliation_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (61, 'affiliation_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (62, 'affiliation_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(63, 'garage_affiliation_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(64, 'garage_affiliation_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(65, 'garage_affiliation_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(66, 'garage_affiliation_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(67, 'garage_service_price_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(68, 'garage_service_price_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(69, 'garage_service_price_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(70, 'garage_service_price_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(71, 'garage_package_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(72, 'garage_package_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(73, 'garage_package_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(74, 'garage_package_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(63, 'business_affiliation_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(64, 'business_affiliation_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(65, 'business_affiliation_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(66, 'business_affiliation_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(67, 'business_service_price_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(68, 'business_service_price_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(69, 'business_service_price_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(70, 'business_service_price_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(71, 'business_package_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(72, 'business_package_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(73, 'business_package_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(74, 'business_package_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (75, 'job_bids_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (76, 'job_bids_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (77, 'job_bids_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
@@ -27628,10 +27628,10 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 (84, 'review_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (85, 'review_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (86, 'review_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(87, 'garage_automobile_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(88, 'garage_automobile_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(89, 'garage_automobile_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(90, 'garage_automobile_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(87, 'business_automobile_create', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(88, 'business_automobile_update', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(89, 'business_automobile_view', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(90, 'business_automobile_delete', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (91, 'fuel_station_gallery_create', 'api', '2023-04-20 07:22:30', '2023-04-20 07:22:30'),
 (92, 'fuel_station_gallery_view', 'api', '2023-04-20 07:22:30', '2023-04-20 07:22:30'),
 (93, 'fuel_station_gallery_delete', 'api', '2023-04-20 07:22:30', '2023-04-20 07:22:30'),
@@ -27856,7 +27856,7 @@ INSERT INTO `questions` (`id`, `question`, `type`, `is_default`, `is_active`, `c
 (1, 'How was this?', 'star', 1, 1, '2023-05-09 17:30:30', '2023-05-09 17:30:30'),
 (2, 'How was this?', 'star', 1, 1, '2023-05-09 17:30:42', '2023-05-09 17:30:42'),
 (3, 'How was this?', 'star', 1, 1, '2023-05-09 17:31:14', '2023-05-09 17:31:14'),
-(4, 'How was this garage?', 'star', 1, 1, '2023-05-09 17:31:29', '2023-05-09 17:31:29');
+(4, 'How was this business?', 'star', 1, 1, '2023-05-09 17:31:29', '2023-05-09 17:31:29');
 
 -- --------------------------------------------------------
 
@@ -27881,7 +27881,7 @@ CREATE TABLE `qusetion_stars` (
 CREATE TABLE `review_news` (
   `id` bigint UNSIGNED NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `garage_id` bigint UNSIGNED DEFAULT NULL,
+  `business_id` bigint UNSIGNED DEFAULT NULL,
   `job_id` bigint UNSIGNED DEFAULT NULL,
   `rate` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` bigint UNSIGNED DEFAULT NULL,
@@ -27927,7 +27927,7 @@ CREATE TABLE `roles` (
 INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES
 (1, 'superadmin', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (2, 'data_collector', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
-(3, 'garage_owner', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
+(3, 'business_owner', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (4, 'shop_owner', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14'),
 (5, 'customer', 'api', '2023-04-19 06:12:14', '2023-04-19 06:12:14');
 
@@ -28770,7 +28770,7 @@ INSERT INTO `users` (`id`, `first_Name`, `last_Name`, `phone`, `image`, `passwor
 (9, 'Rifat', 'Al-Ashwad', '01771034383', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', NULL, 'Dhaka', 'Dinajpur', 'Bangladesh', 'Dhaka', 'Dinajpur', 'rifatalashwad@gmail.com', 'V8bi7aPscYVDCPKAc0k2k2iBNpt3cH', '2023-04-14 20:22:15', NULL, '$2y$10$n.viz3haLS6BVEXro1gp0OaXUylKjbYJ0sv0GBJ5DEHOqLkqYWqUO', NULL, NULL, '1', NULL, NULL, NULL, '2023-04-13 19:22:15', '2023-04-24 03:39:24', NULL, 0, NULL),
 (10, 'Rifat', 'Al', '01771034383', NULL, NULL, 'dhaka', 'dinajpur', 'bangladesh', 'dhaka', '1207', 'rifat@gmail.com', 'FH1u21htWJ3BHuszGTBlVgCmQWfiDu', '2023-04-16 13:55:35', NULL, '$2y$10$GV7xcT0u0ocFcq8BBFfGK.WRCF5IOU6n.8lxmcl1YkiF569t85r/2', NULL, NULL, '0', NULL, NULL, NULL, '2023-04-15 12:55:35', '2023-04-24 03:37:21', NULL, 0, NULL),
 (11, 'Rifat', 'Al-Ashwad', '01771034383', 'https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80', NULL, 'Dhaka', 'Dinajpur', 'Bangladesh', 'Dhaka', 'Dinajpur', 'rifatalashgwad@gmail.com', 'rKVRKAhgijuUmMK5QxdukLCLEU3Z4l', '2023-04-16 14:07:16', NULL, '$2y$10$oKvr2KKMEIP6bVJu8ewBO.cc/NNXw.c6zxCj4bbHbYhxTvwKKVSrq', NULL, NULL, '1', NULL, NULL, NULL, '2023-04-15 13:07:16', '2023-04-24 03:36:37', NULL, 0, NULL),
-(12, 'Garage', '1', '01707172137', NULL, NULL, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'tejime4835@gam1fy.com', 'pL9sKOUdvSDBpIMUFbuhgmpBrGg8DK', '2023-04-18 15:26:58', '2023-04-17 14:27:15', '$2y$10$fYU2BZCirgJVJh5nOpm8JevLul1xggqnGKvWgJyAm3kSDiFY6dLnm', NULL, NULL, '1', NULL, NULL, NULL, '2023-04-17 14:26:57', '2023-04-24 03:35:59', NULL, 0, NULL),
+(12, 'businesses', '1', '01707172137', NULL, NULL, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'tejime4835@gam1fy.com', 'pL9sKOUdvSDBpIMUFbuhgmpBrGg8DK', '2023-04-18 15:26:58', '2023-04-17 14:27:15', '$2y$10$fYU2BZCirgJVJh5nOpm8JevLul1xggqnGKvWgJyAm3kSDiFY6dLnm', NULL, NULL, '1', NULL, NULL, NULL, '2023-04-17 14:26:57', '2023-04-24 03:35:59', NULL, 0, NULL),
 (13, 'Rifat', 'Al', '01771034383', NULL, NULL, 'dhaka', 'dinajpur', 'bangladesh', 'dhaka', '1207', 'rifat1@gmail.com', '1n32Ikm8FKe02BrJtcLBDxZQvUXGIw', '2023-04-18 18:11:11', NULL, '$2y$10$vSlSs9V3uBerwhIUO1RYrOV9chiwez2VQOroZD0rIMO.4yOMBRssi', NULL, NULL, '0', NULL, NULL, NULL, '2023-04-17 17:11:11', '2023-04-24 03:35:47', NULL, 0, NULL),
 (14, 'kk', 'zaman', '1231313131', NULL, NULL, '123 William St, New York, NY 10038, USA', '123 William St, New York, NY 10038, USA', 'US', 'New York', '10038', 'moin12@gmail.com', 'ZVJ0oDsMm3whVbvKpFloGtt53LBOwQ', '2023-04-19 19:01:06', NULL, '$2y$10$RZJDM7TPNQc0Bh2FjLgMTuL1NpQwPp8A3YOGAo6yw4wQNhBiAOVPK', NULL, NULL, '0', NULL, NULL, NULL, '2023-04-18 18:01:06', '2023-04-24 03:35:32', NULL, 0, NULL),
 (15, 'kk', 'zaman', '01707172137', NULL, NULL, '123 William St, New York, NY 10038, USA', '123 William St, New York, NY 10038, USA', 'US', 'New York', '10038', 'kamruzzamankazi33@gmail.com', '3RvnavxGwtgLwhLo1qJ1esoFAB6l1E', '2023-04-19 19:04:50', NULL, '$2y$10$M2VHtAE0HwMoY1b8nQK6kO4SOUmsJNNblXJ5353oktyqUb7W/C..e', NULL, NULL, '0', NULL, NULL, NULL, '2023-04-18 18:04:50', '2023-04-24 03:35:20', NULL, 0, NULL),
@@ -28875,7 +28875,7 @@ ALTER TABLE `automobile_model_variants`
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`id`),
   ADD KEY `bookings_pre_booking_id_foreign` (`pre_booking_id`),
-  ADD KEY `bookings_garage_id_foreign` (`garage_id`),
+  ADD KEY `bookings_business_id_foreign` (`business_id`),
   ADD KEY `bookings_customer_id_foreign` (`customer_id`),
   ADD KEY `bookings_automobile_make_id_foreign` (`automobile_make_id`),
   ADD KEY `bookings_automobile_model_id_foreign` (`automobile_model_id`);
@@ -28886,7 +28886,7 @@ ALTER TABLE `bookings`
 ALTER TABLE `booking_packages`
   ADD PRIMARY KEY (`id`),
   ADD KEY `booking_packages_booking_id_foreign` (`booking_id`),
-  ADD KEY `booking_packages_garage_package_id_foreign` (`garage_package_id`);
+  ADD KEY `booking_packages_business_package_id_foreign` (`business_package_id`);
 
 --
 -- Indexes for table `booking_sub_services`
@@ -28902,7 +28902,7 @@ ALTER TABLE `booking_sub_services`
 ALTER TABLE `coupons`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `coupons_code_unique` (`code`),
-  ADD KEY `coupons_garage_id_foreign` (`garage_id`);
+  ADD KEY `coupons_business_id_foreign` (`business_id`);
 
 --
 -- Indexes for table `email_templates`
@@ -28953,97 +28953,97 @@ ALTER TABLE `fuel_station_services`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `garages`
+-- Indexes for table `businesses`
 --
-ALTER TABLE `garages`
+ALTER TABLE `businesses`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `garages_email_unique` (`email`),
-  ADD KEY `garages_owner_id_foreign` (`owner_id`),
-  ADD KEY `garages_created_by_foreign` (`created_by`);
+  ADD UNIQUE KEY `businesses_email_unique` (`email`),
+  ADD KEY `businesses_owner_id_foreign` (`owner_id`),
+  ADD KEY `businesses_created_by_foreign` (`created_by`);
 
 --
--- Indexes for table `garage_affiliations`
+-- Indexes for table `business_affiliations`
 --
-ALTER TABLE `garage_affiliations`
+ALTER TABLE `business_affiliations`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_affiliations_garage_id_foreign` (`garage_id`),
-  ADD KEY `garage_affiliations_affiliation_id_foreign` (`affiliation_id`);
+  ADD KEY `business_affiliations_business_id_foreign` (`business_id`),
+  ADD KEY `business_affiliations_affiliation_id_foreign` (`affiliation_id`);
 
 --
--- Indexes for table `garage_automobile_makes`
+-- Indexes for table `business_automobile_makes`
 --
-ALTER TABLE `garage_automobile_makes`
+ALTER TABLE `business_automobile_makes`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_automobile_makes_garage_id_foreign` (`garage_id`),
-  ADD KEY `garage_automobile_makes_automobile_make_id_foreign` (`automobile_make_id`);
+  ADD KEY `business_automobile_makes_business_id_foreign` (`business_id`),
+  ADD KEY `business_automobile_makes_automobile_make_id_foreign` (`automobile_make_id`);
 
 --
--- Indexes for table `garage_automobile_models`
+-- Indexes for table `business_automobile_models`
 --
-ALTER TABLE `garage_automobile_models`
+ALTER TABLE `business_automobile_models`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_automobile_models_garage_automobile_make_id_foreign` (`garage_automobile_make_id`),
-  ADD KEY `garage_automobile_models_automobile_model_id_foreign` (`automobile_model_id`);
+  ADD KEY `business_automobile_models_business_automobile_make_id_foreign` (`business_automobile_make_id`),
+  ADD KEY `business_automobile_models_automobile_model_id_foreign` (`automobile_model_id`);
 
 --
--- Indexes for table `garage_galleries`
+-- Indexes for table `business_galleries`
 --
-ALTER TABLE `garage_galleries`
+ALTER TABLE `business_galleries`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_galleries_garage_id_foreign` (`garage_id`);
+  ADD KEY `business_galleries_business_id_foreign` (`business_id`);
 
 --
--- Indexes for table `garage_packages`
+-- Indexes for table `business_packages`
 --
-ALTER TABLE `garage_packages`
+ALTER TABLE `business_packages`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_packages_garage_id_foreign` (`garage_id`);
+  ADD KEY `business_packages_business_id_foreign` (`business_id`);
 
 --
--- Indexes for table `garage_package_sub_services`
+-- Indexes for table `business_package_sub_services`
 --
-ALTER TABLE `garage_package_sub_services`
+ALTER TABLE `business_package_sub_services`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_package_sub_services_garage_sub_service_id_foreign` (`garage_sub_service_id`),
-  ADD KEY `garage_package_sub_services_garage_package_id_foreign` (`garage_package_id`);
+  ADD KEY `business_package_sub_services_business_sub_service_id_foreign` (`business_sub_service_id`),
+  ADD KEY `business_package_sub_services_business_package_id_foreign` (`business_package_id`);
 
 --
--- Indexes for table `garage_rules`
+-- Indexes for table `business_rules`
 --
-ALTER TABLE `garage_rules`
+ALTER TABLE `business_rules`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_rules_garage_id_foreign` (`garage_id`);
+  ADD KEY `business_rules_business_id_foreign` (`business_id`);
 
 --
--- Indexes for table `garage_services`
+-- Indexes for table `business_services`
 --
-ALTER TABLE `garage_services`
+ALTER TABLE `business_services`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_services_garage_id_foreign` (`garage_id`),
-  ADD KEY `garage_services_service_id_foreign` (`service_id`);
+  ADD KEY `business_services_business_id_foreign` (`business_id`),
+  ADD KEY `business_services_service_id_foreign` (`service_id`);
 
 --
--- Indexes for table `garage_sub_services`
+-- Indexes for table `business_sub_services`
 --
-ALTER TABLE `garage_sub_services`
+ALTER TABLE `business_sub_services`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_sub_services_garage_service_id_foreign` (`garage_service_id`),
-  ADD KEY `garage_sub_services_sub_service_id_foreign` (`sub_service_id`);
+  ADD KEY `business_sub_services_business_service_id_foreign` (`business_service_id`),
+  ADD KEY `business_sub_services_sub_service_id_foreign` (`sub_service_id`);
 
 --
--- Indexes for table `garage_sub_service_prices`
+-- Indexes for table `business_sub_service_prices`
 --
-ALTER TABLE `garage_sub_service_prices`
+ALTER TABLE `business_sub_service_prices`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_sub_service_prices_garage_sub_service_id_foreign` (`garage_sub_service_id`),
-  ADD KEY `garage_sub_service_prices_automobile_make_id_foreign` (`automobile_make_id`);
+  ADD KEY `business_sub_service_prices_business_sub_service_id_foreign` (`business_sub_service_id`),
+  ADD KEY `business_sub_service_prices_automobile_make_id_foreign` (`automobile_make_id`);
 
 --
--- Indexes for table `garage_times`
+-- Indexes for table `business_times`
 --
-ALTER TABLE `garage_times`
+ALTER TABLE `business_times`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `garage_times_garage_id_foreign` (`garage_id`);
+  ADD KEY `business_times_business_id_foreign` (`business_id`);
 
 --
 -- Indexes for table `jobs`
@@ -29051,7 +29051,7 @@ ALTER TABLE `garage_times`
 ALTER TABLE `jobs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `jobs_booking_id_foreign` (`booking_id`),
-  ADD KEY `jobs_garage_id_foreign` (`garage_id`),
+  ADD KEY `jobs_business_id_foreign` (`business_id`),
   ADD KEY `jobs_customer_id_foreign` (`customer_id`),
   ADD KEY `jobs_automobile_make_id_foreign` (`automobile_make_id`),
   ADD KEY `jobs_automobile_model_id_foreign` (`automobile_model_id`);
@@ -29062,7 +29062,7 @@ ALTER TABLE `jobs`
 ALTER TABLE `job_bids`
   ADD PRIMARY KEY (`id`),
   ADD KEY `job_bids_pre_booking_id_foreign` (`pre_booking_id`),
-  ADD KEY `job_bids_garage_id_foreign` (`garage_id`);
+  ADD KEY `job_bids_business_id_foreign` (`business_id`);
 
 --
 -- Indexes for table `job_packages`
@@ -29070,7 +29070,7 @@ ALTER TABLE `job_bids`
 ALTER TABLE `job_packages`
   ADD PRIMARY KEY (`id`),
   ADD KEY `job_packages_job_id_foreign` (`job_id`),
-  ADD KEY `job_packages_garage_package_id_foreign` (`garage_package_id`);
+  ADD KEY `job_packages_business_package_id_foreign` (`business_package_id`);
 
 --
 -- Indexes for table `job_payments`
@@ -29116,7 +29116,7 @@ ALTER TABLE `notifications`
   ADD KEY `notifications_sender_id_foreign` (`sender_id`),
   ADD KEY `notifications_receiver_id_foreign` (`receiver_id`),
   ADD KEY `notifications_customer_id_foreign` (`customer_id`),
-  ADD KEY `notifications_garage_id_foreign` (`garage_id`),
+  ADD KEY `notifications_business_id_foreign` (`business_id`),
   ADD KEY `notifications_bid_id_foreign` (`bid_id`),
   ADD KEY `notifications_pre_booking_id_foreign` (`pre_booking_id`),
   ADD KEY `notifications_booking_id_foreign` (`booking_id`),
@@ -29443,75 +29443,75 @@ ALTER TABLE `fuel_station_services`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `garages`
+-- AUTO_INCREMENT for table `businesses`
 --
-ALTER TABLE `garages`
+ALTER TABLE `businesses`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
--- AUTO_INCREMENT for table `garage_affiliations`
+-- AUTO_INCREMENT for table `business_affiliations`
 --
-ALTER TABLE `garage_affiliations`
+ALTER TABLE `business_affiliations`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `garage_automobile_makes`
+-- AUTO_INCREMENT for table `business_automobile_makes`
 --
-ALTER TABLE `garage_automobile_makes`
+ALTER TABLE `business_automobile_makes`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1534;
 
 --
--- AUTO_INCREMENT for table `garage_automobile_models`
+-- AUTO_INCREMENT for table `business_automobile_models`
 --
-ALTER TABLE `garage_automobile_models`
+ALTER TABLE `business_automobile_models`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14189;
 
 --
--- AUTO_INCREMENT for table `garage_galleries`
+-- AUTO_INCREMENT for table `business_galleries`
 --
-ALTER TABLE `garage_galleries`
+ALTER TABLE `business_galleries`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
--- AUTO_INCREMENT for table `garage_packages`
+-- AUTO_INCREMENT for table `business_packages`
 --
-ALTER TABLE `garage_packages`
+ALTER TABLE `business_packages`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `garage_package_sub_services`
+-- AUTO_INCREMENT for table `business_package_sub_services`
 --
-ALTER TABLE `garage_package_sub_services`
+ALTER TABLE `business_package_sub_services`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `garage_rules`
+-- AUTO_INCREMENT for table `business_rules`
 --
-ALTER TABLE `garage_rules`
+ALTER TABLE `business_rules`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `garage_services`
+-- AUTO_INCREMENT for table `business_services`
 --
-ALTER TABLE `garage_services`
+ALTER TABLE `business_services`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=526;
 
 --
--- AUTO_INCREMENT for table `garage_sub_services`
+-- AUTO_INCREMENT for table `business_sub_services`
 --
-ALTER TABLE `garage_sub_services`
+ALTER TABLE `business_sub_services`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8517;
 
 --
--- AUTO_INCREMENT for table `garage_sub_service_prices`
+-- AUTO_INCREMENT for table `business_sub_service_prices`
 --
-ALTER TABLE `garage_sub_service_prices`
+ALTER TABLE `business_sub_service_prices`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `garage_times`
+-- AUTO_INCREMENT for table `business_times`
 --
-ALTER TABLE `garage_times`
+ALTER TABLE `business_times`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -29753,7 +29753,7 @@ ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_automobile_make_id_foreign` FOREIGN KEY (`automobile_make_id`) REFERENCES `automobile_makes` (`id`) ON DELETE RESTRICT,
   ADD CONSTRAINT `bookings_automobile_model_id_foreign` FOREIGN KEY (`automobile_model_id`) REFERENCES `automobile_models` (`id`) ON DELETE RESTRICT,
   ADD CONSTRAINT `bookings_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `bookings_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `bookings_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `bookings_pre_booking_id_foreign` FOREIGN KEY (`pre_booking_id`) REFERENCES `pre_bookings` (`id`) ON DELETE CASCADE;
 
 --
@@ -29761,7 +29761,7 @@ ALTER TABLE `bookings`
 --
 ALTER TABLE `booking_packages`
   ADD CONSTRAINT `booking_packages_booking_id_foreign` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `booking_packages_garage_package_id_foreign` FOREIGN KEY (`garage_package_id`) REFERENCES `garage_packages` (`id`) ON DELETE RESTRICT;
+  ADD CONSTRAINT `booking_packages_business_package_id_foreign` FOREIGN KEY (`business_package_id`) REFERENCES `business_packages` (`id`) ON DELETE RESTRICT;
 
 --
 -- Constraints for table `booking_sub_services`
@@ -29774,7 +29774,7 @@ ALTER TABLE `booking_sub_services`
 -- Constraints for table `coupons`
 --
 ALTER TABLE `coupons`
-  ADD CONSTRAINT `coupons_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `coupons_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `email_templates`
@@ -29802,84 +29802,84 @@ ALTER TABLE `fuel_station_options`
   ADD CONSTRAINT `fuel_station_options_option_id_foreign` FOREIGN KEY (`option_id`) REFERENCES `fuel_station_services` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garages`
+-- Constraints for table `businesses`
 --
-ALTER TABLE `garages`
-  ADD CONSTRAINT `garages_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garages_owner_id_foreign` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `businesses`
+  ADD CONSTRAINT `businesses_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `businesses_owner_id_foreign` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_affiliations`
+-- Constraints for table `business_affiliations`
 --
-ALTER TABLE `garage_affiliations`
-  ADD CONSTRAINT `garage_affiliations_affiliation_id_foreign` FOREIGN KEY (`affiliation_id`) REFERENCES `affiliations` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_affiliations_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_affiliations`
+  ADD CONSTRAINT `business_affiliations_affiliation_id_foreign` FOREIGN KEY (`affiliation_id`) REFERENCES `affiliations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_affiliations_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_automobile_makes`
+-- Constraints for table `business_automobile_makes`
 --
-ALTER TABLE `garage_automobile_makes`
-  ADD CONSTRAINT `garage_automobile_makes_automobile_make_id_foreign` FOREIGN KEY (`automobile_make_id`) REFERENCES `automobile_makes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_automobile_makes_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_automobile_makes`
+  ADD CONSTRAINT `business_automobile_makes_automobile_make_id_foreign` FOREIGN KEY (`automobile_make_id`) REFERENCES `automobile_makes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_automobile_makes_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_automobile_models`
+-- Constraints for table `business_automobile_models`
 --
-ALTER TABLE `garage_automobile_models`
-  ADD CONSTRAINT `garage_automobile_models_automobile_model_id_foreign` FOREIGN KEY (`automobile_model_id`) REFERENCES `automobile_models` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_automobile_models_garage_automobile_make_id_foreign` FOREIGN KEY (`garage_automobile_make_id`) REFERENCES `garage_automobile_makes` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_automobile_models`
+  ADD CONSTRAINT `business_automobile_models_automobile_model_id_foreign` FOREIGN KEY (`automobile_model_id`) REFERENCES `automobile_models` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_automobile_models_business_automobile_make_id_foreign` FOREIGN KEY (`business_automobile_make_id`) REFERENCES `business_automobile_makes` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_galleries`
+-- Constraints for table `business_galleries`
 --
-ALTER TABLE `garage_galleries`
-  ADD CONSTRAINT `garage_galleries_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_galleries`
+  ADD CONSTRAINT `business_galleries_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_packages`
+-- Constraints for table `business_packages`
 --
-ALTER TABLE `garage_packages`
-  ADD CONSTRAINT `garage_packages_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_packages`
+  ADD CONSTRAINT `business_packages_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_package_sub_services`
+-- Constraints for table `business_package_sub_services`
 --
-ALTER TABLE `garage_package_sub_services`
-  ADD CONSTRAINT `garage_package_sub_services_garage_package_id_foreign` FOREIGN KEY (`garage_package_id`) REFERENCES `garage_packages` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_package_sub_services_garage_sub_service_id_foreign` FOREIGN KEY (`garage_sub_service_id`) REFERENCES `garage_sub_services` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_package_sub_services`
+  ADD CONSTRAINT `business_package_sub_services_business_package_id_foreign` FOREIGN KEY (`business_package_id`) REFERENCES `business_packages` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_package_sub_services_business_sub_service_id_foreign` FOREIGN KEY (`business_sub_service_id`) REFERENCES `business_sub_services` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_rules`
+-- Constraints for table `business_rules`
 --
-ALTER TABLE `garage_rules`
-  ADD CONSTRAINT `garage_rules_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_rules`
+  ADD CONSTRAINT `business_rules_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_services`
+-- Constraints for table `business_services`
 --
-ALTER TABLE `garage_services`
-  ADD CONSTRAINT `garage_services_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_services_service_id_foreign` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_services`
+  ADD CONSTRAINT `business_services_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_services_service_id_foreign` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_sub_services`
+-- Constraints for table `business_sub_services`
 --
-ALTER TABLE `garage_sub_services`
-  ADD CONSTRAINT `garage_sub_services_garage_service_id_foreign` FOREIGN KEY (`garage_service_id`) REFERENCES `garage_services` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_sub_services_sub_service_id_foreign` FOREIGN KEY (`sub_service_id`) REFERENCES `sub_services` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_sub_services`
+  ADD CONSTRAINT `business_sub_services_business_service_id_foreign` FOREIGN KEY (`business_service_id`) REFERENCES `business_services` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_sub_services_sub_service_id_foreign` FOREIGN KEY (`sub_service_id`) REFERENCES `sub_services` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_sub_service_prices`
+-- Constraints for table `business_sub_service_prices`
 --
-ALTER TABLE `garage_sub_service_prices`
-  ADD CONSTRAINT `garage_sub_service_prices_automobile_make_id_foreign` FOREIGN KEY (`automobile_make_id`) REFERENCES `automobile_makes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `garage_sub_service_prices_garage_sub_service_id_foreign` FOREIGN KEY (`garage_sub_service_id`) REFERENCES `garage_sub_services` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_sub_service_prices`
+  ADD CONSTRAINT `business_sub_service_prices_automobile_make_id_foreign` FOREIGN KEY (`automobile_make_id`) REFERENCES `automobile_makes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `business_sub_service_prices_business_sub_service_id_foreign` FOREIGN KEY (`business_sub_service_id`) REFERENCES `business_sub_services` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `garage_times`
+-- Constraints for table `business_times`
 --
-ALTER TABLE `garage_times`
-  ADD CONSTRAINT `garage_times_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+ALTER TABLE `business_times`
+  ADD CONSTRAINT `business_times_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `jobs`
@@ -29889,20 +29889,20 @@ ALTER TABLE `jobs`
   ADD CONSTRAINT `jobs_automobile_model_id_foreign` FOREIGN KEY (`automobile_model_id`) REFERENCES `automobile_models` (`id`) ON DELETE RESTRICT,
   ADD CONSTRAINT `jobs_booking_id_foreign` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `jobs_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `jobs_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `jobs_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `job_bids`
 --
 ALTER TABLE `job_bids`
-  ADD CONSTRAINT `job_bids_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `job_bids_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `job_bids_pre_booking_id_foreign` FOREIGN KEY (`pre_booking_id`) REFERENCES `pre_bookings` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `job_packages`
 --
 ALTER TABLE `job_packages`
-  ADD CONSTRAINT `job_packages_garage_package_id_foreign` FOREIGN KEY (`garage_package_id`) REFERENCES `garage_packages` (`id`) ON DELETE RESTRICT,
+  ADD CONSTRAINT `job_packages_business_package_id_foreign` FOREIGN KEY (`business_package_id`) REFERENCES `business_packages` (`id`) ON DELETE RESTRICT,
   ADD CONSTRAINT `job_packages_job_id_foreign` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`id`) ON DELETE CASCADE;
 
 --
@@ -29938,7 +29938,7 @@ ALTER TABLE `notifications`
   ADD CONSTRAINT `notifications_bid_id_foreign` FOREIGN KEY (`bid_id`) REFERENCES `job_bids` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_booking_id_foreign` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `notifications_garage_id_foreign` FOREIGN KEY (`garage_id`) REFERENCES `garages` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notifications_business_id_foreign` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_job_id_foreign` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_notification_template_id_foreign` FOREIGN KEY (`notification_template_id`) REFERENCES `notification_templates` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_pre_booking_id_foreign` FOREIGN KEY (`pre_booking_id`) REFERENCES `pre_bookings` (`id`) ON DELETE CASCADE,

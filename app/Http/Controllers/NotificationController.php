@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\NotificationStatusUpdateRequest;
 use App\Http\Utils\ErrorUtil;
-use App\Http\Utils\GarageUtil;
+use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Notification;
 use Exception;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
-    use ErrorUtil, GarageUtil,UserActivityUtil;
+    use ErrorUtil, BusinessUtil,UserActivityUtil;
 
     /**
      *
@@ -107,19 +107,19 @@ class NotificationController extends Controller
                     );
                 }
 
-                if (!empty($notifications->items()[$i]->garage_id)) {
+                if (!empty($notifications->items()[$i]->business_id)) {
                     $notifications->items()[$i]["template_string"] =  str_replace(
-                        "[garage_owner_name]",
+                        "[business_owner_name]",
 
-                        ($notifications->items()[$i]->garage->owner->first_Name . " " . $notifications->items()[$i]->garage->owner->last_Name),
+                        ($notifications->items()[$i]->business->owner->first_Name . " " . $notifications->items()[$i]->business->owner->last_Name),
 
                         $notifications->items()[$i]["template_string"]
                     );
 
                     $notifications->items()[$i]["template_string"] =  str_replace(
-                        "[garage_name]",
+                        "[business_name]",
 
-                        ($notifications->items()[$i]->garage->name),
+                        ($notifications->items()[$i]->business->name),
 
                         $notifications->items()[$i]["template_string"]
                     );
@@ -163,15 +163,10 @@ class NotificationController extends Controller
                     $notifications->items()[$i]["link"]
                 );
 
-                $notifications->items()[$i]["link"] =  str_replace(
-                    "[pre_booking_id]",
-                    $notifications->items()[$i]->pre_booking_id,
-                    $notifications->items()[$i]["link"]
-                );
 
                 $notifications->items()[$i]["link"] =  str_replace(
-                    "[garage_id]",
-                    $notifications->items()[$i]->garage_id,
+                    "[business_id]",
+                    $notifications->items()[$i]->business_id,
                     $notifications->items()[$i]["link"]
                 );
 
@@ -198,16 +193,16 @@ class NotificationController extends Controller
      /**
      *
      * @OA\Get(
-     *      path="/v1.0/notifications/{garage_id}/{perPage}",
-     *      operationId="getNotificationsByGarageId",
+     *      path="/v1.0/notifications/{business_id}/{perPage}",
+     *      operationId="getNotificationsByBusinessId",
      *      tags={"notification_management"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *   *              @OA\Parameter(
-     *         name="garage_id",
+     *         name="business_id",
      *         in="path",
-     *         description="garage_id",
+     *         description="business_id",
      *         required=true,
      *  example="6"
      *      ),
@@ -219,8 +214,8 @@ class NotificationController extends Controller
      *  example="6"
      *      ),
 
-     *      summary="This method is to get notification by garage id",
-     *      description="This method is to get notification by garage id",
+     *      summary="This method is to get notification by business id",
+     *      description="This method is to get notification by business id",
      *
 
      *      @OA\Response(
@@ -257,19 +252,19 @@ class NotificationController extends Controller
      *     )
      */
 
-    public function getNotificationsByGarageId($garage_id,$perPage, Request $request)
+    public function getNotificationsByBusinessId($business_id,$perPage, Request $request)
     {
         try {
      $this->storeActivity($request,"");
-            if (!$this->garageOwnerCheck($garage_id)) {
+            if (!$this->businessOwnerCheck($business_id)) {
                 return response()->json([
-                    "message" => "you are not the owner of the garage or the requested garage does not exist."
+                    "message" => "you are not the owner of the business or the requested business does not exist."
                 ], 401);
             }
 
             $notificationsQuery = Notification::where([
                 "receiver_id" => $request->user()->id,
-                "garage_id" => $garage_id
+                "business_id" => $business_id
             ]);
 
 
@@ -295,19 +290,19 @@ class NotificationController extends Controller
                     );
                 }
 
-                if (!empty($notifications->items()[$i]->garage_id)) {
+                if (!empty($notifications->items()[$i]->business_id)) {
                     $notifications->items()[$i]["template_string"] =  str_replace(
-                        "[garage_owner_name]",
+                        "[business_owner_name]",
 
-                        ($notifications->items()[$i]->garage->owner->first_Name . " " . $notifications->items()[$i]->garage->owner->last_Name),
+                        ($notifications->items()[$i]->business->owner->first_Name . " " . $notifications->items()[$i]->business->owner->last_Name),
 
                         $notifications->items()[$i]["template_string"]
                     );
 
                     $notifications->items()[$i]["template_string"] =  str_replace(
-                        "[garage_name]",
+                        "[business_name]",
 
-                        ($notifications->items()[$i]->garage->name),
+                        ($notifications->items()[$i]->business->name),
 
                         $notifications->items()[$i]["template_string"]
                     );
@@ -343,25 +338,12 @@ class NotificationController extends Controller
                     $notifications->items()[$i]["link"]
                 );
 
-                $notifications->items()[$i]["link"] =  str_replace(
-                    "[pre_booking_id]",
-                    $notifications->items()[$i]->pre_booking_id,
-                    $notifications->items()[$i]["link"]
-                );
-                $notifications->items()[$i]["link"] =  str_replace(
-                    "[booking_id]",
-                    $notifications->items()[$i]->booking_id,
-                    $notifications->items()[$i]["link"]
-                );
-                $notifications->items()[$i]["link"] =  str_replace(
-                    "[job_id]",
-                    $notifications->items()[$i]->job_id,
-                    $notifications->items()[$i]["link"]
-                );
+
+           
 
                 $notifications->items()[$i]["link"] =  str_replace(
-                    "[garage_id]",
-                    $notifications->items()[$i]->garage_id,
+                    "[business_id]",
+                    $notifications->items()[$i]->business_id,
                     $notifications->items()[$i]["link"]
                 );
 

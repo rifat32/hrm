@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRegenerateTokenRequest;
 
-use App\Http\Requests\AuthRegisterGarageRequestClient;
+
 use App\Http\Requests\AuthRegisterRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\EmailVerifyTokenRequest;
@@ -12,22 +12,11 @@ use App\Http\Requests\ForgetPasswordRequest;
 use App\Http\Requests\PasswordChangeRequest;
 use App\Http\Requests\UserInfoUpdateRequest;
 use App\Http\Utils\ErrorUtil;
-use App\Http\Utils\GarageUtil;
+use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\ForgetPasswordMail;
 use App\Mail\VerifyMail;
-use App\Models\AutomobileCategory;
-use App\Models\AutomobileMake;
-use App\Models\AutomobileModel;
-use App\Models\Garage;
-use App\Models\GarageAutomobileMake;
-use App\Models\GarageAutomobileModel;
-use App\Models\GarageGallery;
-use App\Models\GarageService;
-use App\Models\GarageSubService;
-use App\Models\GarageTime;
-use App\Models\Service;
-use App\Models\SubService;
+
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -41,7 +30,7 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-    use ErrorUtil, GarageUtil, UserActivityUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil;
     /**
      *
      * @OA\Post(
@@ -679,238 +668,6 @@ $datediff = $now - $user_created_date;
 
 
 
-    /**
-     *
-     * @OA\Post(
-     *      path="/v1.0/auth/user-register-with-garage",
-     *      operationId="registerUserWithGarageClient",
-     *      tags={"auth"},
-     *      summary="This method is to store user with garage client side",
-     *      description="This method is to store user with garage client side",
-     *
-     *  @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *            required={"user","garage","service"},
-     *             @OA\Property(property="user", type="string", format="array",example={
-     * "first_Name":"Rifat",
-     * "last_Name":"Al-Ashwad",
-     * "email":"rifatalashwad@gmail.com",
-     *  "password":"12345678",
-     *  "password_confirmation":"12345678",
-     *  "phone":"01771034383",
-     *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
-     *
-     *
-     * }),
-     *
-     *
-     *
-     *   *  @OA\Property(property="garage", type="string", format="array",example={
-     * "name":"ABCD Garage",
-     * "about":"Best Garage in Dhaka",
-     * "web_page":"https://www.facebook.com/",
-     *  "phone":"01771034383",
-     *  "email":"rifatalashwad@gmail.com",
-     *  "phone":"01771034383",
-     *  "additional_information":"No Additional Information",
-     *  "address_line_1":"Dhaka",
-     *  "address_line_2":"Dinajpur",
-     *    * *  "lat":"23.704263332849386",
-     *    * *  "long":"90.44707059805279",
-     *  "country":"Bangladesh",
-     *  "city":"Dhaka",
-     * "currency":"BDT",
-     *  "postcode":"Dinajpur",
-     *
-     *  "logo":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
-     *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
-     *  "images":{"/a","/b","/c"},
-     *  "is_mobile_garage":true,
-     *  "wifi_available":true,
-     *  "labour_rate":500,
-     * "time_format":"12-hour"
-     *
-     * }),
-     *
-     *      *    @OA\Property(property="times", type="string", format="array",example={
-     *
-    *{"day":0,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":1,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":2,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-     *{"day":3,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":4,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":5,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":6,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true}
-     *
-     * }),
-     *
-     *   *  @OA\Property(property="service", type="string", format="array",example={
-     *{
-
-     *"automobile_category_id":1,
-     *"services":{
-     *{
-     *"id":1,
-     *"checked":true,
-     *  "sub_services":{{"id":1,"checked":true},{"id":2,"checked":false}}
-     * }
-     *},
-     *"automobile_makes":{
-     *{
-     *"id":1,
-     *"checked":true,
-     *  "models":{{"id":1,"checked":true},{"id":2,"checked":false}}
-     * }
-     *}
-     *
-
-     *}
-
-     * }),
-     *
-     *
-     *
-     *
-     *
-     *         ),
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-    public function registerUserWithGarageClient(AuthRegisterGarageRequestClient $request)
-    {
-
-        try {
-            $this->storeActivity($request,"");
-            return DB::transaction(function () use (&$request) {
-                $insertableData = $request->validated();
-                // user info starts ##############
-                $insertableData['user']['password'] = Hash::make($insertableData['user']['password']);
-                $insertableData['user']['remember_token'] = Str::random(10);
-                $insertableData['user']['is_active'] = true;
-                $insertableData['user']['address_line_1'] = $insertableData['garage']['address_line_1'];
-    $insertableData['user']['address_line_2'] = $insertableData['garage']['address_line_2'];
-    $insertableData['user']['country'] = $insertableData['garage']['country'];
-    $insertableData['user']['city'] = $insertableData['garage']['city'];
-    $insertableData['user']['postcode'] = $insertableData['garage']['postcode'];
-    $insertableData['user']['lat'] = $insertableData['garage']['lat'];
-    $insertableData['user']['long'] = $insertableData['garage']['long'];
-
-                $user =  User::create($insertableData['user']);
-                $user->assignRole('garage_owner');
-                // end user info ##############
-
-
-
-                //  garage info ##############
-                $insertableData['garage']['status'] = "pending";
-                $insertableData['garage']['owner_id'] = $user->id;
-
-                $insertableData['garage']['is_active'] = true;
-                $garage =  Garage::create($insertableData['garage']);
-
-                GarageTime::where([
-                    "garage_id" => $garage->id
-                   ])
-                   ->delete();
-                   $timesArray = collect($insertableData["times"])->unique("day");
-                   foreach($timesArray as $garage_time) {
-                    GarageTime::create([
-                        "garage_id" => $garage->id,
-                        "day"=> $garage_time["day"],
-                        "opening_time"=> $garage_time["opening_time"],
-                        "closing_time"=> $garage_time["closing_time"],
-                        "is_closed"=> $garage_time["is_closed"],
-                    ]);
-                   }
-
-                if(!empty($insertableData["images"])) {
-                    foreach($insertableData["images"] as $garage_images){
-                        GarageGallery::create([
-                            "image" => $garage_images,
-                            "garage_id" =>$garage->id,
-                        ]);
-                    }
-                }
-
-
-                // end garage info ##############
-
-           // create services
-             $serviceUpdate =  $this->createGarageServices($insertableData['service'],$garage->id,true);
-
-                    if(!$serviceUpdate["success"]){
-                        $error =  [
-                            "message" => "The given data was invalid.",
-                            "errors" => [("service".$serviceUpdate["type"])=>[$serviceUpdate["message"]]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-
-                     }
-
-
-               // verify email starts
-               $email_token = Str::random(30);
-               $user->email_verify_token = $email_token;
-               $user->email_verify_token_expires = Carbon::now()->subDays(-1);
-               $user->save();
-
-                if(env("SEND_EMAIL") == true) {
-                    Mail::to($user->email)->send(new VerifyMail($user));
-                }
-
-// verify email ends
-
-
-
-$user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
-$user->permissions = $user->getAllPermissions()->pluck('name');
-$user->roles = $user->roles->pluck('name');
-
-$this->storeQuestion($garage->id);
-
-                return response([
-                     "user" => $user,
-                     "garage" => $garage,
-                     "success" => true
-                ], 201);
-            });
-        } catch (Exception $e) {
-
-            return $this->sendError($e, 500,$request);
-        }
-    }
 
 
 
@@ -973,7 +730,7 @@ public function getUser (Request $request) {
         $user->permissions = $user->getAllPermissions()->pluck('name');
         $user->roles = $user->roles->pluck('name');
 
-        $user->default_background_image = ("/".  config("setup-config.garage_background_image_location_full"));
+        // $user->default_background_image = ("/".  config("setup-config.business_background_image_location_full"));
 
         return response()->json(
             $user,
