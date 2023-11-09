@@ -257,13 +257,7 @@ class DepartmentController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      * *  @OA\Parameter(
-     * name="product_category_id",
-     * in="query",
-     * description="product_category_id",
-     * required=true,
-     * example="1"
-     * ),
+
      *      * *  @OA\Parameter(
      * name="start_date",
      * in="query",
@@ -344,7 +338,8 @@ class DepartmentController extends Controller
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("description", "like", "%" . $term . "%");
+                        ->orWhere("location", "like", "%" . $term . "%")
+                        ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
