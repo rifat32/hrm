@@ -17,9 +17,8 @@ class CreateDepartmentsTable extends Migration
             $table->id();
             $table->string("name");
             $table->string("location")->nullable();
-            $table->text("deacription")->nullable();
-
-
+            $table->text("description")->nullable();
+            $table->boolean("is_active")->default(true);
 
             $table->unsignedBigInteger("manager_id");
             $table->foreign('manager_id')->references('id')->on('users')->onDelete('cascade');

@@ -13,7 +13,7 @@ class DepartmentCreateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,11 @@ class DepartmentCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            "name" => "required|string",
+            "location" => "nullable|string",
+            "description" => "nullable|string",
+            "manager_id" => "required|numeric",
+            "parent_id" => "nullable|numeric",
         ];
     }
 }
