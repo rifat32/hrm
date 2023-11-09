@@ -18,9 +18,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 
 
 use App\Http\Controllers\BusinessController;
-
-
-
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
@@ -125,40 +123,12 @@ Route::middleware(['auth:api'])->group(function () {
 // user management section --user
 // ********************************************
 
-
-
-
-
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Route::get('/v1.0/users/get-by-id/{id}', [UserManagementController::class, "getUserById"]);
-
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
-
-
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
-
-
-
 Route::get('/v1.0/users/{perPage}', [UserManagementController::class, "getUsers"]);
-
-
 Route::delete('/v1.0/users/{id}', [UserManagementController::class, "deleteUserById"]);
 
 // ********************************************
@@ -178,42 +148,31 @@ Route::delete('/v1.0/roles/{id}', [RolesController::class, "deleteRoleById"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // business management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-
 Route::post('/v1.0/auth/register-with-business', [BusinessController::class, "registerUserWithBusiness"]);
-
 Route::post('/v1.0/businesses', [BusinessController::class, "createBusiness"]);
-
-
-
-
 Route::put('/v1.0/businesses/toggle-active', [BusinessController::class, "toggleActiveBusiness"]);
-
-
-
 Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
 Route::put('/v1.0/businesses/separate', [BusinessController::class, "updateBusinessSeparate"]);
-
-
-
-
 Route::get('/v1.0/businesses/{perPage}', [BusinessController::class, "getBusinesses"]);
 Route::get('/v1.0/businesses/single/{id}', [BusinessController::class, "getBusinessById"]);
 Route::delete('/v1.0/businesses/{id}', [BusinessController::class, "deleteBusinessById"]);
-
 Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class, "getAllBusinessesByBusinessOwner"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end business management section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// businesses Background Image Management
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/business-background-image', [BusinessBackgroundImageController::class, "updateBusinessBackgroundImage"]);
+Route::post('/v1.0/business-background-image/by-user', [BusinessBackgroundImageController::class, "updateBusinessBackgroundImageByUser"]);
+Route::get('/v1.0/business-background-image', [BusinessBackgroundImageController::class, "getBusinessBackgroundImage"]);
 
 
-
-
-
-
-
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// end businesses Background Image Management
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
@@ -228,9 +187,6 @@ Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class,
 Route::put('/v1.0/email-template-wrappers', [EmailTemplateWrapperController::class, "updateEmailTemplateWrapper"]);
 Route::get('/v1.0/email-template-wrappers/{perPage}', [EmailTemplateWrapperController::class, "getEmailTemplateWrappers"]);
 Route::get('/v1.0/email-template-wrappers/single/{id}', [EmailTemplateWrapperController::class, "getEmailTemplateWrapperById"]);
-
-
-
 
 // ********************************************
 // template management section
@@ -247,7 +203,6 @@ Route::get('/v1.0/email-template-types', [EmailTemplateController::class, "getEm
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
 // ********************************************
 // notification template management section
 // ********************************************
@@ -259,34 +214,6 @@ Route::get('/v1.0/notification-template-types', [NotificationTemplateController:
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // notification template management section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-
-
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// businesses Background Image Management
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-Route::post('/v1.0/business-background-image', [BusinessBackgroundImageController::class, "updateBusinessBackgroundImage"]);
-Route::post('/v1.0/business-background-image/by-user', [BusinessBackgroundImageController::class, "updateBusinessBackgroundImageByUser"]);
-Route::get('/v1.0/business-background-image', [BusinessBackgroundImageController::class, "getBusinessBackgroundImage"]);
-
-
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// end businesses Time Management
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-
-
 
 
 
@@ -309,58 +236,58 @@ Route::delete('/v1.0/payment-types/{id}', [PaymentTypeController::class, "delete
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// department  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Route::post('/v1.0/departments', [DepartmentController::class, "createDepartment"]);
+Route::put('/v1.0/departments', [DepartmentController::class, "updateDepartment"]);
+Route::get('/v1.0/departments', [DepartmentController::class, "getDepartments"]);
+Route::get('/v1.0/departments/{id}', [DepartmentController::class, "getDepartmentById"]);
+Route::delete('/v1.0/departments/{id}', [DepartmentController::class, "deleteDepartmentById"]);
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// dashboard section
+// end department  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
-Route::get('/v1.0/business-owner-dashboard/jobs-in-area/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataJobList"]);
-
-Route::get('/v1.0/business-owner-dashboard/jobs-application/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataJobApplications"]);
-
-
-Route::get('/v1.0/business-owner-dashboard/winned-jobs-application/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataWinnedJobApplications"]);
-
-Route::get('/v1.0/business-owner-dashboard/completed-bookings/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataCompletedBookings"]);
-
-
-Route::get('/v1.0/business-owner-dashboard/upcoming-jobs/{business_id}/{duration}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataUpcomingJobs"]);
 
 
 
 
-Route::get('/v1.0/business-owner-dashboard/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardData"]);
-
-Route::get('/v1.0/superadmin-dashboard', [DashboardManagementController::class, "getSuperAdminDashboardData"]);
-Route::get('/v1.0/data-collector-dashboard', [DashboardManagementController::class, "getDataCollectorDashboardData"]);
 
 
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// end dashboard section
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -394,8 +321,9 @@ Route::get('/v1.0/product-categories/get/all', [ProductCategoryController::class
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// product  management section
+// product management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/products', [ProductController::class, "createProduct"]);
@@ -406,18 +334,42 @@ Route::get('/v1.0/products/{perPage}', [ProductController::class, "getProducts"]
 Route::get('/v1.0/products/single/get/{id}', [ProductController::class, "getProductById"]);
 Route::delete('/v1.0/products/{id}', [ProductController::class, "deleteProductById"]);
 
-
-
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end product  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// dashboard section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
+Route::get('/v1.0/business-owner-dashboard/jobs-in-area/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataJobList"]);
+
+Route::get('/v1.0/business-owner-dashboard/jobs-application/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataJobApplications"]);
+
+
+Route::get('/v1.0/business-owner-dashboard/winned-jobs-application/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataWinnedJobApplications"]);
+
+Route::get('/v1.0/business-owner-dashboard/completed-bookings/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataCompletedBookings"]);
+
+
+Route::get('/v1.0/business-owner-dashboard/upcoming-jobs/{business_id}/{duration}', [DashboardManagementController::class, "getBusinessOwnerDashboardDataUpcomingJobs"]);
+
+
+
+
+Route::get('/v1.0/business-owner-dashboard/{business_id}', [DashboardManagementController::class, "getBusinessOwnerDashboardData"]);
+
+Route::get('/v1.0/superadmin-dashboard', [DashboardManagementController::class, "getSuperAdminDashboardData"]);
+Route::get('/v1.0/data-collector-dashboard', [DashboardManagementController::class, "getDataCollectorDashboardData"]);
+
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// end dashboard section
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 

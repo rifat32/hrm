@@ -69,20 +69,17 @@ return [
             "role" => "business_owner",
             "permissions" => [
 
-
-
                 "business_update",
                 "business_view",
+                "product_category_view",
+                "global_business_background_image_view",
 
 
 
-
-
-
-       "product_category_view",
-
-
-       "global_business_background_image_view",
+                "department_create",
+                "department_update",
+                "department_view",
+                "department_delete",
 
 
 
@@ -146,6 +143,12 @@ return [
        "product_update",
        "product_view",
        "product_delete",
+
+
+       "department_create",
+       "department_update",
+       "department_view",
+       "department_delete",
 
     ],
     "unchangeable_roles" => [

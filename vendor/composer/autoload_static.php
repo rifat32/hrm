@@ -42,25 +42,25 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
     );
 
     public static $prefixLengthsPsr4 = array (
-        'v' =>
+        'v' => 
         array (
             'voku\\' => 5,
         ),
-        'p' =>
+        'p' => 
         array (
             'phpseclib3\\' => 11,
         ),
-        'W' =>
+        'W' => 
         array (
             'Whoops\\' => 7,
             'Webmozart\\Assert\\' => 17,
         ),
-        'T' =>
+        'T' => 
         array (
             'TijsVerkoyen\\CssToInlineStyles\\' => 31,
             'Tests\\' => 6,
         ),
-        'S' =>
+        'S' => 
         array (
             'Symfony\\Polyfill\\Php81\\' => 23,
             'Symfony\\Polyfill\\Php80\\' => 23,
@@ -92,12 +92,12 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
             'Symfony\\Bridge\\PsrHttpMessage\\' => 30,
             'Spatie\\Permission\\' => 18,
         ),
-        'R' =>
+        'R' => 
         array (
             'Ramsey\\Uuid\\' => 12,
             'Ramsey\\Collection\\' => 18,
         ),
-        'P' =>
+        'P' => 
         array (
             'Psy\\' => 4,
             'Psr\\SimpleCache\\' => 16,
@@ -113,21 +113,21 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
             'PhpOption\\' => 10,
             'ParagonIE\\ConstantTime\\' => 23,
         ),
-        'O' =>
+        'O' => 
         array (
             'Opis\\Closure\\' => 13,
             'OpenApi\\' => 8,
         ),
-        'N' =>
+        'N' => 
         array (
             'Nyholm\\Psr7\\' => 12,
             'NunoMaduro\\Collision\\' => 21,
         ),
-        'M' =>
+        'M' => 
         array (
             'Monolog\\' => 8,
         ),
-        'L' =>
+        'L' => 
         array (
             'League\\Uri\\' => 11,
             'League\\OAuth2\\Server\\' => 21,
@@ -146,23 +146,23 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
             'Laravel\\Passport\\' => 17,
             'L5Swagger\\' => 10,
         ),
-        'I' =>
+        'I' => 
         array (
             'Illuminate\\Support\\' => 19,
             'Illuminate\\' => 11,
         ),
-        'H' =>
+        'H' => 
         array (
             'Http\\Message\\' => 13,
         ),
-        'G' =>
+        'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
             'GrahamCampbell\\ResultType\\' => 26,
         ),
-        'F' =>
+        'F' => 
         array (
             'Fruitcake\\Cors\\' => 15,
             'Firebase\\JWT\\' => 13,
@@ -171,11 +171,11 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
             'Facade\\IgnitionContracts\\' => 25,
             'Facade\\FlareClient\\' => 19,
         ),
-        'E' =>
+        'E' => 
         array (
             'Egulias\\EmailValidator\\' => 23,
         ),
-        'D' =>
+        'D' => 
         array (
             'Dotenv\\' => 7,
             'Doctrine\\Instantiator\\' => 22,
@@ -188,16 +188,16 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
             'Database\\Seeders\\' => 17,
             'Database\\Factories\\' => 19,
         ),
-        'C' =>
+        'C' => 
         array (
             'Cron\\' => 5,
             'Carbon\\' => 7,
         ),
-        'B' =>
+        'B' => 
         array (
             'Brick\\Math\\' => 11,
         ),
-        'A' =>
+        'A' => 
         array (
             'Asm89\\Stack\\' => 12,
             'App\\' => 4,
@@ -205,415 +205,415 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
     );
 
     public static $prefixDirsPsr4 = array (
-        'voku\\' =>
+        'voku\\' => 
         array (
             0 => __DIR__ . '/..' . '/voku/portable-ascii/src/voku',
         ),
-        'phpseclib3\\' =>
+        'phpseclib3\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
         ),
-        'Whoops\\' =>
+        'Whoops\\' => 
         array (
             0 => __DIR__ . '/..' . '/filp/whoops/src/Whoops',
         ),
-        'Webmozart\\Assert\\' =>
+        'Webmozart\\Assert\\' => 
         array (
             0 => __DIR__ . '/..' . '/webmozart/assert/src',
         ),
-        'TijsVerkoyen\\CssToInlineStyles\\' =>
+        'TijsVerkoyen\\CssToInlineStyles\\' => 
         array (
             0 => __DIR__ . '/..' . '/tijsverkoyen/css-to-inline-styles/src',
         ),
-        'Tests\\' =>
+        'Tests\\' => 
         array (
             0 => __DIR__ . '/../..' . '/tests',
         ),
-        'Symfony\\Polyfill\\Php81\\' =>
+        'Symfony\\Polyfill\\Php81\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php81',
         ),
-        'Symfony\\Polyfill\\Php80\\' =>
+        'Symfony\\Polyfill\\Php80\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
-        'Symfony\\Polyfill\\Php73\\' =>
+        'Symfony\\Polyfill\\Php73\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php73',
         ),
-        'Symfony\\Polyfill\\Php72\\' =>
+        'Symfony\\Polyfill\\Php72\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
         ),
-        'Symfony\\Polyfill\\Mbstring\\' =>
+        'Symfony\\Polyfill\\Mbstring\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Symfony\\Polyfill\\Intl\\Normalizer\\' =>
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
         ),
-        'Symfony\\Polyfill\\Intl\\Idn\\' =>
+        'Symfony\\Polyfill\\Intl\\Idn\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
         ),
-        'Symfony\\Polyfill\\Intl\\Grapheme\\' =>
+        'Symfony\\Polyfill\\Intl\\Grapheme\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme',
         ),
-        'Symfony\\Polyfill\\Iconv\\' =>
+        'Symfony\\Polyfill\\Iconv\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-iconv',
         ),
-        'Symfony\\Polyfill\\Ctype\\' =>
+        'Symfony\\Polyfill\\Ctype\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
-        'Symfony\\Contracts\\Translation\\' =>
+        'Symfony\\Contracts\\Translation\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/translation-contracts',
         ),
-        'Symfony\\Contracts\\Service\\' =>
+        'Symfony\\Contracts\\Service\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/service-contracts',
         ),
-        'Symfony\\Contracts\\EventDispatcher\\' =>
+        'Symfony\\Contracts\\EventDispatcher\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/event-dispatcher-contracts',
         ),
-        'Symfony\\Component\\Yaml\\' =>
+        'Symfony\\Component\\Yaml\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/yaml',
         ),
-        'Symfony\\Component\\VarDumper\\' =>
+        'Symfony\\Component\\VarDumper\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/var-dumper',
         ),
-        'Symfony\\Component\\Translation\\' =>
+        'Symfony\\Component\\Translation\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/translation',
         ),
-        'Symfony\\Component\\String\\' =>
+        'Symfony\\Component\\String\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/string',
         ),
-        'Symfony\\Component\\Routing\\' =>
+        'Symfony\\Component\\Routing\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/routing',
         ),
-        'Symfony\\Component\\Process\\' =>
+        'Symfony\\Component\\Process\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/process',
         ),
-        'Symfony\\Component\\Mime\\' =>
+        'Symfony\\Component\\Mime\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/mime',
         ),
-        'Symfony\\Component\\HttpKernel\\' =>
+        'Symfony\\Component\\HttpKernel\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/http-kernel',
         ),
-        'Symfony\\Component\\HttpFoundation\\' =>
+        'Symfony\\Component\\HttpFoundation\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/http-foundation',
         ),
-        'Symfony\\Component\\Finder\\' =>
+        'Symfony\\Component\\Finder\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/finder',
         ),
-        'Symfony\\Component\\EventDispatcher\\' =>
+        'Symfony\\Component\\EventDispatcher\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/event-dispatcher',
         ),
-        'Symfony\\Component\\ErrorHandler\\' =>
+        'Symfony\\Component\\ErrorHandler\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/error-handler',
         ),
-        'Symfony\\Component\\CssSelector\\' =>
+        'Symfony\\Component\\CssSelector\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/css-selector',
         ),
-        'Symfony\\Component\\Console\\' =>
+        'Symfony\\Component\\Console\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/console',
         ),
-        'Symfony\\Bridge\\PsrHttpMessage\\' =>
+        'Symfony\\Bridge\\PsrHttpMessage\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/psr-http-message-bridge',
         ),
-        'Spatie\\Permission\\' =>
+        'Spatie\\Permission\\' => 
         array (
             0 => __DIR__ . '/..' . '/spatie/laravel-permission/src',
         ),
-        'Ramsey\\Uuid\\' =>
+        'Ramsey\\Uuid\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/uuid/src',
         ),
-        'Ramsey\\Collection\\' =>
+        'Ramsey\\Collection\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/collection/src',
         ),
-        'Psy\\' =>
+        'Psy\\' => 
         array (
             0 => __DIR__ . '/..' . '/psy/psysh/src',
         ),
-        'Psr\\SimpleCache\\' =>
+        'Psr\\SimpleCache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
         ),
-        'Psr\\Log\\' =>
+        'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
-        'Psr\\Http\\Message\\' =>
+        'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
             1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
-        'Psr\\Http\\Client\\' =>
+        'Psr\\Http\\Client\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
         ),
-        'Psr\\EventDispatcher\\' =>
+        'Psr\\EventDispatcher\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/event-dispatcher/src',
         ),
-        'Psr\\Container\\' =>
+        'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'Psr\\Cache\\' =>
+        'Psr\\Cache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/cache/src',
         ),
-        'Propaganistas\\LaravelDisposableEmail\\Tests\\' =>
+        'Propaganistas\\LaravelDisposableEmail\\Tests\\' => 
         array (
             0 => __DIR__ . '/..' . '/propaganistas/laravel-disposable-email/tests',
         ),
-        'Propaganistas\\LaravelDisposableEmail\\' =>
+        'Propaganistas\\LaravelDisposableEmail\\' => 
         array (
             0 => __DIR__ . '/..' . '/propaganistas/laravel-disposable-email/src',
         ),
-        'PhpParser\\' =>
+        'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
-        'PhpOption\\' =>
+        'PhpOption\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
         ),
-        'ParagonIE\\ConstantTime\\' =>
+        'ParagonIE\\ConstantTime\\' => 
         array (
             0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
         ),
-        'Opis\\Closure\\' =>
+        'Opis\\Closure\\' => 
         array (
             0 => __DIR__ . '/..' . '/opis/closure/src',
         ),
-        'OpenApi\\' =>
+        'OpenApi\\' => 
         array (
             0 => __DIR__ . '/..' . '/zircote/swagger-php/src',
         ),
-        'Nyholm\\Psr7\\' =>
+        'Nyholm\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/nyholm/psr7/src',
         ),
-        'NunoMaduro\\Collision\\' =>
+        'NunoMaduro\\Collision\\' => 
         array (
             0 => __DIR__ . '/..' . '/nunomaduro/collision/src',
         ),
-        'Monolog\\' =>
+        'Monolog\\' => 
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
-        'League\\Uri\\' =>
+        'League\\Uri\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/uri/src',
             1 => __DIR__ . '/..' . '/league/uri-interfaces/src',
         ),
-        'League\\OAuth2\\Server\\' =>
+        'League\\OAuth2\\Server\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/oauth2-server/src',
         ),
-        'League\\MimeTypeDetection\\' =>
+        'League\\MimeTypeDetection\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/mime-type-detection/src',
         ),
-        'League\\Flysystem\\' =>
+        'League\\Flysystem\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/flysystem/src',
         ),
-        'League\\Event\\' =>
+        'League\\Event\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/event/src',
         ),
-        'League\\Config\\' =>
+        'League\\Config\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/config/src',
         ),
-        'League\\CommonMark\\' =>
+        'League\\CommonMark\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/commonmark/src',
         ),
-        'Lcobucci\\JWT\\' =>
+        'Lcobucci\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/lcobucci/jwt/src',
         ),
-        'Lcobucci\\Clock\\' =>
+        'Lcobucci\\Clock\\' => 
         array (
             0 => __DIR__ . '/..' . '/lcobucci/clock/src',
         ),
-        'Laravel\\Tinker\\' =>
+        'Laravel\\Tinker\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/tinker/src',
         ),
-        'Laravel\\SerializableClosure\\' =>
+        'Laravel\\SerializableClosure\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/serializable-closure/src',
         ),
-        'Laravel\\Sanctum\\' =>
+        'Laravel\\Sanctum\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/sanctum/src',
         ),
-        'Laravel\\Sail\\' =>
+        'Laravel\\Sail\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/sail/src',
         ),
-        'Laravel\\Passport\\Database\\Factories\\' =>
+        'Laravel\\Passport\\Database\\Factories\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/passport/database/factories',
         ),
-        'Laravel\\Passport\\' =>
+        'Laravel\\Passport\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/passport/src',
         ),
-        'L5Swagger\\' =>
+        'L5Swagger\\' => 
         array (
             0 => __DIR__ . '/..' . '/darkaonline/l5-swagger/src',
         ),
-        'Illuminate\\Support\\' =>
+        'Illuminate\\Support\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Macroable',
             1 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections',
         ),
-        'Illuminate\\' =>
+        'Illuminate\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate',
         ),
-        'Http\\Message\\' =>
+        'Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/php-http/message-factory/src',
         ),
-        'GuzzleHttp\\Psr7\\' =>
+        'GuzzleHttp\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'GuzzleHttp\\Promise\\' =>
+        'GuzzleHttp\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'GuzzleHttp\\' =>
+        'GuzzleHttp\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'GrahamCampbell\\ResultType\\' =>
+        'GrahamCampbell\\ResultType\\' => 
         array (
             0 => __DIR__ . '/..' . '/graham-campbell/result-type/src',
         ),
-        'Fruitcake\\Cors\\' =>
+        'Fruitcake\\Cors\\' => 
         array (
             0 => __DIR__ . '/..' . '/fruitcake/laravel-cors/src',
         ),
-        'Firebase\\JWT\\' =>
+        'Firebase\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
-        'Faker\\' =>
+        'Faker\\' => 
         array (
             0 => __DIR__ . '/..' . '/fakerphp/faker/src/Faker',
         ),
-        'Facade\\Ignition\\' =>
+        'Facade\\Ignition\\' => 
         array (
             0 => __DIR__ . '/..' . '/facade/ignition/src',
         ),
-        'Facade\\IgnitionContracts\\' =>
+        'Facade\\IgnitionContracts\\' => 
         array (
             0 => __DIR__ . '/..' . '/facade/ignition-contracts/src',
         ),
-        'Facade\\FlareClient\\' =>
+        'Facade\\FlareClient\\' => 
         array (
             0 => __DIR__ . '/..' . '/facade/flare-client-php/src',
         ),
-        'Egulias\\EmailValidator\\' =>
+        'Egulias\\EmailValidator\\' => 
         array (
             0 => __DIR__ . '/..' . '/egulias/email-validator/src',
         ),
-        'Dotenv\\' =>
+        'Dotenv\\' => 
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
         ),
-        'Doctrine\\Instantiator\\' =>
+        'Doctrine\\Instantiator\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
         ),
-        'Doctrine\\Inflector\\' =>
+        'Doctrine\\Inflector\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Inflector',
         ),
-        'Doctrine\\Common\\Lexer\\' =>
+        'Doctrine\\Common\\Lexer\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/lexer/lib/Doctrine/Common/Lexer',
         ),
-        'Doctrine\\Common\\Annotations\\' =>
+        'Doctrine\\Common\\Annotations\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations',
         ),
-        'Dflydev\\DotAccessData\\' =>
+        'Dflydev\\DotAccessData\\' => 
         array (
             0 => __DIR__ . '/..' . '/dflydev/dot-access-data/src',
         ),
-        'Defuse\\Crypto\\' =>
+        'Defuse\\Crypto\\' => 
         array (
             0 => __DIR__ . '/..' . '/defuse/php-encryption/src',
         ),
-        'DeepCopy\\' =>
+        'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
         ),
-        'Database\\Seeders\\' =>
+        'Database\\Seeders\\' => 
         array (
             0 => __DIR__ . '/../..' . '/database/seeders',
         ),
-        'Database\\Factories\\' =>
+        'Database\\Factories\\' => 
         array (
             0 => __DIR__ . '/../..' . '/database/factories',
         ),
-        'Cron\\' =>
+        'Cron\\' => 
         array (
             0 => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron',
         ),
-        'Carbon\\' =>
+        'Carbon\\' => 
         array (
             0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
         ),
-        'Brick\\Math\\' =>
+        'Brick\\Math\\' => 
         array (
             0 => __DIR__ . '/..' . '/brick/math/src',
         ),
-        'Asm89\\Stack\\' =>
+        'Asm89\\Stack\\' => 
         array (
             0 => __DIR__ . '/..' . '/asm89/stack-cors/src',
         ),
-        'App\\' =>
+        'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'M' =>
+        'M' => 
         array (
-            'Mockery' =>
+            'Mockery' => 
             array (
                 0 => __DIR__ . '/..' . '/mockery/mockery/library',
             ),
@@ -621,50 +621,25 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\DeleteFilesScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/DeleteFilesScheduler.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
-        'App\\Http\\Controllers\\AffiliationController' => __DIR__ . '/../..' . '/app/Http/Controllers/AffiliationController.php',
         'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
-        'App\\Http\\Controllers\\AutomobilesController' => __DIR__ . '/../..' . '/app/Http/Controllers/AutomobilesController.php',
-        'App\\Http\\Controllers\\BookingController' => __DIR__ . '/../..' . '/app/Http/Controllers/BookingController.php',
+        'App\\Http\\Controllers\\BusinessBackgroundImageController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessBackgroundImageController.php',
+        'App\\Http\\Controllers\\BusinessController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
-        'App\\Http\\Controllers\\CouponController' => __DIR__ . '/../..' . '/app/Http/Controllers/CouponController.php',
         'App\\Http\\Controllers\\DashboardManagementController' => __DIR__ . '/../..' . '/app/Http/Controllers/DashboardManagementController.php',
         'App\\Http\\Controllers\\EmailTemplateController' => __DIR__ . '/../..' . '/app/Http/Controllers/EmailTemplateController.php',
         'App\\Http\\Controllers\\EmailTemplateWrapperController' => __DIR__ . '/../..' . '/app/Http/Controllers/EmailTemplateWrapperController.php',
-        'App\\Http\\Controllers\\FuelStationController' => __DIR__ . '/../..' . '/app/Http/Controllers/FuelStationController.php',
-        'App\\Http\\Controllers\\FuelStationGalleryController' => __DIR__ . '/../..' . '/app/Http/Controllers/FuelStationGalleryController.php',
-        'App\\Http\\Controllers\\FuelStationServiceController' => __DIR__ . '/../..' . '/app/Http/Controllers/FuelStationServiceController.php',
-        'App\\Http\\Controllers\\BusinessAffiliationController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessAffiliationController.php',
-        'App\\Http\\Controllers\\BusinessAutomobilesController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessAutomobilesController.php',
-        'App\\Http\\Controllers\\BusinessGalleryController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessGalleryController.php',
-        'App\\Http\\Controllers\\BusinessPackageController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessPackageController.php',
-        'App\\Http\\Controllers\\BusinessRuleController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessRuleController.php',
-        'App\\Http\\Controllers\\BusinessServiceController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessServiceController.php',
-        'App\\Http\\Controllers\\BusinessServicePriceController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessServicePriceController.php',
-        'App\\Http\\Controllers\\BusinessTimesController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessTimesController.php',
-        'App\\Http\\Controllers\\BusinessController' => __DIR__ . '/../..' . '/app/Http/Controllers/BusinessController.php',
-        'App\\Http\\Controllers\\JobBidController' => __DIR__ . '/../..' . '/app/Http/Controllers/JobBidController.php',
-        'App\\Http\\Controllers\\JobController' => __DIR__ . '/../..' . '/app/Http/Controllers/JobController.php',
         'App\\Http\\Controllers\\NotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/NotificationController.php',
         'App\\Http\\Controllers\\NotificationTemplateController' => __DIR__ . '/../..' . '/app/Http/Controllers/NotificationTemplateController.php',
         'App\\Http\\Controllers\\PaymentTypeController' => __DIR__ . '/../..' . '/app/Http/Controllers/PaymentTypeController.php',
         'App\\Http\\Controllers\\ProductCategoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProductCategoryController.php',
         'App\\Http\\Controllers\\ProductController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProductController.php',
-        'App\\Http\\Controllers\\ReviewController' => __DIR__ . '/../..' . '/app/Http/Controllers/ReviewController.php',
         'App\\Http\\Controllers\\RolesController' => __DIR__ . '/../..' . '/app/Http/Controllers/RolesController.php',
-        'App\\Http\\Controllers\\ServiceController' => __DIR__ . '/../..' . '/app/Http/Controllers/ServiceController.php',
         'App\\Http\\Controllers\\SetUpController' => __DIR__ . '/../..' . '/app/Http/Controllers/SetUpController.php',
-        'App\\Http\\Controllers\\ShopGalleryController' => __DIR__ . '/../..' . '/app/Http/Controllers/ShopGalleryController.php',
-        'App\\Http\\Controllers\\ShopsController' => __DIR__ . '/../..' . '/app/Http/Controllers/ShopsController.php',
         'App\\Http\\Controllers\\SwaggerLoginController' => __DIR__ . '/../..' . '/app/Http/Controllers/SwaggerLoginController.php',
         'App\\Http\\Controllers\\UserManagementController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserManagementController.php',
-        'App\\Http\\Controllers\\client\\ClientBasicController' => __DIR__ . '/../..' . '/app/Http/Controllers/client/ClientBasicController.php',
-        'App\\Http\\Controllers\\client\\ClientBookingController' => __DIR__ . '/../..' . '/app/Http/Controllers/client/ClientBookingController.php',
-        'App\\Http\\Controllers\\client\\ClientCouponController' => __DIR__ . '/../..' . '/app/Http/Controllers/client/ClientCouponController.php',
-        'App\\Http\\Controllers\\client\\ClientJobController' => __DIR__ . '/../..' . '/app/Http/Controllers/client/ClientJobController.php',
-        'App\\Http\\Controllers\\client\\ClientPreBookingController' => __DIR__ . '/../..' . '/app/Http/Controllers/client/ClientPreBookingController.php',
-        'App\\Http\\Controllers\\client\\ClientReviewController' => __DIR__ . '/../..' . '/app/Http/Controllers/client/ClientReviewController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
         'App\\Http\\Middleware\\EncryptCookies' => __DIR__ . '/../..' . '/app/Http/Middleware/EncryptCookies.php',
@@ -675,70 +650,28 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Http\\Middleware\\TrustHosts' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustHosts.php',
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
-        'App\\Http\\Requests\\AffiliationCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AffiliationCreateRequest.php',
-        'App\\Http\\Requests\\AffiliationUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AffiliationUpdateRequest.php',
         'App\\Http\\Requests\\AuthRegenerateTokenRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AuthRegenerateTokenRequest.php',
         'App\\Http\\Requests\\AuthRegisterBusinessRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AuthRegisterBusinessRequest.php',
+        'App\\Http\\Requests\\AuthRegisterBusinessRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/AuthRegisterBusinessRequestClient.php',
         'App\\Http\\Requests\\AuthRegisterRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AuthRegisterRequest.php',
-        'App\\Http\\Requests\\AuthRegisterShopRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AuthRegisterShopRequest.php',
-        'App\\Http\\Requests\\AutomobileCategoryCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileCategoryCreateRequest.php',
-        'App\\Http\\Requests\\AutomobileCategoryUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileCategoryUpdateRequest.php',
-        'App\\Http\\Requests\\AutomobileFuelTypeCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileFuelTypeCreateRequest.php',
-        'App\\Http\\Requests\\AutomobileFuelTypeUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileFuelTypeUpdateRequest.php',
-        'App\\Http\\Requests\\AutomobileMakeCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileMakeCreateRequest.php',
-        'App\\Http\\Requests\\AutomobileMakeUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileMakeUpdateRequest.php',
-        'App\\Http\\Requests\\AutomobileModelCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileModelCreateRequest.php',
-        'App\\Http\\Requests\\AutomobileModelUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileModelUpdateRequest.php',
-        'App\\Http\\Requests\\AutomobileModelVariantCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileModelVariantCreateRequest.php',
-        'App\\Http\\Requests\\AutomobileModelVariantUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/AutomobileModelVariantUpdateRequest.php',
-        'App\\Http\\Requests\\BookingConfirmRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BookingConfirmRequest.php',
-        'App\\Http\\Requests\\BookingCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BookingCreateRequest.php',
-        'App\\Http\\Requests\\BookingCreateRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/BookingCreateRequestClient.php',
-        'App\\Http\\Requests\\BookingStatusChangeRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BookingStatusChangeRequest.php',
-        'App\\Http\\Requests\\BookingStatusChangeRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/BookingStatusChangeRequestClient.php',
-        'App\\Http\\Requests\\BookingToJobRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BookingToJobRequest.php',
-        'App\\Http\\Requests\\BookingUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BookingUpdateRequest.php',
-        'App\\Http\\Requests\\BookingUpdateRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/BookingUpdateRequestClient.php',
+        'App\\Http\\Requests\\BusinessCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessCreateRequest.php',
+        'App\\Http\\Requests\\BusinessOwnerToggleOptionsRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessOwnerToggleOptionsRequest.php',
+        'App\\Http\\Requests\\BusinessUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateRequest.php',
+        'App\\Http\\Requests\\BusinessUpdateSeparateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateSeparateRequest.php',
         'App\\Http\\Requests\\ChangePasswordRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ChangePasswordRequest.php',
-        'App\\Http\\Requests\\CouponCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/CouponCreateRequest.php',
-        'App\\Http\\Requests\\CouponUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/CouponUpdateRequest.php',
         'App\\Http\\Requests\\EmailTemplateCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EmailTemplateCreateRequest.php',
         'App\\Http\\Requests\\EmailTemplateUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EmailTemplateUpdateRequest.php',
         'App\\Http\\Requests\\EmailTemplateWrapperUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EmailTemplateWrapperUpdateRequest.php',
         'App\\Http\\Requests\\EmailVerifyTokenRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EmailVerifyTokenRequest.php',
         'App\\Http\\Requests\\ForgetPasswordRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ForgetPasswordRequest.php',
-        'App\\Http\\Requests\\FuelStationCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/FuelStationCreateRequest.php',
-        'App\\Http\\Requests\\FuelStationGalleryCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/FuelStationGalleryCreateRequest.php',
-        'App\\Http\\Requests\\FuelStationServiceCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/FuelStationServiceCreateRequest.php',
-        'App\\Http\\Requests\\FuelStationServiceUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/FuelStationServiceUpdateRequest.php',
-        'App\\Http\\Requests\\FuelStationUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/FuelStationUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessAffiliationCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessAffiliationCreateRequest.php',
-        'App\\Http\\Requests\\BusinessAffiliationUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessAffiliationUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessCreateRequest.php',
-        'App\\Http\\Requests\\BusinessPackageCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessPackageCreateRequest.php',
-        'App\\Http\\Requests\\BusinessPackageUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessPackageUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessRulesUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessRulesUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessSubServicePriceCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessSubServicePriceCreateRequest.php',
-        'App\\Http\\Requests\\BusinessSubServicePriceUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessSubServicePriceUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessTimesUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessTimesUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateRequest.php',
-        'App\\Http\\Requests\\BusinessUpdateSeparateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateSeparateRequest.php',
-        'App\\Http\\Requests\\GuestUserRegisterRequest' => __DIR__ . '/../..' . '/app/Http/Requests/GuestUserRegisterRequest.php',
+        'App\\Http\\Requests\\GetIdRequest' => __DIR__ . '/../..' . '/app/Http/Requests/GetIdRequest.php',
         'App\\Http\\Requests\\ImageUploadRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ImageUploadRequest.php',
-        'App\\Http\\Requests\\JobBidCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/JobBidCreateRequest.php',
-        'App\\Http\\Requests\\JobBidUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/JobBidUpdateRequest.php',
-        'App\\Http\\Requests\\JobPaymentCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/JobPaymentCreateRequest.php',
-        'App\\Http\\Requests\\JobStatusChangeRequest' => __DIR__ . '/../..' . '/app/Http/Requests/JobStatusChangeRequest.php',
-        'App\\Http\\Requests\\JobUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/JobUpdateRequest.php',
         'App\\Http\\Requests\\MultipleImageUploadRequest' => __DIR__ . '/../..' . '/app/Http/Requests/MultipleImageUploadRequest.php',
         'App\\Http\\Requests\\NotificationStatusUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/NotificationStatusUpdateRequest.php',
         'App\\Http\\Requests\\NotificationTemplateUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/NotificationTemplateUpdateRequest.php',
         'App\\Http\\Requests\\PasswordChangeRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PasswordChangeRequest.php',
         'App\\Http\\Requests\\PaymentTypeCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PaymentTypeCreateRequest.php',
         'App\\Http\\Requests\\PaymentTypeUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PaymentTypeUpdateRequest.php',
-        'App\\Http\\Requests\\PreBookingConfirmRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/PreBookingConfirmRequestClient.php',
-        'App\\Http\\Requests\\PreBookingCreateRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/PreBookingCreateRequestClient.php',
-        'App\\Http\\Requests\\PreBookingUpdateRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/PreBookingUpdateRequestClient.php',
         'App\\Http\\Requests\\ProductCategoryCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProductCategoryCreateRequest.php',
         'App\\Http\\Requests\\ProductCategoryUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProductCategoryUpdateRequest.php',
         'App\\Http\\Requests\\ProductCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProductCreateRequest.php',
@@ -746,82 +679,33 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Http\\Requests\\ProductUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProductUpdateRequest.php',
         'App\\Http\\Requests\\RoleRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RoleRequest.php',
         'App\\Http\\Requests\\RoleUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RoleUpdateRequest.php',
-        'App\\Http\\Requests\\ServiceCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ServiceCreateRequest.php',
-        'App\\Http\\Requests\\ServiceFuelTypeUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ServiceFuelTypeUpdateRequest.php',
-        'App\\Http\\Requests\\ServiceUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ServiceUpdateRequest.php',
-        'App\\Http\\Requests\\ShopUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ShopUpdateRequest.php',
-        'App\\Http\\Requests\\SubServiceCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/SubServiceCreateRequest.php',
-        'App\\Http\\Requests\\SubServiceUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/SubServiceUpdateRequest.php',
         'App\\Http\\Requests\\UserCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserCreateRequest.php',
         'App\\Http\\Requests\\UserInfoUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserInfoUpdateRequest.php',
         'App\\Http\\Requests\\UserUpdateProfileRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserUpdateProfileRequest.php',
         'App\\Http\\Requests\\UserUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserUpdateRequest.php',
+        'App\\Http\\Requests\\VideoUploadRequest' => __DIR__ . '/../..' . '/app/Http/Requests/VideoUploadRequest.php',
+        'App\\Http\\Utils\\BusinessUtil' => __DIR__ . '/../..' . '/app/Http/Utils/BusinessUtil.php',
         'App\\Http\\Utils\\DiscountUtil' => __DIR__ . '/../..' . '/app/Http/Utils/DiscountUtil.php',
         'App\\Http\\Utils\\ErrorUtil' => __DIR__ . '/../..' . '/app/Http/Utils/ErrorUtil.php',
-        'App\\Http\\Utils\\BusinessUtil' => __DIR__ . '/../..' . '/app/Http/Utils/BusinessUtil.php',
-        'App\\Http\\Utils\\PriceUtil' => __DIR__ . '/../..' . '/app/Http/Utils/PriceUtil.php',
-        'App\\Http\\Utils\\ShopUtil' => __DIR__ . '/../..' . '/app/Http/Utils/ShopUtil.php',
         'App\\Http\\Utils\\UserActivityUtil' => __DIR__ . '/../..' . '/app/Http/Utils/UserActivityUtil.php',
         'App\\Mail\\DynamicMail' => __DIR__ . '/../..' . '/app/Mail/DynamicMail.php',
         'App\\Mail\\ForgetPasswordMail' => __DIR__ . '/../..' . '/app/Mail/ForgetPasswordMail.php',
+        'App\\Mail\\SendPassword' => __DIR__ . '/../..' . '/app/Mail/SendPassword.php',
         'App\\Mail\\VerifyMail' => __DIR__ . '/../..' . '/app/Mail/VerifyMail.php',
         'App\\Models\\ActivityLog' => __DIR__ . '/../..' . '/app/Models/ActivityLog.php',
-        'App\\Models\\Affiliation' => __DIR__ . '/../..' . '/app/Models/Affiliation.php',
-        'App\\Models\\AutomobileCategory' => __DIR__ . '/../..' . '/app/Models/AutomobileCategory.php',
-        'App\\Models\\AutomobileFuelType' => __DIR__ . '/../..' . '/app/Models/AutomobileFuelType.php',
-        'App\\Models\\AutomobileMake' => __DIR__ . '/../..' . '/app/Models/AutomobileMake.php',
-        'App\\Models\\AutomobileModel' => __DIR__ . '/../..' . '/app/Models/AutomobileModel.php',
-        'App\\Models\\AutomobileModelVariant' => __DIR__ . '/../..' . '/app/Models/AutomobileModelVariant.php',
-        'App\\Models\\Booking' => __DIR__ . '/../..' . '/app/Models/Booking.php',
-        'App\\Models\\BookingPackage' => __DIR__ . '/../..' . '/app/Models/BookingPackage.php',
-        'App\\Models\\BookingSubService' => __DIR__ . '/../..' . '/app/Models/BookingSubService.php',
-        'App\\Models\\Coupon' => __DIR__ . '/../..' . '/app/Models/Coupon.php',
+        'App\\Models\\Business' => __DIR__ . '/../..' . '/app/Models/Business.php',
+        'App\\Models\\Department' => __DIR__ . '/../..' . '/app/Models/Department.php',
         'App\\Models\\EmailTemplate' => __DIR__ . '/../..' . '/app/Models/EmailTemplate.php',
         'App\\Models\\EmailTemplateWrapper' => __DIR__ . '/../..' . '/app/Models/EmailTemplateWrapper.php',
         'App\\Models\\ErrorLog' => __DIR__ . '/../..' . '/app/Models/ErrorLog.php',
-        'App\\Models\\FuelStation' => __DIR__ . '/../..' . '/app/Models/FuelStation.php',
-        'App\\Models\\FuelStationGallery' => __DIR__ . '/../..' . '/app/Models/FuelStationGallery.php',
-        'App\\Models\\FuelStationOption' => __DIR__ . '/../..' . '/app/Models/FuelStationOption.php',
-        'App\\Models\\FuelStationService' => __DIR__ . '/../..' . '/app/Models/FuelStationService.php',
-        'App\\Models\\businesses' => __DIR__ . '/../..' . '/app/Models/businesses.php',
-        'App\\Models\\BusinessAffiliation' => __DIR__ . '/../..' . '/app/Models/BusinessAffiliation.php',
-        'App\\Models\\BusinessAutomobileMake' => __DIR__ . '/../..' . '/app/Models/BusinessAutomobileMake.php',
-        'App\\Models\\BusinessAutomobileModel' => __DIR__ . '/../..' . '/app/Models/BusinessAutomobileModel.php',
-        'App\\Models\\BusinessGallery' => __DIR__ . '/../..' . '/app/Models/BusinessGallery.php',
-        'App\\Models\\BusinessPackage' => __DIR__ . '/../..' . '/app/Models/BusinessPackage.php',
-        'App\\Models\\BusinessPackageSubService' => __DIR__ . '/../..' . '/app/Models/BusinessPackageSubService.php',
-        'App\\Models\\BusinessRule' => __DIR__ . '/../..' . '/app/Models/BusinessRule.php',
-        'App\\Models\\BusinessService' => __DIR__ . '/../..' . '/app/Models/BusinessService.php',
-        'App\\Models\\BusinessSubService' => __DIR__ . '/../..' . '/app/Models/BusinessSubService.php',
-        'App\\Models\\BusinessSubServicePrice' => __DIR__ . '/../..' . '/app/Models/BusinessSubServicePrice.php',
-        'App\\Models\\BusinessTime' => __DIR__ . '/../..' . '/app/Models/BusinessTime.php',
-        'App\\Models\\GuestUser' => __DIR__ . '/../..' . '/app/Models/GuestUser.php',
-        'App\\Models\\Job' => __DIR__ . '/../..' . '/app/Models/Job.php',
-        'App\\Models\\JobBid' => __DIR__ . '/../..' . '/app/Models/JobBid.php',
-        'App\\Models\\JobPackage' => __DIR__ . '/../..' . '/app/Models/JobPackage.php',
-        'App\\Models\\JobPayment' => __DIR__ . '/../..' . '/app/Models/JobPayment.php',
-        'App\\Models\\JobSubService' => __DIR__ . '/../..' . '/app/Models/JobSubService.php',
         'App\\Models\\Notification' => __DIR__ . '/../..' . '/app/Models/Notification.php',
         'App\\Models\\NotificationTemplate' => __DIR__ . '/../..' . '/app/Models/NotificationTemplate.php',
         'App\\Models\\PaymentType' => __DIR__ . '/../..' . '/app/Models/PaymentType.php',
-        'App\\Models\\PreBooking' => __DIR__ . '/../..' . '/app/Models/PreBooking.php',
-        'App\\Models\\PreBookingSubService' => __DIR__ . '/../..' . '/app/Models/PreBookingSubService.php',
         'App\\Models\\Product' => __DIR__ . '/../..' . '/app/Models/Product.php',
         'App\\Models\\ProductCategory' => __DIR__ . '/../..' . '/app/Models/ProductCategory.php',
         'App\\Models\\ProductGallery' => __DIR__ . '/../..' . '/app/Models/ProductGallery.php',
         'App\\Models\\ProductVariation' => __DIR__ . '/../..' . '/app/Models/ProductVariation.php',
-        'App\\Models\\Question' => __DIR__ . '/../..' . '/app/Models/Question.php',
-        'App\\Models\\QusetionStar' => __DIR__ . '/../..' . '/app/Models/QusetionStar.php',
-        'App\\Models\\ReviewNew' => __DIR__ . '/../..' . '/app/Models/ReviewNew.php',
-        'App\\Models\\ReviewValueNew' => __DIR__ . '/../..' . '/app/Models/ReviewValueNew.php',
-        'App\\Models\\Service' => __DIR__ . '/../..' . '/app/Models/Service.php',
-        'App\\Models\\Shop' => __DIR__ . '/../..' . '/app/Models/Shop.php',
-        'App\\Models\\ShopGallery' => __DIR__ . '/../..' . '/app/Models/ShopGallery.php',
-        'App\\Models\\Star' => __DIR__ . '/../..' . '/app/Models/Star.php',
-        'App\\Models\\StarTag' => __DIR__ . '/../..' . '/app/Models/StarTag.php',
         'App\\Models\\Status' => __DIR__ . '/../..' . '/app/Models/Status.php',
-        'App\\Models\\SubService' => __DIR__ . '/../..' . '/app/Models/SubService.php',
-        'App\\Models\\Tag' => __DIR__ . '/../..' . '/app/Models/Tag.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\AuthServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AuthServiceProvider.php',
@@ -830,6 +714,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/app/Providers/RouteServiceProvider.php',
         'App\\Rules\\DayValidation' => __DIR__ . '/../..' . '/app/Rules/DayValidation.php',
         'App\\Rules\\SomeTimes' => __DIR__ . '/../..' . '/app/Rules/SomeTimes.php',
+        'App\\Rules\\TimeOrderRule' => __DIR__ . '/../..' . '/app/Rules/TimeOrderRule.php',
         'App\\Rules\\TimeValidation' => __DIR__ . '/../..' . '/app/Rules/TimeValidation.php',
         'Asm89\\Stack\\Cors' => __DIR__ . '/..' . '/asm89/stack-cors/src/Cors.php',
         'Asm89\\Stack\\CorsService' => __DIR__ . '/..' . '/asm89/stack-cors/src/CorsService.php',
@@ -942,7 +827,6 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'Cron\\MinutesField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/MinutesField.php',
         'Cron\\MonthField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/MonthField.php',
         'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
-        'Database\\Seeders\\AutomobileCarSeeder' => __DIR__ . '/../..' . '/database/seeders/AutomobileCarSeeder.php',
         'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
         'DeepCopy\\DeepCopy' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/DeepCopy.php',
         'DeepCopy\\Exception\\CloneException' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/Exception/CloneException.php',
