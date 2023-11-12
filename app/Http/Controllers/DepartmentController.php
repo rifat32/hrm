@@ -279,7 +279,13 @@ class DepartmentController extends Controller
      * required=true,
      * example="search_key"
      * ),
-
+   * *  @OA\Parameter(
+  * name="order_by",
+  * in="query",
+  * description="order_by",
+  * required=true,
+  * example="ASC"
+  * ),
 
      *      summary="This method is to get departments  ",
      *      description="This method is to get departments ",
@@ -329,7 +335,7 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $departmentsQuery = Department::where(
+            $departments = Department::where(
                 [
                     "business_id" => $business_id
                 ]
@@ -350,13 +356,19 @@ class DepartmentController extends Controller
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('created_at', "<=", $request->end_date);
-                });
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("departments.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("departments.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
 
-            if (!empty($request->per_page)) {
-                $departments = $departmentsQuery->paginate($request->per_page);
-            } else {
-                $departments = $departmentsQuery->get();
-            }
+
 
             return response()->json($departments, 200);
         } catch (Exception $e) {

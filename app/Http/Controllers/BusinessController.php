@@ -207,7 +207,7 @@ class BusinessController extends Controller
                     array_push($images,("/".$location."/".$new_file_name));
 
 
-                 
+
 
                 }
             }
@@ -1069,7 +1069,7 @@ if(!$user->hasRole('business_owner')) {
     /**
         *
      * @OA\Get(
-     *      path="/v1.0/businesses/{perPage}",
+     *      path="/v1.0/businesses",
      *      operationId="getBusinesses",
      *      tags={"business_management"},
      * *  @OA\Parameter(
@@ -1142,16 +1142,24 @@ if(!$user->hasRole('business_owner')) {
 * required=true,
 * example="4"
 * ),
+     * *  @OA\Parameter(
+* name="per_page",
+* in="query",
+* description="per_page",
+* required=true,
+* example="10"
+* ),
+   * *  @OA\Parameter(
+  * name="order_by",
+  * in="query",
+  * description="order_by",
+  * required=true,
+  * example="ASC"
+  * ),
     *       security={
      *           {"bearerAuth": {}}
      *       },
-     *              @OA\Parameter(
-     *         name="perPage",
-     *         in="path",
-     *         description="perPage",
-     *         required=true,
-     *  example="6"
-     *      ),
+     *
      *      summary="This method is to get businesses",
      *      description="This method is to get businesses",
      *
@@ -1190,7 +1198,7 @@ if(!$user->hasRole('business_owner')) {
      *     )
      */
 
-    public function getBusinesses($perPage,Request $request) {
+    public function getBusinesses(Request $request) {
 
         try{
             $this->storeActivity($request,"");
@@ -1200,73 +1208,66 @@ if(!$user->hasRole('business_owner')) {
                 ],401);
            }
 
-            $businessesQuery = Business::with(
-                "owner",
-            );
+           $businesses = Business::with("owner")
+           ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+               return $query->where(function ($query) use ($request) {
+                   $query->where('owner_id', $request->user()->id)
+                       ->orWhere('id', $request->user()->business_id);
+               });
+           })
+           ->when(!empty($request->search_key), function ($query) use ($request) {
+               $term = $request->search_key;
+               return $query->where(function ($query) use ($term) {
+                   $query->where("name", "like", "%" . $term . "%")
+                       ->orWhere("phone", "like", "%" . $term . "%")
+                       ->orWhere("email", "like", "%" . $term . "%")
+                       ->orWhere("city", "like", "%" . $term . "%")
+                       ->orWhere("postcode", "like", "%" . $term . "%");
+               });
+           })
+           ->when(!empty($request->start_date), function ($query) use ($request) {
+               return $query->where('created_at', ">=", $request->start_date);
+           })
+           ->when(!empty($request->end_date), function ($query) use ($request) {
+               return $query->where('created_at', "<=", $request->end_date);
+           })
+           ->when(!empty($request->start_lat), function ($query) use ($request) {
+               return $query->where('lat', ">=", $request->start_lat);
+           })
+           ->when(!empty($request->end_lat), function ($query) use ($request) {
+               return $query->where('lat', "<=", $request->end_lat);
+           })
+           ->when(!empty($request->start_long), function ($query) use ($request) {
+               return $query->where('long', ">=", $request->start_long);
+           })
+           ->when(!empty($request->end_long), function ($query) use ($request) {
+               return $query->where('long', "<=", $request->end_long);
+           })
+           ->when(!empty($request->address), function ($query) use ($request) {
+               $term = $request->address;
+               return $query->where(function ($query) use ($term) {
+                   $query->where("country", "like", "%" . $term . "%")
+                       ->orWhere("city", "like", "%" . $term . "%");
+               });
+           })
+           ->when(!empty($request->country_code), function ($query) use ($request) {
+               return $query->orWhere("country", "like", "%" . $request->country_code . "%");
+           })
+           ->when(!empty($request->city), function ($query) use ($request) {
+               return $query->orWhere("city", "like", "%" . $request->city . "%");
+           })
+           ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+               return $query->orderBy("businesses.id", $request->order_by);
+           }, function ($query) {
+               return $query->orderBy("businesses.id", "DESC");
+           })
+           ->when(!empty($request->per_page), function ($query) use ($request) {
+               return $query->paginate($request->per_page);
+           }, function ($query) {
+               return $query->get();
+           });
 
-
-            if(!$request->user()->hasRole('superadmin')) {
-                $businessesQuery = $businessesQuery->where(function ($query) use ($request) {
-                    // $query->where('created_by', $request->user()->id)
-                    //       ->orWhere('owner_id', $request->user()->id);
-                    $query->where('owner_id', $request->user()->id)
-                      ->orWhere('id', $request->user()->business_id);
-                });
-            }
-
-            if(!empty($request->search_key)) {
-                $businessesQuery = $businessesQuery->where(function($query) use ($request){
-                    $term = $request->search_key;
-                    $query->where("name", "like", "%" . $term . "%");
-                    $query->orWhere("phone", "like", "%" . $term . "%");
-                    $query->orWhere("email", "like", "%" . $term . "%");
-                    $query->orWhere("city", "like", "%" . $term . "%");
-                    $query->orWhere("postcode", "like", "%" . $term . "%");
-                });
-
-            }
-
-
-            if (!empty($request->start_date)) {
-                $businessesQuery = $businessesQuery->where('created_at', ">=", $request->start_date);
-            }
-            if (!empty($request->end_date)) {
-                $businessesQuery = $businessesQuery->where('created_at', "<=", $request->end_date);
-            }
-
-            if (!empty($request->start_lat)) {
-                $businessesQuery = $businessesQuery->where('lat', ">=", $request->start_lat);
-            }
-            if (!empty($request->end_lat)) {
-                $businessesQuery = $businessesQuery->where('lat', "<=", $request->end_lat);
-            }
-            if (!empty($request->start_long)) {
-                $businessesQuery = $businessesQuery->where('long', ">=", $request->start_long);
-            }
-            if (!empty($request->end_long)) {
-                $businessesQuery = $businessesQuery->where('long', "<=", $request->end_long);
-            }
-
-            if (!empty($request->address)) {
-                $businessesQuery = $businessesQuery->where(function ($query) use ($request) {
-                    $term = $request->address;
-                    $query->where("country", "like", "%" . $term . "%");
-                    $query->orWhere("city", "like", "%" . $term . "%");
-
-
-                });
-            }
-            if (!empty($request->country_code)) {
-                $businessesQuery =   $businessesQuery->orWhere("country", "like", "%" . $request->country_code . "%");
-
-            }
-            if (!empty($request->city)) {
-                $businessesQuery =   $businessesQuery->orWhere("city", "like", "%" . $request->city . "%");
-
-            }
-
-
-            $businesses = $businessesQuery->orderByDesc("id")->paginate($perPage);
+       return response()->json($businesses, 200);
             return response()->json($businesses, 200);
         } catch(Exception $e){
 
@@ -1278,7 +1279,7 @@ if(!$user->hasRole('business_owner')) {
      /**
         *
      * @OA\Get(
-     *      path="/v1.0/businesses/single/{id}",
+     *      path="/v1.0/businesses/{id}",
      *      operationId="getBusinessById",
      *      tags={"business_management"},
     *       security={

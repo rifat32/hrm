@@ -153,8 +153,8 @@ Route::post('/v1.0/businesses', [BusinessController::class, "createBusiness"]);
 Route::put('/v1.0/businesses/toggle-active', [BusinessController::class, "toggleActiveBusiness"]);
 Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
 Route::put('/v1.0/businesses/separate', [BusinessController::class, "updateBusinessSeparate"]);
-Route::get('/v1.0/businesses/{perPage}', [BusinessController::class, "getBusinesses"]);
-Route::get('/v1.0/businesses/single/{id}', [BusinessController::class, "getBusinessById"]);
+Route::get('/v1.0/businesses', [BusinessController::class, "getBusinesses"]);
+Route::get('/v1.0/businesses/{id}', [BusinessController::class, "getBusinessById"]);
 Route::delete('/v1.0/businesses/{id}', [BusinessController::class, "deleteBusinessById"]);
 Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class, "getAllBusinessesByBusinessOwner"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
