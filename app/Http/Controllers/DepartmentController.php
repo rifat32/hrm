@@ -279,13 +279,13 @@ class DepartmentController extends Controller
      * required=true,
      * example="search_key"
      * ),
-   * *  @OA\Parameter(
-  * name="order_by",
-  * in="query",
-  * description="order_by",
-  * required=true,
-  * example="ASC"
-  * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
 
      *      summary="This method is to get departments  ",
      *      description="This method is to get departments ",
@@ -344,8 +344,8 @@ class DepartmentController extends Controller
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("name", "like", "%" . $term . "%")
-                        ->orWhere("location", "like", "%" . $term . "%")
-                        ->orWhere("description", "like", "%" . $term . "%");
+                            ->orWhere("location", "like", "%" . $term . "%")
+                            ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -465,18 +465,18 @@ class DepartmentController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/departments/{id}",
-     *      operationId="deleteDepartmentById",
+     *      path="/v1.0/departments/{ids}",
+     *      operationId="deleteDepartmentsByIds",
      *      tags={"administrator.department"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
-     *         description="id",
+     *         description="ids",
      *         required=true,
-     *  example="6"
+     *  example="1,2,3"
      *      ),
      *      summary="This method is to delete department by id",
      *      description="This method is to delete department by id",
@@ -516,7 +516,7 @@ class DepartmentController extends Controller
      *     )
      */
 
-    public function deleteDepartmentById($id, Request $request)
+    public function deleteDepartmentsByIds(Request $request, $ids)
     {
 
         try {
@@ -527,19 +527,26 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $department = Department::where([
-                "id" => $id,
+            $idsArray = explode(',', $ids);
+            $existingIds = Department::where([
                 "business_id" => $business_id
             ])
-                ->first();
-            if (!$department) {
+                ->whereIn('id', $idsArray)
+                ->select('id')
+                ->get()
+                ->pluck('id')
+                ->toArray();
+            $nonExistingIds = array_diff($idsArray, $existingIds);
+
+            if (!empty($nonExistingIds)) {
                 return response()->json([
-                    "message" => "no department found"
+                    "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            $department->delete();
+            Department::destroy($existingIds);
 
-            return response()->json(["ok" => true], 200);
+
+            return response()->json(["message" => "data deleted sussfully"], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

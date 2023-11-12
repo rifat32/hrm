@@ -7920,7 +7920,7 @@
                 ],
                 "summary": "This method is to delete user by id",
                 "description": "This method is to delete user by id",
-                "operationId": "deleteUserById",
+                "operationId": "deleteUsersByIds",
                 "parameters": [
                     {
                         "name": "id",

@@ -1354,9 +1354,9 @@ if(!$user->hasRole('business_owner')) {
             ->first();
 
 
-        $data["business"] = $business;
 
-        return response()->json($data, 200);
+
+        return response()->json($business, 200);
         } catch(Exception $e){
 
         return $this->sendError($e,500,$request);
@@ -1367,18 +1367,18 @@ if(!$user->hasRole('business_owner')) {
 /**
         *
      * @OA\Delete(
-     *      path="/v1.0/businesses/{id}",
-     *      operationId="deleteBusinessById",
+     *      path="/v1.0/businesses/{ids}",
+     *      operationId="deleteBusinessesByIds",
      *      tags={"business_management"},
     *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
-     *         description="id",
+     *         description="ids",
      *         required=true,
-     *  example="6"
+     *  example="6,7,8"
      *      ),
      *      summary="This method is to delete business by id",
      *      description="This method is to delete business by id",
@@ -1418,7 +1418,7 @@ if(!$user->hasRole('business_owner')) {
      *     )
      */
 
-    public function deleteBusinessById($id,Request $request) {
+    public function deleteBusinessesByIds(Request $request,$ids) {
 
         try{
             $this->storeActivity($request,"");
@@ -1427,23 +1427,26 @@ if(!$user->hasRole('business_owner')) {
                    "message" => "You can not perform this action"
                 ],401);
            }
+           $business_id =  $request->user()->business_id;
+           $idsArray = explode(',', $ids);
+           $existingIds = Business::whereIn('id', $idsArray)
+           ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
+               return $query->where("id", $business_id);
+           })
+               ->select('id')
+               ->get()
+               ->pluck('id')
+               ->toArray();
+           $nonExistingIds = array_diff($idsArray, $existingIds);
 
-           $businessesQuery =   Business::where([
-            "id" => $id
-           ]);
-           if(!$request->user()->hasRole('superadmin')) {
-            $businessesQuery =    $businessesQuery->where([
-                "business_id" =>$request->user()->business_id
-            ]);
-        }
+           if (!empty($nonExistingIds)) {
+               return response()->json([
+                   "message" => "Some or all of the specified data do not exist."
+               ], 404);
+           }
+           Business::destroy($existingIds);
+           return response()->json(["message" => "data deleted sussfully"], 200);
 
-        $business = $businessesQuery->first();
-
-        $business->delete();
-
-
-
-            return response()->json(["ok" => true], 200);
         } catch(Exception $e){
 
         return $this->sendError($e,500,$request);

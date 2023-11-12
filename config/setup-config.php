@@ -69,6 +69,14 @@ return [
             "role" => "business_owner",
             "permissions" => [
 
+
+                "user_create",
+                "user_update",
+                "user_view",
+                "user_delete",
+
+
+
                 "business_update",
                 "business_view",
                 "product_category_view",

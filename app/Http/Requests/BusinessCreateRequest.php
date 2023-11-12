@@ -31,7 +31,7 @@ class BusinessCreateRequest extends FormRequest
 
         return [
 
-            'business.id' => 'required|numeric',
+            'business.owner_id' => 'required|numeric',
 
 
 

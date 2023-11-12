@@ -128,8 +128,8 @@ Route::get('/v1.0/users/get-by-id/{id}', [UserManagementController::class, "getU
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
-Route::get('/v1.0/users/{perPage}', [UserManagementController::class, "getUsers"]);
-Route::delete('/v1.0/users/{id}', [UserManagementController::class, "deleteUserById"]);
+Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);
+Route::delete('/v1.0/users/{ids}', [UserManagementController::class, "deleteUsersByIds"]);
 
 // ********************************************
 // user management section --role
@@ -155,7 +155,7 @@ Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
 Route::put('/v1.0/businesses/separate', [BusinessController::class, "updateBusinessSeparate"]);
 Route::get('/v1.0/businesses', [BusinessController::class, "getBusinesses"]);
 Route::get('/v1.0/businesses/{id}', [BusinessController::class, "getBusinessById"]);
-Route::delete('/v1.0/businesses/{id}', [BusinessController::class, "deleteBusinessById"]);
+Route::delete('/v1.0/businesses/{ids}', [BusinessController::class, "deleteBusinessesByIds"]);
 Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class, "getAllBusinessesByBusinessOwner"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end business management section
@@ -244,7 +244,7 @@ Route::post('/v1.0/departments', [DepartmentController::class, "createDepartment
 Route::put('/v1.0/departments', [DepartmentController::class, "updateDepartment"]);
 Route::get('/v1.0/departments', [DepartmentController::class, "getDepartments"]);
 Route::get('/v1.0/departments/{id}', [DepartmentController::class, "getDepartmentById"]);
-Route::delete('/v1.0/departments/{id}', [DepartmentController::class, "deleteDepartmentById"]);
+Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDepartmentsByIds"]);
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

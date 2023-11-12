@@ -34,8 +34,8 @@ trait BusinessUtil
 
 
     public function checkManager($id) {
-        $manager  = User::where(["id" => $id])->first();
-        if (!$manager){
+        $user  = User::where(["id" => $id])->first();
+        if (!$user){
             return [
                 "ok" => false,
                 "status" => 400,
@@ -43,11 +43,18 @@ trait BusinessUtil
             ];
         }
 
-        if ($manager->business_id != auth()->user()->business_id) {
+        if ($user->business_id != auth()->user()->business_id) {
             return [
                 "ok" => false,
                 "status" => 403,
                 "message" => "Manager belongs to another business."
+            ];
+        }
+        if (!$user->hasRole("manager")){
+            return [
+                "ok" => false,
+                "status" => 403,
+                "message" => "The user is not a manager"
             ];
         }
         return [

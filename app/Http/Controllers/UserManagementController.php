@@ -24,12 +24,12 @@ use Illuminate\Support\Str;
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil,UserActivityUtil;
+    use ErrorUtil, UserActivityUtil;
 
 
 
-       /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/v1.0/user-image",
      *      operationId="createUserImage",
@@ -40,19 +40,19 @@ class UserManagementController extends Controller
      *      summary="This method is to store user image ",
      *      description="This method is to store user image",
      *
-   *  @OA\RequestBody(
-        *   * @OA\MediaType(
-*     mediaType="multipart/form-data",
-*     @OA\Schema(
-*         required={"image"},
-*         @OA\Property(
-*             description="image to upload",
-*             property="image",
-*             type="file",
-*             collectionFormat="multi",
-*         )
-*     )
-* )
+     *  @OA\RequestBody(
+     *   * @OA\MediaType(
+     *     mediaType="multipart/form-data",
+     *     @OA\Schema(
+     *         required={"image"},
+     *         @OA\Property(
+     *             description="image to upload",
+     *             property="image",
+     *             type="file",
+     *             collectionFormat="multi",
+     *         )
+     *     )
+     * )
 
 
 
@@ -93,8 +93,8 @@ class UserManagementController extends Controller
 
     public function createUserImage(ImageUploadRequest $request)
     {
-        try{
-            $this->storeActivity($request,"");
+        try {
+            $this->storeActivity($request, "");
             // if(!$request->user()->hasPermissionTo('user_create')){
             //      return response()->json([
             //         "message" => "You can not perform this action"
@@ -110,12 +110,10 @@ class UserManagementController extends Controller
             $insertableData["image"]->move(public_path($location), $new_file_name);
 
 
-            return response()->json(["image" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
-
-
-        } catch(Exception $e){
+            return response()->json(["image" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
+        } catch (Exception $e) {
             error_log($e->getMessage());
-        return $this->sendError($e,500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
@@ -124,12 +122,12 @@ class UserManagementController extends Controller
 
 
     /**
-        *
+     *
      * @OA\Post(
      *      path="/v1.0/users",
      *      operationId="createUser",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to store user",
@@ -194,12 +192,12 @@ class UserManagementController extends Controller
     public function createUser(UserCreateRequest $request)
     {
 
-        try{
-            $this->storeActivity($request,"");
-            if(!$request->user()->hasPermissionTo('user_create')){
-                 return response()->json([
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
                     "message" => "You can not perform this action"
-                 ],401);
+                ], 401);
             }
             $business_id = $request->user()->business_id;
 
@@ -210,7 +208,7 @@ class UserManagementController extends Controller
             $insertableData['remember_token'] = Str::random(10);
 
 
-            if(!empty($business_id)) {
+            if (!empty($business_id)) {
                 $insertableData['business_id'] = $business_id;
             }
 
@@ -232,21 +230,21 @@ class UserManagementController extends Controller
             // $data["roles"] = $user->roles->pluck('name');
             // $data["token"] = $token;
             return response($user, 201);
-        } catch(Exception $e){
+        } catch (Exception $e) {
             error_log($e->getMessage());
-        return $this->sendError($e,500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
 
 
- /**
-        *
+    /**
+     *
      * @OA\Put(
      *      path="/v1.0/users",
      *      operationId="updateUser",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to update user",
@@ -312,35 +310,35 @@ class UserManagementController extends Controller
     public function updateUser(UserUpdateRequest $request)
     {
 
-        try{
-            $this->storeActivity($request,"");
-            if(!$request->user()->hasPermissionTo('user_update')){
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('user_update')) {
                 return response()->json([
-                   "message" => "You can not perform this action"
-                ],401);
-           }
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-           $userQuery = User::where([
-            "id" => $request["id"]
-       ]);
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
 
-              $updatableUser = $userQuery->first();
-            if($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin"){
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
                 return response()->json([
-                   "message" => "You can not change the role of super admin"
-                ],401);
-           }
-           if(!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id) {
-            return response()->json([
-                "message" => "You can not update this user"
-             ],401);
-        }
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
 
             $updatableData = $request->validated();
 
 
-            if(!empty($updatableData['password'])) {
+            if (!empty($updatableData['password'])) {
                 $updatableData['password'] = Hash::make($updatableData['password']);
             } else {
                 unset($updatableData['password']);
@@ -351,30 +349,30 @@ class UserManagementController extends Controller
                 "id" => $updatableData["id"],
             ];
 
-            $user  =  tap(User::where($userQueryTerms))->update(collect($updatableData)->only([
-                'first_Name' ,
-                'last_Name',
-                'password',
-                'phone',
-                'address_line_1',
-                'address_line_2',
-                'country',
-                'city',
-                'postcode',
-                "lat",
-                "long",
-                "image"
+            $user  =  tap(User::where($userQueryTerms))->update(
+                collect($updatableData)->only([
+                    'first_Name',
+                    'last_Name',
+                    'password',
+                    'phone',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long",
+                    "image"
 
-            ])->toArray()
+                ])->toArray()
             )
                 // ->with("somthing")
 
                 ->first();
-                if(!$user) {
-                    return response()->json([
-                        "message" => "no user found"
-                        ],404);
-
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
             }
 
             $user->syncRoles([$updatableData['role']]);
@@ -386,18 +384,18 @@ class UserManagementController extends Controller
 
 
             return response($user, 201);
-        } catch(Exception $e){
+        } catch (Exception $e) {
             error_log($e->getMessage());
-        return $this->sendError($e,500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
-     /**
-        *
+    /**
+     *
      * @OA\Put(
      *      path="/v1.0/users/toggle-active",
      *      operationId="toggleActiveUser",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to toggle user activity",
@@ -445,20 +443,20 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function toggleActiveUser(GetIdRequest $request)
-     {
+    public function toggleActiveUser(GetIdRequest $request)
+    {
 
-         try{
-             $this->storeActivity($request,"");
-             if(!$request->user()->hasPermissionTo('user_update')){
-                 return response()->json([
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
                     "message" => "You can not perform this action"
-                 ],401);
+                ], 401);
             }
             $updatableData = $request->validated();
 
             $userQuery  = User::where(["id" => $updatableData["id"]]);
-            if(!auth()->user()->hasRole('superadmin')) {
+            if (!auth()->user()->hasRole('superadmin')) {
                 $userQuery = $userQuery->where(function ($query) {
                     // $query->where('created_by', auth()->user()->id);
                     $query->where('business_id', auth()->user()->business_id);
@@ -471,32 +469,30 @@ class UserManagementController extends Controller
                     "message" => "no user found"
                 ], 404);
             }
-            if($user->hasRole("superadmin")){
+            if ($user->hasRole("superadmin")) {
                 return response()->json([
-                   "message" => "superadmin can not be deactivated"
-                ],401);
-           }
+                    "message" => "superadmin can not be deactivated"
+                ], 401);
+            }
 
             $user->update([
                 'is_active' => !$user->is_active
             ]);
 
             return response()->json(['message' => 'User status updated successfully'], 200);
-
-
-         } catch(Exception $e){
-             error_log($e->getMessage());
-         return $this->sendError($e,500,$request);
-         }
-     }
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
-        *
+     *
      * @OA\Put(
      *      path="/v1.0/users/profile",
      *      operationId="updateUserProfile",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to update user profile",
@@ -559,104 +555,104 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function updateUserProfile(UserUpdateProfileRequest $request)
-     {
+    public function updateUserProfile(UserUpdateProfileRequest $request)
+    {
 
-         try{
-
-
-             $this->storeActivity($request,"");
-
-             $updatableData = $request->validated();
+        try {
 
 
-             if(!empty($updatableData['password'])) {
-                 $updatableData['password'] = Hash::make($updatableData['password']);
-             } else {
-                 unset($updatableData['password']);
-             }
+            $this->storeActivity($request, "");
+
+            $updatableData = $request->validated();
+
+
+            if (!empty($updatableData['password'])) {
+                $updatableData['password'] = Hash::make($updatableData['password']);
+            } else {
+                unset($updatableData['password']);
+            }
             //  $updatableData['is_active'] = true;
             //  $updatableData['remember_token'] = Str::random(10);
-             $user  =  tap(User::where(["id" => $request->user()->id]))->update(collect($updatableData)->only([
-                 'first_Name' ,
-                 'last_Name',
-                 'password',
-                 'phone',
-                 'address_line_1',
-                 'address_line_2',
-                 'country',
-                 'city',
-                 'postcode',
-                 "lat",
-                 "long",
-                 "image"
+            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+                collect($updatableData)->only([
+                    'first_Name',
+                    'last_Name',
+                    'password',
+                    'phone',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long",
+                    "image"
 
-             ])->toArray()
-             )
-                 // ->with("somthing")
+                ])->toArray()
+            )
+                // ->with("somthing")
 
-                 ->first();
-                 if(!$user) {
-                     return response()->json([
-                         "message" => "no user found"
-                         ],404);
-
-             }
-
-
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
 
-             $user->roles = $user->roles->pluck('name');
 
 
-             return response($user, 201);
-         } catch(Exception $e){
-             error_log($e->getMessage());
-         return $this->sendError($e,500,$request);
-         }
-     }
+            $user->roles = $user->roles->pluck('name');
+
+
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
-   /**
-        *
+    /**
+     *
      * @OA\Get(
-     *      path="/v1.0/users/{perPage}",
+     *      path="/v1.0/users",
      *      operationId="getUsers",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="perPage",
-     *         in="path",
-     *         description="perPage",
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
      *         required=true,
      *  example="6"
      *      ),
      *      * *  @OA\Parameter(
-* name="start_date",
-* in="query",
-* description="start_date",
-* required=true,
-* example="2019-06-29"
-* ),
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
      * *  @OA\Parameter(
-* name="end_date",
-* in="query",
-* description="end_date",
-* required=true,
-* example="2019-06-29"
-* ),
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
      * *  @OA\Parameter(
-* name="search_key",
-* in="query",
-* description="search_key",
-* required=true,
-* example="search_key"
-* ),
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
      *      summary="This method is to get user",
      *      description="This method is to get user",
      *
@@ -695,59 +691,59 @@ class UserManagementController extends Controller
      *     )
      */
 
-    public function getUsers($perPage,Request $request) {
-        try{
-            $this->storeActivity($request,"");
-            if(!$request->user()->hasPermissionTo('user_view')){
+    public function getUsers(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
-                   "message" => "You can not perform this action"
-                ],401);
-           }
-
-            $usersQuery = User::with("roles");
-            // $query->where('business_id', auth()->user()->business_id);
-            if(!$request->user()->hasRole('superadmin')) {
-                $usersQuery =    $usersQuery->where([
-                    "business_id" =>$request->user()->business_id
-                ]);
+                    "message" => "You can not perform this action"
+                ], 401);
             }
-            // ->whereHas('roles', function ($query) {
-            //     // return $query->where('name','!=', 'customer');
-            // });
 
-            if(!empty($request->search_key)) {
-                $usersQuery = $usersQuery->where(function($query) use ($request){
-                    $term = $request->search_key;
-                    $query->where("first_Name", "like", "%" . $term . "%");
-                    $query->orWhere("last_Name", "like", "%" . $term . "%");
-                    $query->orWhere("email", "like", "%" . $term . "%");
-                    $query->orWhere("phone", "like", "%" . $term . "%");
+            $users = User::with("roles")
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where("business_id", $request->user()->business_id);
+            })
+            ->when(!empty($request->search_key), function ($query) use ($request) {
+                $term = $request->search_key;
+                return $query->where(function ($subquery) use ($term) {
+                    $subquery->where("first_Name", "like", "%" . $term . "%")
+                        ->orWhere("last_Name", "like", "%" . $term . "%")
+                        ->orWhere("email", "like", "%" . $term . "%")
+                        ->orWhere("phone", "like", "%" . $term . "%");
                 });
+            })
+            ->when(!empty($request->start_date), function ($query) use ($request) {
+                return $query->where('created_at', ">=", $request->start_date);
+            })
+            ->when(!empty($request->end_date), function ($query) use ($request) {
+                return $query->where('created_at', "<=", $request->end_date);
+            })
+            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("businesses.id", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("businesses.id", "DESC");
+            })
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
 
-            }
-
-            if (!empty($request->start_date)) {
-                $usersQuery = $usersQuery->where('created_at', ">=", $request->start_date);
-            }
-            if (!empty($request->end_date)) {
-                $usersQuery = $usersQuery->where('created_at', "<=", $request->end_date);
-            }
-
-            $users = $usersQuery->orderByDesc("id")->paginate($perPage);
             return response()->json($users, 200);
-        } catch(Exception $e){
+        } catch (Exception $e) {
 
-        return $this->sendError($e,500,$request);
+            return $this->sendError($e, 500, $request);
         }
-
     }
-       /**
-        *
+    /**
+     *
      * @OA\Get(
      *      path="/v1.0/users/get-by-id/{id}",
      *      operationId="getUserById",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
@@ -796,27 +792,28 @@ class UserManagementController extends Controller
      *     )
      */
 
-    public function getUserById($id,Request $request) {
-        try{
-            $this->storeActivity($request,"");
-            if(!$request->user()->hasPermissionTo('user_view')){
+    public function getUserById($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
-                   "message" => "You can not perform this action"
-                ],401);
-           }
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             $user = User::with("roles")
-            ->where([
-                "id" => $id
-            ])
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                $query->where('business_id', $request->user()->business_id);
-            })
-            ->first();
-            if(!$user) {
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    $query->where('business_id', $request->user()->business_id);
+                })
+                ->first();
+            if (!$user) {
                 return response()->json([
                     "message" => "no user found"
-                ],404);
+                ], 404);
             }
             // ->whereHas('roles', function ($query) {
             //     // return $query->where('name','!=', 'customer');
@@ -824,30 +821,29 @@ class UserManagementController extends Controller
 
 
             return response()->json($user, 200);
-        } catch(Exception $e){
+        } catch (Exception $e) {
 
-        return $this->sendError($e,500,$request);
+            return $this->sendError($e, 500, $request);
         }
-
     }
-/**
-        *
+    /**
+     *
      * @OA\Delete(
-     *      path="/v1.0/users/{id}",
-     *      operationId="deleteUserById",
+     *      path="/v1.0/users/{ids}",
+     *      operationId="deleteUsersByIds",
      *      tags={"user_management"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
-     *         description="id",
+     *         description="ids",
      *         required=true,
-     *  example="1"
+     *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user by id",
-     *      description="This method is to delete user by id",
+     *      summary="This method is to delete user by ids",
+     *      description="This method is to delete user by ids",
      *
 
      *      @OA\Response(
@@ -884,40 +880,58 @@ class UserManagementController extends Controller
      *     )
      */
 
-    public function deleteUserById($id,Request $request) {
+    public function deleteUsersByIds($ids, Request $request)
+    {
 
-        try{
-            $this->storeActivity($request,"");
-            if(!$request->user()->hasPermissionTo('user_delete')){
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('user_delete')) {
                 return response()->json([
-                   "message" => "You can not perform this action"
-                ],401);
-           }
-           $user = User::where([
-            "id" => $id
-       ])->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-        $query->where('business_id', $request->user()->business_id);
-    })
-    ->first();
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-    if(!$user) {
-        return response()->json([
-            "message" => "no user found"
-        ],404);
-    }
-           if($user->hasRole("superadmin")){
-            return response()->json([
-               "message" => "superadmin can not be deleted"
-            ],401);
-       }
-           $user
-           ->delete();
+            $business_id =  $request->user()->business_id;
+            $idsArray = explode(',', $ids);
+            $existingIds = User::whereIn('id', $idsArray)
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
+                    return  $query->where('business_id', $business_id);
+                })
+                ->select('id')
+                ->get()
+                ->pluck('id')
+                ->toArray();
+            $nonExistingIds = array_diff($idsArray, $existingIds);
 
-            return response()->json(["ok" => true], 200);
-        } catch(Exception $e){
+            if (!empty($nonExistingIds)) {
+                return response()->json([
+                    "message" => "Some or all of the specified data do not exist."
+                ], 404);
+            }
+            // Check if any of the existing users are superadmins
+            $superadminCheck = User::whereIn('id', $existingIds)->whereHas('roles', function ($query) {
+                $query->where('name', 'superadmin');
+            })->exists();
 
-        return $this->sendError($e,500,$request);
+            if ($superadminCheck) {
+                return response()->json([
+                    "message" => "Superadmin user(s) cannot be deleted."
+                ], 401);
+            }
+            User::destroy($existingIds);
+            return response()->json(["message" => "data deleted sussfully"], 200);
+
+
+
+
+
+
+
+
+
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
         }
-
     }
 }
