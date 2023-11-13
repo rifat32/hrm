@@ -328,7 +328,7 @@ class UserManagementController extends Controller
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -458,8 +458,9 @@ class UserManagementController extends Controller
             $userQuery  = User::where(["id" => $updatableData["id"]]);
             if (!auth()->user()->hasRole('superadmin')) {
                 $userQuery = $userQuery->where(function ($query) {
-                    // $query->where('created_by', auth()->user()->id);
-                    $query->where('business_id', auth()->user()->business_id);
+                    $query->where('business_id', auth()->user()->business_id)
+                    ->orWhere('created_by', auth()->user()->id)
+                    ->orWhere('id', auth()->user()->id);
                 });
             }
 
@@ -703,7 +704,11 @@ class UserManagementController extends Controller
 
             $users = User::with("roles")
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where("business_id", $request->user()->business_id);
+                return $query->where(function ($query) {
+                    return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                  });
             })
             ->when(!empty($request->search_key), function ($query) use ($request) {
                 $term = $request->search_key;
@@ -807,7 +812,11 @@ class UserManagementController extends Controller
                     "id" => $id
                 ])
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    $query->where('business_id', $request->user()->business_id);
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                                ->orWhere('id', auth()->user()->id)
+                                ->orWhere('business_id', auth()->user()->business_id);
+                      });
                 })
                 ->first();
             if (!$user) {
@@ -895,7 +904,10 @@ class UserManagementController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = User::whereIn('id', $idsArray)
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
-                    return  $query->where('business_id', $business_id);
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                                ->orWhere('business_id', auth()->user()->business_id);
+                      });
                 })
                 ->select('id')
                 ->get()
@@ -918,13 +930,15 @@ class UserManagementController extends Controller
                     "message" => "Superadmin user(s) cannot be deleted."
                 ], 401);
             }
+            $userCheck = User::whereIn('id', $existingIds)->where("id",auth()->user()->id)->exists();
+
+            if ($userCheck) {
+                return response()->json([
+                    "message" => "You can not delete your self."
+                ], 401);
+            }
             User::destroy($existingIds);
             return response()->json(["message" => "data deleted sussfully"], 200);
-
-
-
-
-
 
 
 
