@@ -50,7 +50,7 @@ trait BusinessUtil
                 "message" => "Manager belongs to another business."
             ];
         }
-        if (!$user->hasRole("manager")){
+        if (!$user->hasRole("business_admin")){
             return [
                 "ok" => false,
                 "status" => 403,
@@ -61,6 +61,39 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
+
+    public function checkEmployees($ids) {
+        $users = User::whereIn("id", $ids)->get();
+        foreach ($users as $user) {
+            if (!$user){
+                return [
+                    "ok" => false,
+                    "status" => 400,
+                    "message" => "Employee does not exists."
+                ];
+            }
+
+            if ($user->business_id != auth()->user()->business_id) {
+                return [
+                    "ok" => false,
+                    "status" => 403,
+                    "message" => "Employee belongs to another business."
+                ];
+            }
+            if (!$user->hasRole("business_admin") &&  !$user->hasRole("business_employee")){
+                return [
+                    "ok" => false,
+                    "status" => 403,
+                    "message" => "The user is not a employee"
+                ];
+            }
+        }
+
+        return [
+            "ok" => true,
+        ];
+    }
+
 
     public function checkDepartment($id) {
         $department  = Department::where(["id" => $id])->first();

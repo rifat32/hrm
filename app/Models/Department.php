@@ -18,7 +18,9 @@ class Department extends Model
         "business_id",
     ];
     public function holidays() {
-        return $this->belongsToMany(Holiday::class, 'department_tenants', 'department_id', 'holiday_id');
+        return $this->belongsToMany(Holiday::class, 'department_holidays', 'department_id', 'holiday_id');
     }
-
+    public function work_shifts() {
+        return $this->belongsToMany(WorkShift::class, 'department_work_shifts', 'department_id', 'work_shift_id');
+    }
 }

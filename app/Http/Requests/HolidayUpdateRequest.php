@@ -13,7 +13,7 @@ class HolidayUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,12 @@ class HolidayUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'id' => 'required|numeric',
+             'name' => 'required|string',
+            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'repeats_annually' => 'required|boolean',
         ];
     }
 }

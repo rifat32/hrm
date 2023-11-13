@@ -12,7 +12,7 @@ class Holiday extends Model
         'name', 'description', 'start_date', 'end_date', 'repeats_annually',  'is_active', 'business_id',
     ];
     public function departments() {
-        return $this->belongsToMany(Department::class, 'department_tenants', 'holiday_id', 'department_id');
+        return $this->belongsToMany(Department::class, 'department_holidays', 'holiday_id', 'department_id');
     }
 
 }

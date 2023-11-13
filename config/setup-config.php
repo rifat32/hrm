@@ -93,6 +93,11 @@ return [
                 "holiday_view",
                 "holiday_delete",
 
+                "work_shift_create",
+                "work_shift_update",
+                "work_shift_view",
+                "work_shift_delete",
+
             ],
         ],
 
@@ -106,8 +111,8 @@ return [
         "superadmin",
         'reseller',
         "business_owner",
-        "manager",
-        "employee",
+        "business_admin",
+        "business_employee",
 
     ],
     "permissions" => [
@@ -165,6 +170,11 @@ return [
        "holiday_update",
        "holiday_view",
        "holiday_delete",
+
+       "work_shift_create",
+       "work_shift_update",
+       "work_shift_view",
+       "work_shift_delete",
 
     ],
     "unchangeable_roles" => [

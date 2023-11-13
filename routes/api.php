@@ -31,8 +31,7 @@ use App\Http\Controllers\RolesController;
 
 
 use App\Http\Controllers\UserManagementController;
-
-
+use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -269,6 +268,19 @@ Route::delete('/v1.0/holidays/{ids}', [HolidayController::class, "deleteHolidays
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// work shift  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/work-shifts', [WorkShiftController::class, "createWorkShift"]);
+Route::put('/v1.0/work-shifts', [WorkShiftController::class, "updateWorkShift"]);
+Route::get('/v1.0/work-shifts', [WorkShiftController::class, "getWorkShifts"]);
+Route::get('/v1.0/work-shifts/{id}', [WorkShiftController::class, "getWorkShiftById"]);
+Route::delete('/v1.0/work-shifts/{ids}', [WorkShiftController::class, "deleteWorkShiftsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end work shift  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

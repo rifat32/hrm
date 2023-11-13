@@ -38,6 +38,11 @@ class User extends Authenticatable
          'is_active'
     ];
 
+
+    public function work_shifts() {
+        return $this->belongsToMany(WorkShift::class, 'user_work_shifts', 'user_id', 'work_shift_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
