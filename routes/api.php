@@ -283,6 +283,21 @@ Route::delete('/v1.0/work-shifts/{ids}', [WorkShiftController::class, "deleteWor
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// announcements  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/announcements', [AnnouncementController::class, "createAnnouncement"]);
+Route::put('/v1.0/announcements', [AnnouncementController::class, "updateAnnouncement"]);
+Route::get('/v1.0/announcements', [AnnouncementController::class, "getAnnouncements"]);
+Route::get('/v1.0/announcements/{id}', [AnnouncementController::class, "getAnnouncementById"]);
+Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "deleteAnnouncementsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end announcements management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
 
 
 
