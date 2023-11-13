@@ -86,24 +86,23 @@ class HolidayController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
-                $check_manager = $this->checkManager($request_data["manager_id"]);
-                if (!$check_manager["ok"]) {
-                    return response()->json([
-                        "message" => $check_manager["message"]
-                    ], $check_manager["status"]);
-                }
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
+
+
+               $check_department = $this->checkDepartments($request_data["departments"]);
                     if (!$check_department["ok"]) {
                         return response()->json([
                             "message" => $check_department["message"]
                         ], $check_department["status"]);
                     }
-                }
+
                 $request_data["business_id"] = $business_id;
                 $request_data["is_active"] = true;
 
                 $holiday =  Holiday::create($request_data);
+
+
+                 $holiday->departments()->sync($request_data['departments'],[]);
+
                 return response($holiday, 201);
             });
         } catch (Exception $e) {
@@ -184,20 +183,14 @@ class HolidayController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
-                $check_manager = $this->checkManager($request_data["manager_id"]);
-                if (!$check_manager["ok"]) {
-                    return response()->json([
-                        "message" => $check_manager["message"]
-                    ], $check_manager["status"]);
-                }
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
+
+                $check_department = $this->checkDepartments($request_data["departments"]);
                     if (!$check_department["ok"]) {
                         return response()->json([
                             "message" => $check_department["message"]
                         ], $check_department["status"]);
                     }
-                }
+
 
                 $holiday_query_params = [
                     "id" => $request_data["id"],
@@ -231,7 +224,7 @@ class HolidayController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-
+                $holiday->departments()->sync($request_data['departments'],[]);
                 return response($holiday, 201);
             });
         } catch (Exception $e) {

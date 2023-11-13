@@ -83,4 +83,29 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
+    public function checkDepartments($ids) {
+        $departments = Department::whereIn("id", $ids)->get();
+
+        foreach ($departments as $department) {
+            if (!$department) {
+                return [
+                    "ok" => false,
+                    "status" => 400,
+                    "message" => "Department does not exists."
+                ];
+            }
+
+            if ($department->business_id != auth()->user()->business_id) {
+                return [
+                    "ok" => false,
+                    "status" => 403,
+                    "message" => "Department belongs to another business."
+                ];
+            }
+        }
+
+        return [
+            "ok" => true,
+        ];
+    }
 }

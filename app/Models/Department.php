@@ -17,6 +17,8 @@ class Department extends Model
         "parent_id",
         "business_id",
     ];
-
+    public function holidays() {
+        return $this->belongsToMany(Holiday::class, 'department_tenants', 'department_id', 'holiday_id');
+    }
 
 }
