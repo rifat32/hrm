@@ -33,6 +33,7 @@ class Business extends Model
 
         "average_time_slot",
         "owner_id",
+        'created_by'
 
     ];
 

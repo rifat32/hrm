@@ -348,7 +348,7 @@ if(!$user->hasRole('business_owner')) {
 
         $insertableData['business']['status'] = "pending";
 
-        // $insertableData['business']['created_by'] = $request->user()->id;
+       $insertableData['business']['created_by'] = $request->user()->id;
         $insertableData['business']['is_active'] = true;
         $business =  Business::create($insertableData['business']);
 
@@ -518,7 +518,7 @@ if(!$user->hasRole('business_owner')) {
 
         $insertableData['business']['status'] = "pending";
         $insertableData['business']['owner_id'] = $user->id;
-        // $insertableData['business']['created_by'] = $request->user()->id;
+        $insertableData['business']['created_by'] = $request->user()->id;
         $insertableData['business']['is_active'] = true;
         $business =  Business::create($insertableData['business']);
 
@@ -671,7 +671,7 @@ if(!$user->hasRole('business_owner')) {
        ]);
        if(!$request->user()->hasRole('superadmin')) {
         $userPrev  = $userPrev->where(function ($query) {
-            $query->where('business_id', auth()->user()->business_id)
+          return  $query->where('created_by', auth()->user()->id)
                   ->orWhere('id', auth()->user()->id);
         });
     }
@@ -874,7 +874,9 @@ if(!$user->hasRole('business_owner')) {
             $businessQuery  = Business::where(["id" => $updatableData["id"]]);
             if(!auth()->user()->hasRole('superadmin')) {
                 $businessQuery = $businessQuery->where(function ($query) {
-                    $query->where('id', auth()->user()->business_id);
+                return   $query->where('business_id', auth()->user()->business_id)
+                    ->orWhere('created_by', auth()->user()->id)
+                    ->orWhere('owner_id', auth()->user()->id);
                 });
             }
 
@@ -1210,10 +1212,11 @@ if(!$user->hasRole('business_owner')) {
 
            $businesses = Business::with("owner")
            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-               return $query->where(function ($query) use ($request) {
-                   $query->where('owner_id', $request->user()->id)
-                       ->orWhere('id', $request->user()->business_id);
-               });
+               $query->where(function ($query) {
+                return   $query->where('business_id', auth()->user()->business_id)
+                    ->orWhere('created_by', auth()->user()->id)
+                    ->orWhere('owner_id', auth()->user()->id);
+                });
            })
            ->when(!empty($request->search_key), function ($query) use ($request) {
                $term = $request->search_key;
@@ -1431,8 +1434,14 @@ if(!$user->hasRole('business_owner')) {
            $idsArray = explode(',', $ids);
            $existingIds = Business::whereIn('id', $idsArray)
            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
-               return $query->where("id", $business_id);
-           })
+
+            $query->where(function ($query) {
+                return  $query->where('business_id', auth()->user()->business_id)
+                    ->orWhere('created_by', auth()->user()->id)
+                    ->orWhere('owner_id', auth()->user()->id);
+                });
+
+               })
                ->select('id')
                ->get()
                ->pluck('id')

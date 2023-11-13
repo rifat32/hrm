@@ -22,34 +22,15 @@ return [
        "business_view",
        "business_delete",
 
-
-
-
-
-
-
-
        "template_create",
        "template_update",
        "template_view",
        "template_delete",
 
-
        "payment_type_create",
        "payment_type_update",
        "payment_type_view",
        "payment_type_delete",
-
-
-
-
-
-
-
-
-
-
-
 
 
 "product_category_create",
@@ -61,6 +42,24 @@ return [
 "product_update",
 "product_view",
 "product_delete",
+
+            ],
+        ],
+
+        [
+            "role" => "reseller",
+            "permissions" => [
+
+
+                "user_create",
+                "user_update",
+                "user_view",
+                "user_delete",
+
+                "business_create",
+                "business_update",
+                "business_view",
+                "business_delete",
 
             ],
         ],
@@ -105,6 +104,7 @@ return [
     ],
     "roles" => [
         "superadmin",
+        'reseller',
         "business_owner",
         "manager",
         "employee",
@@ -168,7 +168,8 @@ return [
 
     ],
     "unchangeable_roles" => [
-        "superadmin"
+        "superadmin",
+        "reseller"
     ],
     "unchangeable_permissions" => [
         "business_update",
