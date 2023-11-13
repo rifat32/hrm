@@ -19,6 +19,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
@@ -246,12 +247,24 @@ Route::get('/v1.0/departments', [DepartmentController::class, "getDepartments"])
 Route::get('/v1.0/departments/{id}', [DepartmentController::class, "getDepartmentById"]);
 Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDepartmentsByIds"]);
 
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end department  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// holiday  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/holidays', [HolidayController::class, "createHoliday"]);
+Route::put('/v1.0/holidays', [HolidayController::class, "updateHoliday"]);
+Route::get('/v1.0/holidays', [HolidayController::class, "getHolidays"]);
+Route::get('/v1.0/holidays/{id}', [HolidayController::class, "getHolidayById"]);
+Route::delete('/v1.0/holidays/{ids}', [HolidayController::class, "deleteHolidaysByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end holiday  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

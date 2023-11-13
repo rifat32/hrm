@@ -89,7 +89,10 @@ return [
                 "department_view",
                 "department_delete",
 
-
+                "holiday_create",
+                "holiday_update",
+                "holiday_view",
+                "holiday_delete",
 
             ],
         ],
@@ -157,6 +160,11 @@ return [
        "department_update",
        "department_view",
        "department_delete",
+
+       "holiday_create",
+       "holiday_update",
+       "holiday_view",
+       "holiday_delete",
 
     ],
     "unchangeable_roles" => [
