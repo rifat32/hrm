@@ -133,7 +133,7 @@ class WorkShiftController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+              
                 $request_data = $request->validated();
 
                 $check_employee = $this->checkEmployees($request_data["users"]);
@@ -150,8 +150,9 @@ class WorkShiftController extends Controller
                         ], $check_department["status"]);
                     }
 
-                $request_data["business_id"] = $business_id;
-                $request_data["is_active"] = true;
+                    $request_data["business_id"] = $request->user()->business_id;
+                    $request_data["is_active"] = true;
+                    $request_data["created_by"] = $request->user()->id;
                 $request_data["attendances_count"] = 0;
 
 

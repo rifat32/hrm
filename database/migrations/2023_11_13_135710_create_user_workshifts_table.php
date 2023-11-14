@@ -18,7 +18,7 @@ class CreateUserWorkshiftsTable extends Migration
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->unsignedBigInteger("work_shift_id");
-            $table->foreign('work_shift_id')->references('id')->on('work_shifts')->onDelete('set null');
+            $table->foreign('work_shift_id')->references('id')->on('work_shifts')->onDelete('cascade');
             $table->timestamps();
         });
     }

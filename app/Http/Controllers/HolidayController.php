@@ -84,7 +84,7 @@ class HolidayController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+            
                 $request_data = $request->validated();
 
 
@@ -95,8 +95,9 @@ class HolidayController extends Controller
                         ], $check_department["status"]);
                     }
 
-                $request_data["business_id"] = $business_id;
-                $request_data["is_active"] = true;
+                    $request_data["business_id"] = $request->user()->business_id;
+                    $request_data["is_active"] = true;
+                    $request_data["created_by"] = $request->user()->id;
 
                 $holiday =  Holiday::create($request_data);
 

@@ -28,7 +28,7 @@ class WorkShiftCreateRequest extends FormRequest
             'description' => 'nullable|string',
             'type' => 'required|string|in:regular,scheduled',
             'start_date' => 'required|date',
-            'end_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'departments' => 'nullable|array',
             'departments.*' => 'numeric',
             'users' => 'nullable|array',

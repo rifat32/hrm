@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class WorkShiftUpdateRequest extends FormRequest
+class AnnouncementUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,19 +26,11 @@ class WorkShiftUpdateRequest extends FormRequest
         return [
             'id' => 'required|numeric',
             'name' => 'required|string',
-            'description' => 'nullable|string',
-            'type' => 'required|string|in:regular,scheduled',
+            'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'departments' => 'nullable|array',
+            'departments' => 'present|array',
             'departments.*' => 'numeric',
-            'users' => 'nullable|array',
-            'users.*' => 'numeric',
-            'details' => 'required|array|min:7|max:7',
-            'details.*.off_day' => 'required|boolean',
-            'details.*.start_at' => 'required_if:type,scheduled|date',
-            'details.*.end_at' => 'required_if:type,scheduled|date',
-            'details.*.is_weekend' => 'required|boolean',
         ];
     }
 }

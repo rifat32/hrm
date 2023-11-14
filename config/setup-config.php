@@ -98,6 +98,11 @@ return [
                 "work_shift_view",
                 "work_shift_delete",
 
+                "announcement_create",
+                "announcement_update",
+                "announcement_view",
+                "announcement_delete",
+
             ],
         ],
 
@@ -175,6 +180,12 @@ return [
        "work_shift_update",
        "work_shift_view",
        "work_shift_delete",
+
+
+       "announcement_create",
+       "announcement_update",
+       "announcement_view",
+       "announcement_delete",
 
     ],
     "unchangeable_roles" => [

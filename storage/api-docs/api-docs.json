@@ -19,6 +19,465 @@
         }
     ],
     "paths": {
+        "/v1.0/announcements": {
+            "get": {
+                "tags": [
+                    "administrator.announcements"
+                ],
+                "summary": "This method is to get announcements  ",
+                "description": "This method is to get announcements ",
+                "operationId": "getAnnouncements",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "administrator.announcements"
+                ],
+                "summary": "This method is to update announcement ",
+                "description": "This method is to update announcement",
+                "operationId": "updateAnnouncement",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated announcement celebration"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-12-25"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-12-25"
+                                    },
+                                    "repeats_annually": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "administrator.announcements"
+                ],
+                "summary": "This method is to store announcement",
+                "description": "This method is to store announcement",
+                "operationId": "createAnnouncement",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-14"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-23"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/announcements/{id}": {
+            "get": {
+                "tags": [
+                    "administrator.announcements"
+                ],
+                "summary": "This method is to get announcement by id",
+                "description": "This method is to get announcement by id",
+                "operationId": "getAnnouncementById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/announcements/{ids}": {
+            "delete": {
+                "tags": [
+                    "administrator.announcements"
+                ],
+                "summary": "This method is to delete announcement by id",
+                "description": "This method is to delete announcement by id",
+                "operationId": "deleteAnnouncementsByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/register": {
             "post": {
                 "tags": [
@@ -8527,7 +8986,12 @@
                                     "departments": {
                                         "type": "string",
                                         "format": "array",
-                                        "example": []
+                                        "example": [
+                                            1,
+                                            2,
+                                            3,
+                                            4
+                                        ]
                                     },
                                     "users": {
                                         "type": "string",
@@ -8543,43 +9007,43 @@
                                         "format": "array",
                                         "example": [
                                             {
-                                                "weekday": "0",
+                                                "off_day": "0",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "weekday": "1",
+                                                "off_day": "1",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "weekday": "2",
+                                                "off_day": "2",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "weekday": "3",
+                                                "off_day": "3",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "weekday": "4",
+                                                "off_day": "4",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "weekday": "5",
+                                                "off_day": "5",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "weekday": "6",
+                                                "off_day": "6",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
@@ -8676,25 +9140,86 @@
                                         "format": "string",
                                         "example": "Updated Christmas"
                                     },
-                                    "description": {
+                                    "type": {
                                         "type": "string",
                                         "format": "string",
-                                        "example": "Updated work_shift celebration"
+                                        "example": "regular"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "users": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "details": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "off_day": "0",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "off_day": "1",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "off_day": "2",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "off_day": "3",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "off_day": "4",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "off_day": "5",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "off_day": "6",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            }
+                                        ]
                                     },
                                     "start_date": {
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2023-12-25"
+                                        "example": "2023-11-16"
                                     },
                                     "end_date": {
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2023-12-25"
-                                    },
-                                    "repeats_annually": {
-                                        "type": "boolean",
-                                        "format": "boolean",
-                                        "example": false
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"

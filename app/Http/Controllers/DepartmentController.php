@@ -83,7 +83,7 @@ class DepartmentController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+               
                 $request_data = $request->validated();
                 $check_manager = $this->checkManager($request_data["manager_id"]);
                 if (!$check_manager["ok"]) {
@@ -99,8 +99,9 @@ class DepartmentController extends Controller
                         ], $check_department["status"]);
                     }
                 }
-                $request_data["business_id"] = $business_id;
+                $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
+                $request_data["created_by"] = $request->user()->id;
 
                 $department =  Department::create($request_data);
                 return response($department, 201);

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDepartmentHolidaysTable extends Migration
+class CreateDepartmentAnnouncementsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateDepartmentHolidaysTable extends Migration
      */
     public function up()
     {
-        Schema::create('department_holidays', function (Blueprint $table) {
+        Schema::create('department_announcements', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("department_id");
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
-            $table->unsignedBigInteger("holiday_id");
-            $table->foreign('holiday_id')->references('id')->on('holidays')->onDelete('cascade');
+            $table->unsignedBigInteger("announcement_id");
+            $table->foreign('announcement_id')->references('id')->on('announcements')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ class CreateDepartmentHolidaysTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('department_holidays');
+        Schema::dropIfExists('department_announcements');
     }
 }
