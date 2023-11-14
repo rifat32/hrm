@@ -468,7 +468,7 @@ class RolesController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = Role::whereIn('id', $idsArray)
-            ->where("is_system_role", "!=", 1)
+            ->where("is_system_default", "!=", 1)
             ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
                 return $query->where('business_id', NULL)->where('is_default', true);
             })
@@ -485,7 +485,7 @@ class RolesController extends Controller
 
             if (!empty($nonExistingIds)) {
                 return response()->json([
-                    "message" => "Some or all of the specified data do not exist or they can not be deleted."
+                    "message" => "Some or all of the data they can not be deleted or not exists."
                 ], 404);
             }
 
@@ -581,12 +581,17 @@ class RolesController extends Controller
            foreach ($role_permissions_json as $key => $roleAndPermissions) {
             if(in_array($roleAndPermissions["role"], $unchangeable_roles)){
                 array_splice($role_permissions_main, $key, 1);
-
             }
 
             if(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')) )
             {
                if($roleAndPermissions["role"] == "superadmin" || $roleAndPermissions["role"] == "reseller") {
+                array_splice($role_permissions_main, $key, 1);
+               }
+           }
+           if(!($request->user()->hasRole('superadmin')) )
+            {
+               if($roleAndPermissions["role"] == "superadmin") {
                 array_splice($role_permissions_main, $key, 1);
                }
            }

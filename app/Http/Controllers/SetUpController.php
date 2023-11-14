@@ -94,12 +94,12 @@ return "swagger generated";
             if(!Role::where([
             'name' => $role,
             'guard_name' => 'api',
-            "is_system_role" => 1,
+            "is_system_default" => 1,
             "business_id" => NULL,
             "is_default" => 1,
             ])
             ->exists()){
-             Role::create(['guard_name' => 'api', 'name' => $role,"is_system_role"=> 1, "business_id" => NULL,
+             Role::create(['guard_name' => 'api', 'name' => $role,"is_system_default"=> 1, "business_id" => NULL,
              "is_default" => 1]);
             }
 
@@ -149,7 +149,7 @@ return "swagger generated";
             if(!Role::where([
             'name' => $role,
             'guard_name' => 'api',
-            "is_system_role" => 1,
+            "is_system_default" => 1,
            "business_id" => NULL,
             "is_default" => 1,
             ])
@@ -157,7 +157,7 @@ return "swagger generated";
              Role::create([
                 'name' => $role,
                 'guard_name' => 'api',
-                "is_system_role" => 1,
+                "is_system_default" => 1,
                "business_id" => NULL,
                 "is_default" => 1,
              ]);

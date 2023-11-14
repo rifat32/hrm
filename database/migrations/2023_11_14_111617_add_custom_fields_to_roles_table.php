@@ -16,7 +16,7 @@ class AddCustomFieldsToRolesTable extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->unsignedBigInteger('business_id')->nullable();
             $table->boolean('is_default')->default(false);
-            $table->boolean('is_system_role')->default(false);
+            $table->boolean('is_system_default')->default(false);
 
         });
     }
@@ -31,7 +31,7 @@ class AddCustomFieldsToRolesTable extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn('business_id');
             $table->dropColumn('is_default');
-            $table->dropColumn('is_system_role');
+            $table->dropColumn('is_system_default');
         });
     }
 }
