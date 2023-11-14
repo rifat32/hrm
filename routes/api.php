@@ -20,6 +20,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\EmploymentStatusController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
@@ -314,6 +315,19 @@ Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "delete
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// employment status management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/employment-statuses', [EmploymentStatusController::class, "createEmploymentStatus"]);
+Route::put('/v1.0/employment-statuses', [EmploymentStatusController::class, "updateEmploymentStatus"]);
+Route::get('/v1.0/employment-statuses', [EmploymentStatusController::class, "getEmploymentStatuses"]);
+Route::get('/v1.0/employment-statuses/{id}', [EmploymentStatusController::class, "getEmploymentStatusById"]);
+Route::delete('/v1.0/employment-statuses/{ids}', [EmploymentStatusController::class, "deleteEmploymentStatusesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end employment status  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

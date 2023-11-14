@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDesignationsTable extends Migration
+class CreateEmploymentStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateDesignationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('designations', function (Blueprint $table) {
+        Schema::create('employment_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->string('color');
             $table->text('description')->nullable();
             $table->string('is_active')->default(false);
+
             $table->unsignedBigInteger("business_id")->nullable(true);
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             // $table->unsignedBigInteger("created_by")->nullable();
@@ -33,6 +35,6 @@ class CreateDesignationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('designations');
+        Schema::dropIfExists('employment_statuses');
     }
 }

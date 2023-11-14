@@ -2,35 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DesignationCreateRequest;
-use App\Http\Requests\DesignationUpdateRequest;
+use App\Http\Requests\EmploymentStatusCreateRequest;
+use App\Http\Requests\EmploymentStatusUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\Designation;
+use App\Models\EmploymentStatus;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class DesignationController extends Controller
+class EmploymentStatusController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/designations",
-     *      operationId="createDesignation",
-     *      tags={"administrator.designations"},
+     *      path="/v1.0/employment-statuses",
+     *      operationId="createEmploymentStatus",
+     *      tags={"administrator.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store designation",
-     *      description="This method is to store designation",
+     *      summary="This method is to store employment status",
+     *      description="This method is to store employment status",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
  * @OA\Property(property="name", type="string", format="string", example="tttttt"),
+ *  * @OA\Property(property="color", type="string", format="string", example="red"),
  * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
  *
  *
@@ -71,12 +72,12 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function createDesignation(DesignationCreateRequest $request)
+    public function createEmploymentStatus(EmploymentStatusCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('designation_create')) {
+                if (!$request->user()->hasPermissionTo('employment_status_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -91,12 +92,12 @@ class DesignationController extends Controller
                 $request_data["is_active"] = true;
                 // $request_data["created_by"] = $request->user()->id;
 
-                $designation =  Designation::create($request_data);
+                $employment_status =  EmploymentStatus::create($request_data);
 
 
 
 
-                return response($designation, 201);
+                return response($employment_status, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -107,20 +108,21 @@ class DesignationController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/designations",
-     *      operationId="updateDesignation",
-     *      tags={"administrator.designations"},
+     *      path="/v1.0/employment-statuses",
+     *      operationId="updateEmploymentStatus",
+     *      tags={"administrator.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update designation ",
-     *      description="This method is to update designation",
+     *      summary="This method is to update employment status ",
+     *      description="This method is to update employment status",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
  * @OA\Property(property="name", type="string", format="string", example="tttttt"),
+ *  *  * @OA\Property(property="color", type="string", format="string", example="red"),
  * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
 
 
@@ -161,13 +163,13 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function updateDesignation(DesignationUpdateRequest $request)
+    public function updateEmploymentStatus(EmploymentStatusUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('designation_update')) {
+                if (!$request->user()->hasPermissionTo('employment_status_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -177,21 +179,22 @@ class DesignationController extends Controller
 
 
 
-                $designation_query_params = [
+                $employment_status_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
                 ];
-                $designation_prev = Designation::where($designation_query_params)
+                $employment_status_prev = EmploymentStatus::where($employment_status_query_params)
                     ->first();
-                if (!$designation_prev) {
+                if (!$employment_status_prev) {
                     return response()->json([
-                        "message" => "no designation found"
+                        "message" => "no employment status found"
                     ], 404);
                 }
 
-                $designation  =  tap(Designation::where($designation_query_params))->update(
+                $employment_status  =  tap(EmploymentStatus::where($employment_status_query_params))->update(
                     collect($request_data)->only([
                         'name',
+                        'color',
                         'description',
                         // "is_active",
                         // "business_id",
@@ -201,13 +204,13 @@ class DesignationController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$designation) {
+                if (!$employment_status) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($designation, 201);
+                return response($employment_status, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -219,9 +222,9 @@ class DesignationController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/designations",
-     *      operationId="getDesignations",
-     *      tags={"administrator.designations"},
+     *      path="/v1.0/employment-statuses",
+     *      operationId="getEmploymentStatuses",
+     *      tags={"administrator.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -263,8 +266,8 @@ class DesignationController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get designations  ",
-     *      description="This method is to get designations ",
+     *      summary="This method is to get employment statuses  ",
+     *      description="This method is to get employment statuses ",
      *
 
      *      @OA\Response(
@@ -301,41 +304,41 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function getDesignations(Request $request)
+    public function getEmploymentStatuses(Request $request)
     {
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('designation_view')) {
+            if (!$request->user()->hasPermissionTo('employment_status_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $designations = Designation::where(
+            $employment_statuses = EmploymentStatus::where(
                 [
-                    "designations.business_id" => $business_id
+                    "employment_statuses.business_id" => $business_id
                 ]
             )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("designations.name", "like", "%" . $term . "%")
-                            ->orWhere("designations.description", "like", "%" . $term . "%");
+                        $query->where("employment_statuses.name", "like", "%" . $term . "%")
+                            ->orWhere("employment_statuses.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('designations.created_at', ">=", $request->start_date);
+                    return $query->where('employment_statuses.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('designations.created_at', "<=", $request->end_date);
+                    return $query->where('employment_statuses.created_at', "<=", $request->end_date);
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("designations.id", $request->order_by);
+                    return $query->orderBy("employment_statuses.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("designations.id", "DESC");
+                    return $query->orderBy("employment_statuses.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -345,7 +348,7 @@ class DesignationController extends Controller
 
 
 
-            return response()->json($designations, 200);
+            return response()->json($employment_statuses, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -355,9 +358,9 @@ class DesignationController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/designations/{id}",
-     *      operationId="getDesignationById",
-     *      tags={"administrator.designations"},
+     *      path="/v1.0/employment-statuses/{id}",
+     *      operationId="getEmploymentStatusById",
+     *      tags={"administrator.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -368,8 +371,8 @@ class DesignationController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get designation by id",
-     *      description="This method is to get designation by id",
+     *      summary="This method is to get employment status by id",
+     *      description="This method is to get employment status by id",
      *
 
      *      @OA\Response(
@@ -407,28 +410,28 @@ class DesignationController extends Controller
      */
 
 
-    public function getDesignationById($id, Request $request)
+    public function getEmploymentStatusById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('designation_view')) {
+            if (!$request->user()->hasPermissionTo('employment_status_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $designation =  Designation::where([
+            $employment_status =  EmploymentStatus::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
                 ->first();
-            if (!$designation) {
+            if (!$employment_status) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($designation, 200);
+            return response()->json($employment_status, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -439,9 +442,9 @@ class DesignationController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/designations/{ids}",
-     *      operationId="deleteDesignationsByIds",
-     *      tags={"administrator.designations"},
+     *      path="/v1.0/employment-statuses/{ids}",
+     *      operationId="deleteEmploymentStatusesByIds",
+     *      tags={"administrator.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -452,8 +455,8 @@ class DesignationController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete designation by id",
-     *      description="This method is to delete designation by id",
+     *      summary="This method is to delete employment statuses by ids",
+     *      description="This method is to delete employment statuses by ids",
      *
 
      *      @OA\Response(
@@ -490,19 +493,19 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function deleteDesignationsByIds(Request $request, $ids)
+    public function deleteEmploymentStatusesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('designation_delete')) {
+            if (!$request->user()->hasPermissionTo('employment_status_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
-            $existingIds = Designation::where([
+            $existingIds = EmploymentStatus::where([
                 "business_id" => $business_id
             ])
                 ->whereIn('id', $idsArray)
@@ -517,7 +520,7 @@ class DesignationController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            Designation::destroy($existingIds);
+            EmploymentStatus::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully"], 200);

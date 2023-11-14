@@ -108,6 +108,11 @@ return [
                 "designation_view",
                 "designation_delete",
 
+                "employment_status_create",
+                "employment_status_update",
+                "employment_status_view",
+                "employment_status_delete",
+
             ],
         ],
 
@@ -196,6 +201,11 @@ return [
        "designation_update",
        "designation_view",
        "designation_delete",
+
+       "employment_status_create",
+       "employment_status_update",
+       "employment_status_view",
+       "employment_status_delete",
 
     ],
     "unchangeable_roles" => [
