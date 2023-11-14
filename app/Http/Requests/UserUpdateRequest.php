@@ -41,7 +41,9 @@ class UserUpdateRequest extends FormRequest
             'postcode' => 'nullable|string',
             'lat' => 'required|string',
             'long' => 'required|string',
-            'role' => 'required|string'
+            'role' => 'required|string',
+            'departments' => 'nullable|array',
+            'departments.*' => 'numeric',
         ];
     }
 }

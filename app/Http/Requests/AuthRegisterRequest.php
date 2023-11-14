@@ -38,6 +38,7 @@ class AuthRegisterRequest extends FormRequest
             'postcode' => 'nullable|string',
             'lat' => 'required|string',
             'long' => 'required|string',
+
         ];
     }
 }

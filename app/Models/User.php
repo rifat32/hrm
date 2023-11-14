@@ -22,6 +22,12 @@ class User extends Authenticatable
     protected $fillable = [
         'first_Name',
         'last_Name',
+        'gender',
+        'is_in_employee',
+        'designation_id',
+        'employment_status_id',
+        'joining_date',
+        'salary',
         'phone',
         'image',
         'address_line_1',
@@ -37,6 +43,12 @@ class User extends Authenticatable
         "created_by",
          'is_active'
     ];
+
+
+
+    public function departments() {
+        return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
+    }
 
 
     public function work_shifts() {

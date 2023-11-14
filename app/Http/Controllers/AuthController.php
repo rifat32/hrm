@@ -102,12 +102,17 @@ class AuthController extends Controller
     {
         try {
             $this->storeActivity($request,"");
-            $insertableData = $request->validated();
+            $request_data = $request->validated();
 
-            $insertableData['password'] = Hash::make($request['password']);
-            $insertableData['remember_token'] = Str::random(10);
-            $insertableData['is_active'] = true;
-            $user =  User::create($insertableData);
+            $request_data['password'] = Hash::make($request['password']);
+            $request_data['remember_token'] = Str::random(10);
+            $request_data['is_active'] = true;
+
+
+
+
+
+            $user =  User::create($request_data);
 
               // verify email starts
               $email_token = Str::random(30);
@@ -346,9 +351,9 @@ $datediff = $now - $user_created_date;
 
         try {
             $this->storeActivity($request,"");
-            $insertableData = $request->validated();
+            $request_data = $request->validated();
             $user = User::where([
-                "id" => $insertableData["user_id"],
+                "id" => $request_data["user_id"],
             ])
             ->first();
 
@@ -356,7 +361,7 @@ $datediff = $now - $user_created_date;
 
             $site_redirect_token_db = (json_decode($user->site_redirect_token,true));
 
-            if($site_redirect_token_db["token"] !== $insertableData["site_redirect_token"]) {
+            if($site_redirect_token_db["token"] !== $request_data["site_redirect_token"]) {
                return response()
                ->json([
                   "message" => "invalid token"
@@ -444,9 +449,9 @@ $datediff = $now - $user_created_date;
         try {
             $this->storeActivity($request,"");
             return DB::transaction(function () use (&$request) {
-                $insertableData = $request->validated();
+                $request_data = $request->validated();
 
-            $user = User::where(["email" => $insertableData["email"]])->first();
+            $user = User::where(["email" => $request_data["email"]])->first();
             if (!$user) {
                 return response()->json(["message" => "no user found"], 404);
             }
@@ -457,7 +462,7 @@ $datediff = $now - $user_created_date;
             $user->resetPasswordExpires = Carbon::now()->subDays(-1);
             $user->save();
 
-            Mail::to($insertableData["email"])->send(new ForgetPasswordMail($user,$insertableData["client_site"]));
+            Mail::to($request_data["email"])->send(new ForgetPasswordMail($user,$request_data["client_site"]));
 
 
             return response()->json([
@@ -529,9 +534,9 @@ $datediff = $now - $user_created_date;
         try {
             $this->storeActivity($request,"");
             return DB::transaction(function () use (&$request) {
-                $insertableData = $request->validated();
+                $request_data = $request->validated();
 
-            $user = User::where(["email" => $insertableData["email"]])->first();
+            $user = User::where(["email" => $request_data["email"]])->first();
             if (!$user) {
                 return response()->json(["message" => "no user found"], 404);
             }
@@ -629,7 +634,7 @@ $datediff = $now - $user_created_date;
         try {
             $this->storeActivity($request,"");
             return DB::transaction(function () use (&$request,&$token) {
-                $insertableData = $request->validated();
+                $request_data = $request->validated();
                 $user = User::where([
                     "resetPasswordToken" => $token,
                 ])
@@ -641,7 +646,7 @@ $datediff = $now - $user_created_date;
                     ], 400);
                 }
 
-                $password = Hash::make($insertableData["password"]);
+                $password = Hash::make($request_data["password"]);
                 $user->password = $password;
 
                 $user->login_attempts = 0;
@@ -990,17 +995,17 @@ try{
 
         try{
             $this->storeActivity($request,"");
-            $updatableData = $request->validated();
+            $request_data = $request->validated();
 
 
-            if(!empty($updatableData['password'])) {
-                $updatableData['password'] = Hash::make($updatableData['password']);
+            if(!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
             } else {
-                unset($updatableData['password']);
+                unset($request_data['password']);
             }
-            $updatableData['is_active'] = true;
-            $updatableData['remember_token'] = Str::random(10);
-            $user  =  tap(User::where(["id" => $request->user()->id]))->update(collect($updatableData)->only([
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
+            $user  =  tap(User::where(["id" => $request->user()->id]))->update(collect($request_data)->only([
                 'first_Name' ,
                 'last_Name',
                 'password',

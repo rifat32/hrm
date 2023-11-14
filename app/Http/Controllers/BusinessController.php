@@ -104,13 +104,13 @@ class BusinessController extends Controller
             //      ],401);
             // }
 
-            $insertableData = $request->validated();
+            $request_data = $request->validated();
 
             $location =  config("setup-config.business_gallery_location");
 
-            $new_file_name = time() . '_' . str_replace(' ', '_', $insertableData["image"]->getClientOriginalName());
+            $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["image"]->getClientOriginalName());
 
-            $insertableData["image"]->move(public_path($location), $new_file_name);
+            $request_data["image"]->move(public_path($location), $new_file_name);
 
 
             return response()->json(["image" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
@@ -194,13 +194,13 @@ class BusinessController extends Controller
         try{
             $this->storeActivity($request,"");
 
-            $insertableData = $request->validated();
+            $request_data = $request->validated();
 
             $location =  config("setup-config.business_gallery_location");
 
             $images = [];
-            if(!empty($insertableData["images"])) {
-                foreach($insertableData["images"] as $image){
+            if(!empty($request_data["images"])) {
+                foreach($request_data["images"] as $image){
                     $new_file_name = time() . '_' . str_replace(' ', '_', $image->getClientOriginalName());
                     $image->move(public_path($location), $new_file_name);
 
@@ -319,12 +319,12 @@ class BusinessController extends Controller
                "message" => "You can not perform this action"
             ],401);
        }
-        $insertableData = $request->validated();
+        $request_data = $request->validated();
 
 
 
 $user = User::where([
-    "id" =>  $insertableData['business']['owner_id']
+    "id" =>  $request_data['business']['owner_id']
 ])
 ->first();
 
@@ -346,13 +346,13 @@ if(!$user->hasRole('business_owner')) {
 
 
 
-        $insertableData['business']['status'] = "pending";
+        $request_data['business']['status'] = "pending";
 
-       $insertableData['business']['created_by'] = $request->user()->id;
-        $insertableData['business']['is_active'] = true;
-        $business =  Business::create($insertableData['business']);
+       $request_data['business']['created_by'] = $request->user()->id;
+        $request_data['business']['is_active'] = true;
+        $business =  Business::create($request_data['business']);
 
-
+        $this->storeDefaultsToBusiness($business->id);
 
 
 
@@ -401,6 +401,7 @@ if(!$user->hasRole('business_owner')) {
      *  "phone":"01771034383",
      *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      * "send_password":1
+     *
      *
      *
      * }),
@@ -481,33 +482,35 @@ if(!$user->hasRole('business_owner')) {
                "message" => "You can not perform this action"
             ],401);
        }
-        $insertableData = $request->validated();
+        $request_data = $request->validated();
+
+
 
    // user info starts ##############
 
-   $password = $insertableData['user']['password'];
-   $insertableData['user']['password'] = Hash::make($password);
-   if(!$request->user()->hasRole('superadmin') || empty($insertableData['user']['password'])) {
+   $password = $request_data['user']['password'];
+   $request_data['user']['password'] = Hash::make($password);
+   if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
     $password = Str::random(10);
-    $insertableData['user']['password'] = Hash::make($password);
+    $request_data['user']['password'] = Hash::make($password);
     }
 
 
 
 
-    $insertableData['user']['remember_token'] = Str::random(10);
-    $insertableData['user']['is_active'] = true;
-    $insertableData['user']['created_by'] = $request->user()->id;
+    $request_data['user']['remember_token'] = Str::random(10);
+    $request_data['user']['is_active'] = true;
+    $request_data['user']['created_by'] = $request->user()->id;
 
-    $insertableData['user']['address_line_1'] = $insertableData['business']['address_line_1'];
-    $insertableData['user']['address_line_2'] = (!empty($insertableData['business']['address_line_2'])?$insertableData['business']['address_line_2']:"") ;
-    $insertableData['user']['country'] = $insertableData['business']['country'];
-    $insertableData['user']['city'] = $insertableData['business']['city'];
-    $insertableData['user']['postcode'] = $insertableData['business']['postcode'];
-    $insertableData['user']['lat'] = $insertableData['business']['lat'];
-    $insertableData['user']['long'] = $insertableData['business']['long'];
+    $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+    $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2'])?$request_data['business']['address_line_2']:"") ;
+    $request_data['user']['country'] = $request_data['business']['country'];
+    $request_data['user']['city'] = $request_data['business']['city'];
+    $request_data['user']['postcode'] = $request_data['business']['postcode'];
+    $request_data['user']['lat'] = $request_data['business']['lat'];
+    $request_data['user']['long'] = $request_data['business']['long'];
 
-    $user =  User::create($insertableData['user']);
+    $user =  User::create($request_data['user']);
 
     $user->assignRole('business_owner');
    // end user info ##############
@@ -516,12 +519,12 @@ if(!$user->hasRole('business_owner')) {
   //  business info ##############
 
 
-        $insertableData['business']['status'] = "pending";
-        $insertableData['business']['owner_id'] = $user->id;
-        $insertableData['business']['created_by'] = $request->user()->id;
-        $insertableData['business']['is_active'] = true;
-        $business =  Business::create($insertableData['business']);
-
+        $request_data['business']['status'] = "pending";
+        $request_data['business']['owner_id'] = $user->id;
+        $request_data['business']['created_by'] = $request->user()->id;
+        $request_data['business']['is_active'] = true;
+        $business =  Business::create($request_data['business']);
+        $this->storeDefaultsToBusiness($business->id);
 
         $user->email_verified_at = now();
         $user->business_id = $business->id;
@@ -534,9 +537,9 @@ if(!$user->hasRole('business_owner')) {
   // end business info ##############
 
 
-     if($insertableData['user']['send_password']) {
+     if($request_data['user']['send_password']) {
         if(env("SEND_EMAIL") == true) {
-            Mail::to($insertableData['user']['email'])->send(new SendPassword($user,$password));
+            Mail::to($request_data['user']['email'])->send(new SendPassword($user,$password));
         }
     }
 
@@ -664,10 +667,10 @@ if(!$user->hasRole('business_owner')) {
         ], 401);
     }
 
-       $updatableData = $request->validated();
+       $request_data = $request->validated();
     //    user email check
        $userPrev = User::where([
-        "id" => $updatableData["user"]["id"]
+        "id" => $request_data["user"]["id"]
        ]);
        if(!$request->user()->hasRole('superadmin')) {
         $userPrev  = $userPrev->where(function ($query) {
@@ -686,7 +689,7 @@ if(!$user->hasRole('business_owner')) {
 
 
     //  $businessPrev = Business::where([
-    //     "id" => $updatableData["business"]["id"]
+    //     "id" => $request_data["business"]["id"]
     //  ]);
 
     // $businessPrev = $businessPrev->first();
@@ -696,23 +699,23 @@ if(!$user->hasRole('business_owner')) {
     //     ],404);
     //   }
 
-        if(!empty($updatableData['user']['password'])) {
-            $updatableData['user']['password'] = Hash::make($updatableData['user']['password']);
+        if(!empty($request_data['user']['password'])) {
+            $request_data['user']['password'] = Hash::make($request_data['user']['password']);
         } else {
-            unset($updatableData['user']['password']);
+            unset($request_data['user']['password']);
         }
-        $updatableData['user']['is_active'] = true;
-        $updatableData['user']['remember_token'] = Str::random(10);
-        $updatableData['user']['address_line_1'] = $updatableData['business']['address_line_1'];
-    $updatableData['user']['address_line_2'] = $updatableData['business']['address_line_2'];
-    $updatableData['user']['country'] = $updatableData['business']['country'];
-    $updatableData['user']['city'] = $updatableData['business']['city'];
-    $updatableData['user']['postcode'] = $updatableData['business']['postcode'];
-    $updatableData['user']['lat'] = $updatableData['business']['lat'];
-    $updatableData['user']['long'] = $updatableData['business']['long'];
+        $request_data['user']['is_active'] = true;
+        $request_data['user']['remember_token'] = Str::random(10);
+        $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+    $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
+    $request_data['user']['country'] = $request_data['business']['country'];
+    $request_data['user']['city'] = $request_data['business']['city'];
+    $request_data['user']['postcode'] = $request_data['business']['postcode'];
+    $request_data['user']['lat'] = $request_data['business']['lat'];
+    $request_data['user']['long'] = $request_data['business']['long'];
         $user  =  tap(User::where([
-            "id" => $updatableData['user']["id"]
-            ]))->update(collect($updatableData['user'])->only([
+            "id" => $request_data['user']["id"]
+            ]))->update(collect($request_data['user'])->only([
             'first_Name',
             'last_Name',
             'phone',
@@ -743,11 +746,11 @@ if(!$user->hasRole('business_owner')) {
 
 
   //  business info ##############
-        // $updatableData['business']['status'] = "pending";
+        // $request_data['business']['status'] = "pending";
 
         $business  =  tap(Business::where([
-            "id" => $updatableData['business']["id"]
-            ]))->update(collect($updatableData['business'])->only([
+            "id" => $request_data['business']["id"]
+            ]))->update(collect($request_data['business'])->only([
                 "name",
                 "about",
                 "web_page",
@@ -869,9 +872,9 @@ if(!$user->hasRole('business_owner')) {
                     "message" => "You can not perform this action"
                  ],401);
             }
-            $updatableData = $request->validated();
+            $request_data = $request->validated();
 
-            $businessQuery  = Business::where(["id" => $updatableData["id"]]);
+            $businessQuery  = Business::where(["id" => $request_data["id"]]);
             if(!auth()->user()->hasRole('superadmin')) {
                 $businessQuery = $businessQuery->where(function ($query) {
                 return   $query->where('business_id', auth()->user()->business_id)
@@ -1005,15 +1008,15 @@ if(!$user->hasRole('business_owner')) {
         ], 401);
     }
 
-       $updatableData = $request->validated();
+       $request_data = $request->validated();
 
 
   //  business info ##############
-        // $updatableData['business']['status'] = "pending";
+        // $request_data['business']['status'] = "pending";
 
         $business  =  tap(Business::where([
-            "id" => $updatableData['business']["id"]
-            ]))->update(collect($updatableData['business'])->only([
+            "id" => $request_data['business']["id"]
+            ]))->update(collect($request_data['business'])->only([
                 "name",
                 "about",
                 "web_page",

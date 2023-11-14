@@ -101,13 +101,13 @@ class UserManagementController extends Controller
             //      ],401);
             // }
 
-            $insertableData = $request->validated();
+            $request_data = $request->validated();
 
             $location =  config("setup-config.user_image_location");
 
-            $new_file_name = time() . '_' . str_replace(' ', '_', $insertableData["image"]->getClientOriginalName());
+            $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["image"]->getClientOriginalName());
 
-            $insertableData["image"]->move(public_path($location), $new_file_name);
+            $request_data["image"]->move(public_path($location), $new_file_name);
 
 
             return response()->json(["image" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
@@ -152,6 +152,7 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3})
      *
      *         ),
      *      ),
@@ -199,24 +200,32 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            if(!empty($request_data["departments"])) {
+                $check_department = $this->checkDepartments($request_data["departments"]);
+                        if (!$check_department["ok"]) {
+                            return response()->json([
+                                "message" => $check_department["message"]
+                            ], $check_department["status"]);
+                        }
+                }
+
             $business_id = $request->user()->business_id;
 
-            $insertableData = $request->validated();
+            $request_data = $request->validated();
 
-            $insertableData['password'] = Hash::make($request['password']);
-            $insertableData['is_active'] = true;
-            $insertableData['remember_token'] = Str::random(10);
+            $request_data['password'] = Hash::make($request['password']);
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
 
 
             if (!empty($business_id)) {
-                $insertableData['business_id'] = $business_id;
+                $request_data['business_id'] = $business_id;
             }
 
 
-            $user =  User::create($insertableData);
-
-
-            $user->assignRole($insertableData['role']);
+            $user =  User::create($request_data);
+            $user->departments()->sync($request_data['departments'],[]);
+            $user->assignRole($request_data['role']);
 
             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
@@ -270,6 +279,7 @@ class UserManagementController extends Controller
      *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3})
      *
      *         ),
      *      ),
@@ -335,22 +345,29 @@ class UserManagementController extends Controller
             }
 
 
-            $updatableData = $request->validated();
+            $request_data = $request->validated();
+            if(!empty($request_data["departments"])) {
+                $check_department = $this->checkDepartments($request_data["departments"]);
+                        if (!$check_department["ok"]) {
+                            return response()->json([
+                                "message" => $check_department["message"]
+                            ], $check_department["status"]);
+                        }
+                }
 
-
-            if (!empty($updatableData['password'])) {
-                $updatableData['password'] = Hash::make($updatableData['password']);
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
             } else {
-                unset($updatableData['password']);
+                unset($request_data['password']);
             }
-            $updatableData['is_active'] = true;
-            $updatableData['remember_token'] = Str::random(10);
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
             $userQueryTerms = [
-                "id" => $updatableData["id"],
+                "id" => $request_data["id"],
             ];
 
             $user  =  tap(User::where($userQueryTerms))->update(
-                collect($updatableData)->only([
+                collect($request_data)->only([
                     'first_Name',
                     'last_Name',
                     'password',
@@ -374,8 +391,8 @@ class UserManagementController extends Controller
                     "message" => "no user found"
                 ], 404);
             }
-
-            $user->syncRoles([$updatableData['role']]);
+            $user->departments()->sync($request_data['departments'],[]);
+            $user->syncRoles([$request_data['role']]);
 
 
 
@@ -453,9 +470,9 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $updatableData = $request->validated();
+            $request_data = $request->validated();
 
-            $userQuery  = User::where(["id" => $updatableData["id"]]);
+            $userQuery  = User::where(["id" => $request_data["id"]]);
             if (!auth()->user()->hasRole('superadmin')) {
                 $userQuery = $userQuery->where(function ($query) {
                     $query->where('business_id', auth()->user()->business_id)
@@ -564,18 +581,18 @@ class UserManagementController extends Controller
 
             $this->storeActivity($request, "");
 
-            $updatableData = $request->validated();
+            $request_data = $request->validated();
 
 
-            if (!empty($updatableData['password'])) {
-                $updatableData['password'] = Hash::make($updatableData['password']);
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
             } else {
-                unset($updatableData['password']);
+                unset($request_data['password']);
             }
-            //  $updatableData['is_active'] = true;
-            //  $updatableData['remember_token'] = Str::random(10);
+            //  $request_data['is_active'] = true;
+            //  $request_data['remember_token'] = Str::random(10);
             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
-                collect($updatableData)->only([
+                collect($request_data)->only([
                     'first_Name',
                     'last_Name',
                     'password',

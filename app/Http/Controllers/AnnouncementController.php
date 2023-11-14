@@ -132,7 +132,7 @@ class AnnouncementController extends Controller
  * @OA\Property(property="start_date", type="string", format="date", example="2023-11-14"),
  * @OA\Property(property="end_date", type="string", format="date", example="2023-11-23"),
  * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
- * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+ * @OA\Property(property="departments", type="string", format="array", example={1,2,3})
 
      *
      *         ),

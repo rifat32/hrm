@@ -5,6 +5,8 @@ namespace App\Http\Utils;
 
 use App\Models\Business;
 use App\Models\Department;
+use App\Models\Designation;
+use App\Models\EmploymentStatus;
 use App\Models\User;
 use Exception;
 
@@ -141,4 +143,46 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
+
+
+
+    public function storeDefaultsToBusiness($business_id) {
+        $defaultDesignations = Designation::where([
+            "business_id" => NULL,
+            "is_default" => true
+          ])->get();
+
+          foreach($defaultDesignations as $defaultDesignation) {
+              $insertableData = [
+                'name'  => $defaultDesignation->name,
+                'description'  => $defaultDesignation->description,
+                "is_active" => true,
+                "is_default" => true,
+                "business_id" => $business_id,
+              ];
+           $designation  = Designation::create($insertableData);
+          }
+
+          $defaultEmploymentStatuses = EmploymentStatus::where([
+            "business_id" => NULL,
+            "is_default" => true
+          ])->get();
+
+          foreach($defaultEmploymentStatuses as $defaultEmploymentStatus) {
+              $insertableData = [
+                'name'  => $defaultEmploymentStatus->name,
+                'color'  => $defaultEmploymentStatus->color,
+                'description'  => $defaultEmploymentStatus->description,
+                "is_active" => true,
+                "is_default" => true,
+                "business_id" => $business_id,
+              ];
+           $employment_status  = EmploymentStatus::create($insertableData);
+          }
+
+
+    }
+
+
+
 }

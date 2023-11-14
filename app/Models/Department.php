@@ -21,6 +21,9 @@ class Department extends Model
     public function holidays() {
         return $this->belongsToMany(Holiday::class, 'department_holidays', 'department_id', 'holiday_id');
     }
+    public function users() {
+        return $this->belongsToMany(User::class, 'department_users', 'department_id', 'user_id');
+    }
     public function announcements() {
         return $this->belongsToMany(Announcement::class, 'department_announcements', 'department_id', 'announcement_id');
     }

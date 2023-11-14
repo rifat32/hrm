@@ -17,6 +17,18 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('first_Name');
             $table->string('last_Name');
+
+            $table->enum('gender', ['male', 'female', 'other'])->default("other");
+            $table->boolean('is_in_employee')->default(false);
+            $table->unsignedBigInteger('designation_id')->nullable();
+            $table->foreign('designation_id')->references('id')->on('designations')->onDelete('restrict');
+            $table->unsignedBigInteger('employment_status_id')->nullable();
+            $table->foreign('employment_status_id')->references('id')->on('employment_statuses')->onDelete('restrict');
+            $table->date('joining_date')->nullable()->default(today());
+            $table->string('salary')->nullable()->default(0);
+
+
+
             $table->string('phone')->nullable();
             $table->string('image')->nullable();
 
