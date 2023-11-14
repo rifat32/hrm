@@ -12,6 +12,7 @@ class Designation extends Model
         'name',
         'description',
         "is_active",
+        "is_default",
         "business_id",
     ];
 }

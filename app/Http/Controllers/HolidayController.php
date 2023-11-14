@@ -84,7 +84,7 @@ class HolidayController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-            
+
                 $request_data = $request->validated();
 
 
@@ -540,7 +540,7 @@ class HolidayController extends Controller
             Holiday::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully"], 200);
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

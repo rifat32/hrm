@@ -523,7 +523,7 @@ class EmploymentStatusController extends Controller
             EmploymentStatus::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully"], 200);
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

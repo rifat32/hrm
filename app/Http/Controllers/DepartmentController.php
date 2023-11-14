@@ -83,7 +83,7 @@ class DepartmentController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-               
+
                 $request_data = $request->validated();
                 $check_manager = $this->checkManager($request_data["manager_id"]);
                 if (!$check_manager["ok"]) {
@@ -547,7 +547,7 @@ class DepartmentController extends Controller
             Department::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully"], 200);
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

@@ -43,6 +43,16 @@ return [
 "product_view",
 "product_delete",
 
+"designation_create",
+"designation_update",
+"designation_view",
+"designation_delete",
+
+"employment_status_create",
+"employment_status_update",
+"employment_status_view",
+"employment_status_delete",
+
             ],
         ],
 
@@ -206,6 +216,7 @@ return [
        "employment_status_update",
        "employment_status_view",
        "employment_status_delete",
+
 
     ],
     "unchangeable_roles" => [

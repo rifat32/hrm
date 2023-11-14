@@ -938,7 +938,7 @@ class UserManagementController extends Controller
                 ], 401);
             }
             User::destroy($existingIds);
-            return response()->json(["message" => "data deleted sussfully"], 200);
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
 
 
 

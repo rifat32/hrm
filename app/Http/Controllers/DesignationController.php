@@ -85,11 +85,25 @@ class DesignationController extends Controller
                 $request_data = $request->validated();
 
 
+                // superadmin
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+
+
+                if ($request->user()->hasRole('superadmin')) {
+                    $request_data["business_id"] = NULL;
                 $request_data["is_active"] = true;
+                $request_data["is_default"] = true;
                 // $request_data["created_by"] = $request->user()->id;
+                } else {
+                    $request_data["business_id"] = $request->user()->business_id;
+                    $request_data["is_active"] = true;
+                    $request_data["is_default"] = false;
+                    // $request_data["created_by"] = $request->user()->id;
+                }
+
+
+
 
                 $designation =  Designation::create($request_data);
 
@@ -188,11 +202,25 @@ class DesignationController extends Controller
                         "message" => "no designation found"
                     ], 404);
                 }
+                if ($request->user()->hasRole('superadmin')) {
+                    if(!($designation_prev->business_id == NULL && $designation_prev->is_default == true)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this designation due to role restrictions."
+                        ], 403);
+                    }
 
+                } else {
+                    if(!($designation_prev->business_id == $request->user()->business_id)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this designation due to role restrictions."
+                        ], 403);
+                    }
+                }
                 $designation  =  tap(Designation::where($designation_query_params))->update(
                     collect($request_data)->only([
                         'name',
                         'description',
+                         // "is_default",
                         // "is_active",
                         // "business_id",
 
@@ -310,12 +338,15 @@ class DesignationController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
-            $designations = Designation::where(
-                [
-                    "designations.business_id" => $business_id
-                ]
-            )
+
+
+            $designations = Designation::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('designations.business_id', NULL)
+                             ->where('designations.is_default', true);
+            })
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('designations.business_id', $request->user()->business_id);
+            })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -419,8 +450,14 @@ class DesignationController extends Controller
             $business_id =  $request->user()->business_id;
             $designation =  Designation::where([
                 "id" => $id,
-                "business_id" => $business_id
             ])
+            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('designations.business_id', NULL)
+                             ->where('designations.is_default', true);
+            })
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('designations.business_id', $request->user()->business_id);
+            })
                 ->first();
             if (!$designation) {
                 return response()->json([
@@ -500,12 +537,16 @@ class DesignationController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+
             $idsArray = explode(',', $ids);
-            $existingIds = Designation::where([
-                "business_id" => $business_id
-            ])
-                ->whereIn('id', $idsArray)
+            $existingIds = Designation::whereIn('id', $idsArray)
+            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('designations.business_id', NULL)
+                             ->where('designations.is_default', true);
+            })
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('designations.business_id', $request->user()->business_id);
+            })
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -520,7 +561,7 @@ class DesignationController extends Controller
             Designation::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully"], 200);
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
