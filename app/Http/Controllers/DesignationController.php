@@ -85,7 +85,7 @@ class DesignationController extends Controller
                 $request_data = $request->validated();
 
 
-                // superadmin
+
 
 
 
@@ -447,7 +447,7 @@ class DesignationController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+
             $designation =  Designation::where([
                 "id" => $id,
             ])
@@ -545,7 +545,8 @@ class DesignationController extends Controller
                              ->where('designations.is_default', true);
             })
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
+                return $query->where('designations.business_id', $request->user()->business_id)
+                ->where('designations.is_default', false);
             })
                 ->select('id')
                 ->get()

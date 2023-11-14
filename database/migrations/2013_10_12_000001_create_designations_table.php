@@ -20,7 +20,7 @@ class CreateDesignationsTable extends Migration
             $table->string('is_active')->default(false);
             $table->string('is_default')->default(false);
 
-            $table->unsignedBigInteger("business_id")->nullable(true);
+            $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             // $table->unsignedBigInteger("created_by")->nullable();
             $table->softDeletes();
