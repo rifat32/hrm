@@ -40,6 +40,10 @@ class AuthRegisterBusinessRequest extends FormRequest
             'user.phone' => 'nullable|string',
             'user.image' => 'nullable|string',
 
+
+            'user.gender' => 'required|string|in:male,female,other',
+
+
             // 'user.address_line_1' => 'nullable|string',
             // 'user.address_line_2' => 'nullable|string',
             // 'user.country' => 'nullable|string',
@@ -107,6 +111,7 @@ class AuthRegisterBusinessRequest extends FormRequest
             // 'user.phone.required' => 'The phone field is required.',
             'user.image.string' => 'The image must be a string.',
             // Add custom messages for other fields as needed
+            'user.gender.in' => 'The :attribute field must be in "male","female","other".',
 
             'business.name.required' => 'The name field is required.',
             'business.about.string' => 'The about must be a string.',

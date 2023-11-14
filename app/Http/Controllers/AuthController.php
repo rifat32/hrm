@@ -1005,6 +1005,7 @@ try{
             }
             $request_data['is_active'] = true;
             $request_data['remember_token'] = Str::random(10);
+
             $user  =  tap(User::where(["id" => $request->user()->id]))->update(collect($request_data)->only([
                 'first_Name' ,
                 'last_Name',
@@ -1017,6 +1018,7 @@ try{
                 'postcode',
                 "lat",
                 "long",
+                'gender'
             ])->toArray()
             )
                 // ->with("somthing")

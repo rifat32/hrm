@@ -81,7 +81,7 @@ class WorkShiftController extends Controller
  *     }),
 
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-11-16"),
- *     @OA\Property(property="end_date", type="string", format="date", example=""),
+ *     @OA\Property(property="end_date", type="string", format="date", example="2023-11-16"),
  *
  *
  *

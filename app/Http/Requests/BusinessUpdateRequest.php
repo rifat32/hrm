@@ -35,6 +35,7 @@ class BusinessUpdateRequest extends FormRequest
             'user.password' => 'nullable|confirmed|string|min:6',
             'user.phone' => 'nullable|string',
             'user.image' => 'nullable',
+            'user.gender' => 'required|string|in:male,female,other',
             // 'user.address_line_1' => 'nullable|string',
             // 'user.address_line_2' => 'nullable|string',
             // 'user.country' => 'nullable|string',
@@ -111,6 +112,7 @@ class BusinessUpdateRequest extends FormRequest
         'user.phone.string' => 'The phone field must be a string.',
 
         'user.image.nullable' => 'The image field must be nullable.',
+        'user.gender.in' => 'The :attribute field must be in "male","female","other".',
 
         'business.id.required' => 'The business ID field is required.',
         'business.id.numeric' => 'The business ID must be a numeric value.',

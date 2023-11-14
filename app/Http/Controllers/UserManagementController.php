@@ -139,6 +139,14 @@ class UserManagementController extends Controller
      *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
+     *
+     *              @OA\Property(property="gender", type="string", format="string",example="male"),
+     *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
+     *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
+     *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
+     *               @OA\Property(property="salary", type="string", format="string",example="10"),
+ *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
 
      * *  @OA\Property(property="password", type="string", format="boolean",example="12345678"),
@@ -267,6 +275,13 @@ class UserManagementController extends Controller
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
      *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
+     *
+     *                @OA\Property(property="gender", type="string", format="string",example="male"),
+     *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
+     *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
+     *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
+     *               @OA\Property(property="salary", type="string", format="string",example="10"),
+ *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
      *  * *  @OA\Property(property="password_confirmation", type="boolean", format="boolean",example="1"),
@@ -379,7 +394,13 @@ class UserManagementController extends Controller
                     'postcode',
                     "lat",
                     "long",
-                    "image"
+                    "image",
+                    'gender',
+                    'is_in_employee',
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    'salary',
 
                 ])->toArray()
             )
@@ -604,7 +625,8 @@ class UserManagementController extends Controller
                     'postcode',
                     "lat",
                     "long",
-                    "image"
+                    "image",
+                    "gender"
 
                 ])->toArray()
             )

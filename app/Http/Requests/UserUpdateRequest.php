@@ -44,6 +44,20 @@ class UserUpdateRequest extends FormRequest
             'role' => 'required|string',
             'departments' => 'nullable|array',
             'departments.*' => 'numeric',
+
+            'gender' => 'required|string|in:male,female,other',
+            'is_in_employee' => "nullable|boolean",
+            'designation_id' => "nullable|numeric",
+            'employment_status_id' => "nullable|numeric",
+            'joining_date' => "nullable|date",
+            'salary' => "nullable|string",
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'gender.in' => 'The :attribute field must be in "male","female","other".',
         ];
     }
 }

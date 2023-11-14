@@ -8,6 +8,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Designation;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -559,6 +560,19 @@ class DesignationController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
+
+          $user_exists =  User::whereIn("designation_id",$existingIds)->exists();
+            if($user_exists) {
+                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get(['id', 'first_Name',
+                'last_Name',]);
+
+                return response()->json([
+                    "message" => "Some users are associated with the specified designations",
+                    "conflicting_users" => $conflictingUsers
+                ], 409);
+
+            }
+
             Designation::destroy($existingIds);
 
 

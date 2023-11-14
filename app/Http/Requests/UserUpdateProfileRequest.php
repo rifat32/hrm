@@ -40,7 +40,14 @@ class UserUpdateProfileRequest extends FormRequest
             'postcode' => 'nullable|string',
             'lat' => 'required|string',
             'long' => 'required|string',
+            'gender' => 'required|string|in:male,female,other',
 
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'gender.in' => 'The :attribute field must be in "male","female","other".',
         ];
     }
 }
