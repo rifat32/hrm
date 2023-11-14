@@ -310,15 +310,15 @@ class RolesController extends Controller
                $query->where("name", "like", "%" . $term . "%");
            })
            ->when(!empty($request->start_date), function ($query) use ($request) {
-            return $query->where('work_shifts.created_at', ">=", $request->start_date);
+            return $query->where('created_at', ">=", $request->start_date);
         })
         ->when(!empty($request->end_date), function ($query) use ($request) {
-            return $query->where('work_shifts.created_at', "<=", $request->end_date);
+            return $query->where('created_at', "<=", $request->end_date);
         })
         ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-            return $query->orderBy("work_shifts.id", $request->order_by);
+            return $query->orderBy("id", $request->order_by);
         }, function ($query) {
-            return $query->orderBy("work_shifts.id", "DESC");
+            return $query->orderBy("id", "DESC");
         })
         ->when(!empty($request->per_page), function ($query) use ($request) {
             return $query->paginate($request->per_page);
