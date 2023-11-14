@@ -15,7 +15,7 @@ class CreateDepartmentHolidaysTable extends Migration
     {
         Schema::create('department_holidays', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("department_id");
+            $table->unsignedBigInteger("department_id")->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
             $table->unsignedBigInteger("holiday_id");
             $table->foreign('holiday_id')->references('id')->on('holidays')->onDelete('cascade');

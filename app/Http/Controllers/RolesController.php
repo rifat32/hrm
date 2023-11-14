@@ -8,7 +8,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use Exception;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 class RolesController extends Controller
 {
@@ -80,9 +80,23 @@ class RolesController extends Controller
                ],401);
           }
            $insertableData = $request->validated();
-           $role = Role::create(["name"=>$insertableData["name"]]);
+           $insertableRole = [
+            "name" => $insertableData["name"],
+            "guard_name" => "api",
+           ];
 
+           if($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller') )
+           {
+            $insertableRole["business_id"] = NULL;
+            $insertableRole["is_default"] = true;
+         } else {
+            $insertableRole["business_id"] = $request->user()->business_id;
+            $insertableRole["is_default"] = false;
+         }
+           $role = Role::create($insertableRole);
            $role->syncPermissions($insertableData["permissions"]);
+
+
 
            return response()->json([
                "role" =>  $role,
@@ -163,10 +177,17 @@ class RolesController extends Controller
            ],401);
       }
         $updatableData = $request->validated();
-        $role = Role::where(["id" => $updatableData["id"]])->first();
+
+        $role = Role::where(["id" => $updatableData["id"]])
+        ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+            return $query->where('business_id', NULL)->where('is_default', true);
+        })
+        ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+            return $query->where('business_id', $request->user()->business_id)->where('is_default', false);
+        })
+        ->first();
         if($role->name == "superadmin" )
         {
-
            return response()->json([
               "message" => "You can not perform this action"
            ],401);
@@ -188,7 +209,7 @@ class RolesController extends Controller
     /**
         *
      * @OA\Get(
-     *      path="/v1.0/roles/{perPage}",
+     *      path="/v1.0/roles",
      *      operationId="getRoles",
      *      tags={"user_management.role"},
     *       security={
@@ -198,33 +219,41 @@ class RolesController extends Controller
      *      description="This method is to get roles",
      *
     *              @OA\Parameter(
-     *         name="perPage",
-     *         in="path",
-     *         description="perPage",
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
      *         required=true,
      *  example="6"
      *      ),
+
      *      * *  @OA\Parameter(
-* name="start_date",
-* in="query",
-* description="start_date",
-* required=true,
-* example="2019-06-29"
-* ),
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
      * *  @OA\Parameter(
-* name="end_date",
-* in="query",
-* description="end_date",
-* required=true,
-* example="2019-06-29"
-* ),
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
      * *  @OA\Parameter(
-* name="search_key",
-* in="query",
-* description="search_key",
-* required=true,
-* example="search_key"
-* ),
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
@@ -258,7 +287,7 @@ class RolesController extends Controller
      *      )
      *     )
      */
-    public function getRoles($perPage,Request $request)
+    public function getRoles(Request $request)
     {
 
         try{
@@ -269,19 +298,33 @@ class RolesController extends Controller
                 ],401);
            }
 
-            $rolesQuery =   Role::with('permissions:name,id');
-
-            if(!empty($request->search_key)) {
-                $rolesQuery = $rolesQuery->where(function($query) use ($request){
-                    $term = $request->search_key;
-                    $query->where("name", "like", "%" . $term . "%");
-                });
-
-            }
-
-
-
-            $roles = $rolesQuery->orderByDesc("id")->paginate($perPage);
+           $roles = Role::with('permissions:name,id')
+           ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+            return $query->where('business_id', NULL)->where('is_default', true);
+        })
+        ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+            return $query->where('business_id', $request->user()->business_id)->where('is_default', false);
+        })
+           ->when(!empty($request->search_key), function ($query) use ($request) {
+               $term = $request->search_key;
+               $query->where("name", "like", "%" . $term . "%");
+           })
+           ->when(!empty($request->start_date), function ($query) use ($request) {
+            return $query->where('work_shifts.created_at', ">=", $request->start_date);
+        })
+        ->when(!empty($request->end_date), function ($query) use ($request) {
+            return $query->where('work_shifts.created_at', "<=", $request->end_date);
+        })
+        ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+            return $query->orderBy("work_shifts.id", $request->order_by);
+        }, function ($query) {
+            return $query->orderBy("work_shifts.id", "DESC");
+        })
+        ->when(!empty($request->per_page), function ($query) use ($request) {
+            return $query->paginate($request->per_page);
+        }, function ($query) {
+            return $query->get();
+        });
             return response()->json($roles, 200);
         } catch(Exception $e){
 
@@ -291,77 +334,11 @@ class RolesController extends Controller
 
     }
 
-      /**
-        *
-     * @OA\Get(
-     *      path="/v1.0/roles/get/all",
-     *      operationId="getRolesAll",
-     *      tags={"user_management.role"},
-    *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *      summary="This method is to get all roles",
-     *      description="This method is to get all roles",
-     *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-    public function getRolesAll(Request $request)
-    {
 
-        try{
-            $this->storeActivity($request,"");
-            if(!$request->user()->hasPermissionTo('role_view') && !$request->user()->hasPermissionTo('user_view') ){
-                return response()->json([
-                   "message" => "You can not perform this action"
-                ],401);
-           }
-
-
-            $roles = Role::with('permissions:name,id')->select("name", "id")->get();
-            return response()->json([
-                "roles" => $roles,
-            ], 200);
-        } catch(Exception $e){
-
-        return $this->sendError($e,500,$request);
-        }
-
-    }
         /**
         *
      * @OA\Get(
-     *      path="/v1.0/roles/get-by-id/{id}",
+     *      path="/v1.0/roles/{id}",
      *      operationId="getRoleById",
      *      tags={"user_management.role"},
     *       security={
@@ -428,8 +405,8 @@ class RolesController extends Controller
     /**
     *
      * @OA\Delete(
-     *      path="/v1.0/roles/{id}",
-     *      operationId="deleteRoleById",
+     *      path="/v1.0/roles/{ids}",
+     *      operationId="deleteRolesByIds",
      *      tags={"user_management.role"},
     *       security={
      *           {"bearerAuth": {}}
@@ -438,11 +415,11 @@ class RolesController extends Controller
      *      description="This method is to delete role by id",
      *
     *              @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
-     *         description="id",
+     *         description="ids",
      *         required=true,
-     *  example="1"
+     *  example="1,2,3"
      *      ),
      *      @OA\Response(
      *          response=200,
@@ -477,32 +454,56 @@ class RolesController extends Controller
      *      )
      *     )
      */
-    public function deleteRoleById($id,Request $request) {
+    public function deleteRolesByIds($ids,Request $request) {
 
         try{
             $this->storeActivity($request,"");
-            $initial_roles = config("setup-config.roles");
+            if(!$request->user()->hasPermissionTo('role_delete'))
+            {
 
-            $role = Role::where([
-                 "id" => $id
-                ])->first();
+            return response()->json([
+               "message" => "You can not perform this action"
+            ],401);
+       }
 
-             if(
-                 !$request->user()->hasPermissionTo('role_delete')
-                 ||
-                 in_array($role->name, $initial_roles)
-                 )
-                 {
+            $idsArray = explode(',', $ids);
+            $existingIds = Role::whereIn('id', $idsArray)
+            ->where("is_system_role", "!=", 1)
+            ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+                return $query->where('business_id', NULL)->where('is_default', true);
+            })
+            ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+                return $query->where('business_id', $request->user()->business_id)->where('is_default', false);
+            })
 
-                 return response()->json([
-                    "message" => "You can not perform this action"
-                 ],401);
+
+                ->select('id')
+                ->get()
+                ->pluck('id')
+                ->toArray();
+            $nonExistingIds = array_diff($idsArray, $existingIds);
+
+            if (!empty($nonExistingIds)) {
+                return response()->json([
+                    "message" => "Some or all of the specified data do not exist or they can not be deleted."
+                ], 404);
             }
 
-            Role::where([
-             "id" => $id
-            ])
-            ->delete();
+
+
+
+            Role::destroy($existingIds);
+
+
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+
+
+
+
+
+
+
+
 
              return response()->json(["ok" => true], 200);
         } catch(Exception $e){
@@ -572,9 +573,7 @@ class RolesController extends Controller
                    "message" => "You can not perform this action"
                 ],401);
            }
-
            $role_permissions_main = config("setup-config.roles_permission");
-
            $role_permissions_json = json_decode(json_encode($role_permissions_main),true);
            $unchangeable_roles = config("setup-config.unchangeable_roles");
            $unchangeable_permissions = config("setup-config.unchangeable_permissions");
@@ -582,14 +581,26 @@ class RolesController extends Controller
            foreach ($role_permissions_json as $key => $roleAndPermissions) {
             if(in_array($roleAndPermissions["role"], $unchangeable_roles)){
                 array_splice($role_permissions_main, $key, 1);
-            } else {
+
+            }
+
+            if(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')) )
+            {
+               if($roleAndPermissions["role"] == "superadmin" || $roleAndPermissions["role"] == "reseller") {
+                array_splice($role_permissions_main, $key, 1);
+               }
+           }
+
                 foreach ($roleAndPermissions["permissions"] as $key2 => $permission) {
                     if(in_array($permission, $unchangeable_permissions)){
-                        array_splice($role_permissions_main[$key]["permissions"], $key2, 1);
+                        if(!empty($role_permissions_main[$key]["permissions"])) {
+                            array_splice($role_permissions_main[$key]["permissions"], $key2, 1);
+                        }
+
                     }
 
                 }
-            }
+
 
 
 

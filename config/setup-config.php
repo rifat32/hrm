@@ -126,9 +126,68 @@ return [
             ],
         ],
 
+        [
+            "role" => "business_admin",
+            "permissions" => [
+
+
+                "user_create",
+                "user_update",
+                "user_view",
+                "user_delete",
 
 
 
+                "business_update",
+                "business_view",
+                "product_category_view",
+                "global_business_background_image_view",
+
+
+
+                "department_create",
+                "department_update",
+                "department_view",
+                "department_delete",
+
+                "holiday_create",
+                "holiday_update",
+                "holiday_view",
+                "holiday_delete",
+
+                "work_shift_create",
+                "work_shift_update",
+                "work_shift_view",
+                "work_shift_delete",
+
+                "announcement_create",
+                "announcement_update",
+                "announcement_view",
+                "announcement_delete",
+
+                "designation_create",
+                "designation_update",
+                "designation_view",
+                "designation_delete",
+
+                "employment_status_create",
+                "employment_status_update",
+                "employment_status_view",
+                "employment_status_delete",
+
+
+            ],
+        ],
+
+        [
+            "role" => "business_employee",
+            "permissions" => [
+
+
+
+
+            ],
+        ],
 
 
     ],
@@ -220,12 +279,12 @@ return [
 
     ],
     "unchangeable_roles" => [
-        "superadmin",
-        "reseller"
+        // "superadmin",
+        // "reseller"
     ],
     "unchangeable_permissions" => [
-        "business_update",
-        "business_view",
+        // "business_update",
+        // "business_view",
     ],
     "user_image_location" => "user_image",
 

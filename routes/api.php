@@ -139,10 +139,10 @@ Route::delete('/v1.0/users/{ids}', [UserManagementController::class, "deleteUser
 Route::get('/v1.0/initial-role-permissions', [RolesController::class, "getInitialRolePermissions"]);
 Route::post('/v1.0/roles', [RolesController::class, "createRole"]);
 Route::put('/v1.0/roles', [RolesController::class, "updateRole"]);
-Route::get('/v1.0/roles/{perPage}', [RolesController::class, "getRoles"]);
-Route::get('/v1.0/roles/get/all', [RolesController::class, "getRolesAll"]);
-Route::get('/v1.0/roles/get-by-id/{id}', [RolesController::class, "getRoleById"]);
-Route::delete('/v1.0/roles/{id}', [RolesController::class, "deleteRoleById"]);
+Route::get('/v1.0/roles', [RolesController::class, "getRoles"]);
+
+Route::get('/v1.0/roles/{id}', [RolesController::class, "getRoleById"]);
+Route::delete('/v1.0/roles/{ids}', [RolesController::class, "deleteRolesByIds"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end user management section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

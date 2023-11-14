@@ -475,7 +475,7 @@ class WorkShiftController extends Controller
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });;
+                });
 
 
 

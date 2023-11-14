@@ -15,7 +15,7 @@ class CreateDepartmentUsersTable extends Migration
     {
         Schema::create('department_users', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("department_id");
+            $table->unsignedBigInteger("department_id")->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
