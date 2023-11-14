@@ -38,8 +38,8 @@ class CreateUsersTable extends Migration
 
             $table->string('site_redirect_token')->nullable();
 
-            $table->string('is_active')->default(false);
-        
+
+
 
             $table->integer('login_attempts')->default(0);
             $table->dateTime('last_failed_login_attempt_at')->nullable();
@@ -48,7 +48,7 @@ class CreateUsersTable extends Migration
             $table->string("background_image")->nullable();
 
 
-
+            $table->string('is_active')->default(false);
             $table->unsignedBigInteger("business_id")->nullable(true);
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
       $table->unsignedBigInteger("created_by")->nullable();

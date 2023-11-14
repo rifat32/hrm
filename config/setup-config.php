@@ -103,6 +103,11 @@ return [
                 "announcement_view",
                 "announcement_delete",
 
+                "designation_create",
+                "designation_update",
+                "designation_view",
+                "designation_delete",
+
             ],
         ],
 
@@ -186,6 +191,11 @@ return [
        "announcement_update",
        "announcement_view",
        "announcement_delete",
+
+       "designation_create",
+       "designation_update",
+       "designation_view",
+       "designation_delete",
 
     ],
     "unchangeable_roles" => [

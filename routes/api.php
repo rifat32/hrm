@@ -19,6 +19,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
@@ -298,7 +299,19 @@ Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "dele
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// designation  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::post('/v1.0/designations', [DesignationController::class, "createDesignation"]);
+Route::put('/v1.0/designations', [DesignationController::class, "updateDesignation"]);
+Route::get('/v1.0/designations', [DesignationController::class, "getDesignations"]);
+Route::get('/v1.0/designations/{id}', [DesignationController::class, "getDesignationById"]);
+Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "deleteDesignationsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end designation management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
