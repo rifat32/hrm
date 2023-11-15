@@ -2,37 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DesignationCreateRequest;
-use App\Http\Requests\DesignationUpdateRequest;
+use App\Http\Requests\SettingLeaveTypeCreateRequest;
+use App\Http\Requests\SettingLeaveTypeUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\Designation;
-use App\Models\User;
+use App\Models\SettingLeaveType;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class DesignationController extends Controller
+class SettingLeaveTypeController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/designations",
-     *      operationId="createDesignation",
-     *      tags={"employee.designations"},
+     *      path="/v1.0/setting-leave-types",
+     *      operationId="createSettingLeaveType",
+     *      tags={"settings.setting_leave_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store designation",
-     *      description="This method is to store designation",
+     *      summary="This method is to store setting leave type",
+     *      description="This method is to store setting leave type",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+ *     @OA\Property(property="is_active", type="boolean", example="1"),
+ *     @OA\Property(property="is_earning_enabled", type="boolean", example="1"),
+ *     @OA\Property(property="name", type="string", format="string", example="yy"),
+ *     @OA\Property(property="type", type="string", format="string", example="paid"),
+ *     @OA\Property(property="amount", type="string", format="string", example="30")
  *
  *
      *
@@ -72,12 +74,12 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function createDesignation(DesignationCreateRequest $request)
+    public function createSettingLeaveType(SettingLeaveTypeCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('designation_create')) {
+                if (!$request->user()->hasPermissionTo('setting_leave_type_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -95,23 +97,23 @@ class DesignationController extends Controller
                     $request_data["business_id"] = NULL;
                 $request_data["is_active"] = true;
                 $request_data["is_default"] = 1;
-                // $request_data["created_by"] = $request->user()->id;
+                 $request_data["created_by"] = $request->user()->id;
                 } else {
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_active"] = true;
                     $request_data["is_default"] = 0;
-                    // $request_data["created_by"] = $request->user()->id;
+                 $request_data["created_by"] = $request->user()->id;
                 }
 
 
 
 
-                $designation =  Designation::create($request_data);
+                $setting_leave_type =  SettingLeaveType::create($request_data);
 
 
 
 
-                return response($designation, 201);
+                return response($setting_leave_type, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -122,21 +124,25 @@ class DesignationController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/designations",
-     *      operationId="updateDesignation",
-     *      tags={"employee.designations"},
+     *      path="/v1.0/setting-leave-types",
+     *      operationId="updateSettingLeaveType",
+     *      tags={"settings.setting_leave_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update designation ",
-     *      description="This method is to update designation",
+     *      summary="This method is to update setting leave type ",
+     *      description="This method is to update setting leave type",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+*     @OA\Property(property="is_active", type="boolean", example="1"),
+ *     @OA\Property(property="is_earning_enabled", type="boolean", example="1"),
+ *     @OA\Property(property="name", type="string", format="string", example="yy"),
+ *     @OA\Property(property="type", type="string", format="string", example="paid"),
+ *     @OA\Property(property="amount", type="string", format="string", example="30"),
+
 
 
      *
@@ -176,13 +182,13 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function updateDesignation(DesignationUpdateRequest $request)
+    public function updateSettingLeaveType(SettingLeaveTypeUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('designation_update')) {
+                if (!$request->user()->hasPermissionTo('setting_leave_type_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -192,35 +198,42 @@ class DesignationController extends Controller
 
 
 
-                $designation_query_params = [
+                $setting_leave_type_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
                 ];
-                $designation_prev = Designation::where($designation_query_params)
+                $setting_leave_type_prev = SettingLeaveType::where($setting_leave_type_query_params)
                     ->first();
-                if (!$designation_prev) {
+                if (!$setting_leave_type_prev) {
                     return response()->json([
-                        "message" => "no designation found"
+                        "message" => "no setting leave type found"
                     ], 404);
                 }
                 if ($request->user()->hasRole('superadmin')) {
-                    if(!($designation_prev->business_id == NULL && $designation_prev->is_default == 1)) {
+                    if(!($setting_leave_type_prev->business_id == NULL && $setting_leave_type_prev->is_default == 1)) {
                         return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
+                            "message" => "You do not have permission to update this setting leave type due to role restrictions."
                         ], 403);
                     }
 
                 } else {
-                    if(!($designation_prev->business_id == $request->user()->business_id)) {
+                    if(!($setting_leave_type_prev->business_id == $request->user()->business_id)) {
                         return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
+                            "message" => "You do not have permission to update this setting leave type due to role restrictions."
                         ], 403);
                     }
                 }
-                $designation  =  tap(Designation::where($designation_query_params))->update(
+                $setting_leave_type  =  tap(SettingLeaveType::where($setting_leave_type_query_params))->update(
                     collect($request_data)->only([
                         'name',
-                        'description',
+        'type',
+        'amount',
+        'description',
+        'is_earning_enabled',
+        "is_active"
+
+
+
                          // "is_default",
                         // "is_active",
                         // "business_id",
@@ -230,13 +243,13 @@ class DesignationController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$designation) {
+                if (!$setting_leave_type) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($designation, 201);
+                return response($setting_leave_type, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -248,9 +261,9 @@ class DesignationController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/designations",
-     *      operationId="getDesignations",
-     *      tags={"employee.designations"},
+     *      path="/v1.0/setting-leave-types",
+     *      operationId="getSettingLeaveTypes",
+     *      tags={"settings.setting_leave_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -292,8 +305,8 @@ class DesignationController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get designations  ",
-     *      description="This method is to get designations ",
+     *      summary="This method is to get setting leave types  ",
+     *      description="This method is to get setting leave types ",
      *
 
      *      @OA\Response(
@@ -330,44 +343,44 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function getDesignations(Request $request)
+    public function getSettingLeaveTypes(Request $request)
     {
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('designation_view')) {
+            if (!$request->user()->hasPermissionTo('setting_leave_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
 
-            $designations = Designation::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', NULL)
-                             ->where('designations.is_default', 1);
+            $setting_leave_types = SettingLeaveType::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', NULL)
+                             ->where('setting_leave_types.is_default', 1);
             })
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
+                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("designations.name", "like", "%" . $term . "%")
-                            ->orWhere("designations.description", "like", "%" . $term . "%");
+                        $query->where("setting_leave_types.name", "like", "%" . $term . "%")
+                            ->orWhere("setting_leave_types.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('designations.created_at', ">=", $request->start_date);
+                    return $query->where('setting_leave_types.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('designations.created_at', "<=", $request->end_date);
+                    return $query->where('setting_leave_types.created_at', "<=", $request->end_date);
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("designations.id", $request->order_by);
+                    return $query->orderBy("setting_leave_types.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("designations.id", "DESC");
+                    return $query->orderBy("setting_leave_types.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -377,7 +390,7 @@ class DesignationController extends Controller
 
 
 
-            return response()->json($designations, 200);
+            return response()->json($setting_leave_types, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -387,9 +400,9 @@ class DesignationController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/designations/{id}",
-     *      operationId="getDesignationById",
-     *      tags={"employee.designations"},
+     *      path="/v1.0/setting-leave-types/{id}",
+     *      operationId="getSettingLeaveTypeById",
+     *      tags={"settings.setting_leave_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -400,8 +413,8 @@ class DesignationController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get designation by id",
-     *      description="This method is to get designation by id",
+     *      summary="This method is to get setting leave type by id",
+     *      description="This method is to get setting leave type by id",
      *
 
      *      @OA\Response(
@@ -439,34 +452,34 @@ class DesignationController extends Controller
      */
 
 
-    public function getDesignationById($id, Request $request)
+    public function getSettingLeaveTypeById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('designation_view')) {
+            if (!$request->user()->hasPermissionTo('setting_leave_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $designation =  Designation::where([
+            $setting_leave_type =  SettingLeaveType::where([
                 "id" => $id,
             ])
             ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', NULL)
-                             ->where('designations.is_default', 1);
+                return $query->where('setting_leave_types.business_id', NULL)
+                             ->where('setting_leave_types.is_default', 1);
             })
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
+                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
             })
                 ->first();
-            if (!$designation) {
+            if (!$setting_leave_type) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($designation, 200);
+            return response()->json($setting_leave_type, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -477,9 +490,9 @@ class DesignationController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/designations/{ids}",
-     *      operationId="deleteDesignationsByIds",
-     *      tags={"employee.designations"},
+     *      path="/v1.0/setting-leave-types/{ids}",
+     *      operationId="deleteSettingLeaveTypesByIds",
+     *      tags={"settings.setting_leave_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -490,8 +503,8 @@ class DesignationController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete designation by id",
-     *      description="This method is to delete designation by id",
+     *      summary="This method is to delete setting leave type by id",
+     *      description="This method is to delete setting leave type by id",
      *
 
      *      @OA\Response(
@@ -528,26 +541,26 @@ class DesignationController extends Controller
      *     )
      */
 
-    public function deleteDesignationsByIds(Request $request, $ids)
+    public function deleteSettingLeaveTypesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('designation_delete')) {
+            if (!$request->user()->hasPermissionTo('setting_leave_type_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = Designation::whereIn('id', $idsArray)
+            $existingIds = SettingLeaveType::whereIn('id', $idsArray)
             ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', NULL)
-                             ->where('designations.is_default', 1);
+                return $query->where('setting_leave_types.business_id', NULL)
+                             ->where('setting_leave_types.is_default', 1);
             })
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id)
-                ->where('designations.is_default', 0);
+                return $query->where('setting_leave_types.business_id', $request->user()->business_id)
+                ->where('setting_leave_types.is_default', 0);
             })
                 ->select('id')
                 ->get()
@@ -561,19 +574,19 @@ class DesignationController extends Controller
                 ], 404);
             }
 
-          $user_exists =  User::whereIn("designation_id",$existingIds)->exists();
-            if($user_exists) {
-                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get(['id', 'first_Name',
-                'last_Name',]);
+        //   $user_exists =  User::whereIn("setting_leave_type_id",$existingIds)->exists();
+        //     if($user_exists) {
+        //         $conflictingUsers = User::whereIn("setting_leave_type_id", $existingIds)->get(['id', 'first_Name',
+        //         'last_Name',]);
 
-                return response()->json([
-                    "message" => "Some users are associated with the specified designations",
-                    "conflicting_users" => $conflictingUsers
-                ], 409);
+        //         return response()->json([
+        //             "message" => "Some users are associated with the specified setting_leave_types",
+        //             "conflicting_users" => $conflictingUsers
+        //         ], 409);
 
-            }
+        //     }
 
-            Designation::destroy($existingIds);
+            SettingLeaveType::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

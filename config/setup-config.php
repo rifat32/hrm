@@ -53,6 +53,11 @@ return [
 "employment_status_view",
 "employment_status_delete",
 
+"setting_leave_type_create",
+"setting_leave_type_update",
+"setting_leave_type_view",
+"setting_leave_type_delete",
+
             ],
         ],
 
@@ -123,6 +128,11 @@ return [
                 "employment_status_view",
                 "employment_status_delete",
 
+                "setting_leave_type_create",
+                "setting_leave_type_update",
+                "setting_leave_type_view",
+                "setting_leave_type_delete",
+
             ],
         ],
 
@@ -174,6 +184,11 @@ return [
                 "employment_status_update",
                 "employment_status_view",
                 "employment_status_delete",
+
+                "setting_leave_type_create",
+"setting_leave_type_update",
+"setting_leave_type_view",
+"setting_leave_type_delete",
 
 
             ],
@@ -275,6 +290,11 @@ return [
        "employment_status_view",
        "employment_status_delete",
 
+       "setting_leave_type_create",
+"setting_leave_type_update",
+"setting_leave_type_view",
+"setting_leave_type_delete",
+
 
     ],
     "permissions_titles" => [
@@ -345,6 +365,13 @@ return [
         "employment_status_update" => "Can update employment status",
         "employment_status_view" => "Can view employment status",
         "employment_status_delete" => "Can delete employment status",
+
+        "setting_leave_type_create" => "Can create setting leave type",
+        "setting_leave_type_update" => "Can update setting leave type",
+        "setting_leave_type_view" => "Can view setting leave type",
+        "setting_leave_type_delete" => "Can delete setting leave type",
+
+
     ],
     "unchangeable_roles" => [
         // "superadmin",

@@ -21,7 +21,7 @@ class EmploymentStatusController extends Controller
      * @OA\Post(
      *      path="/v1.0/employment-statuses",
      *      operationId="createEmploymentStatus",
-     *      tags={"administrator.employment_statuses"},
+     *      tags={"employee.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -118,7 +118,7 @@ class EmploymentStatusController extends Controller
      * @OA\Put(
      *      path="/v1.0/employment-statuses",
      *      operationId="updateEmploymentStatus",
-     *      tags={"administrator.employment_statuses"},
+     *      tags={"employee.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -199,7 +199,7 @@ class EmploymentStatusController extends Controller
                     ], 404);
                 }
                 if ($request->user()->hasRole('superadmin')) {
-                    if(!($employment_status_prev->business_id == NULL && $employment_status_prev->is_default == true)) {
+                    if(!($employment_status_prev->business_id == NULL && $employment_status_prev->is_default == 1)) {
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
@@ -245,7 +245,7 @@ class EmploymentStatusController extends Controller
      * @OA\Get(
      *      path="/v1.0/employment-statuses",
      *      operationId="getEmploymentStatuses",
-     *      tags={"administrator.employment_statuses"},
+     *      tags={"employee.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -383,7 +383,7 @@ class EmploymentStatusController extends Controller
      * @OA\Get(
      *      path="/v1.0/employment-statuses/{id}",
      *      operationId="getEmploymentStatusById",
-     *      tags={"administrator.employment_statuses"},
+     *      tags={"employee.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -474,7 +474,7 @@ class EmploymentStatusController extends Controller
      *     @OA\Delete(
      *      path="/v1.0/employment-statuses/{ids}",
      *      operationId="deleteEmploymentStatusesByIds",
-     *      tags={"administrator.employment_statuses"},
+     *      tags={"employee.employment_statuses"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
