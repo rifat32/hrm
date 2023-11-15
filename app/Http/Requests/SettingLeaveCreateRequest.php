@@ -38,4 +38,10 @@ class SettingLeaveCreateRequest extends FormRequest
         ];
 
     }
+    public function messages()
+    {
+        return [
+            'allow_bypass.in' => 'The :attribute field must be either "single" or "multiple".',
+        ];
+    }
 }

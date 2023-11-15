@@ -41,4 +41,10 @@ class WorkShiftUpdateRequest extends FormRequest
             'details.*.is_weekend' => 'required|boolean',
         ];
     }
+    public function messages()
+    {
+        return [
+            'type.in' => 'The :attribute field must be either "regular" or "scheduled".',
+        ];
+    }
 }

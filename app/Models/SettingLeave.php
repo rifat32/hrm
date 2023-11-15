@@ -12,7 +12,10 @@ class SettingLeave extends Model
         'start_month',
         'approval_level',
         'allow_bypass',
-
+      "business_id",
+      "is_active",
+      "is_default",
+      "created_by"
     ];
 
     public function special_users() {

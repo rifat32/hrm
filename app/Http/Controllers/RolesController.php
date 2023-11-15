@@ -302,10 +302,10 @@ class RolesController extends Controller
 
            $roles = Role::with('permissions:name,id')
            ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
-            return $query->where('business_id', NULL)->where('is_default', true);
+            return $query->where('business_id', NULL)->where('is_default', 1);
         })
         ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
-            return $query->where('business_id', $request->user()->business_id)->where('is_default', false);
+            return $query->where('business_id', $request->user()->business_id);
         })
            ->when(!empty($request->search_key), function ($query) use ($request) {
                $term = $request->search_key;

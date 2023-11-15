@@ -90,7 +90,10 @@ return [
                 "user_view",
                 "user_delete",
 
-
+                "role_create",
+                "role_update",
+                "role_view",
+                "role_delete",
 
                 "business_update",
                 "business_view",
@@ -148,7 +151,10 @@ return [
                 "user_view",
                 "user_delete",
 
-
+                "role_create",
+                "role_update",
+                "role_view",
+                "role_delete",
 
                 "business_update",
                 "business_view",
@@ -375,7 +381,9 @@ return [
         "setting_leave_type_view" => "Can view setting leave type",
         "setting_leave_type_delete" => "Can delete setting leave type",
         "setting_leave_type_create" => "Can create setting leave",
-   
+
+
+
 
 
     ],

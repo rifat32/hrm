@@ -693,6 +693,13 @@ class UserManagementController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *    * *  @OA\Parameter(
+     * name="role",
+     * in="query",
+     * description="role",
+     * required=true,
+     * example="role"
+     * ),
      *      summary="This method is to get user",
      *      description="This method is to get user",
      *
@@ -742,6 +749,12 @@ class UserManagementController extends Controller
             }
 
             $users = User::with("roles")
+            ->when(!empty($request->role), function ($query) use ($request) {
+              return   $query->whereHas("roles", function($q) use ($request) {
+                   return $q->whereIn("name", [$request->role]);
+                });
+            })
+
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                 return $query->where(function ($query) {
                     return  $query->where('created_by', auth()->user()->id)
@@ -765,9 +778,9 @@ class UserManagementController extends Controller
                 return $query->where('created_at', "<=", $request->end_date);
             })
             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("businesses.id", $request->order_by);
+                return $query->orderBy("users.id", $request->order_by);
             }, function ($query) {
-                return $query->orderBy("businesses.id", "DESC");
+                return $query->orderBy("users.id", "DESC");
             })
             ->when(!empty($request->per_page), function ($query) use ($request) {
                 return $query->paginate($request->per_page);
@@ -784,7 +797,7 @@ class UserManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/users/get-by-id/{id}",
+     *      path="/v1.0/users/{id}",
      *      operationId="getUserById",
      *      tags={"user_management"},
      *       security={

@@ -22,9 +22,13 @@
         <div class="col-md-3">
             <a href="{{env('APP_URL')}}/swagger-refresh" class="btn btn-primary" target="_blank">Swagger Refresh</a>
         </div>
+
+
         <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/automobile-refresh" class="btn btn-primary" target="_blank">Automobile Refresh</a>
+            <a href="{{env('APP_URL')}}/migrate" class="btn btn-primary" target="_blank">migrate</a>
         </div>
+
+
              <div class="col-md-3">
             <a href="{{env('APP_URL')}}/roleRefresh" class="btn btn-primary" target="_blank">Role Refresh </a>
         </div>

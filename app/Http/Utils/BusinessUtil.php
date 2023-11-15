@@ -371,15 +371,22 @@ trait BusinessUtil
 });
            $setting_leave->paid_leave_employment_statuses()->sync($paid_leave_employment_statuses_for_business,[]);
 
+
+
+           $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
+           $unpaid_leave_employment_statuses_for_business = $default_unpaid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
+            return $attached_defaults["employment_statuses"][$id];
+ });
+           $setting_leave->unpaid_leave_employment_statuses()->sync($unpaid_leave_employment_statuses_for_business,[]);
+
+
+
+
           }
 
 
 
-          $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
-          $unpaid_leave_employment_statuses_for_business = $default_unpaid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
-           return $attached_defaults["employment_statuses"][$id];
-});
-          $setting_leave->unpaid_leave_employment_statuses()->sync($unpaid_leave_employment_statuses_for_business,[]);
+
 
 
 

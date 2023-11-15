@@ -26,15 +26,11 @@ class SetUpController extends Controller
         return view("user-activity-log",compact("activity_logs"));
     }
 
+    public function migrate() {
+        Artisan::call('migrate');
+        return "migrated";
+            }
 
-    public function automobileRefresh() {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        Artisan::call('db:seed --class AutomobileCarSeeder');
-
-        return "automobile refreshed";
-
-    }
     public function swaggerRefresh() {
 Artisan::call('l5-swagger:generate');
 return "swagger generated";
@@ -100,7 +96,13 @@ return "swagger generated";
             ])
             ->exists()){
              Role::create(['guard_name' => 'api', 'name' => $role,"is_system_default"=> 1, "business_id" => NULL,
-             "is_default" => 1]);
+             "is_default" => 1,
+             "is_default_for_business" => (in_array($role ,["business_owner",
+             "business_admin",
+             "business_employee"])?1:0)
+
+
+            ]);
             }
 
         }
@@ -160,6 +162,10 @@ return "swagger generated";
                 "is_system_default" => 1,
                "business_id" => NULL,
                 "is_default" => 1,
+                "is_default_for_business" => (in_array($role ,["business_owner",
+                "business_admin",
+                "business_employee"])?1:0)
+
              ]);
             }
 

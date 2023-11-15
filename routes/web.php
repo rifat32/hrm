@@ -38,9 +38,11 @@ Route::get('/backup/fuel-station-services', [SetUpController::class, "backupFuel
 Route::get('/roleRefresh', [SetUpController::class, "roleRefresh"])->name("roleRefresh");
 
 Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"]);
+Route::get('/migrate', [SetUpController::class, "migrate"]);
 
 
-Route::get('/automobile-refresh', [SetUpController::class, "automobileRefresh"]);
+
+
 
 Route::get("/swagger-login",[SwaggerLoginController::class,"login"])->name("login.view");
 Route::post("/swagger-login",[SwaggerLoginController::class,"passUser"]);
