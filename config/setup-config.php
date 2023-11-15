@@ -203,7 +203,6 @@ return [
         "global_business_background_image_create",
         "global_business_background_image_view",
 
-
        "user_create",
        "user_update",
        "user_view",
@@ -277,6 +276,75 @@ return [
        "employment_status_delete",
 
 
+    ],
+    "permissions_titles" => [
+        "global_business_background_image_create" => "Can create global business background image",
+        "global_business_background_image_view" => "Can view global business background image",
+
+        "user_create" => "Can create user",
+        "user_update" => "Can update user",
+        "user_view" => "Can view user",
+        "user_delete" => "Can delete user",
+
+        "role_create" => "Can create role",
+        "role_update" => "Can update role",
+        "role_view" => "Can view role",
+        "role_delete" => "Can delete role",
+
+        "business_create" => "Can create business",
+        "business_update" => "Can update business",
+        "business_view" => "Can view business",
+        "business_delete" => "Can delete business",
+
+        "template_create" => "Can create template",
+        "template_update" => "Can update template",
+        "template_view" => "Can view template",
+        "template_delete" => "Can delete template",
+
+        "payment_type_create" => "Can create payment type",
+        "payment_type_update" => "Can update payment type",
+        "payment_type_view" => "Can view payment type",
+        "payment_type_delete" => "Can delete payment type",
+
+        "product_category_create" => "Can create product category",
+        "product_category_update" => "Can update product category",
+        "product_category_view" => "Can view product category",
+        "product_category_delete" => "Can delete product category",
+
+        "product_create" => "Can create product",
+        "product_update" => "Can update product",
+        "product_view" => "Can view product",
+        "product_delete" => "Can delete product",
+
+        "department_create" => "Can create department",
+        "department_update" => "Can update department",
+        "department_view" => "Can view department",
+        "department_delete" => "Can delete department",
+
+        "holiday_create" => "Can create holiday",
+        "holiday_update" => "Can update holiday",
+        "holiday_view" => "Can view holiday",
+        "holiday_delete" => "Can delete holiday",
+
+        "work_shift_create" => "Can create work shift",
+        "work_shift_update" => "Can update work shift",
+        "work_shift_view" => "Can view work shift",
+        "work_shift_delete" => "Can delete work shift",
+
+        "announcement_create" => "Can create announcement",
+        "announcement_update" => "Can update announcement",
+        "announcement_view" => "Can view announcement",
+        "announcement_delete" => "Can delete announcement",
+
+        "designation_create" => "Can create designation",
+        "designation_update" => "Can update designation",
+        "designation_view" => "Can view designation",
+        "designation_delete" => "Can delete designation",
+
+        "employment_status_create" => "Can create employment status",
+        "employment_status_update" => "Can update employment status",
+        "employment_status_view" => "Can view employment status",
+        "employment_status_delete" => "Can delete employment status",
     ],
     "unchangeable_roles" => [
         // "superadmin",
