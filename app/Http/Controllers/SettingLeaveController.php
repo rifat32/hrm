@@ -101,6 +101,18 @@ class SettingLeaveController extends Controller
                             "message" => $check_role["message"]
                         ], $check_role["status"]);
                     }
+                    $check_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"],true);
+                    if (!$check_employment_status["ok"]) {
+                        return response()->json([
+                            "message" => $check_employment_status["message"]
+                        ], $check_employment_status["status"]);
+                    }
+                    $check_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"],true);
+                    if (!$check_employment_status["ok"]) {
+                        return response()->json([
+                            "message" => $check_employment_status["message"]
+                        ], $check_employment_status["status"]);
+                    }
 
                 $request_data["business_id"] = NULL;
                 $request_data["is_default"] = 1;
@@ -126,7 +138,18 @@ class SettingLeaveController extends Controller
                             "message" => $check_role["message"]
                         ], $check_role["status"]);
                     }
-
+                    $check_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"],true);
+                    if (!$check_employment_status["ok"]) {
+                        return response()->json([
+                            "message" => $check_employment_status["message"]
+                        ], $check_employment_status["status"]);
+                    }
+                    $check_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"],true);
+                    if (!$check_employment_status["ok"]) {
+                        return response()->json([
+                            "message" => $check_employment_status["message"]
+                        ], $check_employment_status["status"]);
+                    }
 
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_default"] = 0;

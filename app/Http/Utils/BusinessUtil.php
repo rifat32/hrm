@@ -225,7 +225,45 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
+    public function checkEmploymentStatuses($ids,$is_admin) {
+        $employment_statuses = EmploymentStatus::whereIn("id", $ids)
+        ->get();
 
+        foreach ($employment_statuses as $employment_status) {
+            if (!$employment_status) {
+                return [
+                    "ok" => false,
+                    "status" => 400,
+                    "message" => "Employment status does not exists."
+                ];
+            }
+
+            if($is_admin) {
+                if (!(($employment_status->business_id == NULL) && ($employment_status->is_default == 1) && ($employment_status->is_active == 1) )) {
+                    return [
+                        "ok" => false,
+                        "status" => 403,
+                        "message" => "Employment status belongs to another business."
+                    ];
+                }
+            }
+            if(!$is_admin) {
+                if (!(($employment_status->business_id == auth()->user()->business_id) && ($employment_status->is_default == 0) && ($employment_status->is_active == 1))) {
+                    return [
+                        "ok" => false,
+                        "status" => 403,
+                        "message" => "Employment status belongs to another business."
+                    ];
+                }
+            }
+
+
+        }
+
+        return [
+            "ok" => true,
+        ];
+    }
 
     public function storeDefaultsToBusiness($business_id) {
 
@@ -343,7 +381,12 @@ trait BusinessUtil
 });
           $setting_leave->unpaid_leave_employment_statuses()->sync($unpaid_leave_employment_statuses_for_business,[]);
 
-         }
+
+
+
+
+
+
 
     }
 
