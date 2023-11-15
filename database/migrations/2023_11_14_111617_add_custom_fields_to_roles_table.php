@@ -17,7 +17,7 @@ class AddCustomFieldsToRolesTable extends Migration
             $table->unsignedBigInteger('business_id')->nullable();
             $table->boolean('is_default')->default(false);
             $table->boolean('is_system_default')->default(false);
-
+            $table->boolean('is_default_for_business')->default(false);
         });
     }
 
@@ -32,6 +32,9 @@ class AddCustomFieldsToRolesTable extends Migration
             $table->dropColumn('business_id');
             $table->dropColumn('is_default');
             $table->dropColumn('is_system_default');
+            $table->dropColumn('is_default_for_business');
+
+
         });
     }
 }

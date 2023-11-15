@@ -14,7 +14,8 @@ class Role extends SpatieRole
         'guard_name',
         'business_id',
         'is_default',
-        "is_system_default"
+        "is_system_default",
+        "is_default_for_business"
 
     ];
     protected $guard_name = 'api';

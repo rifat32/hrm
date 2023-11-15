@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSettingLeaveTypesTable extends Migration
+class CreateSettingLeavesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,12 @@ class CreateSettingLeaveTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('setting_leave_types', function (Blueprint $table) {
+        Schema::create('setting_leaves', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('type', ['paid', 'unpaid'])->default("unpaid");
-            $table->string('amount');
+            $table->tinyInteger('start_month');
+            $table->enum('approval_level', ['single', 'multi'])->default("single");
+            $table->boolean('allow_bypass');
 
-            $table->boolean('is_earning_enabled');
-
-            
             $table->string('is_active')->default(false);
             $table->string('is_default')->default(false);
             $table->unsignedBigInteger("business_id")->nullable();
@@ -43,6 +40,6 @@ class CreateSettingLeaveTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('setting_leave_types');
+        Schema::dropIfExists('setting_leaves');
     }
 }

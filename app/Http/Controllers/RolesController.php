@@ -88,10 +88,12 @@ class RolesController extends Controller
            if($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller') )
            {
             $insertableRole["business_id"] = NULL;
-            $insertableRole["is_default"] = true;
+            $insertableRole["is_default"] = 1;
          } else {
             $insertableRole["business_id"] = $request->user()->business_id;
-            $insertableRole["is_default"] = false;
+            $insertableRole["is_default"] = 0;
+            $insertableRole["is_default_for_business"] = 0;
+
          }
            $role = Role::create($insertableRole);
            $role->syncPermissions($insertableData["permissions"]);
@@ -180,10 +182,10 @@ class RolesController extends Controller
 
         $role = Role::where(["id" => $updatableData["id"]])
         ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
-            return $query->where('business_id', NULL)->where('is_default', true);
+            return $query->where('business_id', NULL)->where('is_default', 1);
         })
         ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
-            return $query->where('business_id', $request->user()->business_id)->where('is_default', false);
+            return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
         })
         ->first();
         if($role->name == "superadmin" )

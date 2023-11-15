@@ -57,6 +57,7 @@ return [
 "setting_leave_type_update",
 "setting_leave_type_view",
 "setting_leave_type_delete",
+"setting_leave_create",
 
             ],
         ],
@@ -132,6 +133,7 @@ return [
                 "setting_leave_type_update",
                 "setting_leave_type_view",
                 "setting_leave_type_delete",
+                "setting_leave_create",
 
             ],
         ],
@@ -189,6 +191,7 @@ return [
 "setting_leave_type_update",
 "setting_leave_type_view",
 "setting_leave_type_delete",
+"setting_leave_create",
 
 
             ],
@@ -294,6 +297,7 @@ return [
 "setting_leave_type_update",
 "setting_leave_type_view",
 "setting_leave_type_delete",
+"setting_leave_create",
 
 
     ],
@@ -370,6 +374,8 @@ return [
         "setting_leave_type_update" => "Can update setting leave type",
         "setting_leave_type_view" => "Can view setting leave type",
         "setting_leave_type_delete" => "Can delete setting leave type",
+        "setting_leave_type_create" => "Can create setting leave",
+   
 
 
     ],
