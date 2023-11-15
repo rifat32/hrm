@@ -8,6 +8,8 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\EmploymentStatus;
+use App\Models\SettingPaidLeaveEmploymentStatus;
+use App\Models\SettingUnpaidLeaveEmploymentStatus;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -336,11 +338,11 @@ class EmploymentStatusController extends Controller
             }
 
             $employment_statuses = EmploymentStatus::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', NULL)
-                             ->where('designations.is_default', 1);
+                return $query->where('employment_statuses.business_id', NULL)
+                             ->where('employment_statuses.is_default', 1);
             })
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
+                return $query->where('employment_statuses.business_id', $request->user()->business_id);
             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -448,11 +450,11 @@ class EmploymentStatusController extends Controller
 
             ])
             ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', NULL)
-                             ->where('designations.is_default', 1);
+                return $query->where('employment_statuses.business_id', NULL)
+                             ->where('employment_statuses.is_default', 1);
             })
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
+                return $query->where('employment_statuses.business_id', $request->user()->business_id);
             })
                 ->first();
             if (!$employment_status) {
@@ -537,12 +539,12 @@ class EmploymentStatusController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = EmploymentStatus::whereIn('id', $idsArray)
                 ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('designations.business_id', NULL)
-                                 ->where('designations.is_default', 1);
+                    return $query->where('employment_statuses.business_id', NULL)
+                                 ->where('employment_statuses.is_default', 1);
                 })
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('designations.business_id', $request->user()->business_id)
-                    ->where('designations.is_default', 0);
+                    return $query->where('employment_statuses.business_id', $request->user()->business_id)
+                    ->where('employment_statuses.is_default', 0);
                 })
                 ->select('id')
                 ->get()
@@ -562,7 +564,30 @@ class EmploymentStatusController extends Controller
                 'last_Name',]);
 
                 return response()->json([
-                    "message" => "Some users are associated with the specified designations",
+                    "message" => "Some users are associated with the specified employment statuses",
+                    "conflicting_users" => $conflictingUsers
+                ], 409);
+
+            }
+
+            $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
+            if($paid_employment_status_exists) {
+                $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
+                'last_Name',]);
+
+                return response()->json([
+                    "message" => "Some leave settings are associated with the specified employment statuses",
+                    "conflicting_users" => $conflictingUsers
+                ], 409);
+
+            }
+            $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
+            if($unpaid_employment_status_exists) {
+                $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
+                'last_Name',]);
+
+                return response()->json([
+                    "message" => "Some leave settings are associated with the specified employment statuses",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
 

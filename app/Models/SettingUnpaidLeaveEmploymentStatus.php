@@ -11,4 +11,5 @@ class SettingUnpaidLeaveEmploymentStatus extends Model
     protected $fillable = [
         'setting_leave_id', 'employment_status_id'
     ];
+    protected $table = "paid_leave_employment_statuses";
 }
