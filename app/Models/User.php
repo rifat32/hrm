@@ -40,6 +40,7 @@ class User extends Authenticatable
         'email',
         'password',
         'business_id',
+        'employee_id',
         "created_by",
          'is_active'
     ];

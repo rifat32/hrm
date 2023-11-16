@@ -26,6 +26,7 @@ class UserCreateRequest extends FormRequest
         return [
         'first_Name' => 'required|string|max:255',
         'last_Name' => 'required|string|max:255',
+        'employee_id' => 'nullable|string',
 
         // 'email' => 'required|string|email|indisposable|max:255|unique:users',
         'email' => 'required|string|email|max:255|unique:users',
@@ -51,7 +52,7 @@ class UserCreateRequest extends FormRequest
         'joining_date' => "nullable|date",
         'salary' => "nullable|string",
 
-        
+
     ];
 
     }

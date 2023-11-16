@@ -12,11 +12,13 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
 use App\Models\Booking;
+use App\Models\Business;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -139,6 +141,8 @@ class UserManagementController extends Controller
      *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
+     * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
+     *
      *
      *              @OA\Property(property="gender", type="string", format="string",example="male"),
      *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
@@ -208,6 +212,28 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $business_id = $request->user()->business_id;
+
+            $request_data = $request->validated();
+
+            if(!empty($request_data["employee_id"])) {
+                $employee_id_exists =  DB::table( 'users' )->where([
+                    'employee_id'=> $request_data['employee_id'],
+                    "created_by" => $request->user()->id
+                 ]
+                 )->exists();
+                 if ($employee_id_exists) {
+                    $error =  [
+                           "message" => "The given data was invalid.",
+                           "errors" => ["employee_id"=>["The employee id has already been taken."]]
+                    ];
+                       throw new Exception(json_encode($error),422);
+                   }
+            }
+
+
+
+
             if(!empty($request_data["departments"])) {
                 $check_department = $this->checkDepartments($request_data["departments"]);
                         if (!$check_department["ok"]) {
@@ -217,9 +243,7 @@ class UserManagementController extends Controller
                         }
                 }
 
-            $business_id = $request->user()->business_id;
 
-            $request_data = $request->validated();
 
             $request_data['password'] = Hash::make($request['password']);
             $request_data['is_active'] = true;
@@ -274,6 +298,9 @@ class UserManagementController extends Controller
      *           @OA\Property(property="id", type="string", format="number",example="1"),
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
+     *
+     *
+     *      * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
      *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
      *
      *                @OA\Property(property="gender", type="string", format="string",example="male"),
@@ -342,11 +369,29 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $request_data = $request->validated();
+
+if(!empty($request_data["employee_id"])) {
+    $reference_no_exists =  DB::table( 'users' )->where([
+        'employee_id'=> $request_data['employee_id'],
+        "business_id" => $request->user()->business_id
+     ]
+     )
+     ->whereNotIn('id', [$request_data["id"]])->exists();
+     if ($reference_no_exists) {
+        $error =  [
+               "message" => "The given data was invalid.",
+               "errors" => ["employee_id"=>["The employee id has already been taken."]]
+        ];
+           throw new Exception(json_encode($error),422);
+       }
+
+}
+
 
             $userQuery = User::where([
                 "id" => $request["id"]
             ]);
-
             $updatableUser = $userQuery->first();
             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
                 return response()->json([
@@ -360,7 +405,7 @@ class UserManagementController extends Controller
             }
 
 
-            $request_data = $request->validated();
+
             if(!empty($request_data["departments"])) {
                 $check_department = $this->checkDepartments($request_data["departments"]);
                         if (!$check_department["ok"]) {
@@ -385,6 +430,7 @@ class UserManagementController extends Controller
                 collect($request_data)->only([
                     'first_Name',
                     'last_Name',
+                    'employee_id',
                     'password',
                     'phone',
                     'address_line_1',
@@ -1000,4 +1046,167 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
+
+/**
+ *
+ * @OA\Get(
+ *      path="/v1.0/users/generate/employee-id",
+ *      operationId="generateEmployeeId",
+ *      tags={"user_management"},
+ *       security={
+ *           {"bearerAuth": {}}
+ *       },
+
+
+
+ *      summary="This method is to generate employee id",
+ *      description="This method is to generate employee id",
+ *
+
+ *      @OA\Response(
+ *          response=200,
+ *          description="Successful operation",
+ *       @OA\JsonContent(),
+ *       ),
+ *      @OA\Response(
+ *          response=401,
+ *          description="Unauthenticated",
+ * @OA\JsonContent(),
+ *      ),
+ *        @OA\Response(
+ *          response=422,
+ *          description="Unprocesseble Content",
+ *    @OA\JsonContent(),
+ *      ),
+ *      @OA\Response(
+ *          response=403,
+ *          description="Forbidden",
+ *   @OA\JsonContent()
+ * ),
+ *  * @OA\Response(
+ *      response=400,
+ *      description="Bad Request",
+ *   *@OA\JsonContent()
+ *   ),
+ * @OA\Response(
+ *      response=404,
+ *      description="not found",
+ *   *@OA\JsonContent()
+ *   )
+ *      )
+ *     )
+ */
+ public function generateEmployeeId(Request $request)
+ {
+    $business = Business::where(["id" => $request->user()->business_id])->first();
+
+
+        $prefix = "";
+        if ($business) {
+            preg_match_all('/\b\w/', $business->name, $matches);
+
+            $prefix = implode('', array_map(function ($match) {
+                return strtoupper($match[0]);
+            }, $matches[0]));
+
+            // If you want to get only the first two letters from each word:
+            $prefix = substr($prefix, 0, 2 * count($matches[0]));
+        }
+
+        $current_number = 1; // Start from 0001
+
+        do {
+            $employee_id = $prefix . "-" . str_pad($current_number, 4, '0', STR_PAD_LEFT);
+            $current_number++; // Increment the current number for the next iteration
+        } while (
+            DB::table('users')->where([
+                'employee_id' => $employee_id,
+                "business_id" => $request->user()->business_id
+            ])->exists()
+        );
+
+
+return response()->json(["employee_id" => $employee_id],200);
+ }
+
+
+/**
+*
+* @OA\Get(
+*      path="/v1.0/users/validate/employee-id/{employee_id}",
+*      operationId="validateEmployeeId",
+*      tags={"user_management"},
+*       security={
+*           {"bearerAuth": {}}
+*       },
+
+*              @OA\Parameter(
+*         name="employee_id",
+*         in="path",
+*         description="employee_id",
+*         required=true,
+*  example="1"
+*      ),
+
+*      summary="This method is to validate employee id",
+*      description="This method is to validate employee id",
+*
+
+*      @OA\Response(
+*          response=200,
+*          description="Successful operation",
+*       @OA\JsonContent(),
+*       ),
+*      @OA\Response(
+*          response=401,
+*          description="Unauthenticated",
+* @OA\JsonContent(),
+*      ),
+*        @OA\Response(
+*          response=422,
+*          description="Unprocesseble Content",
+*    @OA\JsonContent(),
+*      ),
+*      @OA\Response(
+*          response=403,
+*          description="Forbidden",
+*   @OA\JsonContent()
+* ),
+*  * @OA\Response(
+*      response=400,
+*      description="Bad Request",
+*   *@OA\JsonContent()
+*   ),
+* @OA\Response(
+*      response=404,
+*      description="not found",
+*   *@OA\JsonContent()
+*   )
+*      )
+*     )
+*/
+public function validateEmployeeId($employee_id, Request $request)
+{
+   try {
+       $this->storeActivity($request,"");
+
+       $reference_no_exists =  DB::table( 'users' )->where([
+          'employee_id'=> $employee_id,
+          "business_id" => $request->user()->business_id
+       ]
+       )->exists();
+
+
+
+return response()->json(["reference_no_exists" => $reference_no_exists],200);
+
+   } catch (Exception $e) {
+       error_log($e->getMessage());
+       return $this->sendError($e, 500,$request);
+   }
+}
+
 }

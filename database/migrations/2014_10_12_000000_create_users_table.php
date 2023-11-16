@@ -17,6 +17,7 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('first_Name');
             $table->string('last_Name');
+            $table->string('employee_id')->nullable();
 
             $table->enum('gender', ['male', 'female', 'other'])->default("other");
             $table->boolean('is_in_employee')->nullable()->default(false);

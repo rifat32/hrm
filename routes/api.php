@@ -133,6 +133,11 @@ Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggl
 Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);
 Route::delete('/v1.0/users/{ids}', [UserManagementController::class, "deleteUsersByIds"]);
 
+
+Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class, "generateEmployeeId"]);
+Route::get('/v1.0/users/validate/employee-id/{employee_id}', [UserManagementController::class, "validateEmployeeId"]);
+
+
 // ********************************************
 // user management section --role
 // ********************************************

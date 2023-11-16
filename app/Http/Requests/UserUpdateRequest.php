@@ -28,6 +28,7 @@ class UserUpdateRequest extends FormRequest
             'id' => "required|numeric",
             'first_Name' => 'required|string|max:255',
             'last_Name' => 'required|string|max:255',
+            'employee_id' => 'nullable|string',
             // 'email' => 'required|string|email|indisposable|max:255|unique:users',
             'email' => 'required|string|unique:users,email,' . $this->id . ',id',
 

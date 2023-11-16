@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
+use App\Models\JobPlatform;
 use App\Models\Role;
 use App\Models\SettingLeave;
 use App\Models\User;
@@ -294,10 +295,26 @@ trait BusinessUtil
                    $role->givePermissionTo($permission);
                }
            }
-
-
           }
 
+
+          $defaultJobPlatforms = JobPlatform::where([
+            "business_id" => NULL,
+            "is_default" => 1,
+            "is_active" => 1
+          ])->get();
+
+          foreach($defaultJobPlatforms as $defaultJobPlatform) {
+              $insertableData = [
+                'name'  => $defaultJobPlatform->name,
+                'description'  => $defaultJobPlatform->description,
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => $business_id,
+              ];
+           $job_platform  = JobPlatform::create($insertableData);
+           $attached_defaults["job_platforms"][$defaultJobPlatform->id] = $job_platform->id;
+          }
 
 
         $defaultDesignations = Designation::where([
