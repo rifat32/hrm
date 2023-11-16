@@ -23,13 +23,25 @@ class SettingLeaveTypeCreateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+
+
+        $rules = [
             'name' => 'required|string',
             'type' => 'required|string|in:paid,unpaid',
             'amount' => 'required|numeric',
             'is_active' => 'required|boolean',
             'is_earning_enabled' => 'required|boolean',
         ];
+
+        if (!empty(auth()->user()->business_id)) {
+            $rules['name'] .= '|unique:setting_leave_types,name,NULL,id,business_id,' . auth()->user()->business_id;
+        } else {
+            $rules['name'] .= '|unique:setting_leave_types,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+        }
+
+return $rules;
+
+
     }
 
     public function messages()

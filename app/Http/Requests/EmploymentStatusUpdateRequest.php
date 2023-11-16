@@ -23,11 +23,21 @@ class EmploymentStatusUpdateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+
+        $rules = [
             'id' => 'required|numeric',
-            'name' => 'required|string|unique:employment_statuses,name',
+            'name' => 'required|string',
             'color' => 'required|string',
             'description' => 'nullable|string',
         ];
+
+if (!empty(auth()->user()->business_id)) {
+    $rules['name'] .= '|unique:employment_statuses,name,'.$this->id.',id,business_id,' . auth()->user()->business_id;
+} else {
+    $rules['name'] .= '|unique:employment_statuses,name,'.$this->id.',id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+}
+
+return $rules;
+
     }
 }
