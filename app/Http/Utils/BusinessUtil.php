@@ -377,7 +377,7 @@ trait BusinessUtil
 
            $default_special_roles = $defaultSettingLeave->special_roles()->pluck("role_id");
            $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
-            return $attached_defaults["setting_leaves"][$id];
+            return $attached_defaults["roles"][$id];
 });
            $setting_leave->special_roles()->sync($special_roles_for_business,[]);
 

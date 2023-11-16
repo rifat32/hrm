@@ -23,6 +23,7 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmploymentStatusController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobPlatformController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
@@ -385,7 +386,19 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// leaves  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
+Route::put('/v1.0/leaves', [LeaveController::class, "updateLeave"]);
+Route::get('/v1.0/leaves', [LeaveController::class, "getLeaves"]);
+Route::get('/v1.0/leaves/{id}', [LeaveController::class, "getLeaveById"]);
+Route::delete('/v1.0/leaves/{ids}', [LeaveController::class, "deleteLeavesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end leaves management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

@@ -372,13 +372,13 @@ class UserManagementController extends Controller
             $request_data = $request->validated();
 
 if(!empty($request_data["employee_id"])) {
-    $reference_no_exists =  DB::table( 'users' )->where([
+    $employee_id_exists =  DB::table( 'users' )->where([
         'employee_id'=> $request_data['employee_id'],
         "business_id" => $request->user()->business_id
      ]
      )
      ->whereNotIn('id', [$request_data["id"]])->exists();
-     if ($reference_no_exists) {
+     if ($employee_id_exists) {
         $error =  [
                "message" => "The given data was invalid.",
                "errors" => ["employee_id"=>["The employee id has already been taken."]]
@@ -1193,7 +1193,7 @@ public function validateEmployeeId($employee_id, Request $request)
    try {
        $this->storeActivity($request,"");
 
-       $reference_no_exists =  DB::table( 'users' )->where([
+       $employee_id_exists =  DB::table( 'users' )->where([
           'employee_id'=> $employee_id,
           "business_id" => $request->user()->business_id
        ]
@@ -1201,7 +1201,7 @@ public function validateEmployeeId($employee_id, Request $request)
 
 
 
-return response()->json(["reference_no_exists" => $reference_no_exists],200);
+return response()->json(["employee_id_exists" => $employee_id_exists],200);
 
    } catch (Exception $e) {
        error_log($e->getMessage());
