@@ -43,6 +43,12 @@ return [
 "product_view",
 "product_delete",
 
+"job_platform_create",
+"job_platform_update",
+"job_platform_view",
+"job_platform_delete",
+
+
 "designation_create",
 "designation_update",
 "designation_view",
@@ -122,10 +128,20 @@ return [
                 "announcement_view",
                 "announcement_delete",
 
+
+                "job_platform_create",
+                "job_platform_update",
+                "job_platform_view",
+                "job_platform_delete",
+
+
                 "designation_create",
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+
+
 
                 "employment_status_create",
                 "employment_status_update",
@@ -182,6 +198,12 @@ return [
                 "announcement_update",
                 "announcement_view",
                 "announcement_delete",
+
+                "job_platform_create",
+                "job_platform_update",
+                "job_platform_view",
+                "job_platform_delete",
+
 
                 "designation_create",
                 "designation_update",
@@ -289,10 +311,19 @@ return [
        "announcement_view",
        "announcement_delete",
 
+
+       "job_platform_create",
+       "job_platform_update",
+       "job_platform_view",
+       "job_platform_delete",
+
+
        "designation_create",
        "designation_update",
        "designation_view",
        "designation_delete",
+
+
 
        "employment_status_create",
        "employment_status_update",
@@ -365,6 +396,15 @@ return [
         "announcement_update" => "Can update announcement",
         "announcement_view" => "Can view announcement",
         "announcement_delete" => "Can delete announcement",
+
+
+
+
+        "job_platform_create" => "Can create job platform",
+        "job_platform_update" => "Can update job platform",
+        "job_platform_view" => "Can view job platform",
+        "job_platform_delete" => "Can delete job platform",
+
 
         "designation_create" => "Can create designation",
         "designation_update" => "Can update designation",
