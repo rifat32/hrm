@@ -94,12 +94,19 @@ class LeaveController extends Controller
 
                 $request_data = $request->validated();
 
+                $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
+                if (!$check_leave_type["ok"]) {
+                    return response()->json([
+                        "message" => $check_leave_type["message"]
+                    ], $check_leave_type["status"]);
+                }
 
-               $check_department = $this->checkDepartments($request_data["departments"]);
-                    if (!$check_department["ok"]) {
+
+               $check_employee = $this->checkUser($request_data["employee_id"]);
+                    if (!$check_employee["ok"]) {
                         return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
+                            "message" => $check_employee["message"]
+                        ], $check_employee["status"]);
                     }
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -220,10 +227,17 @@ class LeaveController extends Controller
 
                 $leave  =  tap(Leave::where($leave_query_params))->update(
                     collect($request_data)->only([
-                        'name',
+                        'leave_duration',
+                        'day_type',
+                        'leave_type_id',
+                        'employee_id',
+                        'date',
+                        'note',
                         'start_date',
                         'end_date',
-                        'description',
+                        'start_time',
+                        'end_time',
+                        'attachments',
                         // "is_active",
                         // "business_id",
                         // "created_by"

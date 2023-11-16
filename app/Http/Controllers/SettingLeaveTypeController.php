@@ -7,6 +7,7 @@ use App\Http\Requests\SettingLeaveTypeUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Leave;
 use App\Models\SettingLeaveType;
 use Exception;
 use Illuminate\Http\Request;
@@ -574,17 +575,16 @@ class SettingLeaveTypeController extends Controller
                 ], 404);
             }
 
-        //   $user_exists =  User::whereIn("setting_leave_type_id",$existingIds)->exists();
-        //     if($user_exists) {
-        //         $conflictingUsers = User::whereIn("setting_leave_type_id", $existingIds)->get(['id', 'first_Name',
-        //         'last_Name',]);
+          $leave_exists =  Leave::whereIn("leave_type_id",$existingIds)->exists();
+            if($leave_exists) {
+                $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
 
-        //         return response()->json([
-        //             "message" => "Some users are associated with the specified setting_leave_types",
-        //             "conflicting_users" => $conflictingUsers
-        //         ], 409);
+                return response()->json([
+                    "message" => "Some leaves are associated with the specified setting_leave_types",
+                    "conflicting_leaves" => $conflictingLeaves
+                ], 409);
 
-        //     }
+            }
 
             SettingLeaveType::destroy($existingIds);
 

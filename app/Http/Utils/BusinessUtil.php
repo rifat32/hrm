@@ -10,6 +10,7 @@ use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
 use App\Models\Role;
 use App\Models\SettingLeave;
+use App\Models\SettingLeaveType;
 use App\Models\User;
 use Exception;
 
@@ -35,9 +36,51 @@ trait BusinessUtil
         }
         return $business;
     }
+    public function checkLeaveType($id) {
+        $setting_leave_type  = SettingLeaveType::where(["id" => $id])->first();
+        if (!$setting_leave_type){
+            return [
+                "ok" => false,
+                "status" => 400,
+                "message" => "Leave type does not exists."
+            ];
+        }
 
+        if ($setting_leave_type->business_id != auth()->user()->business_id) {
+            return [
+                "ok" => false,
+                "status" => 403,
+                "message" => "Leave type belongs to another business."
+            ];
+        }
 
+        return [
+            "ok" => true,
+        ];
+    }
 
+    public function checkUser($id) {
+        $user  = User::where(["id" => $id])->first();
+        if (!$user){
+            return [
+                "ok" => false,
+                "status" => 400,
+                "message" => "User does not exists."
+            ];
+        }
+
+        if ($user->business_id != auth()->user()->business_id) {
+            return [
+                "ok" => false,
+                "status" => 403,
+                "message" => "User belongs to another business."
+            ];
+        }
+
+        return [
+            "ok" => true,
+        ];
+    }
     public function checkManager($id) {
         $user  = User::where(["id" => $id])->first();
         if (!$user){
