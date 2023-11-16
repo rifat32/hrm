@@ -23,10 +23,21 @@ class DesignationUpdateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+
+
+
+        $rules = [
             'id' => 'required|numeric',
-            'name' => 'required|string|unique:designation,name,' . $this->id . ',id',
+            'name' => 'required|string',
             'description' => 'nullable|string',
         ];
+
+        if (!empty(auth()->user()->business_id)) {
+            $rules['name'] .= '|unique:designations,name,'.$this->id.',id,business_id,' . auth()->user()->business_id;
+        } else {
+            $rules['name'] .= '|unique:designations,name,'.$this->id.',id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+        }
+
+return $rules;
     }
 }

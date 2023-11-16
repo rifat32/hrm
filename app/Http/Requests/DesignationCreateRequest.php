@@ -23,9 +23,18 @@ class DesignationCreateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name' => 'required|string|unique:designation,name',
+        $rules = [
+            'name' => 'required|string',
             'description' => 'nullable|string',
         ];
+
+        if (!empty(auth()->user()->business_id)) {
+            $rules['name'] .= '|unique:designations,name,NULL,id,business_id,' . auth()->user()->business_id;
+        } else {
+            $rules['name'] .= '|unique:designations,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+        }
+
+return $rules;
+
     }
 }
