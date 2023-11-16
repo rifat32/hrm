@@ -30,11 +30,18 @@ class LeaveController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- * @OA\Property(property="start_date", type="string", format="date", example="2023-11-14"),
- * @OA\Property(property="end_date", type="string", format="date", example="2023-11-23"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
- * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+ *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
+ *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
+ *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
+ *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
+ *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
+ *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
+ *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
+ *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
+ *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
+ *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+ *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *
  *
  *
      *
@@ -128,11 +135,17 @@ class LeaveController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- * @OA\Property(property="start_date", type="string", format="date", example="2023-11-14"),
- * @OA\Property(property="end_date", type="string", format="date", example="2023-11-23"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
- * @OA\Property(property="departments", type="string", format="array", example={1,2,3})
+ *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
+ *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
+ *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
+ *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
+ *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
+ *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
+ *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
+ *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
+ *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
+ *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+ *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
 
      *
      *         ),
@@ -338,8 +351,8 @@ class LeaveController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("leaves.name", "like", "%" . $term . "%")
-                            ->orWhere("leaves.description", "like", "%" . $term . "%");
+                        // $query->where("leaves.name", "like", "%" . $term . "%")
+                        //     ->orWhere("leaves.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {

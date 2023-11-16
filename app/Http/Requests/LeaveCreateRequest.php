@@ -24,7 +24,30 @@ class LeaveCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'leave_duration' => 'required|in:single_day,multiple_day,half_day,hours',
+            'day_type' => 'nullable|in:first_half,last_half',
+            'leave_type_id' => 'required|numeric',
+            'employee_id' => 'required|numeric',
+            'date' => 'required_if:leave_duration,single_day,half_day,hours|date',
+            'note' => 'required|string',
+
+            'start_date' => 'required_if:leave_duration,multiple_day|date',
+            'end_date' => 'required_if:leave_duration,multiple_day|date|after_or_equal:start_date',
+
+            'start_time' => 'required_if:leave_duration,hours|date_format:H:i:s',
+            'end_time' => 'required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:date',
+
+            'attachments' => 'nullable|array',
         ];
     }
+
+    public function messages()
+{
+    return [
+        'leave_duration.required' => 'The leave duration field is required.',
+        'leave_duration.in' => 'Invalid value for leave duration. Valid values are: single_day, multiple_day, half_day, hours.',
+        'day_type.in' => 'Invalid value for day type. Valid values are: first_half, last_half.',
+        // ... other custom messages
+    ];
+}
 }
