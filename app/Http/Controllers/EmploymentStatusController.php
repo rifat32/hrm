@@ -572,23 +572,21 @@ class EmploymentStatusController extends Controller
 
             $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
             if($paid_employment_status_exists) {
-                $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
-                'last_Name',]);
+                $conflictingPaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
 
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_users" => $conflictingUsers
+                    "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatus
                 ], 409);
 
             }
             $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
             if($unpaid_employment_status_exists) {
-                $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
-                'last_Name',]);
+                $conflictingUnpaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
 
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_users" => $conflictingUsers
+                    "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatus
                 ], 409);
 
             }

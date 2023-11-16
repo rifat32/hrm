@@ -586,6 +586,9 @@ class SettingLeaveTypeController extends Controller
 
             }
 
+            
+
+
             SettingLeaveType::destroy($existingIds);
 
 
