@@ -23,15 +23,12 @@ class SettingAttendanceController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store setting leave",
-     *      description="This method is to store setting leave",
+     *      summary="This method is to store setting attendance",
+     *      description="This method is to store setting attendance",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *     @OA\Property(property="start_month", type="number", example="1"),
- *     @OA\Property(property="approval_level", type="string", example="single"),
- *     @OA\Property(property="allow_bypass", type="boolean", format="boolean", example="1"),
  *     @OA\Property(property="punch_in_time_tolerance", type="number", format="number", example="15"),
  *     @OA\Property(property="work_availability_definition", type="number", format="number", example="80"),
  *     @OA\Property(property="punch_in_out_alert", type="boolean", format="boolean", example="1"),
@@ -83,7 +80,7 @@ class SettingAttendanceController extends Controller
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('setting_leave_create')) {
+                if (!$request->user()->hasPermissionTo('setting_attendance_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -92,37 +89,25 @@ class SettingAttendanceController extends Controller
                 $request_data = $request->validated();
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_active"] = 1;
+
+                $check_user = $this->checkUsers($request_data["special_users"]);
+                if (!$check_user["ok"]) {
+                    return response()->json([
+                        "message" => $check_user["message"]
+                    ], $check_user["status"]);
+                }
+                $check_role = $this->checkRoles($request_data["special_roles"]);
+                if (!$check_role["ok"]) {
+                    return response()->json([
+                        "message" => $check_role["message"]
+                    ], $check_role["status"]);
+                }
                 if ($request->user()->hasRole('superadmin')) {
-                    $check_user = $this->checkUsers($request_data["special_users"],true);
-                    if (!$check_user["ok"]) {
-                        return response()->json([
-                            "message" => $check_user["message"]
-                        ], $check_user["status"]);
-                    }
-                    $check_role = $this->checkRoles($request_data["special_roles"],true);
-                    if (!$check_role["ok"]) {
-                        return response()->json([
-                            "message" => $check_role["message"]
-                        ], $check_role["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"],true);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"],true);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
 
                 $request_data["business_id"] = NULL;
                 $request_data["is_default"] = 1;
 
-
-                $setting_leave  =  SettingAttendance::updateOrCreate([
+                $setting_attendance  =  SettingAttendance::updateOrCreate([
 
                     "business_id" => $request_data["business_id"],
 
@@ -139,34 +124,12 @@ class SettingAttendanceController extends Controller
 
 
                 } else {
-                    $check_user = $this->checkUsers($request_data["special_users"],false);
-                    if (!$check_user["ok"]) {
-                        return response()->json([
-                            "message" => $check_user["message"]
-                        ], $check_user["status"]);
-                    }
-                    $check_role = $this->checkRoles($request_data["special_roles"],false);
-                    if (!$check_role["ok"]) {
-                        return response()->json([
-                            "message" => $check_role["message"]
-                        ], $check_role["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"],false);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"],false);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
+                   
+
 
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_default"] = 0;
-                    $setting_leave =     SettingAttendance::updateOrCreate([
+                    $setting_attendance =     SettingAttendance::updateOrCreate([
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]
                     ],
@@ -176,7 +139,7 @@ class SettingAttendanceController extends Controller
 
 
 
-                return response($setting_leave, 201);
+                return response($setting_attendance, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -233,8 +196,8 @@ class SettingAttendanceController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get setting leave  ",
-     *      description="This method is to get setting leave ",
+     *      summary="This method is to get setting attendance  ",
+     *      description="This method is to get setting attendance ",
      *
 
      *      @OA\Response(
@@ -275,40 +238,40 @@ class SettingAttendanceController extends Controller
      {
          try {
              $this->storeActivity($request, "");
-             if (!$request->user()->hasPermissionTo('setting_leave_create')) {
+             if (!$request->user()->hasPermissionTo('setting_attendance_create')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
              }
 
 
-             $setting_leave = SettingAttendance::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where('setting_leaves.business_id', NULL)
-                              ->where('setting_leaves.is_default', 1);
+             $setting_attendance = SettingAttendance::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                 return $query->where('setting_attendances.business_id', NULL)
+                              ->where('setting_attendances.is_default', 1);
              })
              ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where('setting_leaves.business_id', $request->user()->business_id)
-                 ->where('setting_leaves.is_default', 0);
+                 return $query->where('setting_attendances.business_id', $request->user()->business_id)
+                 ->where('setting_attendances.is_default', 0);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;
-                         $query->where("setting_leaves.name", "like", "%" . $term . "%");
+                        //  $query->where("setting_attendances.name", "like", "%" . $term . "%");
                      });
                  })
                  //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                  //        return $query->where('product_category_id', $request->product_category_id);
                  //    })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('setting_leaves.created_at', ">=", $request->start_date);
+                     return $query->where('setting_attendances.created_at', ">=", $request->start_date);
                  })
                  ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('setting_leaves.created_at', "<=", $request->end_date);
+                     return $query->where('setting_attendances.created_at', "<=", $request->end_date);
                  })
                  ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("setting_leaves.id", $request->order_by);
+                     return $query->orderBy("setting_attendances.id", $request->order_by);
                  }, function ($query) {
-                     return $query->orderBy("setting_leaves.id", "DESC");
+                     return $query->orderBy("setting_attendances.id", "DESC");
                  })
                  ->when(!empty($request->per_page), function ($query) use ($request) {
                      return $query->paginate($request->per_page);
@@ -318,7 +281,7 @@ class SettingAttendanceController extends Controller
 
 
 
-             return response()->json($setting_leave, 200);
+             return response()->json($setting_attendance, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);

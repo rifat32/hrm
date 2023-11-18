@@ -9,6 +9,7 @@ use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
 use App\Models\Role;
+use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
 use App\Models\User;
@@ -211,7 +212,7 @@ trait BusinessUtil
         ];
     }
 
-    public function checkUsers($ids,$is_admin) {
+    public function checkUsers($ids) {
         $users = User::whereIn("id", $ids)
         ->get();
 
@@ -224,7 +225,7 @@ trait BusinessUtil
                 ];
             }
 
-            if($is_admin) {
+            if(auth()->user()->hasRole('superadmin')) {
                 if ($user->business_id != NULL) {
                     return [
                         "ok" => false,
@@ -233,7 +234,7 @@ trait BusinessUtil
                     ];
                 }
             }
-            if(!$is_admin) {
+            if(!auth()->user()->hasRole('superadmin')) {
             if ($user->business_id != auth()->user()->business_id) {
                 return [
                     "ok" => false,
@@ -251,7 +252,7 @@ trait BusinessUtil
         ];
     }
 
-    public function checkRoles($ids,$is_admin) {
+    public function checkRoles($ids) {
         $roles = Role::whereIn("id", $ids)
         ->get();
 
@@ -264,7 +265,7 @@ trait BusinessUtil
                 ];
             }
 
-            if($is_admin) {
+            if(auth()->user()->hasRole('superadmin')) {
                 if (!(($role->business_id == NULL) && ($role->is_default == 1))) {
                     return [
                         "ok" => false,
@@ -273,8 +274,9 @@ trait BusinessUtil
                     ];
                 }
             }
-            if(!$is_admin) {
-                if (!(($role->business_id == auth()->user()->business_id) && ($role->is_default == 0))) {
+            if(!auth()->user()->hasRole('superadmin')) {
+                // if (!(($role->business_id == auth()->user()->business_id) && ($role->is_default == 0))) {
+                    if (!(($role->business_id == auth()->user()->business_id))) {
                     return [
                         "ok" => false,
                         "status" => 403,
@@ -290,7 +292,7 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
-    public function checkEmploymentStatuses($ids,$is_admin) {
+    public function checkEmploymentStatuses($ids) {
         $employment_statuses = EmploymentStatus::whereIn("id", $ids)
         ->get();
 
@@ -303,7 +305,7 @@ trait BusinessUtil
                 ];
             }
 
-            if($is_admin) {
+            if(auth()->user()->hasRole('superadmin')) {
                 if (!(($employment_status->business_id == NULL) && ($employment_status->is_default == 1) && ($employment_status->is_active == 1) )) {
                     return [
                         "ok" => false,
@@ -312,7 +314,7 @@ trait BusinessUtil
                     ];
                 }
             }
-            if(!$is_admin) {
+            if(!auth()->user()->hasRole('superadmin')) {
                 if (!(($employment_status->business_id == auth()->user()->business_id) && ($employment_status->is_default == 0) && ($employment_status->is_active == 1))) {
                     return [
                         "ok" => false,
@@ -418,7 +420,7 @@ trait BusinessUtil
            $attached_defaults["employment_statuses"][$defaultEmploymentStatus->id] = $employment_status->id;
           }
 
-
+// load setting leave
           $defaultSettingLeaves = SettingLeave::where([
             "business_id" => NULL,
             "is_active" => 1,
@@ -430,6 +432,7 @@ trait BusinessUtil
                 'start_month' => $defaultSettingLeave->start_month,
                 'approval_level' => $defaultSettingLeave->approval_level,
                 'allow_bypass' => $defaultSettingLeave->allow_bypass,
+                "created_by" => auth()->user()->id,
                 "is_active" => 1,
                 "is_default" => 0,
                 "business_id" => $business_id,
@@ -465,10 +468,51 @@ trait BusinessUtil
 
           }
 
+// end load setting leave
+
+
+
+// load setting attendance
+$defaultSettingAttendances = SettingAttendance::where([
+    "business_id" => NULL,
+    "is_active" => 1,
+    "is_default" => 1
+  ])->get();
+
+
+
+  foreach($defaultSettingAttendances as $defaultSettingAttendance) {
+      $insertableData = [
+        'punch_in_time_tolerance' => $defaultSettingAttendance->punch_in_time_tolerance,
+        'work_availability_definition'=> $defaultSettingAttendance->work_availability_definition,
+        'punch_in_out_alert'=> $defaultSettingAttendance->punch_in_out_alert,
+        'punch_in_out_interval'=> $defaultSettingAttendance->punch_in_out_interval,
+        'alert_area'=> $defaultSettingAttendance->alert_area,
+        'auto_approval'=> $defaultSettingAttendance->auto_approval,
+
+        "created_by" => auth()->user()->id,
+        "is_active" => 1,
+        "is_default" => 0,
+        "business_id" => $business_id,
+      ];
+
+   $setting_attendance  = SettingAttendance::create($insertableData);
+   $attached_defaults["setting_attendances"][$defaultSettingAttendance->id] = $setting_attendance->id;
+
+
+   $default_special_roles = $defaultSettingAttendance->special_roles()->pluck("role_id");
+   $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
+    return $attached_defaults["roles"][$id];
+});
+   $setting_attendance->special_roles()->sync($special_roles_for_business,[]);
 
 
 
 
+
+  }
+
+// end load setting attendance
 
 
 

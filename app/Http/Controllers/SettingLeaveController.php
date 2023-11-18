@@ -29,14 +29,14 @@ class SettingLeaveController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *     @OA\Property(property="start_month", type="number", example="1"),
- *     @OA\Property(property="approval_level", type="string", example="single"),
- *     @OA\Property(property="allow_bypass", type="boolean", format="boolean", example="1"),
- *     @OA\Property(property="special_users", type="string", format="array", example={1,2,3}),
- *     @OA\Property(property="special_roles", type="string", format="array", example={1,2,3}),
- **    @OA\Property(property="paid_leave_employment_statuses", type="string", format="array", example={1,2,3}),
- *     @OA\Property(property="unpaid_leave_employment_statuses", type="string", format="array", example={1,2,3})
- *
+     *     @OA\Property(property="start_month", type="number", example="1"),
+     *     @OA\Property(property="approval_level", type="string", example="single"),
+     *     @OA\Property(property="allow_bypass", type="boolean", format="boolean", example="1"),
+     *     @OA\Property(property="special_users", type="string", format="array", example={1,2,3}),
+     *     @OA\Property(property="special_roles", type="string", format="array", example={1,2,3}),
+     **    @OA\Property(property="paid_leave_employment_statuses", type="string", format="array", example={1,2,3}),
+     *     @OA\Property(property="unpaid_leave_employment_statuses", type="string", format="array", example={1,2,3})
+     *
      *
      *         ),
      *      ),
@@ -88,86 +88,64 @@ class SettingLeaveController extends Controller
                 $request_data = $request->validated();
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_active"] = 1;
+
+                $check_user = $this->checkUsers($request_data["special_users"]);
+                if (!$check_user["ok"]) {
+                    return response()->json([
+                        "message" => $check_user["message"]
+                    ], $check_user["status"]);
+                }
+                $check_role = $this->checkRoles($request_data["special_roles"]);
+                if (!$check_role["ok"]) {
+                    return response()->json([
+                        "message" => $check_role["message"]
+                    ], $check_role["status"]);
+                }
+
+                $check_paid_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"]);
+                if (!$check_paid_employment_status["ok"]) {
+                    return response()->json([
+                        "message" => $check_paid_employment_status["message"]
+                    ], $check_paid_employment_status["status"]);
+                }
+                $check_unpaid_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"]);
+                if (!$check_unpaid_employment_status["ok"]) {
+                    return response()->json([
+                        "message" => $check_unpaid_employment_status["message"]
+                    ], $check_unpaid_employment_status["status"]);
+                }
+
                 if ($request->user()->hasRole('superadmin')) {
-                    $check_user = $this->checkUsers($request_data["special_users"],true);
-                    if (!$check_user["ok"]) {
-                        return response()->json([
-                            "message" => $check_user["message"]
-                        ], $check_user["status"]);
-                    }
-                    $check_role = $this->checkRoles($request_data["special_roles"],true);
-                    if (!$check_role["ok"]) {
-                        return response()->json([
-                            "message" => $check_role["message"]
-                        ], $check_role["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"],true);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"],true);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
 
-                $request_data["business_id"] = NULL;
-                $request_data["is_default"] = 1;
+                    $request_data["business_id"] = NULL;
+                    $request_data["is_default"] = 1;
 
 
-                $setting_leave  =  SettingLeave::updateOrCreate([
+                    $setting_leave  =  SettingLeave::updateOrCreate(
+                        [
 
-                    "business_id" => $request_data["business_id"],
+                            "business_id" => $request_data["business_id"],
 
-                    "is_default" => $request_data["is_default"]
+                            "is_default" => $request_data["is_default"]
 
-                ],
+                        ],
 
-             $request_data
+                        $request_data
 
-
-
-            );
-
-
-
+                    );
                 } else {
-                    $check_user = $this->checkUsers($request_data["special_users"],false);
-                    if (!$check_user["ok"]) {
-                        return response()->json([
-                            "message" => $check_user["message"]
-                        ], $check_user["status"]);
-                    }
-                    $check_role = $this->checkRoles($request_data["special_roles"],false);
-                    if (!$check_role["ok"]) {
-                        return response()->json([
-                            "message" => $check_role["message"]
-                        ], $check_role["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"],false);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
-                    $check_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"],false);
-                    if (!$check_employment_status["ok"]) {
-                        return response()->json([
-                            "message" => $check_employment_status["message"]
-                        ], $check_employment_status["status"]);
-                    }
+
+
 
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_default"] = 0;
-                    $setting_leave =     SettingLeave::updateOrCreate([
-                        "business_id" => $request_data["business_id"],
-                        "is_default" => $request_data["is_default"]
-                    ],
-                    $request_data
-                );
+                    $setting_leave =     SettingLeave::updateOrCreate(
+                        [
+                            "business_id" => $request_data["business_id"],
+                            "is_default" => $request_data["is_default"]
+                        ],
+                        $request_data
+                    );
                 }
 
 
@@ -182,7 +160,7 @@ class SettingLeaveController extends Controller
 
 
 
-      /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/setting-leave",
@@ -267,57 +245,57 @@ class SettingLeaveController extends Controller
      *     )
      */
 
-     public function getSettingLeave(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "");
-             if (!$request->user()->hasPermissionTo('setting_leave_create')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getSettingLeave(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('setting_leave_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $setting_leave = SettingLeave::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where('setting_leaves.business_id', NULL)
-                              ->where('setting_leaves.is_default', 1);
-             })
-             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where('setting_leaves.business_id', $request->user()->business_id)
-                 ->where('setting_leaves.is_default', 0);
-             })
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
-                         $query->where("setting_leaves.name", "like", "%" . $term . "%");
-                     });
-                 })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('setting_leaves.created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('setting_leaves.created_at', "<=", $request->end_date);
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("setting_leaves.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("setting_leaves.id", "DESC");
-                 })
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });;
+            $setting_leave = SettingLeave::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('setting_leaves.business_id', NULL)
+                    ->where('setting_leaves.is_default', 1);
+            })
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where('setting_leaves.business_id', $request->user()->business_id)
+                        ->where('setting_leaves.is_default', 0);
+                })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        $query->where("setting_leaves.name", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('setting_leaves.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('setting_leaves.created_at', "<=", $request->end_date);
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("setting_leaves.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("setting_leaves.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
 
 
 
-             return response()->json($setting_leave, 200);
-         } catch (Exception $e) {
+            return response()->json($setting_leave, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 }

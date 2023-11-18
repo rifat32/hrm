@@ -185,9 +185,16 @@ class RolesController extends Controller
             return $query->where('business_id', NULL)->where('is_default', 1);
         })
         ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
-            return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
+            // return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
+            return $query->where('business_id', $request->user()->business_id);
         })
         ->first();
+        if(!$role)
+        {
+           return response()->json([
+              "message" => "No role found"
+           ],404);
+      }
         if($role->name == "superadmin" )
         {
            return response()->json([
@@ -475,7 +482,7 @@ class RolesController extends Controller
                 return $query->where('business_id', NULL)->where('is_default', 1);
             })
             ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
-                return $query->where('business_id', $request->user()->business_id)->where('is_default', 1);
+                return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
             })
 
 

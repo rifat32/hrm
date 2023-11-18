@@ -65,6 +65,8 @@ return [
 "setting_leave_type_delete",
 "setting_leave_create",
 
+"setting_attendance_create",
+
             ],
         ],
 
@@ -155,11 +157,16 @@ return [
                 "setting_leave_type_delete",
                 "setting_leave_create",
 
+
+
                 "leave_create",
                 "leave_update",
                 "leave_view",
                 "leave_delete",
 
+
+
+                "setting_attendance_create",
             ],
         ],
 
@@ -227,10 +234,15 @@ return [
 "setting_leave_type_delete",
 "setting_leave_create",
 
+
+
 "leave_create",
 "leave_update",
 "leave_view",
 "leave_delete",
+
+
+"setting_attendance_create",
 
 
             ],
@@ -347,11 +359,15 @@ return [
 "setting_leave_type_delete",
 "setting_leave_create",
 
+
+
 "leave_create",
 "leave_update",
 "leave_view",
 "leave_delete",
 
+
+"setting_attendance_create",
 
     ],
     "permissions_titles" => [
@@ -439,12 +455,14 @@ return [
         "setting_leave_create" => "Can create setting leave",
 
 
+
+
         "leave_create" => "Can create leave",
         "leave_update" => "Can update leave",
         "leave_view" => "Can view leave",
         "leave_delete" => "Can delete leave",
 
-
+        "setting_attendance_create" => "Can create setting attendance",
 
 
 

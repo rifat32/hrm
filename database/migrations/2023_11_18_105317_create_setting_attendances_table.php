@@ -15,6 +15,23 @@ class CreateSettingAttendancesTable extends Migration
     {
         Schema::create('setting_attendances', function (Blueprint $table) {
             $table->id();
+            $table->integer('punch_in_time_tolerance')->nullable();
+            $table->integer('work_availability_definition')->nullable();
+            $table->boolean('punch_in_out_alert')->nullable();
+            $table->integer('punch_in_out_interval')->nullable();
+            $table->json('alert_area')->nullable();
+            $table->boolean('auto_approval')->nullable();
+
+
+            $table->string('is_active')->default(false);
+            $table->string('is_default')->default(false);
+            $table->unsignedBigInteger("business_id")->nullable();
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+            $table->unsignedBigInteger("created_by")->nullable();
+            $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
             $table->timestamps();
         });
     }
