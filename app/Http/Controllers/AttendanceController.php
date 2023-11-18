@@ -2,147 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LeaveCreateRequest;
-use App\Http\Requests\LeaveUpdateRequest;
-use App\Http\Requests\MultipleFileUploadRequest;
+use App\Http\Requests\AttendanceCreateRequest;
+use App\Http\Requests\AttendanceUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\Leave;
+use App\Models\Attendance;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class LeaveController extends Controller
+class AttendanceController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
-    /**
-        *
-     * @OA\Post(
-     *      path="/v1.0/leaves/multiple-file-upload",
-     *      operationId="createLeaveFileMultiple",
-     *      tags={"leaves"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-
-     *      summary="This method is to store multiple leave files",
-     *      description="This method is to store multiple leave files",
-     *
-   *  @OA\RequestBody(
-        *   * @OA\MediaType(
-*     mediaType="multipart/form-data",
-*     @OA\Schema(
-*         required={"files[]"},
-*         @OA\Property(
-*             description="array of files to upload",
-*             property="files[]",
-*             type="array",
-*             @OA\Items(
-*                 type="file"
-*             ),
-*             collectionFormat="multi",
-*         )
-*     )
-* )
-
-
-
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-     public function createLeaveFileMultiple(MultipleFileUploadRequest $request)
-     {
-         try{
-             $this->storeActivity($request,"");
-
-             $insertableData = $request->validated();
-
-             $location =  config("setup-config.leave_files");
-
-             $files = [];
-             if(!empty($insertableData["files"])) {
-                 foreach($insertableData["files"] as $file){
-                     $new_file_name = time() . '_' . $file->getClientOriginalName();
-                     $new_file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-                     $file->move(public_path($location), $new_file_name);
-
-                     array_push($files,("/".$location."/".$new_file_name));
-
-
-                 }
-             }
-
-
-             return response()->json(["files" => $files], 201);
-
-
-         } catch(Exception $e){
-             error_log($e->getMessage());
-         return $this->sendError($e,500,$request);
-         }
-     }
 
 
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/leaves",
-     *      operationId="createLeave",
-     *      tags={"leaves"},
+     *      path="/v1.0/attendances",
+     *      operationId="createAttendance",
+     *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store leave",
-     *      description="This method is to store leave",
+     *      summary="This method is to store attendance",
+     *      description="This method is to store attendance",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
- *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
- *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
- *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
- *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
- *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
- *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
- *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
- *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+  *     @OA\Property(property="note", type="string",  format="string", example="r"),
+ *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
+ *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
+ *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
+ *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18")
+ *
  *
  *
  *
@@ -183,12 +79,12 @@ class LeaveController extends Controller
      *     )
      */
 
-    public function createLeave(LeaveCreateRequest $request)
+    public function createAttendance(AttendanceCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('leave_create')) {
+                if (!$request->user()->hasPermissionTo('attendance_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -196,12 +92,6 @@ class LeaveController extends Controller
 
                 $request_data = $request->validated();
 
-                $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
-                if (!$check_leave_type["ok"]) {
-                    return response()->json([
-                        "message" => $check_leave_type["message"]
-                    ], $check_leave_type["status"]);
-                }
 
 
                $check_employee = $this->checkUser($request_data["employee_id"]);
@@ -215,11 +105,12 @@ class LeaveController extends Controller
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
-                $leave =  Leave::create($request_data);
+                $attendance =  Attendance::create($request_data);
 
 
 
-                return response($leave, 201);
+
+                return response($attendance, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -230,30 +121,24 @@ class LeaveController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/leaves",
-     *      operationId="updateLeave",
-     *      tags={"leaves"},
+     *      path="/v1.0/attendances",
+     *      operationId="updateAttendance",
+     *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update leave ",
-     *      description="This method is to update leave",
+     *      summary="This method is to update attendance ",
+     *      description="This method is to update attendance",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
- *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
- *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
- *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
- *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
- *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
- *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
- *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
- *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+  *     @OA\Property(property="note", type="string",  format="string", example="r"),
+ *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
+ *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
+ *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
+ *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18")
 
      *
      *         ),
@@ -292,13 +177,13 @@ class LeaveController extends Controller
      *     )
      */
 
-    public function updateLeave(LeaveUpdateRequest $request)
+    public function updateAttendance(AttendanceUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('leave_update')) {
+                if (!$request->user()->hasPermissionTo('attendance_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -306,47 +191,34 @@ class LeaveController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
-                $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
-                if (!$check_leave_type["ok"]) {
+                $check_employee = $this->checkUser($request_data["employee_id"]);
+                if (!$check_employee["ok"]) {
                     return response()->json([
-                        "message" => $check_leave_type["message"]
-                    ], $check_leave_type["status"]);
+                        "message" => $check_employee["message"]
+                    ], $check_employee["status"]);
                 }
 
 
-               $check_employee = $this->checkUser($request_data["employee_id"]);
-                    if (!$check_employee["ok"]) {
-                        return response()->json([
-                            "message" => $check_employee["message"]
-                        ], $check_employee["status"]);
-                    }
-
-
-                $leave_query_params = [
+                $attendance_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
                 ];
-                $leave_prev = Leave::where($leave_query_params)
+                $attendance_prev = Attendance::where($attendance_query_params)
                     ->first();
-                if (!$leave_prev) {
+                if (!$attendance_prev) {
                     return response()->json([
-                        "message" => "no leave found"
+                        "message" => "no attendance found"
                     ], 404);
                 }
 
-                $leave  =  tap(Leave::where($leave_query_params))->update(
+                $attendance  =  tap(Attendance::where($attendance_query_params))->update(
                     collect($request_data)->only([
-                        'leave_duration',
-                        'day_type',
-                        'leave_type_id',
-                        'employee_id',
-                        'date',
-                        'note',
-                        'start_date',
-                        'end_date',
-                        'start_time',
-                        'end_time',
-                        'attachments',
+        'note',
+        'employee_id',
+        'in_time',
+        'out_time',
+        'in_date',
+
                         // "is_active",
                         // "business_id",
                         // "created_by"
@@ -356,13 +228,13 @@ class LeaveController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$leave) {
+                if (!$attendance) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($leave, 201);
+                return response($attendance, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -374,9 +246,9 @@ class LeaveController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/leaves",
-     *      operationId="getLeaves",
-     *      tags={"leaves"},
+     *      path="/v1.0/attendances",
+     *      operationId="getAttendances",
+     *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -418,8 +290,8 @@ class LeaveController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get leaves  ",
-     *      description="This method is to get leaves ",
+     *      summary="This method is to get attendances  ",
+     *      description="This method is to get attendances ",
      *
 
      *      @OA\Response(
@@ -456,41 +328,41 @@ class LeaveController extends Controller
      *     )
      */
 
-    public function getLeaves(Request $request)
+    public function getAttendances(Request $request)
     {
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+            if (!$request->user()->hasPermissionTo('attendance_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $leaves = Leave::where(
+            $attendances = Attendance::where(
                 [
-                    "leaves.business_id" => $business_id
+                    "attendances.business_id" => $business_id
                 ]
             )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        // $query->where("leaves.name", "like", "%" . $term . "%")
-                        //     ->orWhere("leaves.description", "like", "%" . $term . "%");
+                        // $query->where("attendances.name", "like", "%" . $term . "%")
+                        //     ->orWhere("attendances.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('leaves.created_at', ">=", $request->start_date);
+                    return $query->where('attendances.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('leaves.created_at', "<=", $request->end_date);
+                    return $query->where('attendances.created_at', "<=", $request->end_date);
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("leaves.id", $request->order_by);
+                    return $query->orderBy("attendances.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("leaves.id", "DESC");
+                    return $query->orderBy("attendances.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -500,7 +372,7 @@ class LeaveController extends Controller
 
 
 
-            return response()->json($leaves, 200);
+            return response()->json($attendances, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -510,9 +382,9 @@ class LeaveController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/leaves/{id}",
-     *      operationId="getLeaveById",
-     *      tags={"leaves"},
+     *      path="/v1.0/attendances/{id}",
+     *      operationId="getAttendanceById",
+     *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -523,8 +395,8 @@ class LeaveController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get leave by id",
-     *      description="This method is to get leave by id",
+     *      summary="This method is to get attendance by id",
+     *      description="This method is to get attendance by id",
      *
 
      *      @OA\Response(
@@ -562,28 +434,28 @@ class LeaveController extends Controller
      */
 
 
-    public function getLeaveById($id, Request $request)
+    public function getAttendanceById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+            if (!$request->user()->hasPermissionTo('attendance_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $leave =  Leave::where([
+            $attendance =  Attendance::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
                 ->first();
-            if (!$leave) {
+            if (!$attendance) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($leave, 200);
+            return response()->json($attendance, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -595,9 +467,9 @@ class LeaveController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/leaves/{ids}",
-     *      operationId="deleteLeavesByIds",
-     *      tags={"leaves"},
+     *      path="/v1.0/attendances/{ids}",
+     *      operationId="deleteAttendancesByIds",
+     *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -608,8 +480,8 @@ class LeaveController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete leave by id",
-     *      description="This method is to delete leave by id",
+     *      summary="This method is to delete attendance by id",
+     *      description="This method is to delete attendance by id",
      *
 
      *      @OA\Response(
@@ -646,19 +518,19 @@ class LeaveController extends Controller
      *     )
      */
 
-    public function deleteLeavesByIds(Request $request, $ids)
+    public function deleteAttendancesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "");
-            if (!$request->user()->hasPermissionTo('leave_delete')) {
+            if (!$request->user()->hasPermissionTo('attendance_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
-            $existingIds = Leave::where([
+            $existingIds = Attendance::where([
                 "business_id" => $business_id
             ])
                 ->whereIn('id', $idsArray)
@@ -673,7 +545,7 @@ class LeaveController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            Leave::destroy($existingIds);
+            Attendance::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

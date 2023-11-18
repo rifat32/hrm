@@ -67,6 +67,8 @@ return [
 
 "setting_attendance_create",
 
+
+
             ],
         ],
 
@@ -167,6 +169,11 @@ return [
 
 
                 "setting_attendance_create",
+
+                "attendance_create",
+"attendance_update",
+"attendance_view",
+"attendance_delete",
             ],
         ],
 
@@ -243,6 +250,11 @@ return [
 
 
 "setting_attendance_create",
+
+"attendance_create",
+"attendance_update",
+"attendance_view",
+"attendance_delete",
 
 
             ],
@@ -369,6 +381,11 @@ return [
 
 "setting_attendance_create",
 
+"attendance_create",
+"attendance_update",
+"attendance_view",
+"attendance_delete",
+
     ],
     "permissions_titles" => [
         "global_business_background_image_create" => "Can create global business background image",
@@ -463,6 +480,13 @@ return [
         "leave_delete" => "Can delete leave",
 
         "setting_attendance_create" => "Can create setting attendance",
+
+
+        "attendance_create" => "Can create attendance",
+        "attendance_update" => "Can update attendance",
+        "attendance_view" => "Can view attendance",
+        "attendance_delete" => "Can delete attendance",
+
 
 
 

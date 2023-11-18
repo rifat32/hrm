@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 
 
@@ -420,7 +421,19 @@ Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "cr
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// attendances  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::post('/v1.0/attendances', [AttendanceController::class, "createAttendance"]);
+Route::put('/v1.0/attendances', [AttendanceController::class, "updateAttendance"]);
+Route::get('/v1.0/attendances', [AttendanceController::class, "getAttendances"]);
+Route::get('/v1.0/attendances/{id}', [AttendanceController::class, "getAttendanceById"]);
+Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAttendancesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end attendances management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
