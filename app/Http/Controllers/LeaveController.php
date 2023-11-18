@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LeaveCreateRequest;
 use App\Http\Requests\LeaveUpdateRequest;
+use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -15,6 +16,107 @@ use Illuminate\Support\Facades\DB;
 class LeaveController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
+
+    /**
+        *
+     * @OA\Post(
+     *      path="/v1.0/leaves/multiple-file-upload",
+     *      operationId="createLeaveFileMultiple",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *      summary="This method is to store multiple leave files",
+     *      description="This method is to store multiple leave files",
+     *
+   *  @OA\RequestBody(
+        *   * @OA\MediaType(
+*     mediaType="multipart/form-data",
+*     @OA\Schema(
+*         required={"files[]"},
+*         @OA\Property(
+*             description="array of files to upload",
+*             property="files[]",
+*             type="array",
+*             @OA\Items(
+*                 type="file"
+*             ),
+*             collectionFormat="multi",
+*         )
+*     )
+* )
+
+
+
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createLeaveFileMultiple(MultipleFileUploadRequest $request)
+     {
+         try{
+             $this->storeActivity($request,"");
+
+             $insertableData = $request->validated();
+
+             $location =  config("setup-config.leave_files");
+
+             $files = [];
+             if(!empty($insertableData["files"])) {
+                 foreach($insertableData["files"] as $file){
+                     $new_file_name = time() . '_' . $file->getClientOriginalName();
+                     $new_file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+                     $file->move(public_path($location), $new_file_name);
+
+                     array_push($files,("/".$location."/".$new_file_name));
+
+
+                 }
+             }
+
+
+             return response()->json(["files" => $files], 201);
+
+
+         } catch(Exception $e){
+             error_log($e->getMessage());
+         return $this->sendError($e,500,$request);
+         }
+     }
+
+
     /**
      *
      * @OA\Post(

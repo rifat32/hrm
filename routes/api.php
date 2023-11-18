@@ -389,7 +389,7 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // leaves  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
+Route::post('/v1.0/leaves/multiple-file-upload', [LeaveController::class, "createLeaveFileMultiple"]);
 Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
 Route::put('/v1.0/leaves', [LeaveController::class, "updateLeave"]);
 Route::get('/v1.0/leaves', [LeaveController::class, "getLeaves"]);
