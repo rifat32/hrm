@@ -31,6 +31,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
 use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\UserManagementController;
@@ -405,7 +406,17 @@ Route::delete('/v1.0/leaves/{ids}', [LeaveController::class, "deleteLeavesByIds"
 
 
 
-
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// setting attendance  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "createSettingAttendance"]);
+// Route::put('/v1.0/setting-leave', [SettingLeaveTypeController::class, "updateSettingLeaveType"]);
+ Route::get('/v1.0/setting-attendance', [SettingAttendanceController::class, "getSettingAttendance"]);
+// Route::get('/v1.0/setting-leave/{id}', [SettingLeaveTypeController::class, "getSettingLeaveTypeById"]);
+// Route::delete('/v1.0/setting-leave/{ids}', [SettingLeaveTypeController::class, "deleteSettingLeaveTypesByIds"]);
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end setting attendance management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
