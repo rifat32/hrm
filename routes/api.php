@@ -452,7 +452,18 @@ Route::post('/v1.0/setting-payrun', [SettingPayrollController::class, "createSet
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// setting attendance  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/setting-payslip/upload-logo', [SettingPayrollController::class, "createSettingPayslipUploadLogo"]);
+Route::post('/v1.0/setting-payslip', [SettingPayrollController::class, "createSettingPayslip"]);
+// Route::put('/v1.0/setting-leave', [SettingLeaveTypeController::class, "updateSettingLeaveType"]);
+ Route::get('/v1.0/setting-payslip', [SettingPayrollController::class, "getSettingPayslip"]);
+// Route::get('/v1.0/setting-leave/{id}', [SettingLeaveTypeController::class, "getSettingLeaveTypeById"]);
+// Route::delete('/v1.0/setting-leave/{ids}', [SettingLeaveTypeController::class, "deleteSettingLeaveTypesByIds"]);
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end setting attendance management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

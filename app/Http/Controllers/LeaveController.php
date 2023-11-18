@@ -91,7 +91,7 @@ class LeaveController extends Controller
 
              $insertableData = $request->validated();
 
-             $location =  config("setup-config.leave_files");
+             $location =  config("setup-config.leave_files_location");
 
              $files = [];
              if(!empty($insertableData["files"])) {

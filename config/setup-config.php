@@ -514,7 +514,7 @@ return [
 
     "leave_files_location" => "leave_files",
 
-
+    "payslip_logo_location" => "payslip_logo",
 
 
 
