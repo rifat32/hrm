@@ -81,6 +81,27 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
+    public function checkRole($role) {
+
+        if(!empty(auth()->user()->business_id)) {
+            $role = $role . "#" . auth()->user()->business_id;
+        }
+
+
+        $role  = Role::where(["name" => $role])->first();
+        if (!$role){
+            return [
+                "ok" => false,
+                "status" => 400,
+                "message" => "Role does not exists."
+            ];
+        }
+
+
+        return [
+            "ok" => true,
+        ];
+    }
     public function checkManager($id) {
         $user  = User::where(["id" => $id])->first();
         if (!$user){

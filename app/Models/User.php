@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_Name',
         'last_Name',
+        'emergency_contact_details',
         'gender',
         'is_in_employee',
         'designation_id',
@@ -79,5 +80,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'emergency_contact_details' => 'array',
+
     ];
 }

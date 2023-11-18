@@ -52,6 +52,7 @@ class UserUpdateRequest extends FormRequest
             'employment_status_id' => "nullable|numeric",
             'joining_date' => "nullable|date",
             'salary' => "nullable|string",
+            'emergency_contact_details' => "nullable|array",
         ];
     }
 

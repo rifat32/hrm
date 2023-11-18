@@ -8,6 +8,7 @@ use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
@@ -26,7 +27,7 @@ use Illuminate\Support\Str;
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil;
+    use ErrorUtil, UserActivityUtil,BusinessUtil;
 
 
 
@@ -164,7 +165,8 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
-     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3})
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+     * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
      *
      *         ),
      *      ),
@@ -232,6 +234,13 @@ class UserManagementController extends Controller
             }
 
 
+
+            $check_role = $this->checkRole($request_data["role"]);
+            if (!$check_role["ok"]) {
+                return response()->json([
+                    "message" => $check_role["message"]
+                ], $check_role["status"]);
+            }
 
 
             if(!empty($request_data["departments"])) {
@@ -321,7 +330,8 @@ class UserManagementController extends Controller
      *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
-     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3})
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+     * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
      *
      *         ),
      *      ),
@@ -404,6 +414,12 @@ if(!empty($request_data["employee_id"])) {
                 ], 401);
             }
 
+            $check_role = $this->checkRole($request_data["role"]);
+            if (!$check_role["ok"]) {
+                return response()->json([
+                    "message" => $check_role["message"]
+                ], $check_role["status"]);
+            }
 
 
             if(!empty($request_data["departments"])) {
@@ -447,6 +463,7 @@ if(!empty($request_data["employee_id"])) {
                     'employment_status_id',
                     'joining_date',
                     'salary',
+                    'emergency_contact_details',
 
                 ])->toArray()
             )
@@ -460,7 +477,6 @@ if(!empty($request_data["employee_id"])) {
             }
             $user->departments()->sync($request_data['departments'],[]);
             $user->syncRoles([$request_data['role']]);
-
 
 
 
@@ -602,6 +618,7 @@ if(!empty($request_data["employee_id"])) {
      *  * *  @OA\Property(property="postcode", type="boolean", format="boolean",example="1"),
      *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
+     * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
 
      *
      *         ),
@@ -672,7 +689,8 @@ if(!empty($request_data["employee_id"])) {
                     "lat",
                     "long",
                     "image",
-                    "gender"
+                    "gender",
+                    'emergency_contact_details',
 
                 ])->toArray()
             )

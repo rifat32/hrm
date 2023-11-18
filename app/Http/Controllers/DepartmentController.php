@@ -363,11 +363,19 @@ class DepartmentController extends Controller
                 }, function ($query) {
                     return $query->orderBy("departments.id", "DESC");
                 })
+                ->select('departments.*',
+                DB::raw('
+         COALESCE(
+             (SELECT COUNT(department_users.user_id) FROM department_users WHERE department_users.department_id = departments.id),
+             0
+         ) AS total_users
+         '),
+                 )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });;
+                });
 
 
 

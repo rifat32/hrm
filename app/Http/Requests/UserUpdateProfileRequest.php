@@ -41,6 +41,7 @@ class UserUpdateProfileRequest extends FormRequest
             'lat' => 'required|string',
             'long' => 'required|string',
             'gender' => 'required|string|in:male,female,other',
+            'emergency_contact_details' => "nullable|array"
 
         ];
     }
