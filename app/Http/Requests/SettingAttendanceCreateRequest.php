@@ -47,4 +47,5 @@ class SettingAttendanceCreateRequest extends FormRequest
             'auto_approval.boolean' => 'The :attribute field must be a boolean.',
         ];
     }
+    
 }

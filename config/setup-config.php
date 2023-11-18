@@ -67,7 +67,7 @@ return [
 
 "setting_attendance_create",
 
-
+"setting_payroll_create",
 
             ],
         ],
@@ -174,6 +174,9 @@ return [
 "attendance_update",
 "attendance_view",
 "attendance_delete",
+
+
+"setting_payroll_create",
             ],
         ],
 
@@ -255,6 +258,8 @@ return [
 "attendance_update",
 "attendance_view",
 "attendance_delete",
+
+"setting_payroll_create",
 
 
             ],
@@ -386,6 +391,8 @@ return [
 "attendance_view",
 "attendance_delete",
 
+"setting_payroll_create",
+
     ],
     "permissions_titles" => [
         "global_business_background_image_create" => "Can create global business background image",
@@ -486,6 +493,10 @@ return [
         "attendance_update" => "Can update attendance",
         "attendance_view" => "Can view attendance",
         "attendance_delete" => "Can delete attendance",
+
+
+        "setting_payroll_create" => "Can create setting payroll",
+
 
 
 

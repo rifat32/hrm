@@ -35,6 +35,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
 use App\Http\Controllers\SettingLeaveTypeController;
+use App\Http\Controllers\SettingPayrollController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
@@ -433,6 +434,21 @@ Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAt
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end attendances management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// setting attendance  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/setting-payrun', [SettingPayrollController::class, "createSettingPayrun"]);
+// Route::put('/v1.0/setting-leave', [SettingLeaveTypeController::class, "updateSettingLeaveType"]);
+ Route::get('/v1.0/setting-payrun', [SettingPayrollController::class, "getSettingPayrun"]);
+// Route::get('/v1.0/setting-leave/{id}', [SettingLeaveTypeController::class, "getSettingLeaveTypeById"]);
+// Route::delete('/v1.0/setting-leave/{ids}', [SettingLeaveTypeController::class, "deleteSettingLeaveTypesByIds"]);
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end setting attendance management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
