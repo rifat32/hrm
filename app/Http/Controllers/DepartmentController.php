@@ -455,6 +455,14 @@ class DepartmentController extends Controller
                 "id" => $id,
                 "business_id" => $business_id
             ])
+            ->select('departments.*',
+            DB::raw('
+     COALESCE(
+         (SELECT COUNT(department_users.user_id) FROM department_users WHERE department_users.department_id = departments.id),
+         0
+     ) AS total_users
+     '),
+             )
                 ->first();
             if (!$department) {
                 return response()->json([
