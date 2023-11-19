@@ -25,12 +25,11 @@ class DepartmentCreateRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'location' => 'nullable|string',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'repeats_annually' => 'required|boolean',
-            'departments' => 'present|array',
-            "departments.*" => "numeric",
+            'manager_id' => 'required|numeric',
+            'parent_id' => 'nullable|numeric',
+
         ];
     }
 }
