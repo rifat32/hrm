@@ -23,6 +23,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmploymentStatusController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\JobPlatformController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\NotificationController;
@@ -440,7 +441,7 @@ Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAt
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// setting attendance  management section
+// setting payrun  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Route::post('/v1.0/setting-payrun', [SettingPayrollController::class, "createSettingPayrun"]);
 // Route::put('/v1.0/setting-leave', [SettingLeaveTypeController::class, "updateSettingLeaveType"]);
@@ -448,12 +449,12 @@ Route::post('/v1.0/setting-payrun', [SettingPayrollController::class, "createSet
 // Route::get('/v1.0/setting-leave/{id}', [SettingLeaveTypeController::class, "getSettingLeaveTypeById"]);
 // Route::delete('/v1.0/setting-leave/{ids}', [SettingLeaveTypeController::class, "deleteSettingLeaveTypesByIds"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// end setting attendance management section
+// end setting payrun management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// setting attendance  management section
+// setting payslip  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Route::post('/v1.0/setting-payslip/upload-logo', [SettingPayrollController::class, "createSettingPayslipUploadLogo"]);
 Route::post('/v1.0/setting-payslip', [SettingPayrollController::class, "createSettingPayslip"]);
@@ -462,9 +463,25 @@ Route::post('/v1.0/setting-payslip', [SettingPayrollController::class, "createSe
 // Route::get('/v1.0/setting-leave/{id}', [SettingLeaveTypeController::class, "getSettingLeaveTypeById"]);
 // Route::delete('/v1.0/setting-leave/{ids}', [SettingLeaveTypeController::class, "deleteSettingLeaveTypesByIds"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// end setting attendance management section
+// end setting payslip management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// job listings  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/job-listings', [JobListingController::class, "createJobListing"]);
+Route::put('/v1.0/job-listings', [JobListingController::class, "updateJobListing"]);
+Route::get('/v1.0/job-listings', [JobListingController::class, "getJobListings"]);
+Route::get('/v1.0/job-listings/{id}', [JobListingController::class, "getJobListingById"]);
+Route::delete('/v1.0/job-listings/{ids}', [JobListingController::class, "deleteJobListingsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end job listings  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
