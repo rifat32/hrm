@@ -19,6 +19,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 
 
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmploymentStatusController;
@@ -488,6 +489,19 @@ Route::delete('/v1.0/job-listings/{ids}', [JobListingController::class, "deleteJ
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// candidates  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/candidates/multiple-file-upload', [CandidateController::class, "createCandidateFileMultiple"]);
+Route::post('/v1.0/candidates', [CandidateController::class, "createCandidate"]);
+Route::put('/v1.0/candidates', [CandidateController::class, "updateCandidate"]);
+Route::get('/v1.0/candidates', [CandidateController::class, "getCandidates"]);
+Route::get('/v1.0/candidates/{id}', [CandidateController::class, "getCandidateById"]);
+Route::delete('/v1.0/candidates/{ids}', [CandidateController::class, "deleteCandidatesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end candidates management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateJobListingsTable extends Migration
+class CreateCandidatesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,21 +13,23 @@ class CreateJobListingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('job_listings', function (Blueprint $table) {
+        Schema::create('candidates', function (Blueprint $table) {
             $table->id();
-            $table->string("title");
-            $table->text("description");
-            $table->string("location");
-            $table->string("salary_range");
-            $table->text("required_skills");
-            $table->date("application_deadline");
-            $table->date("posted_on");
+            $table->string("name");
+            $table->string("email");
+            $table->string("phone");
+            $table->integer("experience_years");
+            $table->string("education_level");
+            $table->string("cover_letter")->nullable();
+            $table->date("application_date");
+            $table->date("interview_date")->nullable();
+            $table->text("feedback");
+            $table->enum('status', ['review', 'interviewed', 'hired']);
 
-            $table->unsignedBigInteger("job_platform_id");
-            $table->foreign('job_platform_id')->references('id')->on('job_platforms')->onDelete('cascade');
-            $table->unsignedBigInteger("department_id");
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
 
+            $table->unsignedBigInteger("job_listing_id");
+            $table->foreign('job_listing_id')->references('id')->on('job_listings')->onDelete('restrict');
+            $table->json('attachments')->nullable();
 
             $table->boolean("is_active")->default(true);
             $table->unsignedBigInteger("business_id");
@@ -38,7 +40,6 @@ class CreateJobListingsTable extends Migration
                 ->references('id')
                 ->on('users')
                 ->onDelete('set null');
-
             $table->softDeletes();
             $table->timestamps();
         });
@@ -51,6 +52,6 @@ class CreateJobListingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('job_listings');
+        Schema::dropIfExists('candidates');
     }
 }

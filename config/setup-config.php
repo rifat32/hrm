@@ -171,6 +171,10 @@ return [
                 "leave_view",
                 "leave_delete",
 
+                "candidate_create",
+                "candidate_update",
+                "candidate_view",
+                "candidate_delete",
 
 
                 "setting_attendance_create",
@@ -260,6 +264,12 @@ return [
 "leave_update",
 "leave_view",
 "leave_delete",
+
+"candidate_create",
+"candidate_update",
+"candidate_view",
+"candidate_delete",
+
 
 
 "setting_attendance_create",
@@ -398,6 +408,11 @@ return [
 "leave_view",
 "leave_delete",
 
+"candidate_create",
+"candidate_update",
+"candidate_view",
+"candidate_delete",
+
 
 "setting_attendance_create",
 
@@ -507,6 +522,15 @@ return [
         "leave_view" => "Can view leave",
         "leave_delete" => "Can delete leave",
 
+
+        "candidate_create" => "Can create candidate",
+        "candidate_update" => "Can update candidate",
+        "candidate_view" => "Can view candidate",
+        "candidate_delete" => "Can delete candidate",
+
+
+
+
         "setting_attendance_create" => "Can create setting attendance",
 
 
@@ -534,6 +558,8 @@ return [
     "user_image_location" => "user_image",
 
     "leave_files_location" => "leave_files",
+
+    "candidate_files_location" => "candidate_files",
 
     "payslip_logo_location" => "payslip_logo",
 
