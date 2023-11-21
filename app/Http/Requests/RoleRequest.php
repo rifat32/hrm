@@ -26,7 +26,7 @@ class RoleRequest extends FormRequest
         return [
             "name" => "required|unique:roles,name",
             "is_default_for_business" => "required|boolean",
-            "permissions" => "required"
+            "permissions" => "present|array"
         ];
     }
 }

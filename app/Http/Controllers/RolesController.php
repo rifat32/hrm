@@ -31,6 +31,7 @@ class RolesController extends Controller
      *            required={"name","permissions"},
      *             @OA\Property(property="name", type="string", format="string",example="Rifat"),
      *            @OA\Property(property="permissions", type="string", format="array",example={"user_create","user_update"}),
+     * *            @OA\Property(property="is_default_for_business", type="boolean", format="boolean",example="1"),
 
      *
      *         ),
