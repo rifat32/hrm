@@ -122,6 +122,13 @@ return [
                 "job_listing_view",
                 "job_listing_delete",
 
+
+
+                "project_create",
+                "project_update",
+                "project_view",
+                "project_delete",
+
                 "holiday_create",
                 "holiday_update",
                 "holiday_view",
@@ -220,6 +227,11 @@ return [
                 "job_listing_update",
                 "job_listing_view",
                 "job_listing_delete",
+
+                "project_create",
+                "project_update",
+                "project_view",
+                "project_delete",
 
                 "holiday_create",
                 "holiday_update",
@@ -360,6 +372,11 @@ return [
        "job_listing_view",
        "job_listing_delete",
 
+       "project_create",
+       "project_update",
+       "project_view",
+       "project_delete",
+
        "holiday_create",
        "holiday_update",
        "holiday_view",
@@ -472,6 +489,12 @@ return [
         "job_listing_update" => "Can update job listing",
         "job_listing_view" => "Can view job listing",
         "job_listing_delete" => "Can delete job listing",
+
+        "project_create" => "Can create project",
+        "project_update" => "Can update project",
+        "project_view" => "Can view project",
+        "project_delete" => "Can delete project",
+
 
 
         "holiday_create" => "Can create holiday",

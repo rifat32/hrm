@@ -32,7 +32,7 @@ use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
-
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
@@ -505,7 +505,19 @@ Route::delete('/v1.0/candidates/{ids}', [CandidateController::class, "deleteCand
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::post('/v1.0/projects', [ProjectController::class, "createProject"]);
+Route::put('/v1.0/projects', [ProjectController::class, "updateProject"]);
+Route::get('/v1.0/projects', [ProjectController::class, "getProjects"]);
+Route::get('/v1.0/projects/{id}', [ProjectController::class, "getProjectById"]);
+Route::delete('/v1.0/projects/{ids}', [JobListingController::class, "deleteProjectsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
