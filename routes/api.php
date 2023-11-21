@@ -38,6 +38,7 @@ use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
 use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPayrollController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
@@ -513,12 +514,28 @@ Route::post('/v1.0/projects', [ProjectController::class, "createProject"]);
 Route::put('/v1.0/projects', [ProjectController::class, "updateProject"]);
 Route::get('/v1.0/projects', [ProjectController::class, "getProjects"]);
 Route::get('/v1.0/projects/{id}', [ProjectController::class, "getProjectById"]);
-Route::delete('/v1.0/projects/{ids}', [JobListingController::class, "deleteProjectsByIds"]);
+Route::delete('/v1.0/projects/{ids}', [ProjectController::class, "deleteProjectsByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end project  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/tasks', [TaskController::class, "createTask"]);
+Route::put('/v1.0/tasks', [TaskController::class, "updateTask"]);
+Route::get('/v1.0/tasks', [TaskController::class, "getTasks"]);
+Route::get('/v1.0/tasks/{id}', [TaskController::class, "getTaskById"]);
+Route::delete('/v1.0/tasks/{ids}', [TaskController::class, "deleteTasksByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

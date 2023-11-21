@@ -132,7 +132,7 @@ class RolesController extends Controller
      *            required={"id","permissions"},
      *             @OA\Property(property="id", type="number", format="number",example="1"),
      *            @OA\Property(property="permissions", type="string", format="array",example={"user_create","user_update"}),
-
+     *  *            @OA\Property(property="description", type="string", format="string", example="description"),
      *
      *         ),
      *      ),
@@ -179,9 +179,9 @@ class RolesController extends Controller
               "message" => "You can not perform this action"
            ],401);
       }
-        $updatableData = $request->validated();
+        $request_data = $request->validated();
 
-        $role = Role::where(["id" => $updatableData["id"]])
+        $role = Role::where(["id" => $request_data["id"]])
         ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
             return $query->where('business_id', NULL)->where('is_default', 1);
         })
@@ -190,6 +190,7 @@ class RolesController extends Controller
             return $query->where('business_id', $request->user()->business_id);
         })
         ->first();
+
         if(!$role)
         {
            return response()->json([
@@ -203,7 +204,9 @@ class RolesController extends Controller
            ],401);
       }
 
-        $role->syncPermissions($updatableData["permissions"]);
+        $role->description = $request_data['description'];
+        $role->save();
+        $role->syncPermissions($request_data["permissions"]);
 
 
         return response()->json([

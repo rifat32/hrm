@@ -18,6 +18,7 @@ class AddCustomFieldsToRolesTable extends Migration
             $table->boolean('is_default')->default(false);
             $table->boolean('is_system_default')->default(false);
             $table->boolean('is_default_for_business')->default(false);
+            $table->string('description')->nullable();
         });
     }
 

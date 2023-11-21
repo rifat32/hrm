@@ -129,6 +129,11 @@ return [
                 "project_view",
                 "project_delete",
 
+                "task_create",
+                "task_update",
+                "task_view",
+                "task_delete",
+
                 "holiday_create",
                 "holiday_update",
                 "holiday_view",
@@ -232,6 +237,11 @@ return [
                 "project_update",
                 "project_view",
                 "project_delete",
+
+                "task_create",
+                "task_update",
+                "task_view",
+                "task_delete",
 
                 "holiday_create",
                 "holiday_update",
@@ -377,6 +387,11 @@ return [
        "project_view",
        "project_delete",
 
+       "task_create",
+       "task_update",
+       "task_view",
+       "task_delete",
+
        "holiday_create",
        "holiday_update",
        "holiday_view",
@@ -494,6 +509,13 @@ return [
         "project_update" => "Can update project",
         "project_view" => "Can view project",
         "project_delete" => "Can delete project",
+
+        "task_create" => "Can create task",
+        "task_update" => "Can update task",
+        "task_view" => "Can view task",
+        "task_delete" => "Can delete task",
+
+
 
 
 
