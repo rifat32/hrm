@@ -587,51 +587,53 @@ class RolesController extends Controller
                 ],401);
            }
            $role_permissions_main = config("setup-config.roles_permission");
-           $role_permissions_json = json_decode(json_encode($role_permissions_main),true);
            $unchangeable_roles = config("setup-config.unchangeable_roles");
            $unchangeable_permissions = config("setup-config.unchangeable_permissions");
            $permissions_titles = config("setup-config.permissions_titles");
 
-           foreach ($role_permissions_json as $key => $roleAndPermissions) {
-            if(in_array($roleAndPermissions["role"], $unchangeable_roles)){
-                array_splice($role_permissions_main, $key, 1);
-            }
+           $new_role_permissions = [];
 
-            if(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')) )
-            {
-               if($roleAndPermissions["role"] == "superadmin" || $roleAndPermissions["role"] == "reseller") {
-                array_splice($role_permissions_main, $key, 1);
+           foreach ($role_permissions_main as $roleAndPermissions) {
+               if (in_array($roleAndPermissions["role"], $unchangeable_roles)) {
+                   // Skip unchangeable roles
+                   continue;
                }
-           }
-           if(!($request->user()->hasRole('superadmin')) )
-            {
-               if($roleAndPermissions["role"] == "superadmin") {
-                array_splice($role_permissions_main, $key, 1);
+
+               if (!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller'))) {
+                   if (in_array($roleAndPermissions["role"], ["superadmin", "reseller"])) {
+                       // Skip specific roles
+                       continue;
+                   }
                }
+
+               if (!($request->user()->hasRole('superadmin')) && $roleAndPermissions["role"] == "superadmin") {
+                   // Skip superadmin role
+                   continue;
+               }
+
+               $data = [
+                   "role"        => $roleAndPermissions["role"],
+                   "permissions" => [],
+               ];
+
+               foreach ($roleAndPermissions["permissions"] as $permission) {
+                   if (in_array($permission, $unchangeable_permissions)) {
+                       // Skip unchangeable permissions
+                       continue;
+                   }
+
+                   $data["permissions"][] = [
+                       "name"  => $permission,
+                       "title" => $permissions_titles[$permission] ?? null,
+                   ];
+               }
+
+
+                   array_push($new_role_permissions, $data);
+
            }
 
-                foreach ($roleAndPermissions["permissions"] as $key2 => $permission) {
-                    if(in_array($permission, $unchangeable_permissions)){
-                        if(!empty($role_permissions_main[$key]["permissions"])) {
-                            array_splice($role_permissions_main[$key]["permissions"], $key2, 1);
-                        }
-
-                    }else {
-                        $role_permissions_main[$key]["permissions"][$key2] = [] ;
-                        $role_permissions_main[$key]["permissions"][$key2]["name"] = $permission;
-                        $role_permissions_main[$key]["permissions"][$key2]["title"] = $permissions_titles[$permission];
-                    }
-
-
-                }
-
-
-
-
-
-        }
-
-           return response()->json($role_permissions_main,200);
+           return response()->json($new_role_permissions, 200);
         } catch(Exception $e){
 
         return $this->sendError($e,500,$request);
