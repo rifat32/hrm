@@ -762,7 +762,7 @@ if(!empty($request_data["employee_id"])) {
      * in="query",
      * description="role",
      * required=true,
-     * example="role"
+     * example="admin,manager"
      * ),
      *      summary="This method is to get user",
      *      description="This method is to get user",
@@ -814,8 +814,9 @@ if(!empty($request_data["employee_id"])) {
 
             $users = User::with("roles")
             ->when(!empty($request->role), function ($query) use ($request) {
-              return   $query->whereHas("roles", function($q) use ($request) {
-                   return $q->whereIn("name", [$request->role]);
+                $rolesArray = explode(',', $request->role);
+              return   $query->whereHas("roles", function($q) use ($rolesArray) {
+                   return $q->whereIn("name", $rolesArray);
                 });
             })
 
