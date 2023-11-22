@@ -42,7 +42,7 @@ class UserCreateRequest extends FormRequest
         'lat' => 'required|string',
         'long' => 'required|string',
         'role' => 'required|string',
-        'departments' => 'nullable|array',
+        'departments' => 'present|array',
         'departments.*' => 'numeric',
 
         'gender' => 'required|string|in:male,female,other',

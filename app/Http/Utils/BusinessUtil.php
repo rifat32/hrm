@@ -84,9 +84,9 @@ trait BusinessUtil
     }
     public function checkRole($role) {
 
-        if(!empty(auth()->user()->business_id)) {
-            $role = $role . "#" . auth()->user()->business_id;
-        }
+        // if(!empty(auth()->user()->business_id)) {
+        //     $role = $role . "#" . auth()->user()->business_id;
+        // }
 
 
         $role  = Role::where(["name" => $role])->first();

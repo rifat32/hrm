@@ -34,9 +34,13 @@ class TaskController extends Controller
  *     @OA\Property(property="name", type="string", format="string", example="Task X"),
  *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Task X's objectives and scope."),
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
+ *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
  *     @OA\Property(property="status", type="string", format="string", example="progress"),
- *     @OA\Property(property="department_id", type="number", format="number", example="1")
+ *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
+ *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2")
+
+ *
  *
      *
      *         ),
@@ -99,7 +103,7 @@ class TaskController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-
+                $request_data["assigned_by"] = $request->user()->id;
                 $task =  Task::create($request_data);
                 return response($task, 201);
             });
@@ -128,9 +132,11 @@ class TaskController extends Controller
  *     @OA\Property(property="name", type="string", format="string", example="Task X"),
  *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Task X's objectives and scope."),
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
+ *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
  *     @OA\Property(property="status", type="string", format="string", example="progress"),
- *     @OA\Property(property="department_id", type="number", format="number", example="1")
+ *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
+ *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2")
  *
  *
 
@@ -205,9 +211,12 @@ class TaskController extends Controller
                         'name',
                         'description',
                         'start_date',
+                        'due_date',
                         'end_date',
                         'status',
-                        'department_id',
+                        'project_id',
+                        'parent_task_id',
+                        'assigned_by',
 
                         // "is_active",
                         // "business_id",
