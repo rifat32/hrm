@@ -59,6 +59,21 @@ class TaskCreateRequest extends FormRequest
                     }
                 },
             ],
+            "assignees" => "present|array",
+            "assignees.*" => [
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('users')
+                        ->where('id', $value)
+                        ->where('users.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ]
+
+
 
 
         ];

@@ -92,19 +92,13 @@ class TaskController extends Controller
 
                 $request_data = $request->validated();
 
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
-                }
+
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["assigned_by"] = $request->user()->id;
                 $task =  Task::create($request_data);
+                $task->assignees()->sync($request_data['assignees'],[]);
                 return response($task, 201);
             });
         } catch (Exception $e) {
@@ -232,7 +226,7 @@ class TaskController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-
+                $task->assignees()->sync($request_data['assignees'],[]);
                 return response($task, 201);
             });
         } catch (Exception $e) {

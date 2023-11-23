@@ -73,6 +73,19 @@ class TaskUpdateRequest extends FormRequest
                     }
                 },
             ],
+            "assignees" => "present|array",
+            "assignees.*" => [
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('users')
+                        ->where('id', $value)
+                        ->where('users.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ]
 
 
         ];
@@ -87,7 +100,7 @@ class TaskUpdateRequest extends FormRequest
             'project_id.exists' => 'Invalid project selected.',
             'parent_task_id.exists' => 'Invalid parent task selected.',
 
-         
+
         ];
     }
 }

@@ -38,4 +38,12 @@ class Task extends Model
     {
         return $this->belongsTo(User::class, 'assigned_by');
     }
+
+
+    public function assignees() {
+        return $this->belongsToMany(TaskAssignee::class, 'task_assignees', 'task_id', 'assignee_id');
+    }
+
+
+
 }
