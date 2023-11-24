@@ -397,6 +397,7 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Route::post('/v1.0/leaves/multiple-file-upload', [LeaveController::class, "createLeaveFileMultiple"]);
 Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
+Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
 Route::put('/v1.0/leaves', [LeaveController::class, "updateLeave"]);
 Route::get('/v1.0/leaves', [LeaveController::class, "getLeaves"]);
 Route::get('/v1.0/leaves/{id}', [LeaveController::class, "getLeaveById"]);

@@ -179,6 +179,7 @@ return [
 
 
                 "leave_create",
+                "leave_approve",
                 "leave_update",
                 "leave_view",
                 "leave_delete",
@@ -284,6 +285,7 @@ return [
 
 "leave_create",
 "leave_update",
+"leave_approve",
 "leave_view",
 "leave_delete",
 
@@ -437,6 +439,7 @@ return [
 
 "leave_create",
 "leave_update",
+"leave_approve",
 "leave_view",
 "leave_delete",
 
@@ -564,6 +567,8 @@ return [
 
         "leave_create" => "Can create leave",
         "leave_update" => "Can update leave",
+        "leave_approve" => "Can approve leave",
+
         "leave_view" => "Can view leave",
         "leave_delete" => "Can delete leave",
 

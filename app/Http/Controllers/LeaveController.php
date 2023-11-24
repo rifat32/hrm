@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LeaveApproveRequest;
 use App\Http\Requests\LeaveCreateRequest;
 use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
@@ -9,6 +10,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Leave;
+use App\Models\LeaveApproval;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -226,7 +228,90 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/leaves/approve",
+     *      operationId="approveLeave",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to approve leave ",
+     *      description="This method is to approve leave",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+*      @OA\Property(property="leave_id", type="number", format="number", example="Updated Christmas"),
+ *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1")
 
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function approveLeave(LeaveApproveRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('leave_approve')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+                 $request_data["created_by"] = $request->user()->id;
+                 $leave_approval =  LeaveApproval::create($request_data);
+                 if (!$leave_approval) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+                 return response($leave_approval, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Put(

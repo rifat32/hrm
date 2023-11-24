@@ -20,6 +20,8 @@ class CreateUsersTable extends Migration
 
             $table->json('emergency_contact_details')->nullable();
 
+            $table->string('color_theme_name')->default("default");
+
             $table->string('employee_id')->nullable();
 
             $table->enum('gender', ['male', 'female', 'other'])->default("other");

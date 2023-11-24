@@ -146,8 +146,14 @@ class SettingLeaveController extends Controller
                         ],
                         $request_data
                     );
+
+
                 }
 
+                $setting_leave->special_users()->sync($request_data['special_users'],[]);
+                $setting_leave->special_roles()->sync($request_data['special_roles'],[]);
+                $setting_leave->paid_leave_employment_statuses()->sync($request_data['paid_leave_employment_statuses'],[]);
+                $setting_leave->unpaid_leave_employment_statuses()->sync($request_data['unpaid_leave_employment_statuses'],[]);
 
 
                 return response($setting_leave, 201);
