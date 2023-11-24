@@ -32,6 +32,8 @@ class WorkShiftController extends Controller
      *         @OA\JsonContent(
 *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
  *     @OA\Property(property="type", type="string", format="string", example="regular"),
+ *  *     @OA\Property(property="description", type="string", format="string", example="description"),
+ *
  *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
 
  *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
@@ -187,6 +189,7 @@ class WorkShiftController extends Controller
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
  *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
  *     @OA\Property(property="type", type="string", format="string", example="regular"),
+ *     @OA\Property(property="description", type="string", format="string", example="description"),
  *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
 
  *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
@@ -322,6 +325,7 @@ class WorkShiftController extends Controller
                         'type',
                         'departments',
                         'users',
+                        "description",
                         // 'attendances_count',
                         'details',
                         'start_date',

@@ -12,9 +12,7 @@ class WorkShift extends Model
     protected $fillable = [
         'name',
         'type',
-        'departments',
-
-        'users',
+        "description",
         'attendances_count',
         'details',
         'start_date',
