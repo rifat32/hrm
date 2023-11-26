@@ -763,6 +763,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\JobPlatform' => __DIR__ . '/../..' . '/app/Models/JobPlatform.php',
         'App\\Models\\Leave' => __DIR__ . '/../..' . '/app/Models/Leave.php',
         'App\\Models\\LeaveApproval' => __DIR__ . '/../..' . '/app/Models/LeaveApproval.php',
+        'App\\Models\\LeaveRecord' => __DIR__ . '/../..' . '/app/Models/LeaveRecord.php',
         'App\\Models\\Notification' => __DIR__ . '/../..' . '/app/Models/Notification.php',
         'App\\Models\\NotificationTemplate' => __DIR__ . '/../..' . '/app/Models/NotificationTemplate.php',
         'App\\Models\\PaymentType' => __DIR__ . '/../..' . '/app/Models/PaymentType.php',

@@ -148,6 +148,7 @@ return array(
     'App\\Models\\JobPlatform' => $baseDir . '/app/Models/JobPlatform.php',
     'App\\Models\\Leave' => $baseDir . '/app/Models/Leave.php',
     'App\\Models\\LeaveApproval' => $baseDir . '/app/Models/LeaveApproval.php',
+    'App\\Models\\LeaveRecord' => $baseDir . '/app/Models/LeaveRecord.php',
     'App\\Models\\Notification' => $baseDir . '/app/Models/Notification.php',
     'App\\Models\\NotificationTemplate' => $baseDir . '/app/Models/NotificationTemplate.php',
     'App\\Models\\PaymentType' => $baseDir . '/app/Models/PaymentType.php',

@@ -34,8 +34,8 @@ class LeaveCreateRequest extends FormRequest
             'start_date' => 'required_if:leave_duration,multiple_day|date',
             'end_date' => 'required_if:leave_duration,multiple_day|date|after_or_equal:start_date',
 
-            'start_time' => 'required_if:leave_duration,hours|date_format:H:i:s',
-            'end_time' => 'required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:date',
+            'start_time' => 'required_if:leave_duration,hours|date_format:H:i',
+            'end_time' => 'required_if:leave_duration,hours|date_format:H:i|after_or_equal:date',
 
             'attachments' => 'nullable|array',
         ];

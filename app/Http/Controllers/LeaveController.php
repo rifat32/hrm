@@ -8,21 +8,23 @@ use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\LeaveUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
 use App\Models\WorkShift;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil;
 
     /**
-        *
+     *
      * @OA\Post(
      *      path="/v1.0/leaves/multiple-file-upload",
      *      operationId="createLeaveFileMultiple",
@@ -34,22 +36,22 @@ class LeaveController extends Controller
      *      summary="This method is to store multiple leave files",
      *      description="This method is to store multiple leave files",
      *
-   *  @OA\RequestBody(
-        *   * @OA\MediaType(
-*     mediaType="multipart/form-data",
-*     @OA\Schema(
-*         required={"files[]"},
-*         @OA\Property(
-*             description="array of files to upload",
-*             property="files[]",
-*             type="array",
-*             @OA\Items(
-*                 type="file"
-*             ),
-*             collectionFormat="multi",
-*         )
-*     )
-* )
+     *  @OA\RequestBody(
+     *   * @OA\MediaType(
+     *     mediaType="multipart/form-data",
+     *     @OA\Schema(
+     *         required={"files[]"},
+     *         @OA\Property(
+     *             description="array of files to upload",
+     *             property="files[]",
+     *             type="array",
+     *             @OA\Items(
+     *                 type="file"
+     *             ),
+     *             collectionFormat="multi",
+     *         )
+     *     )
+     * )
 
 
 
@@ -88,37 +90,33 @@ class LeaveController extends Controller
      *     )
      */
 
-     public function createLeaveFileMultiple(MultipleFileUploadRequest $request)
-     {
-         try{
-             $this->storeActivity($request,"");
+    public function createLeaveFileMultiple(MultipleFileUploadRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "");
 
-             $insertableData = $request->validated();
+            $insertableData = $request->validated();
 
-             $location =  config("setup-config.leave_files_location");
+            $location =  config("setup-config.leave_files_location");
 
-             $files = [];
-             if(!empty($insertableData["files"])) {
-                 foreach($insertableData["files"] as $file){
-                     $new_file_name = time() . '_' . $file->getClientOriginalName();
-                     $new_file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-                     $file->move(public_path($location), $new_file_name);
+            $files = [];
+            if (!empty($insertableData["files"])) {
+                foreach ($insertableData["files"] as $file) {
+                    $new_file_name = time() . '_' . $file->getClientOriginalName();
+                    $new_file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+                    $file->move(public_path($location), $new_file_name);
 
-                     array_push($files,("/".$location."/".$new_file_name));
-
-
-                 }
-             }
+                    array_push($files, ("/" . $location . "/" . $new_file_name));
+                }
+            }
 
 
-             return response()->json(["files" => $files], 201);
-
-
-         } catch(Exception $e){
-             error_log($e->getMessage());
-         return $this->sendError($e,500,$request);
-         }
-     }
+            return response()->json(["files" => $files], 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -136,20 +134,20 @@ class LeaveController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
- *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
- *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
- *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
- *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
- *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
- *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
- *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
- *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
- *
- *
- *
+     *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
+     *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
+     *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
+     *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
+     *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
+     *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
+     *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+     *
+     *
+     *
      *
      *         ),
      *      ),
@@ -200,6 +198,11 @@ class LeaveController extends Controller
 
                 $request_data = $request->validated();
 
+                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["is_active"] = true;
+                $request_data["created_by"] = $request->user()->id;
+
+
                 $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
                 if (!$check_leave_type["ok"]) {
                     return response()->json([
@@ -208,47 +211,150 @@ class LeaveController extends Controller
                 }
 
 
-               $check_employee = $this->checkUser($request_data["employee_id"]);
-                    if (!$check_employee["ok"]) {
-                        return response()->json([
-                            "message" => $check_employee["message"]
-                        ], $check_employee["status"]);
-                    }
-
-                $request_data["business_id"] = $request->user()->business_id;
-                $request_data["is_active"] = true;
-                $request_data["created_by"] = $request->user()->id;
-
-                if($request_data["leave_duration"] == "single_day") {
-                      $wors_shift =   WorkShift::whereHas('users', function ($query) use($request_data)  {
-                        $query->where('id', $request_data["employee_id"]);
-                    })->first();
-
-                    if(!$wors_shift) {
-                        $department = Department::whereHas('users', function ($query) use ($request_data) {
-                            $query->where('id', $request_data["employee_id"]);
-                        })->with('parentRecursive')->first();
-
-                        if(!$department) {
-                            return response()->json(["message" => "Hey please specify department for the employee first!"],400);
-                        }
-
-                        $allDepartmentIds = $department->all_parent_ids;
-
-                        $workShift = WorkShift::whereHas('departments', function ($query) use ($allDepartmentIds) {
-                            $query->whereIn('id', $allDepartmentIds);
-                        })->orderByRaw('FIELD(department_id, ' . implode(',', $allDepartmentIds) . ')')->first();
-                        if(!$workShift) {
-                            return response()->json(["message" => "Please define workshift first"],400);
-                        }
-                    }
-                    $request_data["leave_duration"] = $request_data["leave_duration"];
-                    $request_data["leave_duration"] = $request_data["leave_duration"];
-
-
+                $check_employee = $this->checkUser($request_data["employee_id"]);
+                if (!$check_employee["ok"]) {
+                    return response()->json([
+                        "message" => $check_employee["message"]
+                    ], $check_employee["status"]);
                 }
 
+
+
+                $wors_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                    $query->where('id', $request_data["employee_id"]);
+                })->first();
+
+                if (!$wors_shift) {
+                    $department = Department::whereHas('users', function ($query) use ($request_data) {
+                        $query->where('id', $request_data["employee_id"]);
+                    })->with('parentRecursive')->first();
+
+                    if (!$department) {
+                        return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
+                    }
+
+                    $allDepartmentIds = $department->all_parent_ids;
+
+                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($allDepartmentIds) {
+                        $query->whereIn('id', $allDepartmentIds);
+                    })->orderByRaw('FIELD(department_id, ' . implode(',', $allDepartmentIds) . ')')->first();
+                    if (!$work_shift) {
+                        return response()->json(["message" => "Please define workshift first"], 400);
+                    }
+                }
+                $leave_record_data_list = [];
+                if ($request_data["leave_duration"] == "single_day") {
+
+                    $dateString = $request_data["date"];
+                    $dayNumber = Carbon::parse($dateString)->dayOfWeek;
+                    $work_shift_details =  $work_shift->details()->where([
+                        "off_day" => $dayNumber
+                    ])
+                        ->first();
+                    if (!$work_shift_details) {
+                        return response()->json(["message" => "No work shift details found"], 400);
+                    }
+
+                    if (!$work_shift_details->is_weekend) {
+                        $leave_record_data["start_time"] = $work_shift_details->start_at;
+                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+                        $leave_record_data["date"] = $request_data["date"];
+                        array_push($leave_record_data_list, $leave_record_data);
+                    }
+                } else if ($request_data["leave_duration"] == "multiple_day") {
+
+                    $start_date = Carbon::parse($request_data["start_date"]);
+                    $end_date = Carbon::parse($request_data["end_date"]);
+
+
+                    $leave_dates = [];
+                    for ($date = $start_date; $date->lte($end_date); $date->addDay()) {
+                        $leave_dates[] = $date->toDateString();
+                    }
+                    foreach ($leave_dates as $leave_date) {
+                        $dateString = $leave_date;
+                        $dayNumber = Carbon::parse($dateString)->dayOfWeek;
+                        $work_shift_details =  $work_shift->details()->where([
+                            "off_day" => $dayNumber
+                        ])
+                            ->first();
+                        if (!$work_shift_details) {
+                            return response()->json(["message" => "No work shift details found"], 400);
+                        }
+
+                        if (!$work_shift_details->is_weekend) {
+                            $leave_record_data["start_time"] = $work_shift_details->start_at;
+                            $leave_record_data["end_time"] = $work_shift_details->end_at;
+                            $leave_record_data["date"] = $leave_date;
+                            array_push($leave_record_data_list, $leave_record_data);
+                        }
+                    }
+                }
+              else if ($request_data["leave_duration"] == "half_day") {
+
+                    $dateString = $request_data["date"];
+                    $dayNumber = Carbon::parse($dateString)->dayOfWeek;
+                    $work_shift_details =  $work_shift->details()->where([
+                        "off_day" => $dayNumber
+                    ])
+                        ->first();
+                    if (!$work_shift_details) {
+                        return response()->json(["message" => "No work shift details found"], 400);
+                    }
+
+                    if (!$work_shift_details->is_weekend) {
+                        $start_at = $work_shift_details->start_at;
+                        $end_at = $work_shift_details->end_at;
+                        if ($request_data["day_type"] == "first_half") {
+                            $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
+                            $work_shift_details->start_at = $middle_time;
+                        } elseif ($request_data["day_type"] == "last_half") {
+                            $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
+                            $work_shift_details->end_at = $middle_time;
+                        }
+
+                        $leave_record_data["start_time"] = $work_shift_details->start_at;
+                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+                        $leave_record_data["date"] = $request_data["date"];
+                        array_push($leave_record_data_list, $leave_record_data);
+                    }
+                }
+
+               else if ($request_data["leave_duration"] == "hours") {
+
+                    $dateString = $request_data["date"];
+                    $dayNumber = Carbon::parse($dateString)->dayOfWeek;
+                    $work_shift_details =  $work_shift->details()->where([
+                        "off_day" => $dayNumber
+                    ])
+                        ->first();
+                    if (!$work_shift_details) {
+                        return response()->json(["message" => "No work shift details found"], 400);
+                    }
+                    if (!$request_data["start_time"] < $work_shift_details->start_at) {
+                        return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"])], 400);
+                    }
+                    if (!$request_data["end_time"] > $work_shift_details->end_at) {
+                        return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
+                    }
+
+                    if (!$work_shift_details->is_weekend) {
+                        $leave_record_data["start_time"] = $work_shift_details->start_at;
+                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+                        $leave_record_data["date"] = $request_data["date"];
+                        array_push($leave_record_data_list, $leave_record_data);
+                    }
+                }
+
+
+
+
+
+
+
                 $leave =  Leave::create($request_data);
+
+
 
 
 
@@ -259,7 +365,7 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-  /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/leaves/approve",
@@ -274,8 +380,8 @@ class LeaveController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="leave_id", type="number", format="number", example="Updated Christmas"),
- *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1")
+     *      @OA\Property(property="leave_id", type="number", format="number", example="Updated Christmas"),
+     *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1")
 
 
      *
@@ -315,35 +421,35 @@ class LeaveController extends Controller
      *     )
      */
 
-     public function approveLeave(LeaveApproveRequest $request)
-     {
+    public function approveLeave(LeaveApproveRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "");
-             return DB::transaction(function () use ($request) {
-                 if (!$request->user()->hasPermissionTo('leave_approve')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
+        try {
+            $this->storeActivity($request, "");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('leave_approve')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
 
-                 $request_data = $request->validated();
-                 $request_data["created_by"] = $request->user()->id;
+                $request_data = $request->validated();
+                $request_data["created_by"] = $request->user()->id;
 
-                 $leave_approval =  LeaveApproval::create($request_data);
-                 if (!$leave_approval) {
-                     return response()->json([
-                         "message" => "something went wrong."
-                     ], 500);
-                 }
+                $leave_approval =  LeaveApproval::create($request_data);
+                if (!$leave_approval) {
+                    return response()->json([
+                        "message" => "something went wrong."
+                    ], 500);
+                }
 
-                 return response($leave_approval, 201);
-             });
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+                return response($leave_approval, 201);
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Put(
@@ -359,18 +465,18 @@ class LeaveController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
- *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
- *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
- *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
- *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
- *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
- *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
- *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
- *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
- *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
+     *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
+     *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
+     *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
+     *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
+     *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
+     *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
 
      *
      *         ),
@@ -431,12 +537,12 @@ class LeaveController extends Controller
                 }
 
 
-               $check_employee = $this->checkUser($request_data["employee_id"]);
-                    if (!$check_employee["ok"]) {
-                        return response()->json([
-                            "message" => $check_employee["message"]
-                        ], $check_employee["status"]);
-                    }
+                $check_employee = $this->checkUser($request_data["employee_id"]);
+                if (!$check_employee["ok"]) {
+                    return response()->json([
+                        "message" => $check_employee["message"]
+                    ], $check_employee["status"]);
+                }
 
 
                 $leave_query_params = [
@@ -793,7 +899,7 @@ class LeaveController extends Controller
             Leave::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

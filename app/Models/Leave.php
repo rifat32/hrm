@@ -19,8 +19,6 @@ class Leave extends Model
         'end_date',
         'start_time',
         'end_time',
-        "start_date_time",
-        "end_date_time",
         'attachments',
         "is_active",
         "business_id",
@@ -30,4 +28,7 @@ class Leave extends Model
     protected $casts = [
         'attachments' => 'array',
     ];
+    public function records(){
+        return $this->hasMany(LeaveRecord::class,'leave_id', 'id');
+    }
 }

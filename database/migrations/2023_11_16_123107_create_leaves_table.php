@@ -28,8 +28,7 @@ class CreateLeavesTable extends Migration
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
 
-            $table->dateTime('start_date_time')->nullable();
-            $table->dateTime('end_date_time')->nullable();
+
 
             $table->json('attachments')->nullable();
 
