@@ -14,7 +14,6 @@ class WorkShift extends Model
         'type',
         "description",
         'attendances_count',
-        'details',
         'start_date',
         'end_date',
         "is_active",
@@ -22,10 +21,7 @@ class WorkShift extends Model
         "created_by"
 
     ];
-    protected $casts = [
 
-        'details' => 'array',
-    ];
 
     public function details(){
         return $this->belongsTo(WorkShiftDetail::class,'id', 'work_shift_id');

@@ -155,12 +155,14 @@ class WorkShiftController extends Controller
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_active"] = true;
                     $request_data["created_by"] = $request->user()->id;
-                    
+
                 $request_data["attendances_count"] = 0;
                 $work_shift =  WorkShift::create($request_data);
 
                 $work_shift->departments()->sync($request_data['departments'],[]);
                 $work_shift->users()->sync($request_data['users'],[]);
+                $work_shift->details()->sync($request_data['details'],[]);
+
 
                 return response($work_shift, 201);
             });
