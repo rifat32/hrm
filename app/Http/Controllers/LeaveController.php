@@ -9,8 +9,10 @@ use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Department;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
+use App\Models\WorkShift;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -217,6 +219,35 @@ class LeaveController extends Controller
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
+                if($request_data["leave_duration"] == "single_day") {
+                      $wors_shift =   WorkShift::whereHas('users', function ($query) use($request_data)  {
+                        $query->where('id', $request_data["employee_id"]);
+                    })->first();
+
+                    if(!$wors_shift) {
+                        $department = Department::whereHas('users', function ($query) use ($request_data) {
+                            $query->where('id', $request_data["employee_id"]);
+                        })->with('parentRecursive')->first();
+
+                        if(!$department) {
+                            return response()->json(["message" => "Hey please specify department for the employee first!"],400);
+                        }
+
+                        $allDepartmentIds = $department->all_parent_ids;
+
+                        $workShift = WorkShift::whereHas('departments', function ($query) use ($allDepartmentIds) {
+                            $query->whereIn('id', $allDepartmentIds);
+                        })->orderByRaw('FIELD(department_id, ' . implode(',', $allDepartmentIds) . ')')->first();
+                        if(!$workShift) {
+                            return response()->json(["message" => "Please define workshift first"],400);
+                        }
+                    }
+
+
+
+
+                }
+
                 $leave =  Leave::create($request_data);
 
 
@@ -298,6 +329,7 @@ class LeaveController extends Controller
 
                  $request_data = $request->validated();
                  $request_data["created_by"] = $request->user()->id;
+
                  $leave_approval =  LeaveApproval::create($request_data);
                  if (!$leave_approval) {
                      return response()->json([

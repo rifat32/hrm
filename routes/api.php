@@ -402,7 +402,6 @@ Route::put('/v1.0/leaves', [LeaveController::class, "updateLeave"]);
 Route::get('/v1.0/leaves', [LeaveController::class, "getLeaves"]);
 Route::get('/v1.0/leaves/{id}', [LeaveController::class, "getLeaveById"]);
 Route::delete('/v1.0/leaves/{ids}', [LeaveController::class, "deleteLeavesByIds"]);
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end leaves management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

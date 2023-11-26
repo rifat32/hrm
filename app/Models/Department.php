@@ -18,6 +18,32 @@ class Department extends Model
         "business_id",
         "created_by"
     ];
+
+    public function parent(){
+        return $this->belongsTo(Department::class,'id', 'parent_id');
+    }
+    public function parentRecursive()
+    {
+        return $this->belongsTo(Department::class, 'parent_id', 'id')->with('parentRecursive');
+    }
+
+    public function getAllParentIdsAttribute()
+    {
+        $parentIds = [$this->id]; // Start with the current department's ID
+
+        $department = $this;
+
+        while ($department->parentRecursive) {
+            $parentIds[] = $department->parentRecursive->id;
+            $department = $department->parentRecursive;
+        }
+
+        return array_reverse($parentIds); // Reverse the array to have the top-level parent (father) first
+    }
+    
+
+
+
     public function holidays() {
         return $this->belongsToMany(Holiday::class, 'department_holidays', 'department_id', 'holiday_id');
     }

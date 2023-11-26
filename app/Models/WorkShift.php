@@ -31,6 +31,6 @@ class WorkShift extends Model
         return $this->belongsToMany(Department::class, 'department_work_shifts', 'work_shift_id', 'department_id');
     }
     public function users() {
-        return $this->belongsToMany(Department::class, 'department_work_shifts', 'work_shift_id', 'user_id');
+        return $this->belongsToMany(User::class, 'user_workshifts', 'work_shift_id', 'user_id');
     }
 }
