@@ -242,8 +242,8 @@ class LeaveController extends Controller
                             return response()->json(["message" => "Please define workshift first"],400);
                         }
                     }
-
-
+                    $request_data["leave_duration"] = $request_data["leave_duration"];
+                    $request_data["leave_duration"] = $request_data["leave_duration"];
 
 
                 }

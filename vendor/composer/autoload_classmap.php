@@ -174,6 +174,7 @@ return array(
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Models\\UserWorkshift' => $baseDir . '/app/Models/UserWorkshift.php',
     'App\\Models\\WorkShift' => $baseDir . '/app/Models/WorkShift.php',
+    'App\\Models\\WorkShiftDetail' => $baseDir . '/app/Models/WorkShiftDetail.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Providers\\AuthServiceProvider' => $baseDir . '/app/Providers/AuthServiceProvider.php',
     'App\\Providers\\BroadcastServiceProvider' => $baseDir . '/app/Providers/BroadcastServiceProvider.php',

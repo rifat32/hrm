@@ -20,7 +20,7 @@ class Department extends Model
     ];
 
     public function parent(){
-        return $this->belongsTo(Department::class,'id', 'parent_id');
+        return $this->belongsTo(Department::class,'parent_id', 'id');
     }
     public function parentRecursive()
     {
@@ -40,7 +40,7 @@ class Department extends Model
 
         return array_reverse($parentIds); // Reverse the array to have the top-level parent (father) first
     }
-    
+
 
 
 

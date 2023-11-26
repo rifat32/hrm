@@ -789,6 +789,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\UserWorkshift' => __DIR__ . '/../..' . '/app/Models/UserWorkshift.php',
         'App\\Models\\WorkShift' => __DIR__ . '/../..' . '/app/Models/WorkShift.php',
+        'App\\Models\\WorkShiftDetail' => __DIR__ . '/../..' . '/app/Models/WorkShiftDetail.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\AuthServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AuthServiceProvider.php',
         'App\\Providers\\BroadcastServiceProvider' => __DIR__ . '/../..' . '/app/Providers/BroadcastServiceProvider.php',
