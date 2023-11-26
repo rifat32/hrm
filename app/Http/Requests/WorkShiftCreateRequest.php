@@ -36,10 +36,34 @@ class WorkShiftCreateRequest extends FormRequest
             'users' => 'nullable|array',
             'users.*' => 'numeric',
             'details' => 'required|array|min:7|max:7',
-            'details.*.off_day' => 'required|boolean',
-            'details.*.start_at' => 'required_if:type,scheduled|date',
-            'details.*.end_at' => 'required_if:type,scheduled|date',
+            'details.*.off_day' => 'required|numeric|between:0,6',
             'details.*.is_weekend' => 'required|boolean',
+            'details.*.start_at' => [
+                'nullable',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                    $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+                    if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+                    }
+                },
+            ],
+            'details.*.end_at' => [
+                'nullable',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                    $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+                    if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+                    }
+                },
+            ],
+
+
         ];
     }
     public function messages()

@@ -24,12 +24,13 @@ class WorkShift extends Model
 
 
     public function details(){
-        return $this->belongsTo(WorkShiftDetail::class,'id', 'work_shift_id');
+        return $this->belongsTo(WorkShiftDetail::class,'work_shift_id', 'id');
     }
+
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_work_shifts', 'work_shift_id', 'department_id');
     }
     public function users() {
-        return $this->belongsToMany(User::class, 'user_workshifts', 'work_shift_id', 'user_id');
+        return $this->belongsToMany(User::class, 'user_work_shifts', 'work_shift_id', 'user_id');
     }
 }
