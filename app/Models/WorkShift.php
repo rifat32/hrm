@@ -24,7 +24,7 @@ class WorkShift extends Model
 
 
     public function details(){
-        return $this->belongsTo(WorkShiftDetail::class,'work_shift_id', 'id');
+        return $this->hasMany(WorkShiftDetail::class,'work_shift_id', 'id');
     }
 
     public function departments() {

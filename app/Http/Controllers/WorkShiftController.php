@@ -8,6 +8,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\WorkShift;
+use App\Models\WorkShiftDetail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,63 +31,63 @@ class WorkShiftController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
- *     @OA\Property(property="type", type="string", format="string", example="regular"),
- *  *     @OA\Property(property="description", type="string", format="string", example="description"),
- *
- *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
+     *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
+     *     @OA\Property(property="type", type="string", format="string", example="regular"),
+     *  *     @OA\Property(property="description", type="string", format="string", example="description"),
+     *
+     *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
 
- *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
- * *     @OA\Property(property="details", type="string", format="array", example={
- *         {
- *             "off_day": "0",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "1",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "2",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "3",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "4",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "5",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "6",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         }
- *     }),
+     *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
+     * *     @OA\Property(property="details", type="string", format="array", example={
+     *         {
+     *             "off_day": "0",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "1",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "2",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "3",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "4",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "5",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "6",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         }
+     *     }),
 
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-11-16"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-11-16"),
- *
- *
- *
+     *     @OA\Property(property="start_date", type="string", format="date", example="2023-11-16"),
+     *     @OA\Property(property="end_date", type="string", format="date", example="2023-11-16"),
+     *
+     *
+     *
      *
      *         ),
      *      ),
@@ -145,23 +146,23 @@ class WorkShiftController extends Controller
                     ], $check_employee["status"]);
                 }
 
-               $check_department = $this->checkDepartments($request_data["departments"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
+                $check_department = $this->checkDepartments($request_data["departments"]);
+                if (!$check_department["ok"]) {
+                    return response()->json([
+                        "message" => $check_department["message"]
+                    ], $check_department["status"]);
+                }
 
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_active"] = true;
-                    $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["is_active"] = true;
+                $request_data["created_by"] = $request->user()->id;
 
                 $request_data["attendances_count"] = 0;
                 $work_shift =  WorkShift::create($request_data);
 
-                $work_shift->departments()->sync($request_data['departments'],[]);
-                $work_shift->users()->sync($request_data['users'],[]);
-                $work_shift->details()->sync($request_data['details'],[]);
+                $work_shift->departments()->sync($request_data['departments'], []);
+                $work_shift->users()->sync($request_data['users'], []);
+                $work_shift->details()->createMany($request_data['details']);
 
 
                 return response($work_shift, 201);
@@ -187,61 +188,61 @@ class WorkShiftController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
- *     @OA\Property(property="type", type="string", format="string", example="regular"),
- *     @OA\Property(property="description", type="string", format="string", example="description"),
- *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
+     *     @OA\Property(property="type", type="string", format="string", example="regular"),
+     *     @OA\Property(property="description", type="string", format="string", example="description"),
+     *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
 
- *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
- * *     @OA\Property(property="details", type="string", format="array", example={
- *         {
- *             "off_day": "0",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "1",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "2",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "3",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "4",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "5",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         },
- *         {
- *             "off_day": "6",
- *             "start_at": "",
- *             "end_at": "",
- *             "is_weekend": 0
- *         }
- *     }),
+     *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
+     * *     @OA\Property(property="details", type="string", format="array", example={
+     *         {
+     *             "off_day": "0",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "1",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "2",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "3",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "4",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "5",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "off_day": "6",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         }
+     *     }),
 
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-11-16"),
- *     @OA\Property(property="end_date", type="string", format="date", example=""),
- *
+     *     @OA\Property(property="start_date", type="string", format="date", example="2023-11-16"),
+     *     @OA\Property(property="end_date", type="string", format="date", example=""),
+     *
 
      *
      *         ),
@@ -301,11 +302,11 @@ class WorkShiftController extends Controller
                     ], $check_employee["status"]);
                 }
                 $check_department = $this->checkDepartments($request_data["departments"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
+                if (!$check_department["ok"]) {
+                    return response()->json([
+                        "message" => $check_department["message"]
+                    ], $check_department["status"]);
+                }
 
 
                 $work_shift_query_params = [
@@ -344,8 +345,8 @@ class WorkShiftController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $work_shift->departments()->sync($request_data['departments'],[]);
-                $work_shift->users()->sync($request_data['users'],[]);
+                $work_shift->departments()->sync($request_data['departments'], []);
+                $work_shift->users()->sync($request_data['users'], []);
                 return response($work_shift, 201);
             });
         } catch (Exception $e) {
@@ -660,7 +661,7 @@ class WorkShiftController extends Controller
             WorkShift::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
