@@ -16,7 +16,7 @@ class CreateSettingLeavesTable extends Migration
         Schema::create('setting_leaves', function (Blueprint $table) {
             $table->id();
             $table->tinyInteger('start_month');
-            $table->enum('approval_level', ['single', 'multi'])->default("single");
+            $table->enum('approval_level', ['single', 'multiple'])->default("single");
             $table->boolean('allow_bypass');
 
             $table->string('is_active')->default(false);

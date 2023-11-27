@@ -13,6 +13,9 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
+use App\Models\Role;
+use App\Models\SettingLeave;
+use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
 use Exception;
@@ -21,7 +24,7 @@ use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil,LeaveUtil;
 
     /**
      *
@@ -201,7 +204,7 @@ class LeaveController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-
+                $request_data["status"] = "pending";
 
                 $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
                 if (!$check_leave_type["ok"]) {
@@ -227,17 +230,17 @@ class LeaveController extends Controller
                 if (!$wors_shift) {
                     $department = Department::whereHas('users', function ($query) use ($request_data) {
                         $query->where('id', $request_data["employee_id"]);
-                    })->with('parentRecursive')->first();
+                    })->first();
 
                     if (!$department) {
                         return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
                     }
 
-                    $allDepartmentIds = $department->all_parent_ids;
+                    $all_department_ids = $department->all_parent_ids;
 
-                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($allDepartmentIds) {
-                        $query->whereIn('id', $allDepartmentIds);
-                    })->orderByRaw('FIELD(department_id, ' . implode(',', $allDepartmentIds) . ')')->first();
+                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
+                        $query->whereIn('id', $all_department_ids);
+                    })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
                     if (!$work_shift) {
                         return response()->json(["message" => "Please define workshift first"], 400);
                     }
@@ -289,8 +292,7 @@ class LeaveController extends Controller
                             array_push($leave_record_data_list, $leave_record_data);
                         }
                     }
-                }
-              else if ($request_data["leave_duration"] == "half_day") {
+                } else if ($request_data["leave_duration"] == "half_day") {
 
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
@@ -318,9 +320,7 @@ class LeaveController extends Controller
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
-                }
-
-               else if ($request_data["leave_duration"] == "hours") {
+                } else if ($request_data["leave_duration"] == "hours") {
 
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
@@ -430,13 +430,22 @@ class LeaveController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["created_by"] = $request->user()->id;
-
                 $leave_approval =  LeaveApproval::create($request_data);
                 if (!$leave_approval) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+
+            $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"]);
+            if(!$process_leave_approval["success"]) {
+                return response([
+                    "message" => $process_leave_approval["message"]
+                ], $process_leave_approval["status"]);
+            }
+
+
 
                 return response($leave_approval, 201);
             });
@@ -559,17 +568,17 @@ class LeaveController extends Controller
                 if (!$wors_shift) {
                     $department = Department::whereHas('users', function ($query) use ($request_data) {
                         $query->where('id', $request_data["employee_id"]);
-                    })->with('parentRecursive')->first();
+                    })->first();
 
                     if (!$department) {
                         return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
                     }
 
-                    $allDepartmentIds = $department->all_parent_ids;
+                    $all_department_ids = $department->all_parent_ids;
 
-                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($allDepartmentIds) {
-                        $query->whereIn('id', $allDepartmentIds);
-                    })->orderByRaw('FIELD(department_id, ' . implode(',', $allDepartmentIds) . ')')->first();
+                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
+                        $query->whereIn('id', $all_department_ids);
+                    })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
                     if (!$work_shift) {
                         return response()->json(["message" => "Please define workshift first"], 400);
                     }
@@ -621,8 +630,7 @@ class LeaveController extends Controller
                             array_push($leave_record_data_list, $leave_record_data);
                         }
                     }
-                }
-              else if ($request_data["leave_duration"] == "half_day") {
+                } else if ($request_data["leave_duration"] == "half_day") {
 
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
@@ -650,9 +658,7 @@ class LeaveController extends Controller
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
-                }
-
-               else if ($request_data["leave_duration"] == "hours") {
+                } else if ($request_data["leave_duration"] == "hours") {
 
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;

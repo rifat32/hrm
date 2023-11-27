@@ -40,7 +40,19 @@ class Department extends Model
 
         return array_reverse($parentIds); // Reverse the array to have the top-level parent (father) first
     }
+    public function getAllParentDataAttribute()
+    {
+        $parentData = [$this]; // Start with the current department's data
 
+        $department = $this;
+
+        while ($department->parentRecursive) {
+            $parentData[] = $department->parentRecursive;
+            $department = $department->parentRecursive;
+        }
+
+        return array_reverse($parentData); // Reverse the array to have the top-level parent (father) first
+    }
 
 
 

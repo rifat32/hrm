@@ -120,7 +120,7 @@ trait BusinessUtil
                 "message" => "Manager belongs to another business."
             ];
         }
-        if (!$user->hasRole("business_admin")){
+        if (!$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))){
             return [
                 "ok" => false,
                 "status" => 403,
@@ -150,6 +150,7 @@ trait BusinessUtil
                     "message" => "Employee belongs to another business."
                 ];
             }
+
             if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
                 return [
                     "ok" => false,
