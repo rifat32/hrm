@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LeaveApproveRequest;
+use App\Http\Requests\LeaveBypassRequest;
 use App\Http\Requests\LeaveCreateRequest;
 use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
@@ -251,7 +252,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off_day" => $dayNumber
+                        "off" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -278,7 +279,7 @@ class LeaveController extends Controller
                         $dateString = $leave_date;
                         $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                         $work_shift_details =  $work_shift->details()->where([
-                            "off_day" => $dayNumber
+                            "off" => $dayNumber
                         ])
                             ->first();
                         if (!$work_shift_details) {
@@ -297,7 +298,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off_day" => $dayNumber
+                        "off" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -325,7 +326,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off_day" => $dayNumber
+                        "off" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -454,6 +455,110 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/leaves/bypass",
+     *      operationId="bypassLeave",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to approve leave ",
+     *      description="This method is to approve leave",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *      @OA\Property(property="leave_id", type="number", format="number", example="Updated Christmas")
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function bypassLeave(LeaveBypassRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('leave_approve')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+                 $request_data["created_by"] = $request->user()->id;
+
+                 $setting_leave = SettingLeave::where([
+                    "business_id" => auth()->user()->business_id,
+                    "is_default" => 0
+                ])->first();
+
+                if(!$setting_leave->allow_bypass){
+                    return response([
+                        "message" => "bypass not allowed"
+                    ], 400);
+                }
+
+                $leave = Leave::where([
+                    "id" => $request_data["leave_id"],
+                    "business_id" => auth()->user()->business_id
+                ])
+                    ->first();
+
+                if (!$leave) {
+                    return response([
+                        "message" => "no leave found"
+                    ], 400);
+                }
+                $leave->status = "approved";
+
+                $leave->save();
+
+
+                return response($leave, 200);
+
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
     /**
      *
      * @OA\Put(
@@ -589,7 +694,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off_day" => $dayNumber
+                        "off" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -616,7 +721,7 @@ class LeaveController extends Controller
                         $dateString = $leave_date;
                         $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                         $work_shift_details =  $work_shift->details()->where([
-                            "off_day" => $dayNumber
+                            "off" => $dayNumber
                         ])
                             ->first();
                         if (!$work_shift_details) {
@@ -635,7 +740,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off_day" => $dayNumber
+                        "off" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -663,7 +768,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off_day" => $dayNumber
+                        "off" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {

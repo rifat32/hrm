@@ -15,7 +15,10 @@ class SettingLeave extends Model
       "business_id",
       "is_active",
       "is_default",
-      "created_by"
+      "created_by",
+
+
+
     ];
 
     public function special_users() {

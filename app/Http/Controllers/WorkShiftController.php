@@ -40,43 +40,43 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      * *     @OA\Property(property="details", type="string", format="array", example={
      *         {
-     *             "off_day": "0",
+     *             "off": "0",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "1",
+     *             "off": "1",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "2",
+     *             "off": "2",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "3",
+     *             "off": "3",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "4",
+     *             "off": "4",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "5",
+     *             "off": "5",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "6",
+     *             "off": "6",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
@@ -197,43 +197,43 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      * *     @OA\Property(property="details", type="string", format="array", example={
      *         {
-     *             "off_day": "0",
+     *             "off": "0",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "1",
+     *             "off": "1",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "2",
+     *             "off": "2",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "3",
+     *             "off": "3",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "4",
+     *             "off": "4",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "5",
+     *             "off": "5",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off_day": "6",
+     *             "off": "6",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
@@ -329,7 +329,7 @@ class WorkShiftController extends Controller
                         'users',
                         "description",
                         // 'attendances_count',
-                        'details',
+
                         'start_date',
                         'end_date',
                         // 'business_id',
@@ -347,6 +347,8 @@ class WorkShiftController extends Controller
                 }
                 $work_shift->departments()->sync($request_data['departments'], []);
                 $work_shift->users()->sync($request_data['users'], []);
+                $work_shift->details()->delete();
+                $work_shift->details()->createMany($request_data['details']);
                 return response($work_shift, 201);
             });
         } catch (Exception $e) {
@@ -451,7 +453,8 @@ class WorkShiftController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $work_shifts = WorkShift::where(
+            $work_shifts = WorkShift::with("details")
+                ->where(
                 [
                     "work_shifts.business_id" => $business_id
                 ]

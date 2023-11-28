@@ -28,8 +28,6 @@ trait LeaveUtil
                 "message" => "No leave request found",
                 "status" => 400
             ];
-
-
         }
         $leave->status = "progress";
         $setting_leave = SettingLeave::where([
@@ -39,7 +37,8 @@ trait LeaveUtil
 
         if ($setting_leave->approval_level == "single") {
             $leave_approvals = LeaveApproval::where([
-                "leave_id" => $leave->id
+                "leave_id" => $leave->id,
+                "is_approved" => 1
             ])->get();
             foreach ($leave_approvals as $single_leave_approval) {
                 $user = User::where([

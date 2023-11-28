@@ -17,7 +17,7 @@ class CreateWorkShiftDetailsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('work_shift_id');
             $table->foreign('work_shift_id')->references('id')->on('work_shifts')->onDelete('cascade');
-            $table->unsignedTinyInteger('off_day');
+            $table->unsignedTinyInteger('off');
             $table->boolean('is_weekend');
             $table->time('start_at')->nullable();
             $table->time('end_at')->nullable();

@@ -36,7 +36,7 @@ class WorkShiftCreateRequest extends FormRequest
             'users' => 'nullable|array',
             'users.*' => 'numeric',
             'details' => 'required|array|min:7|max:7',
-            'details.*.off_day' => 'required|numeric|between:0,6',
+            'details.*.off' => 'required|numeric|between:0,6',
             'details.*.is_weekend' => 'required|boolean',
             'details.*.start_at' => [
                 'nullable',

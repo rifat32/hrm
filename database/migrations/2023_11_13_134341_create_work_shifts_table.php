@@ -20,7 +20,7 @@ class CreateWorkShiftsTable extends Migration
 
             $table->enum('type', ['regular', 'scheduled'])->default("regular");
 
-            $table->json('details');
+
             $table->unsignedInteger('attendances_count')->default(0);
             $table->date('start_date');
             $table->date('end_date');
