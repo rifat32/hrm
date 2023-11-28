@@ -11,7 +11,7 @@ class WorkShiftDetail extends Model
 
     protected $fillable = [
         'work_shift_id',
-        'off',
+        'day',
         "start_at",
         'end_at',
         'is_weekend',

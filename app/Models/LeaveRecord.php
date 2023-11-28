@@ -16,4 +16,8 @@ class LeaveRecord extends Model
 
     ];
 
+    public function leave(){
+        return $this->belongsTo(Leave::class,'leave_id', 'id');
+    }
+
 }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
+use App\Models\Designation;
+use App\Models\EmploymentStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateRequest extends FormRequest
@@ -43,13 +46,47 @@ class UserUpdateRequest extends FormRequest
             'lat' => 'required|string',
             'long' => 'required|string',
             'role' => 'required|string',
-            'departments' => 'nullable|array',
-            'departments.*' => 'numeric',
+            'departments' => 'present|array',
+            'departments.*' =>  ['numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
 
             'gender' => 'required|string|in:male,female,other',
             'is_in_employee' => "nullable|boolean",
-            'designation_id' => "nullable|numeric",
-            'employment_status_id' => "nullable|numeric",
+            'designation_id' => [
+                "nullable",
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Designation::where('id', $value)
+                        ->where('designations.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
+            'employment_status_id' => [
+                "nullable",
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = EmploymentStatus::where('id', $value)
+                        ->where('employee_statuses.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
             'joining_date' => "nullable|date",
             'salary' => "nullable|string",
             'emergency_contact_details' => "nullable|array",

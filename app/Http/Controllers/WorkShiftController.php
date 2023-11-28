@@ -40,43 +40,43 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      * *     @OA\Property(property="details", type="string", format="array", example={
      *         {
-     *             "off": "0",
+     *             "day": "0",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "1",
+     *             "day": "1",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "2",
+     *             "day": "2",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "3",
+     *             "day": "3",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "4",
+     *             "day": "4",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "5",
+     *             "day": "5",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "6",
+     *             "day": "6",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
@@ -197,43 +197,43 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      * *     @OA\Property(property="details", type="string", format="array", example={
      *         {
-     *             "off": "0",
+     *             "day": "0",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "1",
+     *             "day": "1",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "2",
+     *             "day": "2",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "3",
+     *             "day": "3",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "4",
+     *             "day": "4",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "5",
+     *             "day": "5",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0
      *         },
      *         {
-     *             "off": "6",
+     *             "day": "6",
      *             "start_at": "",
      *             "end_at": "",
      *             "is_weekend": 0

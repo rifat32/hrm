@@ -133,7 +133,9 @@ Route::middleware(['auth:api'])->group(function () {
 // ********************************************
 
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
-Route::get('/v1.0/users/get-by-id/{id}', [UserManagementController::class, "getUserById"]);
+Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
+Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
+
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);

@@ -252,7 +252,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off" => $dayNumber
+                        "day" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -279,7 +279,7 @@ class LeaveController extends Controller
                         $dateString = $leave_date;
                         $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                         $work_shift_details =  $work_shift->details()->where([
-                            "off" => $dayNumber
+                            "day" => $dayNumber
                         ])
                             ->first();
                         if (!$work_shift_details) {
@@ -298,7 +298,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off" => $dayNumber
+                        "day" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -326,7 +326,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off" => $dayNumber
+                        "day" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -694,7 +694,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off" => $dayNumber
+                        "day" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -721,7 +721,7 @@ class LeaveController extends Controller
                         $dateString = $leave_date;
                         $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                         $work_shift_details =  $work_shift->details()->where([
-                            "off" => $dayNumber
+                            "day" => $dayNumber
                         ])
                             ->first();
                         if (!$work_shift_details) {
@@ -740,7 +740,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off" => $dayNumber
+                        "day" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {
@@ -768,7 +768,7 @@ class LeaveController extends Controller
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
-                        "off" => $dayNumber
+                        "day" => $dayNumber
                     ])
                         ->first();
                     if (!$work_shift_details) {

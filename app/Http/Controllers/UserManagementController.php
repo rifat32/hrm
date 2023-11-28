@@ -14,6 +14,9 @@ use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
 use App\Models\Booking;
 use App\Models\Business;
+use App\Models\Leave;
+use App\Models\LeaveRecord;
+use App\Models\SettingLeaveType;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
@@ -952,6 +955,118 @@ if(!empty($request_data["employee_id"])) {
             return $this->sendError($e, 500, $request);
         }
     }
+        /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/get-leave-details/{id}",
+     *      operationId="getLeaveDetailsByUserId",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLeaveDetailsByUserId($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $user = User::with("roles")
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                     return $query->where(function ($query) {
+                         return  $query->where('created_by', auth()->user()->id)
+                                 ->orWhere('id', auth()->user()->id)
+                                 ->orWhere('business_id', auth()->user()->business_id);
+                       });
+                 })
+                 ->first();
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+             $leave_types =   SettingLeaveType::where([
+                "business_id" => auth()->user()->id,
+             ])->get();
+
+             foreach($leave_types as $key=>$leave_type) {
+                $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use($user,$leave_type) {
+                    $query->where([
+                        "employee_id" =>$user->id,
+                        "leave_type_id" => $leave_type->id
+
+                ]);
+                })
+                ->get()
+                ->sum(function ($record) {
+                    return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
+                });
+                $leave_types[$key]->already_taken_hours = $total_recorded_hours;
+             }
+
+
+
+
+             return response()->json($leave_types, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Delete(
