@@ -45,7 +45,7 @@ class WorkShiftUpdateRequest extends FormRequest
                     $isWeekend = request('details')[$index]['is_weekend'] ?? false;
 
                     if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
-                        $fail("The $attribute field is required when type is scheduled and is_weekend is 1.");
+                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
                     }
                 },
             ],
@@ -57,11 +57,10 @@ class WorkShiftUpdateRequest extends FormRequest
                     $isWeekend = request('details')[$index]['is_weekend'] ?? false;
 
                     if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
-                        $fail("The $attribute field is required when type is scheduled and is_weekend is 1.");
+                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
                     }
                 },
             ],
-
 
         ];
     }

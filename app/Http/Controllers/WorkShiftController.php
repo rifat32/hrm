@@ -324,16 +324,14 @@ class WorkShiftController extends Controller
                 $work_shift  =  tap(WorkShift::where($work_shift_query_params))->update(
                     collect($request_data)->only([
                         'name',
-                        'type',
-                        'departments',
-                        'users',
-                        "description",
-                        // 'attendances_count',
-
-                        'start_date',
-                        'end_date',
-                        // 'business_id',
-                        // 'is_active',
+        'type',
+        "description",
+        'attendances_count',
+        'start_date',
+        'end_date',
+        // "is_active",
+        // "business_id",
+        // "created_by"
 
                     ])->toArray()
                 )
@@ -345,7 +343,9 @@ class WorkShiftController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+                $work_shift->departments()->delete();
                 $work_shift->departments()->sync($request_data['departments'], []);
+                $work_shift->users()->delete();
                 $work_shift->users()->sync($request_data['users'], []);
                 $work_shift->details()->delete();
                 $work_shift->details()->createMany($request_data['details']);
