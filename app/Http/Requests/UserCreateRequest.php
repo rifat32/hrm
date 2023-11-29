@@ -80,7 +80,7 @@ class UserCreateRequest extends FormRequest
             'numeric',
             function ($attribute, $value, $fail) {
                 $exists = EmploymentStatus::where('id', $value)
-                    ->where('employee_statuses.business_id', '=', auth()->user()->business_id)
+                    ->where('employment_statuses.business_id', '=', auth()->user()->business_id)
                     ->exists();
 
                 if (!$exists) {
