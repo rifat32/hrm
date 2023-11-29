@@ -17,6 +17,9 @@ class Announcement extends Model
         "business_id",
         "created_by"
     ];
+    public function creator() {
+        return $this->belongsTo(User::class, "created_by","id");
+    }
 
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_announcements', 'announcement_id', 'department_id');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 
 class HolidayUpdateRequest extends FormRequest
@@ -30,6 +31,19 @@ class HolidayUpdateRequest extends FormRequest
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'repeats_annually' => 'required|boolean',
+            'departments' => 'present|array',
+            'departments.*' => [
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
         ];
     }
 }

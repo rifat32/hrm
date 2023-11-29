@@ -40,7 +40,7 @@ class WorkShiftCreateRequest extends FormRequest
             'details.*.is_weekend' => 'required|boolean',
             'details.*.start_at' => [
                 'nullable',
-                'date_format:H:i',
+                'date_format:H:i:s',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
                     $isWeekend = request('details')[$index]['is_weekend'] ?? false;
@@ -52,7 +52,7 @@ class WorkShiftCreateRequest extends FormRequest
             ],
             'details.*.end_at' => [
                 'nullable',
-                'date_format:H:i',
+                'date_format:H:i:s',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
                     $isWeekend = request('details')[$index]['is_weekend'] ?? false;
