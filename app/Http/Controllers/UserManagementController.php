@@ -158,6 +158,7 @@ class UserManagementController extends Controller
  *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
+     *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
 
      * *  @OA\Property(property="password", type="string", format="boolean",example="12345678"),
      *  * *  @OA\Property(property="password_confirmation", type="string", format="boolean",example="12345678"),
@@ -317,7 +318,7 @@ class UserManagementController extends Controller
      *
      *      * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
      *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
-     *
+     *    *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
      *                @OA\Property(property="gender", type="string", format="string",example="male"),
      *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),

@@ -36,7 +36,7 @@ class BusinessUpdateRequest extends FormRequest
 
             'user.password' => 'nullable|confirmed|string|min:6',
             'user.phone' => 'nullable|string',
-            'user.image' => 'nullable',
+            'user.image' => 'nullable|string',
             'user.gender' => 'nullable|string|in:male,female,other',
 
             // 'user.address_line_1' => 'nullable|string',

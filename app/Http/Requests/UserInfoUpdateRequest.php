@@ -31,7 +31,7 @@ class UserInfoUpdateRequest extends FormRequest
             // 'email' => 'required|string|email|indisposable|max:255|unique:users',
             'password' => 'nullable|confirmed|string|min:6',
             'phone' => 'required|string',
-            'image' => 'nullable',
+            'image' => 'nullable|string',
             'address_line_1' => 'nullable',
             'address_line_2' => 'nullable',
             'country' => 'required|string',

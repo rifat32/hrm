@@ -33,7 +33,7 @@ class UserUpdateProfileRequest extends FormRequest
 
             'password' => 'nullable|confirmed|string|min:6',
             'phone' => 'required|string',
-            'image' => 'nullable',
+            'image' => 'nullable|string',
             'address_line_1' => 'nullable',
             'address_line_2' => 'nullable',
             'country' => 'required|string',

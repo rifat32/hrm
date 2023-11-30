@@ -42,6 +42,17 @@ class User extends Authenticatable
         "long",
         'email',
         'password',
+
+
+
+        'is_sponsorship_offered',
+        
+
+
+
+
+
+
         'business_id',
         'employee_id',
         "created_by",

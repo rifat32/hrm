@@ -2424,6 +2424,7 @@
                                         "example": {
                                             "id": 1,
                                             "first_Name": "Rifat",
+                                            "middle_Name": "Al-Ashwad",
                                             "last_Name": "Al-Ashwad",
                                             "email": "rifatalashwad@gmail.com",
                                             "password": "12345678",
@@ -2655,6 +2656,7 @@
                                         "example": {
                                             "first_Name": "Rifat",
                                             "last_Name": "Al-Ashwad",
+                                            "middle_Name": "Al-Ashwad",
                                             "email": "rifatalashwad@gmail.com",
                                             "password": "12345678",
                                             "password_confirmation": "12345678",
@@ -8405,6 +8407,175 @@
                 ]
             }
         },
+        "/v1.0/leaves/approve": {
+            "put": {
+                "tags": [
+                    "leaves"
+                ],
+                "summary": "This method is to approve leave ",
+                "description": "This method is to approve leave",
+                "operationId": "approveLeave",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "leave_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "is_approved": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/leaves/bypass": {
+            "put": {
+                "tags": [
+                    "leaves"
+                ],
+                "summary": "This method is to approve leave ",
+                "description": "This method is to approve leave",
+                "operationId": "bypassLeave",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "leave_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/leaves/{id}": {
             "get": {
                 "tags": [
@@ -11447,6 +11618,11 @@
                                             "user_create",
                                             "user_update"
                                         ]
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "description"
                                     }
                                 },
                                 "type": "object"
@@ -11539,6 +11715,11 @@
                                             "user_create",
                                             "user_update"
                                         ]
+                                    },
+                                    "is_default_for_business": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -13186,6 +13367,491 @@
                 ]
             }
         },
+        "/v1.0/tasks": {
+            "get": {
+                "tags": [
+                    "task"
+                ],
+                "summary": "This method is to get task listings  ",
+                "description": "This method is to get task listings ",
+                "operationId": "getTasks",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "task"
+                ],
+                "summary": "This method is to update task listing ",
+                "description": "This method is to update task listing",
+                "operationId": "updateTask",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Task X"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "A brief overview of Task X's objectives and scope."
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-06-30"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-12-31"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "progress"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "format": "integer",
+                                        "example": "1"
+                                    },
+                                    "parent_task_id": {
+                                        "type": "integer",
+                                        "format": "integer",
+                                        "example": "2"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "task"
+                ],
+                "summary": "This method is to store task listing",
+                "description": "This method is to store task listing",
+                "operationId": "createTask",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Task X"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "A brief overview of Task X's objectives and scope."
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-06-30"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-12-31"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "progress"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "format": "integer",
+                                        "example": "1"
+                                    },
+                                    "parent_task_id": {
+                                        "type": "integer",
+                                        "format": "integer",
+                                        "example": "2"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/tasks/{id}": {
+            "get": {
+                "tags": [
+                    "task"
+                ],
+                "summary": "This method is to get task listing by id",
+                "description": "This method is to get task listing by id",
+                "operationId": "getTaskById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/tasks/{ids}": {
+            "delete": {
+                "tags": [
+                    "task"
+                ],
+                "summary": "This method is to delete task listing by id",
+                "description": "This method is to delete task listing by id",
+                "operationId": "deleteTasksByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/user-image": {
             "post": {
                 "tags": [
@@ -13312,7 +13978,7 @@
                         "in": "query",
                         "description": "role",
                         "required": true,
-                        "example": "role"
+                        "example": "admin,manager"
                     }
                 ],
                 "responses": {
@@ -13409,6 +14075,11 @@
                                         "format": "string",
                                         "example": "Rifat"
                                     },
+                                    "middle_Name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "How was this?"
+                                    },
                                     "last_Name": {
                                         "type": "string",
                                         "format": "string",
@@ -13444,7 +14115,7 @@
                                         "format": "number",
                                         "example": "1"
                                     },
-                                    "salary": {
+                                    "salary_per_annum": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "10"
@@ -13617,6 +14288,11 @@
                                         "format": "string",
                                         "example": "Rifat"
                                     },
+                                    "middle_Name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Al"
+                                    },
                                     "last_Name": {
                                         "type": "string",
                                         "format": "string",
@@ -13647,7 +14323,7 @@
                                         "format": "number",
                                         "example": "1"
                                     },
-                                    "salary": {
+                                    "salary_per_annum": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "10"
@@ -13661,6 +14337,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "rifatalashwad0@gmail.com"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "...png"
                                     },
                                     "password": {
                                         "type": "string",
@@ -14132,6 +14813,80 @@
                 ]
             }
         },
+        "/v1.0/users/get-leave-details/{id}": {
+            "get": {
+                "tags": [
+                    "user_management"
+                ],
+                "summary": "This method is to get user by id",
+                "description": "This method is to get user by id",
+                "operationId": "getLeaveDetailsByUserId",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/users/{ids}": {
             "delete": {
                 "tags": [
@@ -14474,6 +15229,11 @@
                                         "format": "string",
                                         "example": "regular"
                                     },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "description"
+                                    },
                                     "departments": {
                                         "type": "string",
                                         "format": "array",
@@ -14498,43 +15258,43 @@
                                         "format": "array",
                                         "example": [
                                             {
-                                                "off": "0",
+                                                "day": "0",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "1",
+                                                "day": "1",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "2",
+                                                "day": "2",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "3",
+                                                "day": "3",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "4",
+                                                "day": "4",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "5",
+                                                "day": "5",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "6",
+                                                "day": "6",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
@@ -14636,6 +15396,11 @@
                                         "format": "string",
                                         "example": "regular"
                                     },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "description"
+                                    },
                                     "departments": {
                                         "type": "string",
                                         "format": "array",
@@ -14659,43 +15424,43 @@
                                         "format": "array",
                                         "example": [
                                             {
-                                                "off": "0",
+                                                "day": "0",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "1",
+                                                "day": "1",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "2",
+                                                "day": "2",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "3",
+                                                "day": "3",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "4",
+                                                "day": "4",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "5",
+                                                "day": "5",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0
                                             },
                                             {
-                                                "off": "6",
+                                                "day": "6",
                                                 "start_at": "",
                                                 "end_at": "",
                                                 "is_weekend": 0

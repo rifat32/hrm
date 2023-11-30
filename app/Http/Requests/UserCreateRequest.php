@@ -38,7 +38,7 @@ class UserCreateRequest extends FormRequest
 
         'password' => 'required|confirmed|string|min:6',
         'phone' => 'required|string',
-        'image' => 'nullable',
+        'image' => 'nullable|string',
         'address_line_1' => 'required|string',
         'address_line_2' => 'nullable',
         'country' => 'required|string',
