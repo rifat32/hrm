@@ -86,21 +86,24 @@ class JobPlatformController extends Controller
 
 
 
-
-
-
-
-                if ($request->user()->hasRole('superadmin')) {
-                    $request_data["business_id"] = NULL;
+                $request_data["business_id"] = NULL;
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 1;
+
+
+
+                // if ($request->user()->hasRole('superadmin')) {
+                //     $request_data["business_id"] = NULL;
+                // $request_data["is_active"] = 1;
+                // $request_data["is_default"] = 1;
                 // $request_data["created_by"] = $request->user()->id;
-                } else {
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_active"] = 1;
-                    $request_data["is_default"] = 0;
-                    // $request_data["created_by"] = $request->user()->id;
-                }
+                // }
+                // else {
+                //     $request_data["business_id"] = $request->user()->business_id;
+                //     $request_data["is_active"] = 1;
+                //     $request_data["is_default"] = 0;
+                //     // $request_data["created_by"] = $request->user()->id;
+                // }
 
 
 
@@ -186,14 +189,14 @@ class JobPlatformController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                // $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
 
 
                 $job_platform_query_params = [
                     "id" => $request_data["id"],
-                    "business_id" => $business_id
+                    // "business_id" => $business_id
                 ];
                 $job_platform_prev = JobPlatform::where($job_platform_query_params)
                     ->first();
@@ -202,20 +205,22 @@ class JobPlatformController extends Controller
                         "message" => "no job platform found"
                     ], 404);
                 }
-                if ($request->user()->hasRole('superadmin')) {
-                    if(!($job_platform_prev->business_id == NULL && $job_platform_prev->is_default == 1)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this job platform due to role restrictions."
-                        ], 403);
-                    }
 
-                } else {
-                    if(!($job_platform_prev->business_id == $request->user()->business_id)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this job platform due to role restrictions."
-                        ], 403);
-                    }
-                }
+                // if ($request->user()->hasRole('superadmin')) {
+                //     if(!($job_platform_prev->business_id == NULL && $job_platform_prev->is_default == 1)) {
+                //         return response()->json([
+                //             "message" => "You do not have permission to update this job platform due to role restrictions."
+                //         ], 403);
+                //     }
+
+                // }
+                // else {
+                //     if(!($job_platform_prev->business_id == $request->user()->business_id)) {
+                //         return response()->json([
+                //             "message" => "You do not have permission to update this job platform due to role restrictions."
+                //         ], 403);
+                //     }
+                // }
                 $job_platform  =  tap(JobPlatform::where($job_platform_query_params))->update(
                     collect($request_data)->only([
                         'name',
@@ -340,20 +345,23 @@ class JobPlatformController extends Controller
             }
 
 
-            $job_platforms = JobPlatform::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('job_platforms.business_id', NULL)
-                             ->where('job_platforms.is_default', 1);
+            $job_platforms = JobPlatform::when(!empty($request->search_key), function ($query) use ($request) {
+                return $query->where(function ($query) use ($request) {
+                    $term = $request->search_key;
+                    $query->where("job_platforms.name", "like", "%" . $term . "%")
+                        ->orWhere("job_platforms.description", "like", "%" . $term . "%");
+                });
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('job_platforms.business_id', $request->user()->business_id);
-            })
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        $query->where("job_platforms.name", "like", "%" . $term . "%")
-                            ->orWhere("job_platforms.description", "like", "%" . $term . "%");
-                    });
-                })
+
+            //     when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('job_platforms.business_id', NULL)
+            //                  ->where('job_platforms.is_default', 1);
+            // })
+            // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('job_platforms.business_id', $request->user()->business_id);
+            // })
+
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
@@ -451,13 +459,13 @@ class JobPlatformController extends Controller
             $job_platform =  JobPlatform::where([
                 "id" => $id,
             ])
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('job_platforms.business_id', NULL)
-                             ->where('job_platforms.is_default', 1);
-            })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('job_platforms.business_id', $request->user()->business_id);
-            })
+            // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('job_platforms.business_id', NULL)
+            //                  ->where('job_platforms.is_default', 1);
+            // })
+            // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('job_platforms.business_id', $request->user()->business_id);
+            // })
                 ->first();
             if (!$job_platform) {
                 return response()->json([

@@ -332,7 +332,7 @@ class AnnouncementController extends Controller
             $business_id =  $request->user()->business_id;
             $announcements = Announcement::with([
                 "creator" => function ($query) {
-                    $query->select('users.id', 'users.first_Name',
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
                 },
                 "departments" => function ($query) {

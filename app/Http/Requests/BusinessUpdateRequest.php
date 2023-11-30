@@ -27,6 +27,8 @@ class BusinessUpdateRequest extends FormRequest
         return [
             'user.id' => 'required|numeric|exists:users,id',
             'user.first_Name' => 'required|string|max:255',
+            'user.middle_Name' => 'nullable|string|max:255',
+
             'user.last_Name' => 'required|string|max:255',
             // 'user.email' => 'required|string|email|indisposable|max:255',
             // 'user.email' => 'required|string|email|max:255',
@@ -35,7 +37,8 @@ class BusinessUpdateRequest extends FormRequest
             'user.password' => 'nullable|confirmed|string|min:6',
             'user.phone' => 'nullable|string',
             'user.image' => 'nullable',
-            'user.gender' => 'required|string|in:male,female,other',
+            'user.gender' => 'nullable|string|in:male,female,other',
+
             // 'user.address_line_1' => 'nullable|string',
             // 'user.address_line_2' => 'nullable|string',
             // 'user.country' => 'nullable|string',

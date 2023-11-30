@@ -330,7 +330,16 @@ class HolidayController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $holidays = Holiday::where(
+            $holidays = Holiday::with([
+                "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "departments" => function ($query) {
+                    $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
+                }
+            ])
+            ->where(
                 [
                     "holidays.business_id" => $business_id
                 ]

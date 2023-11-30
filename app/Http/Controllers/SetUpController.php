@@ -113,13 +113,14 @@ return "swagger generated";
             $role = Role::where(["name" => $role_permission["role"]])->first();
             error_log($role_permission["role"]);
             $permissions = $role_permission["permissions"];
-            foreach ($permissions as $permission) {
-                if(!$role->hasPermissionTo($permission)){
-                    $role->givePermissionTo($permission);
-                }
+            $role->syncPermissions($permissions);
+            // foreach ($permissions as $permission) {
+            //     if(!$role->hasPermissionTo($permission)){
+            //         $role->givePermissionTo($permission);
+            //     }
 
 
-            }
+            // }
         }
         $admin->assignRole("superadmin");
 
@@ -129,7 +130,7 @@ return "swagger generated";
 
     public function roleRefresh(Request $request)
     {
- // ###############################
+   // ###############################
         // permissions
         // ###############################
         $permissions =  config("setup-config.permissions");
@@ -144,7 +145,6 @@ return "swagger generated";
             }
 
         }
-
         // setup roles
         $roles = config("setup-config.roles");
         foreach ($roles as $role) {
@@ -152,21 +152,18 @@ return "swagger generated";
             'name' => $role,
             'guard_name' => 'api',
             "is_system_default" => 1,
-           "business_id" => NULL,
+            "business_id" => NULL,
             "is_default" => 1,
             ])
             ->exists()){
-             Role::create([
-                'name' => $role,
-                'guard_name' => 'api',
-                "is_system_default" => 1,
-               "business_id" => NULL,
-                "is_default" => 1,
-                "is_default_for_business" => (in_array($role ,["business_owner",
-                "business_admin",
-                "business_employee"])?1:0)
+             Role::create(['guard_name' => 'api', 'name' => $role,"is_system_default"=> 1, "business_id" => NULL,
+             "is_default" => 1,
+             "is_default_for_business" => (in_array($role ,["business_owner",
+             "business_admin",
+             "business_employee"])?1:0)
 
-             ]);
+
+            ]);
             }
 
         }
@@ -177,13 +174,7 @@ return "swagger generated";
             $role = Role::where(["name" => $role_permission["role"]])->first();
             error_log($role_permission["role"]);
             $permissions = $role_permission["permissions"];
-            foreach ($permissions as $permission) {
-                if(!$role->hasPermissionTo($permission)){
-                    $role->givePermissionTo($permission);
-                }
-
-
-            }
+            $role->syncPermissions($permissions);
         }
 
         return "You are done with setup";

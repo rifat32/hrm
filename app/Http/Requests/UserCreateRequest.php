@@ -28,6 +28,8 @@ class UserCreateRequest extends FormRequest
     {
         return [
         'first_Name' => 'required|string|max:255',
+        'middle_Name' => 'required|string|max:255',
+
         'last_Name' => 'required|string|max:255',
         'employee_id' => 'nullable|string',
 
@@ -60,7 +62,7 @@ class UserCreateRequest extends FormRequest
         ],
 
 
-        'gender' => 'required|string|in:male,female,other',
+        'gender' => 'nullable|string|in:male,female,other',
         'is_in_employee' => "nullable|boolean",
         'designation_id' => [
             "nullable",
@@ -90,7 +92,7 @@ class UserCreateRequest extends FormRequest
         ],
 
         'joining_date' => "nullable|date",
-        'salary' => "nullable|string",
+        'salary_per_annum' => "nullable|numeric",
         'emergency_contact_details' => "nullable|array",
 
 

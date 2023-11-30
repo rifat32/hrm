@@ -26,6 +26,7 @@ class UserUpdateProfileRequest extends FormRequest
         return [
 
             'first_Name' => 'required|string|max:255',
+            'middle_Name' => 'nullable|string|max:255',
             'last_Name' => 'required|string|max:255',
             // 'email' => 'required|string|email|indisposable|max:255|unique:users',
             'email' => 'required|string|unique:users,email,' . auth()->user()->id . ',id',
@@ -40,7 +41,7 @@ class UserUpdateProfileRequest extends FormRequest
             'postcode' => 'nullable|string',
             'lat' => 'required|string',
             'long' => 'required|string',
-            'gender' => 'required|string|in:male,female,other',
+            'gender' => 'nullable|string|in:male,female,other',
             'emergency_contact_details' => "nullable|array"
 
         ];

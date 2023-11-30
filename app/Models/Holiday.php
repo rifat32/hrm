@@ -14,5 +14,7 @@ class Holiday extends Model
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_holidays', 'holiday_id', 'department_id');
     }
-
+    public function creator() {
+        return $this->belongsTo(User::class, "created_by","id");
+    }
 }

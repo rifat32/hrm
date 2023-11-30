@@ -144,6 +144,8 @@ class UserManagementController extends Controller
      *         @OA\JsonContent(
      *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
+     *      *            @OA\Property(property="middle_Name", type="string", format="string",example="Al"),
+     *
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
      * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
      *
@@ -152,7 +154,7 @@ class UserManagementController extends Controller
      *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
-     *               @OA\Property(property="salary", type="string", format="string",example="10"),
+     *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
  *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
@@ -309,6 +311,7 @@ class UserManagementController extends Controller
      *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *           @OA\Property(property="id", type="string", format="number",example="1"),
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
+     *   *            @OA\Property(property="middle_Name", type="string", format="string",example="How was this?"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
      *
      *
@@ -319,7 +322,7 @@ class UserManagementController extends Controller
      *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
-     *               @OA\Property(property="salary", type="string", format="string",example="10"),
+     *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
  *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
@@ -448,6 +451,7 @@ if(!empty($request_data["employee_id"])) {
             $user  =  tap(User::where($userQueryTerms))->update(
                 collect($request_data)->only([
                     'first_Name',
+                    'middle_Name',
                     'last_Name',
                     'employee_id',
                     'password',
@@ -681,6 +685,7 @@ if(!empty($request_data["employee_id"])) {
             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
                 collect($request_data)->only([
                     'first_Name',
+                    'middle_Name',
                     'last_Name',
                     'password',
                     'phone',

@@ -395,6 +395,7 @@ if(!$user->hasRole('business_owner')) {
      *             @OA\Property(property="user", type="string", format="array",example={
      * "first_Name":"Rifat",
      * "last_Name":"Al-Ashwad",
+     * "middle_Name":"Al-Ashwad",
      * "email":"rifatalashwad@gmail.com",
      *  "password":"12345678",
      *  "password_confirmation":"12345678",
@@ -576,6 +577,8 @@ if(!$user->hasRole('business_owner')) {
      *             @OA\Property(property="user", type="string", format="array",example={
      *  * "id":1,
      * "first_Name":"Rifat",
+     *  * "middle_Name":"Al-Ashwad",
+     *
      * "last_Name":"Al-Ashwad",
      * "email":"rifatalashwad@gmail.com",
      *  "password":"12345678",
@@ -718,6 +721,7 @@ if(!$user->hasRole('business_owner')) {
             "id" => $request_data['user']["id"]
             ]))->update(collect($request_data['user'])->only([
             'first_Name',
+            'middle_Name',
             'last_Name',
             'phone',
             'image',
@@ -1218,7 +1222,7 @@ if(!$user->hasRole('business_owner')) {
            $businesses = Business::with("owner")
            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
             return   $query->where(function ($query) {
-                return   $query->where('business_id', auth()->user()->business_id)
+                return   $query->where('id', auth()->user()->business_id)
                     ->orWhere('created_by', auth()->user()->id)
                     ->orWhere('owner_id', auth()->user()->id);
                 });

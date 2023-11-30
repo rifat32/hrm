@@ -31,6 +31,7 @@ class AuthRegisterBusinessRequest extends FormRequest
 
         return [
             'user.first_Name' => 'required|string|max:255',
+            'user.middle_Name' => 'nullable|string|max:255',
             'user.last_Name' => 'required|string|max:255',
             // 'user.email' => 'required|string|email|indisposable|max:255|unique:users,email',
             'user.email' => 'required|string|email|max:255|unique:users,email',
@@ -41,7 +42,7 @@ class AuthRegisterBusinessRequest extends FormRequest
             'user.image' => 'nullable|string',
 
 
-            'user.gender' => 'required|string|in:male,female,other',
+            'user.gender' => 'nullable|string|in:male,female,other',
 
 
             // 'user.address_line_1' => 'nullable|string',

@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_Name',
         'last_Name',
+        'middle_Name',
         "color_theme_name",
         'emergency_contact_details',
         'gender',
@@ -29,7 +30,7 @@ class User extends Authenticatable
         'designation_id',
         'employment_status_id',
         'joining_date',
-        'salary',
+        'salary_per_annum',
         'phone',
         'image',
         'address_line_1',
