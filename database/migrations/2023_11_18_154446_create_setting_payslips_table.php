@@ -19,7 +19,7 @@ class CreateSettingPayslipsTable extends Migration
             $table->string('title');
             $table->string('address');
 
-            $table->string('is_active')->default(false);
+            $table->boolean('is_active')->default(false);
             $table->string('is_default')->default(false);
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

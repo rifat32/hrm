@@ -385,7 +385,86 @@ class DepartmentController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+  /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/departments",
+     *      operationId="getDepartmentsV2",
+     *      tags={"administrator.department"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
+
+     *      summary="This method is to get departments  ",
+     *      description="This method is to get departments ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getDepartmentsV2(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "");
+             if (!$request->user()->hasPermissionTo('department_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  $request->user()->business_id;
+             $department = Department::where(
+                 [
+                     "business_id" => $business_id,
+                     "parent_id" => NULL
+                 ]
+             )
+
+
+                 ->orderBy("departments.id", "ASC")
+                 ->select('departments.*')
+                ->first();
+
+
+                $department->all_children_data = $department->all_children_data;
+
+             return response()->json($department, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(

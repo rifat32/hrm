@@ -53,7 +53,27 @@ class Department extends Model
 
         return array_reverse($parentData); // Reverse the array to have the top-level parent (father) first
     }
+    public function childrenRecursive()
+    {
+        return $this->hasMany(Department::class, 'parent_id', 'id')->with('childrenRecursive');
+    }
+    public function getAllChildrenDataAttribute()
+    {
+        $childrenData = collect(); // Start with an empty collection
 
+        $this->load('childrenRecursive');
+
+        foreach ($this->childrenRecursive as $child) {
+            $childrenData->push($child);
+
+            if ($child->childrenRecursive->isNotEmpty()) {
+                // If the child has children, recursively get their data
+                $childrenData = $childrenData->merge($child->getAllChildrenDataAttribute());
+            }
+        }
+
+        return $childrenData;
+    }
 
 
     public function holidays() {

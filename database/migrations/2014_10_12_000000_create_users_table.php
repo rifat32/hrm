@@ -69,7 +69,7 @@ class CreateUsersTable extends Migration
             $table->string("background_image")->nullable();
 
 
-            $table->string('is_active')->default(false);
+            $table->boolean('is_active')->default(false);
             $table->unsignedBigInteger("business_id")->nullable(true);
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
       $table->unsignedBigInteger("created_by")->nullable();

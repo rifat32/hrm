@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
+use Exception;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class DepartmentCreateRequest extends FormRequest
 {
@@ -28,7 +31,16 @@ class DepartmentCreateRequest extends FormRequest
             'location' => 'nullable|string',
             'description' => 'nullable|string',
             'manager_id' => 'required|numeric',
-            'parent_id' => 'nullable|numeric',
+            'parent_id' => [
+                'numeric',
+                Rule::requiredIf(function () {
+                    $exists = Department::whereNull('parent_id')
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    return $exists;
+                }),
+            ],
 
         ];
     }
