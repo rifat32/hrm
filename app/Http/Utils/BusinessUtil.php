@@ -333,11 +333,20 @@ trait BusinessUtil
         ];
     }
 
-    public function storeDefaultsToBusiness($business_id) {
+    public function storeDefaultsToBusiness($business_id,$business_name,$owner_id,$address_line_1) {
+
+
+        Department::create([
+            "name" => $business_name,
+            "location" => $address_line_1,
+            "is_active" => 1,
+            "manager_id" => $owner_id,
+            "business_id" => $business_id,
+            "created_by" => $owner_id
+        ]);
+
 
         $attached_defaults = [];
-
-
         $defaultRoles = Role::where([
             "business_id" => NULL,
             "is_default" => 1,
