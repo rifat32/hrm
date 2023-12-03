@@ -456,6 +456,11 @@ class DepartmentController extends Controller
                  ->select('departments.*')
                 ->first();
 
+                if (!$department) {
+                    return response()->json([
+                        "message" => "no department found"
+                    ], 404);
+                }
 
                 $department->all_children_data = $department->all_children_data;
 

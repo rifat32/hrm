@@ -262,7 +262,9 @@ class SettingLeaveController extends Controller
             }
 
 
-            $setting_leave = SettingLeave::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            $setting_leave = SettingLeave::with("special_users","special_roles","paid_leave_employment_statuses","unpaid_leave_employment_statuses")
+
+            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
                 return $query->where('setting_leaves.business_id', NULL)
                     ->where('setting_leaves.is_default', 1);
             })

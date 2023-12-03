@@ -32,6 +32,7 @@ class DepartmentCreateRequest extends FormRequest
             'description' => 'nullable|string',
             'manager_id' => 'required|numeric',
             'parent_id' => [
+                "nullable",
                 'numeric',
                 Rule::requiredIf(function () {
                     $exists = Department::whereNull('parent_id')
