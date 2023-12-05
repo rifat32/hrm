@@ -15,8 +15,13 @@ class EmployeePassportDetail extends Model
         "passport_issue_date",
         "passport_expiry_date",
         "place_of_issue",
+        'created_by'
     ];
 
+    public function visa()
+    {
+        return $this->hasOne(EmployeeVisaDetail::class, 'employee_passport_details_id', 'id');
+    }
 
 
 }

@@ -224,28 +224,30 @@ class LeaveController extends Controller
 
 
 
-                $wors_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('id', $request_data["employee_id"]);
                 })->first();
-
-                if (!$wors_shift) {
-                    $department = Department::whereHas('users', function ($query) use ($request_data) {
-                        $query->where('id', $request_data["employee_id"]);
-                    })->first();
-
-                    if (!$department) {
-                        return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
-                    }
-
-                    $all_department_ids = $department->all_parent_ids;
-
-                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
-                        $query->whereIn('id', $all_department_ids);
-                    })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
-                    if (!$work_shift) {
-                        return response()->json(["message" => "Please define workshift first"], 400);
-                    }
+                if (!$work_shift) {
+                    return response()->json(["message" => "Please define workshift first"], 400);
                 }
+                // if (!$wors_shift) {
+                //     $department = Department::whereHas('users', function ($query) use ($request_data) {
+                //         $query->where('id', $request_data["employee_id"]);
+                //     })->first();
+
+                //     if (!$department) {
+                //         return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
+                //     }
+
+                //     $all_department_ids = $department->all_parent_ids;
+
+                //     $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
+                //         $query->whereIn('id', $all_department_ids);
+                //     })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
+                //     if (!$work_shift) {
+                //         return response()->json(["message" => "Please define workshift first"], 400);
+                //     }
+                // }
                 $leave_record_data_list = [];
                 if ($request_data["leave_duration"] == "single_day") {
 
@@ -666,28 +668,31 @@ class LeaveController extends Controller
                     ], 404);
                 }
 
-                $wors_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('id', $request_data["employee_id"]);
                 })->first();
 
-                if (!$wors_shift) {
-                    $department = Department::whereHas('users', function ($query) use ($request_data) {
-                        $query->where('id', $request_data["employee_id"]);
-                    })->first();
-
-                    if (!$department) {
-                        return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
-                    }
-
-                    $all_department_ids = $department->all_parent_ids;
-
-                    $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
-                        $query->whereIn('id', $all_department_ids);
-                    })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
-                    if (!$work_shift) {
-                        return response()->json(["message" => "Please define workshift first"], 400);
-                    }
+                if (!$work_shift) {
+                    return response()->json(["message" => "Please define workshift first"], 400);
                 }
+                // if (!$wors_shift) {
+                //     $department = Department::whereHas('users', function ($query) use ($request_data) {
+                //         $query->where('id', $request_data["employee_id"]);
+                //     })->first();
+
+                //     if (!$department) {
+                //         return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
+                //     }
+
+                //     $all_department_ids = $department->all_parent_ids;
+
+                //     $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
+                //         $query->whereIn('id', $all_department_ids);
+                //     })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
+                //     if (!$work_shift) {
+                //         return response()->json(["message" => "Please define workshift first"], 400);
+                //     }
+                // }
                 $leave_record_data_list = [];
                 if ($request_data["leave_duration"] == "single_day") {
 

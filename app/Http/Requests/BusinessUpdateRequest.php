@@ -115,7 +115,7 @@ class BusinessUpdateRequest extends FormRequest
         'user.phone.string' => 'The phone field must be a string.',
 
         'user.image.nullable' => 'The image field must be nullable.',
-        'user.gender.in' => 'The :attribute field must be in "male","female","other".',
+        'user.gender.in' => 'The gender field must be in "male","female","other".',
 
         'business.id.required' => 'The business ID field is required.',
         'business.id.numeric' => 'The business ID must be a numeric value.',

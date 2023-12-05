@@ -19,11 +19,15 @@ class CreateEmployeeSponsorshipsTable extends Migration
             $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
             $table->date("date_assigned");
             $table->date("expiry_date");
-            $table->date("expiry_date");
+
             $table->enum('status', ['pending', 'approved', 'denied', 'visa_granted'])->default("pending");
             $table->text("note");
-     
 
+            $table->unsignedBigInteger("created_by")->nullable();
+            $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
             $table->timestamps();
         });
     }

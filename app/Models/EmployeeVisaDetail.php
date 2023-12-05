@@ -16,6 +16,7 @@ class EmployeeVisaDetail extends Model
         "visa_expiry_date",
         "place_of_issue",
         "visa_docs",
+        'created_by'
     ];
 
 

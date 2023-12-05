@@ -71,12 +71,14 @@ class User extends Authenticatable
     }
 
     public function employment_status() {
-        return $this->belongsTo(Designation::class, 'employment_status_id', 'id');
+        return $this->belongsTo(EmploymentStatus::class, 'employment_status_id', 'id');
     }
 
     public function work_shifts() {
         return $this->belongsToMany(WorkShift::class, 'user_work_shifts', 'user_id', 'work_shift_id');
     }
+
+
 
     /**
      * The attributes that should be hidden for serialization.

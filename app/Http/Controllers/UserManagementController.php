@@ -6,6 +6,7 @@ use App\Http\Requests\GuestUserRegisterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\GetIdRequest;
+use App\Http\Requests\UserStoreDetailsRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Utils\BusinessUtil;
@@ -14,6 +15,9 @@ use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
 use App\Models\Booking;
 use App\Models\Business;
+use App\Models\EmployeePassportDetail;
+use App\Models\EmployeeSponsorship;
+use App\Models\EmployeeVisaDetail;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeaveType;
@@ -497,6 +501,223 @@ if(!empty($request_data["employee_id"])) {
             return $this->sendError($e, 500, $request);
         }
     }
+   /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/store-details",
+     *      operationId="storeUserDetails",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user details",
+     *      description="This method is to store user details",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+ *     @OA\Property(property="employee_id", type="number", format="integer", example="1"),
+ *     @OA\Property(property="date_assigned", type="string", format="date", example="2023-12-05"),
+ *     @OA\Property(property="expiry_date", type="string", format="date", example="2023-12-31"),
+ *     @OA\Property(property="status", type="string", format="string", example="pending", enum={"pending", "approved", "denied", "visa_granted"}),
+ *     @OA\Property(property="note", type="string", format="string", example="Additional note"),
+ *     @OA\Property(property="passport", type="string", format="string", example={
+ *    "passport_number": "ABC123",
+ *    "passport_issue_date": "2023-01-01",
+ *    "passport_expiry_date": "2024-01-01",
+ *    "place_of_issue": "City",
+ *    "visa": {
+ *      "BRP_number": "BRP123",
+ *      "visa_issue_date": "2023-01-01",
+ *      "visa_expiry_date": "2024-01-01",
+ *      "place_of_issue": "City",
+ *      "visa_docs": {
+ *        {
+ *          "file_name": "document1.pdf",
+ *          "description": "Description 1"
+ *        },
+ *        {
+*  *          "file_name": "document2.pdf",
+ *          "description": "Description 2"
+ *        }
+ *      }
+ *    }
+ *
+
+ *
+ * })
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function storeUserDetails(UserStoreDetailsRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+             $request_data["created_by"] = $request->user()->id;
+             if(!empty($request_data["passport"]))  {
+                $request_data["passport"] += ["created_by" => $request_data["created_by"]];
+
+             }
+             if(!empty($request_data["passport"]["visa"]))  {
+                $request_data["passport"]["visa"] += ["created_by" => $request_data["created_by"]];
+
+             }
+
+             $user = User::where([
+                 "id" => $request["employee_id"]
+             ])->first();
+
+
+             if (!$request->user()->hasRole('superadmin') && $user->business_id != $request->user()->business_id && $user->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+             if (!$request->user()->hasRole('superadmin') && $user->hasRole('superadmin')) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
+
+             $employee_sponsorship  =  EmployeeSponsorship::updateOrCreate(
+                [
+
+                    "employee_id" => $request_data["employee_id"],
+
+
+
+                ],
+
+                collect($request_data)->only([
+                    'employee_id',
+                    'date_assigned',
+                    'expiry_date',
+                    'status',
+                    'note',
+                    'created_by'
+                ])->toArray()
+
+            //     [
+            //     "employee_id" => $request_data["employee_id"],
+            //     'date_assigned' =>  $request_data["date_assigned"],
+            //     'expiry_date' =>  $request_data["expiry_date"],
+            //     'status' =>  $request_data["status"],
+            //     'note' =>  $request_data["note"],
+            //     'created_by' =>  $request_data["created_by"],
+            //    ]
+
+
+
+            );
+
+
+
+            if($request_data["status"] == "visa_granted"){
+                $employee_passport_details  =  EmployeePassportDetail::updateOrCreate(
+                    [
+                        "employee_sponsorship_id" => $employee_sponsorship->id,
+                    ],
+                    collect($request_data["passport"])->only([
+                        'employee_sponsorship_id',
+                        'passport_number',
+                        "passport_issue_date",
+                        "passport_expiry_date",
+                        "place_of_issue",
+                        'created_by'
+                    ])->toArray()
+
+                //     [
+                //     "employee_sponsorship_id" => $employee_sponsorship->id,
+                //     'passport_number' =>  $request_data["passport_number"],
+                //     'passport_issue_date' =>  $request_data["passport_issue_date"],
+                //     'passport_expiry_date' =>  $request_data["passport_expiry_date"],
+                //     'place_of_issue' =>  $request_data["place_of_issue"],
+                //     'created_by' =>  $request_data["created_by"],
+                //    ]
+
+                );
+
+
+                $employee_visa_details  =  EmployeeVisaDetail::updateOrCreate(
+                    [
+                        "employee_passport_details_id" => $employee_passport_details->id,
+                    ],
+                    collect($request_data["passport"]["visa"])->only([
+                        'employee_passport_details_id',
+                        'BRP_number',
+                        "visa_issue_date",
+                        "visa_expiry_date",
+                        "place_of_issue",
+                        "visa_docs",
+                        'created_by'
+                    ])->toArray()
+                //     [
+                //     "employee_passport_details_id" => $employee_passport_details->id,
+                //     'BRP_number' =>  $request_data["BRP_number"],
+                //     'visa_issue_date' =>  $request_data["visa_issue_date"],
+                //     'visa_expiry_date' =>  $request_data["visa_expiry_date"],
+                //     'place_of_issue' =>  $request_data["place_of_issue"],
+                //     'visa_docs' =>  $request_data["visa_docs"],
+                //     'created_by' =>  $request_data["created_by"],
+                //    ]
+
+                );
+
+            }
+
+
+            $employee_sponsorship->load(['passport.visa']);
+
+             return response($employee_sponsorship, 200);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
     /**
      *
      * @OA\Put(
@@ -933,7 +1154,14 @@ if(!empty($request_data["employee_id"])) {
                 ], 401);
             }
 
-            $user = User::with("roles","departments","designation","employment_status","work_shifts")
+            $user = User::with([
+                "roles",
+                "departments",
+                "designation",
+                "employment_status",
+
+            ]
+            )
                 ->where([
                     "id" => $id
                 ])
@@ -953,7 +1181,7 @@ if(!empty($request_data["employee_id"])) {
             // ->whereHas('roles', function ($query) {
             //     // return $query->where('name','!=', 'customer');
             // });
-
+            $user->work_shift = $user->work_shifts()->first();
 
             return response()->json($user, 200);
         } catch (Exception $e) {
