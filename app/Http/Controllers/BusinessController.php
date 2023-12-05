@@ -521,7 +521,6 @@ if(!$user->hasRole('business_owner')) {
 
   //  business info ##############
 
-
         $request_data['business']['status'] = "pending";
         $request_data['business']['owner_id'] = $user->id;
         $request_data['business']['created_by'] = $request->user()->id;
@@ -532,9 +531,6 @@ if(!$user->hasRole('business_owner')) {
         $user->email_verified_at = now();
         $user->business_id = $business->id;
         $user->save();
-
-
-
 
 
   // end business info ##############

@@ -46,7 +46,7 @@ class User extends Authenticatable
 
 
         'is_sponsorship_offered',
-        
+
 
 
 
@@ -65,6 +65,14 @@ class User extends Authenticatable
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
     }
 
+
+    public function designation() {
+        return $this->belongsTo(Designation::class, 'designation_id', 'id');
+    }
+
+    public function employment_status() {
+        return $this->belongsTo(Designation::class, 'employment_status_id', 'id');
+    }
 
     public function work_shifts() {
         return $this->belongsToMany(WorkShift::class, 'user_work_shifts', 'user_id', 'work_shift_id');

@@ -98,7 +98,14 @@ class DepartmentController extends Controller
                             "message" => $check_department["message"]
                         ], $check_department["status"]);
                     }
+                } else {
+                    $parent_department = Department::whereNull('parent_id')
+                    ->where('departments.business_id', '=', auth()->user()->business_id)
+                    ->first();
+
+                    $request_data["parent_id"] = $parent_department["id"];
                 }
+
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
@@ -184,12 +191,20 @@ class DepartmentController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
+
+
+
+
+
+
+
                 $check_manager = $this->checkManager($request_data["manager_id"]);
                 if (!$check_manager["ok"]) {
                     return response()->json([
                         "message" => $check_manager["message"]
                     ], $check_manager["status"]);
                 }
+
                 if (!empty($request_data["parent_id"])) {
                     $check_department = $this->checkDepartment($request_data["parent_id"]);
                     if (!$check_department["ok"]) {
@@ -197,6 +212,12 @@ class DepartmentController extends Controller
                             "message" => $check_department["message"]
                         ], $check_department["status"]);
                     }
+                } else {
+                    $parent_department = Department::whereNull('parent_id')
+                    ->where('departments.business_id', '=', auth()->user()->business_id)
+                    ->first();
+
+                    $request_data["parent_id"] = $parent_department["id"];
                 }
 
                 $department_query_params = [
@@ -341,6 +362,7 @@ class DepartmentController extends Controller
                     "business_id" => $business_id
                 ]
             )
+            ->whereNotNull("parent_id")
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;

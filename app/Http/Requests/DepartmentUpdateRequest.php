@@ -34,14 +34,6 @@ class DepartmentUpdateRequest extends FormRequest
             'parent_id' => [
                 "nullable",
                 'numeric',
-                Rule::requiredIf(function () {
-                    $exists = Department::whereNull('parent_id')
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    return $exists;
-
-                }),
             ],
 
         ];

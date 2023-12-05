@@ -933,7 +933,7 @@ if(!empty($request_data["employee_id"])) {
                 ], 401);
             }
 
-            $user = User::with("roles")
+            $user = User::with("roles","departments","designation","employment_status","work_shifts")
                 ->where([
                     "id" => $id
                 ])
