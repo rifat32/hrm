@@ -42,7 +42,7 @@ class UserManagementController extends Controller
      * @OA\Post(
      *      path="/v1.0/users/multiple-file-upload",
      *      operationId="createUserFileMultiple",
-     *      tags={"leaves"},
+     *      tags={"user_management"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -1368,7 +1368,7 @@ if(!empty($request_data["employee_id"])) {
 
 
              $leave_types =   SettingLeaveType::where([
-                "business_id" => auth()->user()->id,
+                "business_id" => auth()->user()->business_id,
              ])->get();
 
              foreach($leave_types as $key=>$leave_type) {

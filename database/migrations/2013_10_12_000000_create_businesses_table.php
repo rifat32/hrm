@@ -19,7 +19,7 @@ class CreateBusinessesTable extends Migration
             $table->text("about")->nullable();
             $table->string("web_page")->nullable();
             $table->string("phone")->nullable();
-            $table->string("email")->unique();
+            $table->string("email")->nullable()->unique();
             $table->text("additional_information")->nullable();
             $table->string("address_line_1")->nullable();
             $table->string("address_line_2")->nullable();
