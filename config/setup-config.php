@@ -608,6 +608,7 @@ return [
     ],
     "user_image_location" => "user_image",
 
+    "user_files_location" => "user_files",
     "leave_files_location" => "leave_files",
 
     "candidate_files_location" => "candidate_files",
@@ -619,6 +620,7 @@ return [
 
 
 
+    "business_gallery_location" => "business_gallery",
     "business_background_image_location" => "business_background_image",
     "business_background_image_location_full" => "business_background_image/business_background_image.jpeg",
 

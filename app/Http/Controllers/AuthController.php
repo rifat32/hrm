@@ -16,7 +16,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\ForgetPasswordMail;
 use App\Mail\VerifyMail;
-
+use App\Models\Business;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -254,8 +254,27 @@ class AuthController extends Controller
 
             if(!$user->is_active) {
                 return response(['message' => 'User not active'], 403);
+            }
+
+            if($user->business_id) {
+                 $business = Business::where([
+                    "id" =>$user->business_id
+                 ])
+                 ->first();
+                 if(!$business) {
+                    return response(['message' => 'Your business not found'], 403);
+                 }
+                 if(!$business->is_active) {
+                    return response(['message' => 'Business not active'], 403);
+                }
 
             }
+
+
+
+
+
+
             $now = time(); // or your date as well
 $user_created_date = strtotime($user->created_at);
 $datediff = $now - $user_created_date;
@@ -1003,7 +1022,7 @@ try{
             } else {
                 unset($request_data['password']);
             }
-            $request_data['is_active'] = true;
+            // $request_data['is_active'] = true;
             $request_data['remember_token'] = Str::random(10);
 
             $user  =  tap(User::where(["id" => $request->user()->id]))->update(collect($request_data)->only([

@@ -32,7 +32,7 @@ class BusinessUpdateRequest extends FormRequest
             'user.last_Name' => 'required|string|max:255',
             // 'user.email' => 'required|string|email|indisposable|max:255',
             // 'user.email' => 'required|string|email|max:255',
-            'user.email' => 'required|string|email|unique:users,email,' . $this->user["id"] . ',id',
+            'user.email' => 'required|string|email|unique:users,email,' .   ($this->user["id"]?$this->user["id"]:"") . ',id',
 
             'user.password' => 'nullable|confirmed|string|min:6',
             'user.phone' => 'nullable|string',
@@ -53,7 +53,7 @@ class BusinessUpdateRequest extends FormRequest
             'business.web_page' => 'nullable|string',
             'business.phone' => 'nullable|string',
             // 'business.email' => 'required|string|email|indisposable|max:255',
-            'business.email' => 'nullable|string|unique:businesses,email,' . $this->business["id"] . ',id',
+            'business.email' => 'nullable|string|unique:businesses,email,' .  ($this->business["id"]?$this->business["id"]:"") . ',id',
             'business.additional_information' => 'nullable|string',
 
 
