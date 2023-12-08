@@ -408,6 +408,7 @@ Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
 Route::put('/v1.0/leaves/bypass', [LeaveController::class, "bypassLeave"]);
 Route::put('/v1.0/leaves', [LeaveController::class, "updateLeave"]);
 Route::get('/v1.0/leaves', [LeaveController::class, "getLeaves"]);
+Route::get('/v2.0/leaves', [LeaveController::class, "getLeavesV2"]);
 Route::get('/v1.0/leaves/{id}', [LeaveController::class, "getLeaveById"]);
 Route::delete('/v1.0/leaves/{ids}', [LeaveController::class, "deleteLeavesByIds"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

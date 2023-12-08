@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use App\Models\Role;
+use App\Models\SettingLeave;
+use App\Models\SettingLeaveType;
 
 class SetUpController extends Controller
 {
@@ -123,6 +125,17 @@ return "swagger generated";
             // }
         }
         $admin->assignRole("superadmin");
+
+
+        SettingLeave::create([
+            'start_month' => 1,
+            'approval_level' => "multiple",
+            'allow_bypass' => 1,
+          "business_id" => NULL,
+          "is_active" => 1,
+          "is_default" => 1,
+          "created_by" => $admin->id,
+        ]);
 
         return "You are done with setup";
     }
