@@ -606,6 +606,497 @@ return [
         // "business_update",
         // "business_view",
     ],
+
+    "beautified_permissions_titles" => [
+        "global_business_background_image_create" => "create",
+        "global_business_background_image_view" => "view",
+
+        "user_create" => "create",
+        "user_update" => "update",
+        "user_view" => "view",
+        "user_delete" => "delete",
+
+        "role_create" => "create",
+        "role_update" => "update",
+        "role_view" => "view",
+        "role_delete" => "delete",
+
+        "business_create" => "create",
+        "business_update" => "update",
+        "business_view" => "view",
+        "business_delete" => "delete",
+
+        "template_create" => "create",
+        "template_update" => "update",
+        "template_view" => "view",
+        "template_delete" => "delete",
+
+        "payment_type_create" => "create",
+        "payment_type_update" => "update",
+        "payment_type_view" => "view",
+        "payment_type_delete" => "delete",
+
+        "product_category_create" => "create",
+        "product_category_update" => "update",
+        "product_category_view" => "view",
+        "product_category_delete" => "delete",
+
+        "product_create" => "create",
+        "product_update" => "update",
+        "product_view" => "view",
+        "product_delete" => "delete",
+
+        "department_create" => "create",
+        "department_update" => "update",
+        "department_view" => "view",
+        "department_delete" => "delete",
+
+        "job_listing_create" => "create",
+        "job_listing_update" => "update",
+        "job_listing_view" => "view",
+        "job_listing_delete" => "delete",
+
+        "project_create" => "create",
+        "project_update" => "update",
+        "project_view" => "view",
+        "project_delete" => "delete",
+
+        "task_create" => "create",
+        "task_update" => "update",
+        "task_view" => "view",
+        "task_delete" => "delete",
+
+
+
+
+
+        "holiday_create" => "create",
+        "holiday_update" => "update",
+        "holiday_view" => "view",
+        "holiday_delete" => "delete",
+
+        "work_shift_create" => "create",
+        "work_shift_update" => "update",
+        "work_shift_view" => "view",
+        "work_shift_delete" => "delete",
+
+        "announcement_create" => "create",
+        "announcement_update" => "update",
+        "announcement_view" => "view",
+        "announcement_delete" => "delete",
+
+
+
+
+        "job_platform_create" => "create",
+        "job_platform_update" => "update",
+        "job_platform_view" => "view",
+        "job_platform_delete" => "delete",
+
+
+        "designation_create" => "create",
+        "designation_update" => "update",
+        "designation_view" => "view",
+        "designation_delete" => "delete",
+
+        "employment_status_create" => "create",
+        "employment_status_update" => "update",
+        "employment_status_view" => "view",
+        "employment_status_delete" => "delete",
+
+        "setting_leave_type_create" => "create",
+        "setting_leave_type_update" => "update",
+        "setting_leave_type_view" => "view",
+        "setting_leave_type_delete" => "delete",
+
+        "setting_leave_create" => "create",
+
+
+
+
+        "leave_create" => "create",
+        "leave_update" => "update",
+        "leave_approve" => "approve",
+
+        "leave_view" => "view",
+        "leave_delete" => "delete",
+
+
+        "candidate_create" => "create",
+        "candidate_update" => "update",
+        "candidate_view" => "view",
+        "candidate_delete" => "delete",
+
+
+
+
+        "setting_attendance_create" => "create",
+
+
+        "attendance_create" => "create",
+        "attendance_update" => "update",
+        "attendance_view" => "view",
+        "attendance_delete" => "delete",
+
+
+        "setting_payroll_create" => "create",
+
+
+
+
+
+    ],
+
+    "beautified_permissions" => [
+        [
+            "header" => "global_business_background_image",
+            "permissions" => [
+                "global_business_background_image_create",
+                "global_business_background_image_view",
+            ],
+        ],
+
+        [
+            "header" => "user",
+            "permissions" => [
+       "user_create",
+       "user_update",
+       "user_view",
+       "user_delete",
+
+            ],
+        ],
+
+        [
+            "header" => "role",
+            "permissions" => [
+                "role_create",
+                "role_update",
+                "role_view",
+                "role_delete",
+
+            ],
+        ],
+
+        [
+            "header" => "business",
+            "permissions" => [
+                "business_create",
+                "business_update",
+                "business_view",
+                "business_delete",
+
+            ],
+        ],
+
+
+        [
+            "header" => "template",
+            "permissions" => [
+                "template_create",
+                "template_update",
+                "template_view",
+                "template_delete",
+
+
+
+            ],
+        ],
+
+
+        [
+            "header" => "payment_type",
+            "permissions" => [
+                "payment_type_create",
+                "payment_type_update",
+                "payment_type_view",
+                "payment_type_delete",
+
+
+            ],
+        ],
+
+        [
+            "header" => "product_category",
+            "permissions" => [
+                "product_category_create",
+                "product_category_update",
+                "product_category_view",
+                "product_category_delete",
+
+
+            ],
+        ],
+
+        [
+            "header" => "product",
+            "permissions" => [
+                "product_create",
+                "product_update",
+                "product_view",
+                "product_delete",
+
+
+
+            ],
+        ],
+
+
+        [
+            "header" => "department",
+            "permissions" => [
+                "department_create",
+                "department_update",
+                "department_view",
+                "department_delete",
+
+
+
+            ],
+        ],
+
+
+        [
+            "header" => "job_listing",
+            "permissions" => [
+                "job_listing_create",
+                "job_listing_update",
+                "job_listing_view",
+                "job_listing_delete",
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "project",
+            "permissions" => [
+
+                "project_create",
+                "project_update",
+                "project_view",
+                "project_delete",
+
+
+            ],
+        ],
+
+
+        [
+            "header" => "task",
+            "permissions" => [
+                "task_create",
+       "task_update",
+       "task_view",
+       "task_delete",
+
+
+
+
+            ],
+        ],
+
+
+        [
+            "header" => "holiday",
+            "permissions" => [
+                "holiday_create",
+       "holiday_update",
+       "holiday_view",
+       "holiday_delete",
+
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "work_shift",
+            "permissions" => [
+                "work_shift_create",
+                "work_shift_update",
+                "work_shift_view",
+                "work_shift_delete",
+
+
+
+            ],
+        ],
+
+
+
+        [
+            "header" => "announcement",
+            "permissions" => [
+                "announcement_create",
+                "announcement_update",
+                "announcement_view",
+                "announcement_delete",
+
+
+
+            ],
+        ],
+
+
+
+        [
+            "header" => "job_platform",
+            "permissions" => [
+
+       "job_platform_create",
+       "job_platform_update",
+       "job_platform_view",
+       "job_platform_delete",
+
+
+
+
+            ],
+        ],
+
+
+        [
+            "header" => "designation",
+            "permissions" => [
+                "designation_create",
+                "designation_update",
+                "designation_view",
+                "designation_delete",
+
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "employment_status",
+            "permissions" => [
+                "employment_status_create",
+                "employment_status_update",
+                "employment_status_view",
+                "employment_status_delete",
+
+
+
+
+
+            ],
+        ],
+        [
+            "header" => "setting_leave_type",
+            "permissions" => [
+                "setting_leave_type_create",
+                "setting_leave_type_update",
+                "setting_leave_type_view",
+                "setting_leave_type_delete",
+
+
+
+
+
+
+            ],
+        ],
+        [
+            "header" => "setting_leave",
+            "permissions" => [
+
+                "setting_leave_create",
+
+
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "leave",
+            "permissions" => [
+
+                "leave_create",
+                "leave_update",
+                "leave_approve",
+                "leave_view",
+                "leave_delete",
+
+
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "candidate",
+            "permissions" => [
+
+                "candidate_create",
+                "candidate_update",
+                "candidate_view",
+                "candidate_delete",
+
+
+
+
+
+            ],
+        ],
+
+
+
+        [
+            "header" => "setting_attendance",
+            "permissions" => [
+
+                "setting_attendance_create",
+
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "attendance",
+            "permissions" => [
+
+                "attendance_create",
+                "attendance_update",
+                "attendance_view",
+                "attendance_delete",
+
+
+
+
+            ],
+        ],
+
+        [
+            "header" => "setting_payroll",
+            "permissions" => [
+
+                "setting_payroll_create",
+
+
+
+            ],
+        ],
+
+
+
+
+
+
+    ],
+
+
+
+
     "user_image_location" => "user_image",
 
     "user_files_location" => "user_files",

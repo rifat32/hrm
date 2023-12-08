@@ -314,7 +314,7 @@ class RolesController extends Controller
                 ],401);
            }
 
-           $roles = Role::with('permissions:name,id')
+           $roles = Role::with('permissions:name,id',"users")
            ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
             return $query->where('business_id', NULL)->where('is_default', 1);
         })
@@ -637,6 +637,98 @@ class RolesController extends Controller
            }
 
            return response()->json($new_role_permissions, 200);
+        } catch(Exception $e){
+
+        return $this->sendError($e,500,$request);
+        }
+
+
+
+    }
+ /**
+    *
+     * @OA\Get(
+     *      path="/v1.0/initial-permissions",
+     *      operationId="getInitialPermissions",
+     *      tags={"user_management.role"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to get initioal permissions",
+     *      description="This method is to get initioal permissions",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function getInitialPermissions (Request $request) {
+
+        try{
+            $this->storeActivity($request,"");
+            if(!$request->user()->hasPermissionTo('role_view')){
+                return response()->json([
+                   "message" => "You can not perform this action"
+                ],401);
+           }
+           $permissions_main = config("setup-config.beautified_permissions");
+
+
+           $permissions_titles = config("setup-config.beautified_permissions_titles");
+
+           $new_permissions = [];
+
+           foreach ($permissions_main as $permissions) {
+
+               $data = [
+                   "header"        => $permissions["header"],
+                   "permissions" => [],
+               ];
+
+               foreach ($permissions["permissions"] as $permission) {
+
+
+                   $data["permissions"][] = [
+                       "name"  => $permission,
+                       "title" => $permissions_titles[$permission] ?? null,
+                   ];
+               }
+
+
+                   array_push($new_permissions, $data);
+
+           }
+
+           return response()->json($new_permissions, 200);
         } catch(Exception $e){
 
         return $this->sendError($e,500,$request);

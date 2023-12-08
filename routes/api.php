@@ -154,6 +154,7 @@ Route::get('/v1.0/users/validate/employee-id/{employee_id}', [UserManagementCont
 // user management section --role
 // ********************************************
 Route::get('/v1.0/initial-role-permissions', [RolesController::class, "getInitialRolePermissions"]);
+Route::get('/v1.0/initial-permissions', [RolesController::class, "getInitialPermissions"]);
 Route::post('/v1.0/roles', [RolesController::class, "createRole"]);
 Route::put('/v1.0/roles', [RolesController::class, "updateRole"]);
 Route::get('/v1.0/roles', [RolesController::class, "getRoles"]);
