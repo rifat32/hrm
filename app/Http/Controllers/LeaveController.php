@@ -225,7 +225,7 @@ class LeaveController extends Controller
 
 
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["employee_id"]);
                 })->first();
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
