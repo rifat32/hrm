@@ -23,6 +23,7 @@ use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeaveType;
 use App\Models\User;
+use App\Models\UserWorkShift;
 use App\Models\WorkShift;
 use Carbon\Carbon;
 use DateTime;
@@ -387,8 +388,8 @@ class UserManagementController extends Controller
             $user->departments()->sync($request_data['departments'],[]);
             $user->assignRole($request_data['role']);
             if(!empty($request_data["work_shift_id"])) {
-                $work_shift->users()->attach([$user->id]);
-              }
+                $work_shift->users()->attach($user->id);
+            }
             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
 
@@ -452,6 +453,7 @@ class UserManagementController extends Controller
      *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
+     *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
      *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
      * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
      *
@@ -552,6 +554,19 @@ if(!empty($request_data["employee_id"])) {
                             ], $check_department["status"]);
                         }
                 }
+                if(!empty($request_data["work_shift_id"])) {
+                    $work_shift =  WorkShift::where([
+                       "id" => $request_data["work_shift_id"],
+                       "business_id" =>auth()->user()->business_id
+                   ])
+                   ->first();
+                   if(!$work_shift) {
+                       return response()->json([
+                           "message" => "no work shift found"
+                       ], 403);
+                   }
+                  }
+
 
             if (!empty($request_data['password'])) {
                 $request_data['password'] = Hash::make($request_data['password']);
@@ -600,7 +615,13 @@ if(!empty($request_data["employee_id"])) {
             }
             $user->departments()->sync($request_data['departments'],[]);
             $user->syncRoles([$request_data['role']]);
-
+            if(!empty($request_data["work_shift_id"])) {
+                UserWorkShift::where([
+                    "user_id" => $user->id
+                ])
+                ->delete();
+                $work_shift->users()->attach($user->id);
+            }
 
 
             $user->roles = $user->roles->pluck('name');
