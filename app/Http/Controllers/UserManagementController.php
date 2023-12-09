@@ -23,6 +23,7 @@ use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeaveType;
 use App\Models\User;
+use App\Models\WorkShift;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -269,7 +270,9 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
+     *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
      *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+     *
      * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
      *
      *         ),
@@ -354,7 +357,19 @@ class UserManagementController extends Controller
                                 "message" => $check_department["message"]
                             ], $check_department["status"]);
                         }
+             }
+             if(!empty($request_data["work_shift_id"])) {
+                 $work_shift =  WorkShift::where([
+                    "id" => $request_data["work_shift_id"],
+                    "business_id" =>auth()->user()->business_id
+                ])
+                ->first();
+                if(!$work_shift) {
+                    return response()->json([
+                        "message" => "no work shift found"
+                    ], 403);
                 }
+               }
 
 
 
@@ -371,7 +386,9 @@ class UserManagementController extends Controller
             $user =  User::create($request_data);
             $user->departments()->sync($request_data['departments'],[]);
             $user->assignRole($request_data['role']);
-
+            if(!empty($request_data["work_shift_id"])) {
+                $work_shift->users()->attach([$user->id]);
+              }
             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
 

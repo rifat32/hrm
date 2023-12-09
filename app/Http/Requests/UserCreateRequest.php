@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
+use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserCreateRequest extends FormRequest
@@ -47,6 +48,11 @@ class UserCreateRequest extends FormRequest
         'lat' => 'required|string',
         'long' => 'required|string',
         'role' => 'required|string',
+
+        'work_shift_id' => [
+            "nullable",
+            'numeric'
+        ],
 
         'departments' => 'present|array',
         'departments.*' =>  ['numeric',

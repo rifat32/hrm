@@ -90,12 +90,24 @@ trait BusinessUtil
 
 
         $role  = Role::where(["name" => $role])->first();
+
+
         if (!$role){
             return [
                 "ok" => false,
                 "status" => 400,
                 "message" => "Role does not exists."
             ];
+        }
+
+        if(!empty(auth()->user()->business_id)) {
+            if ($role->business_id != auth()->user()->business_id){
+                return [
+                    "ok" => false,
+                    "status" => 400,
+                    "message" => "You don't have this role"
+                ];
+            }
         }
 
 
