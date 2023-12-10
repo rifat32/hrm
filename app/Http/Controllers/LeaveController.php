@@ -1331,26 +1331,31 @@ class LeaveController extends Controller
                     $startDate->addDay();
                 }
 
-                foreach ($employees as $employee) {
-                    $employee_leave_info = [];
-                    foreach ($dateArray as $date) {
 
-                        $leaves = Leave::where(
-                            [
-                                "leaves.business_id" => $business_id,
-                                "employee_id" => $employee->id
-                            ]
-                        )
-                            ->where('leaves.date', ">=", $request->start_date)
-                            ->where('leaves.date', "<=", $request->end_date . ' 23:59:59')
-                            ->get();
-                        $employee_leave_info[] = [
-                            'date' => $date,
-                            'is_on_leave' => $leaves->where('date', $date)->isNotEmpty(),
-                        ];
-                    }
-                    $employee->datewise_leave = $employee_leave_info;
-                }
+               // Step 1: Fetch leaves with a single query
+$leaves = Leave::where('business_id', $business_id)
+->whereIn('date', $dateArray)
+->whereIn('employee_id', $employees->pluck('id'))
+->get(['employee_id', 'date']);
+
+// Step 2: Organize leaves by employee_id and date
+$grouped_leaves = $leaves->groupBy(['employee_id', 'date']);
+
+// Step 3: Iterate through employees and populate leave information
+$employees->each(function ($employee) use ($dateArray, $grouped_leaves) {
+// Get leaves for the current employee
+$employee_leaves = $grouped_leaves->get($employee->id, collect());
+
+// Populate leave information
+$employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee_leaves) {
+    return [
+        'date' => $date,
+        'is_on_leave' => $employee_leaves->has($date),
+    ];
+});
+});
+
+
             }
 
 
