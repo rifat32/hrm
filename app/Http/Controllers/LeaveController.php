@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil,LeaveUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil;
 
     /**
      *
@@ -441,12 +441,12 @@ class LeaveController extends Controller
                 }
 
 
-            $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"]);
-            if(!$process_leave_approval["success"]) {
-                return response([
-                    "message" => $process_leave_approval["message"]
-                ], $process_leave_approval["status"]);
-            }
+                $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"]);
+                if (!$process_leave_approval["success"]) {
+                    return response([
+                        "message" => $process_leave_approval["message"]
+                    ], $process_leave_approval["status"]);
+                }
 
 
 
@@ -457,7 +457,7 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-  /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/leaves/bypass",
@@ -510,27 +510,27 @@ class LeaveController extends Controller
      *     )
      */
 
-     public function bypassLeave(LeaveBypassRequest $request)
-     {
+    public function bypassLeave(LeaveBypassRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "");
-             return DB::transaction(function () use ($request) {
-                 if (!$request->user()->hasPermissionTo('leave_approve')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
+        try {
+            $this->storeActivity($request, "");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('leave_approve')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
 
-                 $request_data = $request->validated();
-                 $request_data["created_by"] = $request->user()->id;
+                $request_data = $request->validated();
+                $request_data["created_by"] = $request->user()->id;
 
-                 $setting_leave = SettingLeave::where([
+                $setting_leave = SettingLeave::where([
                     "business_id" => auth()->user()->business_id,
                     "is_default" => 0
                 ])->first();
 
-                if(!$setting_leave->allow_bypass){
+                if (!$setting_leave->allow_bypass) {
                     return response([
                         "message" => "bypass not allowed"
                     ], 400);
@@ -553,13 +553,12 @@ class LeaveController extends Controller
 
 
                 return response($leave, 200);
-
-             });
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -982,7 +981,7 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-        /**
+    /**
      *
      * @OA\Get(
      *      path="/v2.0/leaves",
@@ -1074,95 +1073,107 @@ class LeaveController extends Controller
      *     )
      */
 
-     public function getLeavesV2(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "");
-             if (!$request->user()->hasPermissionTo('leave_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id =  $request->user()->business_id;
-             $leaves = Leave::with([
+    public function getLeavesV2(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('leave_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $leaves = Leave::with([
                 "employee" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name','users.image');
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name',
+                        'users.image'
+                    );
                 },
                 "employee.departments" => function ($query) {
                     // You can select specific fields from the departments table if needed
-                    $query->select('departments.id', 'departments.name',  "departments.location",
-                    "departments.description");
+                    $query->select(
+                        'departments.id',
+                        'departments.name',
+                        "departments.location",
+                        "departments.description"
+                    );
                 },
 
             ])
-             ->where(
-                 [
-                     "leaves.business_id" => $business_id
-                 ]
-             )
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
-                         // $query->where("leaves.name", "like", "%" . $term . "%")
-                         //     ->orWhere("leaves.description", "like", "%" . $term . "%");
-                     });
-                 })
-                 ->when(!empty($request->employee_id), function ($query) use ($request) {
+                ->where(
+                    [
+                        "leaves.business_id" => $business_id
+                    ]
+                )
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        // $query->where("leaves.name", "like", "%" . $term . "%")
+                        //     ->orWhere("leaves.description", "like", "%" . $term . "%");
+                    });
+                })
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
                     return $query->where('leaves.employee_id', $request->employee_id);
                 })
 
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('leaves.created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('leaves.created_at', "<=", $request->end_date . ' 23:59:59');
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("leaves.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("leaves.id", "DESC");
-                 })
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });
-                 $data["data"] = $leaves;
-                 $data["data_highlights"] = [];
-                //  if(!empty($request->per_page)) {
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('leaves.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('leaves.created_at', "<=", $request->end_date . ' 23:59:59');
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("leaves.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("leaves.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
+            $data["data"] = $leaves;
+            $data["data_highlights"] = [];
 
-                //  }
+            $leave_highlights = Leave::where(
+                [
+                    "leaves.business_id" => $business_id
+                ]
+            )
+                ->get();
+            $data["data_highlights"]["employees_on_leave"] = $leave_highlights->count();
 
-                 $data["data_highlights"]["employees_on_leave"] = $leaves->count();
+            $data["data_highlights"]["total_leave_hours"] = $leave_highlights->reduce(function ($carry, $leave) {
+                return $carry + $leave->records->sum(function ($record) {
+                    $startTime = \Carbon\Carbon::parse($record->start_time);
+                    $endTime = \Carbon\Carbon::parse($record->end_time);
 
-                 $data["data_highlights"]["total_leave_hours"] = $leaves->reduce(function ($carry, $leave) {
-                    return $carry + $leave->records->sum(function ($record) {
-                        $startTime = \Carbon\Carbon::parse($record->start_time);
-                        $endTime = \Carbon\Carbon::parse($record->end_time);
+                    return $startTime->diffInHours($endTime);
+                });
+            }, 0);
 
-                        return $startTime->diffInHours($endTime);
-                    });
-                }, 0);
+            $data["data_highlights"]["single_day_leaves"] = $leave_highlights->where([
+                "leave_duration" => "single_day"
+            ])->count();
 
-                $data["data_highlights"]["single_day_leaves"] = $leaves->where([
-                    "leave_duration" => "single_day"
-                ])->count();
-
-                $data["data_highlights"]["multiple_day_leaves"] = $leaves->where([
-                    "leave_duration" => "multiple_day"
-                ])->count();
+            $data["data_highlights"]["multiple_day_leaves"] = $leave_highlights->where([
+                "leave_duration" => "multiple_day"
+            ])->count();
 
 
-             return response()->json($data, 200);
-         } catch (Exception $e) {
-             return $this->sendError($e, 500, $request);
-         }
-     }
-          /**
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Get(
      *      path="/v3.0/leaves",
@@ -1254,94 +1265,105 @@ class LeaveController extends Controller
      *     )
      */
 
-     public function getLeavesV3(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "");
-             if (!$request->user()->hasPermissionTo('leave_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id =  $request->user()->business_id;
-             $leaves = Leave::with([
-                "employee" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name','users.image');
-                },
-                "employee.departments" => function ($query) {
-                    // You can select specific fields from the departments table if needed
-                    $query->select('departments.id', 'departments.name',  "departments.location",
-                    "departments.description");
-                },
-
-            ])
-             ->where(
-                 [
-                     "leaves.business_id" => $business_id
-                 ]
-             )
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
-                         // $query->where("leaves.name", "like", "%" . $term . "%")
-                         //     ->orWhere("leaves.description", "like", "%" . $term . "%");
-                     });
-                 })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->employee_id), function ($query) use ($request) {
+    public function getLeavesV3(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "");
+            if (!$request->user()->hasPermissionTo('leave_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $employees = Leave::leftJoin('users', 'leaves.employee_id', '=', 'users.id')
+                ->where(
+                    [
+                        "leaves.business_id" => $business_id
+                    ]
+                )
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        // $query->where("leaves.name", "like", "%" . $term . "%")
+                        //     ->orWhere("leaves.description", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
                     return $query->where('leaves.employee_id', $request->employee_id);
                 })
 
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('leaves.created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('leaves.created_at', "<=", $request->end_date . ' 23:59:59');
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("leaves.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("leaves.id", "DESC");
-                 })
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });
-                 $data["data"] = $leaves;
-                 $data["data_highlights"] = [];
-                //  if(!empty($request->per_page)) {
-
-                //  }
-
-                 $data["data_highlights"]["employees_on_leave"] = $leaves->count();
-
-                 $data["data_highlights"]["total_leave_hours"] = $leaves->reduce(function ($carry, $leave) {
-                    return $carry + $leave->records->sum(function ($record) {
-                        $startTime = \Carbon\Carbon::parse($record->start_time);
-                        $endTime = \Carbon\Carbon::parse($record->end_time);
-
-                        return $startTime->diffInHours($endTime);
-                    });
-                }, 0);
-
-                $data["data_highlights"]["single_day_leaves"] = $leaves->where([
-                    "leave_duration" => "single_day"
-                ])->count();
-
-                $data["data_highlights"]["multiple_day_leaves"] = $leaves->where([
-                    "leave_duration" => "multiple_day"
-                ])->count();
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('leaves.date', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('leaves.date', "<=", $request->end_date);
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("leaves.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("leaves.id", "DESC");
+                })
+                ->groupBy("users.id")
+                ->select(
+                    "users.id",
+                    "users.first_Name",
+                    "users.middle_Name",
+                    "users.last_Name",
+                )
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
 
 
-             return response()->json($data, 200);
-         } catch (Exception $e) {
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            if ((!empty($request->start_date) && !empty($request->end_date))) {
+
+                $startDate = Carbon::parse($request->start_date);
+                $endDate = Carbon::parse($request->end_date);
+                $dateArray = [];
+
+                while ($startDate->lte($endDate)) {
+                    $dateArray[] = $startDate->toDateString();
+                    $startDate->addDay();
+                }
+
+                foreach ($employees as $employee) {
+                    $employee_leave_info = [];
+                    foreach ($dateArray as $date) {
+
+                        $leaves = Leave::where(
+                            [
+                                "leaves.business_id" => $business_id,
+                                "employee_id" => $employee->id
+                            ]
+                        )
+                            ->where('leaves.date', ">=", $request->start_date)
+                            ->where('leaves.date', "<=", $request->end_date . ' 23:59:59')
+                            ->get();
+                        $employee_leave_info[] = [
+                            'date' => $date,
+                            'is_on_leave' => $leaves->where('date', $date)->isNotEmpty(),
+                        ];
+                    }
+                    $employee->datewise_leave = $employee_leave_info;
+                }
+            }
+
+
+
+
+
+
+
+            return response()->json($employees, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
