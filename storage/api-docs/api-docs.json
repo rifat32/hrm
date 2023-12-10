@@ -14513,6 +14513,11 @@
                                         "format": "boolean",
                                         "example": "customer"
                                     },
+                                    "work_shift_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
                                     "departments": {
                                         "type": "string",
                                         "format": "array",

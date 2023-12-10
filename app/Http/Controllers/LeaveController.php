@@ -1063,7 +1063,19 @@ class LeaveController extends Controller
                  ], 401);
              }
              $business_id =  $request->user()->business_id;
-             $leaves = Leave::where(
+             $leaves = Leave::with([
+                "employee" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name','users.image');
+                },
+                "employee.departments" => function ($query) {
+                    // You can select specific fields from the departments table if needed
+                    $query->select('departments.id', 'departments.name',  "departments.location",
+                    "departments.description");
+                },
+
+            ])
+             ->where(
                  [
                      "leaves.business_id" => $business_id
                  ]
