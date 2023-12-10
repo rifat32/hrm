@@ -53,20 +53,38 @@ class Department extends Model
 
         return array_reverse($parentData); // Reverse the array to have the top-level parent (father) first
     }
-    public function childrenRecursive()
+    public function children_recursive()
     {
-        return $this->hasMany(Department::class, 'parent_id', 'id')->with('childrenRecursive');
+        return $this->hasMany(Department::class, 'parent_id', 'id')->with(
+            [
+                "children_recursive" => function ($query) {
+                    $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
+                },
+                "manager" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                }
+
+            ]
+
+
+        )
+        ->addSelect([
+            'total_users_count' => DepartmentUser::selectRaw('COUNT(*)')
+                ->whereColumn('departments.id', 'department_id')
+        ]);
+      ;
     }
     public function getAllChildrenDataAttribute()
     {
         $childrenData = collect(); // Start with an empty collection
 
-        $this->load('childrenRecursive');
+        $this->load('children_recursive');
 
-        foreach ($this->childrenRecursive as $child) {
+        foreach ($this->children_recursive as $child) {
             $childrenData->push($child);
 
-            if ($child->childrenRecursive->isNotEmpty()) {
+            if ($child->children_recursive->isNotEmpty()) {
                 // If the child has children, recursively get their data
                 $childrenData = $childrenData->merge($child->getAllChildrenDataAttribute());
             }
@@ -76,12 +94,20 @@ class Department extends Model
     }
 
 
+    public function manager(){
+        return $this->belongsTo(User::class,'manager_id', 'id');
+    }
     public function holidays() {
         return $this->belongsToMany(Holiday::class, 'department_holidays', 'department_id', 'holiday_id');
     }
     public function users() {
         return $this->belongsToMany(User::class, 'department_users', 'department_id', 'user_id');
     }
+    public function getTotalUsersCountAttribute()
+    {
+        return $this->users()->count();
+    }
+
     public function announcements() {
         return $this->belongsToMany(Announcement::class, 'department_announcements', 'department_id', 'announcement_id');
     }

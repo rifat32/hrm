@@ -29,7 +29,7 @@ class UserCreateRequest extends FormRequest
     {
         return [
         'first_Name' => 'required|string|max:255',
-        'middle_Name' => 'required|string|max:255',
+        'middle_Name' => 'nullable|string|max:255',
 
         'last_Name' => 'required|string|max:255',
         'employee_id' => 'nullable|string',

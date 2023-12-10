@@ -8,6 +8,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -466,7 +467,14 @@ class DepartmentController extends Controller
                  ], 401);
              }
              $business_id =  $request->user()->business_id;
-             $department = Department::where(
+             $department = Department::   with([
+
+                "manager" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                }
+
+            ])->where(
                  [
                      "business_id" => $business_id,
                      "parent_id" => NULL
@@ -484,7 +492,12 @@ class DepartmentController extends Controller
                     ], 404);
                 }
 
-                $department->all_children_data = $department->all_children_data;
+                $department->children_recursive = $department->children_recursive;
+
+                $department->total_users_counts = User::where([
+                    "business_id" => $business_id
+                ])
+                ->count();
 
              return response()->json($department, 200);
          } catch (Exception $e) {

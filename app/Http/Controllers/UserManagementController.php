@@ -1119,6 +1119,14 @@ if(!empty($request_data["employee_id"])) {
      * required=true,
      * example="search_key"
      * ),
+     *   * *  @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *
      *    * *  @OA\Parameter(
      * name="role",
      * in="query",
@@ -1198,17 +1206,23 @@ if(!empty($request_data["employee_id"])) {
                         ->orWhere("phone", "like", "%" . $term . "%");
                 });
             })
+
+            ->when(!empty($request->is_in_employee), function ($query) use ($request) {
+                return $query->where('is_in_employee', intval($request->is_in_employee));
+            })
             ->when(!empty($request->start_date), function ($query) use ($request) {
                 return $query->where('created_at', ">=", $request->start_date);
             })
             ->when(!empty($request->end_date), function ($query) use ($request) {
                 return $query->where('created_at', "<=", $request->end_date);
             })
+
             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                 return $query->orderBy("users.id", $request->order_by);
             }, function ($query) {
                 return $query->orderBy("users.id", "DESC");
             })
+            ->select("users.*")
             ->when(!empty($request->per_page), function ($query) use ($request) {
                 return $query->paginate($request->per_page);
             }, function ($query) {
@@ -1221,6 +1235,181 @@ if(!empty($request_data["employee_id"])) {
             return $this->sendError($e, 500, $request);
         }
     }
+     /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/users",
+     *      operationId="getUsersV2",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *    * *  @OA\Parameter(
+     * name="role",
+     * in="query",
+     * description="role",
+     * required=true,
+     * example="admin,manager"
+     * ),
+     *      summary="This method is to get user",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUsersV2(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $users = User::with("roles")
+             ->when(!empty($request->role), function ($query) use ($request) {
+                 $rolesArray = explode(',', $request->role);
+               return   $query->whereHas("roles", function($q) use ($rolesArray) {
+                    return $q->whereIn("name", $rolesArray);
+                 });
+             })
+
+             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                 return $query->where(function ($query) {
+                     return  $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id);
+                   });
+             })
+             ->when(!empty($request->search_key), function ($query) use ($request) {
+                 $term = $request->search_key;
+                 return $query->where(function ($subquery) use ($term) {
+                     $subquery->where("first_Name", "like", "%" . $term . "%")
+                         ->orWhere("last_Name", "like", "%" . $term . "%")
+                         ->orWhere("email", "like", "%" . $term . "%")
+                         ->orWhere("phone", "like", "%" . $term . "%");
+                 });
+             })
+
+             ->when(!empty($request->is_in_employee), function ($query) use ($request) {
+                 return $query->where('is_in_employee', intval($request->is_in_employee));
+             })
+             ->when(!empty($request->start_date), function ($query) use ($request) {
+                 return $query->where('created_at', ">=", $request->start_date);
+             })
+             ->when(!empty($request->end_date), function ($query) use ($request) {
+                 return $query->where('created_at', "<=", $request->end_date);
+             })
+
+             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                 return $query->orderBy("users.id", $request->order_by);
+             }, function ($query) {
+                 return $query->orderBy("users.id", "DESC");
+             })
+             ->select("users.*")
+             ->when(!empty($request->per_page), function ($query) use ($request) {
+                 return $query->paginate($request->per_page);
+             }, function ($query) {
+                 return $query->get();
+             });
+
+
+             $data["data"] = $users;
+                 $data["data_highlights"] = [];
+                //  if(!empty($request->per_page)) {
+
+                //  }
+                $user_highlights = User::when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                                ->orWhere('id', auth()->user()->id)
+                                ->orWhere('business_id', auth()->user()->business_id);
+                      });
+                })
+                ->get();
+
+
+
+                 $data["data_highlights"]["total_active_users"] = $user_highlights->where([
+                    "is_active" => 1
+                 ])->count();
+                 $data["data_highlights"]["total_users"] = $user_highlights->count();
+
+             return response()->json($users, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(

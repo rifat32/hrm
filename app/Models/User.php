@@ -59,7 +59,9 @@ class User extends Authenticatable
          'is_active'
     ];
 
-
+    public function business() {
+        return $this->belongsTo(Business::class, 'business_id', 'id');
+    }
 
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');

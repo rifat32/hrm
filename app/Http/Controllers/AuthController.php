@@ -299,7 +299,7 @@ $datediff = $now - $user_created_date;
             $user->token = auth()->user()->createToken('authToken')->accessToken;
             $user->permissions = $user->getAllPermissions()->pluck('name');
             $user->roles = $user->roles->pluck('name');
-
+            $user->business = $user->business;
 
 
 
@@ -753,6 +753,7 @@ public function getUser (Request $request) {
         $user->token = auth()->user()->createToken('authToken')->accessToken;
         $user->permissions = $user->getAllPermissions()->pluck('name');
         $user->roles = $user->roles->pluck('name');
+        $user->business = $user->business;
 
         // $user->default_background_image = ("/".  config("setup-config.business_background_image_location_full"));
 
