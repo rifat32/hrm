@@ -321,6 +321,9 @@ class RolesController extends Controller
         ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
             return $query->where('business_id', $request->user()->business_id);
         })
+          ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
+                return $query->where('name', '!=', 'superadmin');
+            })
            ->when(!empty($request->search_key), function ($query) use ($request) {
                $term = $request->search_key;
                $query->where("name", "like", "%" . $term . "%");
@@ -491,7 +494,9 @@ class RolesController extends Controller
             ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
                 return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
             })
-
+            ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
+                return $query->where('name', '!=', 'superadmin');
+            })
 
                 ->select('id')
                 ->get()

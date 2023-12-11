@@ -771,6 +771,7 @@ if(!$user->hasRole('business_owner')) {
                 "logo",
                 "image",
                 "status",
+                "background_image"
                 // "is_active",
 
 
@@ -1036,6 +1037,7 @@ if(!$user->hasRole('business_owner')) {
                 "postcode",
                 "logo",
                 "image",
+                "background_image",
                 "status",
                 // "is_active",
 

@@ -68,6 +68,7 @@ class BusinessUpdateRequest extends FormRequest
 
             'business.logo' => 'nullable|string',
             'business.image' => 'nullable|string',
+            'business.background_image' => 'nullable|string',
 
             'business.images' => 'nullable|array',
             'business.images.*' => 'nullable|string',

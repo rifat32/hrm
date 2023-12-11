@@ -326,6 +326,14 @@ class UserManagementController extends Controller
 
             $request_data = $request->validated();
 
+
+            if(!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin"){
+                $error =  [
+                    "message" => "You can not create superadmin.",
+             ];
+                throw new Exception(json_encode($error),403);
+            }
+
             if(!empty($request_data["employee_id"])) {
                 $employee_id_exists =  DB::table( 'users' )->where([
                     'employee_id'=> $request_data['employee_id'],
@@ -1126,6 +1134,13 @@ if(!empty($request_data["employee_id"])) {
      * required=true,
      * example="1"
      * ),
+     *      *   * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
      *
      *    * *  @OA\Parameter(
      * name="role",
@@ -1210,6 +1225,10 @@ if(!empty($request_data["employee_id"])) {
             ->when(!empty($request->is_in_employee), function ($query) use ($request) {
                 return $query->where('is_in_employee', intval($request->is_in_employee));
             })
+            ->when(!empty($request->is_active), function ($query) use ($request) {
+                return $query->where('is_active', intval($request->is_active));
+            })
+
             ->when(!empty($request->start_date), function ($query) use ($request) {
                 return $query->where('created_at', ">=", $request->start_date);
             })
@@ -1279,6 +1298,14 @@ if(!empty($request_data["employee_id"])) {
      * required=true,
      * example="1"
      * ),
+     *   *   * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *
      *
      *    * *  @OA\Parameter(
      * name="role",
@@ -1363,6 +1390,10 @@ if(!empty($request_data["employee_id"])) {
              ->when(!empty($request->is_in_employee), function ($query) use ($request) {
                  return $query->where('is_in_employee', intval($request->is_in_employee));
              })
+             ->when(!empty($request->is_active), function ($query) use ($request) {
+                return $query->where('is_active', intval($request->is_active));
+            })
+
              ->when(!empty($request->start_date), function ($query) use ($request) {
                  return $query->where('created_at', ">=", $request->start_date);
              })

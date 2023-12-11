@@ -76,6 +76,7 @@ return [
             "role" => "reseller",
             "permissions" => [
 
+                "role_view",
 
                 "user_create",
                 "user_update",

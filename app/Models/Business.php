@@ -26,6 +26,7 @@ class Business extends Model
         "postcode",
         "logo",
         "image",
+        "background_image",
         "status",
          "is_active",
 
