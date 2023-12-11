@@ -1102,6 +1102,15 @@ class LeaveController extends Controller
                         "departments.description"
                     );
                 },
+                "leave_type" => function ($query) {
+                    $query->select(
+                        'setting_leave_types.id',
+                        'setting_leave_types.name',
+                        'setting_leave_types.type',
+                        'setting_leave_types.amount',
+
+                    );
+                },
 
             ])
                 ->where(
@@ -1147,6 +1156,23 @@ class LeaveController extends Controller
                     "leaves.business_id" => $business_id
                 ]
             )
+            ->when(!empty($request->search_key), function ($query) use ($request) {
+                return $query->where(function ($query) use ($request) {
+                    $term = $request->search_key;
+
+                });
+            })
+            ->when(!empty($request->employee_id), function ($query) use ($request) {
+                return $query->where('leaves.employee_id', $request->employee_id);
+            })
+
+
+            ->when(!empty($request->start_date), function ($query) use ($request) {
+                return $query->where('leaves.created_at', ">=", $request->start_date);
+            })
+            ->when(!empty($request->end_date), function ($query) use ($request) {
+                return $query->where('leaves.created_at', "<=", $request->end_date . ' 23:59:59');
+            })
                 ->get();
             $data["data_highlights"]["employees_on_leave"] = $leave_highlights->count();
 
