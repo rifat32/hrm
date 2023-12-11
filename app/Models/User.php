@@ -80,7 +80,9 @@ class User extends Authenticatable
         return $this->belongsToMany(WorkShift::class, 'user_work_shifts', 'user_id', 'work_shift_id');
     }
 
-
+    public function leaves() {
+        return $this->hasMany(Leave::class, 'employee_id', 'id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

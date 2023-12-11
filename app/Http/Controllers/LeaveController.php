@@ -1275,10 +1275,29 @@ class LeaveController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $employees = Leave::leftJoin('users', 'leaves.employee_id', '=', 'users.id')
+            $employees = User::with(['leaves' => function ($query) use ($request) {
+                $query->when(!empty($request->start_date), function ($query) use ($request) {
+                        return $query->where('date', '>=', $request->start_date);
+                    })
+                    ->when(!empty($request->end_date), function ($query) use ($request) {
+                        return $query->where('date', '<=', $request->end_date);
+                    });
+            }])
+            ->whereHas("leaves", function($q) use ($request)  {
+                $q->whereNotNull("employee_id")
+                  ->when(!empty($request->employee_id), function ($q) use ($request) {
+                      $q->where('employee_id', $request->employee_id);
+                  })
+                  ->when(!empty($request->start_date), function ($q) use ($request) {
+                      $q->where('date', '>=', $request->start_date);
+                  })
+                  ->when(!empty($request->end_date), function ($q) use ($request) {
+                      $q->where('date', '<=', $request->end_date);
+                  });
+            })
                 ->where(
                     [
-                        "leaves.business_id" => $business_id
+                        "users.business_id" => $business_id
                     ]
                 )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -1292,21 +1311,16 @@ class LeaveController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('leaves.employee_id', $request->employee_id);
+                    return $query->whereHas("leaves", function($q)use ($request)  {
+                        $q->where('employee_id', $request->employee_id);
+                    });
                 })
 
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('leaves.date', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('leaves.date', "<=", $request->end_date);
-                })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("leaves.id", $request->order_by);
+                    return $query->orderBy("users.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("leaves.id", "DESC");
+                    return $query->orderBy("users.id", "DESC");
                 })
-                ->groupBy("users.id")
                 ->select(
                     "users.id",
                     "users.first_Name",
@@ -1332,27 +1346,21 @@ class LeaveController extends Controller
                 }
 
 
-               // Step 1: Fetch leaves with a single query
-$leaves = Leave::where('business_id', $business_id)
-->whereIn('date', $dateArray)
-->whereIn('employee_id', $employees->pluck('id'))
-->get(['employee_id', 'date']);
 
-// Step 2: Organize leaves by employee_id and date
-$grouped_leaves = $leaves->groupBy(['employee_id', 'date']);
 
-// Step 3: Iterate through employees and populate leave information
-$employees->each(function ($employee) use ($dateArray, $grouped_leaves) {
+$employees->each(function ($employee) use ($dateArray) {
 // Get leaves for the current employee
-$employee_leaves = $grouped_leaves->get($employee->id, collect());
 
-// Populate leave information
-$employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee_leaves) {
+
+$employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee) {
     return [
         'date' => $date,
-        'is_on_leave' => $employee_leaves->has($date),
+        'is_on_leave' => $employee->leaves->contains('date', $date),
     ];
 });
+
+$employee->unsetRelation('leaves');
+
 });
 
 
