@@ -81,7 +81,7 @@ class JobListingController extends Controller
     public function createJobListing(JobListingCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('job_listing_create')) {
                     return response()->json([
@@ -180,7 +180,7 @@ class JobListingController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('job_listing_update')) {
                     return response()->json([
@@ -329,7 +329,7 @@ class JobListingController extends Controller
     public function getJobListings(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('job_listing_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -439,7 +439,7 @@ class JobListingController extends Controller
     public function getJobListingById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('job_listing_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -526,7 +526,7 @@ class JobListingController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('job_listing_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

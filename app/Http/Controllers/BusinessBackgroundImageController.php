@@ -80,7 +80,7 @@ class BusinessBackgroundImageController extends Controller
      public function updateBusinessBackgroundImage(ImageUploadRequest $request)
      {
          try{
-             $this->storeActivity($request,"");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('global_business_background_image_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -187,7 +187,7 @@ File::put(config_path('setup-config.php'), '<?php return ' . var_export(config('
      public function updateBusinessBackgroundImageByUser(ImageUploadRequest $request)
      {
          try{
-             $this->storeActivity($request,"");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
 
 
@@ -278,7 +278,7 @@ File::put(config_path('setup-config.php'), '<?php return ' . var_export(config('
     public function getBusinessBackgroundImage(Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             if (!$request->user()->hasPermissionTo('global_business_background_image_view')) {
                 return response()->json([

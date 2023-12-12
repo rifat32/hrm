@@ -72,7 +72,7 @@ class SettingPayrollController extends Controller
      public function createSettingPayrun(SettingPayrunCreateRequest $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              return DB::transaction(function () use ($request) {
                  if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
                      return response()->json([
@@ -220,7 +220,7 @@ class SettingPayrollController extends Controller
       public function getSettingPayrun(Request $request)
       {
           try {
-              $this->storeActivity($request, "");
+              $this->storeActivity($request, "DUMMY activity","DUMMY description");
               if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
                   return response()->json([
                       "message" => "You can not perform this action"
@@ -337,7 +337,7 @@ class SettingPayrollController extends Controller
      public function createSettingPayslipUploadLogo(ImageUploadRequest $request)
      {
          try{
-             $this->storeActivity($request,"");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if(!$request->user()->hasPermissionTo('setting_payroll_create')){
                   return response()->json([
                      "message" => "You can not perform this action"
@@ -361,7 +361,7 @@ class SettingPayrollController extends Controller
              return $this->sendError($e,500,$request);
          }
      }
-     
+
       /**
      *
      * @OA\Post(
@@ -421,7 +421,7 @@ class SettingPayrollController extends Controller
     public function createSettingPayslip(SettingPayslipCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
                     return response()->json([
@@ -562,7 +562,7 @@ class SettingPayrollController extends Controller
      public function getSettingPayslip(Request $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
                  return response()->json([
                      "message" => "You can not perform this action"

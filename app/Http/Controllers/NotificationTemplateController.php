@@ -78,7 +78,7 @@ class NotificationTemplateController extends Controller
     public function updateNotificationTemplate(NotificationTemplateUpdateRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return    DB::transaction(function () use (&$request) {
                 if (!$request->user()->hasPermissionTo('template_update')) {
                     return response()->json([
@@ -205,7 +205,7 @@ class NotificationTemplateController extends Controller
     public function getNotificationTemplates($perPage, Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -297,7 +297,7 @@ class NotificationTemplateController extends Controller
     public function getNotificationTemplateById($id, Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -373,7 +373,7 @@ class NotificationTemplateController extends Controller
     public function getNotificationTemplateTypes(Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"

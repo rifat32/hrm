@@ -77,7 +77,7 @@ class DepartmentController extends Controller
     public function createDepartment(DepartmentCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('department_create')) {
                     return response()->json([
@@ -183,7 +183,7 @@ class DepartmentController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('department_update')) {
                     return response()->json([
@@ -351,7 +351,7 @@ class DepartmentController extends Controller
     public function getDepartments(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('department_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -460,7 +460,7 @@ class DepartmentController extends Controller
      public function getDepartmentsV2(Request $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('department_view')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -563,7 +563,7 @@ class DepartmentController extends Controller
     public function getDepartmentById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('department_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -656,7 +656,7 @@ class DepartmentController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('department_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

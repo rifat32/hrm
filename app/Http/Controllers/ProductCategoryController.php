@@ -75,7 +75,7 @@ class ProductCategoryController extends Controller
  {
      try{
 
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
          if(!$request->user()->hasPermissionTo('product_category_create')){
               return response()->json([
@@ -157,7 +157,7 @@ class ProductCategoryController extends Controller
  {
 
      try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
          if(!$request->user()->hasPermissionTo('product_category_update')){
              return response()->json([
                 "message" => "You can not perform this action"
@@ -270,7 +270,7 @@ class ProductCategoryController extends Controller
 
  public function getProductCategories($perPage,Request $request) {
      try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
          if(!$request->user()->hasPermissionTo('product_category_view')){
              return response()->json([
                 "message" => "You can not perform this action"
@@ -363,7 +363,7 @@ class ProductCategoryController extends Controller
 
  public function getProductCategoryById($id,Request $request) {
      try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
          if(!$request->user()->hasPermissionTo('product_category_view')){
              return response()->json([
                 "message" => "You can not perform this action"
@@ -464,7 +464,7 @@ return response()->json([
  public function getAllProductCategory(Request $request) {
      try{
 
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
          $productCategoriesQuery = new ProductCategory();
 
          if(!empty($request->search_key)) {
@@ -548,7 +548,7 @@ return response()->json([
     public function deleteProductCategoryById($id,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('product_category_delete')){
                 return response()->json([
                    "message" => "You can not perform this action"

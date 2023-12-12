@@ -72,7 +72,7 @@ class RolesController extends Controller
     public function createRole(RoleRequest $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if( !$request->user()->hasPermissionTo('role_create'))
             {
 
@@ -171,7 +171,7 @@ class RolesController extends Controller
      */
     public function updateRole(RoleUpdateRequest $request) {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
         if( !$request->user()->hasPermissionTo('role_update') )
         {
 
@@ -307,7 +307,7 @@ class RolesController extends Controller
     {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('role_view')){
                 return response()->json([
                    "message" => "You can not perform this action"
@@ -409,7 +409,7 @@ class RolesController extends Controller
     public function getRoleById($id,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $role = Role::with('permissions:name,id')
             ->where(["id" => $id])
             ->select("name", "id")->get();
@@ -476,7 +476,7 @@ class RolesController extends Controller
     public function deleteRolesByIds($ids,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('role_delete'))
             {
 
@@ -588,7 +588,7 @@ class RolesController extends Controller
     public function getInitialRolePermissions (Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('role_view')){
                 return response()->json([
                    "message" => "You can not perform this action"
@@ -699,7 +699,7 @@ class RolesController extends Controller
     public function getInitialPermissions (Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('role_view')){
                 return response()->json([
                    "message" => "You can not perform this action"

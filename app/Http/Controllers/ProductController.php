@@ -105,7 +105,7 @@ class ProductController extends Controller
  public function createProduct(ProductCreateRequest $request)
  {
      try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         return DB::transaction(function () use ($request) {
             if(!$request->user()->hasPermissionTo('product_create')){
                 return response()->json([
@@ -279,7 +279,7 @@ class ProductController extends Controller
   {
 
       try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         return DB::transaction(function () use ($request) {
             if(!$request->user()->hasPermissionTo('product_update')){
                 return response()->json([
@@ -509,7 +509,7 @@ class ProductController extends Controller
   {
 
       try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         return DB::transaction(function () use ($request) {
             if(!$request->user()->hasPermissionTo('product_update')){
                 return response()->json([
@@ -679,7 +679,7 @@ class ProductController extends Controller
 
   public function getProducts($perPage,Request $request) {
     try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         if(!$request->user()->hasPermissionTo('product_view')){
             return response()->json([
                "message" => "You can not perform this action"
@@ -777,7 +777,7 @@ class ProductController extends Controller
 
   public function getProductById($id,Request $request) {
     try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         if(!$request->user()->hasPermissionTo('product_view')){
             return response()->json([
                "message" => "You can not perform this action"
@@ -861,7 +861,7 @@ return response()->json([
     public function deleteProductById($id,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('product_delete')){
                 return response()->json([
                    "message" => "You can not perform this action"

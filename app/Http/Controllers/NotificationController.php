@@ -75,7 +75,7 @@ class NotificationController extends Controller
     {
         try {
 
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             $notificationsQuery = Notification::where([
                 "receiver_id" => $request->user()->id
@@ -255,7 +255,7 @@ class NotificationController extends Controller
     public function getNotificationsByBusinessId($business_id,$perPage, Request $request)
     {
         try {
-     $this->storeActivity($request,"");
+     $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$this->businessOwnerCheck($business_id)) {
                 return response()->json([
                     "message" => "you are not the owner of the business or the requested business does not exist."
@@ -339,7 +339,7 @@ class NotificationController extends Controller
                 );
 
 
-           
+
 
                 $notifications->items()[$i]["link"] =  str_replace(
                     "[business_id]",
@@ -430,7 +430,7 @@ class NotificationController extends Controller
     public function updateNotificationStatus(NotificationStatusUpdateRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return    DB::transaction(function () use (&$request) {
 
                 $updatableData = $request->validated();
@@ -510,7 +510,7 @@ class NotificationController extends Controller
     public function deleteNotificationById($id,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             $notification = Notification::where([
                 "id" => $id,

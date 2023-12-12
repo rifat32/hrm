@@ -74,7 +74,7 @@ class PaymentTypeController extends Controller
     public function createPaymentType(PaymentTypeCreateRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('payment_type_create')) {
                     return response()->json([
@@ -155,7 +155,7 @@ class PaymentTypeController extends Controller
     public function updatePaymentType(PaymentTypeUpdateRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return  DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('payment_type_update')) {
                     return response()->json([
@@ -269,7 +269,7 @@ class PaymentTypeController extends Controller
     public function getPaymentTypes($perPage, Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('payment_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -359,7 +359,7 @@ class PaymentTypeController extends Controller
     {
 
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('payment_type_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

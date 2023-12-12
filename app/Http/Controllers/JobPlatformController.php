@@ -74,7 +74,7 @@ class JobPlatformController extends Controller
     public function createJobPlatform(JobPlatformCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('job_platform_create')) {
                     return response()->json([
@@ -182,7 +182,7 @@ class JobPlatformController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('job_platform_update')) {
                     return response()->json([
@@ -337,7 +337,7 @@ class JobPlatformController extends Controller
     public function getJobPlatforms(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('job_platform_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -449,7 +449,7 @@ class JobPlatformController extends Controller
     public function getJobPlatformById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('job_platform_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -539,7 +539,7 @@ class JobPlatformController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('job_platform_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

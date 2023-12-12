@@ -14,6 +14,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
+use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\Business;
 use App\Models\EmployeePassportDetail;
@@ -109,7 +110,7 @@ class UserManagementController extends Controller
      public function createUserFileMultiple(MultipleFileUploadRequest $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
              $insertableData = $request->validated();
 
@@ -200,7 +201,7 @@ class UserManagementController extends Controller
     public function createUserImage(ImageUploadRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             // if(!$request->user()->hasPermissionTo('user_create')){
             //      return response()->json([
             //         "message" => "You can not perform this action"
@@ -316,7 +317,7 @@ class UserManagementController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('user_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -505,7 +506,7 @@ class UserManagementController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -728,7 +729,7 @@ if(!empty($request_data["employee_id"])) {
      {
 
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('user_update')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -916,7 +917,7 @@ if(!empty($request_data["employee_id"])) {
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1032,7 +1033,7 @@ if(!empty($request_data["employee_id"])) {
         try {
 
 
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             $request_data = $request->validated();
 
@@ -1200,7 +1201,7 @@ if(!empty($request_data["employee_id"])) {
     public function getUsers(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1272,6 +1273,10 @@ if(!empty($request_data["employee_id"])) {
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
+
      /**
      *
      * @OA\Get(
@@ -1380,7 +1385,7 @@ if(!empty($request_data["employee_id"])) {
      public function getUsersV2(Request $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('user_view')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -1533,7 +1538,7 @@ if(!empty($request_data["employee_id"])) {
     public function getUserById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1633,7 +1638,7 @@ if(!empty($request_data["employee_id"])) {
      public function getLeaveDetailsByUserId($id, Request $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('user_view')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -1745,7 +1750,7 @@ if(!empty($request_data["employee_id"])) {
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('user_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1945,7 +1950,7 @@ return response()->json(["employee_id" => $employee_id],200);
 public function validateEmployeeId($employee_id, Request $request)
 {
    try {
-       $this->storeActivity($request,"");
+       $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
        $employee_id_exists =  DB::table( 'users' )->where([
           'employee_id'=> $employee_id,
@@ -1962,5 +1967,136 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
        return $this->sendError($e, 500,$request);
    }
 }
+
+
+
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/get/user-activity",
+     *      operationId="getUserActivity",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *      *     @OA\Parameter(
+     * name="business_id",
+     * in="query",
+     * description="business_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     *      *   * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *    * *  @OA\Parameter(
+     * name="role",
+     * in="query",
+     * description="role",
+     * required=true,
+     * example="admin,manager"
+     * ),
+     *      summary="This method is to get user activity",
+     *      description="This method is to get user activity",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserActivity(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            //  if (!$request->user()->hasPermissionTo('user_view')) {
+            //      return response()->json([
+            //          "message" => "You can not perform this action"
+            //      ], 401);
+            //  }
+
+             $users = ActivityLog::where('user_id', $request->user()->id)
+             ->where("activity", "!=", "DUMMY activity")
+             ->where("description", "!=", "DUMMY description")
+           ;
+
+             return response()->json($users, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 }

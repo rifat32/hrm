@@ -77,7 +77,7 @@ class SettingLeaveController extends Controller
     public function createSettingLeave(SettingLeaveCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('setting_leave_create')) {
                     return response()->json([
@@ -254,7 +254,7 @@ class SettingLeaveController extends Controller
     public function getSettingLeave(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('setting_leave_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"

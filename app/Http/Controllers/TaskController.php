@@ -83,7 +83,7 @@ class TaskController extends Controller
     public function createTask(TaskCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('task_create')) {
                     return response()->json([
@@ -176,7 +176,7 @@ class TaskController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('task_update')) {
                     return response()->json([
@@ -325,7 +325,7 @@ class TaskController extends Controller
     public function getTasks(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('task_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -435,7 +435,7 @@ class TaskController extends Controller
     public function getTaskById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('task_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -522,7 +522,7 @@ class TaskController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('task_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

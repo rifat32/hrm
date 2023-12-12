@@ -21,6 +21,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -101,7 +102,7 @@ class AuthController extends Controller
     public function register(AuthRegisterRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $request_data = $request->validated();
 
             $request_data['password'] = Hash::make($request['password']);
@@ -204,7 +205,7 @@ class AuthController extends Controller
 
 
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $loginData = $request->validate([
                 'email' => 'email|required',
                 'password' => 'required'
@@ -246,7 +247,8 @@ class AuthController extends Controller
                         }
                     }
                 }
-
+                Auth::login($user);
+                $this->storeActivity($request, "logged in", "User successfully logged into the system.");
                 return response(['message' => 'Invalid Credentials'], 401);
             }
 
@@ -369,7 +371,7 @@ $datediff = $now - $user_created_date;
     {
 
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $request_data = $request->validated();
             $user = User::where([
                 "id" => $request_data["user_id"],
@@ -466,7 +468,7 @@ $datediff = $now - $user_created_date;
     public function storeToken(ForgetPasswordRequest $request) {
 
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use (&$request) {
                 $request_data = $request->validated();
 
@@ -551,7 +553,7 @@ $datediff = $now - $user_created_date;
     public function resendEmailVerifyToken(EmailVerifyTokenRequest $request) {
 
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use (&$request) {
                 $request_data = $request->validated();
 
@@ -651,7 +653,7 @@ $datediff = $now - $user_created_date;
     public function changePasswordByToken($token, ChangePasswordRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use (&$request,&$token) {
                 $request_data = $request->validated();
                 $user = User::where([
@@ -748,7 +750,7 @@ $datediff = $now - $user_created_date;
 
 public function getUser (Request $request) {
     try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $user = $request->user();
         $user->token = auth()->user()->createToken('authToken')->accessToken;
         $user->permissions = $user->getAllPermissions()->pluck('name');
@@ -825,7 +827,7 @@ public function getUser (Request $request) {
 
     public function checkEmail(Request $request) {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $user = User::where([
                 "email" => $request->email
                ])->first();
@@ -904,7 +906,7 @@ public function getUser (Request $request) {
     public function changePassword(PasswordChangeRequest $request)
     {
 try{
-    $this->storeActivity($request,"");
+    $this->storeActivity($request, "DUMMY activity","DUMMY description");
     $client_request = $request->validated();
 
     $user = $request->user();
@@ -1014,7 +1016,7 @@ try{
     {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $request_data = $request->validated();
 
 

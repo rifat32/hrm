@@ -128,7 +128,7 @@ class WorkShiftController extends Controller
     public function createWorkShift(WorkShiftCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('work_shift_create')) {
@@ -285,7 +285,7 @@ class WorkShiftController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('work_shift_update')) {
                     return response()->json([
@@ -446,7 +446,7 @@ class WorkShiftController extends Controller
     public function getWorkShifts(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('work_shift_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -553,7 +553,7 @@ class WorkShiftController extends Controller
     public function getWorkShiftById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('work_shift_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -638,7 +638,7 @@ class WorkShiftController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('work_shift_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

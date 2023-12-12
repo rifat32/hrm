@@ -94,7 +94,7 @@ class DashboardManagementController extends Controller
     public function getBusinessOwnerDashboardDataJobList($business_id, Request $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -204,7 +204,7 @@ class DashboardManagementController extends Controller
     public function getBusinessOwnerDashboardDataJobApplications($business_id, Request $request)
     {
         try{
-        $this->storeActivity($request,"");
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $business = Business::where([
             "id" => $business_id,
             "owner_id" => $request->user()->id
@@ -346,7 +346,7 @@ class DashboardManagementController extends Controller
     public function getBusinessOwnerDashboardDataWinnedJobApplications($business_id, Request $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -453,7 +453,7 @@ class DashboardManagementController extends Controller
     public function getBusinessOwnerDashboardDataCompletedBookings($business_id, Request $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -563,7 +563,7 @@ class DashboardManagementController extends Controller
     public function getBusinessOwnerDashboardDataUpcomingJobs($business_id, $duration, Request $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -663,7 +663,7 @@ class DashboardManagementController extends Controller
     public function getBusinessOwnerDashboardDataExpiringAffiliations($business_id, $duration, Request $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -1189,7 +1189,7 @@ class DashboardManagementController extends Controller
     {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasRole('business_owner')) {
                 return response()->json([
                     "message" => "You are not a business owner"
@@ -1742,7 +1742,7 @@ class DashboardManagementController extends Controller
     public function getSuperAdminDashboardData( Request $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasRole('superadmin')) {
                 return response()->json([
                     "message" => "You are not a superadmin"
@@ -1828,7 +1828,7 @@ class DashboardManagementController extends Controller
      public function getDataCollectorDashboardData( Request $request)
      {
          try{
-             $this->storeActivity($request,"");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasRole('data_collector')) {
                  return response()->json([
                      "message" => "You are not a superadmin"

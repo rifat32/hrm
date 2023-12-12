@@ -77,7 +77,7 @@ class AnnouncementController extends Controller
     public function createAnnouncement(AnnouncementCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('announcement_create')) {
                     return response()->json([
@@ -175,7 +175,7 @@ class AnnouncementController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('announcement_update')) {
                     return response()->json([
@@ -323,7 +323,7 @@ class AnnouncementController extends Controller
     public function getAnnouncements(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('announcement_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -438,7 +438,7 @@ class AnnouncementController extends Controller
     public function getAnnouncementById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('announcement_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -523,7 +523,7 @@ class AnnouncementController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('announcement_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

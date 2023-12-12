@@ -78,7 +78,7 @@ class SettingAttendanceController extends Controller
     public function createSettingAttendance(SettingAttendanceCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('setting_attendance_create')) {
                     return response()->json([
@@ -124,7 +124,7 @@ class SettingAttendanceController extends Controller
 
 
                 } else {
-                   
+
 
 
                     $request_data["business_id"] = $request->user()->business_id;
@@ -237,7 +237,7 @@ class SettingAttendanceController extends Controller
      public function getSettingAttendance(Request $request)
      {
          try {
-             $this->storeActivity($request, "");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('setting_attendance_create')) {
                  return response()->json([
                      "message" => "You can not perform this action"

@@ -97,7 +97,7 @@ class BusinessController extends Controller
     public function createBusinessImage(ImageUploadRequest $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             // if(!$request->user()->hasPermissionTo('business_create')){
             //      return response()->json([
             //         "message" => "You can not perform this action"
@@ -192,7 +192,7 @@ class BusinessController extends Controller
     public function createBusinessImageMultiple(MultipleImageUploadRequest $request)
     {
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             $request_data = $request->validated();
 
@@ -311,7 +311,7 @@ class BusinessController extends Controller
     public function createBusiness(BusinessCreateRequest $request) {
 // this is business create by super admin
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
      return  DB::transaction(function ()use (&$request) {
 
         if(!$request->user()->hasPermissionTo('business_create')){
@@ -477,7 +477,7 @@ if(!$user->hasRole('business_owner')) {
     public function registerUserWithBusiness(AuthRegisterBusinessRequest $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
      return  DB::transaction(function ()use (&$request) {
 
         if(!$request->user()->hasPermissionTo('business_create')){
@@ -656,7 +656,7 @@ if(!$user->hasRole('business_owner')) {
     public function updateBusiness(BusinessUpdateRequest $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
      return  DB::transaction(function ()use (&$request) {
         if(!$request->user()->hasPermissionTo('business_update')){
             return response()->json([
@@ -871,7 +871,7 @@ if(!$user->hasRole('business_owner')) {
      {
 
          try{
-             $this->storeActivity($request,"");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if(!$request->user()->hasPermissionTo('business_update')){
                  return response()->json([
                     "message" => "You can not perform this action"
@@ -1000,7 +1000,7 @@ if(!$user->hasRole('business_owner')) {
     public function updateBusinessSeparate(BusinessUpdateSeparateRequest $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
      return  DB::transaction(function ()use (&$request) {
         if(!$request->user()->hasPermissionTo('business_update')){
             return response()->json([
@@ -1212,7 +1212,7 @@ if(!$user->hasRole('business_owner')) {
     public function getBusinesses(Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('business_view')){
                 return response()->json([
                    "message" => "You can not perform this action"
@@ -1345,7 +1345,7 @@ if(!$user->hasRole('business_owner')) {
     public function getBusinessById($id,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('business_view')){
                 return response()->json([
                    "message" => "You can not perform this action"
@@ -1433,7 +1433,7 @@ if(!$user->hasRole('business_owner')) {
     public function deleteBusinessesByIds(Request $request,$ids) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('business_delete')){
                 return response()->json([
                    "message" => "You can not perform this action"
@@ -1532,7 +1532,7 @@ if(!$user->hasRole('business_owner')) {
     public function getAllBusinessesByBusinessOwner(Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasRole('business_owner')){
                 return response()->json([
                    "message" => "You can not perform this action"

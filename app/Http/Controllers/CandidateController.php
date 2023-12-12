@@ -87,7 +87,7 @@ class CandidateController extends Controller
      public function createCandidateFileMultiple(MultipleFileUploadRequest $request)
      {
          try{
-             $this->storeActivity($request,"");
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
              $insertableData = $request->validated();
 
@@ -187,7 +187,7 @@ class CandidateController extends Controller
     public function createCandidate(CandidateCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('candidate_create')) {
                     return response()->json([
@@ -287,7 +287,7 @@ class CandidateController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('candidate_update')) {
                     return response()->json([
@@ -439,7 +439,7 @@ class CandidateController extends Controller
     public function getCandidates(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('candidate_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -545,7 +545,7 @@ class CandidateController extends Controller
     public function getCandidateById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('candidate_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -630,7 +630,7 @@ class CandidateController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('candidate_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

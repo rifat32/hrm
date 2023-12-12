@@ -80,7 +80,7 @@ class EmailTemplateController extends Controller
     public function createEmailTemplate(EmailTemplateCreateRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return    DB::transaction(function () use (&$request) {
                 if (!$request->user()->hasPermissionTo('template_create')) {
                     return response()->json([
@@ -177,7 +177,7 @@ class EmailTemplateController extends Controller
     public function updateEmailTemplate(EmailTemplateUpdateRequest $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return    DB::transaction(function () use (&$request) {
                 if (!$request->user()->hasPermissionTo('template_update')) {
                     return response()->json([
@@ -299,7 +299,7 @@ class EmailTemplateController extends Controller
     public function getEmailTemplates($perPage, Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -391,7 +391,7 @@ class EmailTemplateController extends Controller
     public function getEmailTemplateById($id, Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -466,7 +466,7 @@ class EmailTemplateController extends Controller
     public function getEmailTemplateTypes( Request $request)
     {
         try {
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -564,7 +564,7 @@ $types = [
     public function deleteEmailTemplateById($id,Request $request) {
 
         try{
-            $this->storeActivity($request,"");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$request->user()->hasPermissionTo('template_delete')){
                 return response()->json([
                    "message" => "You can not perform this action"

@@ -78,7 +78,7 @@ class SettingLeaveTypeController extends Controller
     public function createSettingLeaveType(SettingLeaveTypeCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('setting_leave_type_create')) {
                     return response()->json([
@@ -187,7 +187,7 @@ class SettingLeaveTypeController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('setting_leave_type_update')) {
                     return response()->json([
@@ -347,7 +347,7 @@ class SettingLeaveTypeController extends Controller
     public function getSettingLeaveTypes(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('setting_leave_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -456,7 +456,7 @@ class SettingLeaveTypeController extends Controller
     public function getSettingLeaveTypeById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('setting_leave_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -546,7 +546,7 @@ class SettingLeaveTypeController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('setting_leave_type_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -586,7 +586,7 @@ class SettingLeaveTypeController extends Controller
 
             }
 
-            
+
 
 
             SettingLeaveType::destroy($existingIds);

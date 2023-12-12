@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Leave;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveUpdateRequest extends FormRequest
@@ -24,7 +25,18 @@ class LeaveUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => "required|numeric",
+            'id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Leave::where('id', $value)
+                        ->exists();
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
+
             'leave_duration' => 'required|in:single_day,multiple_day,half_day,hours',
             'day_type' => 'nullable|in:first_half,last_half',
             'leave_type_id' => 'required|numeric',

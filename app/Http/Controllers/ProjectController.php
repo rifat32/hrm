@@ -78,7 +78,7 @@ class ProjectController extends Controller
     public function createProject(ProjectCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('project_create')) {
                     return response()->json([
@@ -175,7 +175,7 @@ class ProjectController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('project_update')) {
                     return response()->json([
@@ -321,7 +321,7 @@ class ProjectController extends Controller
     public function getProjects(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -431,7 +431,7 @@ class ProjectController extends Controller
     public function getProjectById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -518,7 +518,7 @@ class ProjectController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('project_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

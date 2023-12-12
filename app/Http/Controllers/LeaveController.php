@@ -12,6 +12,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\LeaveUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
 use App\Models\Role;
@@ -97,7 +98,7 @@ class LeaveController extends Controller
     public function createLeaveFileMultiple(MultipleFileUploadRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             $insertableData = $request->validated();
 
@@ -192,7 +193,7 @@ class LeaveController extends Controller
     public function createLeave(LeaveCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('leave_create')) {
                     return response()->json([
@@ -221,6 +222,8 @@ class LeaveController extends Controller
                         "message" => $check_employee["message"]
                     ], $check_employee["status"]);
                 }
+
+
 
 
 
@@ -267,6 +270,8 @@ class LeaveController extends Controller
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
+
+
                 } else if ($request_data["leave_duration"] == "multiple_day") {
 
                     $start_date = Carbon::parse($request_data["start_date"]);
@@ -348,6 +353,40 @@ class LeaveController extends Controller
                         array_push($leave_record_data_list, $leave_record_data);
                     }
                 }
+                foreach($leave_record_data_list as $leave_record_data) {
+
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $leave_record_data["date"])
+                    ->where('holidays.end_date', ">=", $leave_record_data["date"] . ' 23:59:59')
+                    ->first();
+                    if ($holiday) {
+                        if($holiday->is_active){
+                            $leave_date = Carbon::parse($leave_record_data["date"]);
+                            $holiday_created_at = Carbon::parse($holiday->created_at);
+                            if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
+                                return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                            }
+                            return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+
+                        }
+
+                    }
+
+
+                $previous_leave =  Leave::where([
+                    "employee_id" => $request->user()->id
+                ])
+                ->whereHas('records', function ($query) use ($leave_record_data) {
+                    $query->where('records.date', $leave_record_data["date"]);
+                })->first();
+                if ($previous_leave) {
+                    return response()->json(["message" => "Leave already exists for the employee on " . $leave_record_data["date"]], 400);
+                }
+
+                }
+
 
 
                 $leave =  Leave::create($request_data);
@@ -423,7 +462,7 @@ class LeaveController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('leave_approve')) {
                     return response()->json([
@@ -514,7 +553,7 @@ class LeaveController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('leave_approve')) {
                     return response()->json([
@@ -629,7 +668,7 @@ class LeaveController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('leave_update')) {
                     return response()->json([
@@ -655,20 +694,11 @@ class LeaveController extends Controller
                 }
 
 
-                $leave_query_params = [
-                    "id" => $request_data["id"],
-                    "business_id" => $business_id
-                ];
-                $leave_prev = Leave::where($leave_query_params)
-                    ->first();
-                if (!$leave_prev) {
-                    return response()->json([
-                        "message" => "no leave found"
-                    ], 404);
-                }
+
+
 
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["employee_id"]);
                 })->first();
 
                 if (!$work_shift) {
@@ -793,7 +823,45 @@ class LeaveController extends Controller
                     }
                 }
 
+                foreach($leave_record_data_list as $leave_record_data) {
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $leave_record_data["date"])
+                    ->where('holidays.end_date', ">=", $leave_record_data["date"] . ' 23:59:59')
+                    ->first();
+                    if ($holiday) {
+                        if($holiday->is_active){
 
+                            $leave_date = Carbon::parse($leave_record_data["date"]);
+                            $holiday_created_at = Carbon::parse($holiday->created_at);
+                            if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
+                                return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                            }
+                            return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+
+                        }
+
+                    }
+
+
+                $previous_leave =  Leave::where([
+                    "employee_id" => $request->user()->id
+                ])
+                ->whereNotIn("id",[$request_data["id"]])
+                ->whereHas('records', function ($query) use ($leave_record_data) {
+                    $query->where('records.date', $leave_record_data["date"]);
+                })->first();
+                if ($previous_leave) {
+                    return response()->json(["message" => "Leave already exists for the employee on " . $leave_record_data["date"]], 400);
+                }
+
+                }
+
+                $leave_query_params = [
+                    "id" => $request_data["id"],
+                    "business_id" => $business_id
+                ];
                 $leave  =  tap(Leave::where($leave_query_params))->update(
                     collect($request_data)->only([
                         'leave_duration',
@@ -928,7 +996,7 @@ class LeaveController extends Controller
     public function getLeaves(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('leave_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1076,7 +1144,7 @@ class LeaveController extends Controller
     public function getLeavesV2(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('leave_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1294,7 +1362,7 @@ class LeaveController extends Controller
     public function getLeavesV3(Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('leave_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1462,7 +1530,7 @@ $employee->unsetRelation('leaves');
     public function getLeaveById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('leave_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1547,7 +1615,7 @@ $employee->unsetRelation('leaves');
     {
 
         try {
-            $this->storeActivity($request, "");
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if (!$request->user()->hasPermissionTo('leave_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
