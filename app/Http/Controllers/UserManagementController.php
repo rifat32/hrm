@@ -2007,38 +2007,14 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
      * required=true,
      * example="search_key"
      * ),
-     *   * *  @OA\Parameter(
-     * name="is_in_employee",
+     *     * *  @OA\Parameter(
+     * name="order_by",
      * in="query",
-     * description="is_in_employee",
+     * description="order_by",
      * required=true,
-     * example="1"
+     * example="ASC"
      * ),
-     *
-     *      *     @OA\Parameter(
-     * name="business_id",
-     * in="query",
-     * description="business_id",
-     * required=true,
-     * example="1"
-     * ),
-     *
-     *
-     *      *   * *  @OA\Parameter(
-     * name="is_active",
-     * in="query",
-     * description="is_active",
-     * required=true,
-     * example="1"
-     * ),
-     *
-     *    * *  @OA\Parameter(
-     * name="role",
-     * in="query",
-     * description="role",
-     * required=true,
-     * example="admin,manager"
-     * ),
+
      *      summary="This method is to get user activity",
      *      description="This method is to get user activity",
      *
@@ -2090,6 +2066,40 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
              $users = ActivityLog::where('user_id', $request->user()->id)
              ->where("activity", "!=", "DUMMY activity")
              ->where("description", "!=", "DUMMY description")
+             ->when(!empty($request->search_key), function ($query) use ($request) {
+                $term = $request->search_key;
+                return $query->where(function ($subquery) use ($term) {
+                    $subquery->where("activity", "like", "%" . $term . "%")
+                        ->orWhere("description", "like", "%" . $term . "%");
+                });
+            })
+
+
+
+            ->when(!empty($request->start_date), function ($query) use ($request) {
+                return $query->where('created_at', ">=", $request->start_date);
+            })
+            ->when(!empty($request->end_date), function ($query) use ($request) {
+                return $query->where('created_at', "<=", $request->end_date);
+            })
+
+            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("id", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("id", "DESC");
+            })
+            ->select( "api_url",
+            "activity",
+            "description",
+            "ip_address",
+            "request_method",
+            "device")
+
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
            ;
 
              return response()->json($users, 200);

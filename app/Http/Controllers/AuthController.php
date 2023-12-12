@@ -247,8 +247,7 @@ class AuthController extends Controller
                         }
                     }
                 }
-                Auth::login($user);
-                $this->storeActivity($request, "logged in", "User successfully logged into the system.");
+
                 return response(['message' => 'Invalid Credentials'], 401);
             }
 
@@ -303,7 +302,8 @@ $datediff = $now - $user_created_date;
             $user->roles = $user->roles->pluck('name');
             $user->business = $user->business;
 
-
+            Auth::login($user);
+            $this->storeActivity($request, "logged in", "User successfully logged into the system.");
 
             return response()->json(['data' => $user,   "ok" => true], 200);
         } catch (Exception $e) {
@@ -326,10 +326,7 @@ $datediff = $now - $user_created_date;
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *            required={"email","password"},
-     *            @OA\Property(property="email", type="string", format="string",example="admin@gmail.com"),
-
-     * *  @OA\Property(property="password", type="string", format="string",example="12345678"),
+     *
      *
      *         ),
      *      ),
@@ -371,7 +368,8 @@ $datediff = $now - $user_created_date;
 
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "logged out", "User logged out of the system.");
+
 
             $request->user()->token()->revoke();
             return response()->json(["ok" => true], 200);
