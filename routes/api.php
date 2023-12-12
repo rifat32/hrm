@@ -57,6 +57,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/v1.0/register', [AuthController::class, "register"]);
 Route::post('/v1.0/login', [AuthController::class, "login"]);
+
 Route::post('/v1.0/token-regenerate', [AuthController::class, "regenerateToken"]);
 
 Route::post('/forgetpassword', [AuthController::class, "storeToken"]);
@@ -102,6 +103,7 @@ Route::post('/v1.0/business-image-multiple', [BusinessController::class, "create
 // Protected Routes
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
 Route::middleware(['auth:api'])->group(function () {
+    Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
     Route::patch('/auth/changepassword', [AuthController::class, "changePassword"]);
 

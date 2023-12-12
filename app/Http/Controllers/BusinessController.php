@@ -771,13 +771,13 @@ if(!$user->hasRole('business_owner')) {
                 "logo",
                 "image",
                 "status",
-                "background_image"
+                "background_image",
                 // "is_active",
 
 
 
 
-                "currency",
+                "currency"
 
         ])->toArray()
         )
