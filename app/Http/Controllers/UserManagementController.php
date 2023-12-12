@@ -1134,6 +1134,16 @@ if(!empty($request_data["employee_id"])) {
      * required=true,
      * example="1"
      * ),
+     *
+     *      *     @OA\Parameter(
+     * name="business_id",
+     * in="query",
+     * description="business_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
      *      *   * *  @OA\Parameter(
      * name="is_active",
      * in="query",
@@ -1198,6 +1208,7 @@ if(!empty($request_data["employee_id"])) {
             }
 
             $users = User::with("roles")
+            ->whereNotIn('id', [$request->user()->id])
             ->when(!empty($request->role), function ($query) use ($request) {
                 $rolesArray = explode(',', $request->role);
               return   $query->whereHas("roles", function($q) use ($rolesArray) {
@@ -1221,13 +1232,20 @@ if(!empty($request_data["employee_id"])) {
                         ->orWhere("phone", "like", "%" . $term . "%");
                 });
             })
+            ->when(empty($request->user()->business_id)  , function ($query) use ($request) {
+                if(empty($request->business_id)) {
+                    return $query->where('business_id', NULL);
+                }
+                    return $query->where('business_id', intval($request->business_id));
 
+            })
             ->when(!empty($request->is_in_employee), function ($query) use ($request) {
                 return $query->where('is_in_employee', intval($request->is_in_employee));
             })
             ->when(!empty($request->is_active), function ($query) use ($request) {
                 return $query->where('is_active', intval($request->is_active));
             })
+
 
             ->when(!empty($request->start_date), function ($query) use ($request) {
                 return $query->where('created_at', ">=", $request->start_date);
@@ -1298,6 +1316,13 @@ if(!empty($request_data["employee_id"])) {
      * required=true,
      * example="1"
      * ),
+     *    *   * *  @OA\Parameter(
+     * name="business_id",
+     * in="query",
+     * description="business_id",
+     * required=true,
+     * example="1"
+     * ),
      *   *   * *  @OA\Parameter(
      * name="is_active",
      * in="query",
@@ -1363,6 +1388,7 @@ if(!empty($request_data["employee_id"])) {
              }
 
              $users = User::with("roles")
+             ->whereNotIn('id', [$request->user()->id])
              ->when(!empty($request->role), function ($query) use ($request) {
                  $rolesArray = explode(',', $request->role);
                return   $query->whereHas("roles", function($q) use ($rolesArray) {
@@ -1377,6 +1403,7 @@ if(!empty($request_data["employee_id"])) {
                              ->orWhere('business_id', auth()->user()->business_id);
                    });
              })
+
              ->when(!empty($request->search_key), function ($query) use ($request) {
                  $term = $request->search_key;
                  return $query->where(function ($subquery) use ($term) {
@@ -1387,6 +1414,13 @@ if(!empty($request_data["employee_id"])) {
                  });
              })
 
+            ->when(empty($request->user()->business_id)  , function ($query) use ($request) {
+                if(empty($request->business_id)) {
+                    return $query->where('business_id', NULL);
+                }
+                    return $query->where('business_id', intval($request->business_id));
+
+            })
              ->when(!empty($request->is_in_employee), function ($query) use ($request) {
                  return $query->where('is_in_employee', intval($request->is_in_employee));
              })
