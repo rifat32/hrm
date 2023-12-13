@@ -18,6 +18,8 @@ class SettingAttendance extends Model
         'auto_approval',
         'special_users',
         'special_roles',
+        'service_name',
+        'api_key',
 
         "business_id",
         "is_active",

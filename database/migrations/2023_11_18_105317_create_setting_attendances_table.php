@@ -20,6 +20,10 @@ class CreateSettingAttendancesTable extends Migration
             $table->boolean('punch_in_out_alert')->nullable();
             $table->integer('punch_in_out_interval')->nullable();
             $table->json('alert_area')->nullable();
+
+            $table->string('service_name')->nullable();
+            $table->text('api_key')->nullable();
+
             $table->boolean('auto_approval')->nullable();
 
 

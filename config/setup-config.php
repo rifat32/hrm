@@ -109,7 +109,6 @@ return [
             "role" => "business_owner",
             "permissions" => [
 
-                "module_view",
 
                 "user_create",
                 "user_update",

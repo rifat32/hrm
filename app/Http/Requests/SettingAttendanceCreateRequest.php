@@ -30,6 +30,9 @@ class SettingAttendanceCreateRequest extends FormRequest
             'punch_in_out_interval' => 'nullable|numeric|min:0',
             'alert_area' => 'nullable|array',
             'alert_area.*' => 'string',
+            'service_name' => 'nullable|string',
+            'api_key'  => 'nullable|string',
+
             'auto_approval' => 'nullable|boolean',
             'special_users' => 'present|array',
             'special_users.*' => 'numeric',
@@ -47,5 +50,5 @@ class SettingAttendanceCreateRequest extends FormRequest
             'auto_approval.boolean' => 'The :attribute field must be a boolean.',
         ];
     }
-    
+
 }

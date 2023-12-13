@@ -34,6 +34,10 @@ class SettingAttendanceController extends Controller
  *     @OA\Property(property="punch_in_out_alert", type="boolean", format="boolean", example="1"),
  *     @OA\Property(property="punch_in_out_interval", type="number", format="number", example="30"),
  *     @OA\Property(property="alert_area", type="string", format="array", example={"web","system"}),
+ *
+ *  *     @OA\Property(property="service_name", type="string", format="string", example="map"),
+ *  *     @OA\Property(property="api_key", type="string", format="string", example="sdthsd@hrhfgf"),
+ *
  *     @OA\Property(property="auto_approval", type="boolean", format="boolean", example="1"),
 *     @OA\Property(property="special_users", type="string", format="array", example={1,2,3}),
  *     @OA\Property(property="special_roles", type="string", format="array", example={1,2,3})
