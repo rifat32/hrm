@@ -22,7 +22,7 @@ class CreateEmploymentStatusesTable extends Migration
             $table->string('is_default')->default(false);
             $table->unsignedBigInteger("business_id")->nullable(true);
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            // $table->unsignedBigInteger("created_by")->nullable();
+         $table->unsignedBigInteger("created_by");
             $table->softDeletes();
             $table->timestamps();
         });

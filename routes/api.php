@@ -19,6 +19,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 
 
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\BusinessTierController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
@@ -123,6 +124,21 @@ Route::get('/v1.0/modules', [ModuleController::class, "getModules"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end modules management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/business-tiers', [BusinessTierController::class, "createBusinessTier"]);
+Route::put('/v1.0/business-tiers', [BusinessTierController::class, "updateBusinessTier"]);
+Route::get('/v1.0/business-tiers', [BusinessTierController::class, "getBusinessTiers"]);
+Route::get('/v1.0/business-tiers/{id}', [BusinessTierController::class, "getBusinessTierById"]);
+Route::delete('/v1.0/business-tiers/{ids}', [BusinessTierController::class, "deleteBusinessTiersByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end job platform management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

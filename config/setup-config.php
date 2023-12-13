@@ -11,6 +11,13 @@ return [
                 "module_update",
                 "module_view",
 
+
+                "business_tier_create",
+                "business_tier_update",
+                "business_tier_view",
+                "business_tier_delete",
+
+
        "user_create",
        "user_update",
        "user_view",
@@ -97,10 +104,10 @@ return [
                 "business_delete",
 
 
-                "job_platform_create",
-"job_platform_update",
-"job_platform_view",
-"job_platform_delete",
+            "job_platform_create",
+            "job_platform_update",
+            "job_platform_view",
+            "job_platform_delete",
 
             ],
         ],
@@ -346,6 +353,12 @@ return [
         "module_update",
         "module_view",
 
+
+        "business_tier_create",
+        "business_tier_update",
+        "business_tier_view",
+        "business_tier_delete",
+
        "user_create",
        "user_update",
        "user_view",
@@ -479,6 +492,12 @@ return [
 
         "module_update" => "Can enable module",
         "module_view" => "Can view module",
+
+
+        "business_tier_create" => "Can create business tier",
+        "business_tier_update" => "Can update business tier" ,
+        "business_tier_view" => "Can view business tier",
+        "business_tier_delete" => "Can delete business tier",
 
 
         "user_create" => "Can create user",
@@ -635,6 +654,10 @@ return [
         "user_create" => "create",
         "user_update" => "update",
 
+        "business_tier_create" => "create",
+        "business_tier_update" => "update",
+        "business_tier_view" => "view",
+        "business_tier_delete" => "delete",
 
 
         "user_view" => "view",
@@ -788,6 +811,17 @@ return [
        "module_view",
 
             ],
+        ],
+
+        [
+            "header" => "business_tier",
+            "permissions" => [
+                "business_tier_create",
+                "business_tier_update",
+                "business_tier_view",
+                "business_tier_delete",
+            ],
+
         ],
 
 
@@ -975,6 +1009,10 @@ return [
 
             ],
         ],
+
+
+
+
 
 
 

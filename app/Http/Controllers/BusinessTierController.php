@@ -2,39 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\EmploymentStatusCreateRequest;
-use App\Http\Requests\EmploymentStatusUpdateRequest;
+use App\Http\Requests\BusinessTierCreateRequest;
+use App\Http\Requests\BusinessTierUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\EmploymentStatus;
-use App\Models\SettingPaidLeaveEmploymentStatus;
-use App\Models\SettingUnpaidLeaveEmploymentStatus;
-use App\Models\User;
+use App\Models\businessTier;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class EmploymentStatusController extends Controller
+class BusinessTierController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/employment-statuses",
-     *      operationId="createEmploymentStatus",
-     *      tags={"employee.employment_statuses"},
+     *      path="/v1.0/business-tiers",
+     *      operationId="createBusinessTier",
+     *      tags={"business_tiers"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store employment status",
-     *      description="This method is to store employment status",
+     *      summary="This method is to store business tier",
+     *      description="This method is to store business tier",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
  * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- *  * @OA\Property(property="color", type="string", format="string", example="red"),
  * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
  *
  *
@@ -75,12 +71,12 @@ class EmploymentStatusController extends Controller
      *     )
      */
 
-    public function createEmploymentStatus(EmploymentStatusCreateRequest $request)
+    public function createBusinessTier(BusinessTierCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employment_status_create')) {
+                if (!$request->user()->hasPermissionTo('business_tier_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -89,25 +85,16 @@ class EmploymentStatusController extends Controller
                 $request_data = $request->validated();
 
 
-                if ($request->user()->hasRole('superadmin')) {
-                    $request_data["business_id"] = NULL;
+
+
                 $request_data["is_active"] = 1;
-                $request_data["is_default"] = 1;
-                 $request_data["created_by"] = $request->user()->id;
-                } else {
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_active"] = 1;
-                    $request_data["is_default"] = 0;
-                     $request_data["created_by"] = $request->user()->id;
-                }
+                $request_data["created_by"] = $request->user()->id;
 
 
-                $employment_status =  EmploymentStatus::create($request_data);
+                $business_tier =  businessTier::create($request_data);
 
 
-
-
-                return response($employment_status, 201);
+                return response($business_tier, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -118,21 +105,20 @@ class EmploymentStatusController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/employment-statuses",
-     *      operationId="updateEmploymentStatus",
-     *      tags={"employee.employment_statuses"},
+     *      path="/v1.0/business-tiers",
+     *      operationId="updateBusinessTier",
+     *      tags={"business_tiers"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update employment status ",
-     *      description="This method is to update employment status",
+     *      summary="This method is to update business tier ",
+     *      description="This method is to update business tier",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
  * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- *  *  * @OA\Property(property="color", type="string", format="string", example="red"),
  * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
 
 
@@ -173,67 +159,45 @@ class EmploymentStatusController extends Controller
      *     )
      */
 
-    public function updateEmploymentStatus(EmploymentStatusUpdateRequest $request)
+    public function updateBusinessTier(BusinessTierUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employment_status_update')) {
+                if (!$request->user()->hasPermissionTo('business_tier_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                // $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
 
 
-                $employment_status_query_params = [
-                    "id" => $request_data["id"],
-                    "business_id" => $business_id
-                ];
-                $employment_status_prev = EmploymentStatus::where($employment_status_query_params)
-                    ->first();
-                if (!$employment_status_prev) {
-                    return response()->json([
-                        "message" => "no employment status found"
-                    ], 404);
-                }
-                if ($request->user()->hasRole('superadmin')) {
-                    if(!($employment_status_prev->business_id == NULL && $employment_status_prev->is_default == 1)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    }
 
-                } else {
-                    if(!($employment_status_prev->business_id == $request->user()->business_id)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    }
-                }
-                $employment_status  =  tap(EmploymentStatus::where($employment_status_query_params))->update(
+
+                $business_tier  =  tap(businessTier::where([
+                    "id" => $request_data["id"],
+
+                ]))->update(
                     collect($request_data)->only([
                         'name',
-                        'color',
-                        'description',
                         // "is_active",
-                        // "business_id",
-
+                        // 'created_by'
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$employment_status) {
+
+                if (!$business_tier) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($employment_status, 201);
+                return response($business_tier, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -245,9 +209,9 @@ class EmploymentStatusController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/employment-statuses",
-     *      operationId="getEmploymentStatuses",
-     *      tags={"employee.employment_statuses"},
+     *      path="/v1.0/business-tiers",
+     *      operationId="getBusinessTiers",
+     *      tags={"business_tiers"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -289,8 +253,8 @@ class EmploymentStatusController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get employment statuses  ",
-     *      description="This method is to get employment statuses ",
+     *      summary="This method is to get business tiers  ",
+     *      description="This method is to get business tiers ",
      *
 
      *      @OA\Response(
@@ -327,43 +291,46 @@ class EmploymentStatusController extends Controller
      *     )
      */
 
-    public function getEmploymentStatuses(Request $request)
+    public function getBusinessTiers(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employment_status_view')) {
+            if (!$request->user()->hasPermissionTo('business_tier_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $employment_statuses = EmploymentStatus::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('employment_statuses.business_id', NULL)
-                             ->where('employment_statuses.is_default', 1);
+
+            $business_tiers = businessTier::when(!empty($request->search_key), function ($query) use ($request) {
+                return $query->where(function ($query) use ($request) {
+                    $term = $request->search_key;
+                    $query->where("business_tiers.name", "like", "%" . $term . "%");
+                });
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('employment_statuses.business_id', $request->user()->business_id);
-            })
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        $query->where("employment_statuses.name", "like", "%" . $term . "%")
-                            ->orWhere("employment_statuses.description", "like", "%" . $term . "%");
-                    });
-                })
+
+            //     when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('business_tiers.business_id', NULL)
+            //                  ->where('business_tiers.is_default', 1);
+            // })
+            // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('business_tiers.business_id', $request->user()->business_id);
+            // })
+
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('employment_statuses.created_at', ">=", $request->start_date);
+                    return $query->where('business_tiers.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('employment_statuses.created_at', "<=", $request->end_date);
+                    return $query->where('business_tiers.created_at', "<=", $request->end_date);
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("employment_statuses.id", $request->order_by);
+                    return $query->orderBy("business_tiers.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("employment_statuses.id", "DESC");
+                    return $query->orderBy("business_tiers.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -373,7 +340,7 @@ class EmploymentStatusController extends Controller
 
 
 
-            return response()->json($employment_statuses, 200);
+            return response()->json($business_tiers, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -383,9 +350,9 @@ class EmploymentStatusController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/employment-statuses/{id}",
-     *      operationId="getEmploymentStatusById",
-     *      tags={"employee.employment_statuses"},
+     *      path="/v1.0/business-tiers/{id}",
+     *      operationId="getBusinessTierById",
+     *      tags={"business_tiers"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -396,8 +363,8 @@ class EmploymentStatusController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get employment status by id",
-     *      description="This method is to get employment status by id",
+     *      summary="This method is to get business tier by id",
+     *      description="This method is to get business tier by id",
      *
 
      *      @OA\Response(
@@ -435,35 +402,34 @@ class EmploymentStatusController extends Controller
      */
 
 
-    public function getEmploymentStatusById($id, Request $request)
+    public function getBusinessTierById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employment_status_view')) {
+            if (!$request->user()->hasPermissionTo('business_tier_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $employment_status =  EmploymentStatus::where([
+            $business_tier =  businessTier::where([
                 "id" => $id,
-
             ])
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('employment_statuses.business_id', NULL)
-                             ->where('employment_statuses.is_default', 1);
-            })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('employment_statuses.business_id', $request->user()->business_id);
-            })
+            // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('business_tiers.business_id', NULL)
+            //                  ->where('business_tiers.is_default', 1);
+            // })
+            // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('business_tiers.business_id', $request->user()->business_id);
+            // })
                 ->first();
-            if (!$employment_status) {
+            if (!$business_tier) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($employment_status, 200);
+            return response()->json($business_tier, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -474,9 +440,9 @@ class EmploymentStatusController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/employment-statuses/{ids}",
-     *      operationId="deleteEmploymentStatusesByIds",
-     *      tags={"employee.employment_statuses"},
+     *      path="/v1.0/business-tiers/{ids}",
+     *      operationId="deleteBusinessTiersByIds",
+     *      tags={"business_tiers"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -487,8 +453,8 @@ class EmploymentStatusController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete employment statuses by ids",
-     *      description="This method is to delete employment statuses by ids",
+     *      summary="This method is to delete business tier by id",
+     *      description="This method is to delete business tier by id",
      *
 
      *      @OA\Response(
@@ -525,27 +491,27 @@ class EmploymentStatusController extends Controller
      *     )
      */
 
-    public function deleteEmploymentStatusesByIds(Request $request, $ids)
+    public function deleteBusinessTiersByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employment_status_delete')) {
+            if (!$request->user()->hasPermissionTo('business_tier_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = EmploymentStatus::whereIn('id', $idsArray)
-                ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('employment_statuses.business_id', NULL)
-                                 ->where('employment_statuses.is_default', 1);
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('employment_statuses.business_id', $request->user()->business_id)
-                    ->where('employment_statuses.is_default', 0);
-                })
+            $existingIds = businessTier::whereIn('id', $idsArray)
+            // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('business_tiers.business_id', NULL)
+            //                  ->where('business_tiers.is_default', 1);
+            // })
+            // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            //     return $query->where('business_tiers.business_id', $request->user()->business_id)
+            //     ->where('business_tiers.is_default', 0);
+            // })
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -558,39 +524,9 @@ class EmploymentStatusController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::whereIn("employment_status_id",$existingIds)->exists();
-            if($user_exists) {
-                $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
-                'last_Name',]);
 
-                return response()->json([
-                    "message" => "Some users are associated with the specified employment statuses",
-                    "conflicting_users" => $conflictingUsers
-                ], 409);
 
-            }
-
-            $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
-            if($paid_employment_status_exists) {
-                $conflictingPaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
-
-                return response()->json([
-                    "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatus
-                ], 409);
-
-            }
-            $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
-            if($unpaid_employment_status_exists) {
-                $conflictingUnpaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
-
-                return response()->json([
-                    "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatus
-                ], 409);
-
-            }
-            EmploymentStatus::destroy($existingIds);
+            businessTier::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
