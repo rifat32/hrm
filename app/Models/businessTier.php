@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Module extends Model
+class businessTier extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         "name",
         "is_active",
-        "is_default",
-        "business_tier_id",
         'created_by'
     ];
 
-    public function business_tier(){
-        return $this->belongsTo(businessTier::class,'business_tier_id', 'id');
+    public function businesses(){
+        return $this->hasMany(Business::class,'business_tier_id', 'id');
     }
+
+
 
 }

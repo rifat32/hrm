@@ -12,6 +12,7 @@ use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
 use App\Models\ActivityLog;
@@ -38,7 +39,7 @@ use Illuminate\Support\Str;
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil,BusinessUtil;
+    use ErrorUtil, UserActivityUtil,BusinessUtil, ModuleUtil;
 
    /**
      *
@@ -2057,6 +2058,13 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if(!$this->isModuleEnabled("user_activity")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
+
+
+
+
             //  if (!$request->user()->hasPermissionTo('user_view')) {
             //      return response()->json([
             //          "message" => "You can not perform this action"

@@ -6,6 +6,7 @@ use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Project;
 use Exception;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil,ModuleUtil;
     /**
      *
      * @OA\Post(
@@ -79,6 +80,9 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('project_create')) {
                     return response()->json([
@@ -176,6 +180,9 @@ class ProjectController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('project_update')) {
                     return response()->json([
@@ -322,6 +329,9 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -432,6 +442,9 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -519,6 +532,10 @@ class ProjectController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
+
             if (!$request->user()->hasPermissionTo('project_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

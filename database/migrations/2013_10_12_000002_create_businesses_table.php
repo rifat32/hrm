@@ -35,6 +35,12 @@ class CreateBusinessesTable extends Migration
             $table->string("image")->nullable();
             $table->string("background_image")->nullable();
 
+
+            $table->unsignedBigInteger("business_tier_id")->default(1);
+            $table->foreign('business_tier_id')->references('id')->on('business_tiers')->onDelete('restrict');
+
+
+
             $table->string('status')->default("pending");
             // $table->enum('status', ['status1', 'status2',  'status3'])->default("status1");
             $table->boolean("is_active")->default(false);

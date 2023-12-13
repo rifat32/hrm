@@ -32,7 +32,7 @@ class Business extends Model
 
 
 
-        "average_time_slot",
+        "business_tier_id",
         "owner_id",
         'created_by'
 
@@ -43,7 +43,9 @@ class Business extends Model
     }
 
 
-
+    public function business_tier(){
+        return $this->belongsTo(businessTier::class,'business_tier_id', 'id');
+    }
 
 
 
