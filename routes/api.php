@@ -38,6 +38,7 @@ use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
 use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPayrollController;
+
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkShiftController;
@@ -106,8 +107,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
     Route::patch('/auth/changepassword', [AuthController::class, "changePassword"]);
-
     Route::put('/v1.0/update-user-info', [AuthController::class, "updateUserInfo"]);
+
 
 
 

@@ -1240,10 +1240,10 @@ if(!empty($request_data["employee_id"])) {
                     return $query->where('business_id', intval($request->business_id));
 
             })
-            ->when(!empty($request->is_in_employee), function ($query) use ($request) {
+            ->when(isset($request->is_in_employee), function ($query) use ($request) {
                 return $query->where('is_in_employee', intval($request->is_in_employee));
             })
-            ->when(!empty($request->is_active), function ($query) use ($request) {
+            ->when(isset($request->is_active), function ($query) use ($request) {
                 return $query->where('is_active', intval($request->is_active));
             })
 
@@ -1426,10 +1426,10 @@ if(!empty($request_data["employee_id"])) {
                     return $query->where('business_id', intval($request->business_id));
 
             })
-             ->when(!empty($request->is_in_employee), function ($query) use ($request) {
+             ->when(isset($request->is_in_employee), function ($query) use ($request) {
                  return $query->where('is_in_employee', intval($request->is_in_employee));
              })
-             ->when(!empty($request->is_active), function ($query) use ($request) {
+             ->when(isset($request->is_active), function ($query) use ($request) {
                 return $query->where('is_active', intval($request->is_active));
             })
 
