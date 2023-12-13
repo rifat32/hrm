@@ -11,7 +11,7 @@ class Module extends Model
 
     protected $fillable = [
         "name",
-        "is_active",
+        "is_enabled",
         "is_default",
         "business_tier_id",
         'created_by'

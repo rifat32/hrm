@@ -94,6 +94,8 @@ class SettingAttendanceController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_active"] = 1;
 
+                $request_data["alert_area"] = json_encode($request_data["alert_area"]);
+
                 $check_user = $this->checkUsers($request_data["special_users"]);
                 if (!$check_user["ok"]) {
                     return response()->json([
@@ -118,7 +120,6 @@ class SettingAttendanceController extends Controller
                     "is_default" => $request_data["is_default"]
 
                 ],
-
              $request_data
 
 
@@ -140,7 +141,8 @@ class SettingAttendanceController extends Controller
                     $request_data
                 );
                 }
-
+                 $setting_attendance->special_users()->sync($request_data['special_users'],[]);
+                 $setting_attendance->special_roles()->sync($request_data['special_roles'],[]);
 
 
                 return response($setting_attendance, 201);

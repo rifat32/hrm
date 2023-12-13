@@ -16,8 +16,7 @@ class SettingAttendance extends Model
         'punch_in_out_interval',
         'alert_area',
         'auto_approval',
-        'special_users',
-        'special_roles',
+
         'service_name',
         'api_key',
 

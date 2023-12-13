@@ -7,7 +7,8 @@ use App\Http\Requests\BusinessTierUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\businessTier;
+use App\Models\BusinessTier;
+use App\Models\Module;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -91,8 +92,28 @@ class BusinessTierController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
 
-                $business_tier =  businessTier::create($request_data);
+                $business_tier =  BusinessTier::create($request_data);
 
+                $default_modules = Module::where([
+                     "is_default" => 1,
+                     "is_active" => 1,
+                ])
+                ->get();
+                if ($default_modules->isNotEmpty()) {
+                    // Transform the collection to an array for createMany
+                    $module_data = $default_modules->map(function ($module) use ($business_tier, $request) {
+                        return [
+                            "name" => $module->name,
+                            "is_active" => 1,
+                            "is_default" => 0,
+                            "business_tier_id" => $business_tier->id,
+                            'created_by' => $request->user()->id,
+                        ];
+                    })->toArray();
+
+                    // Use createMany to insert multiple records in one query
+                    Module::createMany($module_data);
+                }
 
                 return response($business_tier, 201);
             });
@@ -177,7 +198,7 @@ class BusinessTierController extends Controller
 
 
 
-                $business_tier  =  tap(businessTier::where([
+                $business_tier  =  tap(BusinessTier::where([
                     "id" => $request_data["id"],
 
                 ]))->update(
@@ -302,7 +323,8 @@ class BusinessTierController extends Controller
             }
 
 
-            $business_tiers = businessTier::when(!empty($request->search_key), function ($query) use ($request) {
+            $business_tiers = BusinessTier::with("modules")
+            ->when(!empty($request->search_key), function ($query) use ($request) {
                 return $query->where(function ($query) use ($request) {
                     $term = $request->search_key;
                     $query->where("business_tiers.name", "like", "%" . $term . "%");
@@ -412,7 +434,7 @@ class BusinessTierController extends Controller
                 ], 401);
             }
 
-            $business_tier =  businessTier::where([
+            $business_tier =  BusinessTier::where([
                 "id" => $id,
             ])
             // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
@@ -503,7 +525,7 @@ class BusinessTierController extends Controller
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = businessTier::whereIn('id', $idsArray)
+            $existingIds = BusinessTier::whereIn('id', $idsArray)
             // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
             //     return $query->where('business_tiers.business_id', NULL)
             //                  ->where('business_tiers.is_default', 1);
@@ -526,7 +548,7 @@ class BusinessTierController extends Controller
 
 
 
-            businessTier::destroy($existingIds);
+            BusinessTier::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

@@ -18,6 +18,16 @@ class businessTier extends Model
         return $this->hasMany(Business::class,'business_tier_id', 'id');
     }
 
+    public function modules(){
+        return $this->hasMany(Module::class,'business_tier_id', 'id');
+    }
 
+    public function active_modules(){
+        return $this->hasMany(Module::class,'business_tier_id', 'id');
+    }
+    public function getActiveModuleNamesAttribute()
+    {
+        return $this->modules->pluck('name')->toArray();
+    }
 
 }

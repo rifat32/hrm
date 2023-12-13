@@ -87,20 +87,7 @@ class ModuleController extends Controller
                     "message" => "no module found"
                 ], 404);
             }
-            if ($request->user()->hasRole('superadmin')) {
-                if(!($module->business_id == NULL && $module->is_default == 1)) {
-                    return response()->json([
-                        "message" => "You do not have permission to update this setting leave type due to role restrictions."
-                    ], 403);
-                }
 
-            } else {
-                if(!($module->business_id == $request->user()->business_id)) {
-                    return response()->json([
-                        "message" => "You do not have permission to update this setting leave type due to role restrictions."
-                    ], 403);
-                }
-            }
 
              $module->update([
                  'is_active' => !$module->is_active
@@ -150,6 +137,13 @@ class ModuleController extends Controller
      * description="search_key",
      * required=true,
      * example="search_key"
+     * ),
+     *    * *  @OA\Parameter(
+     * name="business_tier_id",
+     * in="query",
+     * description="business_tier_id",
+     * required=true,
+     * example="1"
      * ),
      * *  @OA\Parameter(
      * name="order_by",
@@ -208,16 +202,15 @@ class ModuleController extends Controller
              }
 
 
-             $modules = Module::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where('modules.business_id', NULL)
-                              ->where('modules.is_default', 1);
-             })
-             ->when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
+             $modules = Module::when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
                 return $query->where('modules.is_active', 1);
             })
-             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where('modules.business_id', $request->user()->business_id);
+             ->when(!empty($request->business_tier_id), function ($query) use ($request) {
+                 return $query->where('modules.business_tier_id', $request->business_tier_id);
              })
+             ->when(empty($request->business_tier_id), function ($query) use ($request) {
+                return $query->where('modules.business_tier_id', NULL);
+            })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;

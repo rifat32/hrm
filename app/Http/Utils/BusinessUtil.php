@@ -226,10 +226,11 @@ trait BusinessUtil
     }
 
     public function checkUsers($ids) {
-        $users = User::whereIn("id", $ids)
-        ->get();
 
-        foreach ($users as $user) {
+
+        foreach ($ids as $id) {
+            $user = User::where("id", $id)
+            ->first();
             if (!$user) {
                 return [
                     "ok" => false,
@@ -238,24 +239,26 @@ trait BusinessUtil
                 ];
             }
 
-            if(auth()->user()->hasRole('superadmin')) {
-                if ($user->business_id != NULL) {
+            if(empty(auth()->user()->business_id)) {
+                if(!empty($user->business_id)){
                     return [
                         "ok" => false,
                         "status" => 403,
                         "message" => "User belongs to another business."
                     ];
                 }
+
+            } else {
+                if ($user->business_id != auth()->user()->business_id){
+                    return [
+                        "ok" => false,
+                        "status" => 403,
+                        "message" => "User belongs to another business."
+                    ];
+                }
+
             }
-            if(!auth()->user()->hasRole('superadmin')) {
-            if ($user->business_id != auth()->user()->business_id) {
-                return [
-                    "ok" => false,
-                    "status" => 403,
-                    "message" => "User belongs to another business."
-                ];
-            }
-            }
+
 
 
         }
