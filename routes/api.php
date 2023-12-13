@@ -27,6 +27,7 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\JobPlatformController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
@@ -109,6 +110,20 @@ Route::middleware(['auth:api'])->group(function () {
     Route::patch('/auth/changepassword', [AuthController::class, "changePassword"]);
     Route::put('/v1.0/update-user-info', [AuthController::class, "updateUserInfo"]);
 
+
+
+    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// modules  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+Route::put('/v1.0/modules/toggle-active', [ModuleController::class, "toggleActiveModule"]);
+Route::get('/v1.0/modules', [ModuleController::class, "getModules"]);
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end modules management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

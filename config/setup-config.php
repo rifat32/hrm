@@ -7,6 +7,10 @@ return [
             "permissions" => [
                 "global_business_background_image_create",
                 "global_business_background_image_view",
+
+                "module_update",
+                "module_view",
+
        "user_create",
        "user_update",
        "user_view",
@@ -78,10 +82,14 @@ return [
 
                 "role_view",
 
+
+
                 "user_create",
                 "user_update",
                 "user_view",
                 "user_delete",
+
+
 
                 "business_create",
                 "business_update",
@@ -101,6 +109,7 @@ return [
             "role" => "business_owner",
             "permissions" => [
 
+                "module_view",
 
                 "user_create",
                 "user_update",
@@ -335,6 +344,9 @@ return [
         "global_business_background_image_create",
         "global_business_background_image_view",
 
+        "module_update",
+        "module_view",
+
        "user_create",
        "user_update",
        "user_view",
@@ -464,6 +476,11 @@ return [
     "permissions_titles" => [
         "global_business_background_image_create" => "Can create global business background image",
         "global_business_background_image_view" => "Can view global business background image",
+
+
+        "module_update" => "Can enable module",
+        "module_view" => "Can view module",
+
 
         "user_create" => "Can create user",
         "user_update" => "Can update user",
@@ -612,8 +629,15 @@ return [
         "global_business_background_image_create" => "create",
         "global_business_background_image_view" => "view",
 
+        "module_update" => "enable",
+        "module_view" => "view",
+
+
         "user_create" => "create",
         "user_update" => "update",
+
+
+
         "user_view" => "view",
         "user_delete" => "delete",
 
@@ -756,6 +780,18 @@ return [
                 "global_business_background_image_view",
             ],
         ],
+
+
+        [
+            "header" => "module",
+            "permissions" => [
+       "module_update",
+       "module_view",
+
+            ],
+        ],
+
+
 
         [
             "header" => "user",

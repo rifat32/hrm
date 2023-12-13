@@ -714,6 +714,7 @@ class RolesController extends Controller
 
            foreach ($permissions_main as $permissions) {
 
+
                $data = [
                    "header"        => $permissions["header"],
                    "permissions" => [],
