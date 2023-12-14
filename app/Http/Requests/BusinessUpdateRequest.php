@@ -57,8 +57,9 @@ class BusinessUpdateRequest extends FormRequest
             'business.additional_information' => 'nullable|string',
 
 
-            'business.lat' => 'required|string',
-            'business.long' => 'required|string',
+            'business.lat' => 'nullable|string',
+            'business.long' => 'nullable|string',
+            'business.currency' => 'nullable|string',
             'business.country' => 'required|string',
             'business.city' => 'required|string',
             'business.postcode' => 'nullable|string',
@@ -75,7 +76,7 @@ class BusinessUpdateRequest extends FormRequest
 
 
 
-            'business.currency' => 'required|string',
+
 
 
 
@@ -138,6 +139,7 @@ class BusinessUpdateRequest extends FormRequest
 
         'business.lat.required' => 'The latitude field is required.',
         'business.lat.string' => 'The latitude field must be a string.',
+
 
         'business.long.required' => 'The longitude field is required.',
         'business.long.string' => 'The longitude field must be a string.',

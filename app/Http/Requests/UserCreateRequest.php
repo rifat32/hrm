@@ -45,8 +45,8 @@ class UserCreateRequest extends FormRequest
         'country' => 'required|string',
         'city' => 'required|string',
         'postcode' => 'nullable|string',
-        'lat' => 'required|string',
-        'long' => 'required|string',
+        'lat' => 'nullable|string',
+        'long' => 'nullable|string',
         'role' => 'required|string',
 
         'work_shift_id' => [

@@ -96,19 +96,8 @@ class SettingAttendanceController extends Controller
 
                 $request_data["alert_area"] = json_encode($request_data["alert_area"]);
 
-                $check_user = $this->checkUsers($request_data["special_users"]);
-                if (!$check_user["ok"]) {
-                    return response()->json([
-                        "message" => $check_user["message"]
-                    ], $check_user["status"]);
-                }
-                $check_role = $this->checkRoles($request_data["special_roles"]);
-                if (!$check_role["ok"]) {
-                    return response()->json([
-                        "message" => $check_role["message"]
-                    ], $check_role["status"]);
-                }
-                if ($request->user()->hasRole('superadmin')) {
+
+                if (empty($request->user()->business_id)) {
 
                 $request_data["business_id"] = NULL;
                 $request_data["is_default"] = 1;
@@ -251,11 +240,12 @@ class SettingAttendanceController extends Controller
              }
 
 
-             $setting_attendance = SettingAttendance::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             $setting_attendance = SettingAttendance::with("special_users","special_roles")
+             ->when(empty($request->user()->business_id), function ($query) use ($request) {
                  return $query->where('setting_attendances.business_id', NULL)
                               ->where('setting_attendances.is_default', 1);
              })
-             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                  return $query->where('setting_attendances.business_id', $request->user()->business_id)
                  ->where('setting_attendances.is_default', 0);
              })

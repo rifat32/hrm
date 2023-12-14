@@ -269,10 +269,11 @@ trait BusinessUtil
     }
 
     public function checkRoles($ids) {
-        $roles = Role::whereIn("id", $ids)
-        ->get();
 
-        foreach ($roles as $role) {
+
+        foreach ($ids as $id) {
+            $role = Role::where("id", $id)
+            ->first();
             if (!$role) {
                 return [
                     "ok" => false,
@@ -281,8 +282,16 @@ trait BusinessUtil
                 ];
             }
 
-            if(auth()->user()->hasRole('superadmin')) {
-                if (!(($role->business_id == NULL) && ($role->is_default == 1))) {
+            if (empty(auth()->user()->business_id)) {
+                if (!(empty($role->business_id) || $role->is_default == 1)) {
+                    return [
+                        "ok" => false,
+                        "status" => 403,
+                        "message" => "Role belongs to another business."
+                    ];
+                }
+            } else {
+                if ($role->business_id != auth()->user()->business_id) {
                     return [
                         "ok" => false,
                         "status" => 403,
@@ -290,16 +299,8 @@ trait BusinessUtil
                     ];
                 }
             }
-            if(!auth()->user()->hasRole('superadmin')) {
-                // if (!(($role->business_id == auth()->user()->business_id) && ($role->is_default == 0))) {
-                    if (!(($role->business_id == auth()->user()->business_id))) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "Role belongs to another business."
-                    ];
-                }
-            }
+
+
 
 
         }

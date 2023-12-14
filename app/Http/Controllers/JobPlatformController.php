@@ -548,11 +548,11 @@ class JobPlatformController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = JobPlatform::whereIn('id', $idsArray)
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('job_platforms.business_id', NULL)
                              ->where('job_platforms.is_default', 1);
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('job_platforms.business_id', $request->user()->business_id)
                 ->where('job_platforms.is_default', 0);
             })

@@ -86,7 +86,7 @@ class RolesController extends Controller
             "guard_name" => "api",
            ];
 
-           if($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller') )
+           if(empty($request->user()->business_id))
            {
             $insertableRole["business_id"] = NULL;
             $insertableRole["is_default"] = 1;
@@ -182,10 +182,10 @@ class RolesController extends Controller
         $request_data = $request->validated();
 
         $role = Role::where(["id" => $request_data["id"]])
-        ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+        ->when((empty($request->user()->business_id)), function ($query) use ($request) {
             return $query->where('business_id', NULL)->where('is_default', 1);
         })
-        ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+        ->when(!empty($request->user()->business_id), function ($query) use ($request) {
             // return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
             return $query->where('business_id', $request->user()->business_id);
         })
@@ -315,10 +315,10 @@ class RolesController extends Controller
            }
 
            $roles = Role::with('permissions:name,id',"users")
-           ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+           ->when((empty($request->user()->business_id)), function ($query) use ($request) {
             return $query->where('business_id', NULL)->where('is_default', 1);
         })
-        ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+        ->when(!(empty($request->user()->business_id)), function ($query) use ($request) {
             return $query->where('business_id', $request->user()->business_id);
         })
           ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
@@ -488,10 +488,10 @@ class RolesController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = Role::whereIn('id', $idsArray)
             ->where("is_system_default", "!=", 1)
-            ->when(($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('business_id', NULL)->where('is_default', 1);
             })
-            ->when(!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller')), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
             })
             ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
@@ -607,7 +607,7 @@ class RolesController extends Controller
                    continue;
                }
 
-               if (!($request->user()->hasRole('superadmin') || $request->user()->hasRole('reseller'))) {
+               if (!empty($request->user()->business_id)) {
                    if (in_array($roleAndPermissions["role"], ["superadmin", "reseller"])) {
                        // Skip specific roles
                        continue;

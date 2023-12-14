@@ -36,9 +36,11 @@ class BusinessUpdateSeparateRequest extends FormRequest
             'business.additional_information' => 'nullable|string',
 
 
-            'business.lat' => 'required|string',
-            'business.long' => 'required|string',
+            'business.lat' => 'nullable|string',
+            'business.long' => 'nullable|string',
             'business.country' => 'required|string',
+            'business.currency' => 'nullable|string',
+
             'business.city' => 'required|string',
             'business.postcode' => 'nullable|string',
             'business.address_line_1' => 'required|string',
@@ -109,7 +111,7 @@ class BusinessUpdateSeparateRequest extends FormRequest
             'business.images.array' => 'The images field must be an array.',
             'business.images.*.string' => 'Each image in the images field must be a string.',
 
-          
+
 
 
 

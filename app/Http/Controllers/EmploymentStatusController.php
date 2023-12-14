@@ -89,7 +89,7 @@ class EmploymentStatusController extends Controller
                 $request_data = $request->validated();
 
 
-                if ($request->user()->hasRole('superadmin')) {
+                if (empty($request->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 1;
@@ -200,7 +200,7 @@ class EmploymentStatusController extends Controller
                         "message" => "no employment status found"
                     ], 404);
                 }
-                if ($request->user()->hasRole('superadmin')) {
+                if (empty($request->user()->business_id)) {
                     if(!($employment_status_prev->business_id == NULL && $employment_status_prev->is_default == 1)) {
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
@@ -337,11 +337,11 @@ class EmploymentStatusController extends Controller
                 ], 401);
             }
 
-            $employment_statuses = EmploymentStatus::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            $employment_statuses = EmploymentStatus::when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('employment_statuses.business_id', NULL)
                              ->where('employment_statuses.is_default', 1);
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('employment_statuses.business_id', $request->user()->business_id);
             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -449,11 +449,11 @@ class EmploymentStatusController extends Controller
                 "id" => $id,
 
             ])
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('employment_statuses.business_id', NULL)
                              ->where('employment_statuses.is_default', 1);
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('employment_statuses.business_id', $request->user()->business_id);
             })
                 ->first();
@@ -538,11 +538,11 @@ class EmploymentStatusController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = EmploymentStatus::whereIn('id', $idsArray)
-                ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                ->when(empty($request->user()->business_id), function ($query) use ($request) {
                     return $query->where('employment_statuses.business_id', NULL)
                                  ->where('employment_statuses.is_default', 1);
                 })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                     return $query->where('employment_statuses.business_id', $request->user()->business_id)
                     ->where('employment_statuses.is_default', 0);
                 })

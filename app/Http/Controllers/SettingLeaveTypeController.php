@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\SettingLeaveTypeCreateRequest;
 use App\Http\Requests\SettingLeaveTypeUpdateRequest;
 use App\Http\Utils\BusinessUtil;
@@ -94,7 +95,7 @@ class SettingLeaveTypeController extends Controller
 
 
 
-                if ($request->user()->hasRole('superadmin')) {
+                if (empty($request->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                 $request_data["is_active"] = true;
                 $request_data["is_default"] = 1;
@@ -210,7 +211,7 @@ class SettingLeaveTypeController extends Controller
                         "message" => "no setting leave type found"
                     ], 404);
                 }
-                if ($request->user()->hasRole('superadmin')) {
+                if (empty($request->user()->business_id)) {
                     if(!($setting_leave_type_prev->business_id == NULL && $setting_leave_type_prev->is_default == 1)) {
                         return response()->json([
                             "message" => "You do not have permission to update this setting leave type due to role restrictions."
@@ -258,7 +259,194 @@ class SettingLeaveTypeController extends Controller
         }
     }
 
+   /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/setting-leave-types/toggle-active",
+     *      operationId="toggleActiveSettingLeaveType",
+     *      tags={"settings.setting_leave_types"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle user leave type",
+     *      description="This method is to toggle user leave type",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
 
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function toggleActiveSettingLeaveType(GetIdRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('setting_leave_type_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+             $setting_leave_type =  SettingLeaveType::where([
+                "id" => $request_data["id"],
+            ])
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', NULL)
+                             ->where('setting_leave_types.is_default', 1);
+            })
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
+            })
+                ->first();
+            if (!$setting_leave_type) {
+                return response()->json([
+                    "message" => "no data found"
+                ], 404);
+            }
+
+             $setting_leave_type->update([
+                 'is_active' => !$setting_leave_type->is_active
+             ]);
+
+             return response()->json(['message' => 'User status updated successfully'], 200);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+      /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/setting-leave-types/toggle-earning-enabled",
+     *      operationId="toggleEarningEnabledSettingLeaveType",
+     *      tags={"settings.setting_leave_types"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle Earning Enabled ",
+     *      description="This method is to toggle Earning Enabled",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function toggleEarningEnabledSettingLeaveType(GetIdRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('setting_leave_type_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+             $setting_leave_type =  SettingLeaveType::where([
+                "id" => $request_data["id"],
+            ])
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', NULL)
+                             ->where('setting_leave_types.is_default', 1);
+            })
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
+            })
+                ->first();
+            if (!$setting_leave_type) {
+                return response()->json([
+                    "message" => "no data found"
+                ] , 404);
+            }
+
+
+
+             $setting_leave_type->update([
+                 'is_earning_enabled' => !$setting_leave_type->is_earning_enabled
+             ]);
+
+             return response()->json(['message' => 'User status updated successfully'], 200);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(
@@ -355,11 +543,11 @@ class SettingLeaveTypeController extends Controller
             }
 
 
-            $setting_leave_types = SettingLeaveType::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            $setting_leave_types = SettingLeaveType::when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', NULL)
                              ->where('setting_leave_types.is_default', 1);
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', $request->user()->business_id);
             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -466,11 +654,11 @@ class SettingLeaveTypeController extends Controller
             $setting_leave_type =  SettingLeaveType::where([
                 "id" => $id,
             ])
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', NULL)
                              ->where('setting_leave_types.is_default', 1);
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', $request->user()->business_id);
             })
                 ->first();
@@ -555,11 +743,11 @@ class SettingLeaveTypeController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = SettingLeaveType::whereIn('id', $idsArray)
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', NULL)
                              ->where('setting_leave_types.is_default', 1);
             })
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', $request->user()->business_id)
                 ->where('setting_leave_types.is_default', 0);
             })

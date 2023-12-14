@@ -39,8 +39,8 @@ class UserUpdateProfileRequest extends FormRequest
             'country' => 'required|string',
             'city' => 'required|string',
             'postcode' => 'nullable|string',
-            'lat' => 'required|string',
-            'long' => 'required|string',
+            'lat' => 'nullable|string',
+            'long' => 'nullable|string',
             'gender' => 'nullable|string|in:male,female,other',
             'emergency_contact_details' => "nullable|array"
 

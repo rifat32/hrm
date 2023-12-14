@@ -85,7 +85,7 @@ class SettingPayrollController extends Controller
                  $request_data["is_active"] = 1;
 
 
-                 if ($request->user()->hasRole('superadmin')) {
+                 if (empty($request->user()->business_id)) {
 
                  $request_data["business_id"] = NULL;
                  $request_data["is_default"] = 1;
@@ -228,11 +228,11 @@ class SettingPayrollController extends Controller
               }
 
 
-              $setting_payrun = SettingPayrun::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+              $setting_payrun = SettingPayrun::when(empty($request->user()->business_id), function ($query) use ($request) {
                   return $query->where('setting_payruns.business_id', NULL)
                                ->where('setting_payruns.is_default', 1);
               })
-              ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+              ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                   return $query->where('setting_payruns.business_id', $request->user()->business_id)
                   ->where('setting_payruns.is_default', 0);
               })
@@ -433,7 +433,7 @@ class SettingPayrollController extends Controller
                 $request_data["is_active"] = 1;
 
 
-                if ($request->user()->hasRole('superadmin')) {
+                if (empty($request->user()->business_id)) {
 
                 $request_data["business_id"] = NULL;
                 $request_data["is_default"] = 1;
@@ -570,11 +570,11 @@ class SettingPayrollController extends Controller
              }
 
 
-             $setting_payslip = SettingPayslip::when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             $setting_payslip = SettingPayslip::when(empty($request->user()->business_id), function ($query) use ($request) {
                  return $query->where('setting_payslips.business_id', NULL)
                               ->where('setting_payslips.is_default', 1);
              })
-             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                  return $query->where('setting_payslips.business_id', $request->user()->business_id)
                  ->where('setting_payslips.is_default', 0);
              })

@@ -54,12 +54,12 @@ class AuthRegisterBusinessRequestClient extends FormRequest
             'business.email' => 'nullable|string|email|max:255|unique:businesses,email',
             'business.additional_information' => 'nullable|string',
 
-            'business.lat' => 'required|string',
-            'business.long' => 'required|string',
+            'business.lat' => 'nullable|string',
+            'business.long' => 'nullable|string',
             'business.country' => 'required|string',
             'business.city' => 'required|string',
 
-            'business.currency' => 'required|string',
+            'business.currency' => 'nullable|string',
 
             'business.postcode' => 'required|string',
             'business.address_line_1' => 'required|string',
@@ -124,7 +124,7 @@ class AuthRegisterBusinessRequestClient extends FormRequest
             'business.image.string' => 'The image field must be a string.',
             'business.images.array' => 'The images field must be an array.',
             'business.images.*.string' => 'Each image in the images field must be a string.',
-        
+
 
 
 

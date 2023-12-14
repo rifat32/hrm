@@ -89,18 +89,8 @@ class SettingLeaveController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_active"] = 1;
 
-                $check_user = $this->checkUsers($request_data["special_users"]);
-                if (!$check_user["ok"]) {
-                    return response()->json([
-                        "message" => $check_user["message"]
-                    ], $check_user["status"]);
-                }
-                $check_role = $this->checkRoles($request_data["special_roles"]);
-                if (!$check_role["ok"]) {
-                    return response()->json([
-                        "message" => $check_role["message"]
-                    ], $check_role["status"]);
-                }
+
+
 
                 $check_paid_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"]);
                 if (!$check_paid_employment_status["ok"]) {
@@ -115,7 +105,7 @@ class SettingLeaveController extends Controller
                     ], $check_unpaid_employment_status["status"]);
                 }
 
-                if ($request->user()->hasRole('superadmin')) {
+                if (empty($request->user()->business_id)) {
 
                     $request_data["business_id"] = NULL;
                     $request_data["is_default"] = 1;
@@ -264,11 +254,11 @@ class SettingLeaveController extends Controller
 
             $setting_leave = SettingLeave::with("special_users","special_roles","paid_leave_employment_statuses","unpaid_leave_employment_statuses")
 
-            ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+            ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leaves.business_id', NULL)
                     ->where('setting_leaves.is_default', 1);
             })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                     return $query->where('setting_leaves.business_id', $request->user()->business_id)
                         ->where('setting_leaves.is_default', 0);
                 })

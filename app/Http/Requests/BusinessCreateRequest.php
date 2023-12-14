@@ -43,12 +43,12 @@ class BusinessCreateRequest extends FormRequest
             'business.email' => 'nullable|string|email|max:255|unique:businesses,email',
             'business.additional_information' => 'nullable|string',
 
-            'business.lat' => 'required|string',
-            'business.long' => 'required|string',
+            'business.lat' => 'nullable|string',
+            'business.long' => 'nullable|string',
             'business.country' => 'required|string',
             'business.city' => 'required|string',
 
-            'business.currency' => 'required|string',
+            'business.currency' => 'nullable|string',
 
             'business.postcode' => 'required|string',
             'business.address_line_1' => 'required|string',
