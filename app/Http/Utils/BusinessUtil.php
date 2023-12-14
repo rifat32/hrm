@@ -390,23 +390,6 @@ trait BusinessUtil
           }
 
 
-          $defaultJobPlatforms = JobPlatform::where([
-            "business_id" => NULL,
-            "is_default" => 1,
-            "is_active" => 1
-          ])->get();
-
-          foreach($defaultJobPlatforms as $defaultJobPlatform) {
-              $insertableData = [
-                'name'  => $defaultJobPlatform->name,
-                'description'  => $defaultJobPlatform->description,
-                "is_active" => 1,
-                "is_default" => 1,
-                "business_id" => $business_id,
-              ];
-           $job_platform  = JobPlatform::create($insertableData);
-           $attached_defaults["job_platforms"][$defaultJobPlatform->id] = $job_platform->id;
-          }
 
 
         $defaultDesignations = Designation::where([

@@ -450,8 +450,14 @@ class EmploymentStatusController extends Controller
 
             ])
             ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('employment_statuses.business_id', NULL)
-                             ->where('employment_statuses.is_default', 1);
+                if($request->user()->hasRole("superadmin") ) {
+                    return $query->where('employment_statuses.business_id', NULL)
+                    ->where('employment_statuses.is_default',1);
+                } else {
+                    return $query->where('employment_statuses.business_id', NULL)
+                    ->where('employment_statuses.created_by',$request->user()->id);
+                }
+
             })
             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('employment_statuses.business_id', $request->user()->business_id);
@@ -539,8 +545,14 @@ class EmploymentStatusController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = EmploymentStatus::whereIn('id', $idsArray)
                 ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('employment_statuses.business_id', NULL)
-                                 ->where('employment_statuses.is_default', 1);
+                    if($request->user()->hasRole("superadmin") ) {
+                        return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default',1);
+                    } else {
+                        return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.created_by',$request->user()->id);
+                    }
+              
                 })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                     return $query->where('employment_statuses.business_id', $request->user()->business_id)

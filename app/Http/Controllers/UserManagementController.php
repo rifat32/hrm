@@ -1456,10 +1456,6 @@ if(!empty($request_data["employee_id"])) {
              $data["data"] = $users;
                  $data["data_highlights"] = [];
 
-
-
-
-
                  $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
                     return $user->is_active == 1;
                 })->count();
