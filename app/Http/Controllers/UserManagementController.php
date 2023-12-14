@@ -1221,7 +1221,7 @@ if(!empty($request_data["employee_id"])) {
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                 return $query->where(function ($query) {
                     return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
+
                             ->orWhere('business_id', auth()->user()->business_id);
                   });
             })
@@ -1398,14 +1398,13 @@ if(!empty($request_data["employee_id"])) {
              ->when(!empty($request->role), function ($query) use ($request) {
                  $rolesArray = explode(',', $request->role);
                return   $query->whereHas("roles", function($q) use ($rolesArray) {
-                    return $q->whereIn("name", $rolesArray);
+             return $q->whereIn("name", $rolesArray);
                  });
              })
 
              ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                  return $query->where(function ($query) {
                      return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
                              ->orWhere('business_id', auth()->user()->business_id);
                    });
              })
@@ -1456,26 +1455,17 @@ if(!empty($request_data["employee_id"])) {
 
              $data["data"] = $users;
                  $data["data_highlights"] = [];
-                //  if(!empty($request->per_page)) {
-
-                //  }
-                $user_highlights = User::when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                                ->orWhere('id', auth()->user()->id)
-                                ->orWhere('business_id', auth()->user()->business_id);
-                      });
-                })
-                ->get();
 
 
 
-                 $data["data_highlights"]["total_active_users"] = $user_highlights->where([
-                    "is_active" => 1
-                 ])->count();
-                 $data["data_highlights"]["total_users"] = $user_highlights->count();
 
-             return response()->json($users, 200);
+
+                 $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
+                    return $user->is_active == 1;
+                })->count();
+                 $data["data_highlights"]["total_users"] = $users->count();
+
+             return response()->json($data, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);

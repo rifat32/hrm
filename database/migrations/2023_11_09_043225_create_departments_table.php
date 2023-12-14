@@ -20,8 +20,8 @@ class CreateDepartmentsTable extends Migration
             $table->text("description")->nullable();
             $table->boolean("is_active")->default(true);
 
-            $table->unsignedBigInteger("manager_id");
-            $table->foreign('manager_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("manager_id")->nullable();
+            $table->foreign('manager_id')->references('id')->on('users')->onDelete('set null');
             $table->unsignedBigInteger("parent_id")->nullable(true);
             $table->foreign('parent_id')->references('id')->on('departments')->onDelete('cascade');
             $table->unsignedBigInteger("business_id");

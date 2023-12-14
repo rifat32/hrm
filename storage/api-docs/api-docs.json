@@ -1195,25 +1195,7 @@
                     "required": true,
                     "content": {
                         "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "admin@gmail.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "12345678"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                            "schema": {}
                         }
                     }
                 },
@@ -3208,6 +3190,431 @@
                 "summary": "This method is to get businesses",
                 "description": "This method is to get businesses",
                 "operationId": "getAllBusinessesByBusinessOwner",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-tiers": {
+            "get": {
+                "tags": [
+                    "business_tiers"
+                ],
+                "summary": "This method is to get business tiers  ",
+                "description": "This method is to get business tiers ",
+                "operationId": "getBusinessTiers",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "business_tiers"
+                ],
+                "summary": "This method is to update business tier ",
+                "description": "This method is to update business tier",
+                "operationId": "updateBusinessTier",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "business_tiers"
+                ],
+                "summary": "This method is to store business tier",
+                "description": "This method is to store business tier",
+                "operationId": "createBusinessTier",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-tiers/{id}": {
+            "get": {
+                "tags": [
+                    "business_tiers"
+                ],
+                "summary": "This method is to get business tier by id",
+                "description": "This method is to get business tier by id",
+                "operationId": "getBusinessTierById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-tiers/{ids}": {
+            "delete": {
+                "tags": [
+                    "business_tiers"
+                ],
+                "summary": "This method is to delete business tier by id",
+                "description": "This method is to delete business tier by id",
+                "operationId": "deleteBusinessTiersByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -9105,6 +9512,197 @@
                 ]
             }
         },
+        "/v1.0/modules/toggle-active": {
+            "put": {
+                "tags": [
+                    "modules"
+                ],
+                "summary": "This method is to toggle module active",
+                "description": "This method is to toggle module active",
+                "operationId": "toggleActiveModule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/modules": {
+            "get": {
+                "tags": [
+                    "modules"
+                ],
+                "summary": "This method is to get modules",
+                "description": "This method is to get modules",
+                "operationId": "getModules",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "business_tier_id",
+                        "in": "query",
+                        "description": "business_tier_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/notifications/{perPage}": {
             "get": {
                 "tags": [
@@ -12585,6 +13183,16 @@
                                             "system"
                                         ]
                                     },
+                                    "service_name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "map"
+                                    },
+                                    "api_key": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "sdthsd@hrhfgf"
+                                    },
                                     "auto_approval": {
                                         "type": "boolean",
                                         "format": "boolean",
@@ -13136,6 +13744,170 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "30"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/setting-leave-types/toggle-active": {
+            "put": {
+                "tags": [
+                    "settings.setting_leave_types"
+                ],
+                "summary": "This method is to toggle user leave type",
+                "description": "This method is to toggle user leave type",
+                "operationId": "toggleActiveSettingLeaveType",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/setting-leave-types/toggle-earning-enabled": {
+            "put": {
+                "tags": [
+                    "settings.setting_leave_types"
+                ],
+                "summary": "This method is to toggle Earning Enabled ",
+                "description": "This method is to toggle Earning Enabled",
+                "operationId": "toggleEarningEnabledSettingLeaveType",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -15973,32 +16745,11 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "is_in_employee",
+                        "name": "order_by",
                         "in": "query",
-                        "description": "is_in_employee",
+                        "description": "order_by",
                         "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "business_id",
-                        "in": "query",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "is_active",
-                        "in": "query",
-                        "description": "is_active",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "description": "role",
-                        "required": true,
-                        "example": "admin,manager"
+                        "example": "ASC"
                     }
                 ],
                 "responses": {

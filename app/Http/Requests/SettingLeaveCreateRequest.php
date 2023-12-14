@@ -62,7 +62,7 @@ class SettingLeaveCreateRequest extends FormRequest
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $role = Role::where("id", $value)
-                        ->get();
+                        ->first();
 
 
                     if (!$role) {

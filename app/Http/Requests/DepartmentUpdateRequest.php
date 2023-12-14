@@ -30,7 +30,7 @@ class DepartmentUpdateRequest extends FormRequest
             'name' => 'required|string',
             'location' => 'nullable|string',
             'description' => 'nullable|string',
-            'manager_id' => 'required|numeric',
+            'manager_id' => 'nullable|numeric',
             'parent_id' => [
                 "nullable",
                 'numeric',
