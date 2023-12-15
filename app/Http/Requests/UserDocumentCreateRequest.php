@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserDocumentCreateRequest extends FormRequest
@@ -13,7 +14,7 @@ class UserDocumentCreateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +25,24 @@ class UserDocumentCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name' => 'required|string',
+            'file_name' => 'required|string',
+          
+            'user_id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = User::where('id', $value)
+                        ->where('users.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
         ];
     }
+
+
 }

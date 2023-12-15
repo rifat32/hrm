@@ -122,6 +122,11 @@ return [
                 "user_view",
                 "user_delete",
 
+                "employee_document_create",
+                "employee_document_update",
+                "employee_document_view",
+                "employee_document_delete",
+
                 "role_create",
                 "role_update",
                 "role_view",
@@ -209,6 +214,8 @@ return [
                 "candidate_delete",
 
 
+
+
                 "setting_attendance_create",
 
                 "attendance_create",
@@ -230,6 +237,11 @@ return [
                 "user_update",
                 "user_view",
                 "user_delete",
+
+                "employee_document_create",
+                "employee_document_update",
+                "employee_document_view",
+                "employee_document_delete",
 
                 "role_create",
                 "role_update",
@@ -363,6 +375,11 @@ return [
        "user_update",
        "user_view",
        "user_delete",
+
+       "employee_document_create",
+       "employee_document_update",
+       "employee_document_view",
+       "employee_document_delete",
 
 
        "role_create",
@@ -504,6 +521,13 @@ return [
         "user_update" => "Can update user",
         "user_view" => "Can view user",
         "user_delete" => "Can delete user",
+
+        "employee_document_create" => "",
+        "employee_document_update" => "",
+        "employee_document_view" => "",
+        "employee_document_delete" => "",
+
+
 
         "role_create" => "Can create role",
         "role_update" => "Can update role",
@@ -653,15 +677,22 @@ return [
 
         "user_create" => "create",
         "user_update" => "update",
+        "user_view" => "view",
+        "user_delete" => "delete",
+
 
         "business_tier_create" => "create",
         "business_tier_update" => "update",
         "business_tier_view" => "view",
         "business_tier_delete" => "delete",
 
+        "employee_document_create" => "create",
+        "employee_document_update"  => "update",
+        "employee_document_view"  => "view",
+        "employee_document_delete"  => "delete",
 
-        "user_view" => "view",
-        "user_delete" => "delete",
+
+
 
         "role_create" => "create",
         "role_update" => "update",
@@ -836,6 +867,19 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "user",
+            "permissions" => [
+                "employee_document_create",
+                "employee_document_update",
+                "employee_document_view",
+                "employee_document_delete",
+
+            ],
+        ],
+
+
 
         [
             "header" => "role",

@@ -114,30 +114,23 @@ class UserDocumentController extends Controller
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/candidates",
-     *      operationId="createCandidate",
-     *      tags={"candidates"},
+     *      path="/v1.0/user-documents",
+     *      operationId="createUserDocument",
+     *      tags={"user_documents"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store candidate",
-     *      description="This method is to store candidate",
+     *      summary="This method is to store user document",
+     *      description="This method is to store user document",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*     @OA\Property(property="name", type="string", format="string", example="John Doe"),
- *     @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
- *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
- *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
- *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
- *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
- *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
- *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
- *     @OA\Property(property="feedback", type="string", format="string", example="Positive feedback..."),
- *     @OA\Property(property="status", type="string", format="string", example="review"),
- *     @OA\Property(property="job_listing_id", type="integer", format="int", example=1),
- *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
+ *     @OA\Property(property="file_name", type="string", format="string", example="Your File Name"),
+ *     @OA\Property(property="user_id", type="integer", format="int", example=1),
+ *
+ *
  *
  *
  *
@@ -178,12 +171,12 @@ class UserDocumentController extends Controller
      *     )
      */
 
-    public function createCandidate(UserDocumentCreateRequest $request)
+    public function createUserDocument(UserDocumentCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('candidate_create')) {
+                if (!$request->user()->hasPermissionTo('employee_document_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -196,14 +189,14 @@ class UserDocumentController extends Controller
 
 
                 $request_data["business_id"] = $request->user()->business_id;
-                $request_data["is_active"] = true;
+
                 $request_data["created_by"] = $request->user()->id;
 
-                $candidate =  UserDocument::create($request_data);
+                $user_document =  UserDocument::create($request_data);
 
 
 
-                return response($candidate, 201);
+                return response($user_document, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -214,31 +207,23 @@ class UserDocumentController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/candidates",
-     *      operationId="updateCandidate",
-     *      tags={"candidates"},
+     *      path="/v1.0/user-documents",
+     *      operationId="updateUserDocument",
+     *      tags={"user_documents"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update candidate ",
-     *      description="This method is to update candidate",
+     *      summary="This method is to update  user document ",
+     *      description="This method is to update user document",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-*     @OA\Property(property="name", type="string", format="string", example="John Doe"),
- *     @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
- *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
- *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
- *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
- *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
- *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
- *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
- *     @OA\Property(property="feedback", type="string", format="string", example="Positive feedback..."),
- *     @OA\Property(property="status", type="string", format="string", example="review"),
- *     @OA\Property(property="job_listing_id", type="integer", format="int", example=1),
- *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
+ *     @OA\Property(property="file_name", type="string", format="string", example="Your File Name"),
+ *     @OA\Property(property="user_id", type="integer", format="int", example=1)
+ *
 
      *
      *         ),
@@ -277,13 +262,13 @@ class UserDocumentController extends Controller
      *     )
      */
 
-    public function updateCandidate(UserDocumentUpdateRequest $request)
+    public function updateUserDocument(UserDocumentUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('candidate_update')) {
+                if (!$request->user()->hasPermissionTo('employee_document_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -294,49 +279,37 @@ class UserDocumentController extends Controller
 
 
 
-                $candidate_query_params = [
+                $user_document_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
                 ];
-                // $candidate_prev = Candidate::where($candidate_query_params)
+                // $user_document_prev = UserDocument::where($user_document_query_params)
                 //     ->first();
-                // if (!$candidate_prev) {
+                // if (!$user_document_prev) {
                 //     return response()->json([
-                //         "message" => "no candidate found"
+                //         "message" => "no user document found"
                 //     ], 404);
                 // }
 
-                $candidate  =  tap(UserDocument::where($candidate_query_params))->update(
+                $user_document  =  tap(UserDocument::where($user_document_query_params))->update(
                     collect($request_data)->only([
+                        // 'user_id',
                         'name',
-                        'email',
-                        'phone',
-                        'experience_years',
-                        'education_level',
-                        'cover_letter',
-                        'application_date',
-                        'interview_date',
-                        'feedback',
-                        'status',
-                        'job_listing_id',
-                        'attachments',
-
-                        // "is_active",
-                        // "business_id",
-                        // "created_by"
+                        'file_name',
+                        // 'created_by',
 
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$candidate) {
+                if (!$user_document) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($candidate, 201);
+                return response($user_document, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -348,9 +321,9 @@ class UserDocumentController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/candidates",
-     *      operationId="getCandidates",
-     *      tags={"candidates"},
+     *      path="/v1.0/user-documents",
+     *      operationId="getUserDocuments",
+     *      tags={"user_documents"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -392,8 +365,8 @@ class UserDocumentController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get candidates  ",
-     *      description="This method is to get candidates ",
+     *      summary="This method is to get user documents  ",
+     *      description="This method is to get user documents ",
      *
 
      *      @OA\Response(
@@ -430,41 +403,41 @@ class UserDocumentController extends Controller
      *     )
      */
 
-    public function getCandidates(Request $request)
+    public function getUserDocuments(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('candidate_view')) {
+            if (!$request->user()->hasPermissionTo('employee_document_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $candidates = UserDocument::where(
+            $user_documents = UserDocument::where(
                 [
-                    "candidates.business_id" => $business_id
+                    "user_documents.business_id" => $business_id
                 ]
             )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        // $query->where("candidates.name", "like", "%" . $term . "%")
-                        //     ->orWhere("candidates.description", "like", "%" . $term . "%");
+                        // $query->where("user_documents.name", "like", "%" . $term . "%")
+                        //     ->orWhere("user_documents.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('candidates.created_at', ">=", $request->start_date);
+                    return $query->where('user_documents.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('candidates.created_at', "<=", $request->end_date);
+                    return $query->where('user_documents.created_at', "<=", $request->end_date);
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("candidates.id", $request->order_by);
+                    return $query->orderBy("user_documents.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("candidates.id", "DESC");
+                    return $query->orderBy("user_documents.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -474,7 +447,7 @@ class UserDocumentController extends Controller
 
 
 
-            return response()->json($candidates, 200);
+            return response()->json($user_documents, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -484,9 +457,9 @@ class UserDocumentController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/candidates/{id}",
-     *      operationId="getCandidateById",
-     *      tags={"candidates"},
+     *      path="/v1.0/user-documents/{id}",
+     *      operationId="getUserDocumentById",
+     *      tags={"user_documents"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -497,8 +470,8 @@ class UserDocumentController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get candidate by id",
-     *      description="This method is to get candidate by id",
+     *      summary="This method is to get user document by id",
+     *      description="This method is to get user document by id",
      *
 
      *      @OA\Response(
@@ -536,28 +509,28 @@ class UserDocumentController extends Controller
      */
 
 
-    public function getCandidateById($id, Request $request)
+    public function getUserDocumentById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('candidate_view')) {
+            if (!$request->user()->hasPermissionTo('employee_document_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $candidate =  UserDocument::where([
+            $user_document =  UserDocument::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
                 ->first();
-            if (!$candidate) {
+            if (!$user_document) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($candidate, 200);
+            return response()->json($user_document, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -569,9 +542,9 @@ class UserDocumentController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/candidates/{ids}",
-     *      operationId="deleteCandidatesByIds",
-     *      tags={"candidates"},
+     *      path="/v1.0/user-documents/{ids}",
+     *      operationId="deleteUserDocumentsByIds",
+     *      tags={"user_documents"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -582,8 +555,8 @@ class UserDocumentController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete candidate by id",
-     *      description="This method is to delete candidate by id",
+     *      summary="This method is to delete user document by id",
+     *      description="This method is to delete user document by id",
      *
 
      *      @OA\Response(
@@ -620,12 +593,12 @@ class UserDocumentController extends Controller
      *     )
      */
 
-    public function deleteCandidatesByIds(Request $request, $ids)
+    public function deleteUserDocumentsByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('candidate_delete')) {
+            if (!$request->user()->hasPermissionTo('employee_document_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
