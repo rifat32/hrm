@@ -23,7 +23,7 @@ class UserDocumentController extends Controller
      * @OA\Post(
      *      path="/v1.0/user-documents/single-file-upload",
      *      operationId="createUserDocumentFileSingle",
-     *      tags={"user_management"},
+     *      tags={"user_documents"},
      *       security={
      *           {"bearerAuth": {}}
      *       },

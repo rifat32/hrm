@@ -86,20 +86,10 @@ class DepartmentController extends Controller
                 }
 
                 $request_data = $request->validated();
-                $check_manager = $this->checkManager($request_data["manager_id"]);
-                if (!$check_manager["ok"]) {
-                    return response()->json([
-                        "message" => $check_manager["message"]
-                    ], $check_manager["status"]);
-                }
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
-                } else {
+         
+
+
+                if (empty($request_data["parent_id"])) {
                     $parent_department = Department::whereNull('parent_id')
                     ->where('departments.business_id', '=', auth()->user()->business_id)
                     ->first();
@@ -199,21 +189,8 @@ class DepartmentController extends Controller
 
 
 
-                $check_manager = $this->checkManager($request_data["manager_id"]);
-                if (!$check_manager["ok"]) {
-                    return response()->json([
-                        "message" => $check_manager["message"]
-                    ], $check_manager["status"]);
-                }
 
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
-                } else {
+                if (empty($request_data["parent_id"])) {
                     $parent_department = Department::whereNull('parent_id')
                     ->where('departments.business_id', '=', auth()->user()->business_id)
                     ->first();
@@ -480,8 +457,6 @@ class DepartmentController extends Controller
                      "parent_id" => NULL
                  ]
              )
-
-
                  ->orderBy("departments.id", "ASC")
                  ->select('departments.*')
                 ->first();

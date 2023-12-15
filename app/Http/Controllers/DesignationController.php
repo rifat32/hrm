@@ -86,11 +86,6 @@ class DesignationController extends Controller
                 $request_data = $request->validated();
 
 
-
-
-
-
-
                 if (empty($request->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                 $request_data["is_active"] = 1;

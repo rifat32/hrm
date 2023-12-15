@@ -17,7 +17,7 @@ class CreateUserDocumentsTable extends Migration
             $table->id();
 
             $table->unsignedBigInteger("user_id")->nullable();
-            $table->foreign('users')
+            $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade');
@@ -30,7 +30,7 @@ class CreateUserDocumentsTable extends Migration
                 ->on('users')
                 ->onDelete('set null');
             $table->timestamps();
-            $table->timestamps();
+
         });
     }
 

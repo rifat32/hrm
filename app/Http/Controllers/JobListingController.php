@@ -91,8 +91,8 @@ class JobListingController extends Controller
 
                 $request_data = $request->validated();
 
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
+                if (!empty($request_data["department_id"])) {
+                    $check_department = $this->checkDepartment($request_data["department_id"]);
                     if (!$check_department["ok"]) {
                         return response()->json([
                             "message" => $check_department["message"]

@@ -533,7 +533,7 @@ $datediff = $now - $user_created_date;
      */
 
     public function storeToken(ForgetPasswordRequest $request) {
-
+              
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use (&$request) {

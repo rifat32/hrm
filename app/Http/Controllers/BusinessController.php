@@ -18,6 +18,7 @@ use App\Mail\SendPassword;
 use App\Models\Business;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -493,10 +494,12 @@ if(!$user->hasRole('business_owner')) {
 
    $password = $request_data['user']['password'];
    $request_data['user']['password'] = Hash::make($password);
-   if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
-    $password = Str::random(10);
-    $request_data['user']['password'] = Hash::make($password);
-    }
+
+
+//    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
+//     $password = Str::random(10);
+//     $request_data['user']['password'] = Hash::make($password);
+//     }
 
 
 
@@ -530,17 +533,26 @@ if(!$user->hasRole('business_owner')) {
 
         $user->email_verified_at = now();
         $user->business_id = $business->id;
+
+
+
+        $token = Str::random(30);
+        $user->resetPasswordToken = $token;
+        $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+
         $user->save();
 
 
   // end business info ##############
 
 
-     if($request_data['user']['send_password']) {
-        if(env("SEND_EMAIL") == true) {
+    //  if($request_data['user']['send_password']) {
+
+
+        // if(env("SEND_EMAIL") == true) {
             Mail::to($request_data['user']['email'])->send(new SendPassword($user,$password));
-        }
-    }
+        // }
+    // }
 
         return response([
             "user" => $user,

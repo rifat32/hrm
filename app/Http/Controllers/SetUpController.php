@@ -101,6 +101,7 @@ return "swagger generated";
              "is_default" => 1,
              "is_default_for_business" => (in_array($role ,["business_owner",
              "business_admin",
+             "business_manager",
              "business_employee"])?1:0)
 
 
@@ -173,6 +174,7 @@ return "swagger generated";
              "is_default" => 1,
              "is_default_for_business" => (in_array($role ,["business_owner",
              "business_admin",
+             "business_manager",
              "business_employee"])?1:0)
 
 

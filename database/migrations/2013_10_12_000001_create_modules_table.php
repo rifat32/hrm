@@ -35,14 +35,14 @@ class CreateModulesTable extends Migration
         ->insert(array(
            [
             "name" => "project_and_task_management",
-            "is_active" => 1,
+            "is_enabled" => 1,
             "is_default" => 1,
             "business_tier_id" => NULL,
            ],
 
            [
             "name" => "user_activity",
-            "is_active" => 1,
+            "is_enabled" => 1,
             "is_default" => 1,
             "business_tier_id" => NULL,
            ],
@@ -52,14 +52,14 @@ class CreateModulesTable extends Migration
         ->insert(array(
            [
             "name" => "project_and_task_management",
-            "is_active" => 1,
+            "is_enabled" => 1,
             "is_default" => 1,
             "business_tier_id" => 1,
            ],
 
            [
             "name" => "user_activity",
-            "is_active" => 1,
+            "is_enabled" => 1,
             "is_default" => 1,
             "business_tier_id" => 1,
            ],

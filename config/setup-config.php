@@ -337,6 +337,115 @@ return [
 
             ],
         ],
+        [
+            "role" => "business_manager",
+            "permissions" => [
+
+
+                "user_create",
+                "user_update",
+                "user_view",
+                "user_delete",
+
+                "employee_document_create",
+                "employee_document_update",
+                "employee_document_view",
+                "employee_document_delete",
+
+                "role_create",
+                "role_update",
+                "role_view",
+                "role_delete",
+
+                "business_update",
+                "business_view",
+                "product_category_view",
+                "global_business_background_image_view",
+
+
+
+                "department_create",
+                "department_update",
+                "department_view",
+                "department_delete",
+
+                "job_listing_create",
+                "job_listing_update",
+                "job_listing_view",
+                "job_listing_delete",
+
+                "job_platform_view",
+
+                "project_create",
+                "project_update",
+                "project_view",
+                "project_delete",
+
+                "task_create",
+                "task_update",
+                "task_view",
+                "task_delete",
+
+                "holiday_create",
+                "holiday_update",
+                "holiday_view",
+                "holiday_delete",
+
+                "work_shift_create",
+                "work_shift_update",
+                "work_shift_view",
+                "work_shift_delete",
+
+                "announcement_create",
+                "announcement_update",
+                "announcement_view",
+                "announcement_delete",
+
+
+
+                "designation_create",
+                "designation_update",
+                "designation_view",
+                "designation_delete",
+
+                "employment_status_create",
+                "employment_status_update",
+                "employment_status_view",
+                "employment_status_delete",
+
+"setting_leave_type_create",
+"setting_leave_type_update",
+"setting_leave_type_view",
+"setting_leave_type_delete",
+"setting_leave_create",
+
+
+
+"leave_create",
+"leave_update",
+"leave_approve",
+"leave_view",
+"leave_delete",
+
+"candidate_create",
+"candidate_update",
+"candidate_view",
+"candidate_delete",
+
+
+
+"setting_attendance_create",
+
+"attendance_create",
+"attendance_update",
+"attendance_view",
+"attendance_delete",
+
+"setting_payroll_create",
+
+
+            ],
+        ],
 
         [
             "role" => "business_employee",
@@ -355,6 +464,7 @@ return [
         'reseller',
         "business_owner",
         "business_admin",
+        "business_manager",
         "business_employee",
 
     ],
