@@ -52,7 +52,7 @@ class UserCreateRequest extends FormRequest
             "required",
             'string',
             function ($attribute, $value, $fail) {
-                $role  = Role::where(["name" => "value"])->first();
+                $role  = Role::where(["name" => $value])->first();
 
 
                 if (!$role){
@@ -62,6 +62,11 @@ class UserCreateRequest extends FormRequest
                 }
 
                 if(!empty(auth()->user()->business_id)) {
+                    if (empty($role->business_id)){
+                        // $fail("$attribute is invalid.")
+                      $fail("You don't have this role");
+
+                  }
                     if ($role->business_id != auth()->user()->business_id){
                           // $fail("$attribute is invalid.")
                         $fail("You don't have this role");
