@@ -1,0 +1,659 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\SingleFileUploadRequest;
+use App\Http\Requests\UserDocumentCreateRequest;
+use App\Http\Requests\UserDocumentUpdateRequest;
+use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
+use App\Models\UserDocument;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class UserDocumentController extends Controller
+{
+    use ErrorUtil, UserActivityUtil, BusinessUtil;
+
+
+  /**
+        *
+     * @OA\Post(
+     *      path="/v1.0/user-documents/single-file-upload",
+     *      operationId="createUserDocumentFileSingle",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user doc file ",
+     *      description="This method is to store user doc file",
+     *
+   *  @OA\RequestBody(
+        *   * @OA\MediaType(
+*     mediaType="multipart/form-data",
+*     @OA\Schema(
+*         required={"file"},
+*         @OA\Property(
+*             description="file to upload",
+*             property="file",
+*             type="file",
+*             collectionFormat="multi",
+*         )
+*     )
+* )
+
+
+
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createUserDocumentFileSingle(SingleFileUploadRequest $request)
+     {
+         try{
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             // if(!$request->user()->hasPermissionTo('business_create')){
+             //      return response()->json([
+             //         "message" => "You can not perform this action"
+             //      ],401);
+             // }
+
+             $request_data = $request->validated();
+
+             $location =  config("setup-config.user_files_location");
+
+             $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["file"]->getClientOriginalName());
+
+             $request_data["file"]->move(public_path($location), $new_file_name);
+
+
+             return response()->json(["file" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
+
+
+         } catch(Exception $e){
+             error_log($e->getMessage());
+         return $this->sendError($e,500,$request);
+         }
+     }
+
+
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/candidates",
+     *      operationId="createCandidate",
+     *      tags={"candidates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store candidate",
+     *      description="This method is to store candidate",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+*     @OA\Property(property="name", type="string", format="string", example="John Doe"),
+ *     @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+ *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
+ *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
+ *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
+ *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
+ *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
+ *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
+ *     @OA\Property(property="feedback", type="string", format="string", example="Positive feedback..."),
+ *     @OA\Property(property="status", type="string", format="string", example="review"),
+ *     @OA\Property(property="job_listing_id", type="integer", format="int", example=1),
+ *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *
+ *
+ *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function createCandidate(UserDocumentCreateRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('candidate_create')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+
+                $request_data = $request->validated();
+
+
+
+
+
+                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["is_active"] = true;
+                $request_data["created_by"] = $request->user()->id;
+
+                $candidate =  UserDocument::create($request_data);
+
+
+
+                return response($candidate, 201);
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/candidates",
+     *      operationId="updateCandidate",
+     *      tags={"candidates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update candidate ",
+     *      description="This method is to update candidate",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+*     @OA\Property(property="name", type="string", format="string", example="John Doe"),
+ *     @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+ *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
+ *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
+ *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
+ *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
+ *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
+ *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
+ *     @OA\Property(property="feedback", type="string", format="string", example="Positive feedback..."),
+ *     @OA\Property(property="status", type="string", format="string", example="review"),
+ *     @OA\Property(property="job_listing_id", type="integer", format="int", example=1),
+ *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function updateCandidate(UserDocumentUpdateRequest $request)
+    {
+
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('candidate_update')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+                $business_id =  $request->user()->business_id;
+                $request_data = $request->validated();
+
+
+
+
+                $candidate_query_params = [
+                    "id" => $request_data["id"],
+                    "business_id" => $business_id
+                ];
+                // $candidate_prev = Candidate::where($candidate_query_params)
+                //     ->first();
+                // if (!$candidate_prev) {
+                //     return response()->json([
+                //         "message" => "no candidate found"
+                //     ], 404);
+                // }
+
+                $candidate  =  tap(UserDocument::where($candidate_query_params))->update(
+                    collect($request_data)->only([
+                        'name',
+                        'email',
+                        'phone',
+                        'experience_years',
+                        'education_level',
+                        'cover_letter',
+                        'application_date',
+                        'interview_date',
+                        'feedback',
+                        'status',
+                        'job_listing_id',
+                        'attachments',
+
+                        // "is_active",
+                        // "business_id",
+                        // "created_by"
+
+                    ])->toArray()
+                )
+                    // ->with("somthing")
+
+                    ->first();
+                if (!$candidate) {
+                    return response()->json([
+                        "message" => "something went wrong."
+                    ], 500);
+                }
+
+                return response($candidate, 201);
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/candidates",
+     *      operationId="getCandidates",
+     *      tags={"candidates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get candidates  ",
+     *      description="This method is to get candidates ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getCandidates(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if (!$request->user()->hasPermissionTo('candidate_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $candidates = UserDocument::where(
+                [
+                    "candidates.business_id" => $business_id
+                ]
+            )
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        // $query->where("candidates.name", "like", "%" . $term . "%")
+                        //     ->orWhere("candidates.description", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('candidates.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('candidates.created_at', "<=", $request->end_date);
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("candidates.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("candidates.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
+
+
+
+            return response()->json($candidates, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/candidates/{id}",
+     *      operationId="getCandidateById",
+     *      tags={"candidates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      summary="This method is to get candidate by id",
+     *      description="This method is to get candidate by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+    public function getCandidateById($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if (!$request->user()->hasPermissionTo('candidate_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $candidate =  UserDocument::where([
+                "id" => $id,
+                "business_id" => $business_id
+            ])
+                ->first();
+            if (!$candidate) {
+                return response()->json([
+                    "message" => "no data found"
+                ], 404);
+            }
+
+            return response()->json($candidate, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+
+    /**
+     *
+     *     @OA\Delete(
+     *      path="/v1.0/candidates/{ids}",
+     *      operationId="deleteCandidatesByIds",
+     *      tags={"candidates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="ids",
+     *         in="path",
+     *         description="ids",
+     *         required=true,
+     *  example="1,2,3"
+     *      ),
+     *      summary="This method is to delete candidate by id",
+     *      description="This method is to delete candidate by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function deleteCandidatesByIds(Request $request, $ids)
+    {
+
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if (!$request->user()->hasPermissionTo('candidate_delete')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $idsArray = explode(',', $ids);
+            $existingIds = UserDocument::where([
+                "business_id" => $business_id
+            ])
+                ->whereIn('id', $idsArray)
+                ->select('id')
+                ->get()
+                ->pluck('id')
+                ->toArray();
+            $nonExistingIds = array_diff($idsArray, $existingIds);
+
+            if (!empty($nonExistingIds)) {
+                return response()->json([
+                    "message" => "Some or all of the specified data do not exist."
+                ], 404);
+            }
+            UserDocument::destroy($existingIds);
+
+
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+}

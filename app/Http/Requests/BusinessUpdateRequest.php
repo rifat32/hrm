@@ -34,7 +34,7 @@ class BusinessUpdateRequest extends FormRequest
             // 'user.email' => 'required|string|email|max:255',
             'user.email' => 'required|string|email|unique:users,email,' . $this->user["id"] . ',id',
 
-            'user.password' => 'nullable|confirmed|string|min:6',
+            'user.password' => 'nullable|string|min:6',
             'user.phone' => 'nullable|string',
             'user.image' => 'nullable|string',
             'user.gender' => 'nullable|string|in:male,female,other',

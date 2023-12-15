@@ -42,6 +42,7 @@ use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPayrollController;
 
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
@@ -167,6 +168,8 @@ Route::delete('/v1.0/business-tiers/{ids}', [BusinessTierController::class, "del
 // ********************************************
 // user management section --user
 // ********************************************
+
+Route::post('/v1.0/users/single-file-upload', [UserManagementController::class, "createUserFileSingle"]);
 Route::post('/v1.0/users/multiple-file-upload', [UserManagementController::class, "createUserFileMultiple"]);
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
@@ -186,6 +189,8 @@ Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class,
 Route::get('/v1.0/users/validate/employee-id/{employee_id}', [UserManagementController::class, "validateEmployeeId"]);
 
 
+
+
 // ********************************************
 // user management section --role
 // ********************************************
@@ -200,6 +205,26 @@ Route::delete('/v1.0/roles/{ids}', [RolesController::class, "deleteRolesByIds"])
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end user management section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// candidates  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/user-documents/single-file-upload', [UserDocumentController::class, "createUserDocumentFileSingle"]);
+Route::post('/v1.0/user-documents', [UserDocumentController::class, "createUserDocument"]);
+Route::put('/v1.0/user-documents', [UserDocumentController::class, "updateUserDocument"]);
+Route::get('/v1.0/user-documents', [UserDocumentController::class, "getUserDocuments"]);
+Route::get('/v1.0/user-documents/{id}', [UserDocumentController::class, "getUserDocumentById"]);
+Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "deleteUserDocumentsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end candidates management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // business management section
