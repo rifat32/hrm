@@ -43,10 +43,8 @@ class User extends Authenticatable
         'email',
         'password',
 
-
-
         'is_sponsorship_offered',
-
+        "immigration_status",
 
 
 
@@ -83,6 +81,18 @@ class User extends Authenticatable
     public function leaves() {
         return $this->hasMany(Leave::class, 'employee_id', 'id');
     }
+
+    public function sponsorship_details() {
+        return $this->hasOne(EmployeeSponsorship::class, 'employee_id', 'id');
+    }
+
+    public function passport_details() {
+        return $this->hasOne(EmployeePassportDetail::class, 'employee_id', 'id');
+    }
+    public function visa_details() {
+        return $this->hasOne(EmployeeVisaDetail::class, 'employee_id', 'id');
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.

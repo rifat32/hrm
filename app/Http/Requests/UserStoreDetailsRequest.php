@@ -32,20 +32,20 @@ class UserStoreDetailsRequest extends FormRequest
         ];
 
         if ($this->input('status') === 'visa_granted') {
-            $rules['passport.passport_number'] = 'required|string';
-            $rules['passport.passport_issue_date'] = 'required|date';
-            $rules['passport.passport_expiry_date'] = 'required|date';
-            $rules['passport.place_of_issue'] = 'required|string';
+            $rules['passport_details.passport_number'] = 'required|string';
+            $rules['passport_details.passport_issue_date'] = 'required|date';
+            $rules['passport_details.passport_expiry_date'] = 'required|date';
+            $rules['passport_details.place_of_issue'] = 'required|string';
 
 
 
-            $rules['passport.visa.BRP_number'] = 'required|string';
-            $rules['passport.visa.visa_issue_date'] = 'required|date';
-            $rules['passport.visa.visa_expiry_date'] = 'required|date';
-            $rules['passport.visa.place_of_issue'] = 'required|string';
-            $rules['passport.visa.visa_docs'] = 'present|array';
-            $rules['passport.visa.visa_docs.*.file_name'] = 'required|string';
-            $rules['passport.visa.visa_docs.*.description'] = 'nullable|string';
+            $rules['passport_details.visa_details.BRP_number'] = 'required|string';
+            $rules['passport_details.visa_details.visa_issue_date'] = 'required|date';
+            $rules['passport_details.visa_details.visa_expiry_date'] = 'required|date';
+            $rules['passport_details.visa_details.place_of_issue'] = 'required|string';
+            $rules['passport_details.visa_details.visa_docs'] = 'present|array';
+            $rules['passport_details.visa_details.visa_docs.*.file_name'] = 'required|string';
+            $rules['passport_details.visa_details.visa_docs.*.description'] = 'nullable|string';
 
         }
 
@@ -56,7 +56,7 @@ class UserStoreDetailsRequest extends FormRequest
     {
         return [
 
-            'sponsorship.status.in' => 'Invalid value for status. Valid values are: pending,approved,denied,visa_granted.',
+            'status.in' => 'Invalid value for status. Valid values are: pending,approved,denied,visa_granted.',
             // ... other custom messages
         ];
     }

@@ -89,8 +89,15 @@ class DesignationController extends Controller
                 if (empty($request->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                 $request_data["is_active"] = 1;
-                $request_data["is_default"] = 1;
                 $request_data["created_by"] = $request->user()->id;
+
+
+                if(!$request->user()->hasRole('superadmin')) {
+                    $request_data["is_default"] = 1;
+                }else {
+                    $request_data["is_default"] = 0;
+                }
+
                 } else {
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_active"] = 1;

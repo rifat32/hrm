@@ -327,7 +327,13 @@ class UserDocumentController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-
+     *              @OA\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         description="user_id",
+     *         required=true,
+     *  example="1"
+     *      ),
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -413,21 +419,27 @@ class UserDocumentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $user_documents = UserDocument::where(
-                [
-                    "user_documents.business_id" => $business_id
-                ]
-            )
-                ->when(!empty($request->search_key), function ($query) use ($request) {
+            $user_documents = UserDocument::with([
+                "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+
+            ])
+            ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        // $query->where("user_documents.name", "like", "%" . $term . "%")
+                        $query->where("user_documents.name", "like", "%" . $term . "%");
                         //     ->orWhere("user_documents.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_documents.user_id', $request->user_id);
+                })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('user_documents.created_at', ">=", $request->start_date);
                 })

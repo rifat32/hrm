@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
+use App\Models\Role;
 use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -32,7 +33,7 @@ class UserCreateRequest extends FormRequest
         'middle_Name' => 'nullable|string|max:255',
 
         'last_Name' => 'required|string|max:255',
-        'employee_id' => 'nullable|string',
+
 
         // 'email' => 'required|string|email|indisposable|max:255|unique:users',
         'email' => 'required|string|email|max:255|unique:users',
@@ -47,25 +48,35 @@ class UserCreateRequest extends FormRequest
         'postcode' => 'nullable|string',
         'lat' => 'nullable|string',
         'long' => 'nullable|string',
-        'role' => 'required|string',
-
-        'work_shift_id' => [
-            "nullable",
-            'numeric'
-        ],
-
-        'departments' => 'present|array',
-        'departments.*' =>  ['numeric',
+        'role' => [
+            "required",
+            'string',
             function ($attribute, $value, $fail) {
-                $exists = Department::where('id', $value)
-                    ->where('departments.business_id', '=', auth()->user()->business_id)
-                    ->exists();
+                $role  = Role::where(["name" => "value"])->first();
 
-                if (!$exists) {
-                    $fail("$attribute is invalid.");
+
+                if (!$role){
+                         // $fail("$attribute is invalid.")
+                         $fail("Role does not exists.");
+
                 }
+
+                if(!empty(auth()->user()->business_id)) {
+                    if ($role->business_id != auth()->user()->business_id){
+                          // $fail("$attribute is invalid.")
+                        $fail("You don't have this role");
+
+                    }
+                }
+
+
             },
         ],
+
+
+
+
+
 
 
         'gender' => 'nullable|string|in:male,female,other',
@@ -83,23 +94,9 @@ class UserCreateRequest extends FormRequest
                 }
             },
         ],
-        'employment_status_id' => [
-            "nullable",
-            'numeric',
-            function ($attribute, $value, $fail) {
-                $exists = EmploymentStatus::where('id', $value)
-                    ->where('employment_statuses.business_id', '=', auth()->user()->business_id)
-                    ->exists();
-
-                if (!$exists) {
-                    $fail("$attribute is invalid.");
-                }
-            },
-        ],
 
         'joining_date' => "nullable|date",
         'salary_per_annum' => "nullable|numeric",
-        'emergency_contact_details' => "nullable|array",
 
 
 

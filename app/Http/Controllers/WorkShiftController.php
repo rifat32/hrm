@@ -146,12 +146,7 @@ class WorkShiftController extends Controller
                     ], $check_employee["status"]);
                 }
 
-                $check_department = $this->checkDepartments($request_data["departments"]);
-                if (!$check_department["ok"]) {
-                    return response()->json([
-                        "message" => $check_department["message"]
-                    ], $check_department["status"]);
-                }
+
 
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
@@ -301,12 +296,7 @@ class WorkShiftController extends Controller
                         "message" => $check_employee["message"]
                     ], $check_employee["status"]);
                 }
-                $check_department = $this->checkDepartments($request_data["departments"]);
-                if (!$check_department["ok"]) {
-                    return response()->json([
-                        "message" => $check_department["message"]
-                    ], $check_department["status"]);
-                }
+               
 
 
                 $work_shift_query_params = [

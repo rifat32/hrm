@@ -172,6 +172,8 @@ Route::delete('/v1.0/business-tiers/{ids}', [BusinessTierController::class, "del
 Route::post('/v1.0/users/single-file-upload', [UserManagementController::class, "createUserFileSingle"]);
 Route::post('/v1.0/users/multiple-file-upload', [UserManagementController::class, "createUserFileMultiple"]);
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
+Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
+
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
 Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
 

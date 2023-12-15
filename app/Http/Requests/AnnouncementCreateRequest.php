@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AnnouncementCreateRequest extends FormRequest
@@ -30,6 +31,18 @@ class AnnouncementCreateRequest extends FormRequest
             'end_date' => 'required|date|after_or_equal:start_date',
             'departments' => 'present|array',
             'departments.*' => 'numeric',
+            'departments.*' => [
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
         ];
     }
 }

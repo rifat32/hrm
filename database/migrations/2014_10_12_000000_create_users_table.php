@@ -17,7 +17,6 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('first_Name');
             $table->string('middle_Name')->nullable();
-
             $table->string('last_Name');
 
             $table->json('emergency_contact_details')->nullable();
@@ -26,7 +25,7 @@ class CreateUsersTable extends Migration
 
             $table->string('employee_id')->nullable();
 
-            $table->enum('gender', ['male', 'female', 'other'])->nullable()->default("other");
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
 
             $table->boolean('is_in_employee')->nullable()->default(false);
             $table->unsignedBigInteger('designation_id')->nullable();
@@ -60,13 +59,21 @@ class CreateUsersTable extends Migration
             $table->string('site_redirect_token')->nullable();
 
 
-
-
             $table->integer('login_attempts')->default(0);
             $table->dateTime('last_failed_login_attempt_at')->nullable();
 
 
             $table->string("background_image")->nullable();
+
+
+
+            $table->enum('immigration_status', ['british_citizen', 'ilr', 'immigrant', 'sponsored'])->nullable();
+            $table->boolean('is_sponsorship_offered')->default(0)->nullable();
+
+
+
+
+
 
 
             $table->boolean('is_active')->default(false);

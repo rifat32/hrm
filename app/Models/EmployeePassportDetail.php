@@ -10,7 +10,7 @@ class EmployeePassportDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_sponsorship_id',
+        "employee_id",
         'passport_number',
         "passport_issue_date",
         "passport_expiry_date",
@@ -18,10 +18,7 @@ class EmployeePassportDetail extends Model
         'created_by'
     ];
 
-    public function visa()
-    {
-        return $this->hasOne(EmployeeVisaDetail::class, 'employee_passport_details_id', 'id');
-    }
+
 
 
 }

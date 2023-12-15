@@ -14,12 +14,12 @@ class EmployeeSponsorship extends Model
         'expiry_date',
         'status',
         'note',
+        "certificate_number",
+        "current_certificate_status",
+        "is_sponsorship_withdrawn",
         'created_by'
     ];
-    public function passport()
-    {
-        return $this->hasOne(EmployeePassportDetail::class, 'employee_sponsorship_id', 'id');
-    }
+  
 
 
 }

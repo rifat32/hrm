@@ -88,12 +88,7 @@ class AnnouncementController extends Controller
                 $request_data = $request->validated();
 
 
-               $check_department = $this->checkDepartments($request_data["departments"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
+
 
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
@@ -185,12 +180,7 @@ class AnnouncementController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
-                $check_department = $this->checkDepartments($request_data["departments"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
+              
 
 
                 $announcement_query_params = [

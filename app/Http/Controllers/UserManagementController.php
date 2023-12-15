@@ -8,6 +8,7 @@ use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Requests\SingleFileUploadRequest;
+use App\Http\Requests\UserCreateV2Request;
 use App\Http\Requests\UserStoreDetailsRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRequest;
@@ -345,13 +346,12 @@ class UserManagementController extends Controller
      *      *            @OA\Property(property="middle_Name", type="string", format="string",example="Al"),
      *
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
-     * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
      *
      *
      *              @OA\Property(property="gender", type="string", format="string",example="male"),
      *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
-     *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
+
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
  *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
@@ -369,8 +369,7 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
-     *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
-     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+
      *
      * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
      *
@@ -432,51 +431,11 @@ class UserManagementController extends Controller
                 throw new Exception(json_encode($error),403);
             }
 
-            if(!empty($request_data["employee_id"])) {
-                $employee_id_exists =  DB::table( 'users' )->where([
-                    'employee_id'=> $request_data['employee_id'],
-                    "created_by" => $request->user()->id
-                 ]
-                 )->exists();
-                 if ($employee_id_exists) {
-                    $error =  [
-                           "message" => "The given data was invalid.",
-                           "errors" => ["employee_id"=>["The employee id has already been taken."]]
-                    ];
-                       throw new Exception(json_encode($error),422);
-                   }
-            }
 
 
 
-            $check_role = $this->checkRole($request_data["role"]);
-            if (!$check_role["ok"]) {
-                return response()->json([
-                    "message" => $check_role["message"]
-                ], $check_role["status"]);
-            }
 
 
-            if(!empty($request_data["departments"])) {
-                $check_department = $this->checkDepartments($request_data["departments"]);
-                        if (!$check_department["ok"]) {
-                            return response()->json([
-                                "message" => $check_department["message"]
-                            ], $check_department["status"]);
-                        }
-             }
-             if(!empty($request_data["work_shift_id"])) {
-                 $work_shift =  WorkShift::where([
-                    "id" => $request_data["work_shift_id"],
-                    "business_id" =>auth()->user()->business_id
-                ])
-                ->first();
-                if(!$work_shift) {
-                    return response()->json([
-                        "message" => "no work shift found"
-                    ], 403);
-                }
-               }
 
 
 
@@ -491,11 +450,9 @@ class UserManagementController extends Controller
 
 
             $user =  User::create($request_data);
-            $user->departments()->sync($request_data['departments'],[]);
+
             $user->assignRole($request_data['role']);
-            if(!empty($request_data["work_shift_id"])) {
-                $work_shift->users()->attach($user->id);
-            }
+
             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
 
@@ -513,6 +470,228 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+    /**
+     *
+     * @OA\Post(
+     *      path="/v2.0/users",
+     *      operationId="createUserV2",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user",
+     *      description="This method is to store user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
+     *      *            @OA\Property(property="middle_Name", type="string", format="string",example="Al"),
+     *
+     *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
+     * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
+     *
+     *
+     *              @OA\Property(property="gender", type="string", format="string",example="male"),
+     *                @OA\Property(property="is_in_employee", type="boolean", format="boolean",example="1"),
+     *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
+     *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
+     *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+ *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *
+     *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
+     *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
+
+     * *  @OA\Property(property="password", type="string", format="boolean",example="12345678"),
+     *  * *  @OA\Property(property="password_confirmation", type="string", format="boolean",example="12345678"),
+     *  * *  @OA\Property(property="phone", type="string", format="boolean",example="01771034383"),
+     *  * *  @OA\Property(property="address_line_1", type="string", format="boolean",example="dhaka"),
+     *  * *  @OA\Property(property="address_line_2", type="string", format="boolean",example="dinajpur"),
+     *  * *  @OA\Property(property="country", type="string", format="boolean",example="Bangladesh"),
+     *  * *  @OA\Property(property="city", type="string", format="boolean",example="Dhaka"),
+     *  * *  @OA\Property(property="postcode", type="string", format="boolean",example="1207"),
+     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
+     *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
+     *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
+     *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+     *
+     * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={}),
+     *
+  *  *  * *  @OA\Property(property="immigration_status", type="string", format="string",example="british_citizen"),
+
+   *     @OA\Property(property="sponsorship_details", type="string", format="string", example={
+ *    "date_assigned": "2023-01-01",
+ *    "expiry_date": "2024-01-01",
+ *    "status": "pending",
+ *  *    "note": "pending",
+ *  *    "certificate_number": "pending note",
+ *  *    "current_certificate_status": "pending",
+ * *  *    "is_sponsorship_withdrawn": 1
+ * }),
+ *       @OA\Property(property="visa_details", type="string", format="string", example={
+ *      "BRP_number": "BRP123",
+ *      "visa_issue_date": "2023-01-01",
+ *      "visa_expiry_date": "2024-01-01",
+ *      "place_of_issue": "City",
+ *      "visa_docs": {
+ *        {
+ *          "file_name": "document1.pdf",
+ *          "description": "Description 1"
+ *        },
+ *        {
+*  *          "file_name": "document2.pdf",
+ *          "description": "Description 2"
+ *        }
+ *      }
+ *
+ * }
+ * ),
+ *  *     @OA\Property(property="passport_details", type="string", format="string", example={
+ *    "passport_number": "ABC123",
+ *    "passport_issue_date": "2023-01-01",
+ *    "passport_expiry_date": "2024-01-01",
+ *    "place_of_issue": "City"
+ *
+ * })
+ *
+ *
+ *
+
+ *
+ *
+ *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createUserV2(UserCreateV2Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_create')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id = $request->user()->business_id;
+
+             $request_data = $request->validated();
+
+
+             if(!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin"){
+                 $error =  [
+                     "message" => "You can not create superadmin.",
+              ];
+                 throw new Exception(json_encode($error),403);
+             }
+
+              if(!empty($request_data["work_shift_id"])) {
+                  $work_shift =  WorkShift::where([
+                     "id" => $request_data["work_shift_id"],
+                     "business_id" =>auth()->user()->business_id
+                 ])
+                 ->first();
+                 if(!$work_shift) {
+                     return response()->json([
+                         "message" => "no work shift found"
+                     ], 403);
+                 }
+                }
+
+
+
+
+             $request_data['password'] = Hash::make($request['password']);
+             $request_data['is_active'] = true;
+             $request_data['remember_token'] = Str::random(10);
+
+
+             if (!empty($business_id)) {
+                 $request_data['business_id'] = $business_id;
+             }
+
+
+             $user =  User::create($request_data);
+             $user->departments()->sync($request_data['departments'],[]);
+             $user->assignRole($request_data['role']);
+
+
+             if(in_array($request["immigration_status"] ,['sponsored'])) {
+                if(!empty($request_data["sponsorship_details"])) {
+                    $request_data["sponsorship_details"]["employee_id"] = $user->id;
+                    $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
+                }
+
+             }
+             if(in_array($request["immigration_status"] ,['immigrant', 'sponsored'])) {
+
+                if(!empty($request_data["passport_details"])) {
+                    $request_data["passport_details"]["employee_id"] = $user->id;
+                    $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
+                }
+                if(!empty($request_data["visa_details"])) {
+                    $request_data["visa_details"]["employee_id"] = $user->id;
+                    $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
+                }
+             }
+
+             if(!empty($request_data["work_shift_id"])) {
+                 $work_shift->users()->attach($user->id);
+             }
+             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
+
+
+             $user->roles = $user->roles->pluck('name');
+
+             // $user->permissions  = $user->getAllPermissions()->pluck('name');
+             // error_log("cccccc");
+             // $data["user"] = $user;
+             // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
+             // $data["roles"] = $user->roles->pluck('name');
+             // $data["token"] = $token;
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 
@@ -652,14 +831,7 @@ if(!empty($request_data["employee_id"])) {
             }
 
 
-            if(!empty($request_data["departments"])) {
-                $check_department = $this->checkDepartments($request_data["departments"]);
-                        if (!$check_department["ok"]) {
-                            return response()->json([
-                                "message" => $check_department["message"]
-                            ], $check_department["status"]);
-                        }
-                }
+
                 if(!empty($request_data["work_shift_id"])) {
                     $work_shift =  WorkShift::where([
                        "id" => $request_data["work_shift_id"],
@@ -744,7 +916,7 @@ if(!empty($request_data["employee_id"])) {
      * @OA\Put(
      *      path="/v1.0/users/store-details",
      *      operationId="storeUserDetails",
-     *      tags={"user_management"},
+     *      tags={"user_management.dont_use_now"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -759,12 +931,12 @@ if(!empty($request_data["employee_id"])) {
  *     @OA\Property(property="expiry_date", type="string", format="date", example="2023-12-31"),
  *     @OA\Property(property="status", type="string", format="string", example="pending", enum={"pending", "approved", "denied", "visa_granted"}),
  *     @OA\Property(property="note", type="string", format="string", example="Additional note"),
- *     @OA\Property(property="passport", type="string", format="string", example={
+ *     @OA\Property(property="passport_details", type="string", format="string", example={
  *    "passport_number": "ABC123",
  *    "passport_issue_date": "2023-01-01",
  *    "passport_expiry_date": "2024-01-01",
  *    "place_of_issue": "City",
- *    "visa": {
+ *    "visa_details": {
  *      "BRP_number": "BRP123",
  *      "visa_issue_date": "2023-01-01",
  *      "visa_expiry_date": "2024-01-01",
@@ -834,12 +1006,12 @@ if(!empty($request_data["employee_id"])) {
              }
              $request_data = $request->validated();
              $request_data["created_by"] = $request->user()->id;
-             if(!empty($request_data["passport"]))  {
-                $request_data["passport"] += ["created_by" => $request_data["created_by"]];
+             if(!empty($request_data["passport_details"]))  {
+                $request_data["passport_details"] += ["created_by" => $request_data["created_by"]];
 
              }
-             if(!empty($request_data["passport"]["visa"]))  {
-                $request_data["passport"]["visa"] += ["created_by" => $request_data["created_by"]];
+             if(!empty($request_data["passport_details"]["visa_details"]))  {
+                $request_data["passport_details"]["visa_details"] += ["created_by" => $request_data["created_by"]];
 
              }
 
@@ -862,11 +1034,7 @@ if(!empty($request_data["employee_id"])) {
 
              $employee_sponsorship  =  EmployeeSponsorship::updateOrCreate(
                 [
-
                     "employee_id" => $request_data["employee_id"],
-
-
-
                 ],
 
                 collect($request_data)->only([
@@ -898,7 +1066,7 @@ if(!empty($request_data["employee_id"])) {
                     [
                         "employee_sponsorship_id" => $employee_sponsorship->id,
                     ],
-                    collect($request_data["passport"])->only([
+                    collect($request_data["passport_details"])->only([
                         'employee_sponsorship_id',
                         'passport_number',
                         "passport_issue_date",
@@ -923,7 +1091,7 @@ if(!empty($request_data["employee_id"])) {
                     [
                         "employee_passport_details_id" => $employee_passport_details->id,
                     ],
-                    collect($request_data["passport"]["visa"])->only([
+                    collect($request_data["passport_details"]["visa_details"])->only([
                         'employee_passport_details_id',
                         'BRP_number',
                         "visa_issue_date",
@@ -947,7 +1115,7 @@ if(!empty($request_data["employee_id"])) {
             }
 
 
-            $employee_sponsorship->load(['passport.visa']);
+
 
              return response($employee_sponsorship, 200);
          } catch (Exception $e) {
@@ -1305,7 +1473,17 @@ if(!empty($request_data["employee_id"])) {
                 ], 401);
             }
 
-            $users = User::with("roles")
+            $users = User::with([
+                "designation" => function ($query) {
+                    $query->select(
+                        'designations.id',
+                        'designations.name',
+                    );
+                },
+                "roles"
+            ]
+
+                )
             ->whereNotIn('id', [$request->user()->id])
             ->when(!empty($request->role), function ($query) use ($request) {
                 $rolesArray = explode(',', $request->role);
@@ -1563,6 +1741,207 @@ if(!empty($request_data["employee_id"])) {
              return $this->sendError($e, 500, $request);
          }
      }
+
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v3.0/users",
+     *      operationId="getUsersV3",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *      *     @OA\Parameter(
+     * name="business_id",
+     * in="query",
+     * description="business_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     *      *   * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *    * *  @OA\Parameter(
+     * name="role",
+     * in="query",
+     * description="role",
+     * required=true,
+     * example="admin,manager"
+     * ),
+     *      summary="This method is to get user",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getUsersV3(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            $users = User::with([
+                "designation" => function ($query) {
+                    $query->select(
+                        'designations.id',
+                        'designations.name',
+                    );
+                },
+                "roles",
+                "sponsorship_details",
+                "passport_details",
+                "visa_details"
+
+
+
+            ]
+
+                )
+            ->whereNotIn('id', [$request->user()->id])
+            ->when(!empty($request->role), function ($query) use ($request) {
+                $rolesArray = explode(',', $request->role);
+              return   $query->whereHas("roles", function($q) use ($rolesArray) {
+                   return $q->whereIn("name", $rolesArray);
+                });
+            })
+
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where(function ($query) {
+                    return  $query->where('created_by', auth()->user()->id)
+
+                            ->orWhere('business_id', auth()->user()->business_id);
+                  });
+            })
+            ->when(!empty($request->search_key), function ($query) use ($request) {
+                $term = $request->search_key;
+                return $query->where(function ($subquery) use ($term) {
+                    $subquery->where("first_Name", "like", "%" . $term . "%")
+                        ->orWhere("last_Name", "like", "%" . $term . "%")
+                        ->orWhere("email", "like", "%" . $term . "%")
+                        ->orWhere("phone", "like", "%" . $term . "%");
+                });
+            })
+            ->when(empty($request->user()->business_id)  , function ($query) use ($request) {
+                if(empty($request->business_id)) {
+                    return $query->where('business_id', NULL);
+                }
+                    return $query->where('business_id', intval($request->business_id));
+
+            })
+            ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                return $query->where('is_in_employee', intval($request->is_in_employee));
+            })
+            ->when(isset($request->is_active), function ($query) use ($request) {
+                return $query->where('is_active', intval($request->is_active));
+            })
+
+
+            ->when(!empty($request->start_date), function ($query) use ($request) {
+                return $query->where('created_at', ">=", $request->start_date);
+            })
+            ->when(!empty($request->end_date), function ($query) use ($request) {
+                return $query->where('created_at', "<=", $request->end_date);
+            })
+
+            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("users.id", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("users.id", "DESC");
+            })
+            ->select("users.*")
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
+
+            return response()->json($users, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
     /**
      *
      * @OA\Get(

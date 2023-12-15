@@ -15,13 +15,13 @@ class CreateEmployeePassportDetailsTable extends Migration
     {
         Schema::create('employee_passport_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("employee_sponsorship_id");
-            $table->foreign('employee_sponsorship_id')->references('id')->on('employee_sponsorships')->onDelete('cascade');
+         $table->unsignedBigInteger("employee_id");
+            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
             $table->string("passport_number");
             $table->date("passport_issue_date");
             $table->date("passport_expiry_date");
             $table->string("place_of_issue");
-            
+
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')
