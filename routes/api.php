@@ -172,27 +172,27 @@ Route::delete('/v1.0/business-tiers/{ids}', [BusinessTierController::class, "del
 Route::post('/v1.0/users/single-file-upload', [UserManagementController::class, "createUserFileSingle"]);
 Route::post('/v1.0/users/multiple-file-upload', [UserManagementController::class, "createUserFileMultiple"]);
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
-Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
-
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
-Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
-
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
-Route::put('/v2.0/users', [UserManagementController::class, "updateUser2"]);
 
-Route::put('/v1.0/users/store-details', [UserManagementController::class, "storeUserDetails"]);
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
 Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);
 Route::get('/v2.0/users', [UserManagementController::class, "getUsersV2"]);
-Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
 Route::delete('/v1.0/users/{ids}', [UserManagementController::class, "deleteUsersByIds"]);
-
 Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "getUserActivity"]);
 
+
+
+Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
+Route::put('/v2.0/users', [UserManagementController::class, "updateUser2"]);
+Route::put('/v1.0/users/store-details', [UserManagementController::class, "storeUserDetails"]);
+Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
 Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class, "generateEmployeeId"]);
 Route::get('/v1.0/users/validate/employee-id/{employee_id}', [UserManagementController::class, "validateEmployeeId"]);
 
+Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
+Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
 
 
 

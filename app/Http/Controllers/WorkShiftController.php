@@ -34,6 +34,8 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
      *     @OA\Property(property="type", type="string", format="string", example="regular"),
      *  *     @OA\Property(property="description", type="string", format="string", example="description"),
+     *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
+     *
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
 
@@ -139,7 +141,7 @@ class WorkShiftController extends Controller
 
                 $request_data = $request->validated();
 
-          
+
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -181,6 +183,7 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
      *     @OA\Property(property="type", type="string", format="string", example="regular"),
      *     @OA\Property(property="description", type="string", format="string", example="description"),
+     *    *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
 
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
@@ -311,6 +314,7 @@ class WorkShiftController extends Controller
         'type',
         "description",
         'attendances_count',
+        'is_personal',
         'start_date',
         'end_date',
         // "is_active",
@@ -381,6 +385,14 @@ class WorkShiftController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *      * *  @OA\Parameter(
+     * name="is_personal",
+     * in="query",
+     * description="is_personal",
+     * required=true,
+     * example="1"
+     * ),
+
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -388,6 +400,7 @@ class WorkShiftController extends Controller
      * required=true,
      * example="ASC"
      * ),
+     *
 
      *      summary="This method is to get work shifts  ",
      *      description="This method is to get work shifts ",
@@ -450,6 +463,13 @@ class WorkShiftController extends Controller
                             ->orWhere("work_shifts.description", "like", "%" . $term . "%");
                     });
                 })
+                ->when(isset($request->is_personal), function ($query) use ($request) {
+                    return $query->where('work_shifts.is_personal', intval($request->is_personal));
+                })
+                ->when(!isset($request->is_personal), function ($query) use ($request) {
+                    return $query->where('work_shifts.is_personal', 0);
+                })
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })

@@ -223,10 +223,6 @@ class LeaveController extends Controller
                     ], $check_employee["status"]);
                 }
 
-
-
-
-
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["employee_id"]);
                 })->first();
@@ -363,12 +359,13 @@ class LeaveController extends Controller
                     ->first();
                     if ($holiday) {
                         if($holiday->is_active){
-                            $leave_date = Carbon::parse($leave_record_data["date"]);
-                            $holiday_created_at = Carbon::parse($holiday->created_at);
-                            if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
-                                return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
-                            }
                             return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                            // $leave_date = Carbon::parse($leave_record_data["date"]);
+                            // $holiday_created_at = Carbon::parse($holiday->created_at);
+                            // if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
+                            //     return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                            // }
+                            // return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
 
                         }
 
@@ -832,13 +829,13 @@ class LeaveController extends Controller
                     ->first();
                     if ($holiday) {
                         if($holiday->is_active){
-
-                            $leave_date = Carbon::parse($leave_record_data["date"]);
-                            $holiday_created_at = Carbon::parse($holiday->created_at);
-                            if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
-                                return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
-                            }
                             return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                            // $leave_date = Carbon::parse($leave_record_data["date"]);
+                            // $holiday_created_at = Carbon::parse($holiday->created_at);
+                            // if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
+                            //     return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                            // }
+                            // return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
 
                         }
 

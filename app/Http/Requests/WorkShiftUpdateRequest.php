@@ -29,6 +29,9 @@ class WorkShiftUpdateRequest extends FormRequest
             'id' => 'required|numeric',
             'name' => 'required|string',
             'description' => 'nullable|string',
+            'is_personal' => 'required|boolean',
+
+
             'type' => 'required|string|in:regular,scheduled',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',

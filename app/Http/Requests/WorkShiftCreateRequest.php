@@ -28,6 +28,7 @@ class WorkShiftCreateRequest extends FormRequest
         return [
             'name' => 'required|string',
             'description' => 'nullable|string',
+            'is_personal' => 'required|boolean',
             'type' => 'required|string|in:regular,scheduled',
 
 

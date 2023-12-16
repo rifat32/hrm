@@ -28,7 +28,9 @@ class CreateWorkShiftsTable extends Migration
 
             $table->boolean("is_active")->default(true);
             $table->boolean("is_business_default")->default(false);
-            
+            $table->boolean("is_personal")->default(false);
+
+
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 

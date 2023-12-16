@@ -24,6 +24,7 @@ use App\Models\Business;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeVisaDetail;
+use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeaveType;
@@ -1127,7 +1128,7 @@ class UserManagementController extends Controller
                     ->first();
 
                     if($employee_visa_details) {
-                        $employee_visa_details->update( collect($request_data)->only([
+                        $employee_visa_details->update(collect($request_data)->only([
                             // 'employee_id',
                             'BRP_number',
                             "visa_issue_date",
@@ -2304,7 +2305,7 @@ class UserManagementController extends Controller
      * @OA\Get(
      *      path="/v1.0/users/get-leave-details/{id}",
      *      operationId="getLeaveDetailsByUserId",
-     *      tags={"user_management"},
+     *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -2406,6 +2407,185 @@ class UserManagementController extends Controller
 
 
              return response()->json($leave_types, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+        /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/get-holiday-details/{id}",
+     *      operationId="getholidayDetailsByUserId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getholidayDetailsByUserId($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $user = User::with("roles")
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                     return $query->where(function ($query) {
+                         return  $query->where('created_by', auth()->user()->id)
+                                 ->orWhere('id', auth()->user()->id)
+                                 ->orWhere('business_id', auth()->user()->business_id);
+                       });
+                 })
+                 ->first();
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+             $today = today();
+             $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+
+
+            $holidays = Holiday::where([
+                "business_id" => $user->business_id
+            ])
+            ->where('holidays.start_date', "<=", $today)
+            ->where('holidays.end_date', ">=", $end_date_of_year . ' 23:59:59')
+            ->where([
+                "is_active" => 1
+            ])
+            ->get();
+
+    $holiday_dates = $holidays->flatMap(function ($holiday) {
+                $start_date = Carbon::parse($holiday->start_date);
+                $end_date = Carbon::parse($holiday->end_date);
+
+                $date_range = Carbon::parse($start_date)->daysUntil($end_date->addDay());
+
+                return $date_range->map(function ($date) {
+                    return $date->format('Y-m-d');
+                });
+            });
+
+
+
+       $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
+
+            ->first();
+
+       $weekends = $work_shift->details()->where([
+                "is_weekend" => 1
+            ])
+                ->get();
+
+
+
+      $weekend_dates = $weekends->flatMap(function ($weekend) use ($today, $end_date_of_year) {
+                    $day_of_week = $weekend->day;
+
+                    // Find the next occurrence of the specified day of the week
+                    $next_day = $today->copy()->next($day_of_week);
+
+                    $matching_days = [];
+
+                    // Loop through the days between today and the end date
+                    while ($next_day <= $end_date_of_year) {
+                        $matching_days[] = $next_day->format('Y-m-d');
+                        $next_day->addWeek(); // Move to the next week
+                    }
+
+                    return $matching_days;
+                });
+
+
+
+                $already_taken_leaves =  Leave::where([
+                    "employee_id" => $user->id
+                ])
+                ->whereHas('records', function ($query) use ($today, $end_date_of_year) {
+                    $query->where('leave_records.date', '>=', $today)
+                          ->where('leave_records.date', '<=', $end_date_of_year . ' 23:59:59');
+                })
+                ->get();
+
+
+                $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
+                    return $leave->records->map(function ($record) {
+                        return Carbon::parse($record->date)->format('Y-m-d');
+                    });
+                })->toArray();
+
+
+                // Merge the collections and remove duplicates
+                $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
+
+                // $result_collection now contains all unique dates from holidays and weekends
+                $result_array = $result_collection->values()->all();
+
+
+             return response()->json($result_array, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);
@@ -2533,7 +2713,7 @@ class UserManagementController extends Controller
  * @OA\Get(
  *      path="/v1.0/users/generate/employee-id",
  *      operationId="generateEmployeeId",
- *      tags={"user_management"},
+ *      tags={"user_management.employee"},
  *       security={
  *           {"bearerAuth": {}}
  *       },
@@ -2616,7 +2796,7 @@ return response()->json(["employee_id" => $employee_id],200);
 * @OA\Get(
 *      path="/v1.0/users/validate/employee-id/{employee_id}",
 *      operationId="validateEmployeeId",
-*      tags={"user_management"},
+*      tags={"user_management.employee"},
 *       security={
 *           {"bearerAuth": {}}
 *       },
