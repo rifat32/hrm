@@ -88,12 +88,17 @@ class UserUpdateV2Request extends FormRequest
                           $fail("You don't have this role");
 
                       }
-
                         if ($role->business_id != auth()->user()->business_id){
                               // $fail("$attribute is invalid.")
                             $fail("You don't have this role");
 
                         }
+                    } else {
+                        if (!empty($role->business_id)){
+                            // $fail("$attribute is invalid.")
+                          $fail("You don't have this role");
+
+                      }
                     }
 
 

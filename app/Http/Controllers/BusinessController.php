@@ -561,8 +561,8 @@ if(!$user->hasRole('business_owner')) {
         $request_data["work_shift"]["attendances_count"] = 0;
         $work_shift =  WorkShift::create($request_data["work_shift"]);
 
-        $work_shift->departments()->sync($request_data["work_shift"]['departments'], []);
-        $work_shift->users()->sync($request_data["work_shift"]['users'], []);
+
+
         $work_shift->details()->createMany($request_data["work_shift"]['details']);
 
 
@@ -573,6 +573,7 @@ if(!$user->hasRole('business_owner')) {
 
 
     //  if($request_data['user']['send_password']) {
+
 
 
         // if(env("SEND_EMAIL") == true) {
@@ -1397,6 +1398,7 @@ if(!$user->hasRole('business_owner')) {
 
             $business = Business::with(
                 "owner",
+                // "default_work_shift.details"
 
             )->where([
                 "id" => $id

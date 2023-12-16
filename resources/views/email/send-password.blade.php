@@ -55,8 +55,9 @@
 
                                     <td style="padding:0 35px;">
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            Thank you for creating an account at {{ env('APP_NAME') }}! We're excited to
-                                            have you join our community.
+
+
+
 
                                         </p>
 
@@ -66,19 +67,7 @@
 
                                     <td style="padding:0 35px;">
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            To log into your account, you'll need the following password:
-                                        </p>
-
-                                    </td>
-                                </tr>
-                                <tr>
-
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-
-
-                                            Password: {{ $password }}
-
+                                            Congratulations on successfully creating your business account with {{ env('APP_NAME') }}! We're excited to have you on board.
 
                                         </p>
 
@@ -92,9 +81,41 @@
 
 
 
-                                            Please keep this password secure and do not share it with anyone. If you
-                                            ever forget your password, you can use the "Forgot Password" option on the
-                                            login page to reset it.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                            To ensure the security of your account, please set a password by clicking on the following link:
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+
+
+
+
+                                        </p>
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+
+
+
+
+                                            {{$password_reset_link}}
 
 
 
@@ -110,9 +131,73 @@
 
 
 
+                                        </p>
 
-                                            Best regards,
-                                            The {{ env('APP_NAME') }} Team
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                            If you did not create an account or have any questions, please contact our support team at support@yourbusinessname.com.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+
+
+
+
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+
+                                            Thank you for choosing YourBusinessName. We look forward to serving you.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+
+
+
+
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+
+                                            Best Regards,
+
+
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="padding:0 35px;">
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                            {{ env('APP_NAME') }} Team
+
+
+
                                         </p>
 
                                     </td>

@@ -35,8 +35,11 @@ class SendPassword extends Mailable
 
 
 
+     $front_end_url = env('FRONT_END_URL_DASHBOARD');
+
+     $password_reset_link =  ($front_end_url.'/auth/forgot-password?token='.$this->user->resetPasswordToken);
 
 
-        return $this->subject(("Your Account Password for") . env("APP_NAME"))->view('email.send-password',["user" => $this->user,"password"=>$this->password]);
+        return $this->subject(("Welcome to " . env("APP_NAME") .  " - Set Your Password") . env("APP_NAME"))->view('email.send-password',["user" => $this->user,"password_reset_link" => $password_reset_link]);
     }
 }

@@ -65,6 +65,8 @@ Route::post('/v1.0/login', [AuthController::class, "login"]);
 Route::post('/v1.0/token-regenerate', [AuthController::class, "regenerateToken"]);
 
 Route::post('/forgetpassword', [AuthController::class, "storeToken"]);
+Route::post('/v2.0/forgetpassword', [AuthController::class, "storeTokenV2"]);
+
 Route::post('/resend-email-verify-mail', [AuthController::class, "resendEmailVerifyToken"]);
 
 Route::patch('/forgetpassword/reset/{token}', [AuthController::class, "changePasswordByToken"]);
@@ -174,6 +176,8 @@ Route::post('/v1.0/users/multiple-file-upload', [UserManagementController::class
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
+
+Route::put('/v1.0/users/assign-roles', [UserManagementController::class, "assignUserRole"]);
 
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);

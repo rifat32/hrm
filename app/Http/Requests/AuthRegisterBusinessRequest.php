@@ -93,50 +93,9 @@ class AuthRegisterBusinessRequest extends FormRequest
 
             'work_shift.start_date' => 'required|date',
             'work_shift.end_date' => 'required|date|after_or_equal:start_date',
-            'work_shift.departments' => 'present|array',
-            'work_shift.departments.*' => [
-                'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
-                    }
-                },
-            ],
-            'work_shift.users' => 'present|array',
-            'work_shift.users.*' => [
-                "numeric",
-                function ($attribute, $value, $fail) {
-                    $user = User::where("id", $value)->get();
-
-                        if (!$user){
-                            // $fail("$attribute is invalid.");
-                            $fail("Employee does not exists.");
-
-                        }
-
-                        if ($user->business_id != auth()->user()->business_id) {
-                            // $fail("$attribute is invalid.");
-                            $fail("Employee belongs to another business.");
-
-                        }
-
-                        if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))  && !$user->hasRole(("business_manager" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
-                            // $fail("$attribute is invalid.");
-                            $fail("The user is not a employee");
-
-                        }
 
 
-                    return [
-                        "ok" => true,
-                    ];
-                },
 
-            ],
 
             'work_shift.details' => 'required|array|min:7|max:7',
             'work_shift.details.*.day' => 'required|numeric|between:0,6',

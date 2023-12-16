@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\Role;
+use Illuminate\Foundation\Http\FormRequest;
+
+class AssignRoleRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'id' => "required|numeric",
+            'roles' => "present|array",
+            'roles.*' => [
+                "required",
+                'string',
+                function ($attribute, $value, $fail) {
+                    $role  = Role::where(["name" => $value])->first();
+
+
+                    if (!$role){
+                             // $fail("$attribute is invalid.")
+                             $fail("Role does not exists.");
+
+                    }
+
+                    if(!empty(auth()->user()->business_id)) {
+                        if (empty($role->business_id)){
+                            // $fail("$attribute is invalid.")
+                          $fail("You don't have this role");
+
+                      }
+                        if ($role->business_id != auth()->user()->business_id){
+                              // $fail("$attribute is invalid.")
+                            $fail("You don't have this role");
+
+                        }
+                    } else {
+                        if (!empty($role->business_id)){
+                            // $fail("$attribute is invalid.")
+                          $fail("You don't have this role");
+
+                      }
+                    }
+
+
+
+                },
+            ],
+        ];
+    }
+}

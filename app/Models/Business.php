@@ -50,6 +50,10 @@ class Business extends Model
 
 
 
+    public function default_work_shift(){
+        return $this->hasOne(WorkShift::class,'business_id', 'id')->where('is_business_default',1);
+    }
+
 
 
 

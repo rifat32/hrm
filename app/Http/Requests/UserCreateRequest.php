@@ -72,6 +72,12 @@ class UserCreateRequest extends FormRequest
                         $fail("You don't have this role");
 
                     }
+                } else {
+                    if (!empty($role->business_id)){
+                        // $fail("$attribute is invalid.")
+                      $fail("You don't have this role");
+
+                  }
                 }
 
 

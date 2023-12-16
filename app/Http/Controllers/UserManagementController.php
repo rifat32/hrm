@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\GuestUserRegisterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\UserCreateRequest;
@@ -27,6 +28,7 @@ use App\Models\EmployeeVisaDetail;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
+use App\Models\Role;
 use App\Models\SettingLeaveType;
 use App\Models\User;
 use App\Models\UserWorkShift;
@@ -875,6 +877,125 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+     /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/assign-roles",
+     *      operationId="assignUserRole",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user",
+     *      description="This method is to update user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *  *  * *  @OA\Property(property="roles", type="string", format="array",example={"business_owner#1","business_admin#1"})
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function assignUserRole(AssignRoleRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $user = $userQuery->first();
+
+             if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
+
+
+            foreach($request_data["roles"] as $role){
+                if ($user->hasRole("superadmin") && $role != "superadmin") {
+                    return response()->json([
+                        "message" => "You can not change the role of super admin"
+                    ], 401);
+                }
+                if (!$request->user()->hasRole('superadmin') && $user->business_id != $request->user()->business_id && $user->created_by != $request->user()->id) {
+                    return response()->json([
+                        "message" => "You can not update this user"
+                    ], 401);
+                }
+            }
+
+
+
+
+
+
+$roles = Role::whereIn('name', $request_data["roles"])->get();
+
+
+$user->syncRoles($roles);
+
+
+
+             $user->roles = $user->roles->pluck('name');
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
      /**
      *
      * @OA\Put(

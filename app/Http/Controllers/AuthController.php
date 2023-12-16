@@ -9,6 +9,7 @@ use App\Http\Requests\AuthRegisterRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\EmailVerifyTokenRequest;
 use App\Http\Requests\ForgetPasswordRequest;
+use App\Http\Requests\ForgetPasswordV2Request;
 use App\Http\Requests\PasswordChangeRequest;
 use App\Http\Requests\UserInfoUpdateRequest;
 use App\Http\Utils\ErrorUtil;
@@ -533,7 +534,7 @@ $datediff = $now - $user_created_date;
      */
 
     public function storeToken(ForgetPasswordRequest $request) {
-              
+
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use (&$request) {
@@ -581,6 +582,105 @@ $datediff = $now - $user_created_date;
         }
 
     }
+/**
+        *
+     * @OA\Post(
+     *      path="/v2.0/forgetpassword",
+     *      operationId="storeTokenV2",
+     *      tags={"auth"},
+
+     *      summary="This method is to store token",
+     *      description="This method is to store token",
+
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"email"},
+     *
+     *             @OA\Property(property="email", type="string", format="string",* example="test@g.c"),
+     *    *             @OA\Property(property="client_site", type="string", format="string",* example="client"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request"
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found"
+     *   ),
+     *@OA\JsonContent()
+     *      )
+     *     )
+     */
+
+     public function storeTokenV2(ForgetPasswordV2Request $request) {
+
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            return DB::transaction(function () use (&$request) {
+                $request_data = $request->validated();
+
+            $user = User::where(["id" => $request_data["id"]])->first();
+            if (!$user) {
+                return response()->json(["message" => "no user found"], 404);
+            }
+
+            $token = Str::random(30);
+
+            $user->resetPasswordToken = $token;
+            $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+            $user->save();
+
+
+
+
+            $result = Mail::to($user->email)->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+
+            if (count(Mail::failures()) > 0) {
+                // Handle failed recipients and log the error messages
+                foreach (Mail::failures() as $emailFailure) {
+                }
+                throw new Exception("Failed to send email to:" . $emailFailure);
+            }
+
+            return response()->json([
+                "message" => "Please check your email."
+            ],200);
+
+
+            });
+
+
+
+
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500,$request);
+        }
+
+    }
+
+
 
       /**
         *
