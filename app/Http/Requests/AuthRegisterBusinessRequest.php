@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
+use App\Models\User;
 use App\Rules\DayValidation;
 use App\Rules\SomeTimes;
 use App\Rules\TimeOrderRule;
@@ -84,6 +86,85 @@ class AuthRegisterBusinessRequest extends FormRequest
 
 
 
+            'work_shift.name' => 'required|string',
+            'work_shift.description' => 'nullable|string',
+            'work_shift.type' => 'required|string|in:regular,scheduled',
+
+
+            'work_shift.start_date' => 'required|date',
+            'work_shift.end_date' => 'required|date|after_or_equal:start_date',
+            'work_shift.departments' => 'present|array',
+            'work_shift.departments.*' => [
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
+            'work_shift.users' => 'present|array',
+            'work_shift.users.*' => [
+                "numeric",
+                function ($attribute, $value, $fail) {
+                    $user = User::where("id", $value)->get();
+
+                        if (!$user){
+                            // $fail("$attribute is invalid.");
+                            $fail("Employee does not exists.");
+
+                        }
+
+                        if ($user->business_id != auth()->user()->business_id) {
+                            // $fail("$attribute is invalid.");
+                            $fail("Employee belongs to another business.");
+
+                        }
+
+                        if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))  && !$user->hasRole(("business_manager" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
+                            // $fail("$attribute is invalid.");
+                            $fail("The user is not a employee");
+
+                        }
+
+
+                    return [
+                        "ok" => true,
+                    ];
+                },
+
+            ],
+
+            'work_shift.details' => 'required|array|min:7|max:7',
+            'work_shift.details.*.day' => 'required|numeric|between:0,6',
+            'work_shift.details.*.is_weekend' => 'required|boolean',
+            'work_shift.details.*.start_at' => [
+                'nullable',
+                'date_format:H:i:s',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                    $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+                    if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+                    }
+                },
+            ],
+            'work_shift.details.*.end_at' => [
+                'nullable',
+                'date_format:H:i:s',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                    $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+                    if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+                    }
+                },
+            ],
 
 
 
@@ -138,7 +219,34 @@ class AuthRegisterBusinessRequest extends FormRequest
 
 
 
-
+            'work_shift.name.required' => 'The work shift name field is required.',
+            'work_shift.description.string' => 'The work shift description must be a string.',
+            'work_shift.type.required' => 'The work shift type field is required.',
+            'work_shift.type.string' => 'The work shift type must be a string.',
+            'work_shift.type.in' => 'The work shift type must be either "regular" or "scheduled".',
+            'work_shift.start_date.required' => 'The work shift start date field is required.',
+            'work_shift.start_date.date' => 'The work shift start date must be a valid date.',
+            'work_shift.end_date.required' => 'The work shift end date field is required.',
+            'work_shift.end_date.date' => 'The work shift end date must be a valid date.',
+            'work_shift.end_date.after_or_equal' => 'The work shift end date must be equal to or after the start date.',
+            'work_shift.departments.present' => 'The work shift departments must be present and in array format.',
+            'work_shift.departments.*.numeric' => 'Each department ID must be a numeric value.',
+            'work_shift.departments.*' => 'The selected department is invalid.',
+            'work_shift.users.array' => 'The work shift users must be in array format.',
+            'work_shift.users.*.numeric' => 'Each user ID must be a numeric value.',
+            'work_shift.details.required' => 'The work shift details field is required.',
+            'work_shift.details.array' => 'The work shift details must be in array format.',
+            'work_shift.details.min' => 'The work shift details must have at least 7 items.',
+            'work_shift.details.max' => 'The work shift details must not exceed 7 items.',
+            'work_shift.details.*.day.required' => 'Each work shift detail must have a day value.',
+            'work_shift.details.*.day.numeric' => 'The day value must be a numeric value.',
+            'work_shift.details.*.day.between' => 'The day value must be between 0 and 6.',
+            'work_shift.details.*.is_weekend.required' => 'Each work shift detail must have an is_weekend value.',
+            'work_shift.details.*.is_weekend.boolean' => 'The is_weekend value must be a boolean.',
+            'work_shift.details.*.start_at.nullable' => 'The start_at field must be nullable.',
+            'work_shift.details.*.start_at.date_format' => 'The start_at value must be a valid time format (H:i:s).',
+            'work_shift.details.*.end_at.nullable' => 'The end_at field must be nullable.',
+            'work_shift.details.*.end_at.date_format' => 'The end_at value must be a valid time format (H:i:s).',
 
 
 

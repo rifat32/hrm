@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateRequest extends FormRequest
@@ -30,67 +32,78 @@ class UserUpdateRequest extends FormRequest
         return [
             'id' => "required|numeric",
             'first_Name' => 'required|string|max:255',
-            'middle_Name' => 'nullable|string|max:255',
-            'last_Name' => 'required|string|max:255',
-            'employee_id' => 'nullable|string',
-            // 'email' => 'required|string|email|indisposable|max:255|unique:users',
-            'email' => 'required|string|unique:users,email,' . $this->id . ',id',
+        'middle_Name' => 'nullable|string|max:255',
 
-            'password' => 'nullable|confirmed|string|min:6',
-            'phone' => 'required|string',
-            'image' => 'nullable|string',
-            'address_line_1' => 'required|string',
-            'address_line_2' => 'nullable',
-            'country' => 'required|string',
-            'city' => 'required|string',
-            'postcode' => 'nullable|string',
-            'lat' => 'nullable|string',
-            'long' => 'nullable|string',
-            'role' => 'required|string',
-            'departments' => 'present|array',
-            'departments.*' =>  ['numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->exists();
+        'last_Name' => 'required|string|max:255',
 
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
+
+        // 'email' => 'required|string|email|indisposable|max:255|unique:users',
+        'email' => 'required|string|unique:users,email,' . $this->id . ',id',
+
+        'password' => 'required|string|min:6',
+        'phone' => 'required|string',
+        'image' => 'nullable|string',
+        'address_line_1' => 'required|string',
+        'address_line_2' => 'nullable',
+        'country' => 'required|string',
+        'city' => 'required|string',
+        'postcode' => 'nullable|string',
+        'lat' => 'nullable|string',
+        'long' => 'nullable|string',
+        'role' => [
+            "required",
+            'string',
+            function ($attribute, $value, $fail) {
+                $role  = Role::where(["name" => $value])->first();
+
+
+                if (!$role){
+                         // $fail("$attribute is invalid.")
+                         $fail("Role does not exists.");
+
+                }
+
+                if(!empty(auth()->user()->business_id)) {
+                    if (empty($role->business_id)){
+                        // $fail("$attribute is invalid.")
+                      $fail("You don't have this role");
+
+                  }
+                    if ($role->business_id != auth()->user()->business_id){
+                          // $fail("$attribute is invalid.")
+                        $fail("You don't have this role");
+
                     }
-                },
-            ],
+                }
 
-            'gender' => 'nullable|string|in:male,female,other',
-            'is_in_employee' => "nullable|boolean",
-            'designation_id' => [
-                "nullable",
-                'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Designation::where('id', $value)
-                        ->where('designations.business_id', '=', auth()->user()->business_id)
-                        ->exists();
 
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
-                    }
-                },
-            ],
-            'employment_status_id' => [
-                "nullable",
-                'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = EmploymentStatus::where('id', $value)
-                        ->where('employment_statuses.business_id', '=', auth()->user()->business_id)
-                        ->exists();
+            },
+        ],
 
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
-                    }
-                },
-            ],
-            'joining_date' => "nullable|date",
-            'salary_per_annum' => "nullable|numeric",
-            'emergency_contact_details' => "nullable|array",
+
+
+
+
+
+
+        'gender' => 'nullable|string|in:male,female,other',
+        'is_in_employee' => "nullable|boolean",
+        'designation_id' => [
+            "nullable",
+            'numeric',
+            function ($attribute, $value, $fail) {
+                $exists = Designation::where('id', $value)
+                    ->where('designations.business_id', '=', auth()->user()->business_id)
+                    ->exists();
+
+                if (!$exists) {
+                    $fail("$attribute is invalid.");
+                }
+            },
+        ],
+
+        'joining_date' => "nullable|date",
+        'salary_per_annum' => "nullable|numeric",
         ];
     }
 

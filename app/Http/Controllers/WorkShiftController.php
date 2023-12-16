@@ -139,13 +139,7 @@ class WorkShiftController extends Controller
 
                 $request_data = $request->validated();
 
-                $check_employee = $this->checkEmployees($request_data["users"]);
-                if (!$check_employee["ok"]) {
-                    return response()->json([
-                        "message" => $check_employee["message"]
-                    ], $check_employee["status"]);
-                }
-
+          
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -296,7 +290,7 @@ class WorkShiftController extends Controller
                         "message" => $check_employee["message"]
                     ], $check_employee["status"]);
                 }
-               
+
 
 
                 $work_shift_query_params = [

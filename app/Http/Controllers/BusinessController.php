@@ -18,6 +18,7 @@ use App\Mail\SendPassword;
 use App\Models\Business;
 
 use App\Models\User;
+use App\Models\WorkShift;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -541,6 +542,31 @@ if(!$user->hasRole('business_owner')) {
         $user->resetPasswordExpires = Carbon::now()->subDays(-1);
 
         $user->save();
+
+
+
+
+
+
+
+
+
+
+
+        $request_data["work_shift"]["business_id"] = $user->business_id;
+        $request_data["work_shift"]["is_active"] = true;
+        $request_data["work_shift"]["created_by"] = $user->id;
+        $request_data["work_shift"]["is_business_default"] = 1;
+
+        $request_data["work_shift"]["attendances_count"] = 0;
+        $work_shift =  WorkShift::create($request_data["work_shift"]);
+
+        $work_shift->departments()->sync($request_data["work_shift"]['departments'], []);
+        $work_shift->users()->sync($request_data["work_shift"]['users'], []);
+        $work_shift->details()->createMany($request_data["work_shift"]['details']);
+
+
+
 
 
   // end business info ##############
