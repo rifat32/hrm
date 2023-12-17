@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DesignationCreateRequest;
 use App\Http\Requests\DesignationUpdateRequest;
+use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Designation;
+use App\Models\DisabledDesignation;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,7 +23,7 @@ class DesignationController extends Controller
      * @OA\Post(
      *      path="/v1.0/designations",
      *      operationId="createDesignation",
-     *      tags={"employee.designations"},
+     *      tags={"designations"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -31,10 +33,10 @@ class DesignationController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
- *
- *
+     * @OA\Property(property="name", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     *
+     *
      *
      *         ),
      *      ),
@@ -75,7 +77,7 @@ class DesignationController extends Controller
     public function createDesignation(DesignationCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('designation_create')) {
                     return response()->json([
@@ -85,24 +87,16 @@ class DesignationController extends Controller
 
                 $request_data = $request->validated();
 
+                $request_data["is_active"] = 1;
+                $request_data["is_default"] = 0;
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
 
                 if (empty($request->user()->business_id)) {
                     $request_data["business_id"] = NULL;
-                $request_data["is_active"] = 1;
-                $request_data["created_by"] = $request->user()->id;
-
-
-                if(!$request->user()->hasRole('superadmin')) {
-                    $request_data["is_default"] = 1;
-                }else {
-                    $request_data["is_default"] = 0;
-                }
-
-                } else {
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_active"] = 1;
-                    $request_data["is_default"] = 0;
-                  $request_data["created_by"] = $request->user()->id;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
                 }
 
 
@@ -126,7 +120,7 @@ class DesignationController extends Controller
      * @OA\Put(
      *      path="/v1.0/designations",
      *      operationId="updateDesignation",
-     *      tags={"employee.designations"},
+     *      tags={"designations"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -136,9 +130,9 @@ class DesignationController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     * @OA\Property(property="name", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
 
 
      *
@@ -182,50 +176,29 @@ class DesignationController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('designation_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
 
 
                 $designation_query_params = [
                     "id" => $request_data["id"],
-                    "business_id" => $business_id
                 ];
-                $designation_prev = Designation::where($designation_query_params)
-                    ->first();
-                if (!$designation_prev) {
-                    return response()->json([
-                        "message" => "no designation found"
-                    ], 404);
-                }
-                if (empty($request->user()->business_id)) {
-                    if(!($designation_prev->business_id == NULL && $designation_prev->is_default == 1)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    }
 
-                } else {
-                    if(!($designation_prev->business_id == $request->user()->business_id)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    }
-                }
                 $designation  =  tap(Designation::where($designation_query_params))->update(
                     collect($request_data)->only([
                         'name',
                         'description',
-                         // "is_default",
+                        // "is_default",
                         // "is_active",
                         // "business_id",
+                        // "created_by"
 
                     ])->toArray()
                 )
@@ -238,6 +211,9 @@ class DesignationController extends Controller
                     ], 500);
                 }
 
+
+
+
                 return response($designation, 201);
             });
         } catch (Exception $e) {
@@ -245,14 +221,167 @@ class DesignationController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/designations/toggle-active",
+     *      operationId="toggleActiveDesignation",
+     *      tags={"designations"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle designatation",
+     *      description="This method is to toggle designatation",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
 
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function toggleActiveDesignation(GetIdRequest $request)
+    {
+
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('designation_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+
+            $designation =  Designation::where([
+                "id" => $request_data["id"],
+            ])
+                ->first();
+            if (!$designation) {
+                return response()->json([
+                    "message" => "no data found"
+                ], 404);
+            }
+            $should_update = 0;
+            if (empty(auth()->user()->business_id)) {
+
+                if (auth()->user()->hasRole('superadmin')) {
+                    if (($designation->business_id != NULL || $designation->is_default != 1)) {
+
+                        return response()->json([
+                            "message" => "You do not have permission to update this designation due to role restrictions."
+                        ], 403);
+                    } else {
+                        $should_update = 1;
+                    }
+                } else {
+                    if ($designation->business_id != NULL) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this designation due to role restrictions."
+                        ], 403);
+                    } else if ($designation->is_default == 0) {
+                        if ($designation->created_by != auth()->user()->id) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this designation due to role restrictions."
+                            ], 403);
+                        } else {
+                            $should_update = 1;
+                        }
+                    } else {
+                        DisabledDesignation::create([
+                            'designation_id' => $designation->id,
+                            'business_id' => auth()->user()->business_id,
+                            'created_by' => auth()->user()->business_id,
+                        ]);
+                        //  store in not active based on condition, if active remove else
+                    }
+                }
+            } else {
+                if ($designation->business_id != NULL) {
+                    if (($designation->business_id != auth()->user()->business_id)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this designation due to role restrictions."
+                        ], 403);
+                    } else {
+                        $should_update = 1;
+                    }
+                } else {
+                    if ($designation->is_default == 0) {
+                        if ($designation->created_by != auth()->user()->created_by) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this designation due to role restrictions."
+                            ], 403);
+                        } else {
+                            DisabledDesignation::create([
+                                'designation_id' => $designation->id,
+                                'business_id' => auth()->user()->business_id,
+                                'created_by' => auth()->user()->business_id,
+                            ]);
+                        }
+                    } else {
+                        DisabledDesignation::create([
+                            'designation_id' => $designation->id,
+                            'business_id' => auth()->user()->business_id,
+                            'created_by' => auth()->user()->business_id,
+                        ]);
+                    }
+                }
+            }
+
+            if ($should_update) {
+                $designation->update([
+                    'is_active' => !$designation->is_active
+                ]);
+            }
+
+
+            return response()->json(['message' => 'Designation status updated successfully'], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
      * @OA\Get(
      *      path="/v1.0/designations",
      *      operationId="getDesignations",
-     *      tags={"employee.designations"},
+     *      tags={"designations"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -264,7 +393,13 @@ class DesignationController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-
+*      * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
      *      * *  @OA\Parameter(
      * name="start_date",
      * in="query",
@@ -335,7 +470,7 @@ class DesignationController extends Controller
     public function getDesignations(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('designation_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -344,12 +479,48 @@ class DesignationController extends Controller
 
 
             $designations = Designation::when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('designations.business_id', NULL)
-                             ->where('designations.is_default', 1);
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('designations.business_id', NULL)
+                        ->where('designations.is_default', 1)
+                        ->when(!isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('designations.is_active', intval($request->is_active));
+                        });
+                } else {
+                    return $query->where('designations.business_id', NULL)
+                        ->where('designations.is_default', 1)
+                        ->where('designations.is_active', 1)
+                        // where has created by me
+                        ->orWhere(function ($query) use ($request) {
+                            $query->where('designations.business_id', NULL)
+                                ->where('designations.is_default', 0)
+                                ->where('designations.created_by', auth()->user()->id)
+                                ->when(!isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('designations.is_active', intval($request->is_active));
+                                });
+                        });
+                }
             })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
-            })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                    return $query->where('designations.business_id', NULL)
+                        ->where('designations.is_default', 1)
+                        ->where('designations.is_active', 1)
+                        // where has business id mine or created by my creator
+                        ->orWhere(function ($query) {
+                            $query->where('designations.business_id', NULL)
+                                ->where('designations.is_default', 0)
+                                ->where('designations.created_by', auth()->user()->created_by)
+                                ->where('designations.is_active', 1)
+                        // where has business id mine
+                                ;
+                        })
+                        ->orWhere(function ($query) use($request) {
+                            $query->where('designations.business_id', auth()->user()->business_id)
+                                ->where('designations.is_default', 0)
+                                ->when(!isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('designations.is_active', intval($request->is_active));
+                                });;
+                        });
+                })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -391,7 +562,7 @@ class DesignationController extends Controller
      * @OA\Get(
      *      path="/v1.0/designations/{id}",
      *      operationId="getDesignationById",
-     *      tags={"employee.designations"},
+     *      tags={"designations"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -444,7 +615,7 @@ class DesignationController extends Controller
     public function getDesignationById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('designation_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -454,18 +625,36 @@ class DesignationController extends Controller
             $designation =  Designation::where([
                 "id" => $id,
             ])
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                if($request->user()->hasRole("superadmin") ) {
+                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                    if (auth()->user()->hasRole('superadmin')) {
+                        return $query->where('designations.business_id', NULL)
+                            ->where('designations.is_default', 1);
+                    } else {
+                        return $query->where('designations.business_id', NULL)
+                            ->where('designations.is_default', 1)
+                            ->where('designations.is_active', 1)
+                            ->orWhere(function ($query) {
+                                $query->where('designations.business_id', NULL)
+                                    ->where('designations.is_default', 0)
+                                    ->where('designations.created_by', auth()->user()->created_by);
+                            });
+                    }
+                })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                     return $query->where('designations.business_id', NULL)
-                    ->where('designations.is_default',1);
-                } else {
-                    return $query->where('designations.business_id', NULL)
-                    ->where('designations.created_by',$request->user()->id);
-                }
-            })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id);
-            })
+                        ->where('designations.is_default', 1)
+                        ->where('designations.is_active', 1)
+                        ->orWhere(function ($query) {
+                            $query->where('designations.business_id', NULL)
+                                ->where('designations.is_default', 0)
+                                ->where('designations.created_by', auth()->user()->created_by)
+                                ->where('designations.is_active', 1);
+                        })
+                        ->orWhere(function ($query) {
+                            $query->where('designations.business_id', auth()->user()->business_id)
+                                ->where('designations.is_default', 0);
+                        });
+                })
                 ->first();
             if (!$designation) {
                 return response()->json([
@@ -486,7 +675,7 @@ class DesignationController extends Controller
      *     @OA\Delete(
      *      path="/v1.0/designations/{ids}",
      *      operationId="deleteDesignationsByIds",
-     *      tags={"employee.designations"},
+     *      tags={"designations"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -539,7 +728,7 @@ class DesignationController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('designation_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -548,19 +737,20 @@ class DesignationController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = Designation::whereIn('id', $idsArray)
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                if($request->user()->hasRole("superadmin") ) {
-                    return $query->where('designations.business_id', NULL)
-                    ->where('designations.is_default',1);
-                } else {
-                    return $query->where('designations.business_id', NULL)
-                    ->where('designations.created_by',$request->user()->id);
-                }
-            })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id)
-                ->where('designations.is_default', 0);
-            })
+                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                    if ($request->user()->hasRole("superadmin")) {
+                        return $query->where('designations.business_id', NULL)
+                            ->where('designations.is_default', 1);
+                    } else {
+                        return $query->where('designations.business_id', NULL)
+                            ->where('designations.is_default', 1)
+                            ->where('designations.created_by', $request->user()->id);
+                    }
+                })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                    return $query->where('designations.business_id', $request->user()->business_id)
+                        ->where('designations.is_default', 0);
+                })
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -573,22 +763,23 @@ class DesignationController extends Controller
                 ], 404);
             }
 
-          $user_exists =  User::whereIn("designation_id",$existingIds)->exists();
-            if($user_exists) {
-                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get(['id', 'first_Name',
-                'last_Name',]);
+            $user_exists =  User::whereIn("designation_id", $existingIds)->exists();
+            if ($user_exists) {
+                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
+                    'id', 'first_Name',
+                    'last_Name',
+                ]);
 
                 return response()->json([
                     "message" => "Some users are associated with the specified designations",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
-
             }
 
             Designation::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

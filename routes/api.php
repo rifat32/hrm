@@ -412,6 +412,8 @@ Route::delete('/v1.0/job-platforms/{ids}', [JobPlatformController::class, "delet
 
 Route::post('/v1.0/designations', [DesignationController::class, "createDesignation"]);
 Route::put('/v1.0/designations', [DesignationController::class, "updateDesignation"]);
+Route::put('/v1.0/setting-leave-types/toggle-active', [SettingLeaveTypeController::class, "toggleActiveSettingLeaveType"]);
+Route::put('/v1.0/designations/toggle-active', [DesignationController::class, "toggleActiveDesignation"]);
 Route::get('/v1.0/designations', [DesignationController::class, "getDesignations"]);
 Route::get('/v1.0/designations/{id}', [DesignationController::class, "getDesignationById"]);
 Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "deleteDesignationsByIds"]);

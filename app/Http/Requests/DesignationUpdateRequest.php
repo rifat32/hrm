@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Designation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DesignationUpdateRequest extends FormRequest
@@ -27,7 +28,54 @@ class DesignationUpdateRequest extends FormRequest
 
 
         $rules = [
-            'id' => 'required|numeric',
+
+            'id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+
+                    $designation_query_params = [
+                        "id" => $this->id,
+                        "business_id" => auth()->user()->business_id
+                    ];
+                    $designation = Designation::where($designation_query_params)
+                        ->first();
+                    if (!$designation) {
+                            // $fail("$attribute is invalid.");
+                            $fail("no designation found");
+
+                    }
+                    if (empty(auth()->user()->business_id)) {
+
+                        if(auth()->user()->hasRole('superadmin')) {
+                            if(($designation->business_id != NULL || $designation->is_default != 1)) {
+                                // $fail("$attribute is invalid.");
+                                $fail("You do not have permission to update this designation due to role restrictions.");
+
+                          }
+
+                        } else {
+                            if(($designation->business_id != NULL || $designation->is_default != 0 || $designation->created_by != auth()->user()->id)) {
+                                // $fail("$attribute is invalid.");
+                                $fail("You do not have permission to update this designation due to role restrictions.");
+
+                          }
+                        }
+
+                    } else {
+                        if(($designation->business_id != auth()->user()->business_id || $designation->is_default != 0)) {
+                               // $fail("$attribute is invalid.");
+                            $fail("You do not have permission to update this designation due to role restrictions.");
+                        }
+                    }
+
+
+
+
+                },
+            ],
+
+
             'name' => 'required|string',
             'description' => 'nullable|string',
         ];
