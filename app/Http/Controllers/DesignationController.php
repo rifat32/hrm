@@ -297,11 +297,11 @@ class DesignationController extends Controller
                 ], 404);
             }
             $should_update = 0;
+            $should_disable = 0;
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($designation->business_id != NULL || $designation->is_default != 1)) {
-
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
@@ -313,21 +313,14 @@ class DesignationController extends Controller
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
-                    } else if ($designation->is_default == 0) {
-                        if ($designation->created_by != auth()->user()->id) {
+                    } else if ($designation->is_default == 0 && $designation->created_by != auth()->user()->id) {
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
-                        } else {
-                            $should_update = 1;
-                        }
+
                     } else {
-                        DisabledDesignation::create([
-                            'designation_id' => $designation->id,
-                            'business_id' => auth()->user()->business_id,
-                            'created_by' => auth()->user()->business_id,
-                        ]);
-                        //  store in not active based on condition, if active remove else
+                     $should_disable = 1;
+
                     }
                 }
             } else {
@@ -346,18 +339,12 @@ class DesignationController extends Controller
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
                         } else {
-                            DisabledDesignation::create([
-                                'designation_id' => $designation->id,
-                                'business_id' => auth()->user()->business_id,
-                                'created_by' => auth()->user()->business_id,
-                            ]);
+                            $should_disable = 1;
+
                         }
                     } else {
-                        DisabledDesignation::create([
-                            'designation_id' => $designation->id,
-                            'business_id' => auth()->user()->business_id,
-                            'created_by' => auth()->user()->business_id,
-                        ]);
+                        $should_disable = 1;
+
                     }
                 }
             }
@@ -366,6 +353,24 @@ class DesignationController extends Controller
                 $designation->update([
                     'is_active' => !$designation->is_active
                 ]);
+            }
+
+            if($should_disable) {
+
+                $disabled_designation =    DisabledDesignation::where([
+                    'designation_id' => $designation->id,
+                    'business_id' => auth()->user()->business_id,
+                    'created_by' => auth()->user()->business_id,
+                ])->first();
+                if(!$disabled_designation) {
+                    DisabledDesignation::create([
+                        'designation_id' => $designation->id,
+                        'business_id' => auth()->user()->business_id,
+                        'created_by' => auth()->user()->business_id,
+                    ]);
+                } else {
+                    $disabled_designation->delete();
+                }
             }
 
 
@@ -482,19 +487,26 @@ class DesignationController extends Controller
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
-                        ->when(!isset($request->is_active), function ($query) use ($request) {
+                        ->when(isset($request->is_active), function ($query) use ($request) {
                             return $query->where('designations.is_active', intval($request->is_active));
                         });
                 } else {
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
                         ->where('designations.is_active', 1)
-                        // where has created by me
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            if(intval($request->is_active)) {
+                                return $query->whereHas("disabled", function($q) {
+                                    $q->whereNotIn("disabled_designations.created_by", [auth()->user()->id]);
+                                });
+                            }
+
+                        })
                         ->orWhere(function ($query) use ($request) {
                             $query->where('designations.business_id', NULL)
                                 ->where('designations.is_default', 0)
                                 ->where('designations.created_by', auth()->user()->id)
-                                ->when(!isset($request->is_active), function ($query) use ($request) {
+                                ->when(isset($request->is_active), function ($query) use ($request) {
                                     return $query->where('designations.is_active', intval($request->is_active));
                                 });
                         });
@@ -504,19 +516,39 @@ class DesignationController extends Controller
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
                         ->where('designations.is_active', 1)
-                        // where has business id mine or created by my creator
-                        ->orWhere(function ($query) {
+                        ->whereHas("disabled", function($q) {
+                            $q->whereNotIn("disabled_designations.created_by", [auth()->user()->created_by]);
+                        })
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            if(intval($request->is_active)) {
+                                return $query->whereHas("disabled", function($q) {
+                                    $q->whereNotIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                });
+                            }
+
+                        })
+
+
+                        ->orWhere(function ($query) use($request){
                             $query->where('designations.business_id', NULL)
                                 ->where('designations.is_default', 0)
                                 ->where('designations.created_by', auth()->user()->created_by)
                                 ->where('designations.is_active', 1)
-                        // where has business id mine
+
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    if(intval($request->is_active)) {
+                                        return $query->whereHas("disabled", function($q) {
+                                            $q->whereNotIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                        });
+                                    }
+
+                                })
                                 ;
                         })
                         ->orWhere(function ($query) use($request) {
                             $query->where('designations.business_id', auth()->user()->business_id)
                                 ->where('designations.is_default', 0)
-                                ->when(!isset($request->is_active), function ($query) use ($request) {
+                                ->when(isset($request->is_active), function ($query) use ($request) {
                                     return $query->where('designations.is_active', intval($request->is_active));
                                 });;
                         });

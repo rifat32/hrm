@@ -16,4 +16,8 @@ class Designation extends Model
         "business_id",
         "created_by"
     ];
+
+    public function disabled(){
+        return $this->hasMany(DisabledDesignation::class,'designation_id', 'id');
+    }
 }
