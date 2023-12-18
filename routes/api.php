@@ -190,7 +190,9 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 
 
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
-Route::put('/v2.0/users', [UserManagementController::class, "updateUser2"]);
+Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
+Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);
+Route::put('/v1.0/users/update-emergency-contact', [UserManagementController::class, "updateEmergencyContact"]);
 Route::put('/v1.0/users/store-details', [UserManagementController::class, "storeUserDetails"]);
 Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
 Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"]);

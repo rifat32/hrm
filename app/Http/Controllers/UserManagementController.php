@@ -11,6 +11,8 @@ use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Requests\SingleFileUploadRequest;
 use App\Http\Requests\UserCreateV2Request;
 use App\Http\Requests\UserStoreDetailsRequest;
+use App\Http\Requests\UserUpdateAddressRequest;
+use App\Http\Requests\UserUpdateEmergencyContactRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
@@ -1289,6 +1291,254 @@ $user->syncRoles($roles);
              return $this->sendError($e, 500, $request);
          }
      }
+         /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/update-address",
+     *      operationId="updateUserAddress",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user address",
+     *      description="This method is to update user address",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+
+     *
+
+     *  * *  @OA\Property(property="phone", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="address_line_1", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="address_line_2", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="country", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="city", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="postcode", type="boolean", format="boolean",example="1"),
+     *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
+     *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserAddress(UserUpdateAddressRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+
+             $userQueryTerms = [
+                 "id" => $request_data["id"],
+             ];
+
+             $user  =  tap(User::where($userQueryTerms))->update(
+                 collect($request_data)->only([
+                    'phone',
+            'address_line_1',
+            'address_line_2',
+            'country',
+            'city',
+            'postcode',
+            'lat',
+            'long',
+
+                 ])->toArray()
+             )
+                 // ->with("somthing")
+
+                 ->first();
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+        /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/update-emergency-contact",
+     *      operationId="updateEmergencyContact",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user contact",
+     *      description="This method is to update contact",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+
+      * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateEmergencyContact(UserUpdateEmergencyContactRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+
+             $userQueryTerms = [
+                 "id" => $request_data["id"],
+             ];
+
+             $user  =  tap(User::where($userQueryTerms))->update(
+                 collect($request_data)->only([
+                    'emergency_contact_details'
+
+                 ])->toArray()
+             )
+                 // ->with("somthing")
+
+                 ->first();
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
    /**
      *
      * @OA\Put(
