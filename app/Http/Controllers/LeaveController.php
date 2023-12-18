@@ -260,12 +260,28 @@ class LeaveController extends Controller
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
 
-                    if (!$work_shift_details->is_weekend) {
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $request_data["date"])
+                    ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->first();
+
+                    $previous_leave =  Leave::where([
+                        "employee_id" => $request_data["employee_id"]
+                    ])
+                    ->whereHas('records', function ($query) use ($request_data) {
+                        $query->where('leave_records.date', $request_data["date"]);
+                    })->first();
+
+                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
+
+
 
 
                 } else if ($request_data["leave_duration"] == "multiple_day") {
@@ -289,7 +305,22 @@ class LeaveController extends Controller
                             return response()->json(["message" => "No work shift details found"], 400);
                         }
 
-                        if (!$work_shift_details->is_weekend) {
+                        $holiday =   Holiday::where([
+                            "business_id" => $request->user()->business_id
+                        ])
+                        ->where('holidays.start_date', "<=", $leave_date)
+                        ->where('holidays.end_date', ">=", $leave_date . ' 23:59:59')
+                        ->first();
+
+                        $previous_leave =  Leave::where([
+                            "employee_id" => $request_data["employee_id"]
+                        ])
+                        ->whereHas('records', function ($query) use ($leave_date) {
+                            $query->where('leave_records.date', $leave_date);
+                        })->first();
+
+
+                        if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                             $leave_record_data["start_time"] = $work_shift_details->start_at;
                             $leave_record_data["end_time"] = $work_shift_details->end_at;
                             $leave_record_data["date"] = $leave_date;
@@ -307,8 +338,22 @@ class LeaveController extends Controller
                     if (!$work_shift_details) {
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $request_data["date"])
+                    ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->first();
 
-                    if (!$work_shift_details->is_weekend) {
+                    $previous_leave =  Leave::where([
+                        "employee_id" => $request_data["employee_id"]
+                    ])
+                    ->whereHas('records', function ($query) use ($request_data) {
+                        $query->where('leave_records.date', $request_data["date"]);
+                    })->first();
+
+
+                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                         $start_at = $work_shift_details->start_at;
                         $end_at = $work_shift_details->end_at;
                         if ($request_data["day_type"] == "first_half") {
@@ -342,47 +387,62 @@ class LeaveController extends Controller
                         return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
                     }
 
-                    if (!$work_shift_details->is_weekend) {
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $request_data["date"])
+                    ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->first();
+
+                    $previous_leave =  Leave::where([
+                        "employee_id" => $request_data["employee_id"]
+                    ])
+                    ->whereHas('records', function ($query) use ($request_data) {
+                        $query->where('leave_records.date', $request_data["date"]);
+                    })->first();
+
+
+                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
                 }
-                foreach($leave_record_data_list as $leave_record_data) {
+                // foreach($leave_record_data_list as $leave_record_data) {
 
-                    $holiday =   Holiday::where([
-                        "business_id" => $request->user()->business_id
-                    ])
-                    ->where('holidays.start_date', "<=", $leave_record_data["date"])
-                    ->where('holidays.end_date', ">=", $leave_record_data["date"] . ' 23:59:59')
-                    ->first();
-                    if ($holiday) {
-                        if($holiday->is_active){
-                            return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
-                            // $leave_date = Carbon::parse($leave_record_data["date"]);
-                            // $holiday_created_at = Carbon::parse($holiday->created_at);
-                            // if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
-                            //     return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
-                            // }
-                            // return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                //     // $holiday =   Holiday::where([
+                //     //     "business_id" => $request->user()->business_id
+                //     // ])
+                //     // ->where('holidays.start_date', "<=", $leave_record_data["date"])
+                //     // ->where('holidays.end_date', ">=", $leave_record_data["date"] . ' 23:59:59')
+                //     // ->first();
+                //     // if ($holiday) {
+                //     //     if($holiday->is_active){
+                //     //         return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                //     //         // $leave_date = Carbon::parse($leave_record_data["date"]);
+                //     //         // $holiday_created_at = Carbon::parse($holiday->created_at);
+                //     //         // if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
+                //     //         //     return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                //     //         // }
+                //     //         // return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
 
-                        }
+                //     //     }
 
-                    }
+                //     // }
 
 
-                $previous_leave =  Leave::where([
-                    "employee_id" => $request->user()->id
-                ])
-                ->whereHas('records', function ($query) use ($leave_record_data) {
-                    $query->where('leave_records.date', $leave_record_data["date"]);
-                })->first();
-                if ($previous_leave) {
-                    return response()->json(["message" => "Leave already exists for the employee on " . $leave_record_data["date"]], 400);
-                }
+                // $previous_leave =  Leave::where([
+                //     "employee_id" => $request->user()->id
+                // ])
+                // ->whereHas('records', function ($query) use ($leave_record_data) {
+                //     $query->where('leave_records.date', $leave_record_data["date"]);
+                // })->first();
+                // if ($previous_leave) {
+                //     return response()->json(["message" => "Leave already exists for the employee on " . $leave_record_data["date"]], 400);
+                // }
 
-                }
+                // }
 
 
 
@@ -721,7 +781,6 @@ class LeaveController extends Controller
                 // }
                 $leave_record_data_list = [];
                 if ($request_data["leave_duration"] == "single_day") {
-
                     $dateString = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
@@ -732,7 +791,23 @@ class LeaveController extends Controller
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
 
-                    if (!$work_shift_details->is_weekend) {
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $request_data["date"])
+                    ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->first();
+
+                    $previous_leave =  Leave::where([
+                        "employee_id" => $request_data["employee_id"]
+                    ])
+                    ->whereNotIn("id",[$request_data["id"]])
+                    ->whereHas('records', function ($query) use ($request_data) {
+                        $query->where('leave_records.date', $request_data["date"]);
+                    })->first();
+
+
+                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
@@ -758,8 +833,22 @@ class LeaveController extends Controller
                         if (!$work_shift_details) {
                             return response()->json(["message" => "No work shift details found"], 400);
                         }
+                        $holiday =   Holiday::where([
+                            "business_id" => $request->user()->business_id
+                        ])
+                        ->where('holidays.start_date', "<=", $leave_date)
+                        ->where('holidays.end_date', ">=", $leave_date . ' 23:59:59')
+                        ->first();
 
-                        if (!$work_shift_details->is_weekend) {
+                        $previous_leave =  Leave::where([
+                            "employee_id" => $request_data["employee_id"]
+                        ])
+                        ->whereNotIn("id",[$request_data["id"]])
+                        ->whereHas('records', function ($query) use ($leave_date) {
+                            $query->where('leave_records.date', $leave_date["date"]);
+                        })->first();
+
+                        if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                             $leave_record_data["start_time"] = $work_shift_details->start_at;
                             $leave_record_data["end_time"] = $work_shift_details->end_at;
                             $leave_record_data["date"] = $leave_date;
@@ -777,8 +866,22 @@ class LeaveController extends Controller
                     if (!$work_shift_details) {
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $request_data["date"])
+                    ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->first();
 
-                    if (!$work_shift_details->is_weekend) {
+                    $previous_leave =  Leave::where([
+                        "employee_id" => $request_data["employee_id"]
+                    ])
+                    ->whereNotIn("id",[$request_data["id"]])
+                    ->whereHas('records', function ($query) use ($request_data) {
+                        $query->where('leave_records.date', $request_data["date"]);
+                    })->first();
+
+                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                         $start_at = $work_shift_details->start_at;
                         $end_at = $work_shift_details->end_at;
                         if ($request_data["day_type"] == "first_half") {
@@ -812,7 +915,23 @@ class LeaveController extends Controller
                         return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
                     }
 
-                    if (!$work_shift_details->is_weekend) {
+                    $holiday =   Holiday::where([
+                        "business_id" => $request->user()->business_id
+                    ])
+                    ->where('holidays.start_date', "<=", $request_data["date"])
+                    ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->first();
+
+                    $previous_leave =  Leave::where([
+                        "employee_id" => $request_data["employee_id"]
+                    ])
+                    ->whereNotIn("id",[$request_data["id"]])
+                    ->whereHas('records', function ($query) use ($request_data) {
+                        $query->where('leave_records.date', $request_data["date"]);
+                    })->first();
+
+
+                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
@@ -820,40 +939,40 @@ class LeaveController extends Controller
                     }
                 }
 
-                foreach($leave_record_data_list as $leave_record_data) {
-                    $holiday =   Holiday::where([
-                        "business_id" => $request->user()->business_id
-                    ])
-                    ->where('holidays.start_date', "<=", $leave_record_data["date"])
-                    ->where('holidays.end_date', ">=", $leave_record_data["date"] . ' 23:59:59')
-                    ->first();
-                    if ($holiday) {
-                        if($holiday->is_active){
-                            return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
-                            // $leave_date = Carbon::parse($leave_record_data["date"]);
-                            // $holiday_created_at = Carbon::parse($holiday->created_at);
-                            // if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
-                            //     return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
-                            // }
-                            // return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                // foreach($leave_record_data_list as $leave_record_data) {
+                //     // $holiday =   Holiday::where([
+                //     //     "business_id" => $request->user()->business_id
+                //     // ])
+                //     // ->where('holidays.start_date', "<=", $leave_record_data["date"])
+                //     // ->where('holidays.end_date', ">=", $leave_record_data["date"] . ' 23:59:59')
+                //     // ->first();
+                //     // if ($holiday) {
+                //     //     if($holiday->is_active){
+                //     //         return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                //     //         // $leave_date = Carbon::parse($leave_record_data["date"]);
+                //     //         // $holiday_created_at = Carbon::parse($holiday->created_at);
+                //     //         // if (!$holiday->repeats_annually && !($leave_date->diffInYears($holiday_created_at) > 1)) {
+                //     //         //     return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
+                //     //         // }
+                //     //         // return response()->json(["message" => ("There is a holiday on " . $leave_record_data["date"])], 400);
 
-                        }
+                //     //     }
 
-                    }
+                //     // }
 
 
-                $previous_leave =  Leave::where([
-                    "employee_id" => $request->user()->id
-                ])
-                ->whereNotIn("id",[$request_data["id"]])
-                ->whereHas('records', function ($query) use ($leave_record_data) {
-                    $query->where('leave_records.date', $leave_record_data["date"]);
-                })->first();
-                if ($previous_leave) {
-                    return response()->json(["message" => "Leave already exists for the employee on " . $leave_record_data["date"]], 400);
-                }
+                // // $previous_leave =  Leave::where([
+                // //     "employee_id" => $request_data["employee_id"]
+                // // ])
+                // // ->whereNotIn("id",[$request_data["id"]])
+                // // ->whereHas('records', function ($query) use ($leave_record_data) {
+                // //     $query->where('leave_records.date', $leave_record_data["date"]);
+                // // })->first();
+                // // if ($previous_leave) {
+                // //     return response()->json(["message" => "Leave already exists for the employee on " . $leave_record_data["date"]], 400);
+                // // }
 
-                }
+                // }
 
                 $leave_query_params = [
                     "id" => $request_data["id"],
@@ -1036,7 +1155,17 @@ class LeaveController extends Controller
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });;
+                });
+
+                foreach ($leaves as $leave) {
+                    $leave->total_leave_hours = $leave->records->sum(function ($record) {
+                     $startTime = Carbon::parse($record->start_time);
+                     $endTime = Carbon::parse($record->end_time);
+                     return $startTime->diffInHours($endTime);
+
+                    });
+
+                 }
 
 
 
@@ -1213,7 +1342,19 @@ class LeaveController extends Controller
                 }, function ($query) {
                     return $query->get();
                 });
+
+                foreach ($leaves as $leave) {
+                   $leave->total_leave_hours = $leave->records->sum(function ($record) {
+                    $startTime = Carbon::parse($record->start_time);
+                    $endTime = Carbon::parse($record->end_time);
+                    return $startTime->diffInHours($endTime);
+
+                   });
+
+                }
             $data["data"] = $leaves;
+
+
             $data["data_highlights"] = [];
 
             $data["data_highlights"]["employees_on_leave"] = $leaves->count();

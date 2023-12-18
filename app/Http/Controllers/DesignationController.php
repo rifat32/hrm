@@ -481,9 +481,9 @@ class DesignationController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+$created_by = auth()->user()->business->id;
 
-
-            $designations = Designation::when(empty($request->user()->business_id), function ($query) use ($request) {
+            $designations = Designation::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
@@ -512,12 +512,12 @@ class DesignationController extends Controller
                         });
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
                         ->where('designations.is_active', 1)
-                        ->whereHas("disabled", function($q) {
-                            $q->whereNotIn("disabled_designations.created_by", [auth()->user()->created_by]);
+                        ->whereHas("disabled", function($q) use($created_by) {
+                            $q->whereNotIn("disabled_designations.created_by", [$created_by]);
                         })
                         ->when(isset($request->is_active), function ($query) use ($request) {
                             if(intval($request->is_active)) {
@@ -529,10 +529,10 @@ class DesignationController extends Controller
                         })
 
 
-                        ->orWhere(function ($query) use($request){
+                        ->orWhere(function ($query) use($request, $created_by){
                             $query->where('designations.business_id', NULL)
                                 ->where('designations.is_default', 0)
-                                ->where('designations.created_by', auth()->user()->created_by)
+                                ->where('designations.created_by', $created_by)
                                 ->where('designations.is_active', 1)
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {

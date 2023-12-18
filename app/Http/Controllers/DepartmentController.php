@@ -86,7 +86,7 @@ class DepartmentController extends Controller
                 }
 
                 $request_data = $request->validated();
-         
+
 
 
                 if (empty($request_data["parent_id"])) {
@@ -473,6 +473,7 @@ class DepartmentController extends Controller
                     "business_id" => $business_id
                 ])
                 ->count();
+
 
              return response()->json($department, 200);
          } catch (Exception $e) {

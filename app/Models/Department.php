@@ -27,32 +27,32 @@ class Department extends Model
         return $this->belongsTo(Department::class, 'parent_id', 'id')->with('parentRecursive');
     }
 
-    public function getAllParentIdsAttribute()
-    {
-        $parentIds = [$this->id]; // Start with the current department's ID
+    // public function getAllParentIdsAttribute()
+    // {
+    //     $parentIds = [$this->id]; // Start with the current department's ID
 
-        $department = $this;
+    //     $department = $this;
 
-        while ($department->parentRecursive) {
-            $parentIds[] = $department->parentRecursive->id;
-            $department = $department->parentRecursive;
-        }
+    //     while ($department->parentRecursive) {
+    //         $parentIds[] = $department->parentRecursive->id;
+    //         $department = $department->parentRecursive;
+    //     }
 
-        return array_reverse($parentIds); // Reverse the array to have the top-level parent (father) first
-    }
-    public function getAllParentDataAttribute()
-    {
-        $parentData = [$this]; // Start with the current department's data
+    //     return array_reverse($parentIds); // Reverse the array to have the top-level parent (father) first
+    // }
+    // public function getAllParentDataAttribute()
+    // {
+    //     $parentData = [$this]; // Start with the current department's data
 
-        $department = $this;
+    //     $department = $this;
 
-        while ($department->parentRecursive) {
-            $parentData[] = $department->parentRecursive;
-            $department = $department->parentRecursive;
-        }
+    //     while ($department->parentRecursive) {
+    //         $parentData[] = $department->parentRecursive;
+    //         $department = $department->parentRecursive;
+    //     }
 
-        return array_reverse($parentData); // Reverse the array to have the top-level parent (father) first
-    }
+    //     return array_reverse($parentData); // Reverse the array to have the top-level parent (father) first
+    // }
     public function children_recursive()
     {
         return $this->hasMany(Department::class, 'parent_id', 'id')->with(
@@ -75,23 +75,23 @@ class Department extends Model
         ]);
       ;
     }
-    public function getAllChildrenDataAttribute()
-    {
-        $childrenData = collect(); // Start with an empty collection
+    // public function getAllChildrenDataAttribute()
+    // {
+    //     $childrenData = collect(); // Start with an empty collection
 
-        $this->load('children_recursive');
+    //     $this->load('children_recursive');
 
-        foreach ($this->children_recursive as $child) {
-            $childrenData->push($child);
+    //     foreach ($this->children_recursive as $child) {
+    //         $childrenData->push($child);
 
-            if ($child->children_recursive->isNotEmpty()) {
-                // If the child has children, recursively get their data
-                $childrenData = $childrenData->merge($child->getAllChildrenDataAttribute());
-            }
-        }
+    //         if ($child->children_recursive->isNotEmpty()) {
+    //             // If the child has children, recursively get their data
+    //             $childrenData = $childrenData->merge($child->getAllChildrenDataAttribute());
+    //         }
+    //     }
 
-        return $childrenData;
-    }
+    //     return $childrenData;
+    // }
 
 
     public function manager(){

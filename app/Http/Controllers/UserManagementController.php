@@ -863,7 +863,6 @@ class UserManagementController extends Controller
                     "message" => "no user found"
                 ], 404);
             }
-            $user->departments()->sync($request_data['departments'],[]);
             $user->syncRoles([$request_data['role']]);
 
 
@@ -2425,7 +2424,7 @@ $user->syncRoles($roles);
     /**
      *
      * @OA\Get(
-     *      path="/2.0/users/{id}",
+     *      path="/v2.0/users/{id}",
      *      operationId="getUserByIdV2",
      *      tags={"user_management.employee"},
      *       security={
@@ -3187,9 +3186,9 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if(!$this->isModuleEnabled("user_activity")) {
-                return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            //  if(!$this->isModuleEnabled("user_activity")) {
+            //     return response()->json(['messege' => 'Module is not enabled'], 403);
+            //  }
 
 
 
