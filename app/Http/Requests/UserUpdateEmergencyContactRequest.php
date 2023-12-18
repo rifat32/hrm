@@ -24,6 +24,7 @@ class UserUpdateEmergencyContactRequest extends FormRequest
     public function rules()
     {
         return [
+            'id' => "required|numeric",
             'emergency_contact_details' => "present|array",
         ];
     }
