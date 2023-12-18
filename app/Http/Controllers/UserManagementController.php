@@ -3229,7 +3229,11 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
             "description",
             "ip_address",
             "request_method",
-            "device")
+            "device",
+            "created_at",
+            "updated_at"
+
+            )
 
             ->when(!empty($request->per_page), function ($query) use ($request) {
                 return $query->paginate($request->per_page);

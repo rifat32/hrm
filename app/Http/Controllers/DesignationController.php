@@ -313,12 +313,21 @@ class DesignationController extends Controller
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
-                    } else if ($designation->is_default == 0 && $designation->created_by != auth()->user()->id) {
+                    } else if ($designation->is_default == 0) {
+
+                        if($designation->created_by != auth()->user()->id) {
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
+                        }
+                        else {
+                            $should_update = 1;
+                        }
 
-                    } else {
+
+
+                    }
+                    else {
                      $should_disable = 1;
 
                     }
@@ -360,13 +369,13 @@ class DesignationController extends Controller
                 $disabled_designation =    DisabledDesignation::where([
                     'designation_id' => $designation->id,
                     'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->business_id,
+                    'created_by' => auth()->user()->id,
                 ])->first();
                 if(!$disabled_designation) {
                     DisabledDesignation::create([
                         'designation_id' => $designation->id,
                         'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->business_id,
+                        'created_by' => auth()->user()->id,
                     ]);
                 } else {
                     $disabled_designation->delete();
@@ -481,7 +490,12 @@ class DesignationController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-$created_by = auth()->user()->business->id;
+            $created_by  = NULL;
+            if(auth()->user()->business) {
+                $created_by = auth()->user()->business->created_by;
+            }
+
+
 
             $designations = Designation::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
@@ -496,8 +510,8 @@ $created_by = auth()->user()->business->id;
                         ->where('designations.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
                             if(intval($request->is_active)) {
-                                return $query->whereHas("disabled", function($q) {
-                                    $q->whereNotIn("disabled_designations.created_by", [auth()->user()->id]);
+                                return $query->whereDoesntHave("disabled", function($q) {
+                                    $q->whereIn("disabled_designations.created_by", [auth()->user()->id]);
                                 });
                             }
 
@@ -516,13 +530,13 @@ $created_by = auth()->user()->business->id;
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
                         ->where('designations.is_active', 1)
-                        ->whereHas("disabled", function($q) use($created_by) {
-                            $q->whereNotIn("disabled_designations.created_by", [$created_by]);
+                        ->whereDoesntHave("disabled", function($q) use($created_by) {
+                            $q->whereIn("disabled_designations.created_by", [$created_by]);
                         })
-                        ->when(isset($request->is_active), function ($query) use ($request) {
+                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
                             if(intval($request->is_active)) {
-                                return $query->whereHas("disabled", function($q) {
-                                    $q->whereNotIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                                    $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
                                 });
                             }
 
@@ -537,12 +551,14 @@ $created_by = auth()->user()->business->id;
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     if(intval($request->is_active)) {
-                                        return $query->whereHas("disabled", function($q) {
-                                            $q->whereNotIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                        return $query->whereDoesntHave("disabled", function($q) {
+                                            $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
                                         });
                                     }
 
                                 })
+
+
                                 ;
                         })
                         ->orWhere(function ($query) use($request) {
@@ -653,41 +669,55 @@ $created_by = auth()->user()->business->id;
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $created_by  = NULL;
+            if(auth()->user()->business) {
+                $created_by = auth()->user()->business->created_by;
+            }
 
             $designation =  Designation::where([
-                "id" => $id,
+                "designations.id" => $id,
             ])
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                    if (auth()->user()->hasRole('superadmin')) {
-                        return $query->where('designations.business_id', NULL)
-                            ->where('designations.is_default', 1);
-                    } else {
-                        return $query->where('designations.business_id', NULL)
-                            ->where('designations.is_default', 1)
-                            ->where('designations.is_active', 1)
-                            ->orWhere(function ($query) {
-                                $query->where('designations.business_id', NULL)
-                                    ->where('designations.is_default', 0)
-                                    ->where('designations.created_by', auth()->user()->created_by);
-                            });
-                    }
-                })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1)
-                        ->where('designations.is_active', 1)
-                        ->orWhere(function ($query) {
-                            $query->where('designations.business_id', NULL)
-                                ->where('designations.is_default', 0)
-                                ->where('designations.created_by', auth()->user()->created_by)
-                                ->where('designations.is_active', 1);
-                        })
-                        ->orWhere(function ($query) {
-                            $query->where('designations.business_id', auth()->user()->business_id)
-                                ->where('designations.is_default', 0);
-                        });
-                })
+
                 ->first();
+
+                if (empty(auth()->user()->business_id)) {
+
+                    if (auth()->user()->hasRole('superadmin')) {
+                        if (($designation->business_id != NULL || $designation->is_default != 1)) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this designation due to role restrictions."
+                            ], 403);
+                        }
+                    } else {
+                        if ($designation->business_id != NULL) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this designation due to role restrictions."
+                            ], 403);
+                        } else if ($designation->is_default == 0 && $designation->created_by != auth()->user()->id) {
+                                return response()->json([
+                                    "message" => "You do not have permission to update this designation due to role restrictions."
+                                ], 403);
+
+                        }
+                    }
+                } else {
+                    if ($designation->business_id != NULL) {
+                        if (($designation->business_id != auth()->user()->business_id)) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this designation due to role restrictions."
+                            ], 403);
+                        }
+                    } else {
+                        if ($designation->is_default == 0) {
+                            if ($designation->created_by != auth()->user()->created_by) {
+                                return response()->json([
+                                    "message" => "You do not have permission to update this designation due to role restrictions."
+                                ], 403);
+                            }
+                        }
+                    }
+                }
+
             if (!$designation) {
                 return response()->json([
                     "message" => "no data found"
@@ -775,7 +805,7 @@ $created_by = auth()->user()->business->id;
                             ->where('designations.is_default', 1);
                     } else {
                         return $query->where('designations.business_id', NULL)
-                            ->where('designations.is_default', 1)
+                            ->where('designations.is_default', 0)
                             ->where('designations.created_by', $request->user()->id);
                     }
                 })

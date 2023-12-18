@@ -237,11 +237,11 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user social site  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Route::post('/v1.0/user-social-sites', [UserSocialSiteController::class, "createSocialSite"]);
-Route::put('/v1.0/user-social-sites', [UserSocialSiteController::class, "updateSocialSite"]);
-Route::get('/v1.0/user-social-sites', [UserSocialSiteController::class, "getSocialSites"]);
-Route::get('/v1.0/user-social-sites/{id}', [UserSocialSiteController::class, "getSocialSiteById"]);
-Route::delete('/v1.0/user-social-sites/{ids}', [UserSocialSiteController::class, "deleteSocialSitesByIds"]);
+Route::post('/v1.0/user-social-sites', [UserSocialSiteController::class, "createUserSocialSite"]);
+Route::put('/v1.0/user-social-sites', [UserSocialSiteController::class, "updateUserSocialSite"]);
+Route::get('/v1.0/user-social-sites', [UserSocialSiteController::class, "getUserSocialSites"]);
+Route::get('/v1.0/user-social-sites/{id}', [UserSocialSiteController::class, "getUserSocialSiteById"]);
+Route::delete('/v1.0/user-social-sites/{ids}', [UserSocialSiteController::class, "deleteUserSocialSitesByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user social site management section

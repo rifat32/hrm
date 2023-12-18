@@ -103,7 +103,10 @@ return [
                 "user_view",
                 "user_delete",
 
-
+                "designation_create",
+                "designation_update",
+                "designation_view",
+                "designation_delete",
 
                 "business_create",
                 "business_update",

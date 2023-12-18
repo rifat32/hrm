@@ -36,13 +36,13 @@ class DesignationUpdateRequest extends FormRequest
 
                     $designation_query_params = [
                         "id" => $this->id,
-                        "business_id" => auth()->user()->business_id
                     ];
                     $designation = Designation::where($designation_query_params)
                         ->first();
                     if (!$designation) {
                             // $fail("$attribute is invalid.");
                             $fail("no designation found");
+                            return 0;
 
                     }
                     if (empty(auth()->user()->business_id)) {
