@@ -40,7 +40,7 @@ use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
 use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPayrollController;
-
+use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserManagementController;
@@ -402,6 +402,21 @@ Route::delete('/v1.0/job-platforms/{ids}', [JobPlatformController::class, "delet
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end job platform management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//  social media management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/social-sites', [SocialSiteController::class, "createSocialSite"]);
+Route::put('/v1.0/social-sites', [SocialSiteController::class, "updateSocialSite"]);
+Route::get('/v1.0/social-sites', [SocialSiteController::class, "getSocialSites"]);
+Route::get('/v1.0/social-sites/{id}', [SocialSiteController::class, "getSocialSiteById"]);
+Route::delete('/v1.0/social-sites/{ids}', [SocialSiteController::class, "deleteSocialSitesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end social media management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

@@ -59,6 +59,13 @@ return [
 "job_platform_view",
 "job_platform_delete",
 
+"social_site_create",
+"social_site_update",
+"social_site_view",
+"social_site_delete",
+
+
+
 
 "designation_create",
 "designation_update",
@@ -108,6 +115,13 @@ return [
             "job_platform_update",
             "job_platform_view",
             "job_platform_delete",
+
+
+"social_site_create",
+"social_site_update",
+"social_site_view",
+"social_site_delete",
+
 
             ],
         ],
@@ -569,6 +583,12 @@ return [
        "job_platform_view",
        "job_platform_delete",
 
+       "social_site_create",
+"social_site_update",
+"social_site_view",
+"social_site_delete",
+
+
 
        "designation_create",
        "designation_update",
@@ -715,6 +735,12 @@ return [
         "job_platform_update" => "Can update job platform",
         "job_platform_view" => "Can view job platform",
         "job_platform_delete" => "Can delete job platform",
+
+        "social_site_create" => "Can create social site",
+"social_site_update"  => "Can update social site",
+"social_site_view" => "Can view social site",
+"social_site_delete" => "Can delete social site",
+
 
 
         "designation_create" => "Can create designation",
@@ -880,6 +906,11 @@ return [
         "job_platform_update" => "update",
         "job_platform_view" => "view",
         "job_platform_delete" => "delete",
+
+        "social_site_create" => "create",
+        "social_site_update" => "update",
+        "social_site_view" => "view",
+        "social_site_delete" => "delete",
 
 
         "designation_create" => "create",
@@ -1184,6 +1215,23 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "social_site",
+            "permissions" => [
+
+                "social_site_create",
+                "social_site_update",
+                "social_site_view",
+                "social_site_delete",
+
+
+
+            ],
+        ],
+
+
+
 
 
         [
