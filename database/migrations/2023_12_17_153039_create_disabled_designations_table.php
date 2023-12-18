@@ -22,7 +22,7 @@ class CreateDisabledDesignationsTable extends Migration
             $table->foreign('business_id')->references('id')->on('users')->onDelete('cascade');
 
 
-            $table->unsignedBigInteger("created_by");
+            $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')
                 ->on('users')

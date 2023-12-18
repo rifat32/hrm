@@ -7,6 +7,7 @@ use App\Http\Requests\JobPlatformUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\JobListing;
 use App\Models\JobPlatform;
 use Exception;
 use Illuminate\Http\Request;
@@ -568,7 +569,16 @@ class JobPlatformController extends Controller
                 ], 404);
             }
 
-
+            $job_post_exists =  JobListing::whereIn("job_platform_id", $existingIds)->exists();
+            if ($job_post_exists) {
+                // $conflictingSocialSites = UserSocialSite::whereIn("social_site_id", $existingIds)->get([
+                //     'id',
+                // ]);
+                return response()->json([
+                    "message" => "Some user's are using some of these job platforms.",
+                    // "conflicting_users" => $conflictingSocialSites
+                ], 409);
+            }
 
             JobPlatform::destroy($existingIds);
 

@@ -171,34 +171,34 @@ class UserCreateV2Request extends FormRequest
 
 
 
+        'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
 
-
-        "sponsorship_details.date_assigned" => 'required|date',
-        "sponsorship_details.expiry_date" => 'required|date',
-        "sponsorship_details.status" => 'required|in:pending,approved,denied,visa_granted',
-        "sponsorship_details.note" => 'required|string',
-        "sponsorship_details.certificate_number" => 'required|string',
-        "sponsorship_details.current_certificate_status" => 'required|in:pending,approved,denied',
-        "sponsorship_details.is_sponsorship_withdrawn" => 'required|boolean',
-
-
-
-
-
-        'passport_details.passport_number' => 'required|string',
-        'passport_details.passport_issue_date' => 'required|date',
-        'passport_details.passport_expiry_date' => 'required|date',
-        'passport_details.place_of_issue' => 'required|string',
+        "sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
+        "sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
+        "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',
+        "sponsorship_details.note" => 'nullable|required_if:immigration_status,sponsored|string',
+        "sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
+        "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied',
+        "sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
 
 
 
 
-        'visa_details.BRP_number' => 'required|string',
-        'visa_details.visa_issue_date' => 'required|date',
-        'visa_details.visa_expiry_date' => 'required|date',
-        'visa_details.place_of_issue' => 'required|string',
-        'visa_details.visa_docs' => 'present|array',
-        'visa_details.visa_docs.*.file_name' => 'required|string',
+
+        'passport_details.passport_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+        'passport_details.passport_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+        'passport_details.passport_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+        'passport_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+
+
+
+
+        'visa_details.BRP_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+        'visa_details.visa_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+        'visa_details.visa_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+        'visa_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+        'visa_details.visa_docs' => 'nullable|required_if:immigration_status,sponsored,immigrant|array',
+        'visa_details.visa_docs.*.file_name' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
         'visa_details.visa_docs.*.description' => 'nullable|string',
 
 

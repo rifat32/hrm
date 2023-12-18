@@ -16,8 +16,13 @@ class UserSocialSite extends Model
         "created_by"
     ];
 
-    public function social_link()
+    public function social_site()
     {
         return $this->belongsTo(SocialSite::class, 'social_site_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

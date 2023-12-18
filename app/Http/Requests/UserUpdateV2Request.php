@@ -58,7 +58,7 @@ class UserUpdateV2Request extends FormRequest
             // 'email' => 'required|string|email|indisposable|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
 
-            'password' => 'required|string|min:6',
+            'password' => 'nullable|string|min:6',
             'phone' => 'required|string',
             'image' => 'nullable|string',
             'address_line_1' => 'required|string',

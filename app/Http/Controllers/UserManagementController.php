@@ -2421,6 +2421,116 @@ $user->syncRoles($roles);
             return $this->sendError($e, 500, $request);
         }
     }
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/2.0/users/{id}",
+     *      operationId="getUserByIdV2",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserByIdV2($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $user = User::with([
+                "designation" => function ($query) {
+                    $query->select(
+                        'designations.id',
+                        'designations.name',
+                    );
+                },
+                "roles",
+                "departments",
+                "employment_status",
+                "sponsorship_details",
+                "passport_details",
+                "visa_details"
+            ]
+
+                )
+
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                     return $query->where(function ($query) {
+                         return  $query->where('created_by', auth()->user()->id)
+                                 ->orWhere('id', auth()->user()->id)
+                                 ->orWhere('business_id', auth()->user()->business_id);
+                       });
+                 })
+                 ->first();
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+             // ->whereHas('roles', function ($query) {
+             //     // return $query->where('name','!=', 'customer');
+             // });
+             $user->work_shift = $user->work_shifts()->first();
+
+             return response()->json($user, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
         /**
      *
      * @OA\Get(

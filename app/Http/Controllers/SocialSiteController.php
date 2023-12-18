@@ -574,12 +574,12 @@ class SocialSiteController extends Controller
 
            $employee_social_site_exists =  UserSocialSite::whereIn("social_site_id", $existingIds)->exists();
             if ($employee_social_site_exists) {
-                $conflictingSocialSites = UserSocialSite::whereIn("social_site_id", $existingIds)->get([
-                    'id',
-                ]);
+                // $conflictingSocialSites = UserSocialSite::whereIn("social_site_id", $existingIds)->get([
+                //     'id',
+                // ]);
                 return response()->json([
-                    "message" => "Some user' are using some of these social links.",
-                    "conflicting_users" => $conflictingSocialSites
+                    "message" => "Some user's are using some of these social sites.",
+                    // "conflicting_users" => $conflictingSocialSites
                 ], 409);
             }
 

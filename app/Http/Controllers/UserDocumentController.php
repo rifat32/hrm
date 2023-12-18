@@ -188,7 +188,7 @@ class UserDocumentController extends Controller
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+
 
                 $request_data["created_by"] = $request->user()->id;
 
@@ -281,7 +281,6 @@ class UserDocumentController extends Controller
 
                 $user_document_query_params = [
                     "id" => $request_data["id"],
-                    "business_id" => $business_id
                 ];
                 // $user_document_prev = UserDocument::where($user_document_query_params)
                 //     ->first();
@@ -439,6 +438,9 @@ class UserDocumentController extends Controller
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('user_documents.user_id', $request->user_id);
+                })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_documents.user_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('user_documents.created_at', ">=", $request->start_date);

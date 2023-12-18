@@ -141,6 +141,11 @@ return [
                 "employee_document_view",
                 "employee_document_delete",
 
+                "employee_social_site_create",
+                "employee_social_site_update",
+                "employee_social_site_view",
+                "employee_social_site_delete",
+
                 "role_create",
                 "role_update",
                 "role_view",
@@ -257,6 +262,11 @@ return [
                 "employee_document_view",
                 "employee_document_delete",
 
+                "employee_social_site_create",
+                "employee_social_site_update",
+                "employee_social_site_view",
+                "employee_social_site_delete",
+
                 "role_create",
                 "role_update",
                 "role_view",
@@ -365,6 +375,11 @@ return [
                 "employee_document_update",
                 "employee_document_view",
                 "employee_document_delete",
+
+                "employee_social_site_create",
+                "employee_social_site_update",
+                "employee_social_site_view",
+                "employee_social_site_delete",
 
                 "role_create",
                 "role_update",
@@ -504,6 +519,11 @@ return [
        "employee_document_update",
        "employee_document_view",
        "employee_document_delete",
+
+       "employee_social_site_create",
+       "employee_social_site_update",
+       "employee_social_site_view",
+       "employee_social_site_delete",
 
 
        "role_create",
@@ -656,6 +676,11 @@ return [
         "employee_document_update" => "",
         "employee_document_view" => "",
         "employee_document_delete" => "",
+
+        "employee_social_site_create" => "",
+        "employee_social_site_update" => "",
+        "employee_social_site_view" => "",
+        "employee_social_site_delete" => "",
 
 
 
@@ -826,6 +851,12 @@ return [
         "employee_document_update"  => "update",
         "employee_document_view"  => "view",
         "employee_document_delete"  => "delete",
+
+
+        "employee_social_site_create" => "create",
+        "employee_social_site_update" => "update",
+        "employee_social_site_view" => "view",
+        "employee_social_site_delete" => "delete",
 
 
 
@@ -1010,7 +1041,7 @@ return [
         ],
 
         [
-            "header" => "user",
+            "header" => "employee_document",
             "permissions" => [
                 "employee_document_create",
                 "employee_document_update",
@@ -1019,6 +1050,18 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "employee_social_site",
+            "permissions" => [
+                "employee_social_site_create",
+        "employee_social_site_update",
+        "employee_social_site_view",
+        "employee_social_site_delete",
+
+            ],
+        ],
+
 
 
 

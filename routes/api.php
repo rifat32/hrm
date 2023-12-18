@@ -44,6 +44,7 @@ use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
 
@@ -192,6 +193,7 @@ Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 Route::put('/v2.0/users', [UserManagementController::class, "updateUser2"]);
 Route::put('/v1.0/users/store-details', [UserManagementController::class, "storeUserDetails"]);
 Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
+Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"]);
 Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class, "generateEmployeeId"]);
 Route::get('/v1.0/users/validate/employee-id/{employee_id}', [UserManagementController::class, "validateEmployeeId"]);
 
@@ -217,7 +219,7 @@ Route::delete('/v1.0/roles/{ids}', [RolesController::class, "deleteRolesByIds"])
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// candidates  management section
+// user document  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Route::post('/v1.0/user-documents/single-file-upload', [UserDocumentController::class, "createUserDocumentFileSingle"]);
 Route::post('/v1.0/user-documents', [UserDocumentController::class, "createUserDocument"]);
@@ -227,12 +229,23 @@ Route::get('/v1.0/user-documents/{id}', [UserDocumentController::class, "getUser
 Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "deleteUserDocumentsByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// end candidates management section
+// end user document management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user social site  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/user-social-sites', [UserSocialSiteController::class, "createSocialSite"]);
+Route::put('/v1.0/user-social-sites', [UserSocialSiteController::class, "updateSocialSite"]);
+Route::get('/v1.0/user-social-sites', [UserSocialSiteController::class, "getSocialSites"]);
+Route::get('/v1.0/user-social-sites/{id}', [UserSocialSiteController::class, "getSocialSiteById"]);
+Route::delete('/v1.0/user-social-sites/{ids}', [UserSocialSiteController::class, "deleteSocialSitesByIds"]);
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user social site management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
