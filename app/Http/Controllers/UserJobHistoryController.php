@@ -24,14 +24,14 @@ class UserJobHistoryController extends Controller
       /**
        *
        * @OA\Post(
-       *      path="/v1.0/user-documents",
+       *      path="/v1.0/user-job-histories",
        *      operationId="createUserJobHistory",
-       *      tags={"user_documents"},
+       *      tags={"user_job_histories"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
-       *      summary="This method is to store user document",
-       *      description="This method is to store user document",
+       *      summary="This method is to store user job history",
+       *      description="This method is to store user job history",
        *
        *  @OA\RequestBody(
        *         required=true,
@@ -110,11 +110,11 @@ class UserJobHistoryController extends Controller
 
                   $request_data["created_by"] = $request->user()->id;
 
-                  $user_document =  UserJobHistory::create($request_data);
+                  $user_job_history =  UserJobHistory::create($request_data);
 
 
 
-                  return response($user_document, 201);
+                  return response($user_job_history, 201);
               });
           } catch (Exception $e) {
               error_log($e->getMessage());
@@ -125,14 +125,14 @@ class UserJobHistoryController extends Controller
       /**
        *
        * @OA\Put(
-       *      path="/v1.0/user-documents",
+       *      path="/v1.0/user-job-histories",
        *      operationId="updateUserJobHistory",
-       *      tags={"user_documents"},
+       *      tags={"user_job_histories"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
-       *      summary="This method is to update  user document ",
-       *      description="This method is to update user document",
+       *      summary="This method is to update  user job history ",
+       *      description="This method is to update user job history",
        *
        *  @OA\RequestBody(
        *         required=true,
@@ -206,18 +206,18 @@ class UserJobHistoryController extends Controller
 
 
 
-                  $user_document_query_params = [
+                  $user_job_history_query_params = [
                       "id" => $request_data["id"],
                   ];
-                  // $user_document_prev = UserJobHistory::where($user_document_query_params)
+                  // $user_job_history_prev = UserJobHistory::where($user_job_history_query_params)
                   //     ->first();
-                  // if (!$user_document_prev) {
+                  // if (!$user_job_history_prev) {
                   //     return response()->json([
-                  //         "message" => "no user document found"
+                  //         "message" => "no user job history found"
                   //     ], 404);
                   // }
 
-                  $user_document  =  tap(UserJobHistory::where($user_document_query_params))->update(
+                  $user_job_history  =  tap(UserJobHistory::where($user_job_history_query_params))->update(
                       collect($request_data)->only([
                         'user_id',
                         'company_name',
@@ -237,13 +237,13 @@ class UserJobHistoryController extends Controller
                       // ->with("somthing")
 
                       ->first();
-                  if (!$user_document) {
+                  if (!$user_job_history) {
                       return response()->json([
                           "message" => "something went wrong."
                       ], 500);
                   }
 
-                  return response($user_document, 201);
+                  return response($user_job_history, 201);
               });
           } catch (Exception $e) {
               error_log($e->getMessage());
@@ -255,9 +255,9 @@ class UserJobHistoryController extends Controller
       /**
        *
        * @OA\Get(
-       *      path="/v1.0/user-documents",
+       *      path="/v1.0/user-job-histories",
        *      operationId="getUserJobHistories",
-       *      tags={"user_documents"},
+       *      tags={"user_job_histories"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -305,8 +305,8 @@ class UserJobHistoryController extends Controller
        * example="ASC"
        * ),
 
-       *      summary="This method is to get user documents  ",
-       *      description="This method is to get user documents ",
+       *      summary="This method is to get user job histories  ",
+       *      description="This method is to get user job histories ",
        *
 
        *      @OA\Response(
@@ -353,7 +353,7 @@ class UserJobHistoryController extends Controller
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $user_documents = UserJobHistory::with([
+              $user_job_histories = UserJobHistory::with([
                   "creator" => function ($query) {
                       $query->select('users.id', 'users.first_Name','users.middle_Name',
                       'users.last_Name');
@@ -363,8 +363,8 @@ class UserJobHistoryController extends Controller
               ->when(!empty($request->search_key), function ($query) use ($request) {
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;
-                          $query->where("user_documents.name", "like", "%" . $term . "%");
-                          //     ->orWhere("user_documents.description", "like", "%" . $term . "%");
+                          $query->where("user_job_histories.name", "like", "%" . $term . "%");
+                          //     ->orWhere("user_job_histories.description", "like", "%" . $term . "%");
                       });
                   })
                   //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -372,21 +372,21 @@ class UserJobHistoryController extends Controller
                   //    })
 
                   ->when(!empty($request->user_id), function ($query) use ($request) {
-                      return $query->where('user_documents.user_id', $request->user_id);
+                      return $query->where('user_job_histories.user_id', $request->user_id);
                   })
                   ->when(empty($request->user_id), function ($query) use ($request) {
-                      return $query->where('user_documents.user_id', $request->user()->id);
+                      return $query->where('user_job_histories.user_id', $request->user()->id);
                   })
                   ->when(!empty($request->start_date), function ($query) use ($request) {
-                      return $query->where('user_documents.created_at', ">=", $request->start_date);
+                      return $query->where('user_job_histories.created_at', ">=", $request->start_date);
                   })
                   ->when(!empty($request->end_date), function ($query) use ($request) {
-                      return $query->where('user_documents.created_at', "<=", $request->end_date);
+                      return $query->where('user_job_histories.created_at', "<=", $request->end_date);
                   })
                   ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                      return $query->orderBy("user_documents.id", $request->order_by);
+                      return $query->orderBy("user_job_histories.id", $request->order_by);
                   }, function ($query) {
-                      return $query->orderBy("user_documents.id", "DESC");
+                      return $query->orderBy("user_job_histories.id", "DESC");
                   })
                   ->when(!empty($request->per_page), function ($query) use ($request) {
                       return $query->paginate($request->per_page);
@@ -396,7 +396,7 @@ class UserJobHistoryController extends Controller
 
 
 
-              return response()->json($user_documents, 200);
+              return response()->json($user_job_histories, 200);
           } catch (Exception $e) {
 
               return $this->sendError($e, 500, $request);
@@ -406,9 +406,9 @@ class UserJobHistoryController extends Controller
       /**
        *
        * @OA\Get(
-       *      path="/v1.0/user-documents/{id}",
+       *      path="/v1.0/user-job-histories/{id}",
        *      operationId="getUserJobHistoryById",
-       *      tags={"user_documents"},
+       *      tags={"user_job_histories"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -419,8 +419,8 @@ class UserJobHistoryController extends Controller
        *         required=true,
        *  example="6"
        *      ),
-       *      summary="This method is to get user document by id",
-       *      description="This method is to get user document by id",
+       *      summary="This method is to get user job history by id",
+       *      description="This method is to get user job history by id",
        *
 
        *      @OA\Response(
@@ -468,18 +468,18 @@ class UserJobHistoryController extends Controller
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $user_document =  UserJobHistory::where([
+              $user_job_history =  UserJobHistory::where([
                   "id" => $id,
                   "business_id" => $business_id
               ])
                   ->first();
-              if (!$user_document) {
+              if (!$user_job_history) {
                   return response()->json([
                       "message" => "no data found"
                   ], 404);
               }
 
-              return response()->json($user_document, 200);
+              return response()->json($user_job_history, 200);
           } catch (Exception $e) {
 
               return $this->sendError($e, 500, $request);
@@ -491,9 +491,9 @@ class UserJobHistoryController extends Controller
       /**
        *
        *     @OA\Delete(
-       *      path="/v1.0/user-documents/{ids}",
+       *      path="/v1.0/user-job-histories/{ids}",
        *      operationId="deleteUserJobHistoriesByIds",
-       *      tags={"user_documents"},
+       *      tags={"user_job_histories"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -504,8 +504,8 @@ class UserJobHistoryController extends Controller
        *         required=true,
        *  example="1,2,3"
        *      ),
-       *      summary="This method is to delete user document by id",
-       *      description="This method is to delete user document by id",
+       *      summary="This method is to delete user job history by id",
+       *      description="This method is to delete user job history by id",
        *
 
        *      @OA\Response(
