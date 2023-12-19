@@ -535,7 +535,7 @@ class UserDocumentController extends Controller
             $business_id =  $request->user()->business_id;
             $user_document =  UserDocument::where([
                 "id" => $id,
-                "business_id" => $business_id
+
             ])
                 ->first();
             if (!$user_document) {
@@ -619,10 +619,7 @@ class UserDocumentController extends Controller
             }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
-            $existingIds = UserDocument::where([
-                "business_id" => $business_id
-            ])
-                ->whereIn('id', $idsArray)
+            $existingIds = UserDocument::whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
                 ->pluck('id')

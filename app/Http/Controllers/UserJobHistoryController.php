@@ -470,7 +470,6 @@ class UserJobHistoryController extends Controller
               $business_id =  $request->user()->business_id;
               $user_job_history =  UserJobHistory::where([
                   "id" => $id,
-                  "business_id" => $business_id
               ])
                   ->first();
               if (!$user_job_history) {
@@ -554,10 +553,7 @@ class UserJobHistoryController extends Controller
               }
               $business_id =  $request->user()->business_id;
               $idsArray = explode(',', $ids);
-              $existingIds = UserJobHistory::where([
-                  "business_id" => $business_id
-              ])
-                  ->whereIn('id', $idsArray)
+              $existingIds = UserJobHistory::whereIn('id', $idsArray)
                   ->select('id')
                   ->get()
                   ->pluck('id')

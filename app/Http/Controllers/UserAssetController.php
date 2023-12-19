@@ -547,7 +547,7 @@ class UserAssetController extends Controller
               $business_id =  $request->user()->business_id;
               $user_asset =  UserAsset::where([
                   "id" => $id,
-                  "business_id" => $business_id
+
               ])
                   ->first();
               if (!$user_asset) {
@@ -631,10 +631,7 @@ class UserAssetController extends Controller
               }
               $business_id =  $request->user()->business_id;
               $idsArray = explode(',', $ids);
-              $existingIds = UserAsset::where([
-                  "business_id" => $business_id
-              ])
-                  ->whereIn('id', $idsArray)
+              $existingIds = UserAsset::whereIn('id', $idsArray)
                   ->select('id')
                   ->get()
                   ->pluck('id')

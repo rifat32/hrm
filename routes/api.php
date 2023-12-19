@@ -56,7 +56,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
+| routes are loaded by the RouteServiceProvider jistoryin a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
@@ -240,11 +240,11 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 // user job history  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-Route::post('/v1.0/user-job-histories', [UserJobHistoryController::class, "createUserJobJistory"]);
-Route::put('/v1.0/user-job-histories', [UserJobHistoryController::class, "updateUserJobJistory"]);
-Route::get('/v1.0/user-job-histories', [UserJobHistoryController::class, "getUserJobJistories"]);
-Route::get('/v1.0/user-job-histories/{id}', [UserJobHistoryController::class, "getUserJobJistoryById"]);
-Route::delete('/v1.0/user-job-histories/{ids}', [UserJobHistoryController::class, "deleteUserJobJistoriesByIds"]);
+Route::post('/v1.0/user-job-histories', [UserJobHistoryController::class, "createUserJobHistory"]);
+Route::put('/v1.0/user-job-histories', [UserJobHistoryController::class, "updateUserJobHistory"]);
+Route::get('/v1.0/user-job-histories', [UserJobHistoryController::class, "getUserJobHistories"]);
+Route::get('/v1.0/user-job-histories/{id}', [UserJobHistoryController::class, "getUserJobHistoryById"]);
+Route::delete('/v1.0/user-job-histories/{ids}', [UserJobHistoryController::class, "deleteUserJobHistoriesByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user job history management section
