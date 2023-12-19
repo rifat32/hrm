@@ -31,6 +31,9 @@ class WorkShiftUpdateRequest extends FormRequest
             'description' => 'nullable|string',
             'is_personal' => 'required|boolean',
 
+            'break_type' => 'required|string|in:paid,unpaid',
+            'break_hours' => 'required|numeric',
+
 
             'type' => 'required|string|in:regular,scheduled',
             'start_date' => 'required|date',
@@ -113,6 +116,7 @@ class WorkShiftUpdateRequest extends FormRequest
     {
         return [
             'type.in' => 'The :attribute field must be either "regular" or "scheduled".',
+            'break_type.in' => 'The :attribute field must be either "paid" or "unpaid".',
         ];
     }
 }

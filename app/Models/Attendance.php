@@ -15,10 +15,27 @@ class Attendance extends Model
         'in_time',
         'out_time',
         'in_date',
+        'does_break_taken',
+
+
+        "capacity_hours",
+        "work_hours_delta",
+        "break_type",
+        "break_hours",
+        "total_paid_hours",
+        "regular_work_hours",
+
+
         "is_active",
         "business_id",
         "created_by"
     ];
+
+    public function employee(){
+        return $this->hasOne(User::class,'id', 'employee_id');
+    }
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

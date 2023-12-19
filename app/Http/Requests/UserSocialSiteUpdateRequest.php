@@ -27,7 +27,10 @@ class UserSocialSiteUpdateRequest extends FormRequest
     public function rules()
     {
 
-        [
+      return  [
+
+
+
             'id' => [
                 'required',
                 'numeric',
@@ -41,34 +44,37 @@ class UserSocialSiteUpdateRequest extends FormRequest
                     }
                 },
             ],
+
             'social_site_id' => [
-            'required',
-            'numeric',
-            function ($attribute, $value, $fail) {
-                $exists = SocialSite::where('id', $value)
-                    ->where('sicial_sites.is_active',1)
-                    ->exists();
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = SocialSite::where('id', $value)
+                        ->where('social_sites.is_active', 1)
+                        ->exists();
 
-                if (!$exists) {
-                    $fail("$attribute is invalid.");
-                }
-            },
-        ],
-        'user_id' => [
-            'required',
-            'numeric',
-            function ($attribute, $value, $fail) {
-                $exists = User::where('id', $value)
-                    ->where('users.business_id', '=', auth()->user()->business_id)
-                    ->exists();
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
 
-                if (!$exists) {
-                    $fail("$attribute is invalid.");
-                }
-            },
-        ],
-        'profile_link' => "required|string",
+            'user_id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = User::where('id', $value)
+                        ->where('users.business_id', '=', auth()->user()->business_id)
+                        ->exists();
 
-    ];
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
+
+            'profile_link' => "nullable|string",
+
+        ];
     }
 }

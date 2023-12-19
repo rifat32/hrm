@@ -29,11 +29,20 @@ class WorkShiftCreateRequest extends FormRequest
             'name' => 'required|string',
             'description' => 'nullable|string',
             'is_personal' => 'required|boolean',
+
+            'break_type' => 'required|string|in:paid,unpaid',
+            'break_hours' => 'required|numeric',
+
+
+
             'type' => 'required|string|in:regular,scheduled',
 
 
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+
+
+
             'departments' => 'present|array',
             'departments.*' => [
                 'numeric',
@@ -51,30 +60,32 @@ class WorkShiftCreateRequest extends FormRequest
             'users.*' => [
                 "numeric",
                 function ($attribute, $value, $fail) {
-                    $user = User::where("id", $value)->get();
+                    $user = User::where("id", $value)->first();
 
                         if (!$user){
                             // $fail("$attribute is invalid.");
                             $fail("Employee does not exists.");
+                            return;
 
+                        }
+                        if(empty($user->business_id)) {
+                            $fail("Employee belongs to another business.");
+                            return;
                         }
 
                         if ($user->business_id != auth()->user()->business_id) {
                             // $fail("$attribute is invalid.");
                             $fail("Employee belongs to another business.");
+                            return;
 
                         }
 
                         if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))  && !$user->hasRole(("business_manager" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
                             // $fail("$attribute is invalid.");
                             $fail("The user is not a employee");
+                            return;
 
                         }
-
-
-                    return [
-                        "ok" => true,
-                    ];
                 },
 
             ],
@@ -113,6 +124,7 @@ class WorkShiftCreateRequest extends FormRequest
 {
     return [
         'type.in' => 'The :attribute field must be either "regular" or "scheduled".',
+        'break_type.in' => 'The :attribute field must be either "paid" or "unpaid".',
     ];
 }
 }

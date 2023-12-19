@@ -30,6 +30,11 @@ class CreateWorkShiftsTable extends Migration
             $table->boolean("is_business_default")->default(false);
             $table->boolean("is_personal")->default(false);
 
+            $table->enum('break_type', ['paid', 'unpaid']);
+            $table->double("break_hours")->default(0.0);
+
+
+
 
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

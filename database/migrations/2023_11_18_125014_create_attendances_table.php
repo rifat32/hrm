@@ -21,8 +21,28 @@ class CreateAttendancesTable extends Migration
 
 
             $table->date('in_date');
+
+            $table->boolean("does_break_taken");
+
+
             $table->time('in_time');
             $table->time('out_time')->nullable();
+
+            $table->integer('capacity_hours');
+            $table->integer('work_hours_delta');
+            $table->integer('regular_work_hours');
+            $table->integer('total_paid_hours');
+
+            $table->integer('break_type');
+            $table->integer('break_hours');
+
+
+
+
+
+
+
+
 
             $table->boolean("is_active")->default(true);
             $table->unsignedBigInteger("business_id");

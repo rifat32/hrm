@@ -85,7 +85,7 @@ class UserSocialSiteController extends Controller
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
               return DB::transaction(function () use ($request) {
-                  if (!$request->user()->hasPermissionTo('employee_social_sites_create')) {
+                  if (!$request->user()->hasPermissionTo('employee_social_site_create')) {
                       return response()->json([
                           "message" => "You can not perform this action"
                       ], 401);
@@ -99,6 +99,12 @@ class UserSocialSiteController extends Controller
 
 
                   $request_data["created_by"] = $request->user()->id;
+
+
+UserSocialSite::where([
+    'social_site_id'=> $request_data[""],
+    'user_id' => $request_data["user_id"] ,
+])->delete();
 
                   $user_social_site =  UserSocialSite::create($request_data);
 
@@ -176,14 +182,13 @@ class UserSocialSiteController extends Controller
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
               return DB::transaction(function () use ($request) {
-                  if (!$request->user()->hasPermissionTo('employee_social_sites_update')) {
+                  if (!$request->user()->hasPermissionTo('employee_social_site_update')) {
                       return response()->json([
                           "message" => "You can not perform this action"
                       ], 401);
                   }
                   $business_id =  $request->user()->business_id;
                   $request_data = $request->validated();
-
 
 
 
@@ -198,23 +203,29 @@ class UserSocialSiteController extends Controller
                   //     ], 404);
                   // }
 
-                  $user_social_site  =  tap(UserSocialSite::where($user_social_site_query_params))->update(
-                      collect($request_data)->only([
-                        'social_site_id',
-                        'user_id',
-                        'profile_link',
-                        // "created_by"
+                  if (empty($request["profile_link"])) {
+                    UserSocialSite::where($user_social_site_query_params)->delete();
+                  } else {
+                    $user_social_site  =  tap(UserSocialSite::where($user_social_site_query_params))->update(
+                        collect($request_data)->only([
+                          'social_site_id',
+                          'user_id',
+                          'profile_link',
+                          // "created_by"
 
-                      ])->toArray()
-                  )
-                      // ->with("somthing")
+                        ])->toArray()
+                    )
+                        // ->with("somthing")
 
-                      ->first();
-                  if (!$user_social_site) {
-                      return response()->json([
-                          "message" => "something went wrong."
-                      ], 500);
+                        ->first();
+                    if (!$user_social_site) {
+                        return response()->json([
+                            "message" => "something went wrong."
+                        ], 500);
+                    }
+
                   }
+
 
                   return response($user_social_site, 201);
               });
@@ -320,7 +331,7 @@ class UserSocialSiteController extends Controller
       {
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('employee_social_sites_view')) {
+              if (!$request->user()->hasPermissionTo('employee_social_site_view')) {
                   return response()->json([
                       "message" => "You can not perform this action"
                   ], 401);
@@ -356,9 +367,9 @@ class UserSocialSiteController extends Controller
                       return $query->where('user_social_sites.created_at', "<=", $request->end_date);
                   })
                   ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                      return $query->orderBy("user_social_sites.id", $request->order_by);
+                      return $query->orderBy("social_sites.id", $request->order_by);
                   }, function ($query) {
-                      return $query->orderBy("user_social_sites.id", "DESC");
+                      return $query->orderBy("social_sites.id", "DESC");
                   })
                   ->when(!empty($request->per_page), function ($query) use ($request) {
                       return $query->paginate($request->per_page);
@@ -434,7 +445,7 @@ class UserSocialSiteController extends Controller
       {
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('employee_social_sites_view')) {
+              if (!$request->user()->hasPermissionTo('employee_social_site_view')) {
                   return response()->json([
                       "message" => "You can not perform this action"
                   ], 401);
@@ -522,7 +533,7 @@ class UserSocialSiteController extends Controller
 
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('employee_social_sites_delete')) {
+              if (!$request->user()->hasPermissionTo('employee_social_site_delete')) {
                   return response()->json([
                       "message" => "You can not perform this action"
                   ], 401);

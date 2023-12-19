@@ -30,6 +30,7 @@ class AttendanceUpdateRequest extends FormRequest
             'in_time' => 'required|date_format:H:i:s',
             'out_time' => 'nullable|date_format:H:i:s|after_or_equal:in_time',
             'in_date' => 'required|date',
+            'does_break_taken' => "required|boolean"
         ];
     }
 }

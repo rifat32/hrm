@@ -56,7 +56,7 @@ class UserUpdateV2Request extends FormRequest
             ],
 
             // 'email' => 'required|string|email|indisposable|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|unique:users,email,' . $this->id . ',id',
 
             'password' => 'nullable|string|min:6',
             'phone' => 'required|string',

@@ -12,11 +12,16 @@ class WorkShift extends Model
 
     protected $fillable = [
         'name',
+        "break_type",
+        "break_hours",
         'type',
         "description",
         'attendances_count',
         'is_business_default',
         'is_personal',
+
+
+
         'start_date',
         'end_date',
         "is_active",

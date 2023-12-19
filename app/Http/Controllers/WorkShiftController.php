@@ -36,6 +36,8 @@ class WorkShiftController extends Controller
      *  *     @OA\Property(property="description", type="string", format="string", example="description"),
      *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
      *
+     *     @OA\Property(property="break_type", type="string", format="string", example="paid"),
+     *  *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="0"),
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
 
@@ -129,6 +131,7 @@ class WorkShiftController extends Controller
 
     public function createWorkShift(WorkShiftCreateRequest $request)
     {
+
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
@@ -138,10 +141,7 @@ class WorkShiftController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-
                 $request_data = $request->validated();
-
-
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -184,6 +184,9 @@ class WorkShiftController extends Controller
      *     @OA\Property(property="type", type="string", format="string", example="regular"),
      *     @OA\Property(property="description", type="string", format="string", example="description"),
      *    *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
+     *   *     @OA\Property(property="break_type", type="string", format="string", example="paid"),
+     *  *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="0"),
+     *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
 
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
@@ -315,6 +318,9 @@ class WorkShiftController extends Controller
         "description",
         'attendances_count',
         'is_personal',
+        'break_type',
+        'break_hours',
+
         'start_date',
         'end_date',
         // "is_active",
