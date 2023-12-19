@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUserDocumentsTable extends Migration
+class CreateUserJobHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,23 @@ class CreateUserDocumentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_documents', function (Blueprint $table) {
+        Schema::create('user_job_histories', function (Blueprint $table) {
             $table->id();
-
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade');
-            $table->string("name");
-            $table->string("file_name");
+            $table->string('company_name');
+            $table->string('job_title');
+            $table->date('employment_start_date');
+            $table->date('employment_end_date')->nullable();
+            $table->text('responsibilities')->nullable();
+            $table->string('supervisor_name')->nullable();
+            $table->string('contact_information')->nullable();
+            $table->decimal('salary', 10, 2)->nullable();
+            $table->string('work_location')->nullable();
+            $table->text('achievements')->nullable();
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
@@ -30,7 +37,6 @@ class CreateUserDocumentsTable extends Migration
                 ->on('users')
                 ->onDelete('set null');
             $table->timestamps();
-
         });
     }
 
@@ -41,6 +47,6 @@ class CreateUserDocumentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_documents');
+        Schema::dropIfExists('user_job_histories');
     }
 }

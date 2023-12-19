@@ -44,6 +44,7 @@ use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserAssetController;
 use App\Http\Controllers\UserDocumentController;
+use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\WorkShiftController;
@@ -234,6 +235,22 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user document management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user job history  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-job-histories', [UserJobHistoryController::class, "createUserJobJistory"]);
+Route::put('/v1.0/user-job-histories', [UserJobHistoryController::class, "updateUserJobJistory"]);
+Route::get('/v1.0/user-job-histories', [UserJobHistoryController::class, "getUserJobJistories"]);
+Route::get('/v1.0/user-job-histories/{id}', [UserJobHistoryController::class, "getUserJobJistoryById"]);
+Route::delete('/v1.0/user-job-histories/{ids}', [UserJobHistoryController::class, "deleteUserJobJistoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user job history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user asset  management section

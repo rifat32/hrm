@@ -292,7 +292,7 @@ class UserDocumentController extends Controller
 
                 $user_document  =  tap(UserDocument::where($user_document_query_params))->update(
                     collect($request_data)->only([
-                        // 'user_id',
+                         'user_id',
                         'name',
                         'file_name',
                         // 'created_by',

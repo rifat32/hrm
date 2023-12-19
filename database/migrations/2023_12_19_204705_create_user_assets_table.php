@@ -15,7 +15,7 @@ class CreateUserAssetsTable extends Migration
     {
         Schema::create('user_assets', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("user_id")->nullable();
+            $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')

@@ -2,121 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SingleFileUploadRequest;
-use App\Http\Requests\UserAssetCreateRequest;
-use App\Http\Requests\UserAssetUpdateRequest;
+use App\Http\Requests\UserJobHistoryCreateRequest;
+use App\Http\Requests\UserJobHistoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\UserAsset;
+use App\Models\UserJobHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserAssetController extends Controller
+class UserJobHistoryController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
 
-    /**
-          *
-       * @OA\Post(
-       *      path="/v1.0/user-assets/single-file-upload",
-       *      operationId="createUserAssetFileSingle",
-       *      tags={"user_assets"},
-       *       security={
-       *           {"bearerAuth": {}}
-       *       },
-       *      summary="This method is to store user asset file ",
-       *      description="This method is to store user asset file",
-       *
-     *  @OA\RequestBody(
-          *   * @OA\MediaType(
-  *     mediaType="multipart/form-data",
-  *     @OA\Schema(
-  *         required={"file"},
-  *         @OA\Property(
-  *             description="file to upload",
-  *             property="file",
-  *             type="file",
-  *             collectionFormat="multi",
-  *         )
-  *     )
-  * )
 
-
-
-       *      ),
-       *      @OA\Response(
-       *          response=200,
-       *          description="Successful operation",
-       *       @OA\JsonContent(),
-       *       ),
-       *      @OA\Response(
-       *          response=401,
-       *          description="Unauthenticated",
-       * @OA\JsonContent(),
-       *      ),
-       *        @OA\Response(
-       *          response=422,
-       *          description="Unprocesseble Content",
-       *    @OA\JsonContent(),
-       *      ),
-       *      @OA\Response(
-       *          response=403,
-       *          description="Forbidden",
-       *   @OA\JsonContent()
-       * ),
-       *  * @OA\Response(
-       *      response=400,
-       *      description="Bad Request",
-       *   *@OA\JsonContent()
-       *   ),
-       * @OA\Response(
-       *      response=404,
-       *      description="not found",
-       *   *@OA\JsonContent()
-       *   )
-       *      )
-       *     )
-       */
-
-       public function createUserAssetFileSingle(SingleFileUploadRequest $request)
-       {
-           try{
-               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-               // if(!$request->user()->hasPermissionTo('business_create')){
-               //      return response()->json([
-               //         "message" => "You can not perform this action"
-               //      ],401);
-               // }
-
-               $request_data = $request->validated();
-
-               $location =  config("setup-config.user_assets_location");
-
-               $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["file"]->getClientOriginalName());
-
-               $request_data["file"]->move(public_path($location), $new_file_name);
-
-
-               return response()->json(["file" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
-
-
-           } catch(Exception $e){
-               error_log($e->getMessage());
-           return $this->sendError($e,500,$request);
-           }
-       }
 
 
 
       /**
        *
        * @OA\Post(
-       *      path="/v1.0/user-assets",
-       *      operationId="createUserAsset",
-       *      tags={"user_assets"},
+       *      path="/v1.0/user-documents",
+       *      operationId="createUserJobHistory",
+       *      tags={"user_documents"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -126,15 +36,17 @@ class UserAssetController extends Controller
        *  @OA\RequestBody(
        *         required=true,
        *         @OA\JsonContent(
-*     @OA\Property(property="user_id", type="integer", format="int", example=1),
- *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
- *     @OA\Property(property="code", type="string", format="string", example="Your Code"),
- *     @OA\Property(property="serial_number", type="string", format="string", example="Your Serial Number"),
- *     @OA\Property(property="type", type="string", format="string", example="Your Type"),
- *     @OA\Property(property="image", type="string", format="string", example="Your Image URL"),
- *     @OA\Property(property="date", type="string", format="string", example="Your Date"),
- *     @OA\Property(property="note", type="string", format="string", example="Your Note"),
- *
+  *     @OA\Property(property="user_id", type="integer", format="int", example=1),
+ *     @OA\Property(property="company_name", type="string", format="string", example="Your Company Name"),
+ *     @OA\Property(property="job_title", type="string", format="string", example="Your Job Title"),
+ *     @OA\Property(property="employment_start_date", type="string", format="date", example="2023-01-01"),
+ *     @OA\Property(property="employment_end_date", type="string", format="date", example="2023-12-31"),
+ *     @OA\Property(property="responsibilities", type="string", format="string", example="Your Responsibilities"),
+ *     @OA\Property(property="supervisor_name", type="string", format="string", example="Supervisor Name"),
+ *     @OA\Property(property="contact_information", type="string", format="string", example="Contact Information"),
+ *     @OA\Property(property="salary", type="number", format="float", example=50000.00),
+ *     @OA\Property(property="work_location", type="string", format="string", example="Work Location"),
+ *     @OA\Property(property="achievements", type="string", format="string", example="Your Achievements")
    *
    *
    *
@@ -177,12 +89,12 @@ class UserAssetController extends Controller
        *     )
        */
 
-      public function createUserAsset(UserAssetCreateRequest $request)
+      public function createUserJobHistory(UserJobHistoryCreateRequest $request)
       {
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
               return DB::transaction(function () use ($request) {
-                  if (!$request->user()->hasPermissionTo('employee_asset_create')) {
+                  if (!$request->user()->hasPermissionTo('employee_job_history_create')) {
                       return response()->json([
                           "message" => "You can not perform this action"
                       ], 401);
@@ -191,13 +103,18 @@ class UserAssetController extends Controller
                   $request_data = $request->validated();
 
 
+
+
+
+
+
                   $request_data["created_by"] = $request->user()->id;
 
-                  $user_asset =  UserAsset::create($request_data);
+                  $user_document =  UserJobHistory::create($request_data);
 
 
 
-                  return response($user_asset, 201);
+                  return response($user_document, 201);
               });
           } catch (Exception $e) {
               error_log($e->getMessage());
@@ -208,9 +125,9 @@ class UserAssetController extends Controller
       /**
        *
        * @OA\Put(
-       *      path="/v1.0/user-assets",
-       *      operationId="updateUserAsset",
-       *      tags={"user_assets"},
+       *      path="/v1.0/user-documents",
+       *      operationId="updateUserJobHistory",
+       *      tags={"user_documents"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -221,14 +138,17 @@ class UserAssetController extends Controller
        *         required=true,
        *         @OA\JsonContent(
   *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-*     @OA\Property(property="user_id", type="integer", format="int", example=1),
- *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
- *     @OA\Property(property="code", type="string", format="string", example="Your Code"),
- *     @OA\Property(property="serial_number", type="string", format="string", example="Your Serial Number"),
- *     @OA\Property(property="type", type="string", format="string", example="Your Type"),
- *     @OA\Property(property="image", type="string", format="string", example="Your Image URL"),
- *     @OA\Property(property="date", type="string", format="string", example="Your Date"),
- *     @OA\Property(property="note", type="string", format="string", example="Your Note"),
+ *     @OA\Property(property="user_id", type="integer", format="int", example=1),
+ *     @OA\Property(property="company_name", type="string", format="string", example="Your Company Name"),
+ *     @OA\Property(property="job_title", type="string", format="string", example="Your Job Title"),
+ *     @OA\Property(property="employment_start_date", type="string", format="date", example="2023-01-01"),
+ *     @OA\Property(property="employment_end_date", type="string", format="date", example="2023-12-31"),
+ *     @OA\Property(property="responsibilities", type="string", format="string", example="Your Responsibilities"),
+ *     @OA\Property(property="supervisor_name", type="string", format="string", example="Supervisor Name"),
+ *     @OA\Property(property="contact_information", type="string", format="string", example="Contact Information"),
+ *     @OA\Property(property="salary", type="number", format="float", example=50000.00),
+ *     @OA\Property(property="work_location", type="string", format="string", example="Work Location"),
+ *     @OA\Property(property="achievements", type="string", format="string", example="Your Achievements")
  *
    *
 
@@ -269,13 +189,13 @@ class UserAssetController extends Controller
        *     )
        */
 
-      public function updateUserAsset(UserAssetUpdateRequest $request)
+      public function updateUserJobHistory(UserJobHistoryUpdateRequest $request)
       {
 
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
               return DB::transaction(function () use ($request) {
-                  if (!$request->user()->hasPermissionTo('employee_asset_update')) {
+                  if (!$request->user()->hasPermissionTo('employee_job_history_update')) {
                       return response()->json([
                           "message" => "You can not perform this action"
                       ], 401);
@@ -286,41 +206,44 @@ class UserAssetController extends Controller
 
 
 
-                  $user_asset_query_params = [
+                  $user_document_query_params = [
                       "id" => $request_data["id"],
                   ];
-                  // $user_asset_prev = UserAsset::where($user_asset_query_params)
+                  // $user_document_prev = UserJobHistory::where($user_document_query_params)
                   //     ->first();
-                  // if (!$user_asset_prev) {
+                  // if (!$user_document_prev) {
                   //     return response()->json([
                   //         "message" => "no user document found"
                   //     ], 404);
                   // }
 
-                  $user_asset  =  tap(UserAsset::where($user_asset_query_params))->update(
+                  $user_document  =  tap(UserJobHistory::where($user_document_query_params))->update(
                       collect($request_data)->only([
-                           'user_id',
-                          'name',
-                          'code',
-                          'serial_number',
-                          'type',
-                          'image',
-                          'date',
-                          'note',
-                          // 'created_by',
+                        'user_id',
+                        'company_name',
+                        'job_title',
+                        'employment_start_date',
+                        'employment_end_date',
+                        'responsibilities',
+                        'supervisor_name',
+                        'contact_information',
+                        'salary',
+                        'work_location',
+                        'achievements',
+                        // 'created_by',
 
                       ])->toArray()
                   )
                       // ->with("somthing")
 
                       ->first();
-                  if (!$user_asset) {
+                  if (!$user_document) {
                       return response()->json([
                           "message" => "something went wrong."
                       ], 500);
                   }
 
-                  return response($user_asset, 201);
+                  return response($user_document, 201);
               });
           } catch (Exception $e) {
               error_log($e->getMessage());
@@ -332,9 +255,9 @@ class UserAssetController extends Controller
       /**
        *
        * @OA\Get(
-       *      path="/v1.0/user-assets",
-       *      operationId="get",
-       *      tags={"user_assets"},
+       *      path="/v1.0/user-documents",
+       *      operationId="getUserJobHistories",
+       *      tags={"user_documents"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -382,8 +305,8 @@ class UserAssetController extends Controller
        * example="ASC"
        * ),
 
-       *      summary="This method is to get user assets  ",
-       *      description="This method is to get user assets ",
+       *      summary="This method is to get user documents  ",
+       *      description="This method is to get user documents ",
        *
 
        *      @OA\Response(
@@ -420,17 +343,17 @@ class UserAssetController extends Controller
        *     )
        */
 
-      public function getUserAssets(Request $request)
+      public function getUserJobHistories(Request $request)
       {
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('employee_asset_view')) {
+              if (!$request->user()->hasPermissionTo('employee_job_history_view')) {
                   return response()->json([
                       "message" => "You can not perform this action"
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $user_assets = UserAsset::with([
+              $user_documents = UserJobHistory::with([
                   "creator" => function ($query) {
                       $query->select('users.id', 'users.first_Name','users.middle_Name',
                       'users.last_Name');
@@ -440,8 +363,8 @@ class UserAssetController extends Controller
               ->when(!empty($request->search_key), function ($query) use ($request) {
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;
-                          $query->where("user_assets.name", "like", "%" . $term . "%");
-                          //     ->orWhere("user_assets.description", "like", "%" . $term . "%");
+                          $query->where("user_documents.name", "like", "%" . $term . "%");
+                          //     ->orWhere("user_documents.description", "like", "%" . $term . "%");
                       });
                   })
                   //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -449,21 +372,21 @@ class UserAssetController extends Controller
                   //    })
 
                   ->when(!empty($request->user_id), function ($query) use ($request) {
-                      return $query->where('user_assets.user_id', $request->user_id);
+                      return $query->where('user_documents.user_id', $request->user_id);
                   })
                   ->when(empty($request->user_id), function ($query) use ($request) {
-                      return $query->where('user_assets.user_id', $request->user()->id);
+                      return $query->where('user_documents.user_id', $request->user()->id);
                   })
                   ->when(!empty($request->start_date), function ($query) use ($request) {
-                      return $query->where('user_assets.created_at', ">=", $request->start_date);
+                      return $query->where('user_documents.created_at', ">=", $request->start_date);
                   })
                   ->when(!empty($request->end_date), function ($query) use ($request) {
-                      return $query->where('user_assets.created_at', "<=", $request->end_date);
+                      return $query->where('user_documents.created_at', "<=", $request->end_date);
                   })
                   ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                      return $query->orderBy("user_assets.id", $request->order_by);
+                      return $query->orderBy("user_documents.id", $request->order_by);
                   }, function ($query) {
-                      return $query->orderBy("user_assets.id", "DESC");
+                      return $query->orderBy("user_documents.id", "DESC");
                   })
                   ->when(!empty($request->per_page), function ($query) use ($request) {
                       return $query->paginate($request->per_page);
@@ -473,7 +396,7 @@ class UserAssetController extends Controller
 
 
 
-              return response()->json($user_assets, 200);
+              return response()->json($user_documents, 200);
           } catch (Exception $e) {
 
               return $this->sendError($e, 500, $request);
@@ -483,9 +406,9 @@ class UserAssetController extends Controller
       /**
        *
        * @OA\Get(
-       *      path="/v1.0/user-assets/{id}",
-       *      operationId="getUserAssetById",
-       *      tags={"user_assets"},
+       *      path="/v1.0/user-documents/{id}",
+       *      operationId="getUserJobHistoryById",
+       *      tags={"user_documents"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -535,28 +458,28 @@ class UserAssetController extends Controller
        */
 
 
-      public function getUserAssetById($id, Request $request)
+      public function getUserJobHistoryById($id, Request $request)
       {
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('employee_asset_view')) {
+              if (!$request->user()->hasPermissionTo('employee_job_history_view')) {
                   return response()->json([
                       "message" => "You can not perform this action"
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $user_asset =  UserAsset::where([
+              $user_document =  UserJobHistory::where([
                   "id" => $id,
                   "business_id" => $business_id
               ])
                   ->first();
-              if (!$user_asset) {
+              if (!$user_document) {
                   return response()->json([
                       "message" => "no data found"
                   ], 404);
               }
 
-              return response()->json($user_asset, 200);
+              return response()->json($user_document, 200);
           } catch (Exception $e) {
 
               return $this->sendError($e, 500, $request);
@@ -568,9 +491,9 @@ class UserAssetController extends Controller
       /**
        *
        *     @OA\Delete(
-       *      path="/v1.0/user-assets/{ids}",
-       *      operationId="deleteUserAssetsByIds",
-       *      tags={"user_assets"},
+       *      path="/v1.0/user-documents/{ids}",
+       *      operationId="deleteUserJobHistoriesByIds",
+       *      tags={"user_documents"},
        *       security={
        *           {"bearerAuth": {}}
        *       },
@@ -619,19 +542,19 @@ class UserAssetController extends Controller
        *     )
        */
 
-      public function deleteUserAssetsByIds(Request $request, $ids)
+      public function deleteUserJobHistoriesByIds(Request $request, $ids)
       {
 
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('employee_asset_delete')) {
+              if (!$request->user()->hasPermissionTo('employee_job_history_delete')) {
                   return response()->json([
                       "message" => "You can not perform this action"
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
               $idsArray = explode(',', $ids);
-              $existingIds = UserAsset::where([
+              $existingIds = UserJobHistory::where([
                   "business_id" => $business_id
               ])
                   ->whereIn('id', $idsArray)
@@ -646,7 +569,7 @@ class UserAssetController extends Controller
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);
               }
-              UserAsset::destroy($existingIds);
+              UserJobHistory::destroy($existingIds);
 
 
               return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
