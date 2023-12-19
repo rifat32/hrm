@@ -21,11 +21,11 @@ class Role extends SpatieRole
     protected $guard_name = 'api';
     public function getCreatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
     public function getUpdatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
 
 }

@@ -46,24 +46,24 @@ class Task extends Model
     }
     public function getCreatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
     public function getUpdatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
 
     public function getStartDateAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
     public function getEndDateAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
     public function getDueDateAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
 
 }

@@ -15,11 +15,11 @@ class SettingPaidLeaveEmploymentStatus extends Model
     protected $table = "paid_leave_employment_statuses";
     public function getCreatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
     public function getUpdatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
 
 }

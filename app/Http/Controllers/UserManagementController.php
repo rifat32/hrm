@@ -2774,6 +2774,9 @@ $user->syncRoles($roles);
              // });
              $user->work_shift = $user->work_shifts()->first();
 
+             $user->department_ids = $user->departments->pluck("id");
+
+
              return response()->json($user, 200);
          } catch (Exception $e) {
 

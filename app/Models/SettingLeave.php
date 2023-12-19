@@ -19,7 +19,6 @@ class SettingLeave extends Model
       "created_by",
 
 
-
     ];
 
     public function special_users() {
@@ -36,10 +35,10 @@ class SettingLeave extends Model
     }
     public function getCreatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
     public function getUpdatedAtAttribute($value)
     {
-        return (new Carbon($value))->format('d/m/Y');
+        return (new Carbon($value))->format('d-m-Y');
     }
 }
