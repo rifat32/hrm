@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,9 +27,7 @@ class Leave extends Model
         "created_by"
     ];
 
-    protected $casts = [
-        'attachments' => 'array',
-    ];
+
     public function records(){
         return $this->hasMany(LeaveRecord::class,'leave_id', 'id');
     }
@@ -38,4 +37,32 @@ class Leave extends Model
     public function leave_type() {
         return $this->belongsTo(SettingLeaveType::class, "leave_type_id","id");
     }
+    protected $casts = [
+        'attachments' => 'array',
+
+    ];
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+
+    public function getStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+
+
+
 }

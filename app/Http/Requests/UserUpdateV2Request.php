@@ -132,8 +132,63 @@ class UserUpdateV2Request extends FormRequest
                 'numeric',
                 function ($attribute, $value, $fail) {
                     if(!empty($value)){
-                        $exists = Designation::where('id', $value)
-                        ->where('designations.business_id', '=', auth()->user()->business_id)
+                        $created_by  = NULL;
+                        if(auth()->user()->business) {
+                            $created_by = auth()->user()->business->created_by;
+                        }
+
+                        $exists = Designation::where("designations.id",$value)
+                        ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
+                            if (auth()->user()->hasRole('superadmin')) {
+                                return $query->where('designations.business_id', NULL)
+                                    ->where('designations.is_default', 1)
+                                    ->where('designations.is_active', 1);
+
+                            } else {
+                                return $query->where('designations.business_id', NULL)
+                                    ->where('designations.is_default', 1)
+                                    ->where('designations.is_active', 1)
+                                    ->whereDoesntHave("disabled", function($q) {
+                                        $q->whereIn("disabled_designations.created_by", [auth()->user()->id]);
+                                    })
+
+                                    ->orWhere(function ($query) use($value)  {
+                                        $query->where("designations.id",$value)->where('designations.business_id', NULL)
+                                            ->where('designations.is_default', 0)
+                                            ->where('designations.created_by', auth()->user()->id)
+                                            ->where('designations.is_active', 1);
+
+
+                                    });
+                            }
+                        })
+                            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
+                                return $query->where('designations.business_id', NULL)
+                                    ->where('designations.is_default', 1)
+                                    ->where('designations.is_active', 1)
+                                    ->whereDoesntHave("disabled", function($q) use($created_by) {
+                                        $q->whereIn("disabled_designations.created_by", [$created_by]);
+                                    })
+                                    ->whereDoesntHave("disabled", function($q)  {
+                                        $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                    })
+
+                                    ->orWhere(function ($query) use( $created_by, $value){
+                                        $query->where("designations.id",$value)->where('designations.business_id', NULL)
+                                            ->where('designations.is_default', 0)
+                                            ->where('designations.created_by', $created_by)
+                                            ->where('designations.is_active', 1)
+                                            ->whereDoesntHave("disabled", function($q) {
+                                                $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                            });
+                                    })
+                                    ->orWhere(function ($query) use($value)  {
+                                        $query->where("designations.id",$value)->where('designations.business_id', auth()->user()->business_id)
+                                            ->where('designations.is_default', 0)
+                                            ->where('designations.is_active', 1);
+
+                                    });
+                            })
                         ->exists();
 
                     if (!$exists) {
@@ -177,32 +232,32 @@ class UserUpdateV2Request extends FormRequest
 
 
 
-            "sponsorship_details.date_assigned" => 'required|date',
-            "sponsorship_details.expiry_date" => 'required|date',
-            "sponsorship_details.status" => 'required|in:pending,approved,denied,visa_granted',
-            "sponsorship_details.note" => 'required|string',
-            "sponsorship_details.certificate_number" => 'required|string',
-            "sponsorship_details.current_certificate_status" => 'required|in:pending,approved,denied',
-            "sponsorship_details.is_sponsorship_withdrawn" => 'required|boolean',
+            "sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
+            "sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
+            "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',
+            "sponsorship_details.note" => 'nullable|required_if:immigration_status,sponsored|string',
+            "sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
+            "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied',
+            "sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
 
 
 
 
 
-            'passport_details.passport_number' => 'required|string',
-            'passport_details.passport_issue_date' => 'required|date',
-            'passport_details.passport_expiry_date' => 'required|date',
-            'passport_details.place_of_issue' => 'required|string',
+            'passport_details.passport_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+            'passport_details.passport_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+            'passport_details.passport_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+            'passport_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
 
 
 
 
-            'visa_details.BRP_number' => 'required|string',
-            'visa_details.visa_issue_date' => 'required|date',
-            'visa_details.visa_expiry_date' => 'required|date',
-            'visa_details.place_of_issue' => 'required|string',
-            'visa_details.visa_docs' => 'present|array',
-            'visa_details.visa_docs.*.file_name' => 'required|string',
+            'visa_details.BRP_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+            'visa_details.visa_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+            'visa_details.visa_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+            'visa_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+            'visa_details.visa_docs' => 'nullable|required_if:immigration_status,sponsored,immigrant|array',
+            'visa_details.visa_docs.*.file_name' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
             'visa_details.visa_docs.*.description' => 'nullable|string',
 
         ];

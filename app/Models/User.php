@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -119,5 +120,20 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'emergency_contact_details' => 'array',
 
+
+
     ];
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getJoiningDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,7 +29,22 @@ class Candidate extends Model
         "created_by"
     ];
 
-    protected $casts = [
-        'attachments' => 'array',
-    ];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+
+    public function getApplicationDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getInterviewDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 }

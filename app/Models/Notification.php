@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,7 +18,7 @@ class Notification extends Model
 
 
 
-      
+
         "notification_template_id",
         "status",
 
@@ -36,6 +37,12 @@ class Notification extends Model
         return $this->belongsTo(Business::class,'business_id', 'id')->withTrashed();
     }
 
-
-
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 }

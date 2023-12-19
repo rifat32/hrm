@@ -27,5 +27,18 @@ class LeaveRecord extends Model
     public function leave(){
         return $this->belongsTo(Leave::class,'leave_id', 'id');
     }
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+
+    public function getDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 
 }

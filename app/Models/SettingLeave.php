@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,5 +34,12 @@ class SettingLeave extends Model
     public function unpaid_leave_employment_statuses() {
         return $this->belongsToMany(EmploymentStatus::class, 'unpaid_leave_employment_statuses', 'setting_leave_id', 'employment_status_id');
     }
-
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 }

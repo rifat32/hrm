@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,7 +44,26 @@ class Task extends Model
     public function assignees() {
         return $this->belongsToMany(TaskAssignee::class, 'task_assignees', 'task_id', 'assignee_id');
     }
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 
-
+    public function getStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getDueDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 
 }

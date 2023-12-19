@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,10 +21,27 @@ class EmployeeVisaDetail extends Model
     ];
 
 
+
     protected $casts = [
         'visa_docs' => 'array',
-    ];
 
+    ];
+    public function getCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getVisaIssueDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
+    public function getVisaExpiryDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d/m/Y');
+    }
 
 
 }
