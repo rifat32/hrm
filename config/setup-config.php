@@ -144,6 +144,11 @@ return [
                 "employee_document_view",
                 "employee_document_delete",
 
+                "employee_asset_create",
+                "employee_asset_update",
+                "employee_asset_view",
+                "employee_asset_delete",
+
                 "employee_social_site_create",
                 "employee_social_site_update",
                 "employee_social_site_view",
@@ -265,6 +270,11 @@ return [
                 "employee_document_view",
                 "employee_document_delete",
 
+                "employee_asset_create",
+                "employee_asset_update",
+                "employee_asset_view",
+                "employee_asset_delete",
+
                 "employee_social_site_create",
                 "employee_social_site_update",
                 "employee_social_site_view",
@@ -378,6 +388,11 @@ return [
                 "employee_document_update",
                 "employee_document_view",
                 "employee_document_delete",
+
+                "employee_asset_create",
+                "employee_asset_update",
+                "employee_asset_view",
+                "employee_asset_delete",
 
                 "employee_social_site_create",
                 "employee_social_site_update",
@@ -522,6 +537,11 @@ return [
        "employee_document_update",
        "employee_document_view",
        "employee_document_delete",
+
+       "employee_asset_create",
+       "employee_asset_update",
+       "employee_asset_view",
+       "employee_asset_delete",
 
        "employee_social_site_create",
        "employee_social_site_update",
@@ -679,6 +699,11 @@ return [
         "employee_document_update" => "",
         "employee_document_view" => "",
         "employee_document_delete" => "",
+
+        "employee_asset_create" => "",
+        "employee_asset_update" => "",
+        "employee_asset_view" => "",
+        "employee_asset_delete" => "",
 
         "employee_social_site_create" => "",
         "employee_social_site_update" => "",
@@ -854,6 +879,11 @@ return [
         "employee_document_update"  => "update",
         "employee_document_view"  => "view",
         "employee_document_delete"  => "delete",
+
+        "employee_asset_create" => "create",
+        "employee_asset_update" => "update",
+        "employee_asset_view" => "view",
+        "employee_asset_delete" => "delete",
 
 
         "employee_social_site_create" => "create",
@@ -1051,8 +1081,24 @@ return [
                 "employee_document_view",
                 "employee_document_delete",
 
+
+
             ],
         ],
+
+        [
+            "header" => "employee_asset",
+            "permissions" => [
+                "employee_asset_create",
+                "employee_asset_update",
+                "employee_asset_view",
+                "employee_asset_delete",
+
+
+            ],
+        ],
+
+
 
         [
             "header" => "employee_social_site",
@@ -1422,6 +1468,9 @@ return [
     "user_image_location" => "user_image",
 
     "user_files_location" => "user_files",
+
+    "user_assets_location" => "user_assets",
+
     "leave_files_location" => "leave_files",
 
     "candidate_files_location" => "candidate_files",

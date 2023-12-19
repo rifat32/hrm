@@ -42,6 +42,7 @@ use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPayrollController;
 use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserAssetController;
 use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserSocialSiteController;
@@ -232,6 +233,20 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user document management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user asset  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/user-assets/single-file-upload', [UserAssetController::class, "createUserAssetFileSingle"]);
+Route::post('/v1.0/user-assets', [UserAssetController::class, "createUserAsset"]);
+Route::put('/v1.0/user-assets', [UserAssetController::class, "updateUserAsset"]);
+Route::get('/v1.0/user-assets', [UserAssetController::class, "getUserAssets"]);
+Route::get('/v1.0/user-assets/{id}', [UserAssetController::class, "getUserAssetById"]);
+Route::delete('/v1.0/user-assets/{ids}', [UserAssetController::class, "deleteUserAssetsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user asset management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
