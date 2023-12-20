@@ -7,6 +7,7 @@ use App\Http\Requests\SettingPayrunCreateRequest;
 use App\Http\Requests\SettingPayslipCreateRequest;
 use App\Models\SettingPayrun;
 use App\Models\SettingPayslip;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -246,10 +247,10 @@ class SettingPayrollController extends Controller
                   //        return $query->where('product_category_id', $request->product_category_id);
                   //    })
                   ->when(!empty($request->start_date), function ($query) use ($request) {
-                      return $query->where('setting_payruns.created_at', ">=", $request->start_date);
+                      return $query->where('setting_payruns.created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
                   })
                   ->when(!empty($request->end_date), function ($query) use ($request) {
-                      return $query->where('setting_payruns.created_at', "<=", $request->end_date);
+                      return $query->where('setting_payruns.created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
                   })
                   ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                       return $query->orderBy("setting_payruns.id", $request->order_by);
@@ -588,10 +589,10 @@ class SettingPayrollController extends Controller
                  //        return $query->where('product_category_id', $request->product_category_id);
                  //    })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('setting_payslips.created_at', ">=", $request->start_date);
+                     return $query->where('setting_payslips.created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
                  })
                  ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('setting_payslips.created_at', "<=", $request->end_date);
+                     return $query->where('setting_payslips.created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
                  })
                  ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                      return $query->orderBy("setting_payslips.id", $request->order_by);

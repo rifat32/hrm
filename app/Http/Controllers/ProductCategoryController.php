@@ -7,6 +7,7 @@ use App\Http\Requests\ProductCategoryUpdateRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ProductCategory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -290,11 +291,11 @@ class ProductCategoryController extends Controller
          }
 
          if (!empty($request->start_date)) {
-             $productCategoriesQuery = $productCategoriesQuery->where('created_at', ">=", $request->start_date);
+             $productCategoriesQuery = $productCategoriesQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
          }
 
          if (!empty($request->end_date)) {
-             $productCategoriesQuery = $productCategoriesQuery->where('created_at', "<=", $request->end_date);
+             $productCategoriesQuery = $productCategoriesQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
          }
 
 
@@ -476,10 +477,10 @@ return response()->json([
          }
 
          if (!empty($request->start_date)) {
-             $productCategoriesQuery = $productCategoriesQuery->where('created_at', ">=", $request->start_date);
+             $productCategoriesQuery = $productCategoriesQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
          }
          if (!empty($request->end_date)) {
-             $productCategoriesQuery = $productCategoriesQuery->where('created_at', "<=", $request->end_date);
+             $productCategoriesQuery = $productCategoriesQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
          }
 
          $product_categories = $productCategoriesQuery->orderByDesc("name")->get();

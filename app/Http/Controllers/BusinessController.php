@@ -1277,10 +1277,10 @@ if(!$user->hasRole('business_owner')) {
                });
            })
            ->when(!empty($request->start_date), function ($query) use ($request) {
-               return $query->where('created_at', ">=", $request->start_date);
+               return $query->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
            })
            ->when(!empty($request->end_date), function ($query) use ($request) {
-               return $query->where('created_at', "<=", $request->end_date);
+               return $query->where('created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
            })
            ->when(!empty($request->start_lat), function ($query) use ($request) {
                return $query->where('lat', ">=", $request->start_lat);

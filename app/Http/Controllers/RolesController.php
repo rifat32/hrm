@@ -9,6 +9,7 @@ use App\Http\Utils\UserActivityUtil;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\Role;
+use Carbon\Carbon;
 
 class RolesController extends Controller
 {
@@ -329,10 +330,10 @@ class RolesController extends Controller
                $query->where("name", "like", "%" . $term . "%");
            })
            ->when(!empty($request->start_date), function ($query) use ($request) {
-            return $query->where('created_at', ">=", $request->start_date);
+            return $query->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
         })
         ->when(!empty($request->end_date), function ($query) use ($request) {
-            return $query->where('created_at', "<=", $request->end_date);
+            return $query->where('created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
         })
         ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
             return $query->orderBy("id", $request->order_by);

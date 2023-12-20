@@ -6,6 +6,7 @@ use App\Http\Requests\EmailTemplateWrapperUpdateRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\EmailTemplateWrapper;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -218,10 +219,10 @@ class EmailTemplateWrapperController extends Controller
             }
 
             if (!empty($request->start_date)) {
-                $templateQuery = $templateQuery->where('created_at', ">=", $request->start_date);
+                $templateQuery = $templateQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
             }
             if (!empty($request->end_date)) {
-                $templateQuery = $templateQuery->where('created_at', "<=", $request->end_date);
+                $templateQuery = $templateQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
             }
 
             $templates = $templateQuery->orderByDesc("id")->paginate($perPage);
