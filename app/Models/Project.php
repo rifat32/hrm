@@ -28,6 +28,11 @@ class Project extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -36,6 +41,15 @@ class Project extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
+
+
+
+
+
     public function getStartDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -44,4 +58,19 @@ class Project extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+    public function setStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+
+
+
+
 }

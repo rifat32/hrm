@@ -45,11 +45,20 @@ class Attendance extends Model
         return (new Carbon($value))->format('d-m-Y');
     }
 
+
+
+
+
     public function getInDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
     }
 
+
+    public function setInDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
 
 
 }

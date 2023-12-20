@@ -95,6 +95,9 @@ class AuthRegisterBusinessRequest extends FormRequest
             'work_shift.end_date' => 'required|date|after_or_equal:start_date',
 
 
+            'work_shift.break_type' => 'required|string|in:paid,unpaid',
+            'work_shift.break_hours' => 'required|numeric',
+
 
 
             'work_shift.details' => 'required|array|min:7|max:7',
@@ -124,6 +127,7 @@ class AuthRegisterBusinessRequest extends FormRequest
                     }
                 },
             ],
+
 
 
 

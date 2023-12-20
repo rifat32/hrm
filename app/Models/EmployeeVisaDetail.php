@@ -26,6 +26,10 @@ class EmployeeVisaDetail extends Model
         'visa_docs' => 'array',
 
     ];
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -34,6 +38,10 @@ class EmployeeVisaDetail extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
     public function getVisaIssueDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -44,4 +52,13 @@ class EmployeeVisaDetail extends Model
     }
 
 
+
+    public function setVisaIssueDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setVisaExpiryDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
 }

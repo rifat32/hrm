@@ -227,10 +227,12 @@ class SocialSiteController extends Controller
                 $social_site  =  tap(SocialSite::where($social_site_query_params))->update(
                     collect($request_data)->only([
                         'name',
-                        'description',
-                         // "is_default",
+                        'icon',
+                        'link',
                         // "is_active",
+                        // "is_default",
                         // "business_id",
+                        // "created_by"
 
                     ])->toArray()
                 )

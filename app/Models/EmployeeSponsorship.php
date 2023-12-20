@@ -20,6 +20,14 @@ class EmployeeSponsorship extends Model
         "is_sponsorship_withdrawn",
         'created_by'
     ];
+
+
+
+
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -28,6 +36,12 @@ class EmployeeSponsorship extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
+
+
     public function getDateAssignedAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -35,6 +49,15 @@ class EmployeeSponsorship extends Model
     public function getExpiryDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+    public function setDateAssignedAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setExpiryDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
     }
 
 }

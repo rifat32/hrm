@@ -20,10 +20,9 @@ class WorkShift extends Model
         'is_business_default',
         'is_personal',
 
-
-
         'start_date',
         'end_date',
+
         "is_active",
         "business_id",
         "created_by"
@@ -41,20 +40,45 @@ class WorkShift extends Model
     public function users() {
         return $this->belongsToMany(User::class, 'user_work_shifts', 'work_shift_id', 'user_id');
     }
+
+
     public function getCreatedAtAttribute($value)
     {
+
         return (new Carbon($value))->format('d-m-Y');
     }
     public function getUpdatedAtAttribute($value)
     {
+
         return (new Carbon($value))->format('d-m-Y');
     }
+
     public function getStartDateAttribute($value)
     {
+
         return (new Carbon($value))->format('d-m-Y');
     }
+
     public function getEndDateAttribute($value)
     {
+
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
+
+
+
+    public function setStartDateAttribute($value)
+    {
+
+        return (new Carbon($value))->format('Y-m-d');
+    }
+
+    public function setEndDateAttribute($value)
+    {
+
+        return (new Carbon($value))->format('Y-m-d');
     }
 }

@@ -33,7 +33,7 @@ class CreateAttendancesTable extends Migration
             $table->integer('regular_work_hours');
             $table->integer('total_paid_hours');
 
-            $table->integer('break_type');
+            $table->enum('break_type', ['paid', 'unpaid']);
             $table->integer('break_hours');
 
 

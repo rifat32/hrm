@@ -40,12 +40,13 @@ class AttendanceMultipleCreateRequest extends FormRequest
                 },
             ],
 
+
             'attendance_details' => 'required|array',
 
             'attendance_details.*.note' => 'nullable|string',
             'attendance_details.*.in_time' => 'required|date_format:H:i:s',
             'attendance_details.*.out_time' => [
-                'nullable',
+                'required',
                 'date_format:H:i:s',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
@@ -67,7 +68,7 @@ class AttendanceMultipleCreateRequest extends FormRequest
                     ->whereDate('attendances.business_id', '=', auth()->user()->business_id)
                     ->exists();
 
-                if (!$exists) {
+                if ($exists) {
                     $fail("$attribute is invalid.");
                 }
 
@@ -77,7 +78,8 @@ class AttendanceMultipleCreateRequest extends FormRequest
 
 
 
-            'attendance_details.*.does_break_taken' => "required|boolean"
+            'attendance_details.*.does_break_taken' => "required|boolean",
+
 
 
         ];

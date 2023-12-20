@@ -62,6 +62,11 @@ class User extends Authenticatable
         return $this->belongsTo(Business::class, 'business_id', 'id');
     }
 
+    public function all_users() {
+        return $this->hasMany(User::class, 'business_id', 'business_id');
+    }
+
+
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
     }
@@ -81,6 +86,9 @@ class User extends Authenticatable
 
     public function leaves() {
         return $this->hasMany(Leave::class, 'employee_id', 'id');
+    }
+    public function attendances() {
+        return $this->hasMany(Attendance::class, 'employee_id', 'id');
     }
 
     public function sponsorship_details() {
@@ -131,9 +139,19 @@ class User extends Authenticatable
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
     public function getJoiningDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+    public function setJoiningDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+
 
 }

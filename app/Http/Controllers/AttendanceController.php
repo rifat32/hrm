@@ -11,6 +11,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
 use App\Models\Holiday;
+use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
 use Exception;
@@ -118,10 +119,16 @@ class AttendanceController extends Controller
                 ])
                     ->first();
                 if (!$work_shift_details) {
-                    return response()->json(["message" => ("No work shift details found  day" . $day_number)], 400);
+                    $error =  [
+                        "message" => ("No work shift details found  day" . $day_number),
+                 ];
+                    throw new Exception(json_encode($error),400);
                 }
                 if($work_shift_details->is_weekend){
-                    return response()->json(["message" => ("there is a weekend on date" . $request_data["in_date"])], 400);
+                    $error =  [
+                        "message" => ("there is a weekend on date" . $request_data["in_date"]),
+                 ];
+                    throw new Exception(json_encode($error),400);
                 }
                 $holiday =   Holiday::where([
                     "business_id" => auth()->user()->business_id
@@ -130,8 +137,14 @@ class AttendanceController extends Controller
                 ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
                 ->first();
 
-                if($holiday || $holiday->is_active){
-                    return response()->json(["message" => ("there is a holiday on date" . $request_data["in_date"])], 400);
+                if($holiday){
+                    if($holiday->is_active) {
+                        $error =  [
+                            "message" => ("there is a holiday on date" . $request_data["in_date"]),
+                     ];
+                        throw new Exception(json_encode($error),400);
+                    }
+
                 }
 
                 $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -205,7 +218,7 @@ class AttendanceController extends Controller
  *    @OA\Property(property="attendance_details", type="string", format="array", example={
  * {
  *    "note" : "note",
- *    "in_time" : "8:44:00",
+ *    "in_time" : "08:44:00",
  * "out_time" : "12:44:00",
  * "in_date" : "2023-11-18",
  * "does_break_taken" : 1
@@ -284,12 +297,24 @@ class AttendanceController extends Controller
                         "day" => $day_number
                     ])
                         ->first();
+
                     if (!$work_shift_details) {
-                        return response()->json(["message" => ("No work shift details found  day" . $day_number)], 400);
+                        $error =  [
+                            "message" => ("No work shift details found  day" . $day_number),
+                     ];
+                        throw new Exception(json_encode($error),400);
                     }
+
+
+
                     if($work_shift_details->is_weekend){
-                        return response()->json(["message" => ("there is a weekend on date" . $item["in_date"])], 400);
+                        $error =  [
+                            "message" => ("there is a weekend on date" . $item["in_date"]),
+                     ];
+                        throw new Exception(json_encode($error),400);
+
                     }
+
                     $holiday =   Holiday::where([
                         "business_id" => auth()->user()->business_id
                     ])
@@ -297,8 +322,15 @@ class AttendanceController extends Controller
                     ->where('holidays.end_date', ">=", $item["in_date"] . ' 23:59:59')
                     ->first();
 
-                    if($holiday || $holiday->is_active){
-                        return response()->json(["message" => ("there is a holiday on date" . $item["in_date"])], 400);
+                    if($holiday){
+                        if($holiday->is_active) {
+                            $error =  [
+                                "message" => ("there is a holiday on date" . $item["in_date"]),
+                         ];
+                            throw new Exception(json_encode($error),400);
+
+                        }
+
                     }
 
                     $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -318,7 +350,7 @@ class AttendanceController extends Controller
 
 
 
-                    if($request_data["does_break_taken"]) {
+                    if($item["does_break_taken"]) {
                         if($work_shift->break_type == 'unpaid') {
                             $total_paid_hours -= $work_shift->break_hours;
 
@@ -359,7 +391,14 @@ class AttendanceController extends Controller
             });
 
 
-             $success =   Attendance::createMany($attendances_data);
+            $employee = User::where([
+                "id" => $request_data["employee_id"]
+            ])
+            ->first();
+
+
+
+             $success =   $employee->attendances()->createMany($attendances_data);
 
                 if ($success) {
                     // Retrieve the created attendance records
@@ -490,10 +529,16 @@ class AttendanceController extends Controller
                 ])
                     ->first();
                 if (!$work_shift_details) {
-                    return response()->json(["message" => ("No work shift details found  day" . $day_number)], 400);
+                    $error =  [
+                        "message" => ("No work shift details found  day" . $day_number),
+                 ];
+                    throw new Exception(json_encode($error),400);
                 }
                 if($work_shift_details->is_weekend){
-                    return response()->json(["message" => ("there is a weekend on date" . $request_data["in_date"])], 400);
+                    $error =  [
+                        "message" => ("there is a weekend on date" . $request_data["in_date"]),
+                 ];
+                    throw new Exception(json_encode($error),400);
                 }
                 $holiday =   Holiday::where([
                     "business_id" => auth()->user()->business_id
@@ -502,8 +547,14 @@ class AttendanceController extends Controller
                 ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
                 ->first();
 
-                if($holiday || $holiday->is_active){
-                    return response()->json(["message" => ("there is a holiday on date" . $request_data["in_date"])], 400);
+                if($holiday){
+                    if($holiday->is_active) {
+                        $error =  [
+                            "message" => ("there is a holiday on date" . $request_data["in_date"]),
+                     ];
+                        throw new Exception(json_encode($error),400);
+                    }
+
                 }
 
                 $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);

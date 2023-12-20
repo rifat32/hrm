@@ -37,6 +37,10 @@ class JobListing extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -45,6 +49,13 @@ class JobListing extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
+
+
+
     public function getApplicationDeadlineAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -53,5 +64,12 @@ class JobListing extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
-
+    public function setApplicationDeadlineAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setPostedOnAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
 }

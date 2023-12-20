@@ -39,6 +39,10 @@ class Candidate extends Model
         return (new Carbon($value))->format('d-m-Y');
     }
 
+
+
+
+
     public function getApplicationDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -46,5 +50,16 @@ class Candidate extends Model
     public function getInterviewDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
+    public function setApplicationDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setInterviewDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
     }
 }

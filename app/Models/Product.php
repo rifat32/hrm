@@ -26,6 +26,10 @@ class Product extends Model
     public function product_variations(){
         return $this->hasMany(ProductVariation::class,'product_id', 'id');
     }
+
+
+
+    
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

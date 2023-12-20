@@ -41,4 +41,26 @@ class UserJobHistory extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+    public function getEmploymentStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+    public function getEmploymentEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
+
+
+    public function setEmploymentStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setEmploymentEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
 }

@@ -41,6 +41,10 @@ class Leave extends Model
         'attachments' => 'array',
 
     ];
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -49,6 +53,14 @@ class Leave extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
+
+
+
+
     public function getDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -62,6 +74,25 @@ class Leave extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+    public function setDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+
+    public function setStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+
+
+
 
 
 

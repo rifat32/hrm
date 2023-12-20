@@ -37,6 +37,7 @@ use App\Models\UserWorkShift;
 use App\Models\WorkShift;
 use Carbon\Carbon;
 use DateTime;
+use Error;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -461,6 +462,19 @@ class UserManagementController extends Controller
 
             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
+                // $default_work_shift = WorkShift::where([
+                //       "business_id" => auth()->user()->id,
+                //       "is_business_default" => 1
+                // ])
+                // ->first();
+                // if(!$default_work_shift) {
+                //     throw new Error("There is no default workshift for this business");
+                //  }
+                //   $default_work_shift->users()->attach($user->id);
+
+
+
+
 
             $user->roles = $user->roles->pluck('name');
 
@@ -628,18 +642,6 @@ class UserManagementController extends Controller
                  throw new Exception(json_encode($error),403);
              }
 
-              if(!empty($request_data["work_shift_id"])) {
-                  $work_shift =  WorkShift::where([
-                     "id" => $request_data["work_shift_id"],
-                     "business_id" =>auth()->user()->business_id
-                 ])
-                 ->first();
-                 if(!$work_shift) {
-                     return response()->json([
-                         "message" => "no work shift found"
-                     ], 403);
-                 }
-                }
 
 
 
@@ -678,8 +680,30 @@ class UserManagementController extends Controller
                 }
              }
 
+
              if(!empty($request_data["work_shift_id"])) {
+                $work_shift =  WorkShift::where([
+                    "id" => $request_data["work_shift_id"],
+                    "business_id" =>auth()->user()->business_id
+                ])
+                ->first();
+                if(!$work_shift) {
+                   throw new Exception("Work shift validation failed");
+                }
                  $work_shift->users()->attach($user->id);
+             } else {
+                $default_work_shift = WorkShift::where([
+                      "business_id" => auth()->user()->business_id,
+                      "is_business_default" => 1
+                ])
+                ->first();
+                if(!$default_work_shift) {
+                    throw new Exception("There is no default workshift for this business");
+                 }
+                  $default_work_shift->users()->attach($user->id);
+
+
+
              }
              // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
@@ -2108,11 +2132,42 @@ $user->syncRoles($roles);
                         'designations.name',
                     );
                 },
-                "roles"
+                "roles",
             ]
-
                 )
+
             ->whereNotIn('id', [$request->user()->id])
+
+            ->when(empty(auth()->user()->business_id), function ($query) use($request) {
+                        if(auth()->user()->hasRole("superadmin")) {
+                            return  $query->where(function($query) {
+                                  return   $query->where('business_id', NULL)
+                                  ->orWhere(function($query) {
+                                             return $query
+                                             ->whereNotNull("business_id")
+                                             ->whereHas("roles", function($query) {
+                                                return $query->where("roles.name","business_owner");
+                                             });
+                                  });
+                            });
+
+
+                        } else {
+                            return  $query->where(function($query) {
+                                return   $query->where('created_by', auth()->user()->id);
+
+                          });
+
+
+                        }
+            })
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                return $query->where(function ($query) {
+                    return  $query->where('business_id', auth()->user()->business_id);
+                  });
+            })
+
+
             ->when(!empty($request->role), function ($query) use ($request) {
                 $rolesArray = explode(',', $request->role);
               return   $query->whereHas("roles", function($q) use ($rolesArray) {
@@ -2120,13 +2175,8 @@ $user->syncRoles($roles);
                 });
             })
 
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where(function ($query) {
-                    return  $query->where('created_by', auth()->user()->id)
 
-                            ->orWhere('business_id', auth()->user()->business_id);
-                  });
-            })
+
             ->when(!empty($request->search_key), function ($query) use ($request) {
                 $term = $request->search_key;
                 return $query->where(function ($subquery) use ($term) {
@@ -2136,13 +2186,7 @@ $user->syncRoles($roles);
                         ->orWhere("phone", "like", "%" . $term . "%");
                 });
             })
-            ->when(empty($request->user()->business_id)  , function ($query) use ($request) {
-                if(empty($request->business_id)) {
-                    return $query->where('business_id', NULL);
-                }
-                    return $query->where('business_id', intval($request->business_id));
 
-            })
             ->when(isset($request->is_in_employee), function ($query) use ($request) {
                 return $query->where('is_in_employee', intval($request->is_in_employee));
             })
@@ -2163,7 +2207,8 @@ $user->syncRoles($roles);
             }, function ($query) {
                 return $query->orderBy("users.id", "DESC");
             })
-            ->select("users.*")
+
+            ->withCount('all_users as user_count')
             ->when(!empty($request->per_page), function ($query) use ($request) {
                 return $query->paginate($request->per_page);
             }, function ($query) {

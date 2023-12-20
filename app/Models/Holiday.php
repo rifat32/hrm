@@ -19,6 +19,11 @@ class Holiday extends Model
         return $this->belongsTo(User::class, "created_by","id");
     }
 
+
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -27,6 +32,10 @@ class Holiday extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
     public function getStartDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -34,6 +43,18 @@ class Holiday extends Model
     public function getEndDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
+
+    public function setStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
     }
 
 }

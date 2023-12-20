@@ -39,8 +39,19 @@ class UserAsset extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
     public function getDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
+    public function setDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
     }
 }

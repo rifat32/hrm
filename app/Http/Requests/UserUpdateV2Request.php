@@ -7,6 +7,7 @@ use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateV2Request extends FormRequest
@@ -106,12 +107,25 @@ class UserUpdateV2Request extends FormRequest
             ],
 
 
-            'work_shift_id' => [
-                "nullable",
-                'numeric'
-            ],
 
-            'departments' => 'present|array',
+        'work_shift_id' => [
+            "nullable",
+            'numeric',
+            function ($attribute, $value, $fail) {
+                if(!empty($value)){
+                    $exists = WorkShift::where('id', $value)
+                    ->where('work_shifts.business_id', '=', auth()->user()->business_id)
+                    ->exists();
+
+                if (!$exists) {
+                    $fail("$attribute is invalid.");
+                }
+                }
+
+            },
+        ],
+
+            'departments' => 'required|array',
             'departments.*' =>  ['numeric',
                 function ($attribute, $value, $fail) {
                     $exists = Department::where('id', $value)
@@ -128,10 +142,10 @@ class UserUpdateV2Request extends FormRequest
             'gender' => 'nullable|string|in:male,female,other',
             'is_in_employee' => "required|boolean",
             'designation_id' => [
-                "nullable",
+                "required",
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    if(!empty($value)){
+
                         $created_by  = NULL;
                         if(auth()->user()->business) {
                             $created_by = auth()->user()->business->created_by;
@@ -194,15 +208,15 @@ class UserUpdateV2Request extends FormRequest
                     if (!$exists) {
                         $fail("$attribute is invalid.");
                     }
-                    }
+
 
                 },
             ],
             'employment_status_id' => [
-                "nullable",
+                "required",
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    if(!empty($value)){
+
                         $exists = EmploymentStatus::where('id', $value)
                         ->where('employment_statuses.business_id', '=', auth()->user()->business_id)
                         ->exists();
@@ -210,7 +224,7 @@ class UserUpdateV2Request extends FormRequest
                     if (!$exists) {
                         $fail("$attribute is invalid.");
                     }
-                    }
+
 
                 },
             ],

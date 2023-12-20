@@ -18,7 +18,7 @@ class Announcement extends Model
         "business_id",
         "created_by"
     ];
-    
+
     public function creator() {
         return $this->belongsTo(User::class, "created_by","id");
     }
@@ -26,6 +26,7 @@ class Announcement extends Model
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_announcements', 'announcement_id', 'department_id');
     }
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -34,6 +35,15 @@ class Announcement extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+
+
+
+
+
+
+
     public function getStartDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -41,5 +51,15 @@ class Announcement extends Model
     public function getEndDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+    public function setStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
     }
 }

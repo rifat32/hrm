@@ -33,6 +33,11 @@ class SettingAttendance extends Model
     public function special_roles() {
         return $this->belongsToMany(Role::class, 'setting_attendance_special_roles', 'setting_attendance_id', 'role_id');
     }
+
+
+
+
+    
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

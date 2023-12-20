@@ -53,6 +53,9 @@ class Task extends Model
         return (new Carbon($value))->format('d-m-Y');
     }
 
+
+
+
     public function getStartDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -64,6 +67,21 @@ class Task extends Model
     public function getDueDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
+    public function setStartDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setEndDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setDueDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
     }
 
 }

@@ -29,6 +29,10 @@ class EmployeePassportDetail extends Model
     }
 
 
+
+
+
+
     public function getPassportIssueDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -37,5 +41,16 @@ class EmployeePassportDetail extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+    public function setPassportIssueDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+    public function setPassportExpiryDateAttribute($value)
+    {
+        return (new Carbon($value))->format('Y-m-d');
+    }
+
 
 }

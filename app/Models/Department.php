@@ -115,6 +115,11 @@ class Department extends Model
     public function work_shifts() {
         return $this->belongsToMany(WorkShift::class, 'department_work_shifts', 'department_id', 'work_shift_id');
     }
+
+
+
+
+    
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

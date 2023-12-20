@@ -577,6 +577,7 @@ Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "cr
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/attendances', [AttendanceController::class, "createAttendance"]);
+Route::post('/v1.0/attendances/multiple', [AttendanceController::class, "createMultipleAttendance"]);
 Route::put('/v1.0/attendances', [AttendanceController::class, "updateAttendance"]);
 Route::get('/v1.0/attendances', [AttendanceController::class, "getAttendances"]);
 Route::get('/v1.0/attendances/{id}', [AttendanceController::class, "getAttendanceById"]);
