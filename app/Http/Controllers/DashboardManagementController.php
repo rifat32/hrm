@@ -116,10 +116,10 @@ class DashboardManagementController extends Controller
 
 
             if (!empty($request->start_date)) {
-                $prebookingQuery = $prebookingQuery->where('pre_bookings.created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
+                $prebookingQuery = $prebookingQuery->where('pre_bookings.created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
             }
             if (!empty($request->end_date)) {
-                $prebookingQuery = $prebookingQuery->where('pre_bookings.created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
+                $prebookingQuery = $prebookingQuery->where('pre_bookings.created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
             }
             $data = $prebookingQuery->groupBy("pre_bookings.id")
                 ->select(

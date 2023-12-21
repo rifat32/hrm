@@ -225,10 +225,10 @@ class NotificationTemplateController extends Controller
             }
 
             if (!empty($request->start_date)) {
-                $templateQuery = $templateQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', ($request->start_date)));
+                $templateQuery = $templateQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
             }
             if (!empty($request->end_date)) {
-                $templateQuery = $templateQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y', ($request->end_date . ' 23:59:59'))->format('Y-m-d'));
+                $templateQuery = $templateQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
             }
 
             $templates = $templateQuery->orderByDesc("id")->paginate($perPage);
