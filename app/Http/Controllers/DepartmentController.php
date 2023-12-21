@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DepartmentCreateRequest;
 use App\Http\Requests\DepartmentUpdateRequest;
+use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -240,6 +241,98 @@ class DepartmentController extends Controller
         }
     }
 
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/departments/toggle-active",
+     *      operationId="toggleActiveDepartment",
+     *      tags={"administrator.department"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle department active,
+     *      description="This method is to toggle department active",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function toggleActiveDepartment(GetIdRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+
+            $department = Department::where([
+                "id" => $request_data["id"],
+                "business_id" => auth()->user()->business_id
+            ])
+                ->first();
+            if (!$department) {
+                return response()->json([
+                    "message" => "no department found"
+                ], 404);
+            }
+
+
+             $department->update([
+                 'is_active' => !$department->is_active
+             ]);
+
+             return response()->json(['message' => 'department status updated successfully'], 200);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
     /**
      *
@@ -279,6 +372,13 @@ class DepartmentController extends Controller
      * description="search_key",
      * required=true,
      * example="search_key"
+     * ),
+     *  * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
      * ),
      * *  @OA\Parameter(
      * name="order_by",
@@ -350,14 +450,14 @@ class DepartmentController extends Controller
                             ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    return $query->where('departments.is_active', intval($request->is_active));
+                })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
+                    return $query->where('departments.created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
+                    return $query->where('departments.created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("departments.id", $request->order_by);

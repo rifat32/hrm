@@ -70,6 +70,9 @@ class Department extends Model
 
 
         )
+        ->where([
+            "is_active" => 1
+        ])
         ->addSelect([
             'total_users_count' => DepartmentUser::selectRaw('COUNT(*)')
                 ->whereColumn('departments.id', 'department_id')
@@ -119,7 +122,7 @@ class Department extends Model
 
 
 
-    
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
