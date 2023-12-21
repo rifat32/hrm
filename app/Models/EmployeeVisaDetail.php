@@ -55,10 +55,10 @@ class EmployeeVisaDetail extends Model
 
     public function setVisaIssueDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['visa_issue_date'] = (new Carbon($value))->format('Y-m-d');
     }
     public function setVisaExpiryDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['visa_expiry_date'] = (new Carbon($value))->format('Y-m-d');
     }
 }

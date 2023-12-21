@@ -23,10 +23,10 @@ class Department extends Model
     public function parent(){
         return $this->belongsTo(Department::class,'parent_id', 'id');
     }
-    public function parentRecursive()
-    {
-        return $this->belongsTo(Department::class, 'parent_id', 'id')->with('parentRecursive');
-    }
+    // public function parentRecursive()
+    // {
+    //     return $this->belongsTo(Department::class, 'parent_id', 'id')->with('parentRecursive');
+    // }
 
     // public function getAllParentIdsAttribute()
     // {
@@ -54,6 +54,14 @@ class Department extends Model
 
     //     return array_reverse($parentData); // Reverse the array to have the top-level parent (father) first
     // }
+
+
+
+
+
+
+
+
     public function children_recursive()
     {
         return $this->hasMany(Department::class, 'parent_id', 'id')->with(

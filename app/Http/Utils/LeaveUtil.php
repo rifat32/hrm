@@ -68,7 +68,7 @@ trait LeaveUtil
             $not_approved_manager_found = false;
 
             $department = Department::whereHas('users', function ($query) use ($leave) {
-                $query->where('id', $leave->employee_id);
+                $query->where('departments.id', $leave->employee_id);
             })->first();
 
             if (!$department) {
@@ -79,8 +79,24 @@ trait LeaveUtil
                 ];
 
             }
-            $all_departments = $department->all_parent_data;
-            foreach($all_departments as $single_department) {
+
+
+            $parentData = [$department];
+
+            $parent = clone $department;
+
+            while (!empty($parent->parent)) {
+
+                $parentData[] = $parent->parent;
+                $parent = clone $parent->parent;
+
+            }
+
+            $parentData = array_reverse($parentData);
+
+
+
+            foreach($parentData as $single_department) {
                  $verify_leave_approval =   LeaveApproval::where([
                         'leave_id' => $leave->id,
                         'is_approved' => 1,

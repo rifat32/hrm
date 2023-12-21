@@ -56,10 +56,10 @@ class Candidate extends Model
 
     public function setApplicationDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['application_date'] =  (new Carbon($value))->format('Y-m-d');
     }
     public function setInterviewDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['interview_date'] (new Carbon($value))->format('Y-m-d');
     }
 }

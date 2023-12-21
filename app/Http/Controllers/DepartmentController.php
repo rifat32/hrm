@@ -219,7 +219,7 @@ class DepartmentController extends Controller
                         "description",
                         // "is_active",
                         "manager_id",
-                        "parent_id",
+                        // "parent_id",
                         // "business_id",
 
                     ])->toArray()
@@ -322,7 +322,7 @@ class DepartmentController extends Controller
             }
             if (!$department->parent_id) {
                 return response()->json([
-                    "message" => "You can not change the status of a parent department."
+                    "message" => "You can not change the status of main parent department."
                 ], 409);
             }
 
@@ -750,6 +750,7 @@ class DepartmentController extends Controller
             $existingIds = Department::where([
                 "business_id" => $business_id
             ])
+            ->whereNotNull('parent_id')
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
@@ -759,7 +760,7 @@ class DepartmentController extends Controller
 
             if (!empty($nonExistingIds)) {
                 return response()->json([
-                    "message" => "Some or all of the specified data do not exist."
+                    "message" => "Some or all of the specified data do not exist. or something else"
                 ], 404);
             }
             Department::destroy($existingIds);

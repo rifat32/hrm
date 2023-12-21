@@ -53,11 +53,11 @@ class EmployeeSponsorship extends Model
 
     public function setDateAssignedAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['date_assigned'] = (new Carbon($value))->format('Y-m-d');
     }
     public function setExpiryDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['expiry_date'] = (new Carbon($value))->format('Y-m-d');
     }
 
 }

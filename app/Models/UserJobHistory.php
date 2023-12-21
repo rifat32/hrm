@@ -57,10 +57,10 @@ class UserJobHistory extends Model
 
     public function setEmploymentStartDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['employment_start_date'] = (new Carbon($value))->format('Y-m-d');
     }
     public function setEmploymentEndDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['employment_end_date'] = (new Carbon($value))->format('Y-m-d');
     }
 }

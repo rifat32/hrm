@@ -45,11 +45,11 @@ class EmployeePassportDetail extends Model
 
     public function setPassportIssueDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['passport_issue_date'] = (new Carbon($value))->format('Y-m-d');
     }
     public function setPassportExpiryDateAttribute($value)
     {
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['passport_expiry_date'] = (new Carbon($value))->format('Y-m-d');
     }
 
 

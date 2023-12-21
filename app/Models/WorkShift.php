@@ -73,12 +73,12 @@ class WorkShift extends Model
     public function setStartDateAttribute($value)
     {
 
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['start_date'] = (new Carbon($value))->format('Y-m-d');
     }
 
     public function setEndDateAttribute($value)
     {
 
-        return (new Carbon($value))->format('Y-m-d');
+        $this->attributes['end_date'] = (new Carbon($value))->format('Y-m-d');
     }
 }

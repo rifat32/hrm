@@ -70,6 +70,10 @@ class DepartmentUpdateRequest extends FormRequest
                     if (!$exists) {
                         $fail("$attribute is invalid.");
                     }
+
+                    if($value == $this->id) {
+                        $fail("parent can not be same");
+                    }
                     }
 
                 },
