@@ -356,7 +356,7 @@ class SocialSiteController extends Controller
                 return $query->where(function ($query) use ($request) {
                     $term = $request->search_key;
                     $query->where("social_sites.name", "like", "%" . $term . "%")
-                        ->orWhere("social_sites.description", "like", "%" . $term . "%");
+                        ->orWhere("social_sites.link", "like", "%" . $term . "%");
                 });
             })
 

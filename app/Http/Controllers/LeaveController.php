@@ -263,8 +263,8 @@ class LeaveController extends Controller
                     $holiday =   Holiday::where([
                         "business_id" => $request->user()->business_id
                     ])
-                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', ($request_data["date"]))->format('Y-m-d'))
-                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
+                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', trim($request_data["date"]))->format('Y-m-d'))
+                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -310,7 +310,9 @@ class LeaveController extends Controller
                         ])
                         ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', ($leave_date))->format('Y-m-d'))
 
-                        ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($leave_date . ' 23:59:59'))->format('Y-m-d') )
+
+                        ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($leave_date . ' 23:59:59'))->format('Y-m-d'))
+
                         ->first();
 
                         $previous_leave =  Leave::where([
@@ -342,8 +344,8 @@ class LeaveController extends Controller
                     $holiday =   Holiday::where([
                         "business_id" => $request->user()->business_id
                     ])
-                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', ($request_data["date"]))->format('Y-m-d'))
-                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
+                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', trim($request_data["date"]))->format('Y-m-d'))
+                   ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
 
                     ->first();
 
@@ -393,9 +395,9 @@ class LeaveController extends Controller
                         "business_id" => $request->user()->business_id
                     ])
 
-                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', ($request_data["date"]))->format('Y-m-d'))
+                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', trim($request_data["date"]))->format('Y-m-d'))
 
-                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
+                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -798,8 +800,8 @@ class LeaveController extends Controller
                     $holiday =   Holiday::where([
                         "business_id" => $request->user()->business_id
                     ])
-                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', $request_data["date"])->format('Y-m-d'))
-                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
+                    ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', trim($request_data["date"]))->format('Y-m-d'))
+                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -840,8 +842,8 @@ class LeaveController extends Controller
                         $holiday =   Holiday::where([
                             "business_id" => $request->user()->business_id
                         ])
-                        ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', ($leave_date . ' 00:00:00'))->format('Y-m-d'))
-                        ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($leave_date . ' 23:59:59'))->format('Y-m-d'))
+                        ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', trim($leave_date))->format('Y-m-d'))
+                        ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($leave_date . ' 23:59:59'))->format('Y-m-d'))
                         ->first();
 
                         $previous_leave =  Leave::where([
@@ -849,7 +851,7 @@ class LeaveController extends Controller
                         ])
                         ->whereNotIn("id",[$request_data["id"]])
                         ->whereHas('records', function ($query) use ($leave_date) {
-                            $query->where('leave_records.date', Carbon::createFromFormat('d-m-Y', ($leave_date . ' 00:00:00'))->format('Y-m-d'));
+                            $query->where('leave_records.date', Carbon::createFromFormat('d-m-Y', ($leave_date))->format('Y-m-d'));
                         })->first();
 
                         if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
@@ -873,8 +875,8 @@ class LeaveController extends Controller
                     $holiday =   Holiday::where([
                         "business_id" => $request->user()->business_id
                     ])
-                    ->where('holidays.start_date', "<=",Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 00:00:00')))
-                    ->where('holidays.end_date', ">=",  Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
+                    ->where('holidays.start_date', "<=",Carbon::createFromFormat('d-m-Y', trim($request_data["date"])))
+                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -882,7 +884,7 @@ class LeaveController extends Controller
                     ])
                     ->whereNotIn("id",[$request_data["id"]])
                     ->whereHas('records', function ($query) use ($request_data) {
-                        $query->where('leave_records.date', Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 00:00:00')));
+                        $query->where('leave_records.date', Carbon::createFromFormat('d-m-Y', trim($request_data["date"])));
                     })->first();
 
                     if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
@@ -923,7 +925,7 @@ class LeaveController extends Controller
                         "business_id" => $request->user()->business_id
                     ])
                     ->where('holidays.start_date', "<=", Carbon::createFromFormat('d-m-Y', ($request_data["date"]))->format('Y-m-d'))
-                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y', ($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
+                    ->where('holidays.end_date', ">=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request_data["date"] . ' 23:59:59'))->format('Y-m-d'))
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -1338,7 +1340,7 @@ class LeaveController extends Controller
                 })
 
 
-          
+
 
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {

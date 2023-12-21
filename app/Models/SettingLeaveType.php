@@ -13,7 +13,7 @@ class SettingLeaveType extends Model
         'name',
         'type',
         'amount',
-        'description',
+
         'is_earning_enabled',
         "is_active",
         "is_default",

@@ -393,6 +393,7 @@ Route::delete('/v1.0/asset-types/{ids}', [AssetTypeController::class, "deleteAss
 Route::post('/v1.0/departments', [DepartmentController::class, "createDepartment"]);
 Route::put('/v1.0/departments', [DepartmentController::class, "updateDepartment"]);
 Route::get('/v1.0/departments', [DepartmentController::class, "getDepartments"]);
+Route::get('/v2.0/departments', [AssetTypeController::class, "getDepartmentsV2"]);
 Route::get('/v1.0/departments/{id}', [DepartmentController::class, "getDepartmentById"]);
 Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDepartmentsByIds"]);
 

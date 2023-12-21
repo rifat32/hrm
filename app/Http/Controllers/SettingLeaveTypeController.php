@@ -555,7 +555,7 @@ class SettingLeaveTypeController extends Controller
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("setting_leave_types.name", "like", "%" . $term . "%")
-                            ->orWhere("setting_leave_types.description", "like", "%" . $term . "%");
+                            ->orWhere("setting_leave_types.type", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
