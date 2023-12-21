@@ -595,6 +595,93 @@ class WorkShiftController extends Controller
     }
 
 
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/work-shifts/get-by-user-id/{user_id}",
+     *      operationId="getWorkShiftByUserId",
+     *      tags={"administrator.work_shift"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      summary="This method is to get work shift by user id",
+     *      description="This method is to get work shift by user id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getWorkShiftByUserId($user_id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('work_shift_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  auth()->user()->business_id;
+
+
+             $work_shift =   WorkShift::with("details")->where([
+                "business_id" => $business_id
+            ])->whereHas('users', function ($query) use ($user_id) {
+                $query->where('users.id', $user_id);
+            })->first();
+
+
+
+             if (!$work_shift) {
+                 return response()->json([
+                     "message" => "no work shift found for the user"
+                 ], 404);
+             }
+
+             return response()->json($work_shift, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

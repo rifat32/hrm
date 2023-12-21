@@ -176,6 +176,12 @@ return [
                 "department_view",
                 "department_delete",
 
+
+                "asset_type_create",
+                "asset_type_update",
+                "asset_type_view",
+                "asset_type_delete",
+
                 "job_listing_create",
                 "job_listing_update",
                 "job_listing_view",
@@ -307,6 +313,11 @@ return [
                 "department_view",
                 "department_delete",
 
+                "asset_type_create",
+                "asset_type_update",
+                "asset_type_view",
+                "asset_type_delete",
+
                 "job_listing_create",
                 "job_listing_update",
                 "job_listing_view",
@@ -430,6 +441,11 @@ return [
                 "department_update",
                 "department_view",
                 "department_delete",
+
+                "asset_type_create",
+                "asset_type_update",
+                "asset_type_view",
+                "asset_type_delete",
 
                 "job_listing_create",
                 "job_listing_update",
@@ -609,6 +625,11 @@ return [
        "department_view",
        "department_delete",
 
+       "asset_type_create",
+       "asset_type_update",
+       "asset_type_view",
+       "asset_type_delete",
+
        "job_listing_create",
        "job_listing_update",
        "job_listing_view",
@@ -773,6 +794,11 @@ return [
         "department_update" => "Can update department",
         "department_view" => "Can view department",
         "department_delete" => "Can delete department",
+
+        "asset_type_create" => "",
+        "asset_type_update" => "",
+        "asset_type_view" => "",
+        "asset_type_delete" => "",
 
         "job_listing_create" => "Can create job listing",
         "job_listing_update" => "Can update job listing",
@@ -960,6 +986,12 @@ return [
         "department_update" => "update",
         "department_view" => "view",
         "department_delete" => "delete",
+
+        "asset_type_create" => "create",
+        "asset_type_update" => "update",
+        "asset_type_view" => "view",
+        "asset_type_delete" => "delete",
+
 
         "job_listing_create" => "create",
         "job_listing_update" => "update",
@@ -1241,11 +1273,20 @@ return [
                 "department_update",
                 "department_view",
                 "department_delete",
-
-
-
             ],
         ],
+        [
+            "header" => "asset_type",
+            "permissions" => [
+                "asset_type_create",
+                "asset_type_update",
+                "asset_type_view",
+                "asset_type_delete",
+            ],
+        ],
+
+
+
 
 
         [

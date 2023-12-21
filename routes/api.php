@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 
@@ -367,7 +368,19 @@ Route::delete('/v1.0/payment-types/{id}', [PaymentTypeController::class, "delete
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// asset type  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::post('/v1.0/asset-types', [AssetTypeController::class, "createAssetType"]);
+Route::put('/v1.0/asset-types', [AssetTypeController::class, "updateAssetType"]);
+Route::get('/v1.0/asset-types', [AssetTypeController::class, "getAssetTypes"]);
+Route::get('/v1.0/asset-types/{id}', [AssetTypeController::class, "getAssetTypeById"]);
+Route::delete('/v1.0/asset-types/{ids}', [AssetTypeController::class, "deleteAssetTypesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end asset type  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
@@ -380,7 +393,6 @@ Route::delete('/v1.0/payment-types/{id}', [PaymentTypeController::class, "delete
 Route::post('/v1.0/departments', [DepartmentController::class, "createDepartment"]);
 Route::put('/v1.0/departments', [DepartmentController::class, "updateDepartment"]);
 Route::get('/v1.0/departments', [DepartmentController::class, "getDepartments"]);
-Route::get('/v2.0/departments', [DepartmentController::class, "getDepartmentsV2"]);
 Route::get('/v1.0/departments/{id}', [DepartmentController::class, "getDepartmentById"]);
 Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDepartmentsByIds"]);
 
@@ -414,6 +426,9 @@ Route::post('/v1.0/work-shifts', [WorkShiftController::class, "createWorkShift"]
 Route::put('/v1.0/work-shifts', [WorkShiftController::class, "updateWorkShift"]);
 Route::get('/v1.0/work-shifts', [WorkShiftController::class, "getWorkShifts"]);
 Route::get('/v1.0/work-shifts/{id}', [WorkShiftController::class, "getWorkShiftById"]);
+
+Route::get('/v1.0/work-shifts/get-by-user-id/{user_id}', [WorkShiftController::class, "getWorkShiftByUserId"]);
+
 Route::delete('/v1.0/work-shifts/{ids}', [WorkShiftController::class, "deleteWorkShiftsByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

@@ -83,7 +83,13 @@ class DesignationUpdateRequest extends FormRequest
         if (!empty(auth()->user()->business_id)) {
             $rules['name'] .= '|unique:designations,name,'.$this->id.',id,business_id,' . auth()->user()->business_id;
         } else {
-            $rules['name'] .= '|unique:designations,name,'.$this->id.',id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+            if(auth()->user()->hasRole('superadmin')){
+                $rules['name'] .= '|unique:designations,name,'.$this->id.',id,is_default,' . 1 . ',business_id,' . NULL;
+            }
+            else {
+                $rules['name'] .= '|unique:designations,name,'.$this->id.',id,is_default,' . 0 . ',business_id,' . NULL;
+            }
+
         }
 
 return $rules;
