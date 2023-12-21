@@ -320,6 +320,12 @@ class DepartmentController extends Controller
                     "message" => "no department found"
                 ], 404);
             }
+            if (!$department->parent_id) {
+                return response()->json([
+                    "message" => "You can not change the status of a parent department."
+                ], 409);
+            }
+
 
 
              $department->update([
