@@ -91,8 +91,8 @@ class AuthRegisterBusinessRequest extends FormRequest
             'work_shift.type' => 'required|string|in:regular,scheduled',
 
 
-            'work_shift.start_date' => 'required|date',
-            'work_shift.end_date' => 'required|date|after_or_equal:start_date',
+            'work_shift.start_date' => 'nullable|date',
+            'work_shift.end_date' => 'nullable|date|after_or_equal:start_date',
 
 
             'work_shift.break_type' => 'required|string|in:paid,unpaid',
