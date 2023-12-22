@@ -15,6 +15,7 @@ use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
+use App\Models\LeaveRecord;
 use App\Models\Role;
 use App\Models\SettingLeave;
 use App\Models\User;
@@ -1571,10 +1572,16 @@ class LeaveController extends Controller
                 $endDate = Carbon::parse(Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
                 $dateArray = [];
 
-                while ($startDate->lte($endDate)) {
-                    $dateArray[] = $startDate->toDateString();
-                    $startDate->addDay();
+
+
+                for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+                    $dateArray[] = $date->format('Y-m-d');
                 }
+
+                // while ($startDate->lte($endDate)) {
+                //     $dateArray[] = $startDate->toDateString();
+                //     $startDate->addDay();
+                // }
 
 
 
@@ -1583,16 +1590,49 @@ $employees->each(function ($employee) use ($dateArray) {
 // Get leaves for the current employee
 
 
-$employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee) {
+$total_leave_hours = 0;
+
+$employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee,&$total_leave_hours) {
+
+    // foreach ($leaves as $leave) {
+    //     $leave->total_leave_hours = $leave->records->sum(function ($record) {
+    //      $startTime = Carbon::parse($record->start_time);
+    //      $endTime = Carbon::parse($record->end_time);
+    //      return $startTime->diffInHours($endTime);
+
+    //     });
+
+    //  }
+   $leave_record = LeaveRecord::whereHas(
+        "leave.employee", function($query) use($employee,$date) {
+             $query->where([
+                "users.id" => $employee->id,
+                "leave_records.date" => $date
+             ]);
+
+        }
+    )
+    ->first();
+
+    $leave_hours = 0;
+    if($leave_record) {
+        $startTime = Carbon::parse($leave_record->start_time);
+        $endTime = Carbon::parse($leave_record->end_time);
+        $leave_hours = $startTime->diffInHours($endTime);
+        $total_leave_hours += $leave_hours;
+    }
 
 
     return [
-        'date' => $date,
-        'is_on_leave' => $employee->leaves->contains('date', $date),
+        'date' => Carbon::parse($date)->format('d-m-Y'),
+        'is_on_leave' => $leave_record?1:0,
+        'leave_hours' => $leave_hours
     ];
 });
 
+$employee->total_leave_hours = $total_leave_hours;
 $employee->unsetRelation('leaves');
+return $employee;
 
 });
 
