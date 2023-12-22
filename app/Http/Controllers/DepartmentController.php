@@ -174,6 +174,7 @@ class DepartmentController extends Controller
     public function updateDepartment(DepartmentUpdateRequest $request)
     {
 
+
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
@@ -192,13 +193,7 @@ class DepartmentController extends Controller
 
 
 
-                if (empty($request_data["parent_id"])) {
-                    $parent_department = Department::whereNull('parent_id')
-                    ->where('departments.business_id', '=', auth()->user()->business_id)
-                    ->first();
 
-                    $request_data["parent_id"] = $parent_department["id"];
-                }
 
                 $department_query_params = [
                     "id" => $request_data["id"],
@@ -211,6 +206,39 @@ class DepartmentController extends Controller
                         "message" => "no department found"
                     ], 404);
                 }
+                $main_parent_department = Department::whereNull('parent_id')
+                ->where('departments.business_id', '=', auth()->user()->business_id)
+                ->first();
+
+                if (!$main_parent_department) {
+                    return response()->json([
+                        "message" => "main parent not found."
+                    ], 409);
+                }
+
+
+                if (empty($request_data["parent_id"])) {
+                    $request_data["parent_id"] = $main_parent_department->id;
+                } else {
+                    $previous_parent_id =  $department_prev->parent_id;
+                    if($previous_parent_id !== $request_data["parent_id"]) {
+                        $descendantIds = $department_prev->getAllDescendantIds();
+                        if (in_array($request_data["parent_id"], $descendantIds)) {
+                         Department::where([
+                            "id" => $request_data["parent_id"]
+                          ])->update(
+                            [
+                                "parent_id" => $main_parent_department->id
+                            ]
+                          );
+
+
+                        }
+                    }
+
+
+                }
+
 
                 $department  =  tap(Department::where($department_query_params))->update(
                     collect($request_data)->only([
@@ -219,7 +247,7 @@ class DepartmentController extends Controller
                         "description",
                         // "is_active",
                         "manager_id",
-                        // "parent_id",
+                      "parent_id",
                         // "business_id",
 
                     ])->toArray()
@@ -246,17 +274,17 @@ class DepartmentController extends Controller
      * @OA\Put(
      *      path="/v1.0/departments/toggle-active",
      *      operationId="toggleActiveDepartment",
-     *      tags={"administrator.department"},
+     *      tags={"user_management"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to toggle department active,
-     *      description="This method is to toggle department active",
+     *      summary="This method is to toggle department activity",
+     *      description="This method is to toggle department activity",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *           @OA\Property(property="id", type="string", format="number",example="1"),
      *
      *         ),
@@ -294,6 +322,7 @@ class DepartmentController extends Controller
      *      )
      *     )
      */
+
 
      public function toggleActiveDepartment(GetIdRequest $request)
      {

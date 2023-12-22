@@ -23,6 +23,32 @@ class Department extends Model
     public function parent(){
         return $this->belongsTo(Department::class,'parent_id', 'id');
     }
+
+    public function children()
+    {
+        return $this->hasMany(Department::class, 'parent_id', 'id');
+    }
+
+
+    public function getAllDescendantIds()
+    {
+        $descendantIds = [];
+        $this->getDescendantIdsRecursive($this, $descendantIds);
+
+        return $descendantIds;
+    }
+
+    protected function getDescendantIdsRecursive($department, &$descendantIds)
+    {
+        foreach ($department->children as $child) {
+            $descendantIds[] = $child->id;
+
+            // Recursively get the descendants of the current child
+            $this->getDescendantIdsRecursive($child, $descendantIds);
+        }
+    }
+
+
     // public function parentRecursive()
     // {
     //     return $this->belongsTo(Department::class, 'parent_id', 'id')->with('parentRecursive');

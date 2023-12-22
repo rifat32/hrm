@@ -1495,14 +1495,24 @@ class LeaveController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $employees = User::with(['leaves' => function ($query) use ($request) {
+            $employees = User::with(
+                [
+                    'leaves' => function ($query) use ($request) {
                 $query->when(!empty($request->start_date), function ($query) use ($request) {
                         return $query->where('date', '>=', Carbon::createFromFormat('d-m-Y H:i:s', trim($request->start_date . ' 00:00:00'))->format('Y-m-d'));
                     })
                     ->when(!empty($request->end_date), function ($query) use ($request) {
                         return $query->where('date', '<=', Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
                     });
-            }])
+            },
+            'departments' => function ($query) use ($request) {
+                $query->select("departments.name");
+            },
+
+
+
+
+            ])
             ->whereHas("leaves", function($q) use ($request)  {
                 $q->whereNotNull("employee_id")
                   ->when(!empty($request->employee_id), function ($q) use ($request) {
