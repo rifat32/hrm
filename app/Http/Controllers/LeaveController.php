@@ -1574,6 +1574,8 @@ $employees->each(function ($employee) use ($dateArray) {
 
 
 $employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee) {
+
+
     return [
         'date' => $date,
         'is_on_leave' => $employee->leaves->contains('date', $date),
