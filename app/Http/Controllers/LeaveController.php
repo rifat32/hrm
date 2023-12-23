@@ -1864,11 +1864,30 @@ return $employee;
                 return ($leave->status == "approved");
             })->sum('total_leave_hours');
 
+            $data["data_highlights"]["leave_approved_total_individual_days"] = $leaves->filter(function ($leave) {
+
+                return ($leave->status == "approved");
+            })->sum(function ($leave) {
+                return $leave->records->count();
+            });
+
+
 
             $data["data_highlights"]["upcoming_leaves_hours"] = $leaves->filter(function ($leave) {
 
                 return Carbon::parse($leave->start_date)->isFuture();
+            })->sum(function ($leave) {
+                return $leave->records->count();
+            });
+
+            $data["data_highlights"]["upcoming_leaves_total_individual_days"] = $leaves->filter(function ($leave) {
+
+                return Carbon::parse($leave->start_date)->isFuture();
             })->sum('total_leave_hours');
+
+
+
+
             $data["data_highlights"]["pending_leaves"] = $leaves->filter(function ($leave) {
 
                 return ($leave->status != "approved");
