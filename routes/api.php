@@ -598,6 +598,7 @@ Route::post('/v1.0/attendances', [AttendanceController::class, "createAttendance
 Route::post('/v1.0/attendances/multiple', [AttendanceController::class, "createMultipleAttendance"]);
 Route::put('/v1.0/attendances', [AttendanceController::class, "updateAttendance"]);
 Route::get('/v1.0/attendances', [AttendanceController::class, "getAttendances"]);
+Route::get('/v2.0/attendances', [AttendanceController::class, "getAttendancesV2"]);
 Route::get('/v1.0/attendances/{id}', [AttendanceController::class, "getAttendanceById"]);
 Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAttendancesByIds"]);
 

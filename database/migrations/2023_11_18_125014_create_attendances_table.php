@@ -25,7 +25,7 @@ class CreateAttendancesTable extends Migration
             $table->boolean("does_break_taken");
 
 
-            $table->time('in_time');
+            $table->time('in_time')->nullable();
             $table->time('out_time')->nullable();
 
             $table->integer('capacity_hours');
@@ -35,6 +35,7 @@ class CreateAttendancesTable extends Migration
 
             $table->enum('break_type', ['paid', 'unpaid']);
             $table->integer('break_hours');
+   
 
 
 

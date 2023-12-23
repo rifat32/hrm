@@ -154,12 +154,12 @@ class AttendanceController extends Controller
 
                 $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
                 $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
-                $total_worked_hours = $out_time->diffInHours($in_time);
+                $total_present_hours = $out_time->diffInHours($in_time);
 
 
-                $work_hours_delta = $total_worked_hours - $capacity_hours;
+                $work_hours_delta = $total_present_hours - $capacity_hours;
 
-                $total_paid_hours = $total_worked_hours;
+                $total_paid_hours = $total_present_hours;
 
 
 
@@ -185,6 +185,8 @@ class AttendanceController extends Controller
                 $request_data["break_hours"] = $work_shift->break_hours;
                 $request_data["total_paid_hours"] = $total_paid_hours;
                 $request_data["regular_work_hours"] = $regular_work_hours;
+
+
 
 
                 $attendance =  Attendance::create($request_data);
@@ -340,12 +342,12 @@ class AttendanceController extends Controller
 
                     $in_time = Carbon::createFromFormat('H:i:s', $item["in_time"]);
                     $out_time = Carbon::createFromFormat('H:i:s', $item["out_time"]);
-                    $total_worked_hours = $out_time->diffInHours($in_time);
+                    $total_present_hours = $out_time->diffInHours($in_time);
 
 
-                    $work_hours_delta = $total_worked_hours - $capacity_hours;
+                    $work_hours_delta = $total_present_hours - $capacity_hours;
 
-                    $total_paid_hours = $total_worked_hours;
+                    $total_paid_hours = $total_present_hours;
 
 
 
@@ -381,7 +383,7 @@ class AttendanceController extends Controller
                     "break_type" => $work_shift->break_type,
                     "break_hours" => $work_shift->break_hours,
                     "total_paid_hours" => $total_paid_hours,
-                    "regular_work_hours" => $regular_work_hours
+                    "regular_work_hours" => $regular_work_hours,
 
 
 
@@ -564,12 +566,12 @@ class AttendanceController extends Controller
 
                 $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
                 $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
-                $total_worked_hours = $out_time->diffInHours($in_time);
+                $total_present_hours = $out_time->diffInHours($in_time);
 
 
-                $work_hours_delta = $total_worked_hours - $capacity_hours;
+                $work_hours_delta = $total_present_hours - $capacity_hours;
 
-                $total_paid_hours = $total_worked_hours;
+                $total_paid_hours = $total_present_hours;
 
 
 
@@ -734,6 +736,9 @@ class AttendanceController extends Controller
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
                 },
+                "employee.departments" => function ($query) {
+                    $query->select('departments.id', 'departments.name');
+                },
             ])
 
             ->where(
@@ -776,6 +781,220 @@ class AttendanceController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+    /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/attendances",
+     *      operationId="getAttendancesV2",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *     *      *    * *  @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get attendances  ",
+     *      description="This method is to get attendances ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getAttendancesV2(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('attendance_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  $request->user()->business_id;
+             $attendances = Attendance::with([
+                 "employee" => function ($query) {
+                     $query->select('users.id', 'users.first_Name','users.middle_Name',
+                     'users.last_Name');
+                 },
+                 "employee.departments" => function ($query) {
+                    $query->select('departments.id', 'departments.name');
+                },
+             ])
+
+             ->where(
+                 [
+                     "attendances.business_id" => $business_id
+                 ]
+             )
+             ->when(!empty($request->employee_id), function ($query) use ($request) {
+                return $query->where('attendances.employee_id', $request->employee_id);
+            })
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         // $query->where("attendances.name", "like", "%" . $term . "%")
+                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
+                     });
+                 })
+                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                 //        return $query->where('product_category_id', $request->product_category_id);
+                 //    })
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('attendances.created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('attendances.created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("attendances.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("attendances.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });;
+
+
+
+                //  foreach ($attendances as $attendance) {
+                //     $attendance->total_leave_hours = $attendance->records->sum(function ($record) {
+                //      $startTime = Carbon::parse($record->start_time);
+                //      $endTime = Carbon::parse($record->end_time);
+                //      return $startTime->diffInHours($endTime);
+
+                //     });
+
+                //  }
+
+
+             $data["data"] = $attendances;
+
+
+             $data["data_highlights"] = [];
+
+
+
+            $data["data_highlights"]["total_schedule_hours"] = $attendances->sum('capacity_hours');
+
+            $data["data_highlights"]["total_leave_hours"] = abs($attendances->filter(function ($attendance) {
+
+                return $attendance->work_hours_delta < 0;
+
+            })->sum("work_hours_delta"));
+
+
+            $total_available_hours = $data["data_highlights"]["total_schedule_hours"] - $data["data_highlights"]["total_leave_hours"];
+
+
+            if($total_available_hours == 0 || $data["data_highlights"]["total_leave_hours"] == 0) {
+                $data["data_highlights"]["total_work_availability_per_centum"] = 0;
+            }
+            else {
+                $data["data_highlights"]["total_work_availability_per_centum"] = ($total_available_hours / $data["data_highlights"]["total_leave_hours"]) * 100;
+            }
+
+
+
+            $data["data_highlights"]["total_active_hours"] = $attendances->sum('total_paid_hours');
+
+
+            $data["data_highlights"]["total_extra_hours"] = $attendances->filter(function ($attendance) {
+
+                return $attendance->work_hours_delta > 0;
+
+            })->sum("work_hours_delta");
+
+
+
+
+
+
+
+
+             return response()->json($data, 200);
+
+
+             return response()->json($attendances, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
     /**
      *

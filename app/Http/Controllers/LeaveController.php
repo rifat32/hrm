@@ -1826,6 +1826,8 @@ return $employee;
                      return $query->get();
                  });
 
+
+
                  foreach ($leaves as $leave) {
                     $leave->total_leave_hours = $leave->records->sum(function ($record) {
                      $startTime = Carbon::parse($record->start_time);

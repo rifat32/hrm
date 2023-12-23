@@ -26,6 +26,8 @@ class Attendance extends Model
         "regular_work_hours",
 
 
+
+
         "is_active",
         "business_id",
         "created_by"
