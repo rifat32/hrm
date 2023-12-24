@@ -704,11 +704,11 @@ class ProductController extends Controller
         }
 
         if (!empty($request->start_date)) {
-            $productsQuery = $productsQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
+            $productsQuery = $productsQuery->where('created_at', ">=", $request->start_date);
         }
 
         if (!empty($request->end_date)) {
-            $productsQuery = $productsQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
+            $productsQuery = $productsQuery->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
         }
 
 

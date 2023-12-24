@@ -219,10 +219,10 @@ class EmailTemplateWrapperController extends Controller
             }
 
             if (!empty($request->start_date)) {
-                $templateQuery = $templateQuery->where('created_at', ">=", Carbon::createFromFormat('d-m-Y', trim(($request->start_date)))->format('Y-m-d'));
+                $templateQuery = $templateQuery->where('created_at', ">=", $request->start_date);
             }
             if (!empty($request->end_date)) {
-                $templateQuery = $templateQuery->where('created_at', "<=", Carbon::createFromFormat('d-m-Y H:i:s', trim($request->end_date . ' 23:59:59'))->format('Y-m-d'));
+                $templateQuery = $templateQuery->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
             }
 
             $templates = $templateQuery->orderByDesc("id")->paginate($perPage);

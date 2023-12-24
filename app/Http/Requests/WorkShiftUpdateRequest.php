@@ -55,30 +55,30 @@ class WorkShiftUpdateRequest extends FormRequest
             'users.*' => [
                 "numeric",
                 function ($attribute, $value, $fail) {
-                    $user = User::where("id", $value)->get();
+                    $user = User::where("id", $value)->first();
 
                         if (!$user){
                             // $fail("$attribute is invalid.");
                             $fail("Employee does not exists.");
+                            return;
 
                         }
 
                         if ($user->business_id != auth()->user()->business_id) {
                             // $fail("$attribute is invalid.");
                             $fail("Employee belongs to another business.");
+                            return;
 
                         }
 
                         if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))  && !$user->hasRole(("business_manager" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
                             // $fail("$attribute is invalid.");
                             $fail("The user is not a employee");
+                            return;
 
                         }
 
 
-                    return [
-                        "ok" => true,
-                    ];
                 },
 
             ],

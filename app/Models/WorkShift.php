@@ -29,6 +29,9 @@ class WorkShift extends Model
 
     ];
 
+    protected $dates = ['start_date',
+    'end_date',];
+
 
     public function details(){
         return $this->hasMany(WorkShiftDetail::class,'work_shift_id', 'id');
@@ -81,4 +84,6 @@ class WorkShift extends Model
 
         $this->attributes['end_date'] = (new Carbon($value))->format('Y-m-d');
     }
+
+  
 }

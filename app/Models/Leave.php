@@ -56,11 +56,6 @@ class Leave extends Model
 
 
 
-
-
-
-
-
     public function getDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -77,20 +72,6 @@ class Leave extends Model
 
 
 
-    public function setDateAttribute($value)
-    {
-        $this->attributes['date'] = (new Carbon($value))->format('Y-m-d');
-    }
-
-    public function setStartDateAttribute($value)
-    {
-        $this->attributes['start_date'] = (new Carbon($value))->format('Y-m-d');
-    }
-
-    public function setEndDateAttribute($value)
-    {
-        $this->attributes['end_date'] = (new Carbon($value))->format('Y-m-d');
-    }
 
 
 
