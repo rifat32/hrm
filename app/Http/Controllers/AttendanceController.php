@@ -39,16 +39,16 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-  *     @OA\Property(property="note", type="string",  format="string", example="r"),
- *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
- *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
- *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
- *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
- * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1")
- *
- *
- *
- *
+     *     @OA\Property(property="note", type="string",  format="string", example="r"),
+     *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
+     *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
+     *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
+     *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
+     * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1")
+     *
+     *
+     *
+     *
      *
      *         ),
      *      ),
@@ -89,7 +89,7 @@ class AttendanceController extends Controller
     public function createAttendance(AttendanceCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('attendance_create')) {
                     return response()->json([
@@ -121,30 +121,29 @@ class AttendanceController extends Controller
                 if (!$work_shift_details) {
                     $error =  [
                         "message" => ("No work shift details found  day" . $day_number),
-                 ];
-                    throw new Exception(json_encode($error),400);
+                    ];
+                    throw new Exception(json_encode($error), 400);
                 }
-                if($work_shift_details->is_weekend){
+                if ($work_shift_details->is_weekend) {
                     $error =  [
-                        "message" => ("there is a weekend on date" . $request_data["in_date"]),
-                 ];
-                    throw new Exception(json_encode($error),400);
+                        "message" => ("there is a weekend on date " . $request_data["in_date"]),
+                    ];
+                    throw new Exception(json_encode($error), 400);
                 }
                 $holiday =   Holiday::where([
                     "business_id" => auth()->user()->business_id
                 ])
-                ->where('holidays.start_date', "<=", $request_data["in_date"])
-                ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
-                ->first();
+                    ->where('holidays.start_date', "<=", $request_data["in_date"])
+                    ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                    ->first();
 
-                if($holiday){
-                    if($holiday->is_active) {
+                if ($holiday) {
+                    if ($holiday->is_active) {
                         $error =  [
                             "message" => ("there is a holiday on date" . $request_data["in_date"]),
-                     ];
-                        throw new Exception(json_encode($error),400);
+                        ];
+                        throw new Exception(json_encode($error), 400);
                     }
-
                 }
 
                 $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -164,18 +163,17 @@ class AttendanceController extends Controller
 
 
 
-                if($request_data["does_break_taken"]) {
-                    if($work_shift->break_type == 'unpaid') {
+                if ($request_data["does_break_taken"]) {
+                    if ($work_shift->break_type == 'unpaid') {
                         $total_paid_hours -= $work_shift->break_hours;
-
                     }
                 }
 
-                if($work_hours_delta > 0){
+                if ($work_hours_delta > 0) {
                     $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                  } else {
-                     $regular_work_hours = $total_paid_hours;
-                  }
+                } else {
+                    $regular_work_hours = $total_paid_hours;
+                }
 
 
 
@@ -201,7 +199,7 @@ class AttendanceController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-  /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/attendances/multiple",
@@ -216,23 +214,23 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *    @OA\Property(property="employee_id", type="number", format="number", example="1"),
- *    @OA\Property(property="attendance_details", type="string", format="array", example={
- * {
- *    "note" : "note",
- *    "in_time" : "08:44:00",
- * "out_time" : "12:44:00",
- * "in_date" : "2023-11-18",
- * "does_break_taken" : 1
- *
- * }
- *
- * }),
+     *    @OA\Property(property="employee_id", type="number", format="number", example="1"),
+     *    @OA\Property(property="attendance_details", type="string", format="array", example={
+     * {
+     *    "note" : "note",
+     *    "in_time" : "08:44:00",
+     * "out_time" : "12:44:00",
+     * "in_date" : "2023-11-18",
+     * "does_break_taken" : 1
+     *
+     * }
+     *
+     * }),
 
- *
- *
- *
- *
+     *
+     *
+     *
+     *
      *
      *         ),
      *      ),
@@ -270,20 +268,20 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function createMultipleAttendance(AttendanceMultipleCreateRequest $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             return DB::transaction(function () use ($request) {
-                 if (!$request->user()->hasPermissionTo('attendance_create')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
+    public function createMultipleAttendance(AttendanceMultipleCreateRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('attendance_create')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
 
-                 $request_data = $request->validated();
+                $request_data = $request->validated();
 
-                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["employee_id"]);
                 })->first();
                 if (!$work_shift) {
@@ -293,7 +291,7 @@ class AttendanceController extends Controller
 
 
 
-                 $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use($request_data, $work_shift) {
+                $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $work_shift) {
                     $day_number = Carbon::parse($item["in_date"])->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
                         "day" => $day_number
@@ -303,36 +301,33 @@ class AttendanceController extends Controller
                     if (!$work_shift_details) {
                         $error =  [
                             "message" => ("No work shift details found  day" . $day_number),
-                     ];
-                        throw new Exception(json_encode($error),400);
+                        ];
+                        throw new Exception(json_encode($error), 400);
                     }
 
 
 
-                    if($work_shift_details->is_weekend){
+                    if ($work_shift_details->is_weekend) {
                         $error =  [
                             "message" => ("there is a weekend on date" . $item["in_date"]),
-                     ];
-                        throw new Exception(json_encode($error),400);
-
+                        ];
+                        throw new Exception(json_encode($error), 400);
                     }
 
                     $holiday =   Holiday::where([
                         "business_id" => auth()->user()->business_id
                     ])
-                    ->where('holidays.start_date', "<=", $item["in_date"])
-                    ->where('holidays.end_date', ">=", $item["in_date"] . ' 23:59:59')
-                    ->first();
+                        ->where('holidays.start_date', "<=", $item["in_date"])
+                        ->where('holidays.end_date', ">=", $item["in_date"] . ' 23:59:59')
+                        ->first();
 
-                    if($holiday){
-                        if($holiday->is_active) {
+                    if ($holiday) {
+                        if ($holiday->is_active) {
                             $error =  [
                                 "message" => ("there is a holiday on date" . $item["in_date"]),
-                         ];
-                            throw new Exception(json_encode($error),400);
-
+                            ];
+                            throw new Exception(json_encode($error), 400);
                         }
-
                     }
 
                     $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -352,55 +347,53 @@ class AttendanceController extends Controller
 
 
 
-                    if($item["does_break_taken"]) {
-                        if($work_shift->break_type == 'unpaid') {
+                    if ($item["does_break_taken"]) {
+                        if ($work_shift->break_type == 'unpaid') {
                             $total_paid_hours -= $work_shift->break_hours;
-
                         }
                     }
 
-                    if($work_hours_delta > 0){
+                    if ($work_hours_delta > 0) {
                         $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                      } else {
-                         $regular_work_hours = $total_paid_hours;
-                      }
+                    } else {
+                        $regular_work_hours = $total_paid_hours;
+                    }
 
 
 
 
-                return [
-                    "employee_id" => $request_data["employee_id"],
-                    "business_id" => auth()->user()->business_id,
-                    "is_active" => True,
-                    "created_by" => auth()->user()->id,
-                    "note" => $item["note"],
-                    "in_time" => $item["in_time"],
-                    "out_time" => $item["out_time"],
-                    "in_date" => $item["in_date"],
-                    "does_break_taken" => $item["does_break_taken"],
-                    "capacity_hours" => $capacity_hours,
-                    "work_hours_delta" => $work_hours_delta,
-                    "break_type" => $work_shift->break_type,
-                    "break_hours" => $work_shift->break_hours,
-                    "total_paid_hours" => $total_paid_hours,
-                    "regular_work_hours" => $regular_work_hours,
+                    return [
+                        "employee_id" => $request_data["employee_id"],
+                        "business_id" => auth()->user()->business_id,
+                        "is_active" => True,
+                        "created_by" => auth()->user()->id,
+                        "note" => $item["note"],
+                        "in_time" => $item["in_time"],
+                        "out_time" => $item["out_time"],
+                        "in_date" => $item["in_date"],
+                        "does_break_taken" => $item["does_break_taken"],
+                        "capacity_hours" => $capacity_hours,
+                        "work_hours_delta" => $work_hours_delta,
+                        "break_type" => $work_shift->break_type,
+                        "break_hours" => $work_shift->break_hours,
+                        "total_paid_hours" => $total_paid_hours,
+                        "regular_work_hours" => $regular_work_hours,
 
 
 
 
-                ];
-
-            });
-
-
-            $employee = User::where([
-                "id" => $request_data["employee_id"]
-            ])
-            ->first();
+                    ];
+                });
 
 
+                $employee = User::where([
+                    "id" => $request_data["employee_id"]
+                ])
+                    ->first();
 
-             $success =   $employee->attendances()->createMany($attendances_data);
+
+
+                $success =   $employee->attendances()->createMany($attendances_data);
 
                 if ($success) {
                     // Retrieve the created attendance records
@@ -417,13 +410,13 @@ class AttendanceController extends Controller
 
 
 
-                 return response([], 201);
-             });
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+                return response([], 201);
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Put(
@@ -439,13 +432,13 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-  *     @OA\Property(property="note", type="string",  format="string", example="r"),
- *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
- *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
- *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
- *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
- *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1")
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     *     @OA\Property(property="note", type="string",  format="string", example="r"),
+     *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
+     *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
+     *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
+     *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
+     *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1")
 
      *
      *         ),
@@ -488,7 +481,7 @@ class AttendanceController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('attendance_update')) {
                     return response()->json([
@@ -533,30 +526,29 @@ class AttendanceController extends Controller
                 if (!$work_shift_details) {
                     $error =  [
                         "message" => ("No work shift details found  day" . $day_number),
-                 ];
-                    throw new Exception(json_encode($error),400);
+                    ];
+                    throw new Exception(json_encode($error), 400);
                 }
-                if($work_shift_details->is_weekend){
+                if ($work_shift_details->is_weekend) {
                     $error =  [
                         "message" => ("there is a weekend on date" . $request_data["in_date"]),
-                 ];
-                    throw new Exception(json_encode($error),400);
+                    ];
+                    throw new Exception(json_encode($error), 400);
                 }
                 $holiday =   Holiday::where([
                     "business_id" => auth()->user()->business_id
                 ])
-                ->where('holidays.start_date', "<=", $request_data["in_date"])
-                ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
-                ->first();
+                    ->where('holidays.start_date', "<=", $request_data["in_date"])
+                    ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                    ->first();
 
-                if($holiday){
-                    if($holiday->is_active) {
+                if ($holiday) {
+                    if ($holiday->is_active) {
                         $error =  [
                             "message" => ("there is a holiday on date" . $request_data["in_date"]),
-                     ];
-                        throw new Exception(json_encode($error),400);
+                        ];
+                        throw new Exception(json_encode($error), 400);
                     }
-
                 }
 
                 $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -576,17 +568,16 @@ class AttendanceController extends Controller
 
 
 
-                if($request_data["does_break_taken"]) {
-                    if($work_shift->break_type == 'unpaid') {
+                if ($request_data["does_break_taken"]) {
+                    if ($work_shift->break_type == 'unpaid') {
                         $total_paid_hours -= $work_shift->break_hours;
-
                     }
                 }
 
-                if($work_hours_delta > 0){
-                  $regular_work_hours =  $total_paid_hours - $work_hours_delta;
+                if ($work_hours_delta > 0) {
+                    $regular_work_hours =  $total_paid_hours - $work_hours_delta;
                 } else {
-                   $regular_work_hours = $total_paid_hours;
+                    $regular_work_hours = $total_paid_hours;
                 }
 
 
@@ -599,18 +590,18 @@ class AttendanceController extends Controller
                 $request_data["regular_work_hours"] = $regular_work_hours;
                 $attendance  =  tap(Attendance::where($attendance_query_params))->update(
                     collect($request_data)->only([
-        'note',
-        'employee_id',
-        'in_time',
-        'out_time',
-        'in_date',
-        'does_break_taken',
-        "capacity_hours",
-        "work_hours_delta",
-        "break_type",
-        "break_hours",
-        "total_paid_hours",
-        "regular_work_hours"
+                        'note',
+                        'employee_id',
+                        'in_time',
+                        'out_time',
+                        'in_date',
+                        'does_break_taken',
+                        "capacity_hours",
+                        "work_hours_delta",
+                        "break_type",
+                        "break_hours",
+                        "total_paid_hours",
+                        "regular_work_hours"
 
                         // "is_active",
                         // "business_id",
@@ -724,7 +715,7 @@ class AttendanceController extends Controller
     public function getAttendances(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('attendance_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -733,19 +724,23 @@ class AttendanceController extends Controller
             $business_id =  $request->user()->business_id;
             $attendances = Attendance::with([
                 "employee" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
                 },
                 "employee.departments" => function ($query) {
                     $query->select('departments.id', 'departments.name');
                 },
             ])
 
-            ->where(
-                [
-                    "attendances.business_id" => $business_id
-                ]
-            )
+                ->where(
+                    [
+                        "attendances.business_id" => $business_id
+                    ]
+                )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -873,78 +868,82 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function getAttendancesV2(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('attendance_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id =  $request->user()->business_id;
-             $attendances = Attendance::with([
-                 "employee" => function ($query) {
-                     $query->select('users.id', 'users.first_Name','users.middle_Name',
-                     'users.last_Name');
-                 },
-                 "employee.departments" => function ($query) {
+    public function getAttendancesV2(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('attendance_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $attendances = Attendance::with([
+                "employee" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "employee.departments" => function ($query) {
                     $query->select('departments.id', 'departments.name');
                 },
-             ])
+            ])
 
-             ->where(
-                 [
-                     "attendances.business_id" => $business_id
-                 ]
-             )
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('attendances.employee_id', $request->employee_id);
-            })
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
-                         // $query->where("attendances.name", "like", "%" . $term . "%")
-                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
-                     });
-                 })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('attendances.created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('attendances.created_at', "<=", ($request->end_date . ' 23:59:59'));
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("attendances.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("attendances.id", "DESC");
-                 })
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });;
-
-
-
-                //  foreach ($attendances as $attendance) {
-                //     $attendance->total_leave_hours = $attendance->records->sum(function ($record) {
-                //      $startTime = Carbon::parse($record->start_time);
-                //      $endTime = Carbon::parse($record->end_time);
-                //      return $startTime->diffInHours($endTime);
-
-                //     });
-
-                //  }
+                ->where(
+                    [
+                        "attendances.business_id" => $business_id
+                    ]
+                )
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                    return $query->where('attendances.employee_id', $request->employee_id);
+                })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        // $query->where("attendances.name", "like", "%" . $term . "%")
+                        //     ->orWhere("attendances.description", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('attendances.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('attendances.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("attendances.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("attendances.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
 
 
-             $data["data"] = $attendances;
+
+            //  foreach ($attendances as $attendance) {
+            //     $attendance->total_leave_hours = $attendance->records->sum(function ($record) {
+            //      $startTime = Carbon::parse($record->start_time);
+            //      $endTime = Carbon::parse($record->end_time);
+            //      return $startTime->diffInHours($endTime);
+
+            //     });
+
+            //  }
 
 
-             $data["data_highlights"] = [];
+            $data["data"] = $attendances;
+
+
+            $data["data_highlights"] = [];
 
 
 
@@ -953,17 +952,15 @@ class AttendanceController extends Controller
             $data["data_highlights"]["total_leave_hours"] = abs($attendances->filter(function ($attendance) {
 
                 return $attendance->work_hours_delta < 0;
-
             })->sum("work_hours_delta"));
 
 
             $total_available_hours = $data["data_highlights"]["total_schedule_hours"] - $data["data_highlights"]["total_leave_hours"];
 
 
-            if($total_available_hours == 0 || $data["data_highlights"]["total_leave_hours"] == 0) {
+            if ($total_available_hours == 0 || $data["data_highlights"]["total_leave_hours"] == 0) {
                 $data["data_highlights"]["total_work_availability_per_centum"] = 0;
-            }
-            else {
+            } else {
                 $data["data_highlights"]["total_work_availability_per_centum"] = ($total_available_hours / $data["data_highlights"]["total_leave_hours"]) * 100;
             }
 
@@ -975,7 +972,6 @@ class AttendanceController extends Controller
             $data["data_highlights"]["total_extra_hours"] = $attendances->filter(function ($attendance) {
 
                 return $attendance->work_hours_delta > 0;
-
             })->sum("work_hours_delta");
 
 
@@ -985,15 +981,259 @@ class AttendanceController extends Controller
 
 
 
-             return response()->json($data, 200);
+            return response()->json($data, 200);
 
 
-             return response()->json($attendances, 200);
-         } catch (Exception $e) {
+            return response()->json($attendances, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v3.0/attendances",
+     *      operationId="getAttendancesV3",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *      *    * *  @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get leaves  ",
+     *      description="This method is to get leaves ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getAttendancesV3(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            if (!$request->user()->hasPermissionTo('leave_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $employees = User::with(
+                [
+                    'attendances' => function ($query) use ($request) {
+                        $query->when(!empty($request->start_date), function ($query) use ($request) {
+                            return $query->where('in_date', '>=', ($request->start_date . ' 00:00:00'));
+                        })
+                            ->when(!empty($request->end_date), function ($query) use ($request) {
+                                return $query->where('in_date', '<=', ($request->end_date . ' 23:59:59'));
+                            });
+                    },
+                    'departments' => function ($query) use ($request) {
+                        $query->select("departments.name");
+                    },
+
+
+
+
+                ]
+            )
+                ->whereHas("attendances", function ($q) use ($request) {
+                    $q->whereNotNull("employee_id")
+                        ->when(!empty($request->employee_id), function ($q) use ($request) {
+                            $q->where('employee_id', $request->employee_id);
+                        })
+                        ->when(!empty($request->start_date), function ($q) use ($request) {
+                            $q->where('in_date', '>=', $request->start_date . ' 00:00:00');
+                        })
+                        ->when(!empty($request->end_date), function ($q) use ($request) {
+                            $q->where('in_date', '<=', ($request->end_date . ' 23:59:59'));
+                        });
+                })
+                ->where(
+                    [
+                        "users.business_id" => $business_id
+                    ]
+                )
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        // $query->where("leaves.name", "like", "%" . $term . "%")
+                        //     ->orWhere("leaves.description", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                    return $query->whereHas("attendances", function ($q) use ($request) {
+                        $q->where('employee_id', $request->employee_id);
+                    });
+                })
+
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("users.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("users.id", "DESC");
+                })
+                ->select(
+                    "users.id",
+                    "users.first_Name",
+                    "users.middle_Name",
+                    "users.last_Name",
+                    "users.image",
+                )
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
+
+
+            if ((!empty($request->start_date) && !empty($request->end_date))) {
+
+                $startDate = Carbon::parse(($request->start_date . ' 00:00:00'));
+                $endDate = Carbon::parse(($request->end_date . ' 23:59:59'));
+                $dateArray = [];
+
+
+
+                for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+                    $dateArray[] = $date->format('Y-m-d');
+                }
+
+                // while ($startDate->lte($endDate)) {
+                //     $dateArray[] = $startDate->toDateString();
+                //     $startDate->addDay();
+                // }
+
+
+
+                $employees->each(function ($employee) use ($dateArray) {
+                    // Get leaves for the current employee
+
+
+                    $total_paid_hours = 0;
+
+
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($employee, &$total_paid_hours) {
+
+
+
+                        $attendance = $employee->attendances->first(function ($attendance) use (&$date){
+
+                            $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
+
+
+                            return $in_date == $date;
+
+                        });
+
+
+
+
+                        if($attendance){
+                            $total_paid_hours += $attendance->total_paid_hours;
+                            return [
+
+                                'date' => Carbon::parse($date)->format("d-m-Y"),
+                                'is_present' => 1,
+                                'paid_hours' => $attendance->total_paid_hours
+                            ];
+                        }
+
+                        return  null;
+
+
+
+                    })->filter()->values();
+
+                    $employee->total_paid_hours = $total_paid_hours;
+                    $employee->unsetRelation('attendances');
+                    return $employee;
+                });
+            }
+
+
+            return response()->json($employees, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -1054,7 +1294,7 @@ class AttendanceController extends Controller
     public function getAttendanceById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('attendance_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1139,7 +1379,7 @@ class AttendanceController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('attendance_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1165,7 +1405,7 @@ class AttendanceController extends Controller
             Attendance::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

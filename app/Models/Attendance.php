@@ -57,10 +57,5 @@ class Attendance extends Model
     }
 
 
-    public function setInDateAttribute($value)
-    {
-        $this->attributes['in_date'] =  (new Carbon($value))->format('Y-m-d');
-    }
-
-
+  
 }

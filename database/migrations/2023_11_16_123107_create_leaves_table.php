@@ -28,7 +28,7 @@ class CreateLeavesTable extends Migration
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
 
-            $table->enum('status', ['pending','progress', 'approved'])->default("pending");
+            $table->enum('status', ['pending','progress', 'approved','rejected'])->default("pending");
 
             $table->json('attachments')->nullable();
 

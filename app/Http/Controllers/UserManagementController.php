@@ -3434,6 +3434,15 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
      * required=true,
      * example="search_key"
      * ),
+     *  * *  @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
      *     * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -3497,9 +3506,14 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
             //      ], 401);
             //  }
 
-             $users = ActivityLog::where('user_id', $request->user()->id)
-             ->where("activity", "!=", "DUMMY activity")
+             $users = ActivityLog::where("activity", "!=", "DUMMY activity")
              ->where("description", "!=", "DUMMY description")
+             ->when(!empty($request->employee_id), function ($query) use ($request) {
+                return $query->where('user_id', $request->employee_id);
+            })
+            ->when(empty($request->employee_id), function ($query) use ($request) {
+                return $query->where('user_id', $request->user()->id);
+            })
              ->when(!empty($request->search_key), function ($query) use ($request) {
                 $term = $request->search_key;
                 return $query->where(function ($subquery) use ($term) {

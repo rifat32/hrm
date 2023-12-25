@@ -48,13 +48,6 @@ class Holiday extends Model
 
 
 
-    public function setStartDateAttribute($value)
-    {
-        $this->attributes['start_date'] = (new Carbon($value))->format('Y-m-d');
-    }
-    public function setEndDateAttribute($value)
-    {
-        $this->attributes['end_date'] = (new Carbon($value))->format('Y-m-d');
-    }
+  
 
 }

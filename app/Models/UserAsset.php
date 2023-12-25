@@ -50,8 +50,5 @@ class UserAsset extends Model
 
 
 
-    public function setDateAttribute($value)
-    {
-        $this->attributes['date'] = (new Carbon($value))->format('Y-m-d');
-    }
+  
 }

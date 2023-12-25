@@ -64,12 +64,5 @@ class JobListing extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
-    public function setApplicationDeadlineAttribute($value)
-    {
-        $this->attributes['application_deadline'] = (new Carbon($value))->format('Y-m-d');
-    }
-    public function setPostedOnAttribute($value)
-    {
-        $this->attributes['posted_on'] = (new Carbon($value))->format('Y-m-d');
-    }
+ 
 }

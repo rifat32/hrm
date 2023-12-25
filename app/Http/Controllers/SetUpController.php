@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
 use App\Models\ActivityLog;
 
 use App\Models\ErrorLog;
@@ -18,28 +20,34 @@ use App\Models\SettingLeaveType;
 
 class SetUpController extends Controller
 {
+    use ErrorUtil, UserActivityUtil;
 
-    public function getErrorLogs() {
+    public function getErrorLogs(Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $error_logs = ErrorLog::orderbyDesc("id")->paginate(10);
         return view("error-log",compact("error_logs"));
     }
-    public function getActivityLogs() {
+    public function getActivityLogs(Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $activity_logs = ActivityLog::orderbyDesc("id")->paginate(10);
         return view("user-activity-log",compact("activity_logs"));
     }
 
-    public function migrate() {
+    public function migrate(Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         Artisan::call('migrate');
         return "migrated";
             }
 
-    public function swaggerRefresh() {
+    public function swaggerRefresh(Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
 Artisan::call('l5-swagger:generate');
 return "swagger generated";
     }
 
     public function setUp(Request $request)
     {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         // @@@@@@@@@@@@@@@@@@@
         // clear everything
         // @@@@@@@@@@@@@@@@@@@
@@ -65,7 +73,7 @@ return "swagger generated";
         'city'=> "Dhaka",
         'postcode'=> "1207",
         'email'=> "admin@gmail.com",
-        'password'=>Hash::make("12345678"),
+        'password'=>Hash::make("12345678@We"),
         "email_verified_at"=>now(),
         'is_active' => 1
         ]);
@@ -144,6 +152,8 @@ return "swagger generated";
 
     public function roleRefresh(Request $request)
     {
+
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
    // ###############################
         // permissions
         // ###############################
@@ -196,7 +206,8 @@ return "swagger generated";
     }
 
 
-    public function backup() {
+    public function backup(Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
         foreach(DB::connection('backup_database')->table('users')->get() as $backup_data){
 
         $data_exists = DB::connection('mysql')->table('users')->where([
@@ -311,20 +322,5 @@ return "swagger generated";
 
                                                 return response()->json("done",200);
     }
-    public function backupFuelStationService() {
-        foreach(DB::connection('backup_database')->table('fuel_station_services')->get() as $backup_data){
 
-        $data_exists = DB::connection('mysql')->table('fuel_station_services')->where([
-            "id" => $backup_data->id
-           ])->first();
-           if(!$data_exists) {
-            DB::connection('mysql')->table('fuel_station_services')->insert(get_object_vars($backup_data));
-           }
-        }
-
-
-
-
-                                                return response()->json("done",200);
-    }
 }

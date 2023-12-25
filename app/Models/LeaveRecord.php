@@ -48,10 +48,6 @@ class LeaveRecord extends Model
         return (new Carbon($value))->format('d-m-Y');
     }
 
-    public function setDateAttribute($value)
-    {
-        $this->attributes['date'] = (new Carbon($value))->format('Y-m-d');
-    }
 
 
 

@@ -12,6 +12,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
 
 trait LeaveUtil
 {
@@ -38,29 +40,59 @@ trait LeaveUtil
         if ($setting_leave->approval_level == "single") {
             $leave_approvals = LeaveApproval::where([
                 "leave_id" => $leave->id,
-                "is_approved" => 1
-            ])->get();
+            ])->orderBy("id","DESC")->get();
+
+
             foreach ($leave_approvals as $single_leave_approval) {
                 $user = User::where([
                     "id" =>  $single_leave_approval->created_by
                 ])
                     ->first();
-                $role_names = $user->getRoleNames();
+
+
+                $user_business_id = auth()->user()->business_id;
+
+                $role_names = $user->getRoleNames()->toArray();
+
+                $modified_role_names = [];
+                foreach ($role_names as $roleName) {
+                    $modified_role_names[] = $roleName . '#' . $user_business_id;
+                }
+
+                $combined_role_names = array_merge($role_names, $modified_role_names);
+
+
+
 
                 $special_user = $setting_leave->special_users()->where(["user_id" => $user->id])->first();
                 if ($special_user) {
-                    $leave->status = "approved";
+                    if($single_leave_approval->is_approved) {
+                        $leave->status = "approved";
+                    }else {
+                        $leave->status = "rejected";
+                    }
+
                     break;
                 }
 
-                $roles =  Role::whereIn("name", $role_names)->get();
+                $roles =  Role::whereIn("name", $combined_role_names)->get();
+
+
                 foreach ($roles as $role) {
-                    $special_role = $setting_leave->special_users()->where(["user_id" => $role->id])->first();
+
+                    $special_role = $setting_leave->special_roles()->where(["role_id" => $role->id])->first();
+
                     if ($special_role) {
-                        $leave->status = "approved";
+                        if($single_leave_approval->is_approved) {
+                            $leave->status = "approved";
+                        }else {
+                            $leave->status = "rejected";
+                        }
                         break 2;
                     }
                 }
+
+
             }
         }
         if ($setting_leave->approval_level == "multiple") {

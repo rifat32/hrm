@@ -553,6 +553,9 @@ class LeaveController extends Controller
                 }
 
 
+
+
+
                 $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"]);
                 if (!$process_leave_approval["success"]) {
                     return response([
@@ -1611,15 +1614,7 @@ $total_leave_hours = 0;
 
 $employee->datewise_leave = collect($dateArray)->map(function ($date) use ($employee,&$total_leave_hours) {
 
-    // foreach ($leaves as $leave) {
-    //     $leave->total_leave_hours = $leave->records->sum(function ($record) {
-    //      $startTime = Carbon::parse($record->start_time);
-    //      $endTime = Carbon::parse($record->end_time);
-    //      return $startTime->diffInHours($endTime);
 
-    //     });
-
-    //  }
    $leave_record = LeaveRecord::whereHas(
         "leave.employee", function($query) use($employee,$date) {
              $query->where([
@@ -1639,13 +1634,17 @@ $employee->datewise_leave = collect($dateArray)->map(function ($date) use ($empl
         $total_leave_hours += $leave_hours;
     }
 
-
+if($leave_record) {
     return [
-        'date' => $date,
+        'date' => Carbon::parse($date)->format("d-m-Y"),
         'is_on_leave' => $leave_record?1:0,
-        'leave_hours' => $leave_hours
+        'leave_hours' => $leave_hours,
+
     ];
-});
+}
+return null;
+
+})->filter()->values();
 
 $employee->total_leave_hours = $total_leave_hours;
 $employee->unsetRelation('leaves');
