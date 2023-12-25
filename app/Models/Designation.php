@@ -18,17 +18,65 @@ class Designation extends Model
         "created_by"
     ];
 
-    public function disabled(){
-        return $this->hasMany(DisabledDesignation::class,'designation_id', 'id');
+    public function disabled()
+    {
+        return $this->hasMany(DisabledDesignation::class, 'designation_id', 'id');
     }
 
 
+    public function getIsActiveAttribute($value)
+    {
+
+        $is_active = $value;
+        $user = auth()->user();
+
+        if(empty($user->business_id)) {
+            if(empty($this->business_id) && $this->is_default == 1) {
+                if(!$user->hasRole("superadmin")) {
+                    $disabled = $this->disabled()->where([
+                        "created_by" => $user->id
+                   ])
+                   ->first();
+                   if($disabled) {
+                      $is_active = 0;
+                   }
+                }
+               }
+
+
+        } else {
+
+            if(empty($this->business_id)) {
+             $disabled = $this->disabled()->where([
+                  "business_id" => $user->business_id
+             ])
+             ->first();
+             if($disabled) {
+                $is_active = 0;
+             }
+
+            }
+
+
+        }
+
+
+
+
+        return $is_active;
+    }
+
+
+
     public function getCreatedAtAttribute($value)
-{
-    return (new Carbon($value))->format('d-m-Y');
-}
-public function getUpdatedAtAttribute($value)
-{
-    return (new Carbon($value))->format('d-m-Y');
-}
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+
+
+
 }

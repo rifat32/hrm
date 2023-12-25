@@ -300,7 +300,6 @@ class DesignationController extends Controller
             $should_update = 0;
             $should_disable = 0;
             if (empty(auth()->user()->business_id)) {
-
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($designation->business_id != NULL || $designation->is_default != 1)) {
                         return response()->json([
