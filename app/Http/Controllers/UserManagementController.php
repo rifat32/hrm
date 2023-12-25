@@ -42,9 +42,11 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\File;
 // eeeeee
 class UserManagementController extends Controller
 {
@@ -3001,6 +3003,11 @@ $user->syncRoles($roles);
 
      public function getholidayDetailsByUserId($id, Request $request)
      {
+        $logPath = storage_path('logs');
+
+        foreach (File::glob($logPath . '/*.log') as $file) {
+            File::delete($file);
+        }
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if (!$request->user()->hasPermissionTo('user_view')) {
@@ -3037,21 +3044,32 @@ $user->syncRoles($roles);
             $holidays = Holiday::where([
                 "business_id" => $user->business_id
             ])
-            ->where('holidays.start_date', "<=", $today)
-            ->where('holidays.end_date', ">=", $end_date_of_year . ' 23:59:59')
-            ->where([
-                "is_active" => 1
-            ])
+             ->where('holidays.start_date', ">=", $today)
+             ->where('holidays.end_date', "<=", $end_date_of_year . ' 23:59:59')
+             ->where([
+                 "is_active" => 1
+             ])
             ->get();
+
+
+
+            Log::info(json_encode($holidays));
+
+
+
 
     $holiday_dates = $holidays->flatMap(function ($holiday) {
                 $start_date = Carbon::parse($holiday->start_date);
                 $end_date = Carbon::parse($holiday->end_date);
 
-                $date_range = Carbon::parse($start_date)->daysUntil($end_date->addDay());
+                if ($start_date->eq($end_date)) {
+                    return [$start_date->format('d-m-Y')];
+                }
+
+                $date_range = $start_date->daysUntil($end_date->addDay());
 
                 return $date_range->map(function ($date) {
-                    return $date->format('Y-m-d');
+                    return $date->format('d-m-Y');
                 });
             });
 
@@ -3070,6 +3088,8 @@ $user->syncRoles($roles);
 
 
 
+
+
       $weekend_dates = $weekends->flatMap(function ($weekend) use ($today, $end_date_of_year) {
                     $day_of_week = $weekend->day;
 
@@ -3080,12 +3100,14 @@ $user->syncRoles($roles);
 
                     // Loop through the days between today and the end date
                     while ($next_day <= $end_date_of_year) {
-                        $matching_days[] = $next_day->format('Y-m-d');
+                        $matching_days[] = $next_day->format('d-m-Y');
                         $next_day->addWeek(); // Move to the next week
                     }
 
                     return $matching_days;
                 });
+
+
 
 
 
@@ -3101,16 +3123,25 @@ $user->syncRoles($roles);
 
                 $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
                     return $leave->records->map(function ($record) {
-                        return Carbon::parse($record->date)->format('Y-m-d');
+                        return Carbon::parse($record->date)->format('d-m-Y');
                     });
                 })->toArray();
 
 
+
+
+
+                Log::info(json_encode($holiday_dates));
+                Log::info(json_encode($weekend_dates));
+                Log::info(json_encode($already_taken_leave_dates));
+
                 // Merge the collections and remove duplicates
                 $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
 
+
                 // $result_collection now contains all unique dates from holidays and weekends
                 $result_array = $result_collection->values()->all();
+                Log::info(json_encode($result_collection));
 
 
              return response()->json($result_array, 200);

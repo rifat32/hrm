@@ -300,6 +300,7 @@ class DesignationController extends Controller
             $should_update = 0;
             $should_disable = 0;
             if (empty(auth()->user()->business_id)) {
+
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($designation->business_id != NULL || $designation->is_default != 1)) {
                         return response()->json([
@@ -505,7 +506,10 @@ class DesignationController extends Controller
                             return $query->where('designations.is_active', intval($request->is_active));
                         });
                 } else {
-                    return $query->where('designations.business_id', NULL)
+                    return $query
+
+                    ->where(function($query) use($request) {
+                        $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
                         ->where('designations.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
@@ -524,10 +528,16 @@ class DesignationController extends Controller
                                     return $query->where('designations.is_active', intval($request->is_active));
                                 });
                         });
+
+                    });
                 }
             })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query->where('designations.business_id', NULL)
+                    return $query
+                    ->where(function($query) use($request, $created_by) {
+
+
+                        $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
                         ->where('designations.is_active', 1)
                         ->whereDoesntHave("disabled", function($q) use($created_by) {
@@ -568,6 +578,9 @@ class DesignationController extends Controller
                                     return $query->where('designations.is_active', intval($request->is_active));
                                 });;
                         });
+                    });
+
+
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
