@@ -131,6 +131,49 @@ class User extends Authenticatable
 
 
     ];
+
+
+
+
+
+
+
+    protected static function boot()
+    {
+        User::boot();
+
+        static::deleting(function ($user) {
+            // Cascade soft delete to related children
+            $user->leaves()->delete();
+            $user->attendances()->delete();
+
+        });
+
+        static::restoring(function ($user) {
+            // Cascade restore to related children
+            $user->leaves()->withTrashed()->restore();
+            $user->attendances()->withTrashed()->restore();
+        });
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -148,6 +191,6 @@ class User extends Authenticatable
         return (new Carbon($value))->format('d-m-Y');
     }
 
- 
+
 
 }

@@ -3035,7 +3035,7 @@ $user->syncRoles($roles);
              }
 
 
-             $today = today();
+             $today = Carbon::now()->startOfYear()->format('Y-m-d');
              $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
 
 
@@ -3094,7 +3094,7 @@ $user->syncRoles($roles);
                     $day_of_week = $weekend->day;
 
                     // Find the next occurrence of the specified day of the week
-                    $next_day = $today->copy()->next($day_of_week);
+                    $next_day = Carbon::parse($today)->copy()->next($day_of_week);
 
                     $matching_days = [];
 
@@ -3129,11 +3129,6 @@ $user->syncRoles($roles);
 
 
 
-
-
-                Log::info(json_encode($holiday_dates));
-                Log::info(json_encode($weekend_dates));
-                Log::info(json_encode($already_taken_leave_dates));
 
                 // Merge the collections and remove duplicates
                 $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();

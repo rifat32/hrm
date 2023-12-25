@@ -1421,7 +1421,7 @@
         "/v3.0/attendances": {
             "get": {
                 "tags": [
-                    "leaves"
+                    "attendances"
                 ],
                 "summary": "This method is to get leaves  ",
                 "description": "This method is to get leaves ",
@@ -21058,6 +21058,13 @@
                         "example": "search_key"
                     },
                     {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "order_by",
                         "in": "query",
                         "description": "order_by",
@@ -22125,9 +22132,9 @@
                 "operationId": "getWorkShiftByUserId",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
-                        "description": "id",
+                        "description": "user_id",
                         "required": true,
                         "example": "6"
                     }
