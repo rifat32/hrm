@@ -605,9 +605,9 @@ class WorkShiftController extends Controller
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="id",
+     *         name="user_id",
      *         in="path",
-     *         description="id",
+     *         description="user_id",
      *         required=true,
      *  example="6"
      *      ),
