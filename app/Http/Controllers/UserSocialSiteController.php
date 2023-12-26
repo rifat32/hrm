@@ -103,7 +103,7 @@ class UserSocialSiteController extends Controller
 
 
 UserSocialSite::where([
-    'social_site_id'=> $request_data[""],
+    'social_site_id'=> $request_data["social_site_id"],
     'user_id' => $request_data["user_id"] ,
 ])->delete();
 

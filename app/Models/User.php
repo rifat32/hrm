@@ -140,7 +140,7 @@ class User extends Authenticatable
 
     protected static function boot()
     {
-        User::boot();
+        parent::boot();
 
         static::deleting(function ($user) {
             // Cascade soft delete to related children

@@ -673,7 +673,8 @@ class AttendanceController extends Controller
      * required=true,
      * example="1"
      * ),
-     * employee_id
+     *
+     * 
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",

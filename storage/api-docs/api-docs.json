@@ -935,6 +935,13 @@
                         "example": "search_key"
                     },
                     {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "order_by",
                         "in": "query",
                         "description": "order_by",
@@ -16848,6 +16855,11 @@
                                         "format": "string",
                                         "example": "Your Code"
                                     },
+                                    "is_working": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    },
                                     "serial_number": {
                                         "type": "string",
                                         "format": "string",
@@ -16962,6 +16974,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "Your Code"
+                                    },
+                                    "is_working": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
                                     },
                                     "serial_number": {
                                         "type": "string",

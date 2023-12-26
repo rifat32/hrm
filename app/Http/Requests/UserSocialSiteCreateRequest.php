@@ -31,7 +31,7 @@ class UserSocialSiteCreateRequest extends FormRequest
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = SocialSite::where('id', $value)
-                        ->where('sicial_sites.is_active',1)
+                        ->where('social_sites.is_active',1)
                         ->exists();
 
                     if (!$exists) {

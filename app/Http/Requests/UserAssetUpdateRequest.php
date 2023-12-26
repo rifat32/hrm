@@ -54,6 +54,7 @@ class UserAssetUpdateRequest extends FormRequest
             ],
             'name' => "required|string",
             'code' => "required|string",
+            "is_working" => "required|boolean",
             'serial_number' => "required|string",
             'type' => "required|string",
             'image' => "nullable|string",

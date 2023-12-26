@@ -1484,8 +1484,8 @@ if(!$user->hasRole('business_owner')) {
            $existingIds = Business::whereIn('id', $idsArray)
            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
 
-         return   $query->where(function ($query) {
-                return  $query->where('business_id', auth()->user()->business_id)
+              return   $query->where(function ($query) {
+                return  $query->where('id', auth()->user()->business_id)
                     ->orWhere('created_by', auth()->user()->id)
                     ->orWhere('owner_id', auth()->user()->id);
                 });

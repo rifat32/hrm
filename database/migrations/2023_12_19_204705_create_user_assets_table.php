@@ -24,6 +24,7 @@ class CreateUserAssetsTable extends Migration
             $table->string("name");
             $table->string("code");
             $table->string("serial_number");
+            $table->boolean("is_working");
             $table->string("type");
             $table->string("image")->nullable();
             $table->date("date");

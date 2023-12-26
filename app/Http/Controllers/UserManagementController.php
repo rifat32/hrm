@@ -2342,65 +2342,95 @@ $user->syncRoles($roles);
                  ], 401);
              }
 
-             $users = User::with("roles")
-             ->whereNotIn('id', [$request->user()->id])
-             ->when(!empty($request->role), function ($query) use ($request) {
-                 $rolesArray = explode(',', $request->role);
-               return   $query->whereHas("roles", function($q) use ($rolesArray) {
-             return $q->whereIn("name", $rolesArray);
-                 });
-             })
+             $users = User::with([
+                "designation" => function ($query) {
+                    $query->select(
+                        'designations.id',
+                        'designations.name',
+                    );
+                },
+                "roles",
+            ]
+                )
 
-             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                 return $query->where(function ($query) {
-                     return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id);
-                   });
-             })
+            ->whereNotIn('id', [$request->user()->id])
 
-             ->when(!empty($request->search_key), function ($query) use ($request) {
-                 $term = $request->search_key;
-                 return $query->where(function ($subquery) use ($term) {
-                     $subquery->where("first_Name", "like", "%" . $term . "%")
-                         ->orWhere("last_Name", "like", "%" . $term . "%")
-                         ->orWhere("email", "like", "%" . $term . "%")
-                         ->orWhere("phone", "like", "%" . $term . "%");
-                 });
-             })
+            ->when(empty(auth()->user()->business_id), function ($query) use($request) {
+                        if(auth()->user()->hasRole("superadmin")) {
+                            return  $query->where(function($query) {
+                                  return   $query->where('business_id', NULL)
+                                  ->orWhere(function($query) {
+                                             return $query
+                                             ->whereNotNull("business_id")
+                                             ->whereHas("roles", function($query) {
+                                                return $query->where("roles.name","business_owner");
+                                             });
+                                  });
+                            });
 
-            ->when(empty($request->user()->business_id)  , function ($query) use ($request) {
-                if(empty($request->business_id)) {
-                    return $query->where('business_id', NULL);
-                }
-                    return $query->where('business_id', intval($request->business_id));
 
+                        } else {
+                            return  $query->where(function($query) {
+                                return   $query->where('created_by', auth()->user()->id);
+
+                          });
+
+
+                        }
             })
-             ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                 return $query->where('is_in_employee', intval($request->is_in_employee));
-             })
-             ->when(isset($request->is_active), function ($query) use ($request) {
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                return $query->where(function ($query) {
+                    return  $query->where('business_id', auth()->user()->business_id);
+                  });
+            })
+
+
+            ->when(!empty($request->role), function ($query) use ($request) {
+                $rolesArray = explode(',', $request->role);
+              return   $query->whereHas("roles", function($q) use ($rolesArray) {
+                   return $q->whereIn("name", $rolesArray);
+                });
+            })
+
+
+
+            ->when(!empty($request->search_key), function ($query) use ($request) {
+                $term = $request->search_key;
+                return $query->where(function ($subquery) use ($term) {
+                    $subquery->where("first_Name", "like", "%" . $term . "%")
+                        ->orWhere("last_Name", "like", "%" . $term . "%")
+                        ->orWhere("email", "like", "%" . $term . "%")
+                        ->orWhere("phone", "like", "%" . $term . "%");
+                });
+            })
+
+            ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                return $query->where('is_in_employee', intval($request->is_in_employee));
+            })
+            ->when(isset($request->is_active), function ($query) use ($request) {
                 return $query->where('is_active', intval($request->is_active));
             })
 
-             ->when(!empty($request->start_date), function ($query) use ($request) {
-                 return $query->where('created_at', ">=", $request->start_date);
-             })
-             ->when(!empty($request->end_date), function ($query) use ($request) {
-                 return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-             })
 
-             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                 return $query->orderBy("users.id", $request->order_by);
-             }, function ($query) {
-                 return $query->orderBy("users.id", "DESC");
-             })
-             ->select("users.*")
-             ->when(!empty($request->per_page), function ($query) use ($request) {
-                 return $query->paginate($request->per_page);
-             }, function ($query) {
-                 return $query->get();
-             });
+            ->when(!empty($request->start_date), function ($query) use ($request) {
+                return $query->where('created_at', ">=", $request->start_date);
+            })
+            ->when(!empty($request->end_date), function ($query) use ($request) {
+                return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+            })
 
+            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("users.id", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("users.id", "DESC");
+            })
+
+            ->withCount('all_users as user_count')
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
 
              $data["data"] = $users;
                  $data["data_highlights"] = [];

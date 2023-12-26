@@ -130,6 +130,7 @@ class UserAssetController extends Controller
 *     @OA\Property(property="user_id", type="integer", format="int", example=1),
  *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
  *     @OA\Property(property="code", type="string", format="string", example="Your Code"),
+ *     @OA\Property(property="is_working", type="boolean", format="boolean", example="1"),
  *     @OA\Property(property="serial_number", type="string", format="string", example="Your Serial Number"),
  *     @OA\Property(property="type", type="string", format="string", example="Your Type"),
  *     @OA\Property(property="image", type="string", format="string", example="Your Image URL"),
@@ -225,6 +226,9 @@ class UserAssetController extends Controller
 *     @OA\Property(property="user_id", type="integer", format="int", example=1),
  *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
  *     @OA\Property(property="code", type="string", format="string", example="Your Code"),
+ *
+ *  *     @OA\Property(property="is_working", type="boolean", format="boolean", example="1"),
+ *
  *     @OA\Property(property="serial_number", type="string", format="string", example="Your Serial Number"),
  *     @OA\Property(property="type", type="string", format="string", example="Your Type"),
  *     @OA\Property(property="image", type="string", format="string", example="Your Image URL"),
@@ -304,6 +308,8 @@ class UserAssetController extends Controller
                           'name',
                           'code',
                           'serial_number',
+                          'is_working',
+
                           'type',
                           'image',
                           'date',

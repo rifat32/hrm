@@ -15,6 +15,7 @@ class UserAsset extends Model
         'code',
         'serial_number',
         'type',
+        "is_working",
         'image',
         'date',
         'note',
@@ -50,5 +51,5 @@ class UserAsset extends Model
 
 
 
-  
+
 }

@@ -39,6 +39,7 @@ class UserAssetCreateRequest extends FormRequest
                 },
             ],
             'name' => "required|string",
+            "is_working" => "required|boolean",
             'code' => "required|string",
             'serial_number' => "required|string",
             'type' => "required|string",
