@@ -18,7 +18,7 @@ class CreateJobPlatformsTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(false);
-            $table->string('is_default')->default(false);
+            $table->boolean('is_default')->default(false);
 
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

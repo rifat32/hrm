@@ -18,7 +18,7 @@ class CreateModulesTable extends Migration
             $table->id();
             $table->string("name");
             $table->boolean('is_enabled')->default(false);
-            $table->string('is_default')->default(false);
+            $table->boolean('is_default')->default(false);
 
 
 

@@ -666,6 +666,14 @@ class AttendanceController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *   * *  @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     * employee_id
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -748,9 +756,9 @@ class AttendanceController extends Controller
                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
                     });
                 })
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
+                   ->when(!empty($request->employee_id), function ($query) use ($request) {
+                       return $query->where('employee_id', $request->employee_id);
+                   })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('attendances.created_at', ">=", $request->start_date);
                 })
