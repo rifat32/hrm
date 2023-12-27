@@ -95,7 +95,9 @@ class SettingAttendanceController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_active"] = 1;
 
-                $request_data["alert_area"] = json_encode($request_data["alert_area"]);
+                if(!empty($request_data["alert_area"])){
+                    $request_data["alert_area"] = json_encode($request_data["alert_area"]);
+                }
 
 
                 if (empty($request->user()->business_id)) {
