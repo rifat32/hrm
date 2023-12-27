@@ -301,7 +301,6 @@ class AssetTypeController extends Controller
                     "business_id" => $business_id
                 ]
             )
-            ->whereNotNull("parent_id")
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
