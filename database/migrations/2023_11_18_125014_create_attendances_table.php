@@ -16,6 +16,9 @@ class CreateAttendancesTable extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->text('note')->nullable();
+            $table->string('in_geolocation')->nullable();
+            $table->string('out_geolocation')->nullable();
+
             $table->unsignedBigInteger("employee_id");
             $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
 
@@ -29,13 +32,17 @@ class CreateAttendancesTable extends Migration
             $table->time('out_time')->nullable();
 
             $table->integer('capacity_hours');
+
+            $table->enum('behavior', ['absent', 'late','regular','early']);
+
+
             $table->integer('work_hours_delta');
             $table->integer('regular_work_hours');
             $table->integer('total_paid_hours');
 
             $table->enum('break_type', ['paid', 'unpaid']);
             $table->integer('break_hours');
-   
+
 
 
 

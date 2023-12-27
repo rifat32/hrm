@@ -42,9 +42,11 @@ class AttendanceCreateRequest extends FormRequest
                 },
             ],
             'note' => 'nullable|string',
+            'in_geolocation' => 'nullable|string',
+            'out_geolocation' => 'nullable|string',
 
 
-            'in_time' => 'required|date_format:H:i:s',
+            'in_time' => 'nullable|date_format:H:i:s',
             'out_time' => 'nullable|date_format:H:i:s|after_or_equal:in_time',
 
 

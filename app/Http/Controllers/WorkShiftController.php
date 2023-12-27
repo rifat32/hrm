@@ -457,7 +457,7 @@ class WorkShiftController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $work_shifts = WorkShift::with("details")
+            $work_shifts = WorkShift::with("details","departments","users")
                 ->where(
                 [
                     "work_shifts.business_id" => $business_id

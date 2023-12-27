@@ -44,7 +44,10 @@ class AttendanceMultipleCreateRequest extends FormRequest
             'attendance_details' => 'required|array',
 
             'attendance_details.*.note' => 'nullable|string',
-            'attendance_details.*.in_time' => 'required|date_format:H:i:s',
+            'attendance_details.*.in_geolocation' => 'nullable|string',
+            'attendance_details.*.out_geolocation' => 'nullable|string',
+
+            'attendance_details.*.in_time' => 'nullable|date_format:H:i:s',
             'attendance_details.*.out_time' => [
                 'required',
                 'date_format:H:i:s',

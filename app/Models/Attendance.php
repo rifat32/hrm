@@ -11,13 +11,15 @@ class Attendance extends Model
     use HasFactory;
     protected $fillable = [
         'note',
+        "in_geolocation",
+        "out_geolocation",
         'employee_id',
         'in_time',
         'out_time',
         'in_date',
         'does_break_taken',
 
-
+        "behavior",
         "capacity_hours",
         "work_hours_delta",
         "break_type",
@@ -57,5 +59,5 @@ class Attendance extends Model
     }
 
 
-  
+
 }

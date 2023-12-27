@@ -11,6 +11,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
 use App\Models\Holiday;
+use App\Models\SettingAttendance;
 use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
@@ -40,6 +41,9 @@ class AttendanceController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *     @OA\Property(property="note", type="string",  format="string", example="r"),
+     *    *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
+     *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
+     *
      *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
      *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
@@ -99,90 +103,143 @@ class AttendanceController extends Controller
 
                 $request_data = $request->validated();
 
-
-
-
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
-                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["employee_id"]);
-                })->first();
-                if (!$work_shift) {
-                    return response()->json(["message" => "Please define workshift first"], 400);
-                }
 
-                $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
-                $work_shift_details =  $work_shift->details()->where([
-                    "day" => $day_number
-                ])
-                    ->first();
-                if (!$work_shift_details) {
-                    $error =  [
-                        "message" => ("No work shift details found  day" . $day_number),
-                    ];
-                    throw new Exception(json_encode($error), 400);
-                }
-                if ($work_shift_details->is_weekend) {
-                    $error =  [
-                        "message" => ("there is a weekend on date " . $request_data["in_date"]),
-                    ];
-                    throw new Exception(json_encode($error), 400);
-                }
-                $holiday =   Holiday::where([
-                    "business_id" => auth()->user()->business_id
-                ])
-                    ->where('holidays.start_date', "<=", $request_data["in_date"])
-                    ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
-                    ->first();
 
-                if ($holiday) {
-                    if ($holiday->is_active) {
+
+                    $setting_attendance = SettingAttendance::where([
+                        "business_id" => auth()->user()->business_id
+                    ])
+                    ->first();
+                    if (!$setting_attendance) {
+                        return response()->json(["message" => "Please define attendance setting first"], 400);
+                    }
+                    $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                        $query->where('users.id', $request_data["employee_id"]);
+                    })->first();
+                    if (!$work_shift) {
+                        return response()->json(["message" => "Please define workshift first"], 400);
+                    }
+
+                    $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
+                    $work_shift_details =  $work_shift->details()->where([
+                        "day" => $day_number
+                    ])
+                        ->first();
+                    if (!$work_shift_details) {
                         $error =  [
-                            "message" => ("there is a holiday on date" . $request_data["in_date"]),
+                            "message" => ("No work shift details found  day" . $day_number),
                         ];
                         throw new Exception(json_encode($error), 400);
                     }
-                }
-
-                $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                $end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                $capacity_hours = $end_at->diffInHours($start_at);
-
-
-                $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
-                $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
-                $total_present_hours = $out_time->diffInHours($in_time);
-
-
-                $work_hours_delta = $total_present_hours - $capacity_hours;
-
-                $total_paid_hours = $total_present_hours;
-
-
-
-
-                if ($request_data["does_break_taken"]) {
-                    if ($work_shift->break_type == 'unpaid') {
-                        $total_paid_hours -= $work_shift->break_hours;
+                    if ($work_shift_details->is_weekend) {
+                        $error =  [
+                            "message" => ("there is a weekend on date " . $request_data["in_date"]),
+                        ];
+                        throw new Exception(json_encode($error), 400);
                     }
+                    $holiday =   Holiday::where([
+                        "business_id" => auth()->user()->business_id
+                    ])
+                        ->where('holidays.start_date', "<=", $request_data["in_date"])
+                        ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                        ->first();
+
+                    if ($holiday) {
+                        if ($holiday->is_active) {
+                            $error =  [
+                                "message" => ("there is a holiday on date" . $request_data["in_date"]),
+                            ];
+                            throw new Exception(json_encode($error), 400);
+                        }
+                    }
+
+
+
+
+                    $request_data["behavior"] = "absent";
+                    $request_data["capacity_hours"] = 0;
+                    $request_data["work_hours_delta"] = 0;
+                    $request_data["total_paid_hours"] = 0;
+                    $request_data["regular_work_hours"] = 0;
+                    $request_data["break_type"] = $work_shift->break_type;
+                    $request_data["break_hours"] = $work_shift->break_hours;
+
+                    if(!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
+
+
+                    $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                    $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                    $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+
+
+                    $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
+                    $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
+                    $total_present_hours = $out_time->diffInHours($in_time);
+
+                    $tolerance_time = $in_time->diffInHours($work_shift_start_at);
+
+
+                    $work_hours_delta = $total_present_hours - $capacity_hours;
+                    $total_paid_hours = $total_present_hours;
+
+
+
+
+
+                    if(empty($setting_attendance->punch_in_time_tolerance)) {
+                        $behavior = "regular";
+                    }
+                    else {
+                        if($tolerance_time > $setting_attendance->punch_in_time_tolerance){
+                            $behavior = "late";
+                        } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
+                            $behavior = "early";
+                        } else {
+                            $behavior = "regular";
+                        }
+                    }
+
+
+
+
+
+                    if ($request_data["does_break_taken"]) {
+                        if ($work_shift->break_type == 'unpaid') {
+                            $total_paid_hours -= $work_shift->break_hours;
+                        }
+                    }
+
+
+
+
+
+
+
+
+
+                    if ($work_hours_delta > 0) {
+                        $regular_work_hours =  $total_paid_hours - $work_hours_delta;
+                    } else {
+                        $regular_work_hours = $total_paid_hours;
+                    }
+
+
+
+                    $request_data["behavior"] = $behavior;
+                    $request_data["capacity_hours"] = $capacity_hours;
+                    $request_data["work_hours_delta"] = $work_hours_delta;
+                    $request_data["total_paid_hours"] = $total_paid_hours;
+                    $request_data["regular_work_hours"] = $regular_work_hours;
                 }
 
-                if ($work_hours_delta > 0) {
-                    $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                } else {
-                    $regular_work_hours = $total_paid_hours;
-                }
 
 
 
-                $request_data["capacity_hours"] = $capacity_hours;
-                $request_data["work_hours_delta"] = $work_hours_delta;
-                $request_data["break_type"] = $work_shift->break_type;
-                $request_data["break_hours"] = $work_shift->break_hours;
-                $request_data["total_paid_hours"] = $total_paid_hours;
-                $request_data["regular_work_hours"] = $regular_work_hours;
+
 
 
 
@@ -218,6 +275,8 @@ class AttendanceController extends Controller
      *    @OA\Property(property="attendance_details", type="string", format="array", example={
      * {
      *    "note" : "note",
+     *    "in_geolocation":"in_geolocation",
+     *      *    "out_geolocation":"out_geolocation",
      *    "in_time" : "08:44:00",
      * "out_time" : "12:44:00",
      * "in_date" : "2023-11-18",
@@ -281,6 +340,16 @@ class AttendanceController extends Controller
 
                 $request_data = $request->validated();
 
+
+
+
+                $setting_attendance = SettingAttendance::where([
+                    "business_id" => auth()->user()->business_id
+                ])
+                ->first();
+                if (!$setting_attendance) {
+                    return response()->json(["message" => "Please define attendance setting first"], 400);
+                }
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["employee_id"]);
                 })->first();
@@ -291,7 +360,7 @@ class AttendanceController extends Controller
 
 
 
-                $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $work_shift) {
+                $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $work_shift, $setting_attendance) {
                     $day_number = Carbon::parse($item["in_date"])->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
                         "day" => $day_number
@@ -330,44 +399,76 @@ class AttendanceController extends Controller
                         }
                     }
 
-                    $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                    $end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                    $capacity_hours = $end_at->diffInHours($start_at);
 
-
-                    $in_time = Carbon::createFromFormat('H:i:s', $item["in_time"]);
-                    $out_time = Carbon::createFromFormat('H:i:s', $item["out_time"]);
-                    $total_present_hours = $out_time->diffInHours($in_time);
-
-
-                    $work_hours_delta = $total_present_hours - $capacity_hours;
-
-                    $total_paid_hours = $total_present_hours;
+                    $behavior = "absent";
+                    $capacity_hours = 0;
+                    $work_hours_delta = 0;
+                    $total_paid_hours = 0;
+                    $regular_work_hours = 0;
 
 
 
+                    if(!empty($item["in_time"]) && !empty($item["out_time"])) {
+                        $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                        $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                        $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
 
-                    if ($item["does_break_taken"]) {
-                        if ($work_shift->break_type == 'unpaid') {
-                            $total_paid_hours -= $work_shift->break_hours;
+
+                        $in_time = Carbon::createFromFormat('H:i:s', $item["in_time"]);
+                        $out_time = Carbon::createFromFormat('H:i:s', $item["out_time"]);
+                        $total_present_hours = $out_time->diffInHours($in_time);
+
+                        $tolerance_time = $in_time->diffInHours($work_shift_start_at);
+
+                        $work_hours_delta = $total_present_hours - $capacity_hours;
+
+                        $total_paid_hours = $total_present_hours;
+                        $behavior = "absent";
+
+
+                        if(empty($setting_attendance->punch_in_time_tolerance)) {
+                            $behavior = "regular";
                         }
+                        else {
+                            if($tolerance_time > $setting_attendance->punch_in_time_tolerance){
+                                $behavior = "late";
+                            } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
+                                $behavior = "early";
+                            } else {
+                                $behavior = "regular";
+                            }
+                        }
+
+                        if ($item["does_break_taken"]) {
+                            if ($work_shift->break_type == 'unpaid') {
+                                $total_paid_hours -= $work_shift->break_hours;
+                            }
+                        }
+
+
+
+                        if ($work_hours_delta > 0) {
+                            $regular_work_hours =  $total_paid_hours - $work_hours_delta;
+                        } else {
+                            $regular_work_hours = $total_paid_hours;
+                        }
+
                     }
 
-                    if ($work_hours_delta > 0) {
-                        $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                    } else {
-                        $regular_work_hours = $total_paid_hours;
-                    }
+
 
 
 
 
                     return [
+                        "behavior" => $behavior,
                         "employee_id" => $request_data["employee_id"],
                         "business_id" => auth()->user()->business_id,
                         "is_active" => True,
                         "created_by" => auth()->user()->id,
                         "note" => $item["note"],
+                        "in_geolocation" => $item["in_geolocation"],
+                        "out_geolocation" => $item["out_geolocation"],
                         "in_time" => $item["in_time"],
                         "out_time" => $item["out_time"],
                         "in_date" => $item["in_date"],
@@ -378,10 +479,6 @@ class AttendanceController extends Controller
                         "break_hours" => $work_shift->break_hours,
                         "total_paid_hours" => $total_paid_hours,
                         "regular_work_hours" => $regular_work_hours,
-
-
-
-
                     ];
                 });
 
@@ -390,6 +487,12 @@ class AttendanceController extends Controller
                     "id" => $request_data["employee_id"]
                 ])
                     ->first();
+
+                    if(!$employee) {
+                         return response()->json([
+                            "message" => "someting_went_wrong"
+                         ]);
+                    }
 
 
 
@@ -434,6 +537,9 @@ class AttendanceController extends Controller
      *         @OA\JsonContent(
      *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
      *     @OA\Property(property="note", type="string",  format="string", example="r"),
+     *   *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
+     *    *   *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
+     *
      *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
      *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
@@ -511,6 +617,14 @@ class AttendanceController extends Controller
                     ], 404);
                 }
 
+                $setting_attendance = SettingAttendance::where([
+                    "business_id" => auth()->user()->business_id
+                ])
+                ->first();
+                if (!$setting_attendance) {
+                    return response()->json(["message" => "Please define attendance setting first"], 400);
+                }
+
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["employee_id"]);
                 })->first();
@@ -551,20 +665,45 @@ class AttendanceController extends Controller
                     }
                 }
 
-                $start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                $end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                $capacity_hours = $end_at->diffInHours($start_at);
+                $request_data["behavior"] = "absent";
+                $request_data["capacity_hours"] = 0;
+                $request_data["work_hours_delta"] = 0;
+                $request_data["total_paid_hours"] = 0;
+                $request_data["regular_work_hours"] = 0;
+                $request_data["break_type"] = $work_shift->break_type;
+                $request_data["break_hours"] = $work_shift->break_hours;
+
+                if(!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
+
+                $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
 
 
                 $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
                 $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
                 $total_present_hours = $out_time->diffInHours($in_time);
 
+                $tolerance_time = $in_time->diffInHours($work_shift_start_at);
 
                 $work_hours_delta = $total_present_hours - $capacity_hours;
 
                 $total_paid_hours = $total_present_hours;
 
+                $behavior = "absent";
+
+                if(empty($setting_attendance->punch_in_time_tolerance)) {
+                    $behavior = "regular";
+                }
+                else {
+                    if($tolerance_time > $setting_attendance->punch_in_time_tolerance){
+                        $behavior = "late";
+                    } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
+                        $behavior = "early";
+                    } else {
+                        $behavior = "regular";
+                    }
+                }
 
 
 
@@ -574,28 +713,32 @@ class AttendanceController extends Controller
                     }
                 }
 
+
                 if ($work_hours_delta > 0) {
                     $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                } else {
+                }  else {
                     $regular_work_hours = $total_paid_hours;
                 }
 
 
-
+                $request_data["behavior"] = $behavior;
                 $request_data["capacity_hours"] = $capacity_hours;
                 $request_data["work_hours_delta"] = $work_hours_delta;
-                $request_data["break_type"] = $work_shift->break_type;
-                $request_data["break_hours"] = $work_shift->break_hours;
                 $request_data["total_paid_hours"] = $total_paid_hours;
                 $request_data["regular_work_hours"] = $regular_work_hours;
+            }
+
                 $attendance  =  tap(Attendance::where($attendance_query_params))->update(
                     collect($request_data)->only([
                         'note',
+                        'in_geolocation',
+                        'out_geolocation',
                         'employee_id',
                         'in_time',
                         'out_time',
                         'in_date',
                         'does_break_taken',
+                        'behavior',
                         "capacity_hours",
                         "work_hours_delta",
                         "break_type",
@@ -674,7 +817,6 @@ class AttendanceController extends Controller
      * example="1"
      * ),
      *
-     * 
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -887,6 +1029,13 @@ class AttendanceController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $setting_attendance = SettingAttendance::where([
+                "business_id" => auth()->user()->business_id
+            ])
+            ->first();
+            if (!$setting_attendance) {
+                return response()->json(["message" => "Please define attendance setting first"], 400);
+            }
             $attendances = Attendance::with([
                 "employee" => function ($query) {
                     $query->select(
@@ -954,6 +1103,23 @@ class AttendanceController extends Controller
 
             $data["data_highlights"] = [];
 
+            $data["data_highlights"]["behavior"]["absent"] = $attendances->filter(function ($attendance) {
+                return $attendance->behavior == "absent";
+            })->count();
+            $data["data_highlights"]["behavior"]["regular"] = $attendances->filter(function ($attendance) {
+                return $attendance->behavior == "regular";
+            })->count();
+            $data["data_highlights"]["behavior"]["early"] = $attendances->filter(function ($attendance) {
+                return $attendance->behavior == "early";
+            })->count();
+            $data["data_highlights"]["behavior"]["late"] = $attendances->filter(function ($attendance) {
+                return $attendance->behavior == "late";
+            })->count();
+
+
+            $maxBehavior = max($data["data_highlights"]["behavior"]);
+
+            $data["data_highlights"]["average_behavior"] = array_search($maxBehavior, $data["data_highlights"]["behavior"]);
 
 
             $data["data_highlights"]["total_schedule_hours"] = $attendances->sum('capacity_hours');
@@ -972,6 +1138,18 @@ class AttendanceController extends Controller
             } else {
                 $data["data_highlights"]["total_work_availability_per_centum"] = ($total_available_hours / $data["data_highlights"]["total_leave_hours"]) * 100;
             }
+
+            if(!empty($setting_attendance->work_availability_definition)) {
+                if($data["data_highlights"]["work_availability"] >= $setting_attendance->work_availability_definition) {
+                    $data["data_highlights"]["work_availability"] = "good";
+                } else {
+                    $data["data_highlights"]["work_availability"] = "bad";
+                }
+            } else {
+                $data["data_highlights"]["work_availability"] = "good";
+            }
+
+
 
 
 
@@ -1200,9 +1378,6 @@ class AttendanceController extends Controller
 
 
                     $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($employee, &$total_paid_hours) {
-
-
-
                         $attendance = $employee->attendances->first(function ($attendance) use (&$date){
 
                             $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
