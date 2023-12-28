@@ -39,6 +39,7 @@ class SettingLeaveTypeCreateRequest extends FormRequest
             $rules['name'] .= '|unique:setting_leave_types,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
         }
 
+
 return $rules;
 
 

@@ -284,7 +284,7 @@ class EmploymentStatusController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('designation_update')) {
+             if (!$request->user()->hasPermissionTo('employment_status_update')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
@@ -307,7 +307,7 @@ class EmploymentStatusController extends Controller
                  if (auth()->user()->hasRole('superadmin')) {
                      if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
                          return response()->json([
-                             "message" => "You do not have permission to update this designation due to role restrictions."
+                             "message" => "You do not have permission to update this employment status due to role restrictions."
                          ], 403);
                      } else {
                          $should_update = 1;
@@ -315,13 +315,13 @@ class EmploymentStatusController extends Controller
                  } else {
                      if ($employment_status->business_id != NULL) {
                          return response()->json([
-                             "message" => "You do not have permission to update this designation due to role restrictions."
+                             "message" => "You do not have permission to update this employment status due to role restrictions."
                          ], 403);
                      } else if ($employment_status->is_default == 0) {
 
                          if($employment_status->created_by != auth()->user()->id) {
                              return response()->json([
-                                 "message" => "You do not have permission to update this designation due to role restrictions."
+                                 "message" => "You do not have permission to update this employment status due to role restrictions."
                              ], 403);
                          }
                          else {
@@ -387,7 +387,7 @@ class EmploymentStatusController extends Controller
              }
 
 
-             return response()->json(['message' => 'Designation status updated successfully'], 200);
+             return response()->json(['message' => 'employment status status updated successfully'], 200);
          } catch (Exception $e) {
              error_log($e->getMessage());
              return $this->sendError($e, 500, $request);
@@ -503,32 +503,32 @@ class EmploymentStatusController extends Controller
 
             $employment_statuses = EmploymentStatus::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1)
+                    return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('designations.is_active', intval($request->is_active));
+                            return $query->where('employment_statuses.is_active', intval($request->is_active));
                         });
                 } else {
                     return $query
 
                     ->where(function($query) use($request) {
-                        $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1)
-                        ->where('designations.is_active', 1)
+                        $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 1)
+                        ->where('employment_statuses.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
                             if(intval($request->is_active)) {
                                 return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_designations.created_by", [auth()->user()->id]);
+                                    $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
                                 });
                             }
 
                         })
                         ->orWhere(function ($query) use ($request) {
-                            $query->where('designations.business_id', NULL)
-                                ->where('designations.is_default', 0)
-                                ->where('designations.created_by', auth()->user()->id)
+                            $query->where('employment_statuses.business_id', NULL)
+                                ->where('employment_statuses.is_default', 0)
+                                ->where('employment_statuses.created_by', auth()->user()->id)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('designations.is_active', intval($request->is_active));
+                                    return $query->where('employment_statuses.is_active', intval($request->is_active));
                                 });
                         });
 
@@ -540,16 +540,16 @@ class EmploymentStatusController extends Controller
                     ->where(function($query) use($request, $created_by) {
 
 
-                        $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1)
-                        ->where('designations.is_active', 1)
+                        $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 1)
+                        ->where('employment_statuses.is_active', 1)
                         ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_designations.created_by", [$created_by]);
+                            $q->whereIn("disabled_employment_statuses.created_by", [$created_by]);
                         })
                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
                             if(intval($request->is_active)) {
                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                    $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
                                 });
                             }
 
@@ -557,15 +557,15 @@ class EmploymentStatusController extends Controller
 
 
                         ->orWhere(function ($query) use($request, $created_by){
-                            $query->where('designations.business_id', NULL)
-                                ->where('designations.is_default', 0)
-                                ->where('designations.created_by', $created_by)
-                                ->where('designations.is_active', 1)
+                            $query->where('employment_statuses.business_id', NULL)
+                                ->where('employment_statuses.is_default', 0)
+                                ->where('employment_statuses.created_by', $created_by)
+                                ->where('employment_statuses.is_active', 1)
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     if(intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
+                                            $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
                                         });
                                     }
 
@@ -575,10 +575,10 @@ class EmploymentStatusController extends Controller
                                 ;
                         })
                         ->orWhere(function ($query) use($request) {
-                            $query->where('designations.business_id', auth()->user()->business_id)
-                                ->where('designations.is_default', 0)
+                            $query->where('employment_statuses.business_id', auth()->user()->business_id)
+                                ->where('employment_statuses.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('designations.is_active', intval($request->is_active));
+                                    return $query->where('employment_statuses.is_active', intval($request->is_active));
                                 });;
                         });
                     });
@@ -691,6 +691,11 @@ class EmploymentStatusController extends Controller
 
             ])
                 ->first();
+                if (!$employment_status) {
+                    return response()->json([
+                        "message" => "no data found"
+                    ], 404);
+                }
 
                 if (empty(auth()->user()->business_id)) {
 
@@ -729,11 +734,7 @@ class EmploymentStatusController extends Controller
                         }
                     }
                 }
-            if (!$employment_status) {
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
+
 
             return response()->json($employment_status, 200);
         } catch (Exception $e) {
@@ -812,17 +813,17 @@ class EmploymentStatusController extends Controller
             $existingIds = EmploymentStatus::whereIn('id', $idsArray)
             ->when(empty($request->user()->business_id), function ($query) use ($request) {
                 if ($request->user()->hasRole("superadmin")) {
-                    return $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1);
+                    return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 1);
                 } else {
-                    return $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 0)
-                        ->where('designations.created_by', $request->user()->id);
+                    return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 0)
+                        ->where('employment_statuses.created_by', $request->user()->id);
                 }
             })
             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('designations.business_id', $request->user()->business_id)
-                    ->where('designations.is_default', 0);
+                return $query->where('employment_statuses.business_id', $request->user()->business_id)
+                    ->where('employment_statuses.is_default', 0);
             })
                 ->select('id')
                 ->get()

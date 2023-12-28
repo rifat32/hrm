@@ -491,7 +491,6 @@ Route::delete('/v1.0/social-sites/{ids}', [SocialSiteController::class, "deleteS
 
 Route::post('/v1.0/designations', [DesignationController::class, "createDesignation"]);
 Route::put('/v1.0/designations', [DesignationController::class, "updateDesignation"]);
-Route::put('/v1.0/setting-leave-types/toggle-active', [SettingLeaveTypeController::class, "toggleActiveSettingLeaveType"]);
 Route::put('/v1.0/designations/toggle-active', [DesignationController::class, "toggleActiveDesignation"]);
 Route::get('/v1.0/designations', [DesignationController::class, "getDesignations"]);
 Route::get('/v1.0/designations/{id}', [DesignationController::class, "getDesignationById"]);

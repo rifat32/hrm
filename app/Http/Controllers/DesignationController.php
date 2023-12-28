@@ -689,6 +689,12 @@ class DesignationController extends Controller
 
                 ->first();
 
+                if (!$designation) {
+                    return response()->json([
+                        "message" => "no data found"
+                    ], 404);
+                }
+
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
@@ -727,11 +733,7 @@ class DesignationController extends Controller
                     }
                 }
 
-            if (!$designation) {
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
+
 
             return response()->json($designation, 200);
         } catch (Exception $e) {

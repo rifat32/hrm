@@ -8,6 +8,7 @@ use App\Http\Requests\SettingLeaveTypeUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\DisabledSettingLeaveType;
 use App\Models\Leave;
 use App\Models\SettingLeaveType;
 use Carbon\Carbon;
@@ -96,19 +97,17 @@ class SettingLeaveTypeController extends Controller
 
 
 
+                $request_data["is_active"] = 1;
+                $request_data["is_default"] = 0;
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
+
                 if (empty($request->user()->business_id)) {
                     $request_data["business_id"] = NULL;
-                $request_data["is_active"] = true;
-                $request_data["is_default"] = 1;
-                 $request_data["created_by"] = $request->user()->id;
-                } else {
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_active"] = true;
-                    $request_data["is_default"] = 0;
-                 $request_data["created_by"] = $request->user()->id;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
                 }
-
-
 
 
                 $setting_leave_type =  SettingLeaveType::create($request_data);
@@ -140,8 +139,6 @@ class SettingLeaveTypeController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-*     @OA\Property(property="is_active", type="boolean", example="1"),
- *     @OA\Property(property="is_earning_enabled", type="boolean", example="1"),
  *     @OA\Property(property="name", type="string", format="string", example="yy"),
  *     @OA\Property(property="type", type="string", format="string", example="paid"),
  *     @OA\Property(property="amount", type="string", format="string", example="30"),
@@ -196,44 +193,23 @@ class SettingLeaveTypeController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
 
 
                 $setting_leave_type_query_params = [
                     "id" => $request_data["id"],
-                    "business_id" => $business_id
-                ];
-                $setting_leave_type_prev = SettingLeaveType::where($setting_leave_type_query_params)
-                    ->first();
-                if (!$setting_leave_type_prev) {
-                    return response()->json([
-                        "message" => "no setting leave type found"
-                    ], 404);
-                }
-                if (empty($request->user()->business_id)) {
-                    if(!($setting_leave_type_prev->business_id == NULL && $setting_leave_type_prev->is_default == 1)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this setting leave type due to role restrictions."
-                        ], 403);
-                    }
 
-                } else {
-                    if(!($setting_leave_type_prev->business_id == $request->user()->business_id)) {
-                        return response()->json([
-                            "message" => "You do not have permission to update this setting leave type due to role restrictions."
-                        ], 403);
-                    }
-                }
+                ];
+
                 $setting_leave_type  =  tap(SettingLeaveType::where($setting_leave_type_query_params))->update(
                     collect($request_data)->only([
                         'name',
         'type',
         'amount',
         'description',
-        'is_earning_enabled',
-        "is_active"
+        // 'is_earning_enabled',
+        // "is_active"
 
 
 
@@ -329,25 +305,100 @@ class SettingLeaveTypeController extends Controller
              $setting_leave_type =  SettingLeaveType::where([
                 "id" => $request_data["id"],
             ])
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', NULL)
-                             ->where('setting_leave_types.is_default', 1);
-            })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
-            })
                 ->first();
             if (!$setting_leave_type) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
+            $should_update = 0;
+            $should_disable = 0;
+            if (empty(auth()->user()->business_id)) {
 
-             $setting_leave_type->update([
-                 'is_active' => !$setting_leave_type->is_active
-             ]);
+                if (auth()->user()->hasRole('superadmin')) {
+                    if (($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this leave type due to role restrictions."
+                        ], 403);
+                    } else {
+                        $should_update = 1;
+                    }
+                } else {
+                    if ($setting_leave_type->business_id != NULL) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this leave type due to role restrictions."
+                        ], 403);
+                    } else if ($setting_leave_type->is_default == 0) {
 
-             return response()->json(['message' => 'User status updated successfully'], 200);
+                        if($setting_leave_type->created_by != auth()->user()->id) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this leave type due to role restrictions."
+                            ], 403);
+                        }
+                        else {
+                            $should_update = 1;
+                        }
+
+
+
+                    }
+                    else {
+                     $should_disable = 1;
+
+                    }
+                }
+            } else {
+                if ($setting_leave_type->business_id != NULL) {
+                    if (($setting_leave_type->business_id != auth()->user()->business_id)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this leave type due to role restrictions."
+                        ], 403);
+                    } else {
+                        $should_update = 1;
+                    }
+                } else {
+                    if ($setting_leave_type->is_default == 0) {
+                        if ($setting_leave_type->created_by != auth()->user()->created_by) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this leave type status due to role restrictions."
+                            ], 403);
+                        } else {
+                            $should_disable = 1;
+
+                        }
+                    } else {
+                        $should_disable = 1;
+
+                    }
+                }
+            }
+
+            if ($should_update) {
+                $setting_leave_type->update([
+                    'is_active' => !$setting_leave_type->is_active
+                ]);
+            }
+
+            if($should_disable) {
+
+                $disabled_setting_leave_type =    DisabledSettingLeaveType::where([
+                    'setting_leave_type_id' => $setting_leave_type->id,
+                    'business_id' => auth()->user()->business_id,
+                    'created_by' => auth()->user()->id,
+                ])->first();
+                if(!$disabled_setting_leave_type) {
+                    DisabledSettingLeaveType::create([
+                        'setting_leave_type_id' => $setting_leave_type->id,
+                        'business_id' => auth()->user()->business_id,
+                        'created_by' => auth()->user()->id,
+                    ]);
+                } else {
+                    $disabled_setting_leave_type->delete();
+                }
+            }
+
+
+            return response()->json(['message' => 'leave type status updated successfully'], 200);
          } catch (Exception $e) {
              error_log($e->getMessage());
              return $this->sendError($e, 500, $request);
@@ -487,6 +538,13 @@ class SettingLeaveTypeController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     * @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -543,14 +601,96 @@ class SettingLeaveTypeController extends Controller
                 ], 401);
             }
 
+            $created_by  = NULL;
+            if(auth()->user()->business) {
+                $created_by = auth()->user()->business->created_by;
+            }
 
-            $setting_leave_types = SettingLeaveType::when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', NULL)
-                             ->where('setting_leave_types.is_default', 1);
+
+            $setting_leave_types = SettingLeaveType::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('setting_leave_types.business_id', NULL)
+                        ->where('setting_leave_types.is_default', 1)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('setting_leave_types.is_active', intval($request->is_active));
+                        });
+                } else {
+                    return $query
+
+                    ->where(function($query) use($request) {
+                        $query->where('setting_leave_types.business_id', NULL)
+                        ->where('setting_leave_types.is_default', 1)
+                        ->where('setting_leave_types.is_active', 1)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            if(intval($request->is_active)) {
+                                return $query->whereDoesntHave("disabled", function($q) {
+                                    $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
+                                });
+                            }
+
+                        })
+                        ->orWhere(function ($query) use ($request) {
+                            $query->where('setting_leave_types.business_id', NULL)
+                                ->where('setting_leave_types.is_default', 0)
+                                ->where('setting_leave_types.created_by', auth()->user()->id)
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('setting_leave_types.is_active', intval($request->is_active));
+                                });
+                        });
+
+                    });
+                }
             })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
-            })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                    return $query
+                    ->where(function($query) use($request, $created_by) {
+
+
+                        $query->where('setting_leave_types.business_id', NULL)
+                        ->where('setting_leave_types.is_default', 1)
+                        ->where('setting_leave_types.is_active', 1)
+                        ->whereDoesntHave("disabled", function($q) use($created_by) {
+                            $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
+                        })
+                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+                            if(intval($request->is_active)) {
+                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                                    $q->whereIn("disabled_setting_leave_types.business_id",[auth()->user()->business_id]);
+                                });
+                            }
+
+                        })
+
+
+                        ->orWhere(function ($query) use($request, $created_by){
+                            $query->where('setting_leave_types.business_id', NULL)
+                                ->where('setting_leave_types.is_default', 0)
+                                ->where('setting_leave_types.created_by', $created_by)
+                                ->where('setting_leave_types.is_active', 1)
+
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    if(intval($request->is_active)) {
+                                        return $query->whereDoesntHave("disabled", function($q) {
+                                            $q->whereIn("disabled_setting_leave_types.business_id",[auth()->user()->business_id]);
+                                        });
+                                    }
+
+                                })
+
+
+                                ;
+                        })
+                        ->orWhere(function ($query) use($request) {
+                            $query->where('setting_leave_types.business_id', auth()->user()->business_id)
+                                ->where('setting_leave_types.is_default', 0)
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('setting_leave_types.is_active', intval($request->is_active));
+                                });;
+                        });
+                    });
+
+
+                })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -655,19 +795,52 @@ class SettingLeaveTypeController extends Controller
             $setting_leave_type =  SettingLeaveType::where([
                 "id" => $id,
             ])
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', NULL)
-                             ->where('setting_leave_types.is_default', 1);
-            })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
-            })
                 ->first();
-            if (!$setting_leave_type) {
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
+                if (!$setting_leave_type) {
+                    return response()->json([
+                        "message" => "no data found"
+                    ], 404);
+                }
+                if (empty(auth()->user()->business_id)) {
+
+                    if (auth()->user()->hasRole('superadmin')) {
+                        if (($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this leave type due to role restrictions."
+                            ], 403);
+                        }
+                    } else {
+                        if ($setting_leave_type->business_id != NULL) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this leave type due to role restrictions."
+                            ], 403);
+                        } else if ($setting_leave_type->is_default == 0 && $setting_leave_type->created_by != auth()->user()->id) {
+                                return response()->json([
+                                    "message" => "You do not have permission to update this leave type due to role restrictions."
+                                ], 403);
+
+                        }
+                    }
+                } else {
+                    if ($setting_leave_type->business_id != NULL) {
+                        if (($setting_leave_type->business_id != auth()->user()->business_id)) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this leave type due to role restrictions."
+                            ], 403);
+                        }
+                    } else {
+                        if ($setting_leave_type->is_default == 0) {
+                            if ($setting_leave_type->created_by != auth()->user()->created_by) {
+                                return response()->json([
+                                    "message" => "You do not have permission to update this leave type due to role restrictions."
+                                ], 403);
+                            }
+                        }
+                    }
+                }
+
+
+
 
             return response()->json($setting_leave_type, 200);
         } catch (Exception $e) {
@@ -745,12 +918,18 @@ class SettingLeaveTypeController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = SettingLeaveType::whereIn('id', $idsArray)
             ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', NULL)
-                             ->where('setting_leave_types.is_default', 1);
+                if ($request->user()->hasRole("superadmin")) {
+                    return $query->where('setting_leave_types.business_id', NULL)
+                        ->where('setting_leave_types.is_default', 1);
+                } else {
+                    return $query->where('setting_leave_types.business_id', NULL)
+                        ->where('setting_leave_types.is_default', 0)
+                        ->where('setting_leave_types.created_by', $request->user()->id);
+                }
             })
             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', $request->user()->business_id)
-                ->where('setting_leave_types.is_default', 0);
+                    ->where('setting_leave_types.is_default', 0);
             })
                 ->select('id')
                 ->get()

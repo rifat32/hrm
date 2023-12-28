@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\SettingLeaveType;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingLeaveTypeUpdateRequest extends FormRequest
@@ -24,18 +25,66 @@ class SettingLeaveTypeUpdateRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'id' => 'required|numeric',
+            'id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+
+                    $setting_leave_type_query_params = [
+                        "id" => $this->id,
+                    ];
+                    $setting_leave_type = SettingLeaveType::where($setting_leave_type_query_params)
+                        ->first();
+                    if (!$setting_leave_type) {
+                            // $fail("$attribute is invalid.");
+                            $fail("no leave type found");
+                            return 0;
+
+                    }
+                    if (empty(auth()->user()->business_id)) {
+
+                        if(auth()->user()->hasRole('superadmin')) {
+                            if(($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
+                                // $fail("$attribute is invalid.");
+                                $fail("You do not have permission to update this leave type due to role restrictions.");
+
+                          }
+
+                        } else {
+                            if(($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 0 || $setting_leave_type->created_by != auth()->user()->id)) {
+                                // $fail("$attribute is invalid.");
+                                $fail("You do not have permission to update this leave type due to role restrictions.");
+
+                          }
+                        }
+
+                    } else {
+                        if(($setting_leave_type->business_id != auth()->user()->business_id || $setting_leave_type->is_default != 0)) {
+                               // $fail("$attribute is invalid.");
+                            $fail("You do not have permission to update this leave type status due to role restrictions.");
+                        }
+                    }
+
+
+
+
+                },
+            ],
             'name' => 'required|string',
             'type' => 'required|string|in:paid,unpaid',
-            'amount' => 'required|numeric',
-            'is_active' => 'required|boolean',
-            'is_earning_enabled' => 'required|boolean',
+            'amount' => 'required|numeric'
         ];
 
         if (!empty(auth()->user()->business_id)) {
             $rules['name'] .= '|unique:setting_leave_types,name,'.$this->id.',id,business_id,' . auth()->user()->business_id;
         } else {
-            $rules['name'] .= '|unique:setting_leave_types,name,'.$this->id.',id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+            if(auth()->user()->hasRole('superadmin')){
+                $rules['name'] .= '|unique:setting_leave_types,name,'.$this->id.',id,is_default,' . 1 . ',business_id,' . NULL;
+            }
+            else {
+                $rules['name'] .= '|unique:setting_leave_types,name,'.$this->id.',id,is_default,' . 0 . ',business_id,' . NULL;
+            }
+
         }
 
         return $rules;
