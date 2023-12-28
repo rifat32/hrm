@@ -436,7 +436,7 @@ class UserAssetController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+
               $user_assets = UserAsset::with([
                   "creator" => function ($query) {
                       $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -458,9 +458,9 @@ class UserAssetController extends Controller
                   ->when(!empty($request->user_id), function ($query) use ($request) {
                       return $query->where('user_assets.user_id', $request->user_id);
                   })
-                  ->when(empty($request->user_id), function ($query) use ($request) {
-                      return $query->where('user_assets.user_id', $request->user()->id);
-                  })
+                //   ->when(empty($request->user_id), function ($query) use ($request) {
+                //       return $query->where('user_assets.user_id', $request->user()->id);
+                //   })
                   ->when(!empty($request->start_date), function ($query) use ($request) {
                       return $query->where('user_assets.created_at', ">=", $request->start_date);
                   })

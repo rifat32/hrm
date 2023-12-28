@@ -304,9 +304,7 @@ class AssetTypeController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("location", "like", "%" . $term . "%")
-                            ->orWhere("description", "like", "%" . $term . "%");
+                        $query->where("name", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
