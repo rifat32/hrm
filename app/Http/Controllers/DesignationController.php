@@ -682,10 +682,6 @@ class DesignationController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $created_by  = NULL;
-            if(auth()->user()->business) {
-                $created_by = auth()->user()->business->created_by;
-            }
 
             $designation =  Designation::where([
                 "designations.id" => $id,

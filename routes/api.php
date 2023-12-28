@@ -508,6 +508,7 @@ Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "delete
 
 Route::post('/v1.0/employment-statuses', [EmploymentStatusController::class, "createEmploymentStatus"]);
 Route::put('/v1.0/employment-statuses', [EmploymentStatusController::class, "updateEmploymentStatus"]);
+Route::put('/v1.0/employment-statuses/toggle-active', [EmploymentStatusController::class, "toggleActiveEmploymentStatus"]);
 Route::get('/v1.0/employment-statuses', [EmploymentStatusController::class, "getEmploymentStatuses"]);
 Route::get('/v1.0/employment-statuses/{id}', [EmploymentStatusController::class, "getEmploymentStatusById"]);
 Route::delete('/v1.0/employment-statuses/{ids}', [EmploymentStatusController::class, "deleteEmploymentStatusesByIds"]);

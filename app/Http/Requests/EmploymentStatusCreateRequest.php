@@ -26,16 +26,25 @@ class EmploymentStatusCreateRequest extends FormRequest
 
         $rules = [
             'name' => 'required|string',
-            'color' => 'required|string',
             'description' => 'nullable|string',
+            'color' => 'required|string',
         ];
 
         if (!empty(auth()->user()->business_id)) {
-            $rules['name'] .= '|unique:employment_statuses,name,NULL,id,business_id,' . auth()->user()->business_id;
+            $rules['name'] .= '|unique:designations,name,NULL,id,business_id,' . auth()->user()->business_id;
         } else {
-            $rules['name'] .= '|unique:employment_statuses,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
+            $rules['name'] .= '|unique:designations,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
         }
 
+
 return $rules;
+
+
+
+
+
+
+
+
     }
 }
