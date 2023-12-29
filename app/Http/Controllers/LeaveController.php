@@ -209,12 +209,7 @@ class LeaveController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["status"] = "pending";
 
-                $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
-                if (!$check_leave_type["ok"]) {
-                    return response()->json([
-                        "message" => $check_leave_type["message"]
-                    ], $check_leave_type["status"]);
-                }
+
 
 
                 $check_employee = $this->checkUser($request_data["employee_id"]);
@@ -754,12 +749,7 @@ class LeaveController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
-                $check_leave_type = $this->checkLeaveType($request_data["leave_type_id"]);
-                if (!$check_leave_type["ok"]) {
-                    return response()->json([
-                        "message" => $check_leave_type["message"]
-                    ], $check_leave_type["status"]);
-                }
+            
 
 
                 $check_employee = $this->checkUser($request_data["employee_id"]);
