@@ -476,7 +476,15 @@ class DepartmentController extends Controller
                     "business_id" => $business_id
                 ]
             )
-            ->whereNotNull("parent_id")
+
+            ->when(isset($request->show_parent), function ($query) use ($request) {
+                if(intval($request->show_parent)) {
+                    return $query->whereNotNull("parent_id");
+                } else {
+                    return $query;
+                }
+
+            })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;

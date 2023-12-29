@@ -1140,7 +1140,7 @@ class AttendanceController extends Controller
             }
 
             if(!empty($setting_attendance->work_availability_definition)) {
-                if($data["data_highlights"]["work_availability"] >= $setting_attendance->work_availability_definition) {
+                if($data["data_highlights"]["total_work_availability_per_centum"] >= $setting_attendance->work_availability_definition) {
                     $data["data_highlights"]["work_availability"] = "good";
                 } else {
                     $data["data_highlights"]["work_availability"] = "bad";

@@ -181,6 +181,7 @@ return array(
     'App\\Models\\EmailTemplate' => $baseDir . '/app/Models/EmailTemplate.php',
     'App\\Models\\EmailTemplateWrapper' => $baseDir . '/app/Models/EmailTemplateWrapper.php',
     'App\\Models\\EmployeePassportDetail' => $baseDir . '/app/Models/EmployeePassportDetail.php',
+    'App\\Models\\EmployeePassportDetailHistory' => $baseDir . '/app/Models/EmployeePassportDetailHistory.php',
     'App\\Models\\EmployeeSponsorship' => $baseDir . '/app/Models/EmployeeSponsorship.php',
     'App\\Models\\EmployeeVisaDetail' => $baseDir . '/app/Models/EmployeeVisaDetail.php',
     'App\\Models\\EmploymentStatus' => $baseDir . '/app/Models/EmploymentStatus.php',

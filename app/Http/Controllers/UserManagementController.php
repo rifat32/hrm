@@ -25,6 +25,7 @@ use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\Business;
 use App\Models\EmployeePassportDetail;
+use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeVisaDetail;
 use App\Models\Holiday;
@@ -50,12 +51,12 @@ use Illuminate\Support\Facades\File;
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil,BusinessUtil, ModuleUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil;
 
 
 
-  /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/v1.0/users/single-file-upload",
      *      operationId="createUserFileSingle",
@@ -66,19 +67,19 @@ class UserManagementController extends Controller
      *      summary="This method is to store user file ",
      *      description="This method is to store user file",
      *
-   *  @OA\RequestBody(
-        *   * @OA\MediaType(
-*     mediaType="multipart/form-data",
-*     @OA\Schema(
-*         required={"file"},
-*         @OA\Property(
-*             description="file to upload",
-*             property="file",
-*             type="file",
-*             collectionFormat="multi",
-*         )
-*     )
-* )
+     *  @OA\RequestBody(
+     *   * @OA\MediaType(
+     *     mediaType="multipart/form-data",
+     *     @OA\Schema(
+     *         required={"file"},
+     *         @OA\Property(
+     *             description="file to upload",
+     *             property="file",
+     *             type="file",
+     *             collectionFormat="multi",
+     *         )
+     *     )
+     * )
 
 
 
@@ -117,37 +118,35 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function createUserFileSingle(SingleFileUploadRequest $request)
-     {
-         try{
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             // if(!$request->user()->hasPermissionTo('business_create')){
-             //      return response()->json([
-             //         "message" => "You can not perform this action"
-             //      ],401);
-             // }
+    public function createUserFileSingle(SingleFileUploadRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            // if(!$request->user()->hasPermissionTo('business_create')){
+            //      return response()->json([
+            //         "message" => "You can not perform this action"
+            //      ],401);
+            // }
 
-             $request_data = $request->validated();
+            $request_data = $request->validated();
 
-             $location =  config("setup-config.user_files_location");
+            $location =  config("setup-config.user_files_location");
 
-             $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["file"]->getClientOriginalName());
+            $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["file"]->getClientOriginalName());
 
-             $request_data["file"]->move(public_path($location), $new_file_name);
-
-
-             return response()->json(["file" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
+            $request_data["file"]->move(public_path($location), $new_file_name);
 
 
-         } catch(Exception $e){
-             error_log($e->getMessage());
-         return $this->sendError($e,500,$request);
-         }
-     }
+            return response()->json(["file" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
-   /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/users/multiple-file-upload",
@@ -214,33 +213,33 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function createUserFileMultiple(MultipleFileUploadRequest $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function createUserFileMultiple(MultipleFileUploadRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $insertableData = $request->validated();
+            $insertableData = $request->validated();
 
-             $location =  config("setup-config.user_files_location");
+            $location =  config("setup-config.user_files_location");
 
-             $files = [];
-             if (!empty($insertableData["files"])) {
-                 foreach ($insertableData["files"] as $file) {
-                     $new_file_name = time() . '_' . $file->getClientOriginalName();
-                     $new_file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-                     $file->move(public_path($location), $new_file_name);
+            $files = [];
+            if (!empty($insertableData["files"])) {
+                foreach ($insertableData["files"] as $file) {
+                    $new_file_name = time() . '_' . $file->getClientOriginalName();
+                    $new_file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+                    $file->move(public_path($location), $new_file_name);
 
-                     array_push($files, ("/" . $location . "/" . $new_file_name));
-                 }
-             }
+                    array_push($files, ("/" . $location . "/" . $new_file_name));
+                }
+            }
 
 
-             return response()->json(["files" => $files], 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response()->json(["files" => $files], 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -308,7 +307,7 @@ class UserManagementController extends Controller
     public function createUserImage(ImageUploadRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             // if(!$request->user()->hasPermissionTo('user_create')){
             //      return response()->json([
             //         "message" => "You can not perform this action"
@@ -362,7 +361,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
 
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
- *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
      *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
@@ -422,7 +421,7 @@ class UserManagementController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -433,11 +432,11 @@ class UserManagementController extends Controller
             $request_data = $request->validated();
 
 
-            if(!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin"){
+            if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
                 $error =  [
                     "message" => "You can not create superadmin.",
-             ];
-                throw new Exception(json_encode($error),403);
+                ];
+                throw new Exception(json_encode($error), 403);
             }
 
 
@@ -464,15 +463,15 @@ class UserManagementController extends Controller
 
             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
-                // $default_work_shift = WorkShift::where([
-                //       "business_id" => auth()->user()->id,
-                //       "is_business_default" => 1
-                // ])
-                // ->first();
-                // if(!$default_work_shift) {
-                //     throw new Error("There is no default workshift for this business");
-                //  }
-                //   $default_work_shift->users()->attach($user->id);
+            // $default_work_shift = WorkShift::where([
+            //       "business_id" => auth()->user()->id,
+            //       "is_business_default" => 1
+            // ])
+            // ->first();
+            // if(!$default_work_shift) {
+            //     throw new Error("There is no default workshift for this business");
+            //  }
+            //   $default_work_shift->users()->attach($user->id);
 
 
 
@@ -520,7 +519,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
- *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
      *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
@@ -541,49 +540,49 @@ class UserManagementController extends Controller
      *
      * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={}),
      *
-  *  *  * *  @OA\Property(property="immigration_status", type="string", format="string",example="british_citizen"),
+     *  *  * *  @OA\Property(property="immigration_status", type="string", format="string",example="british_citizen"),
 
-   *     @OA\Property(property="sponsorship_details", type="string", format="string", example={
- *    "date_assigned": "2023-01-01",
- *    "expiry_date": "2024-01-01",
- *    "status": "pending",
- *  *    "note": "pending",
- *  *    "certificate_number": "pending note",
- *  *    "current_certificate_status": "pending",
- * *  *    "is_sponsorship_withdrawn": 1
- * }),
- *       @OA\Property(property="visa_details", type="string", format="string", example={
- *      "BRP_number": "BRP123",
- *      "visa_issue_date": "2023-01-01",
- *      "visa_expiry_date": "2024-01-01",
- *      "place_of_issue": "City",
- *      "visa_docs": {
- *        {
- *          "file_name": "document1.pdf",
- *          "description": "Description 1"
- *        },
- *        {
-*  *          "file_name": "document2.pdf",
- *          "description": "Description 2"
- *        }
- *      }
- *
- * }
- * ),
- *  *     @OA\Property(property="passport_details", type="string", format="string", example={
- *    "passport_number": "ABC123",
- *    "passport_issue_date": "2023-01-01",
- *    "passport_expiry_date": "2024-01-01",
- *    "place_of_issue": "City"
- *
- * })
- *
- *
- *
+     *     @OA\Property(property="sponsorship_details", type="string", format="string", example={
+     *    "date_assigned": "2023-01-01",
+     *    "expiry_date": "2024-01-01",
+     *    "status": "pending",
+     *  *    "note": "pending",
+     *  *    "certificate_number": "pending note",
+     *  *    "current_certificate_status": "pending",
+     * *  *    "is_sponsorship_withdrawn": 1
+     * }),
+     *       @OA\Property(property="visa_details", type="string", format="string", example={
+     *      "BRP_number": "BRP123",
+     *      "visa_issue_date": "2023-01-01",
+     *      "visa_expiry_date": "2024-01-01",
+     *      "place_of_issue": "City",
+     *      "visa_docs": {
+     *        {
+     *          "file_name": "document1.pdf",
+     *          "description": "Description 1"
+     *        },
+     *        {
+     *  *          "file_name": "document2.pdf",
+     *          "description": "Description 2"
+     *        }
+     *      }
+     *
+     * }
+     * ),
+     *  *     @OA\Property(property="passport_details", type="string", format="string", example={
+     *    "passport_number": "ABC123",
+     *    "passport_issue_date": "2023-01-01",
+     *    "passport_expiry_date": "2024-01-01",
+     *    "place_of_issue": "City"
+     *
+     * })
+     *
+     *
+     *
 
- *
- *
- *
+     *
+     *
+     *
      *
      *
      *         ),
@@ -622,108 +621,109 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function createUserV2(UserCreateV2Request $request)
-     {
+    public function createUserV2(UserCreateV2Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_create')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id = $request->user()->business_id;
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id = $request->user()->business_id;
 
-             $request_data = $request->validated();
-
-
-             if(!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin"){
-                 $error =  [
-                     "message" => "You can not create superadmin.",
-              ];
-                 throw new Exception(json_encode($error),403);
-             }
+            $request_data = $request->validated();
 
 
+            if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+                $error =  [
+                    "message" => "You can not create superadmin.",
+                ];
+                throw new Exception(json_encode($error), 403);
+            }
 
 
 
-             $request_data['password'] = Hash::make($request['password']);
-             $request_data['is_active'] = true;
-             $request_data['remember_token'] = Str::random(10);
 
 
-             if (!empty($business_id)) {
-                 $request_data['business_id'] = $business_id;
-             }
+            $request_data['password'] = Hash::make($request['password']);
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
 
 
-             $user =  User::create($request_data);
-             $user->departments()->sync($request_data['departments'],[]);
-             $user->assignRole($request_data['role']);
+            if (!empty($business_id)) {
+                $request_data['business_id'] = $business_id;
+            }
 
 
-             if(in_array($request["immigration_status"] ,['sponsored'])) {
-                if(!empty($request_data["sponsorship_details"])) {
+            $user =  User::create($request_data);
+            $user->departments()->sync($request_data['departments'], []);
+            $user->assignRole($request_data['role']);
+
+
+            if (in_array($request["immigration_status"], ['sponsored'])) {
+                if (!empty($request_data["sponsorship_details"])) {
                     $request_data["sponsorship_details"]["employee_id"] = $user->id;
                     $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
                 }
+            }
+            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
 
-             }
-             if(in_array($request["immigration_status"] ,['immigrant', 'sponsored'])) {
-
-                if(!empty($request_data["passport_details"])) {
+                if (!empty($request_data["passport_details"])) {
                     $request_data["passport_details"]["employee_id"] = $user->id;
                     $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
+                    $request_data["passport_details"]["from_date"] = now();
+                    $request_data["passport_details"]["employee_passport_detail_id"] = $employee_passport_details->id;
+
+
+                    $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
                 }
-                if(!empty($request_data["visa_details"])) {
+                if (!empty($request_data["visa_details"])) {
                     $request_data["visa_details"]["employee_id"] = $user->id;
                     $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
                 }
-             }
+            }
 
 
-             if(!empty($request_data["work_shift_id"])) {
+            if (!empty($request_data["work_shift_id"])) {
                 $work_shift =  WorkShift::where([
                     "id" => $request_data["work_shift_id"],
-                    "business_id" =>auth()->user()->business_id
+                    "business_id" => auth()->user()->business_id
                 ])
-                ->first();
-                if(!$work_shift) {
-                   throw new Exception("Work shift validation failed");
+                    ->first();
+                if (!$work_shift) {
+                    throw new Exception("Work shift validation failed");
                 }
-                 $work_shift->users()->attach($user->id);
-             } else {
+                $work_shift->users()->attach($user->id);
+            } else {
                 $default_work_shift = WorkShift::where([
-                      "business_id" => auth()->user()->business_id,
-                      "is_business_default" => 1
+                    "business_id" => auth()->user()->business_id,
+                    "is_business_default" => 1
                 ])
-                ->first();
-                if(!$default_work_shift) {
+                    ->first();
+                if (!$default_work_shift) {
                     throw new Exception("There is no default workshift for this business");
-                 }
-                  $default_work_shift->users()->attach($user->id);
+                }
+                $default_work_shift->users()->attach($user->id);
+            }
+            // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
 
+            $user->roles = $user->roles->pluck('name');
 
-             }
-             // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
-
-
-             $user->roles = $user->roles->pluck('name');
-
-             // $user->permissions  = $user->getAllPermissions()->pluck('name');
-             // error_log("cccccc");
-             // $data["user"] = $user;
-             // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
-             // $data["roles"] = $user->roles->pluck('name');
-             // $data["token"] = $token;
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            // $user->permissions  = $user->getAllPermissions()->pluck('name');
+            // error_log("cccccc");
+            // $data["user"] = $user;
+            // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
+            // $data["roles"] = $user->roles->pluck('name');
+            // $data["token"] = $token;
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -757,7 +757,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
- *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
      *  * *  @OA\Property(property="password_confirmation", type="boolean", format="boolean",example="1"),
@@ -814,7 +814,7 @@ class UserManagementController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -905,7 +905,7 @@ class UserManagementController extends Controller
         }
     }
 
-     /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/assign-roles",
@@ -962,33 +962,33 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function assignUserRole(AssignRoleRequest $request)
-     {
+    public function assignUserRole(AssignRoleRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $user = $userQuery->first();
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $user = $userQuery->first();
 
-             if (!$user) {
+            if (!$user) {
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
 
 
-            foreach($request_data["roles"] as $role){
+            foreach ($request_data["roles"] as $role) {
                 if ($user->hasRole("superadmin") && $role != "superadmin") {
                     return response()->json([
                         "message" => "You can not change the role of super admin"
@@ -1006,24 +1006,24 @@ class UserManagementController extends Controller
 
 
 
-$roles = Role::whereIn('name', $request_data["roles"])->get();
+            $roles = Role::whereIn('name', $request_data["roles"])->get();
 
 
-$user->syncRoles($roles);
+            $user->syncRoles($roles);
 
 
 
-             $user->roles = $user->roles->pluck('name');
+            $user->roles = $user->roles->pluck('name');
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-     /**
+    /**
      *
      * @OA\Put(
      *      path="/v2.0/users",
@@ -1053,7 +1053,7 @@ $user->syncRoles($roles);
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
- *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
      *  * *  @OA\Property(property="password_confirmation", type="boolean", format="boolean",example="1"),
@@ -1106,152 +1106,147 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function updateUserV2(UserUpdateV2Request $request)
-     {
+    public function updateUserV2(UserUpdateV2Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-
-
-
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-                 if(!empty($request_data["work_shift_id"])) {
-                     $work_shift =  WorkShift::where([
-                        "id" => $request_data["work_shift_id"],
-                        "business_id" =>auth()->user()->business_id
-                    ])
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
+
+
+
+            if (!empty($request_data["work_shift_id"])) {
+                $work_shift =  WorkShift::where([
+                    "id" => $request_data["work_shift_id"],
+                    "business_id" => auth()->user()->business_id
+                ])
                     ->first();
-                    if(!$work_shift) {
-                        return response()->json([
-                            "message" => "no work shift found"
-                        ], 403);
-                    }
-                   }
+                if (!$work_shift) {
+                    return response()->json([
+                        "message" => "no work shift found"
+                    ], 403);
+                }
+            }
 
 
-             if (!empty($request_data['password'])) {
-                 $request_data['password'] = Hash::make($request_data['password']);
-             } else {
-                 unset($request_data['password']);
-             }
-             $request_data['is_active'] = true;
-             $request_data['remember_token'] = Str::random(10);
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
+            } else {
+                unset($request_data['password']);
+            }
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
 
-             $user  =  tap(User::where($userQueryTerms))->update(
-                 collect($request_data)->only([
-                     'first_Name',
-                     'middle_Name',
-                     'last_Name',
-                     'employee_id',
-                     'password',
-                     'phone',
-                     'address_line_1',
-                     'address_line_2',
-                     'country',
-                     'city',
-                     'postcode',
-                     "lat",
-                     "long",
-                     "image",
-                     'gender',
-                     'is_in_employee',
-                     'designation_id',
-                     'employment_status_id',
-                     'joining_date',
-                     'salary',
-                     'emergency_contact_details',
+            $user  =  tap(User::where($userQueryTerms))->update(
+                collect($request_data)->only([
+                    'first_Name',
+                    'middle_Name',
+                    'last_Name',
+                    'employee_id',
+                    'password',
+                    'phone',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long",
+                    "image",
+                    'gender',
+                    'is_in_employee',
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    'salary',
+                    'emergency_contact_details',
 
-                 ])->toArray()
-             )
-                 // ->with("somthing")
+                ])->toArray()
+            )
+                // ->with("somthing")
 
-                 ->first();
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-             $user->departments()->sync($request_data['departments'],[]);
-             $user->syncRoles([$request_data['role']]);
-             if(!empty($request_data["work_shift_id"])) {
-                 UserWorkShift::where([
-                     "user_id" => $user->id
-                 ])
-                 ->delete();
-                 $work_shift->users()->attach($user->id);
-             }
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
+            $user->departments()->sync($request_data['departments'], []);
+            $user->syncRoles([$request_data['role']]);
+            if (!empty($request_data["work_shift_id"])) {
+                UserWorkShift::where([
+                    "user_id" => $user->id
+                ])
+                    ->delete();
+                $work_shift->users()->attach($user->id);
+            }
 
 
 
-             if(in_array($request["immigration_status"] ,['sponsored'])) {
-                if(!empty($request_data["sponsorship_details"])) {
+            if (in_array($request["immigration_status"], ['sponsored'])) {
+                if (!empty($request_data["sponsorship_details"])) {
                     $request_data["sponsorship_details"]["employee_id"] = $user->id;
 
                     $employee_sponsorship  =  EmployeeSponsorship::where([
                         "employee_id" =>  $request_data["sponsorship_details"]["employee_id"]
                     ])
-                    ->first();
+                        ->first();
 
-                    if($employee_sponsorship) {
-                        $employee_sponsorship->update( collect($request_data)->only([
-        //  'employee_id',
-        'date_assigned',
-        'expiry_date',
-        'status',
-        'note',
-        "certificate_number",
-        "current_certificate_status",
-        "is_sponsorship_withdrawn",
-        // 'created_by'
+                    if ($employee_sponsorship) {
+                        $employee_sponsorship->update(collect($request_data)->only([
+                            //  'employee_id',
+                            'date_assigned',
+                            'expiry_date',
+                            'status',
+                            'note',
+                            "certificate_number",
+                            "current_certificate_status",
+                            "is_sponsorship_withdrawn",
+                            // 'created_by'
                         ])->toArray());
-
-                    }else {
+                    } else {
                         $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
                     }
-
-
-
                 }
+            }
+            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
 
-             }
-             if(in_array($request["immigration_status"] ,['immigrant', 'sponsored'])) {
-
-                if(!empty($request_data["passport_details"])) {
+                if (!empty($request_data["passport_details"])) {
                     $request_data["passport_details"]["employee_id"] = $user->id;
 
 
                     $employee_passport_details  =  EmployeePassportDetail::where([
                         "employee_id" =>  $request_data["passport_details"]["employee_id"]
                     ])
-                    ->first();
+                        ->first();
 
-                    if($employee_passport_details) {
-                        $employee_passport_details->update( collect($request_data)->only([
+                    if ($employee_passport_details) {
+                        $employee_passport_details->update(collect($request_data)->only([
                             // "employee_id",
                             'passport_number',
                             "passport_issue_date",
@@ -1260,22 +1255,36 @@ $user->syncRoles($roles);
                             // 'created_by'
                         ])->toArray());
 
-                    }else {
+                        $employee_passport_details_history  =  EmployeePassportDetailHistory::where([
+                            "employee_id" =>  $request_data["passport_details"]["employee_id"],
+                            "employee_passport_detail_id" => $employee_passport_details->id
+                        ])
+                            ->latest('created_at')
+                            ->first();
+
+                        if ($employee_passport_details_history) {
+                            $employee_passport_details_history->to_date = now();
+                            $employee_passport_details_history->save();
+                        }
+                    } else {
                         $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
-
                     }
-
-
+                    if (!empty($request_data["passport_details"]["to_date"])) {
+                        unset($request_data["passport_details"]["to_date"]);
+                    }
+                    $request_data["passport_details"]["employee_passport_detail_id"] = $employee_passport_details->id;
+                    $request_data["passport_details"]["from_date"] = now();
+                    $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
                 }
-                if(!empty($request_data["visa_details"])) {
+                if (!empty($request_data["visa_details"])) {
                     $request_data["visa_details"]["employee_id"] = $user->id;
 
                     $employee_visa_details  =  EmployeeVisaDetail::where([
                         "employee_id" =>  $request_data["visa_details"]["employee_id"]
                     ])
-                    ->first();
+                        ->first();
 
-                    if($employee_visa_details) {
+                    if ($employee_visa_details) {
                         $employee_visa_details->update(collect($request_data)->only([
                             // 'employee_id',
                             'BRP_number',
@@ -1285,13 +1294,11 @@ $user->syncRoles($roles);
                             "visa_docs",
                             // 'created_by'
                         ])->toArray());
-
-                    }else {
+                    } else {
                         $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
-
                     }
                 }
-             }
+            }
 
 
 
@@ -1300,7 +1307,7 @@ $user->syncRoles($roles);
 
 
 
-             $user->roles = $user->roles->pluck('name');
+            $user->roles = $user->roles->pluck('name');
 
 
 
@@ -1311,13 +1318,13 @@ $user->syncRoles($roles);
 
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
-         /**
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/update-address",
@@ -1383,73 +1390,73 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function updateUserAddress(UserUpdateAddressRequest $request)
-     {
+    public function updateUserAddress(UserUpdateAddressRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-
-
-
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
-             $user  =  tap(User::where($userQueryTerms))->update(
-                 collect($request_data)->only([
+
+
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
+
+            $user  =  tap(User::where($userQueryTerms))->update(
+                collect($request_data)->only([
                     'phone',
-            'address_line_1',
-            'address_line_2',
-            'country',
-            'city',
-            'postcode',
-            'lat',
-            'long',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    'lat',
+                    'long',
 
-                 ])->toArray()
-             )
-                 // ->with("somthing")
+                ])->toArray()
+            )
+                // ->with("somthing")
 
-                 ->first();
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-        /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/update-emergency-contact",
@@ -1467,7 +1474,7 @@ $user->syncRoles($roles);
 
      *           @OA\Property(property="id", type="string", format="number",example="1"),
 
-      * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
+     * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
 
      *
      *         ),
@@ -1506,66 +1513,66 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function updateEmergencyContact(UserUpdateEmergencyContactRequest $request)
-     {
+    public function updateEmergencyContact(UserUpdateEmergencyContactRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-
-
-
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
-             $user  =  tap(User::where($userQueryTerms))->update(
-                 collect($request_data)->only([
+
+
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
+
+            $user  =  tap(User::where($userQueryTerms))->update(
+                collect($request_data)->only([
                     'emergency_contact_details'
 
-                 ])->toArray()
-             )
-                 // ->with("somthing")
+                ])->toArray()
+            )
+                // ->with("somthing")
 
-                 ->first();
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-   /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/store-details",
@@ -1580,36 +1587,36 @@ $user->syncRoles($roles);
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *     @OA\Property(property="employee_id", type="number", format="integer", example="1"),
- *     @OA\Property(property="date_assigned", type="string", format="date", example="2023-12-05"),
- *     @OA\Property(property="expiry_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="pending", enum={"pending", "approved", "denied", "visa_granted"}),
- *     @OA\Property(property="note", type="string", format="string", example="Additional note"),
- *     @OA\Property(property="passport_details", type="string", format="string", example={
- *    "passport_number": "ABC123",
- *    "passport_issue_date": "2023-01-01",
- *    "passport_expiry_date": "2024-01-01",
- *    "place_of_issue": "City",
- *    "visa_details": {
- *      "BRP_number": "BRP123",
- *      "visa_issue_date": "2023-01-01",
- *      "visa_expiry_date": "2024-01-01",
- *      "place_of_issue": "City",
- *      "visa_docs": {
- *        {
- *          "file_name": "document1.pdf",
- *          "description": "Description 1"
- *        },
- *        {
-*  *          "file_name": "document2.pdf",
- *          "description": "Description 2"
- *        }
- *      }
- *    }
- *
+     *     @OA\Property(property="employee_id", type="number", format="integer", example="1"),
+     *     @OA\Property(property="date_assigned", type="string", format="date", example="2023-12-05"),
+     *     @OA\Property(property="expiry_date", type="string", format="date", example="2023-12-31"),
+     *     @OA\Property(property="status", type="string", format="string", example="pending", enum={"pending", "approved", "denied", "visa_granted"}),
+     *     @OA\Property(property="note", type="string", format="string", example="Additional note"),
+     *     @OA\Property(property="passport_details", type="string", format="string", example={
+     *    "passport_number": "ABC123",
+     *    "passport_issue_date": "2023-01-01",
+     *    "passport_expiry_date": "2024-01-01",
+     *    "place_of_issue": "City",
+     *    "visa_details": {
+     *      "BRP_number": "BRP123",
+     *      "visa_issue_date": "2023-01-01",
+     *      "visa_expiry_date": "2024-01-01",
+     *      "place_of_issue": "City",
+     *      "visa_docs": {
+     *        {
+     *          "file_name": "document1.pdf",
+     *          "description": "Description 1"
+     *        },
+     *        {
+     *  *          "file_name": "document2.pdf",
+     *          "description": "Description 2"
+     *        }
+     *      }
+     *    }
+     *
 
- *
- * })
+     *
+     * })
 
      *
      *         ),
@@ -1648,45 +1655,43 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function storeUserDetails(UserStoreDetailsRequest $request)
-     {
+    public function storeUserDetails(UserStoreDetailsRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-             $request_data["created_by"] = $request->user()->id;
-             if(!empty($request_data["passport_details"]))  {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+            $request_data["created_by"] = $request->user()->id;
+            if (!empty($request_data["passport_details"])) {
                 $request_data["passport_details"] += ["created_by" => $request_data["created_by"]];
-
-             }
-             if(!empty($request_data["passport_details"]["visa_details"]))  {
+            }
+            if (!empty($request_data["passport_details"]["visa_details"])) {
                 $request_data["passport_details"]["visa_details"] += ["created_by" => $request_data["created_by"]];
+            }
 
-             }
-
-             $user = User::where([
-                 "id" => $request["employee_id"]
-             ])->first();
+            $user = User::where([
+                "id" => $request["employee_id"]
+            ])->first();
 
 
-             if (!$request->user()->hasRole('superadmin') && $user->business_id != $request->user()->business_id && $user->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
-
-             if (!$request->user()->hasRole('superadmin') && $user->hasRole('superadmin')) {
+            if (!$request->user()->hasRole('superadmin') && $user->business_id != $request->user()->business_id && $user->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
             }
 
-             $employee_sponsorship  =  EmployeeSponsorship::updateOrCreate(
+            if (!$request->user()->hasRole('superadmin') && $user->hasRole('superadmin')) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
+
+            $employee_sponsorship  =  EmployeeSponsorship::updateOrCreate(
                 [
                     "employee_id" => $request_data["employee_id"],
                 ],
@@ -1700,14 +1705,14 @@ $user->syncRoles($roles);
                     'created_by'
                 ])->toArray()
 
-            //     [
-            //     "employee_id" => $request_data["employee_id"],
-            //     'date_assigned' =>  $request_data["date_assigned"],
-            //     'expiry_date' =>  $request_data["expiry_date"],
-            //     'status' =>  $request_data["status"],
-            //     'note' =>  $request_data["note"],
-            //     'created_by' =>  $request_data["created_by"],
-            //    ]
+                //     [
+                //     "employee_id" => $request_data["employee_id"],
+                //     'date_assigned' =>  $request_data["date_assigned"],
+                //     'expiry_date' =>  $request_data["expiry_date"],
+                //     'status' =>  $request_data["status"],
+                //     'note' =>  $request_data["note"],
+                //     'created_by' =>  $request_data["created_by"],
+                //    ]
 
 
 
@@ -1715,7 +1720,7 @@ $user->syncRoles($roles);
 
 
 
-            if($request_data["status"] == "visa_granted"){
+            if ($request_data["status"] == "visa_granted") {
                 $employee_passport_details  =  EmployeePassportDetail::updateOrCreate(
                     [
                         "employee_sponsorship_id" => $employee_sponsorship->id,
@@ -1729,14 +1734,14 @@ $user->syncRoles($roles);
                         'created_by'
                     ])->toArray()
 
-                //     [
-                //     "employee_sponsorship_id" => $employee_sponsorship->id,
-                //     'passport_number' =>  $request_data["passport_number"],
-                //     'passport_issue_date' =>  $request_data["passport_issue_date"],
-                //     'passport_expiry_date' =>  $request_data["passport_expiry_date"],
-                //     'place_of_issue' =>  $request_data["place_of_issue"],
-                //     'created_by' =>  $request_data["created_by"],
-                //    ]
+                    //     [
+                    //     "employee_sponsorship_id" => $employee_sponsorship->id,
+                    //     'passport_number' =>  $request_data["passport_number"],
+                    //     'passport_issue_date' =>  $request_data["passport_issue_date"],
+                    //     'passport_expiry_date' =>  $request_data["passport_expiry_date"],
+                    //     'place_of_issue' =>  $request_data["place_of_issue"],
+                    //     'created_by' =>  $request_data["created_by"],
+                    //    ]
 
                 );
 
@@ -1754,29 +1759,28 @@ $user->syncRoles($roles);
                         "visa_docs",
                         'created_by'
                     ])->toArray()
-                //     [
-                //     "employee_passport_details_id" => $employee_passport_details->id,
-                //     'BRP_number' =>  $request_data["BRP_number"],
-                //     'visa_issue_date' =>  $request_data["visa_issue_date"],
-                //     'visa_expiry_date' =>  $request_data["visa_expiry_date"],
-                //     'place_of_issue' =>  $request_data["place_of_issue"],
-                //     'visa_docs' =>  $request_data["visa_docs"],
-                //     'created_by' =>  $request_data["created_by"],
-                //    ]
+                    //     [
+                    //     "employee_passport_details_id" => $employee_passport_details->id,
+                    //     'BRP_number' =>  $request_data["BRP_number"],
+                    //     'visa_issue_date' =>  $request_data["visa_issue_date"],
+                    //     'visa_expiry_date' =>  $request_data["visa_expiry_date"],
+                    //     'place_of_issue' =>  $request_data["place_of_issue"],
+                    //     'visa_docs' =>  $request_data["visa_docs"],
+                    //     'created_by' =>  $request_data["created_by"],
+                    //    ]
 
                 );
-
             }
 
 
 
 
-             return response($employee_sponsorship, 200);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response($employee_sponsorship, 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -1836,7 +1840,7 @@ $user->syncRoles($roles);
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1848,8 +1852,8 @@ $user->syncRoles($roles);
             if (!auth()->user()->hasRole('superadmin')) {
                 $userQuery = $userQuery->where(function ($query) {
                     $query->where('business_id', auth()->user()->business_id)
-                    ->orWhere('created_by', auth()->user()->id)
-                    ->orWhere('id', auth()->user()->id);
+                        ->orWhere('created_by', auth()->user()->id)
+                        ->orWhere('id', auth()->user()->id);
                 });
             }
 
@@ -1952,7 +1956,7 @@ $user->syncRoles($roles);
         try {
 
 
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             $request_data = $request->validated();
 
@@ -2120,102 +2124,98 @@ $user->syncRoles($roles);
     public function getUsers(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $users = User::with([
-                "designation" => function ($query) {
-                    $query->select(
-                        'designations.id',
-                        'designations.name',
-                    );
-                },
-                "roles",
-            ]
-                )
+            $users = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                ]
+            )
 
-            ->whereNotIn('id', [$request->user()->id])
+                ->whereNotIn('id', [$request->user()->id])
 
-            ->when(empty(auth()->user()->business_id), function ($query) use($request) {
-                        if(auth()->user()->hasRole("superadmin")) {
-                            return  $query->where(function($query) {
-                                  return   $query->where('business_id', NULL)
-                                  ->orWhere(function($query) {
-                                             return $query
-                                             ->whereNotNull("business_id")
-                                             ->whereHas("roles", function($query) {
-                                                return $query->where("roles.name","business_owner");
-                                             });
-                                  });
-                            });
-
-
-                        } else {
-                            return  $query->where(function($query) {
-                                return   $query->where('created_by', auth()->user()->id);
-
-                          });
-
-
-                        }
-            })
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
-                return $query->where(function ($query) {
-                    return  $query->where('business_id', auth()->user()->business_id);
-                  });
-            })
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
+                    if (auth()->user()->hasRole("superadmin")) {
+                        return  $query->where(function ($query) {
+                            return   $query->where('business_id', NULL)
+                                ->orWhere(function ($query) {
+                                    return $query
+                                        ->whereNotNull("business_id")
+                                        ->whereHas("roles", function ($query) {
+                                            return $query->where("roles.name", "business_owner");
+                                        });
+                                });
+                        });
+                    } else {
+                        return  $query->where(function ($query) {
+                            return   $query->where('created_by', auth()->user()->id);
+                        });
+                    }
+                })
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('business_id', auth()->user()->business_id);
+                    });
+                })
 
 
-            ->when(!empty($request->role), function ($query) use ($request) {
-                $rolesArray = explode(',', $request->role);
-              return   $query->whereHas("roles", function($q) use ($rolesArray) {
-                   return $q->whereIn("name", $rolesArray);
+                ->when(!empty($request->role), function ($query) use ($request) {
+                    $rolesArray = explode(',', $request->role);
+                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
+                        return $q->whereIn("name", $rolesArray);
+                    });
+                })
+
+
+
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    $term = $request->search_key;
+                    return $query->where(function ($subquery) use ($term) {
+                        $subquery->where("first_Name", "like", "%" . $term . "%")
+                            ->orWhere("last_Name", "like", "%" . $term . "%")
+                            ->orWhere("email", "like", "%" . $term . "%")
+                            ->orWhere("phone", "like", "%" . $term . "%");
+                    });
+                })
+
+                ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                    return $query->where('is_in_employee', intval($request->is_in_employee));
+                })
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    return $query->where('is_active', intval($request->is_active));
+                })
+
+
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("users.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("users.id", "DESC");
+                })
+
+                ->withCount('all_users as user_count')
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
                 });
-            })
-
-
-
-            ->when(!empty($request->search_key), function ($query) use ($request) {
-                $term = $request->search_key;
-                return $query->where(function ($subquery) use ($term) {
-                    $subquery->where("first_Name", "like", "%" . $term . "%")
-                        ->orWhere("last_Name", "like", "%" . $term . "%")
-                        ->orWhere("email", "like", "%" . $term . "%")
-                        ->orWhere("phone", "like", "%" . $term . "%");
-                });
-            })
-
-            ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                return $query->where('is_in_employee', intval($request->is_in_employee));
-            })
-            ->when(isset($request->is_active), function ($query) use ($request) {
-                return $query->where('is_active', intval($request->is_active));
-            })
-
-
-            ->when(!empty($request->start_date), function ($query) use ($request) {
-                return $query->where('created_at', ">=", $request->start_date);
-            })
-            ->when(!empty($request->end_date), function ($query) use ($request) {
-                return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-            })
-
-            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("users.id", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("users.id", "DESC");
-            })
-
-            ->withCount('all_users as user_count')
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
 
             return response()->json($users, 200);
         } catch (Exception $e) {
@@ -2227,7 +2227,7 @@ $user->syncRoles($roles);
 
 
 
-     /**
+    /**
      *
      * @OA\Get(
      *      path="/v2.0/users",
@@ -2332,120 +2332,116 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function getUsersV2(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getUsersV2(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $users = User::with([
-                "designation" => function ($query) {
-                    $query->select(
-                        'designations.id',
-                        'designations.name',
-                    );
-                },
-                "roles",
-            ]
-                )
+            $users = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                ]
+            )
 
-            ->whereNotIn('id', [$request->user()->id])
+                ->whereNotIn('id', [$request->user()->id])
 
-            ->when(empty(auth()->user()->business_id), function ($query) use($request) {
-                        if(auth()->user()->hasRole("superadmin")) {
-                            return  $query->where(function($query) {
-                                  return   $query->where('business_id', NULL)
-                                  ->orWhere(function($query) {
-                                             return $query
-                                             ->whereNotNull("business_id")
-                                             ->whereHas("roles", function($query) {
-                                                return $query->where("roles.name","business_owner");
-                                             });
-                                  });
-                            });
-
-
-                        } else {
-                            return  $query->where(function($query) {
-                                return   $query->where('created_by', auth()->user()->id);
-
-                          });
-
-
-                        }
-            })
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
-                return $query->where(function ($query) {
-                    return  $query->where('business_id', auth()->user()->business_id);
-                  });
-            })
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
+                    if (auth()->user()->hasRole("superadmin")) {
+                        return  $query->where(function ($query) {
+                            return   $query->where('business_id', NULL)
+                                ->orWhere(function ($query) {
+                                    return $query
+                                        ->whereNotNull("business_id")
+                                        ->whereHas("roles", function ($query) {
+                                            return $query->where("roles.name", "business_owner");
+                                        });
+                                });
+                        });
+                    } else {
+                        return  $query->where(function ($query) {
+                            return   $query->where('created_by', auth()->user()->id);
+                        });
+                    }
+                })
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('business_id', auth()->user()->business_id);
+                    });
+                })
 
 
-            ->when(!empty($request->role), function ($query) use ($request) {
-                $rolesArray = explode(',', $request->role);
-              return   $query->whereHas("roles", function($q) use ($rolesArray) {
-                   return $q->whereIn("name", $rolesArray);
+                ->when(!empty($request->role), function ($query) use ($request) {
+                    $rolesArray = explode(',', $request->role);
+                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
+                        return $q->whereIn("name", $rolesArray);
+                    });
+                })
+
+
+
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    $term = $request->search_key;
+                    return $query->where(function ($subquery) use ($term) {
+                        $subquery->where("first_Name", "like", "%" . $term . "%")
+                            ->orWhere("last_Name", "like", "%" . $term . "%")
+                            ->orWhere("email", "like", "%" . $term . "%")
+                            ->orWhere("phone", "like", "%" . $term . "%");
+                    });
+                })
+
+                ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                    return $query->where('is_in_employee', intval($request->is_in_employee));
+                })
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    return $query->where('is_active', intval($request->is_active));
+                })
+
+
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("users.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("users.id", "DESC");
+                })
+
+                ->withCount('all_users as user_count')
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
                 });
-            })
 
+            $data["data"] = $users;
+            $data["data_highlights"] = [];
 
+            $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
+                return $user->is_active == 1;
+            })->count();
+            $data["data_highlights"]["total_users"] = $users->count();
 
-            ->when(!empty($request->search_key), function ($query) use ($request) {
-                $term = $request->search_key;
-                return $query->where(function ($subquery) use ($term) {
-                    $subquery->where("first_Name", "like", "%" . $term . "%")
-                        ->orWhere("last_Name", "like", "%" . $term . "%")
-                        ->orWhere("email", "like", "%" . $term . "%")
-                        ->orWhere("phone", "like", "%" . $term . "%");
-                });
-            })
+            return response()->json($data, 200);
+        } catch (Exception $e) {
 
-            ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                return $query->where('is_in_employee', intval($request->is_in_employee));
-            })
-            ->when(isset($request->is_active), function ($query) use ($request) {
-                return $query->where('is_active', intval($request->is_active));
-            })
-
-
-            ->when(!empty($request->start_date), function ($query) use ($request) {
-                return $query->where('created_at', ">=", $request->start_date);
-            })
-            ->when(!empty($request->end_date), function ($query) use ($request) {
-                return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-            })
-
-            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("users.id", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("users.id", "DESC");
-            })
-
-            ->withCount('all_users as user_count')
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
-
-             $data["data"] = $users;
-                 $data["data_highlights"] = [];
-
-                 $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
-                    return $user->is_active == 1;
-                })->count();
-                 $data["data_highlights"]["total_users"] = $users->count();
-
-             return response()->json($data, 200);
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -2558,87 +2554,87 @@ $user->syncRoles($roles);
     public function getUsersV3(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $users = User::with([
-                "designation" => function ($query) {
-                    $query->select(
-                        'designations.id',
-                        'designations.name',
-                    );
-                },
-                "roles",
-                "sponsorship_details",
-                "passport_details",
-                "visa_details"
+            $users = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                    "sponsorship_details",
+                    "passport_details",
+                    "visa_details"
 
 
 
-            ]
+                ]
 
-                )
-            ->whereNotIn('id', [$request->user()->id])
-            ->when(!empty($request->role), function ($query) use ($request) {
-                $rolesArray = explode(',', $request->role);
-              return   $query->whereHas("roles", function($q) use ($rolesArray) {
-                   return $q->whereIn("name", $rolesArray);
-                });
-            })
+            )
+                ->whereNotIn('id', [$request->user()->id])
+                ->when(!empty($request->role), function ($query) use ($request) {
+                    $rolesArray = explode(',', $request->role);
+                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
+                        return $q->whereIn("name", $rolesArray);
+                    });
+                })
 
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where(function ($query) {
-                    return  $query->where('created_by', auth()->user()->id)
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
 
                             ->orWhere('business_id', auth()->user()->business_id);
-                  });
-            })
-            ->when(!empty($request->search_key), function ($query) use ($request) {
-                $term = $request->search_key;
-                return $query->where(function ($subquery) use ($term) {
-                    $subquery->where("first_Name", "like", "%" . $term . "%")
-                        ->orWhere("last_Name", "like", "%" . $term . "%")
-                        ->orWhere("email", "like", "%" . $term . "%")
-                        ->orWhere("phone", "like", "%" . $term . "%");
-                });
-            })
-            ->when(empty($request->user()->business_id)  , function ($query) use ($request) {
-                if(empty($request->business_id)) {
-                    return $query->where('business_id', NULL);
-                }
+                    });
+                })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    $term = $request->search_key;
+                    return $query->where(function ($subquery) use ($term) {
+                        $subquery->where("first_Name", "like", "%" . $term . "%")
+                            ->orWhere("last_Name", "like", "%" . $term . "%")
+                            ->orWhere("email", "like", "%" . $term . "%")
+                            ->orWhere("phone", "like", "%" . $term . "%");
+                    });
+                })
+                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                    if (empty($request->business_id)) {
+                        return $query->where('business_id', NULL);
+                    }
                     return $query->where('business_id', intval($request->business_id));
+                })
+                ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                    return $query->where('is_in_employee', intval($request->is_in_employee));
+                })
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    return $query->where('is_active', intval($request->is_active));
+                })
 
-            })
-            ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                return $query->where('is_in_employee', intval($request->is_in_employee));
-            })
-            ->when(isset($request->is_active), function ($query) use ($request) {
-                return $query->where('is_active', intval($request->is_active));
-            })
 
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
 
-            ->when(!empty($request->start_date), function ($query) use ($request) {
-                return $query->where('created_at', ">=", $request->start_date);
-            })
-            ->when(!empty($request->end_date), function ($query) use ($request) {
-                return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-            })
-
-            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("users.id", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("users.id", "DESC");
-            })
-            ->select("users.*")
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("users.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("users.id", "DESC");
+                })
+                ->select("users.*")
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
 
             return response()->json($users, 200);
         } catch (Exception $e) {
@@ -2705,20 +2701,21 @@ $user->syncRoles($roles);
     public function getUserById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $user = User::with([
-                "roles",
-                "departments",
-                "designation",
-                "employment_status",
+            $user = User::with(
+                [
+                    "roles",
+                    "departments",
+                    "designation",
+                    "employment_status",
 
-            ]
+                ]
             )
                 ->where([
                     "id" => $id
@@ -2726,9 +2723,9 @@ $user->syncRoles($roles);
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
-                                ->orWhere('id', auth()->user()->id)
-                                ->orWhere('business_id', auth()->user()->business_id);
-                      });
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
                 })
                 ->first();
             if (!$user) {
@@ -2803,65 +2800,66 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function getUserByIdV2($id, Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getUserByIdV2($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $user = User::with([
-                "designation" => function ($query) {
-                    $query->select(
-                        'designations.id',
-                        'designations.name',
-                    );
-                },
-                "roles",
-                "departments",
-                "employment_status",
-                "sponsorship_details",
-                "passport_details",
-                "visa_details",
-                "work_shifts"
-            ]
+            $user = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                    "departments",
+                    "employment_status",
+                    "sponsorship_details",
+                    "passport_details",
+                    "visa_details",
+                    "work_shifts"
+                ]
 
-                )
+            )
 
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                                 ->orWhere('id', auth()->user()->id)
-                                 ->orWhere('business_id', auth()->user()->business_id);
-                       });
-                 })
-                 ->first();
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-             // ->whereHas('roles', function ($query) {
-             //     // return $query->where('name','!=', 'customer');
-             // });
-             $user->work_shift = $user->work_shifts()->first();
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
+            // ->whereHas('roles', function ($query) {
+            //     // return $query->where('name','!=', 'customer');
+            // });
+            $user->work_shift = $user->work_shifts()->first();
 
-             $user->department_ids = $user->departments->pluck("id");
+            $user->department_ids = $user->departments->pluck("id");
 
 
-             return response()->json($user, 200);
-         } catch (Exception $e) {
+            return response()->json($user, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
-        /**
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get-leave-details/{id}",
@@ -2916,68 +2914,68 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function getLeaveDetailsByUserId($id, Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getLeaveDetailsByUserId($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $user = User::with("roles")
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                                 ->orWhere('id', auth()->user()->id)
-                                 ->orWhere('business_id', auth()->user()->business_id);
-                       });
-                 })
-                 ->first();
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+            $user = User::with("roles")
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
-             $leave_types =   SettingLeaveType::where([
+            $leave_types =   SettingLeaveType::where([
                 "business_id" => auth()->user()->business_id,
-             ])->get();
+            ])->get();
 
-             foreach($leave_types as $key=>$leave_type) {
-                $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use($user,$leave_type) {
+            foreach ($leave_types as $key => $leave_type) {
+                $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
                     $query->where([
-                        "employee_id" =>$user->id,
+                        "employee_id" => $user->id,
                         "leave_type_id" => $leave_type->id
 
-                ]);
+                    ]);
                 })
-                ->get()
-                ->sum(function ($record) {
-                    return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
-                });
+                    ->get()
+                    ->sum(function ($record) {
+                        return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
+                    });
                 $leave_types[$key]->already_taken_hours = $total_recorded_hours;
-             }
+            }
 
 
 
 
-             return response()->json($leave_types, 200);
-         } catch (Exception $e) {
+            return response()->json($leave_types, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
-
-
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
-        /**
+
+
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get-holiday-details/{id}",
@@ -3032,42 +3030,42 @@ $user->syncRoles($roles);
      *     )
      */
 
-     public function getholidayDetailsByUserId($id, Request $request)
-     {
+    public function getholidayDetailsByUserId($id, Request $request)
+    {
         $logPath = storage_path('logs');
 
         foreach (File::glob($logPath . '/*.log') as $file) {
             File::delete($file);
         }
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $user = User::with("roles")
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                                 ->orWhere('id', auth()->user()->id)
-                                 ->orWhere('business_id', auth()->user()->business_id);
-                       });
-                 })
-                 ->first();
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+            $user = User::with("roles")
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
-             $today = Carbon::now()->startOfYear()->format('Y-m-d');
-             $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
+            $today = Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
 
 
 
@@ -3075,12 +3073,12 @@ $user->syncRoles($roles);
             $holidays = Holiday::where([
                 "business_id" => $user->business_id
             ])
-             ->where('holidays.start_date', ">=", $today)
-             ->where('holidays.end_date', "<=", $end_date_of_year . ' 23:59:59')
-             ->where([
-                 "is_active" => 1
-             ])
-            ->get();
+                ->where('holidays.start_date', ">=", $today)
+                ->where('holidays.end_date', "<=", $end_date_of_year . ' 23:59:59')
+                ->where([
+                    "is_active" => 1
+                ])
+                ->get();
 
 
 
@@ -3089,7 +3087,7 @@ $user->syncRoles($roles);
 
 
 
-    $holiday_dates = $holidays->flatMap(function ($holiday) {
+            $holiday_dates = $holidays->flatMap(function ($holiday) {
                 $start_date = Carbon::parse($holiday->start_date);
                 $end_date = Carbon::parse($holiday->end_date);
 
@@ -3106,13 +3104,13 @@ $user->syncRoles($roles);
 
 
 
-       $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
+            $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
                 $query->where('users.id', $user->id);
             })
 
-            ->first();
+                ->first();
 
-       $weekends = $work_shift->details()->where([
+            $weekends = $work_shift->details()->where([
                 "is_weekend" => 1
             ])
                 ->get();
@@ -3121,61 +3119,61 @@ $user->syncRoles($roles);
 
 
 
-      $weekend_dates = $weekends->flatMap(function ($weekend) use ($today, $end_date_of_year) {
-                    $day_of_week = $weekend->day;
+            $weekend_dates = $weekends->flatMap(function ($weekend) use ($today, $end_date_of_year) {
+                $day_of_week = $weekend->day;
 
-                    // Find the next occurrence of the specified day of the week
-                    $next_day = Carbon::parse($today)->copy()->next($day_of_week);
+                // Find the next occurrence of the specified day of the week
+                $next_day = Carbon::parse($today)->copy()->next($day_of_week);
 
-                    $matching_days = [];
+                $matching_days = [];
 
-                    // Loop through the days between today and the end date
-                    while ($next_day <= $end_date_of_year) {
-                        $matching_days[] = $next_day->format('d-m-Y');
-                        $next_day->addWeek(); // Move to the next week
-                    }
+                // Loop through the days between today and the end date
+                while ($next_day <= $end_date_of_year) {
+                    $matching_days[] = $next_day->format('d-m-Y');
+                    $next_day->addWeek(); // Move to the next week
+                }
 
-                    return $matching_days;
-                });
-
-
+                return $matching_days;
+            });
 
 
 
-                $already_taken_leaves =  Leave::where([
-                    "employee_id" => $user->id
-                ])
+
+
+            $already_taken_leaves =  Leave::where([
+                "employee_id" => $user->id
+            ])
                 ->whereHas('records', function ($query) use ($today, $end_date_of_year) {
                     $query->where('leave_records.date', '>=', $today)
-                          ->where('leave_records.date', '<=', $end_date_of_year . ' 23:59:59');
+                        ->where('leave_records.date', '<=', $end_date_of_year . ' 23:59:59');
                 })
                 ->get();
 
 
-                $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
-                    return $leave->records->map(function ($record) {
-                        return Carbon::parse($record->date)->format('d-m-Y');
-                    });
-                })->toArray();
+            $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
+                return $leave->records->map(function ($record) {
+                    return Carbon::parse($record->date)->format('d-m-Y');
+                });
+            })->toArray();
 
 
 
 
-                // Merge the collections and remove duplicates
-                $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
+            // Merge the collections and remove duplicates
+            $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
 
 
-                // $result_collection now contains all unique dates from holidays and weekends
-                $result_array = $result_collection->values()->all();
-                Log::info(json_encode($result_collection));
+            // $result_collection now contains all unique dates from holidays and weekends
+            $result_array = $result_collection->values()->all();
+            Log::info(json_encode($result_collection));
 
 
-             return response()->json($result_array, 200);
-         } catch (Exception $e) {
+            return response()->json($result_array, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Delete(
@@ -3234,7 +3232,7 @@ $user->syncRoles($roles);
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -3247,8 +3245,8 @@ $user->syncRoles($roles);
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
-                                ->orWhere('business_id', auth()->user()->business_id);
-                      });
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
                 })
                 ->select('id')
                 ->get()
@@ -3271,7 +3269,7 @@ $user->syncRoles($roles);
                     "message" => "Superadmin user(s) cannot be deleted."
                 ], 401);
             }
-            $userCheck = User::whereIn('id', $existingIds)->where("id",auth()->user()->id)->exists();
+            $userCheck = User::whereIn('id', $existingIds)->where("id", auth()->user()->id)->exists();
 
             if ($userCheck) {
                 return response()->json([
@@ -3279,11 +3277,7 @@ $user->syncRoles($roles);
                 ], 401);
             }
             User::destroy($existingIds);
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
-
-
-
-
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -3293,58 +3287,58 @@ $user->syncRoles($roles);
 
 
 
-/**
- *
- * @OA\Get(
- *      path="/v1.0/users/generate/employee-id",
- *      operationId="generateEmployeeId",
- *      tags={"user_management.employee"},
- *       security={
- *           {"bearerAuth": {}}
- *       },
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/generate/employee-id",
+     *      operationId="generateEmployeeId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
 
 
- *      summary="This method is to generate employee id",
- *      description="This method is to generate employee id",
- *
+     *      summary="This method is to generate employee id",
+     *      description="This method is to generate employee id",
+     *
 
- *      @OA\Response(
- *          response=200,
- *          description="Successful operation",
- *       @OA\JsonContent(),
- *       ),
- *      @OA\Response(
- *          response=401,
- *          description="Unauthenticated",
- * @OA\JsonContent(),
- *      ),
- *        @OA\Response(
- *          response=422,
- *          description="Unprocesseble Content",
- *    @OA\JsonContent(),
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *   @OA\JsonContent()
- * ),
- *  * @OA\Response(
- *      response=400,
- *      description="Bad Request",
- *   *@OA\JsonContent()
- *   ),
- * @OA\Response(
- *      response=404,
- *      description="not found",
- *   *@OA\JsonContent()
- *   )
- *      )
- *     )
- */
- public function generateEmployeeId(Request $request)
- {
-    $business = Business::where(["id" => $request->user()->business_id])->first();
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function generateEmployeeId(Request $request)
+    {
+        $business = Business::where(["id" => $request->user()->business_id])->first();
 
 
         $prefix = "";
@@ -3372,89 +3366,89 @@ $user->syncRoles($roles);
         );
 
 
-return response()->json(["employee_id" => $employee_id],200);
- }
+        return response()->json(["employee_id" => $employee_id], 200);
+    }
 
 
-/**
-*
-* @OA\Get(
-*      path="/v1.0/users/validate/employee-id/{employee_id}",
-*      operationId="validateEmployeeId",
-*      tags={"user_management.employee"},
-*       security={
-*           {"bearerAuth": {}}
-*       },
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/validate/employee-id/{employee_id}",
+     *      operationId="validateEmployeeId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
-*              @OA\Parameter(
-*         name="employee_id",
-*         in="path",
-*         description="employee_id",
-*         required=true,
-*  example="1"
-*      ),
+     *              @OA\Parameter(
+     *         name="employee_id",
+     *         in="path",
+     *         description="employee_id",
+     *         required=true,
+     *  example="1"
+     *      ),
 
-*      summary="This method is to validate employee id",
-*      description="This method is to validate employee id",
-*
+     *      summary="This method is to validate employee id",
+     *      description="This method is to validate employee id",
+     *
 
-*      @OA\Response(
-*          response=200,
-*          description="Successful operation",
-*       @OA\JsonContent(),
-*       ),
-*      @OA\Response(
-*          response=401,
-*          description="Unauthenticated",
-* @OA\JsonContent(),
-*      ),
-*        @OA\Response(
-*          response=422,
-*          description="Unprocesseble Content",
-*    @OA\JsonContent(),
-*      ),
-*      @OA\Response(
-*          response=403,
-*          description="Forbidden",
-*   @OA\JsonContent()
-* ),
-*  * @OA\Response(
-*      response=400,
-*      description="Bad Request",
-*   *@OA\JsonContent()
-*   ),
-* @OA\Response(
-*      response=404,
-*      description="not found",
-*   *@OA\JsonContent()
-*   )
-*      )
-*     )
-*/
-public function validateEmployeeId($employee_id, Request $request)
-{
-   try {
-       $this->storeActivity($request, "DUMMY activity","DUMMY description");
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function validateEmployeeId($employee_id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-       $employee_id_exists =  DB::table( 'users' )->where([
-          'employee_id'=> $employee_id,
-          "business_id" => $request->user()->business_id
-       ]
-       )->exists();
-
-
-
-return response()->json(["employee_id_exists" => $employee_id_exists],200);
-
-   } catch (Exception $e) {
-       error_log($e->getMessage());
-       return $this->sendError($e, 500,$request);
-   }
-}
+            $employee_id_exists =  DB::table('users')->where(
+                [
+                    'employee_id' => $employee_id,
+                    "business_id" => $request->user()->business_id
+                ]
+            )->exists();
 
 
 
-  /**
+            return response()->json(["employee_id_exists" => $employee_id_exists], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get/user-activity",
@@ -3546,10 +3540,10 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
      *     )
      */
 
-     public function getUserActivity(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function getUserActivity(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             //  if(!$this->isModuleEnabled("user_activity")) {
             //     return response()->json(['messege' => 'Module is not enabled'], 403);
             //  }
@@ -3563,59 +3557,58 @@ return response()->json(["employee_id_exists" => $employee_id_exists],200);
             //      ], 401);
             //  }
 
-             $users = ActivityLog::where("activity", "!=", "DUMMY activity")
-             ->where("description", "!=", "DUMMY description")
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('user_id', $request->employee_id);
-            })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('user_id', $request->user()->id);
-            })
-             ->when(!empty($request->search_key), function ($query) use ($request) {
-                $term = $request->search_key;
-                return $query->where(function ($subquery) use ($term) {
-                    $subquery->where("activity", "like", "%" . $term . "%")
-                        ->orWhere("description", "like", "%" . $term . "%");
-                });
-            })
+            $users = ActivityLog::where("activity", "!=", "DUMMY activity")
+                ->where("description", "!=", "DUMMY description")
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                    return $query->where('user_id', $request->employee_id);
+                })
+                ->when(empty($request->employee_id), function ($query) use ($request) {
+                    return $query->where('user_id', $request->user()->id);
+                })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    $term = $request->search_key;
+                    return $query->where(function ($subquery) use ($term) {
+                        $subquery->where("activity", "like", "%" . $term . "%")
+                            ->orWhere("description", "like", "%" . $term . "%");
+                    });
+                })
 
 
 
-            ->when(!empty($request->start_date), function ($query) use ($request) {
-                return $query->where('created_at', ">=", $request->start_date);
-            })
-            ->when(!empty($request->end_date), function ($query) use ($request) {
-                return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-            })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
 
-            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("id", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("id", "DESC");
-            })
-            ->select( "api_url",
-            "activity",
-            "description",
-            "ip_address",
-            "request_method",
-            "device",
-            "created_at",
-            "updated_at"
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("id", "DESC");
+                })
+                ->select(
+                    "api_url",
+                    "activity",
+                    "description",
+                    "ip_address",
+                    "request_method",
+                    "device",
+                    "created_at",
+                    "updated_at"
 
-            )
+                )
 
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
-           ;
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
 
-             return response()->json($users, 200);
-         } catch (Exception $e) {
+            return response()->json($users, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
-
+            return $this->sendError($e, 500, $request);
+        }
+    }
 }
