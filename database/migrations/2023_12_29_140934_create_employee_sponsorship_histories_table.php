@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmployeeVisaDetailHistoriesTable extends Migration
+class CreateEmployeeSponsorshipHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,21 +13,23 @@ class CreateEmployeeVisaDetailHistoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_visa_detail_histories', function (Blueprint $table) {
+        Schema::create('employee_sponsorship_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("employee_id");
             $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string("BRP_number");
-            $table->date("visa_issue_date");
-            $table->date("visa_expiry_date");
-            $table->string("place_of_issue");
-            $table->json("visa_docs");
+            $table->date("date_assigned");
+            $table->date("expiry_date");
+            $table->enum('status', ['pending', 'approved', 'denied', 'visa_granted'])->default("pending");
+            $table->text("note");
+            $table->text("certificate_number");
+            $table->enum('current_certificate_status', ['pending', 'approved', 'denied'])->default("pending");
+            $table->boolean("is_sponsorship_withdrawn");
+
 
             $table->date("from_date");
             $table->date("to_date")->nullable();
-
-            $table->unsignedBigInteger("visa_detail_id")->nullable();
-            $table->foreign('visa_detail_id')->references('id')->on('employee_visa_details')->onDelete('set null');
+            $table->unsignedBigInteger("sponsorship_id")->nullable();
+            $table->foreign('sponsorship_id')->references('id')->on('employee_sponsorship_details')->onDelete('set null');
 
 
             $table->unsignedBigInteger("created_by")->nullable();
@@ -46,6 +48,6 @@ class CreateEmployeeVisaDetailHistoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_visa_detail_histories');
+        Schema::dropIfExists('employee_sponsorship_histories');
     }
 }

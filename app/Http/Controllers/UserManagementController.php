@@ -27,6 +27,7 @@ use App\Models\Business;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeSponsorship;
+use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeVisaDetail;
 use App\Models\EmployeeVisaDetailHistory;
 use App\Models\Holiday;
@@ -667,6 +668,13 @@ class UserManagementController extends Controller
                 if (!empty($request_data["sponsorship_details"])) {
                     $request_data["sponsorship_details"]["employee_id"] = $user->id;
                     $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
+
+                    $request_data["sponsorship_details"]["from_date"] = now();
+                    $request_data["sponsorship_details"]["sponsorship_id"] = $employee_sponsorship->id;
+                    $employee_sponsorship_history  =  EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
+
+                    $ten_years_ago = Carbon::now()->subYears(10);
+                    EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }
             }
             if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
@@ -1240,9 +1248,28 @@ class UserManagementController extends Controller
                             "is_sponsorship_withdrawn",
                             // 'created_by'
                         ])->toArray());
+                        $employee_sponsorship_history  =  EmployeeSponsorshipHistory::where([
+                            "employee_id" =>  $request_data["sponsorship_details"]["employee_id"],
+                            "sponsorship_id" => $employee_sponsorship->id
+                        ])
+                            ->latest('created_at')
+                            ->first();
+
+                        if ($employee_sponsorship_history) {
+                            $employee_sponsorship_history->to_date = now();
+                            $employee_sponsorship_history->save();
+                        }
                     } else {
                         $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
                     }
+                    if (!empty($request_data["sponsorship_details"]["to_date"])) {
+                        unset($request_data["sponsorship_details"]["to_date"]);
+                    }
+                    $request_data["sponsorship_details"]["passport_detail_id"] = $employee_sponsorship->id;
+                    $request_data["sponsorship_details"]["from_date"] = now();
+                    $employee_sponsorship_history  =  EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
+                    $ten_years_ago = Carbon::now()->subYears(10);
+                    EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }
             }
             if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
@@ -1326,7 +1353,7 @@ class UserManagementController extends Controller
                     }
                     $request_data["visa_details"]["passport_detail_id"] = $employee_visa_details->id;
                     $request_data["visa_details"]["from_date"] = now();
-                    $employee_visa_details_history  =  EmployeePassportDetailHistory::create($request_data["visa_details"]);
+                    $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
                     $ten_years_ago = Carbon::now()->subYears(10);
                     EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }

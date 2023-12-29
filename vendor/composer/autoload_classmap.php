@@ -184,6 +184,7 @@ return array(
     'App\\Models\\EmployeePassportDetail' => $baseDir . '/app/Models/EmployeePassportDetail.php',
     'App\\Models\\EmployeePassportDetailHistory' => $baseDir . '/app/Models/EmployeePassportDetailHistory.php',
     'App\\Models\\EmployeeSponsorship' => $baseDir . '/app/Models/EmployeeSponsorship.php',
+    'App\\Models\\EmployeeSponsorshipHistory' => $baseDir . '/app/Models/EmployeeSponsorshipHistory.php',
     'App\\Models\\EmployeeVisaDetail' => $baseDir . '/app/Models/EmployeeVisaDetail.php',
     'App\\Models\\EmployeeVisaDetailHistory' => $baseDir . '/app/Models/EmployeeVisaDetailHistory.php',
     'App\\Models\\EmploymentStatus' => $baseDir . '/app/Models/EmploymentStatus.php',

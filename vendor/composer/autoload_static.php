@@ -799,6 +799,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\EmployeePassportDetail' => __DIR__ . '/../..' . '/app/Models/EmployeePassportDetail.php',
         'App\\Models\\EmployeePassportDetailHistory' => __DIR__ . '/../..' . '/app/Models/EmployeePassportDetailHistory.php',
         'App\\Models\\EmployeeSponsorship' => __DIR__ . '/../..' . '/app/Models/EmployeeSponsorship.php',
+        'App\\Models\\EmployeeSponsorshipHistory' => __DIR__ . '/../..' . '/app/Models/EmployeeSponsorshipHistory.php',
         'App\\Models\\EmployeeVisaDetail' => __DIR__ . '/../..' . '/app/Models/EmployeeVisaDetail.php',
         'App\\Models\\EmployeeVisaDetailHistory' => __DIR__ . '/../..' . '/app/Models/EmployeeVisaDetailHistory.php',
         'App\\Models\\EmploymentStatus' => __DIR__ . '/../..' . '/app/Models/EmploymentStatus.php',
