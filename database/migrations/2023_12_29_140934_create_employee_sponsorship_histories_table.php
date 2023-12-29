@@ -29,7 +29,7 @@ class CreateEmployeeSponsorshipHistoriesTable extends Migration
             $table->date("from_date");
             $table->date("to_date")->nullable();
             $table->unsignedBigInteger("sponsorship_id")->nullable();
-            $table->foreign('sponsorship_id')->references('id')->on('employee_sponsorship_details')->onDelete('set null');
+            $table->foreign('sponsorship_id')->references('id')->on('employee_sponsorships')->onDelete('set null');
 
 
             $table->unsignedBigInteger("created_by")->nullable();

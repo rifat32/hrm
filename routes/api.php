@@ -615,7 +615,8 @@ Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAt
 
 Route::get('/v1.0/histories/user-passport-details', [HistoryDetailsController::class, "getUserPassportDetailsHistory"]);
 Route::get('/v1.0/histories/user-visa-details', [HistoryDetailsController::class, "getUserVisaDetailsHistory"]);
-
+Route::get('/v1.0/histories/user-sponsorship-details', [HistoryDetailsController::class, "getUserSponsorshipDetailsHistory"]);
+Route::get('/v1.0/histories/user-address-details', [HistoryDetailsController::class, "getUserAddressDetailsHistory"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end history details management section
