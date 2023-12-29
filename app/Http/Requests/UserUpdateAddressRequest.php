@@ -27,7 +27,7 @@ class UserUpdateAddressRequest extends FormRequest
         return [
             'id' => "required|numeric",
 
-            'phone' => 'required|string',
+            'phone' => 'nullable|string',
 
             'address_line_1' => 'required|string',
             'address_line_2' => 'nullable',
