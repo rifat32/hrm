@@ -2825,7 +2825,8 @@ $user->syncRoles($roles);
                 "employment_status",
                 "sponsorship_details",
                 "passport_details",
-                "visa_details"
+                "visa_details",
+                "work_shifts"
             ]
 
                 )
