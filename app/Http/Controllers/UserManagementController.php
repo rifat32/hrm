@@ -675,9 +675,10 @@ class UserManagementController extends Controller
                     $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
                     $request_data["passport_details"]["from_date"] = now();
                     $request_data["passport_details"]["employee_passport_detail_id"] = $employee_passport_details->id;
-
-
                     $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
+                    $ten_years_ago = Carbon::now()->subYears(10);
+
+                    EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }
                 if (!empty($request_data["visa_details"])) {
                     $request_data["visa_details"]["employee_id"] = $user->id;
@@ -1275,6 +1276,8 @@ class UserManagementController extends Controller
                     $request_data["passport_details"]["employee_passport_detail_id"] = $employee_passport_details->id;
                     $request_data["passport_details"]["from_date"] = now();
                     $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
+                    $ten_years_ago = Carbon::now()->subYears(10);
+                    EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }
                 if (!empty($request_data["visa_details"])) {
                     $request_data["visa_details"]["employee_id"] = $user->id;

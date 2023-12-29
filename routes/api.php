@@ -25,6 +25,7 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmploymentStatusController;
+use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\JobPlatformController;
@@ -606,6 +607,17 @@ Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAt
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end attendances management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// history details  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::get('/v1.0/histories/user-passport-details', [HistoryDetailsController::class, "getUserPassportDetailsHistory"]);
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end history details management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
