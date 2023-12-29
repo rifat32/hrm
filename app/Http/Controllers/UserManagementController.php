@@ -28,6 +28,7 @@ use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeVisaDetail;
+use App\Models\EmployeeVisaDetailHistory;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
@@ -676,13 +677,22 @@ class UserManagementController extends Controller
                     $request_data["passport_details"]["from_date"] = now();
                     $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
                     $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
-                    $ten_years_ago = Carbon::now()->subYears(10);
 
+                    $ten_years_ago = Carbon::now()->subYears(10);
                     EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }
                 if (!empty($request_data["visa_details"])) {
                     $request_data["visa_details"]["employee_id"] = $user->id;
                     $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
+
+
+
+                    $request_data["visa_details"]["from_date"] = now();
+                    $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
+                    $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+                    $ten_years_ago = Carbon::now()->subYears(10);
+                    EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
                 }
             }
 
@@ -1297,9 +1307,28 @@ class UserManagementController extends Controller
                             "visa_docs",
                             // 'created_by'
                         ])->toArray());
+                        $employee_visa_details_history  =  EmployeeVisaDetailHistory::where([
+                            "employee_id" =>  $request_data["visa_details"]["employee_id"],
+                            "visa_detail_id" => $employee_visa_details->id
+                        ])
+                            ->latest('created_at')
+                            ->first();
+
+                        if ($employee_visa_details_history) {
+                            $employee_visa_details_history->to_date = now();
+                            $employee_visa_details_history->save();
+                        }
                     } else {
                         $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
                     }
+                    if (!empty($request_data["visa_details"]["to_date"])) {
+                        unset($request_data["visa_details"]["to_date"]);
+                    }
+                    $request_data["visa_details"]["passport_detail_id"] = $employee_visa_details->id;
+                    $request_data["visa_details"]["from_date"] = now();
+                    $employee_visa_details_history  =  EmployeePassportDetailHistory::create($request_data["visa_details"]);
+                    $ten_years_ago = Carbon::now()->subYears(10);
+                    EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
                 }
             }
 
