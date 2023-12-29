@@ -695,12 +695,12 @@ class UserManagementController extends Controller
                     $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
 
 
+                    $ten_years_ago = Carbon::now()->subYears(10);
+                    EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
 
                     $request_data["visa_details"]["from_date"] = now();
                     $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
                     $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
 
                 }
             }
@@ -1222,6 +1222,24 @@ class UserManagementController extends Controller
             $three_years_ago = Carbon::now()->subYears(3);
             EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
 
+
+
+
+            // history section
+
+            $address_history_data = [
+                'employee_id' => $user->id,
+                'from_date' => now(),
+                'created_by' => $request->user()->id,
+                'address_line_1' => $request_data["address_line_1"],
+                'address_line_2' => $request_data["address_line_2"],
+                'country' => $request_data["country"],
+                'city' => $request_data["city"],
+                'postcode' => $request_data["postcode"],
+                'lat' => $request_data["lat"],
+                'long' => $request_data["long"]
+            ];
+
             $employee_address_history  =  EmployeeAddressHistory::where([
                 "employee_id" =>   $user_prev->id
             ])
@@ -1229,30 +1247,25 @@ class UserManagementController extends Controller
                 ->first();
 
             if ($employee_address_history) {
-                $employee_address_history->to_date = now();
-                $employee_address_history->save();
+                $fields_to_check = ["address_line_1", "address_line_2", "country", "city", "postcode"];
+                $fields_changed =  array_reduce($fields_to_check, function ($carry, $field) use ($employee_address_history, $request_data) {
+                    return $carry && $employee_address_history->$field !== $request_data[$field];
+                }, true);
+                if (
+                    $fields_changed
+                ) {
+                    $employee_address_history->to_date = now();
+                    $employee_address_history->save();
+                    EmployeeAddressHistory::create($address_history_data);
+                }
+            } else {
+                EmployeeAddressHistory::create($address_history_data);
             }
 
+            // end history section
 
 
 
-
-            EmployeeAddressHistory::create([
-                'employee_id' => $user->id,
-                'from_date' => now(),
-                'created_by' => $request->user()->id,
-
-
-
-
-                'address_line_1' => $request_data["address_line_1"],
-                'address_line_2'=> $request_data["address_line_2"],
-                'country'=> $request_data["country"],
-                'city'=> $request_data["city"],
-                'postcode'=> $request_data["postcode"],
-                'lat'=> $request_data["lat"],
-                'long'=> $request_data["long"]
-            ]);
 
 
 
@@ -1292,28 +1305,61 @@ class UserManagementController extends Controller
                             "is_sponsorship_withdrawn",
                             // 'created_by'
                         ])->toArray());
+
+                    } else {
+                        $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
+                    }
+
+
+
+
+
+                        // history section
+
+                        $ten_years_ago = Carbon::now()->subYears(10);
+                        EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+                        $request_data["sponsorship_details"]["sponsorship_id"] = $employee_sponsorship->id;
+                        $request_data["sponsorship_details"]["from_date"] = now();
+
+
                         $employee_sponsorship_history  =  EmployeeSponsorshipHistory::where([
                             "employee_id" =>  $request_data["sponsorship_details"]["employee_id"],
-                            "sponsorship_id" => $employee_sponsorship->id
                         ])
                             ->latest('created_at')
                             ->first();
 
                         if ($employee_sponsorship_history) {
-                            $employee_sponsorship_history->to_date = now();
-                            $employee_sponsorship_history->save();
+                            $fields_to_check = [
+          'date_assigned', 'expiry_date', 'status', 'note',  "certificate_number", "current_certificate_status", "is_sponsorship_withdrawn",
+
+                            ];
+                            $fields_changed =  array_reduce($fields_to_check, function ($carry, $field) use ($employee_sponsorship_history, $request_data) {
+                                return $carry && $employee_sponsorship_history->$field !== $request_data["sponsorship_details"][$field];
+                            }, true);
+                            if (
+                                $fields_changed
+                            ) {
+                                $employee_sponsorship_history->to_date = now();
+                                $employee_sponsorship_history->save();
+                                EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
+                            }
+                        } else {
+                            EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
                         }
-                    } else {
-                        $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
-                    }
-                    if (!empty($request_data["sponsorship_details"]["to_date"])) {
-                        unset($request_data["sponsorship_details"]["to_date"]);
-                    }
-                    $request_data["sponsorship_details"]["passport_detail_id"] = $employee_sponsorship->id;
-                    $request_data["sponsorship_details"]["from_date"] = now();
-                    $employee_sponsorship_history  =  EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+                        // end history section
+
+
+
+
+
+
+
+
+
+
                 }
             }
             if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
@@ -1337,30 +1383,67 @@ class UserManagementController extends Controller
                             // 'created_by'
                         ])->toArray());
 
-                        $employee_passport_details_history  =  EmployeePassportDetailHistory::where([
-                            "employee_id" =>  $request_data["passport_details"]["employee_id"],
-                            "passport_detail_id" => $employee_passport_details->id
-                        ])
-                            ->latest('created_at')
-                            ->first();
-
-                        if ($employee_passport_details_history) {
-                            $employee_passport_details_history->to_date = now();
-                            $employee_passport_details_history->save();
-                        }
                     } else {
                         $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
                     }
-                    if (!empty($request_data["passport_details"]["to_date"])) {
-                        unset($request_data["passport_details"]["to_date"]);
-                    }
-                    $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
-                    $request_data["passport_details"]["from_date"] = now();
-                    $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+
+
+
+
+
+
+
+                      // history section
+
+                      $ten_years_ago = Carbon::now()->subYears(10);
+                      EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+                      $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
+                      $request_data["passport_details"]["from_date"] = now();
+
+
+                      $employee_passport_details_history  =  EmployeePassportDetailHistory::where([
+                          "employee_id" =>  $request_data["passport_details"]["employee_id"],
+                      ])
+                          ->latest('created_at')
+                          ->first();
+
+                      if ($employee_passport_details_history) {
+                          $fields_to_check = [
+     'passport_number',"passport_issue_date","passport_expiry_date","place_of_issue", "passport_detail_id",
+
+                          ];
+                          $fields_changed =  array_reduce($fields_to_check, function ($carry, $field) use ($employee_passport_details_history, $request_data) {
+                              return $carry && $employee_passport_details_history->$field !== $request_data["passport_details"][$field];
+                          }, true);
+                          if (
+                              $fields_changed
+                          ) {
+                              $employee_passport_details_history->to_date = now();
+                              $employee_passport_details_history->save();
+                              EmployeePassportDetailHistory::create($request_data["passport_details"]);
+                          }
+                      } else {
+                        EmployeePassportDetailHistory::create($request_data["passport_details"]);
+                      }
+
+                      // end history section
+
+
+
+
+
+
+
+
+
+
                 }
                 if (!empty($request_data["visa_details"])) {
+
                     $request_data["visa_details"]["employee_id"] = $user->id;
 
                     $employee_visa_details  =  EmployeeVisaDetail::where([
@@ -1378,28 +1461,58 @@ class UserManagementController extends Controller
                             "visa_docs",
                             // 'created_by'
                         ])->toArray());
-                        $employee_visa_details_history  =  EmployeeVisaDetailHistory::where([
-                            "employee_id" =>  $request_data["visa_details"]["employee_id"],
-                            "visa_detail_id" => $employee_visa_details->id
-                        ])
-                            ->latest('created_at')
-                            ->first();
-
-                        if ($employee_visa_details_history) {
-                            $employee_visa_details_history->to_date = now();
-                            $employee_visa_details_history->save();
-                        }
                     } else {
                         $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
                     }
-                    if (!empty($request_data["visa_details"]["to_date"])) {
-                        unset($request_data["visa_details"]["to_date"]);
-                    }
-                    $request_data["visa_details"]["passport_detail_id"] = $employee_visa_details->id;
-                    $request_data["visa_details"]["from_date"] = now();
-                    $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    // history section
+
                     $ten_years_ago = Carbon::now()->subYears(10);
                     EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+                    $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
+                    $request_data["visa_details"]["from_date"] = now();
+
+
+                    $employee_visa_details_history  =  EmployeeVisaDetailHistory::where([
+                        "employee_id" =>  $request_data["visa_details"]["employee_id"],
+                    ])
+                        ->latest('created_at')
+                        ->first();
+
+                    if ($employee_visa_details_history) {
+                        $fields_to_check = [
+                            'BRP_number', "visa_issue_date", "visa_expiry_date", "place_of_issue", "visa_docs",
+                        ];
+                        $fields_changed =  array_reduce($fields_to_check, function ($carry, $field) use ($employee_visa_details_history, $request_data) {
+                            return $carry && $employee_visa_details_history->$field !== $request_data["visa_details"][$field];
+                        }, true);
+                        if (
+                            $fields_changed
+                        ) {
+                            $employee_visa_details_history->to_date = now();
+                            $employee_visa_details_history->save();
+                            EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+                        }
+                    } else {
+                        EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+                    }
+
+                    // end history section
+
                 }
             }
 
@@ -1553,8 +1666,20 @@ class UserManagementController extends Controller
                 ], 404);
             }
 
-            $three_years_ago = Carbon::now()->subYears(3);
-            EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
+            // history section
+
+            $address_history_data = [
+                'employee_id' => $user->id,
+                'from_date' => now(),
+                'created_by' => $request->user()->id,
+                'address_line_1' => $request_data["address_line_1"],
+                'address_line_2' => $request_data["address_line_2"],
+                'country' => $request_data["country"],
+                'city' => $request_data["city"],
+                'postcode' => $request_data["postcode"],
+                'lat' => $request_data["lat"],
+                'long' => $request_data["long"]
+            ];
 
             $employee_address_history  =  EmployeeAddressHistory::where([
                 "employee_id" =>   $user_prev->id
@@ -1563,31 +1688,22 @@ class UserManagementController extends Controller
                 ->first();
 
             if ($employee_address_history) {
-                $employee_address_history->to_date = now();
-                $employee_address_history->save();
+                $fields_to_check = ["address_line_1", "address_line_2", "country", "city", "postcode"];
+                $fields_changed =  array_reduce($fields_to_check, function ($carry, $field) use ($employee_address_history, $request_data) {
+                    return $carry && $employee_address_history->$field !== $request_data[$field];
+                }, true);
+                if (
+                    $fields_changed
+                ) {
+                    $employee_address_history->to_date = now();
+                    $employee_address_history->save();
+                    EmployeeAddressHistory::create($address_history_data);
+                }
+            } else {
+                EmployeeAddressHistory::create($address_history_data);
             }
 
-
-
-
-
-            EmployeeAddressHistory::create([
-                'employee_id' => $user->id,
-                'from_date' => now(),
-                'created_by' => $request->user()->id,
-
-
-
-
-                'address_line_1' => $request_data["address_line_1"],
-                'address_line_2'=> $request_data["address_line_2"],
-                'country'=> $request_data["country"],
-                'city'=> $request_data["city"],
-                'postcode'=> $request_data["postcode"],
-                'lat'=> $request_data["lat"],
-                'long'=> $request_data["long"]
-            ]);
-
+            // end history section
 
 
 

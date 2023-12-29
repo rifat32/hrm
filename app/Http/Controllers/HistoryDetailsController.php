@@ -412,7 +412,6 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_sponsorship_histories.employee_id', $request->user()->id);
             })
-
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;

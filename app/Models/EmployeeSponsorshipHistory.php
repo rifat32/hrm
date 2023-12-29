@@ -10,7 +10,7 @@ class EmployeeSponsorshipHistory extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'employee_id',
+
         'date_assigned',
         'expiry_date',
         'status',
@@ -18,6 +18,8 @@ class EmployeeSponsorshipHistory extends Model
         "certificate_number",
         "current_certificate_status",
         "is_sponsorship_withdrawn",
+
+        'employee_id',
         "sponsorship_id",
         "from_date",
         "to_date",
