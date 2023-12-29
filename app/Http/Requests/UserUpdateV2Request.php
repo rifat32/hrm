@@ -60,7 +60,7 @@ class UserUpdateV2Request extends FormRequest
             'email' => 'required|string|unique:users,email,' . $this->id . ',id',
 
             'password' => 'nullable|string|min:6',
-            'phone' => 'required|string',
+            'phone' => 'nullable|string',
             'image' => 'nullable|string',
             'address_line_1' => 'required|string',
             'address_line_2' => 'nullable',

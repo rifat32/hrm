@@ -10,6 +10,7 @@ use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeVisaDetail;
+use App\Models\EmployeeVisaDetailHistory;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -263,7 +264,7 @@ class HistoryDetailsController extends Controller
                  ], 401);
              }
 
-             $employee_visa_details_history = EmployeeVisaDetail::when(!empty($request->employee_id), function ($query) use ($request) {
+             $employee_visa_details_history = EmployeeVisaDetailHistory::when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_visa_detail_histories.employee_id', $request->employee_id);
             })
             ->when(empty($request->employee_id), function ($query) use ($request) {
