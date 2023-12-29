@@ -796,6 +796,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\DisabledSettingLeaveType' => __DIR__ . '/../..' . '/app/Models/DisabledSettingLeaveType.php',
         'App\\Models\\EmailTemplate' => __DIR__ . '/../..' . '/app/Models/EmailTemplate.php',
         'App\\Models\\EmailTemplateWrapper' => __DIR__ . '/../..' . '/app/Models/EmailTemplateWrapper.php',
+        'App\\Models\\EmployeeAddressHistory' => __DIR__ . '/../..' . '/app/Models/EmployeeAddressHistory.php',
         'App\\Models\\EmployeePassportDetail' => __DIR__ . '/../..' . '/app/Models/EmployeePassportDetail.php',
         'App\\Models\\EmployeePassportDetailHistory' => __DIR__ . '/../..' . '/app/Models/EmployeePassportDetailHistory.php',
         'App\\Models\\EmployeeSponsorship' => __DIR__ . '/../..' . '/app/Models/EmployeeSponsorship.php',

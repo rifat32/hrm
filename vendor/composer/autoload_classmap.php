@@ -181,6 +181,7 @@ return array(
     'App\\Models\\DisabledSettingLeaveType' => $baseDir . '/app/Models/DisabledSettingLeaveType.php',
     'App\\Models\\EmailTemplate' => $baseDir . '/app/Models/EmailTemplate.php',
     'App\\Models\\EmailTemplateWrapper' => $baseDir . '/app/Models/EmailTemplateWrapper.php',
+    'App\\Models\\EmployeeAddressHistory' => $baseDir . '/app/Models/EmployeeAddressHistory.php',
     'App\\Models\\EmployeePassportDetail' => $baseDir . '/app/Models/EmployeePassportDetail.php',
     'App\\Models\\EmployeePassportDetailHistory' => $baseDir . '/app/Models/EmployeePassportDetailHistory.php',
     'App\\Models\\EmployeeSponsorship' => $baseDir . '/app/Models/EmployeeSponsorship.php',

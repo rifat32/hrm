@@ -24,6 +24,7 @@ use App\Mail\VerifyMail;
 use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\Business;
+use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeSponsorship;
@@ -1181,7 +1182,9 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $user  =  tap(User::where($userQueryTerms))->update(
+            $user_prev = User::where($userQueryTerms)->first();
+
+            $user  =  tap($user_prev)->update(
                 collect($request_data)->only([
                     'first_Name',
                     'middle_Name',
@@ -1215,6 +1218,47 @@ class UserManagementController extends Controller
                     "message" => "no user found"
                 ], 404);
             }
+
+            $three_years_ago = Carbon::now()->subYears(3);
+            EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
+
+            $employee_address_history  =  EmployeeAddressHistory::where([
+                "employee_id" =>   $user_prev->id
+            ])
+                ->latest('created_at')
+                ->first();
+
+            if ($employee_address_history) {
+                $employee_address_history->to_date = now();
+                $employee_address_history->save();
+            }
+
+
+
+
+
+            EmployeeAddressHistory::create([
+                'employee_id' => $user->id,
+                'from_date' => now(),
+                'created_by' => $request->user()->id,
+
+
+
+
+                'address_line_1' => $request_data["address_line_1"],
+                'address_line_2'=> $request_data["address_line_2"],
+                'country'=> $request_data["country"],
+                'city'=> $request_data["city"],
+                'postcode'=> $request_data["postcode"],
+                'lat'=> $request_data["lat"],
+                'long'=> $request_data["long"]
+            ]);
+
+
+
+
+
+
             $user->departments()->sync($request_data['departments'], []);
             $user->syncRoles([$request_data['role']]);
             if (!empty($request_data["work_shift_id"])) {
@@ -1484,7 +1528,11 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $user  =  tap(User::where($userQueryTerms))->update(
+
+            $user_prev = User::where($userQueryTerms)->first();
+
+
+            $user  =  tap($user_prev)->update(
                 collect($request_data)->only([
                     'phone',
                     'address_line_1',
@@ -1498,13 +1546,51 @@ class UserManagementController extends Controller
                 ])->toArray()
             )
                 // ->with("somthing")
-
                 ->first();
             if (!$user) {
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
+
+            $three_years_ago = Carbon::now()->subYears(3);
+            EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
+
+            $employee_address_history  =  EmployeeAddressHistory::where([
+                "employee_id" =>   $user_prev->id
+            ])
+                ->latest('created_at')
+                ->first();
+
+            if ($employee_address_history) {
+                $employee_address_history->to_date = now();
+                $employee_address_history->save();
+            }
+
+
+
+
+
+            EmployeeAddressHistory::create([
+                'employee_id' => $user->id,
+                'from_date' => now(),
+                'created_by' => $request->user()->id,
+
+
+
+
+                'address_line_1' => $request_data["address_line_1"],
+                'address_line_2'=> $request_data["address_line_2"],
+                'country'=> $request_data["country"],
+                'city'=> $request_data["city"],
+                'postcode'=> $request_data["postcode"],
+                'lat'=> $request_data["lat"],
+                'long'=> $request_data["long"]
+            ]);
+
+
+
+
 
 
 
