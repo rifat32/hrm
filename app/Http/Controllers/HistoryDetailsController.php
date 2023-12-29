@@ -118,6 +118,9 @@ class HistoryDetailsController extends Controller
              $employee_passport_details_history = EmployeePassportDetailHistory::when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_passport_detail_histories.employee_id', $request->employee_id);
             })
+            ->when(empty($request->employee_id), function ($query) use ($request) {
+                return $query->where('employee_passport_detail_histories.employee_id', $request->user()->id);
+            })
 
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
@@ -152,4 +155,6 @@ class HistoryDetailsController extends Controller
              return $this->sendError($e, 500, $request);
          }
      }
+
+     
 }

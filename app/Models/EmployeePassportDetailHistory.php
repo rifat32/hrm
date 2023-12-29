@@ -17,7 +17,7 @@ class EmployeePassportDetailHistory extends Model
         "place_of_issue",
         "from_date",
         "to_date",
-        "employee_passport_detail_id",
+        "passport_detail_id",
         'created_by'
     ];
 
