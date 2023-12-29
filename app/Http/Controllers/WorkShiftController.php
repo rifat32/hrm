@@ -586,6 +586,8 @@ class WorkShiftController extends Controller
                     "message" => "no work shift found"
                 ], 404);
             }
+            $work_shift->departments = $work_shift->departments;
+            $work_shift->users = $work_shift->users;
 
             return response()->json($work_shift, 200);
         } catch (Exception $e) {
