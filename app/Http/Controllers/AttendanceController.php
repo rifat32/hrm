@@ -10,6 +10,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
+use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\SettingAttendance;
 use App\Models\User;
@@ -872,6 +873,14 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
             $business_id =  $request->user()->business_id;
             $attendances = Attendance::with([
                 "employee" => function ($query) {
@@ -886,6 +895,9 @@ class AttendanceController extends Controller
                     $query->select('departments.id', 'departments.name');
                 },
             ])
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
 
                 ->where(
                     [
@@ -1028,6 +1040,13 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $setting_attendance = SettingAttendance::where([
                 "business_id" => auth()->user()->business_id
@@ -1055,6 +1074,9 @@ class AttendanceController extends Controller
                         "attendances.business_id" => $business_id
                     ]
                 )
+                ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
                     return $query->where('attendances.employee_id', $request->employee_id);
                 })
@@ -1279,6 +1301,12 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $employees = User::with(
                 [
@@ -1299,6 +1327,9 @@ class AttendanceController extends Controller
 
                 ]
             )
+            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->whereHas("attendances", function ($q) use ($request) {
                     $q->whereNotNull("employee_id")
                         ->when(!empty($request->employee_id), function ($q) use ($request) {
@@ -1484,11 +1515,20 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $attendance =  Attendance::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
+            ->whereHas("employee..departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("employee.departments.id",$all_manager_department_ids);
+             })
                 ->first();
             if (!$attendance) {
                 return response()->json([
@@ -1569,11 +1609,20 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Attendance::where([
                 "business_id" => $business_id
             ])
+            ->whereHas("employee..departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("employee.departments.id",$all_manager_department_ids);
+             })
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

@@ -212,12 +212,6 @@ class LeaveController extends Controller
 
 
 
-                $check_employee = $this->checkUser($request_data["employee_id"]);
-                if (!$check_employee["ok"]) {
-                    return response()->json([
-                        "message" => $check_employee["message"]
-                    ], $check_employee["status"]);
-                }
 
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["employee_id"]);
@@ -749,7 +743,7 @@ class LeaveController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
-            
+
 
 
                 $check_employee = $this->checkUser($request_data["employee_id"]);
@@ -1134,12 +1128,22 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
             $business_id =  $request->user()->business_id;
             $leaves = Leave::where(
                 [
                     "leaves.business_id" => $business_id
                 ]
             )
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -1292,6 +1296,12 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $leaves = Leave::with([
                 "employee" => function ($query) {
@@ -1328,6 +1338,9 @@ class LeaveController extends Controller
                         "leaves.business_id" => $business_id
                     ]
                 )
+                ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -1505,6 +1518,12 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $employees = User::with(
                 [
@@ -1524,6 +1543,9 @@ class LeaveController extends Controller
 
 
             ])
+            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
             ->whereHas("leaves", function($q) use ($request)  {
                 $q->whereNotNull("employee_id")
                   ->when(!empty($request->employee_id), function ($q) use ($request) {
@@ -1760,6 +1782,12 @@ return $employee;
                      "message" => "You can not perform this action"
                  ], 401);
              }
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
              $business_id =  $request->user()->business_id;
              $leaves = Leave::with([
                  "employee" => function ($query) {
@@ -1796,6 +1824,9 @@ return $employee;
                          "leaves.business_id" => $business_id
                      ]
                  )
+                 ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;
@@ -1974,11 +2005,20 @@ return $employee;
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $leave =  Leave::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->first();
             if (!$leave) {
                 return response()->json([
@@ -2059,11 +2099,20 @@ return $employee;
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Leave::where([
                 "business_id" => $business_id
             ])
+            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

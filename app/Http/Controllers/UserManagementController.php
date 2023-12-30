@@ -24,6 +24,7 @@ use App\Mail\VerifyMail;
 use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\Business;
+use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
@@ -2917,6 +2918,14 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
+
 
             $users = User::with(
                 [
@@ -2936,6 +2945,9 @@ class UserManagementController extends Controller
                 ]
 
             )
+            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+               $query->whereIn("departments.id",$all_manager_department_ids);
+            })
                 ->whereNotIn('id', [$request->user()->id])
                 ->when(!empty($request->role), function ($query) use ($request) {
                     $rolesArray = explode(',', $request->role);
