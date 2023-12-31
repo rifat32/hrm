@@ -23,6 +23,11 @@ class EmployeePassportDetailHistory extends Model
         'created_by'
     ];
 
+
+    public function employee(){
+        return $this->hasOne(User::class,'id', 'employee_id');
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

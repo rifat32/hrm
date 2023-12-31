@@ -27,7 +27,9 @@ class EmployeeSponsorshipHistory extends Model
     ];
 
 
-
+    public function employee(){
+        return $this->hasOne(User::class,'id', 'employee_id');
+    }
 
 
 

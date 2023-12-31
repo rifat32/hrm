@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeSponsorship;
@@ -120,13 +121,22 @@ class HistoryDetailsController extends Controller
                  ], 401);
              }
 
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+
              $employee_passport_details_history = EmployeePassportDetailHistory::when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_passport_detail_histories.employee_id', $request->employee_id);
             })
             ->when(empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_passport_detail_histories.employee_id', $request->user()->id);
             })
-
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;
@@ -263,6 +273,13 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+
 
              $employee_visa_details_history = EmployeeVisaDetailHistory::when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_visa_detail_histories.employee_id', $request->employee_id);
@@ -270,6 +287,9 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_visa_detail_histories.employee_id', $request->user()->id);
             })
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
 
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
@@ -406,7 +426,12 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
              $employee_sponsorship_details_history = EmployeeSponsorshipHistory::when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_sponsorship_histories.employee_id', $request->employee_id);
             })
@@ -419,7 +444,9 @@ class HistoryDetailsController extends Controller
                          $query->where("employee_sponsorship_histories.certificate_number", "like", "%" . $term . "%");
                      });
                  })
-
+                 ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
                      return $query->where('employee_sponsorship_histories.created_at', ">=", $request->start_date);
                  })
@@ -548,14 +575,21 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
              $employee_address_details_history = EmployeeAddressHistory::when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_address_histories.employee_id', $request->employee_id);
             })
             ->when(empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_address_histories.employee_id', $request->user()->id);
             })
-
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;

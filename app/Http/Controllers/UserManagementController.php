@@ -2483,10 +2483,17 @@ class UserManagementController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
+            }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
 
             $users = User::with(
@@ -2502,6 +2509,11 @@ class UserManagementController extends Controller
             )
 
                 ->whereNotIn('id', [$request->user()->id])
+                ->when(!empty($all_manager_department_ids), function ($query) use ($request, $all_manager_department_ids) {
+                    $query->whereHas("departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     });
+                })
 
                 ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if (auth()->user()->hasRole("superadmin")) {

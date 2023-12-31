@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use App\Models\SocialSite;
 use App\Models\User;
 use App\Models\UserSocialSite;
@@ -58,20 +59,38 @@ class UserSocialSiteUpdateRequest extends FormRequest
                     }
                 },
             ],
-
             'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    $exists = User::where('id', $value)
-                        ->where('users.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
+                    $all_manager_department_ids = [];
+                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+                    foreach ($manager_departments as $manager_department) {
+                        $all_manager_department_ids[] = $manager_department->id;
+                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                     }
+
+                  $exists =  User::where(
+                    [
+                        "users.id" => $value,
+                        "users.business_id" => auth()->user()->business_id
+
+                    ])
+                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->first();
+
+            if (!$exists) {
+                $fail("$attribute is invalid.");
+                return;
+            }
+
+
+
                 },
             ],
+
 
             'profile_link' => "nullable|string",
 

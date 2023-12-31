@@ -26,7 +26,9 @@ class EmployeeVisaDetailHistory extends Model
         'created_by'
     ];
 
-
+    public function employee(){
+        return $this->hasOne(User::class,'id', 'employee_id');
+    }
 
     protected $casts = [
         'visa_docs' => 'array',

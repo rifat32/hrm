@@ -7,6 +7,7 @@ use App\Http\Requests\UserSocialSiteUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Department;
 use App\Models\SocialSite;
 use App\Models\UserSocialSite;
 use Carbon\Carbon;
@@ -338,6 +339,13 @@ UserSocialSite::where([
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
+              $all_manager_department_ids = [];
+              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+              foreach ($manager_departments as $manager_department) {
+                  $all_manager_department_ids[] = $manager_department->id;
+                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+              }
+
               $user_social_sites = SocialSite::where('is_active', 1)
               ->with(['user_social_site' => function ($query) use ($request) {
                   $query->when(!empty($request->user_id), function ($query) use ($request) {
@@ -348,7 +356,9 @@ UserSocialSite::where([
                 })
                 ;
               }])
-
+              ->whereHas("user_social_site.user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
               ->when(!empty($request->search_key), function ($query) use ($request) {
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;
@@ -452,9 +462,18 @@ UserSocialSite::where([
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
+              $all_manager_department_ids = [];
+              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+              foreach ($manager_departments as $manager_department) {
+                  $all_manager_department_ids[] = $manager_department->id;
+                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+              }
               $user_social_site =  UserSocialSite::where([
                   "id" => $id,
               ])
+              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
               ->whereHas("user", function($q) use($request) {
                 $q->where("users.business_id", $request->user()->business_id)
                 ->orWhere("users.created_by", $request->user()->id);
@@ -540,10 +559,19 @@ UserSocialSite::where([
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
+              $all_manager_department_ids = [];
+              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+              foreach ($manager_departments as $manager_department) {
+                  $all_manager_department_ids[] = $manager_department->id;
+                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+              }
               $idsArray = explode(',', $ids);
               $existingIds = UserSocialSite::where([
                   "business_id" => $business_id
               ])
+              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                   ->whereIn('id', $idsArray)
                   ->select('id')
                   ->get()
