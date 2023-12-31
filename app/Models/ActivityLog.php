@@ -21,6 +21,10 @@ class ActivityLog extends Model
         "request_method",
         "device"
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id','id');
+    }
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

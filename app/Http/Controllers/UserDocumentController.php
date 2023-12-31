@@ -8,6 +8,7 @@ use App\Http\Requests\UserDocumentUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Department;
 use App\Models\UserDocument;
 use Carbon\Carbon;
 use Exception;
@@ -419,6 +420,12 @@ class UserDocumentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $user_documents = UserDocument::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -426,6 +433,9 @@ class UserDocumentController extends Controller
                 },
 
             ])
+            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -534,10 +544,19 @@ class UserDocumentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $user_document =  UserDocument::where([
                 "id" => $id,
 
             ])
+            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->first();
             if (!$user_document) {
                 return response()->json([
@@ -619,9 +638,18 @@ class UserDocumentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $idsArray = explode(',', $ids);
             $existingIds = UserDocument::whereIn('id', $idsArray)
                 ->select('id')
+                ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                 ->get()
                 ->pluck('id')
                 ->toArray();

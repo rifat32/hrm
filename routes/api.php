@@ -227,6 +227,7 @@ Route::delete('/v1.0/roles/{ids}', [RolesController::class, "deleteRolesByIds"])
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user document  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 Route::post('/v1.0/user-documents/single-file-upload', [UserDocumentController::class, "createUserDocumentFileSingle"]);
 Route::post('/v1.0/user-documents', [UserDocumentController::class, "createUserDocument"]);
 Route::put('/v1.0/user-documents', [UserDocumentController::class, "updateUserDocument"]);

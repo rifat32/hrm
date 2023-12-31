@@ -3304,11 +3304,19 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $user = User::with("roles")
                 ->where([
                     "id" => $id
                 ])
+                ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
@@ -3426,10 +3434,20 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
             $user = User::with("roles")
                 ->where([
                     "id" => $id
                 ])
+                ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
@@ -3438,6 +3456,7 @@ class UserManagementController extends Controller
                     });
                 })
                 ->first();
+
             if (!$user) {
                 return response()->json([
                     "message" => "no user found"
@@ -3929,7 +3948,12 @@ class UserManagementController extends Controller
             //     return response()->json(['messege' => 'Module is not enabled'], 403);
             //  }
 
-
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
 
 
             //  if (!$request->user()->hasPermissionTo('user_view')) {
@@ -3940,6 +3964,9 @@ class UserManagementController extends Controller
 
             $users = ActivityLog::where("activity", "!=", "DUMMY activity")
                 ->where("description", "!=", "DUMMY description")
+                ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
                     return $query->where('user_id', $request->employee_id);
                 })
