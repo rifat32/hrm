@@ -48,6 +48,9 @@ class UserJobHistory extends Model
     }
     public function getEmploymentEndDateAttribute($value)
     {
+        if(empty($value)) {
+             return NULL;
+        }
         return (new Carbon($value))->format('d-m-Y');
     }
 
@@ -55,5 +58,5 @@ class UserJobHistory extends Model
 
 
 
- 
+
 }

@@ -3095,6 +3095,7 @@ class UserManagementController extends Controller
                     "departments",
                     "designation",
                     "employment_status",
+                    "business"
 
                 ]
             )
