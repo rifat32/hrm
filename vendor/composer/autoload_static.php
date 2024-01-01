@@ -839,6 +839,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\UserAsset' => __DIR__ . '/../..' . '/app/Models/UserAsset.php',
         'App\\Models\\UserDocument' => __DIR__ . '/../..' . '/app/Models/UserDocument.php',
+        'App\\Models\\UserEducationHistory' => __DIR__ . '/../..' . '/app/Models/UserEducationHistory.php',
         'App\\Models\\UserJobHistory' => __DIR__ . '/../..' . '/app/Models/UserJobHistory.php',
         'App\\Models\\UserSocialSite' => __DIR__ . '/../..' . '/app/Models/UserSocialSite.php',
         'App\\Models\\UserWorkShift' => __DIR__ . '/../..' . '/app/Models/UserWorkShift.php',

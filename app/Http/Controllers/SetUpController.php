@@ -17,6 +17,7 @@ use Spatie\Permission\Models\Permission;
 use App\Models\Role;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
+use App\Models\SocialSite;
 
 class SetUpController extends Controller
 {
@@ -145,6 +146,53 @@ return "swagger generated";
           "is_default" => 1,
           "created_by" => $admin->id,
         ]);
+
+        $social_media_platforms = [
+            [
+                'name' => "Facebook",
+                'icon' => "facebook",
+                'link' => "https://www.facebook.com/",
+            ],
+            [
+                'name' => "LinkedIn",
+                'icon' => "linkedin",
+                'link' => "https://www.linkedin.com/",
+            ],
+            [
+                'name' => "Twitter",
+                'icon' => "twitter",
+                'link' => "https://twitter.com/",
+            ],
+            [
+                'name' => "GitHub",
+                'icon' => "github",
+                'link' => "https://github.com/",
+            ],
+            [
+                'name' => "Instagram",
+                'icon' => "instagram",
+                'link' => "https://www.instagram.com/",
+            ],
+            [
+                'name' => "YouTube",
+                'icon' => "youtube",
+                'link' => "https://www.youtube.com/",
+            ],
+            // Add more social media platforms as needed
+        ];
+
+        // Iterate through the array and create records
+        foreach ($social_media_platforms as $platform) {
+            SocialSite::create([
+                'name' => $platform['name'],
+                'icon' => $platform['icon'],
+                'link' => $platform['link'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
 
         return "You are done with setup";
     }

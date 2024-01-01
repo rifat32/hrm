@@ -224,6 +224,7 @@ return array(
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Models\\UserAsset' => $baseDir . '/app/Models/UserAsset.php',
     'App\\Models\\UserDocument' => $baseDir . '/app/Models/UserDocument.php',
+    'App\\Models\\UserEducationHistory' => $baseDir . '/app/Models/UserEducationHistory.php',
     'App\\Models\\UserJobHistory' => $baseDir . '/app/Models/UserJobHistory.php',
     'App\\Models\\UserSocialSite' => $baseDir . '/app/Models/UserSocialSite.php',
     'App\\Models\\UserWorkShift' => $baseDir . '/app/Models/UserWorkShift.php',

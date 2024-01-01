@@ -46,6 +46,7 @@ use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserAssetController;
 use App\Http\Controllers\UserDocumentController;
+use App\Http\Controllers\UserEducationHistoryController;
 use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserSocialSiteController;
@@ -251,6 +252,20 @@ Route::delete('/v1.0/user-job-histories/{ids}', [UserJobHistoryController::class
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user job history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user education history  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-education-histories', [UserEducationHistoryController::class, "createUserEducationHistory"]);
+Route::put('/v1.0/user-education-histories', [UserEducationHistoryController::class, "updateUserEducationHistory"]);
+Route::get('/v1.0/user-education-histories', [UserEducationHistoryController::class, "getUserEducationHistories"]);
+Route::get('/v1.0/user-education-histories/{id}', [UserEducationHistoryController::class, "getUserEducationHistoryById"]);
+Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryController::class, "deleteUserEducationHistoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user education history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
