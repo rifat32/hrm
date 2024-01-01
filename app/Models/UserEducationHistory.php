@@ -16,7 +16,7 @@ class UserEducationHistory extends Model
         'school_name',
         'graduation_date',
         'start_date',
-        'gpa',
+     
         'achievements',
         'description',
         'address',

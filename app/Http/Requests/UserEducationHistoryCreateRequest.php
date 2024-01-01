@@ -62,7 +62,6 @@ class UserEducationHistoryCreateRequest extends FormRequest
             'school_name' => 'required|string',
             'graduation_date' => 'required|date',
             'start_date' => 'required|date',
-            'gpa' => 'required|numeric',
             'achievements' => 'nullable|string',
             'description' => 'nullable|string',
             'address' => 'required|string',

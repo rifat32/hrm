@@ -25,7 +25,6 @@ class CreateUserEducationHistoriesTable extends Migration
             $table->string('school_name');
             $table->date('graduation_date');
             $table->date('start_date');
-            $table->float('gpa');
             $table->text('achievements')->nullable();
             $table->text('description')->nullable();
             $table->string("address");
