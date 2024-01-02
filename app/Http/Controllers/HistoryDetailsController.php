@@ -581,7 +581,8 @@ class HistoryDetailsController extends Controller
                  $all_manager_department_ids[] = $manager_department->id;
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              }
-             $employee_address_details_history = EmployeeAddressHistory::when(!empty($request->employee_id), function ($query) use ($request) {
+             $employee_address_details_history = EmployeeAddressHistory::where(["is_manual" => 0])
+             ->when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_address_histories.employee_id', $request->employee_id);
             })
             ->when(empty($request->employee_id), function ($query) use ($request) {

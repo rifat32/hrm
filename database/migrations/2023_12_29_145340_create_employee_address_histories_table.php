@@ -28,6 +28,7 @@ class CreateEmployeeAddressHistoriesTable extends Migration
             $table->string("long")->nullable();
             $table->date("from_date");
             $table->date("to_date")->nullable();
+            $table->boolean("is_manual")->default(0);
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')

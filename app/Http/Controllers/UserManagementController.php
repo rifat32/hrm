@@ -2324,6 +2324,11 @@ class UserManagementController extends Controller
             } else {
                 unset($request_data['password']);
             }
+
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
             //  $request_data['is_active'] = true;
             //  $request_data['remember_token'] = Str::random(10);
             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
@@ -2349,6 +2354,12 @@ class UserManagementController extends Controller
                 // ->with("somthing")
 
                 ->first();
+
+
+
+
+
+
             if (!$user) {
                 return response()->json([
                     "message" => "no user found"
@@ -2357,6 +2368,60 @@ class UserManagementController extends Controller
 
 
 
+
+            // history section
+
+            $address_history_data = [
+                'employee_id' => $user->id,
+                'from_date' => now(),
+                'created_by' => $request->user()->id,
+                'address_line_1' => $request_data["address_line_1"],
+                'address_line_2' => $request_data["address_line_2"],
+                'country' => $request_data["country"],
+                'city' => $request_data["city"],
+                'postcode' => $request_data["postcode"],
+                'lat' => $request_data["lat"],
+                'long' => $request_data["long"]
+            ];
+
+            $employee_address_history  =  EmployeeAddressHistory::where([
+                "employee_id" =>   $updatableUser->id
+            ])
+                ->latest('created_at')
+                ->first();
+
+            if ($employee_address_history) {
+                $fields_to_check = ["address_line_1", "address_line_2", "country", "city", "postcode"];
+
+
+                $fields_changed = false; // Initialize to false
+                foreach ($fields_to_check as $field) {
+                    $value1 = $employee_address_history->$field;
+                    $value2 = $request_data[$field];
+
+                    if ($value1 !== $value2) {
+                        $fields_changed = true;
+                        break;
+                    }
+                }
+
+
+
+
+
+
+                if (
+                    $fields_changed
+                ) {
+                    $employee_address_history->to_date = now();
+                    $employee_address_history->save();
+                    EmployeeAddressHistory::create($address_history_data);
+                }
+            } else {
+                EmployeeAddressHistory::create($address_history_data);
+            }
+
+            // end history section
 
 
 

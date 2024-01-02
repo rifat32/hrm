@@ -18,13 +18,10 @@ class EmployeeAddressHistory extends Model
         "postcode",
         "lat",
         "long",
-
-
-
-
         'employee_id',
         "from_date",
         "to_date",
+        "is_manual",
         'created_by'
     ];
 

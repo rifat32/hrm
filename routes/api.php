@@ -44,6 +44,7 @@ use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPayrollController;
 use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserAddressHistoryController;
 use App\Http\Controllers\UserAssetController;
 use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserEducationHistoryController;
@@ -263,6 +264,21 @@ Route::put('/v1.0/user-education-histories', [UserEducationHistoryController::cl
 Route::get('/v1.0/user-education-histories', [UserEducationHistoryController::class, "getUserEducationHistories"]);
 Route::get('/v1.0/user-education-histories/{id}', [UserEducationHistoryController::class, "getUserEducationHistoryById"]);
 Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryController::class, "deleteUserEducationHistoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user education history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user education history  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-address-histories', [UserAddressHistoryController::class, "createUserAddressHistory"]);
+Route::put('/v1.0/user-address-histories', [UserAddressHistoryController::class, "updateUserAddressHistory"]);
+Route::get('/v1.0/user-address-histories', [UserAddressHistoryController::class, "getUserAddressHistories"]);
+Route::get('/v1.0/user-address-histories/{id}', [UserAddressHistoryController::class, "getUserAddressHistoryById"]);
+Route::delete('/v1.0/user-address-histories/{ids}', [UserAddressHistoryController::class, "deleteUserAddressHistoriesByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user education history management section

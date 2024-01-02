@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserEducationHistoryCreateRequest;
-use App\Http\Requests\UserEducationHistoryUpdateRequest;
+use App\Http\Requests\UserAddressHistoryCreateRequest;
+use App\Http\Requests\UserAddressHistoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
-use App\Models\UserEducationHistory;
+use App\Models\EmployeeAddressHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserEducationHistoryController extends Controller
+class UserAddressHistoryController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
@@ -25,31 +25,30 @@ class UserEducationHistoryController extends Controller
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/user-education-histories",
-     *      operationId="createUserEducationHistory",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-address-histories",
+     *      operationId="createUserAddressHistory",
+     *      tags={"user_address_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store user education history",
-     *      description="This method is to store user education history",
+     *      summary="This method is to store user address history",
+     *      description="This method is to store user address history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- * @OA\Property(property="user_id", type="integer", format="int", example=1),
- * @OA\Property(property="degree", type="string", format="string", example="Your Degree"),
- * @OA\Property(property="major", type="string", format="string", example="Your Major"),
- * @OA\Property(property="school_name", type="string", format="string", example="Your School Name"),
- * @OA\Property(property="graduation_date", type="string", format="date", example="2023-05-01"),
- * @OA\Property(property="start_date", type="string", format="date", example="2019-09-01"),
- * @OA\Property(property="achievements", type="string", format="string", example="Your Achievements"),
- * @OA\Property(property="description", type="string", format="string", example="Your Description"),
- *  * @OA\Property(property="address", type="string", format="string", example="Your address"),
+     *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="address", type="string", format="string", example="Your address"),
+ * @OA\Property(property="address_line_1", type="string", format="string", example="Your address_line_1"),
+ * @OA\Property(property="address_line_2", type="string", format="string", example="Your address_line_2"),
  * @OA\Property(property="country", type="string", format="string", example="Your Country"),
  * @OA\Property(property="city", type="string", format="string", example="Your City"),
  * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="is_current", type="boolean", format="boolean", example=false)
+ * @OA\Property(property="lat", type="string", format="string", example="Your Latitude"),
+ * @OA\Property(property="long", type="string", format="string", example="Your Longitude"),
+ * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+ * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+
  *
  *
  *
@@ -90,12 +89,12 @@ class UserEducationHistoryController extends Controller
      *     )
      */
 
-    public function createUserEducationHistory(UserEducationHistoryCreateRequest $request)
+    public function createUserAddressHistory(UserAddressHistoryCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_education_history_create')) {
+                if (!$request->user()->hasPermissionTo('employee_address_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -103,19 +102,13 @@ class UserEducationHistoryController extends Controller
 
                 $request_data = $request->validated();
 
-
-
-
-
-
-
                 $request_data["created_by"] = $request->user()->id;
 
-                $user_education_history =  UserEducationHistory::create($request_data);
+                $user_address_history =  EmployeeAddressHistory::create($request_data);
 
 
 
-                return response($user_education_history, 201);
+                return response($user_address_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -126,32 +119,30 @@ class UserEducationHistoryController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/user-education-histories",
-     *      operationId="updateUserEducationHistory",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-address-histories",
+     *      operationId="updateUserAddressHistory",
+     *      tags={"user_address_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update  user education history ",
-     *      description="This method is to update user education history",
+     *      summary="This method is to update  user address history ",
+     *      description="This method is to update user address history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- * @OA\Property(property="user_id", type="integer", format="int", example=1),
- * @OA\Property(property="degree", type="string", format="string", example="Your Degree"),
- * @OA\Property(property="major", type="string", format="string", example="Your Major"),
- * @OA\Property(property="school_name", type="string", format="string", example="Your School Name"),
- * @OA\Property(property="graduation_date", type="string", format="date", example="2023-05-01"),
- * @OA\Property(property="start_date", type="string", format="date", example="2019-09-01"),
- * @OA\Property(property="achievements", type="string", format="string", example="Your Achievements"),
- * @OA\Property(property="description", type="string", format="string", example="Your Description"),
- *  * @OA\Property(property="address", type="string", format="string", example="Your address"),
+     *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="address", type="string", format="string", example="Your address"),
+ * @OA\Property(property="address_line_1", type="string", format="string", example="Your address_line_1"),
+ * @OA\Property(property="address_line_2", type="string", format="string", example="Your address_line_2"),
  * @OA\Property(property="country", type="string", format="string", example="Your Country"),
  * @OA\Property(property="city", type="string", format="string", example="Your City"),
  * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="is_current", type="boolean", format="boolean", example=false)
+ * @OA\Property(property="lat", type="string", format="string", example="Your Latitude"),
+ * @OA\Property(property="long", type="string", format="string", example="Your Longitude"),
+ * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+ * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
 *
  *
 
@@ -192,13 +183,13 @@ class UserEducationHistoryController extends Controller
      *     )
      */
 
-    public function updateUserEducationHistory(UserEducationHistoryUpdateRequest $request)
+    public function updateUserAddressHistory(UserAddressHistoryUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_education_history_update')) {
+                if (!$request->user()->hasPermissionTo('employee_address_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -209,46 +200,43 @@ class UserEducationHistoryController extends Controller
 
 
 
-                $user_education_history_query_params = [
+                $user_address_history_query_params = [
                     "id" => $request_data["id"],
+                    "is_manual" => 1
                 ];
-                // $user_education_history_prev = UserEducationHistory::where($user_education_history_query_params)
+                // $user_address_history_prev = UserAddressHistory::where($user_address_history_query_params)
                 //     ->first();
-                // if (!$user_education_history_prev) {
+                // if (!$user_address_history_prev) {
                 //     return response()->json([
-                //         "message" => "no user education history found"
+                //         "message" => "no user address history found"
                 //     ], 404);
                 // }
 
-                $user_education_history  =  tap(UserEducationHistory::where($user_education_history_query_params))->update(
+                $user_address_history  =  tap(EmployeeAddressHistory::where($user_address_history_query_params))->update(
                     collect($request_data)->only([
-                        'user_id',
-                        'degree',
-                        'major',
-                        'school_name',
-                        'graduation_date',
-                        'start_date',
-
-                        'achievements',
-                        'description',
-                        'address',
-                        'country',
-                        'city',
-                        'postcode',
-                        'is_current',
+                        "address_line_1",
+                        "address_line_2",
+                        "country",
+                        "city",
+                        "postcode",
+                        "lat",
+                        "long",
+                        'employee_id',
+                        "from_date",
+                        "to_date",
 
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$user_education_history) {
+                if (!$user_address_history) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($user_education_history, 201);
+                return response($user_address_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -260,16 +248,16 @@ class UserEducationHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-education-histories",
-     *      operationId="getUserEducationHistories",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-address-histories",
+     *      operationId="getUserAddressHistories",
+     *      tags={"user_address_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="user_id",
+     *         name="employee_id",
      *         in="query",
-     *         description="user_id",
+     *         description="employee_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -310,8 +298,8 @@ class UserEducationHistoryController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get user education histories  ",
-     *      description="This method is to get user education histories ",
+     *      summary="This method is to get user address histories  ",
+     *      description="This method is to get user address histories ",
      *
 
      *      @OA\Response(
@@ -348,11 +336,11 @@ class UserEducationHistoryController extends Controller
      *     )
      */
 
-    public function getUserEducationHistories(Request $request)
+    public function getUserAddressHistories(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_education_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_address_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -364,43 +352,44 @@ class UserEducationHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_education_histories = UserEducationHistory::with([
+            $user_address_histories = EmployeeAddressHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
                 },
 
             ])
+            ->where(["is_manual" => 1])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("user_education_histories.name", "like", "%" . $term . "%");
-                        //     ->orWhere("user_education_histories.description", "like", "%" . $term . "%");
+                        $query->where("user_address_histories.name", "like", "%" . $term . "%");
+                        //     ->orWhere("user_address_histories.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_education_histories.user_id', $request->user_id);
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                    return $query->where('user_address_histories.employee_id', $request->employee_id);
                 })
-                ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_education_histories.user_id', $request->user()->id);
+                ->when(empty($request->employee_id), function ($query) use ($request) {
+                    return $query->where('user_address_histories.employee_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('user_education_histories.created_at', ">=", $request->start_date);
+                    return $query->where('user_address_histories.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('user_education_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('user_address_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("user_education_histories.id", $request->order_by);
+                    return $query->orderBy("user_address_histories.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("user_education_histories.id", "DESC");
+                    return $query->orderBy("user_address_histories.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -410,7 +399,7 @@ class UserEducationHistoryController extends Controller
 
 
 
-            return response()->json($user_education_histories, 200);
+            return response()->json($user_address_histories, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -420,9 +409,9 @@ class UserEducationHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-education-histories/{id}",
-     *      operationId="getUserEducationHistoryById",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-address-histories/{id}",
+     *      operationId="getUserAddressHistoryById",
+     *      tags={"user_address_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -433,8 +422,8 @@ class UserEducationHistoryController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get user education history by id",
-     *      description="This method is to get user education history by id",
+     *      summary="This method is to get user address history by id",
+     *      description="This method is to get user address history by id",
      *
 
      *      @OA\Response(
@@ -472,11 +461,11 @@ class UserEducationHistoryController extends Controller
      */
 
 
-    public function getUserEducationHistoryById($id, Request $request)
+    public function getUserAddressHistoryById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_education_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_address_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -488,20 +477,22 @@ class UserEducationHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_education_history =  UserEducationHistory::where([
+            $user_address_history =  EmployeeAddressHistory::where([
                 "id" => $id,
+                "is_manual" => 1
             ])
+
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
-            if (!$user_education_history) {
+            if (!$user_address_history) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($user_education_history, 200);
+            return response()->json($user_address_history, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -513,9 +504,9 @@ class UserEducationHistoryController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/user-education-histories/{ids}",
-     *      operationId="deleteUserEducationHistoriesByIds",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-address-histories/{ids}",
+     *      operationId="deleteUserAddressHistoriesByIds",
+     *      tags={"user_address_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -526,8 +517,8 @@ class UserEducationHistoryController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user education history by id",
-     *      description="This method is to delete user education history by id",
+     *      summary="This method is to delete user address history by id",
+     *      description="This method is to delete user address history by id",
      *
 
      *      @OA\Response(
@@ -564,12 +555,12 @@ class UserEducationHistoryController extends Controller
      *     )
      */
 
-    public function deleteUserEducationHistoriesByIds(Request $request, $ids)
+    public function deleteUserAddressHistoriesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_education_history_delete')) {
+            if (!$request->user()->hasPermissionTo('employee_address_history_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -582,7 +573,8 @@ class UserEducationHistoryController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $idsArray = explode(',', $ids);
-            $existingIds = UserEducationHistory::whereIn('id', $idsArray)
+            $existingIds = EmployeeAddressHistory::whereIn('id', $idsArray)
+            ->where(["is_manual" => 1])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
@@ -597,7 +589,7 @@ class UserEducationHistoryController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            UserEducationHistory::destroy($existingIds);
+            EmployeeAddressHistory::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
