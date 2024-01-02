@@ -530,7 +530,16 @@ if(!$user->hasRole('business_owner')) {
         $request_data['business']['created_by'] = $request->user()->id;
         $request_data['business']['is_active'] = true;
         $business =  Business::create($request_data['business']);
+
+
+
         $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1);
+
+
+        
+
+
+
 
         $user->email_verified_at = now();
         $user->business_id = $business->id;

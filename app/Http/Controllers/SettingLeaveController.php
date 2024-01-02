@@ -77,6 +77,7 @@ class SettingLeaveController extends Controller
 
     public function createSettingLeave(SettingLeaveCreateRequest $request)
     {
+
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
@@ -87,49 +88,45 @@ class SettingLeaveController extends Controller
                 }
 
                 $request_data = $request->validated();
-                $request_data["created_by"] = $request->user()->id;
+
                 $request_data["is_active"] = 1;
+                $request_data["is_default"] = 0;
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
 
-
-
-
-                $check_paid_employment_status = $this->checkEmploymentStatuses($request_data["paid_leave_employment_statuses"]);
-                if (!$check_paid_employment_status["ok"]) {
-                    return response()->json([
-                        "message" => $check_paid_employment_status["message"]
-                    ], $check_paid_employment_status["status"]);
+                if (empty($request->user()->business_id)) {
+                    $request_data["business_id"] = NULL;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
                 }
-                $check_unpaid_employment_status = $this->checkEmploymentStatuses($request_data["unpaid_leave_employment_statuses"]);
-                if (!$check_unpaid_employment_status["ok"]) {
-                    return response()->json([
-                        "message" => $check_unpaid_employment_status["message"]
-                    ], $check_unpaid_employment_status["status"]);
-                }
+
+
+
 
                 if (empty($request->user()->business_id)) {
 
-                    $request_data["business_id"] = NULL;
-                    $request_data["is_default"] = 1;
+               $check_data =     [
+
+                        "business_id" => $request_data["business_id"],
+
+                        "is_default" => $request_data["is_default"]
+
+               ];
+               if (!$request->user()->hasRole('superadmin')) {
+        $check_data["created_by"] =    $request_data["created_by"];
+            }
 
 
                     $setting_leave  =  SettingLeave::updateOrCreate(
-                        [
-
-                            "business_id" => $request_data["business_id"],
-
-                            "is_default" => $request_data["is_default"]
-
-                        ],
+                        $check_data
+                        ,
 
                         $request_data
 
                     );
                 } else {
 
-
-
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_default"] = 0;
                     $setting_leave =     SettingLeave::updateOrCreate(
                         [
                             "business_id" => $request_data["business_id"],
@@ -251,17 +248,33 @@ class SettingLeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $created_by  = NULL;
+            if(auth()->user()->business) {
+                $created_by = auth()->user()->business->created_by;
+            }
+
 
 
             $setting_leave = SettingLeave::with("special_users","special_roles","paid_leave_employment_statuses","unpaid_leave_employment_statuses")
 
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leaves.business_id', NULL)
-                    ->where('setting_leaves.is_default', 1);
+            ->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('designations.business_id', NULL)
+                        ->where('designations.is_default', 1)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('designations.is_active', intval($request->is_active));
+                        });
+                } else {
+                    return   $query->where('designations.business_id', NULL)
+                    ->where('designations.is_default', 0)
+                    ->where('designations.created_by', auth()->user()->id);
+                }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('setting_leaves.business_id', $request->user()->business_id)
-                        ->where('setting_leaves.is_default', 0);
+                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                 return   $query->where('designations.business_id', auth()->user()->business_id)
+                    ->where('designations.is_default', 0);
+
+
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {

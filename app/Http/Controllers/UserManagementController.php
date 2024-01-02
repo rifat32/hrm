@@ -445,13 +445,6 @@ class UserManagementController extends Controller
             }
 
 
-
-
-
-
-
-
-
             $request_data['password'] = Hash::make($request['password']);
             $request_data['is_active'] = true;
             $request_data['remember_token'] = Str::random(10);
@@ -478,11 +471,13 @@ class UserManagementController extends Controller
             //  }
             //   $default_work_shift->users()->attach($user->id);
 
-
-
-
-
             $user->roles = $user->roles->pluck('name');
+
+
+            $this->loadDefaultSettingLeave($user->business_id);
+
+
+
 
             // $user->permissions  = $user->getAllPermissions()->pluck('name');
             // error_log("cccccc");
@@ -2312,7 +2307,6 @@ class UserManagementController extends Controller
     {
 
         try {
-
 
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 

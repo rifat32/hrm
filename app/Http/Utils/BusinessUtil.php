@@ -21,13 +21,14 @@ trait BusinessUtil
 
 
 
-    public function businessOwnerCheck($business_id) {
+    public function businessOwnerCheck($business_id)
+    {
 
         $businessQuery  = Business::where(["id" => $business_id]);
-        if(!auth()->user()->hasRole('superadmin')) {
+        if (!auth()->user()->hasRole('superadmin')) {
             $businessQuery = $businessQuery->where(function ($query) {
                 $query->where('created_by', auth()->user()->id)
-                      ->orWhere('owner_id', auth()->user()->id);
+                    ->orWhere('owner_id', auth()->user()->id);
             });
         }
 
@@ -37,9 +38,10 @@ trait BusinessUtil
         }
         return $business;
     }
-    public function checkLeaveType($id) {
+    public function checkLeaveType($id)
+    {
         $setting_leave_type  = SettingLeaveType::where(["id" => $id])->first();
-        if (!$setting_leave_type){
+        if (!$setting_leave_type) {
             return [
                 "ok" => false,
                 "status" => 400,
@@ -60,9 +62,10 @@ trait BusinessUtil
         ];
     }
 
-    public function checkUser($id) {
+    public function checkUser($id)
+    {
         $user  = User::where(["id" => $id])->first();
-        if (!$user){
+        if (!$user) {
             return [
                 "ok" => false,
                 "status" => 400,
@@ -82,7 +85,8 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
-    public function checkRole($role) {
+    public function checkRole($role)
+    {
 
         // if(!empty(auth()->user()->business_id)) {
         //     $role = $role . "#" . auth()->user()->business_id;
@@ -92,7 +96,7 @@ trait BusinessUtil
         $role  = Role::where(["name" => $role])->first();
 
 
-        if (!$role){
+        if (!$role) {
             return [
                 "ok" => false,
                 "status" => 400,
@@ -100,8 +104,8 @@ trait BusinessUtil
             ];
         }
 
-        if(!empty(auth()->user()->business_id)) {
-            if ($role->business_id != auth()->user()->business_id){
+        if (!empty(auth()->user()->business_id)) {
+            if ($role->business_id != auth()->user()->business_id) {
                 return [
                     "ok" => false,
                     "status" => 400,
@@ -115,9 +119,10 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
-    public function checkManager($id) {
+    public function checkManager($id)
+    {
         $user  = User::where(["id" => $id])->first();
-        if (!$user){
+        if (!$user) {
             return [
                 "ok" => false,
                 "status" => 400,
@@ -132,7 +137,7 @@ trait BusinessUtil
                 "message" => "Manager belongs to another business."
             ];
         }
-        if (!$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))){
+        if (!$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))) {
             return [
                 "ok" => false,
                 "status" => 403,
@@ -144,10 +149,11 @@ trait BusinessUtil
         ];
     }
 
-    public function checkEmployees($ids) {
+    public function checkEmployees($ids)
+    {
         $users = User::whereIn("id", $ids)->get();
         foreach ($users as $user) {
-            if (!$user){
+            if (!$user) {
                 return [
                     "ok" => false,
                     "status" => 400,
@@ -163,7 +169,7 @@ trait BusinessUtil
                 ];
             }
 
-            if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
+            if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))) {
                 return [
                     "ok" => false,
                     "status" => 403,
@@ -178,9 +184,10 @@ trait BusinessUtil
     }
 
 
-    public function checkDepartment($id) {
+    public function checkDepartment($id)
+    {
         $department  = Department::where(["id" => $id])->first();
-        if (!$department){
+        if (!$department) {
             return [
                 "ok" => false,
                 "status" => 400,
@@ -199,7 +206,8 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
-    public function checkDepartments($ids) {
+    public function checkDepartments($ids)
+    {
         $departments = Department::whereIn("id", $ids)->get();
 
         foreach ($departments as $department) {
@@ -225,12 +233,13 @@ trait BusinessUtil
         ];
     }
 
-    public function checkUsers($ids) {
+    public function checkUsers($ids)
+    {
 
 
         foreach ($ids as $id) {
             $user = User::where("id", $id)
-            ->first();
+                ->first();
             if (!$user) {
                 return [
                     "ok" => false,
@@ -239,28 +248,23 @@ trait BusinessUtil
                 ];
             }
 
-            if(empty(auth()->user()->business_id)) {
-                if(!empty($user->business_id)){
+            if (empty(auth()->user()->business_id)) {
+                if (!empty($user->business_id)) {
                     return [
                         "ok" => false,
                         "status" => 403,
                         "message" => "User belongs to another business."
                     ];
                 }
-
             } else {
-                if ($user->business_id != auth()->user()->business_id){
+                if ($user->business_id != auth()->user()->business_id) {
                     return [
                         "ok" => false,
                         "status" => 403,
                         "message" => "User belongs to another business."
                     ];
                 }
-
             }
-
-
-
         }
 
         return [
@@ -268,12 +272,13 @@ trait BusinessUtil
         ];
     }
 
-    public function checkRoles($ids) {
+    public function checkRoles($ids)
+    {
 
 
         foreach ($ids as $id) {
             $role = Role::where("id", $id)
-            ->first();
+                ->first();
             if (!$role) {
                 return [
                     "ok" => false,
@@ -299,19 +304,16 @@ trait BusinessUtil
                     ];
                 }
             }
-
-
-
-
         }
 
         return [
             "ok" => true,
         ];
     }
-    public function checkEmploymentStatuses($ids) {
+    public function checkEmploymentStatuses($ids)
+    {
         $employment_statuses = EmploymentStatus::whereIn("id", $ids)
-        ->get();
+            ->get();
 
         foreach ($employment_statuses as $employment_status) {
             if (!$employment_status) {
@@ -322,8 +324,8 @@ trait BusinessUtil
                 ];
             }
 
-            if(auth()->user()->hasRole('superadmin')) {
-                if (!(($employment_status->business_id == NULL) && ($employment_status->is_default == 1) && ($employment_status->is_active == 1) )) {
+            if (auth()->user()->hasRole('superadmin')) {
+                if (!(($employment_status->business_id == NULL) && ($employment_status->is_default == 1) && ($employment_status->is_active == 1))) {
                     return [
                         "ok" => false,
                         "status" => 403,
@@ -331,7 +333,7 @@ trait BusinessUtil
                     ];
                 }
             }
-            if(!auth()->user()->hasRole('superadmin')) {
+            if (!auth()->user()->hasRole('superadmin')) {
                 if (!(($employment_status->business_id == auth()->user()->business_id) && ($employment_status->is_default == 0) && ($employment_status->is_active == 1))) {
                     return [
                         "ok" => false,
@@ -340,8 +342,6 @@ trait BusinessUtil
                     ];
                 }
             }
-
-
         }
 
         return [
@@ -349,7 +349,237 @@ trait BusinessUtil
         ];
     }
 
-    public function storeDefaultsToBusiness($business_id,$business_name,$owner_id,$address_line_1) {
+    //     public function storeDefaultsToBusiness($business_id,$business_name,$owner_id,$address_line_1) {
+
+
+    //         Department::create([
+    //             "name" => $business_name,
+    //             "location" => $address_line_1,
+    //             "is_active" => 1,
+    //             "manager_id" => $owner_id,
+    //             "business_id" => $business_id,
+    //             "created_by" => $owner_id
+    //         ]);
+
+
+    //         $attached_defaults = [];
+    //         $defaultRoles = Role::where([
+    //             "business_id" => NULL,
+    //             "is_default" => 1,
+    //             "is_default_for_business" => 1,
+    //             "guard_name" => "api",
+    //           ])->get();
+
+    //           foreach($defaultRoles as $defaultRole) {
+    //               $insertableData = [
+    //                 'name'  => ($defaultRole->name . "#" . $business_id),
+    //                 "is_default" => 1,
+    //                 "business_id" => $business_id,
+    //                 "is_default_for_business" => 0,
+    //                 "guard_name" => "api",
+    //               ];
+    //            $role  = Role::create($insertableData);
+    //            $attached_defaults["roles"][$defaultRole->id] = $role->id;
+
+    //            $permissions = $defaultRole->permissions;
+    //            foreach ($permissions as $permission) {
+    //                if(!$role->hasPermissionTo($permission)){
+    //                    $role->givePermissionTo($permission);
+    //                }
+    //            }
+    //           }
+
+
+
+
+    //         $defaultDesignations = Designation::where([
+    //             "business_id" => NULL,
+    //             "is_default" => 1,
+    //             "is_active" => 1
+    //           ])->get();
+
+    //           foreach($defaultDesignations as $defaultDesignation) {
+    //               $insertableData = [
+    //                 'name'  => $defaultDesignation->name,
+    //                 'description'  => $defaultDesignation->description,
+    //                 "is_active" => 1,
+    //                 "is_default" => 1,
+    //                 "business_id" => $business_id,
+    //               ];
+    //            $designation  = Designation::create($insertableData);
+    //            $attached_defaults["designations"][$defaultDesignation->id] = $designation->id;
+    //           }
+
+    //           $defaultEmploymentStatuses = EmploymentStatus::where([
+    //             "business_id" => NULL,
+    //             "is_active" => 1,
+    //             "is_default" => 1
+    //           ])->get();
+
+    //           foreach($defaultEmploymentStatuses as $defaultEmploymentStatus) {
+    //               $insertableData = [
+    //                 'name'  => $defaultEmploymentStatus->name,
+    //                 'color'  => $defaultEmploymentStatus->color,
+    //                 'description'  => $defaultEmploymentStatus->description,
+    //                 "is_active" => 1,
+    //                 "is_default" => 1,
+    //                 "business_id" => $business_id,
+    //               ];
+    //            $employment_status  = EmploymentStatus::create($insertableData);
+    //            $attached_defaults["employment_statuses"][$defaultEmploymentStatus->id] = $employment_status->id;
+    //           }
+
+    // // load setting leave
+    //           $defaultSettingLeaves = SettingLeave::where([
+    //             "business_id" => NULL,
+    //             "is_active" => 1,
+    //             "is_default" => 1
+    //           ])->get();
+
+    //           foreach($defaultSettingLeaves as $defaultSettingLeave) {
+    //               $insertableData = [
+    //                 'start_month' => $defaultSettingLeave->start_month,
+    //                 'approval_level' => $defaultSettingLeave->approval_level,
+    //                 'allow_bypass' => $defaultSettingLeave->allow_bypass,
+    //                 "created_by" => auth()->user()->id,
+    //                 "is_active" => 1,
+    //                 "is_default" => 0,
+    //                 "business_id" => $business_id,
+    //               ];
+
+    //            $setting_leave  = SettingLeave::create($insertableData);
+    //            $attached_defaults["setting_leaves"][$defaultSettingLeave->id] = $setting_leave->id;
+
+
+    //            $default_special_roles = $defaultSettingLeave->special_roles()->pluck("role_id");
+    //            $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
+    //             return $attached_defaults["roles"][$id];
+    // });
+    //            $setting_leave->special_roles()->sync($special_roles_for_business,[]);
+
+
+    //     $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
+    //            $paid_leave_employment_statuses_for_business = $default_paid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
+    //             return $attached_defaults["employment_statuses"][$id];
+    // });
+    //            $setting_leave->paid_leave_employment_statuses()->sync($paid_leave_employment_statuses_for_business,[]);
+
+
+
+    //            $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
+    //            $unpaid_leave_employment_statuses_for_business = $default_unpaid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
+    //             return $attached_defaults["employment_statuses"][$id];
+    //  });
+    //            $setting_leave->unpaid_leave_employment_statuses()->sync($unpaid_leave_employment_statuses_for_business,[]);
+
+
+
+
+    //           }
+
+    // // end load setting leave
+
+
+
+    // // load setting attendance
+    // $defaultSettingAttendances = SettingAttendance::where([
+    //     "business_id" => NULL,
+    //     "is_active" => 1,
+    //     "is_default" => 1
+    //   ])->get();
+
+
+
+    //   foreach($defaultSettingAttendances as $defaultSettingAttendance) {
+    //       $insertableData = [
+    //         'punch_in_time_tolerance' => $defaultSettingAttendance->punch_in_time_tolerance,
+    //         'work_availability_definition'=> $defaultSettingAttendance->work_availability_definition,
+    //         'punch_in_out_alert'=> $defaultSettingAttendance->punch_in_out_alert,
+    //         'punch_in_out_interval'=> $defaultSettingAttendance->punch_in_out_interval,
+    //         'alert_area'=> $defaultSettingAttendance->alert_area,
+    //         'auto_approval'=> $defaultSettingAttendance->auto_approval,
+
+    //         "created_by" => auth()->user()->id,
+    //         "is_active" => 1,
+    //         "is_default" => 0,
+    //         "business_id" => $business_id,
+    //       ];
+
+    //    $setting_attendance  = SettingAttendance::create($insertableData);
+    //    $attached_defaults["setting_attendances"][$defaultSettingAttendance->id] = $setting_attendance->id;
+
+
+    //    $default_special_roles = $defaultSettingAttendance->special_roles()->pluck("role_id");
+    //    $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
+    //     return $attached_defaults["roles"][$id];
+    // });
+    //    $setting_attendance->special_roles()->sync($special_roles_for_business,[]);
+
+
+
+
+
+    //   }
+
+    // // end load setting attendance
+
+
+
+
+
+
+
+    //     }
+
+
+
+    public function loadDefaultSettingLeave($business_id = NULL) {
+    // load setting leave
+    $default_setting_leave_type_query = [
+        "business_id" => NULL,
+        "is_active" => 1,
+        "is_default" => 1
+    ];
+    if(!auth()->user()->hasRole("superadmin")) {
+        $default_setting_leave_type_query["is_default"] = 0;
+        $default_setting_leave_type_query["created_by"] = auth()->user()->id;
+    }
+
+    $defaultSettingLeaves = SettingLeave::where($default_setting_leave_type_query)->get();
+    foreach ($defaultSettingLeaves as $defaultSettingLeave) {
+        $insertableData = [
+            'start_month' => $defaultSettingLeave->start_month,
+            'approval_level' => $defaultSettingLeave->approval_level,
+            'allow_bypass' => $defaultSettingLeave->allow_bypass,
+            "created_by" => auth()->user()->id,
+            "is_active" => 1,
+            "is_default" => 0,
+            "business_id" => $business_id,
+        ];
+
+        $setting_leave  = SettingLeave::create($insertableData);
+
+        $business_owner_role_id = Role::where([
+            "name" => ("business_owner#" . $business_id)
+        ])
+        ->pluck("id");
+
+        $setting_leave->special_roles()->sync($business_owner_role_id, []);
+
+
+        $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
+        $setting_leave->paid_leave_employment_statuses()->sync($default_paid_leave_employment_statuses, []);
+
+        $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
+        $setting_leave->unpaid_leave_employment_statuses()->sync($default_unpaid_leave_employment_statuses, []);
+    }
+
+    // end load setting leave
+    }
+
+
+    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1)
+    {
 
 
         Department::create([
@@ -360,168 +590,78 @@ trait BusinessUtil
             "business_id" => $business_id,
             "created_by" => $owner_id
         ]);
-
-
         $attached_defaults = [];
         $defaultRoles = Role::where([
             "business_id" => NULL,
             "is_default" => 1,
             "is_default_for_business" => 1,
             "guard_name" => "api",
-          ])->get();
+        ])->get();
 
-          foreach($defaultRoles as $defaultRole) {
-              $insertableData = [
+        foreach ($defaultRoles as $defaultRole) {
+            $insertableData = [
                 'name'  => ($defaultRole->name . "#" . $business_id),
                 "is_default" => 1,
                 "business_id" => $business_id,
                 "is_default_for_business" => 0,
                 "guard_name" => "api",
-              ];
-           $role  = Role::create($insertableData);
-           $attached_defaults["roles"][$defaultRole->id] = $role->id;
+            ];
+            $role  = Role::create($insertableData);
+            $attached_defaults["roles"][$defaultRole->id] = $role->id;
 
-           $permissions = $defaultRole->permissions;
-           foreach ($permissions as $permission) {
-               if(!$role->hasPermissionTo($permission)){
-                   $role->givePermissionTo($permission);
-               }
-           }
-          }
-
-
+            $permissions = $defaultRole->permissions;
+            foreach ($permissions as $permission) {
+                if (!$role->hasPermissionTo($permission)) {
+                    $role->givePermissionTo($permission);
+                }
+            }
+        }
 
 
-        $defaultDesignations = Designation::where([
-            "business_id" => NULL,
-            "is_default" => 1,
-            "is_active" => 1
-          ])->get();
 
-          foreach($defaultDesignations as $defaultDesignation) {
-              $insertableData = [
-                'name'  => $defaultDesignation->name,
-                'description'  => $defaultDesignation->description,
-                "is_active" => 1,
-                "is_default" => 1,
-                "business_id" => $business_id,
-              ];
-           $designation  = Designation::create($insertableData);
-           $attached_defaults["designations"][$defaultDesignation->id] = $designation->id;
-          }
 
-          $defaultEmploymentStatuses = EmploymentStatus::where([
+
+
+       $this->loadDefaultSettingLeave($business_id);
+
+
+
+        // load setting attendance
+        $defaultSettingAttendances = SettingAttendance::where([
             "business_id" => NULL,
             "is_active" => 1,
             "is_default" => 1
-          ])->get();
+        ])->get();
 
-          foreach($defaultEmploymentStatuses as $defaultEmploymentStatus) {
-              $insertableData = [
-                'name'  => $defaultEmploymentStatus->name,
-                'color'  => $defaultEmploymentStatus->color,
-                'description'  => $defaultEmploymentStatus->description,
-                "is_active" => 1,
-                "is_default" => 1,
-                "business_id" => $business_id,
-              ];
-           $employment_status  = EmploymentStatus::create($insertableData);
-           $attached_defaults["employment_statuses"][$defaultEmploymentStatus->id] = $employment_status->id;
-          }
 
-// load setting leave
-          $defaultSettingLeaves = SettingLeave::where([
-            "business_id" => NULL,
-            "is_active" => 1,
-            "is_default" => 1
-          ])->get();
 
-          foreach($defaultSettingLeaves as $defaultSettingLeave) {
-              $insertableData = [
-                'start_month' => $defaultSettingLeave->start_month,
-                'approval_level' => $defaultSettingLeave->approval_level,
-                'allow_bypass' => $defaultSettingLeave->allow_bypass,
+        foreach ($defaultSettingAttendances as $defaultSettingAttendance) {
+            $insertableData = [
+                'punch_in_time_tolerance' => $defaultSettingAttendance->punch_in_time_tolerance,
+                'work_availability_definition' => $defaultSettingAttendance->work_availability_definition,
+                'punch_in_out_alert' => $defaultSettingAttendance->punch_in_out_alert,
+                'punch_in_out_interval' => $defaultSettingAttendance->punch_in_out_interval,
+                'alert_area' => $defaultSettingAttendance->alert_area,
+                'auto_approval' => $defaultSettingAttendance->auto_approval,
+
                 "created_by" => auth()->user()->id,
                 "is_active" => 1,
                 "is_default" => 0,
                 "business_id" => $business_id,
-              ];
+            ];
 
-           $setting_leave  = SettingLeave::create($insertableData);
-           $attached_defaults["setting_leaves"][$defaultSettingLeave->id] = $setting_leave->id;
-
-
-           $default_special_roles = $defaultSettingLeave->special_roles()->pluck("role_id");
-           $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
-            return $attached_defaults["roles"][$id];
-});
-           $setting_leave->special_roles()->sync($special_roles_for_business,[]);
+            $setting_attendance  = SettingAttendance::create($insertableData);
+            $attached_defaults["setting_attendances"][$defaultSettingAttendance->id] = $setting_attendance->id;
 
 
-    $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
-           $paid_leave_employment_statuses_for_business = $default_paid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
-            return $attached_defaults["employment_statuses"][$id];
-});
-           $setting_leave->paid_leave_employment_statuses()->sync($paid_leave_employment_statuses_for_business,[]);
+            $default_special_roles = $defaultSettingAttendance->special_roles()->pluck("role_id");
+            $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
+                return $attached_defaults["roles"][$id];
+            });
+            $setting_attendance->special_roles()->sync($special_roles_for_business, []);
+        }
 
-
-
-           $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
-           $unpaid_leave_employment_statuses_for_business = $default_unpaid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
-            return $attached_defaults["employment_statuses"][$id];
- });
-           $setting_leave->unpaid_leave_employment_statuses()->sync($unpaid_leave_employment_statuses_for_business,[]);
-
-
-
-
-          }
-
-// end load setting leave
-
-
-
-// load setting attendance
-$defaultSettingAttendances = SettingAttendance::where([
-    "business_id" => NULL,
-    "is_active" => 1,
-    "is_default" => 1
-  ])->get();
-
-
-
-  foreach($defaultSettingAttendances as $defaultSettingAttendance) {
-      $insertableData = [
-        'punch_in_time_tolerance' => $defaultSettingAttendance->punch_in_time_tolerance,
-        'work_availability_definition'=> $defaultSettingAttendance->work_availability_definition,
-        'punch_in_out_alert'=> $defaultSettingAttendance->punch_in_out_alert,
-        'punch_in_out_interval'=> $defaultSettingAttendance->punch_in_out_interval,
-        'alert_area'=> $defaultSettingAttendance->alert_area,
-        'auto_approval'=> $defaultSettingAttendance->auto_approval,
-
-        "created_by" => auth()->user()->id,
-        "is_active" => 1,
-        "is_default" => 0,
-        "business_id" => $business_id,
-      ];
-
-   $setting_attendance  = SettingAttendance::create($insertableData);
-   $attached_defaults["setting_attendances"][$defaultSettingAttendance->id] = $setting_attendance->id;
-
-
-   $default_special_roles = $defaultSettingAttendance->special_roles()->pluck("role_id");
-   $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
-    return $attached_defaults["roles"][$id];
-});
-   $setting_attendance->special_roles()->sync($special_roles_for_business,[]);
-
-
-
-
-
-  }
-
-// end load setting attendance
+        // end load setting attendance
 
 
 
@@ -530,7 +670,4 @@ $defaultSettingAttendances = SettingAttendance::where([
 
 
     }
-
-
-
 }

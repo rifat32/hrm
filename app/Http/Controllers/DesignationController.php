@@ -77,7 +77,7 @@ class DesignationController extends Controller
 
     public function createDesignation(DesignationCreateRequest $request)
     {
-        
+
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {

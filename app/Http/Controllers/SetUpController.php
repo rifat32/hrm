@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ActivityLog;
-
+use App\Models\Designation;
+use App\Models\EmploymentStatus;
 use App\Models\ErrorLog;
 
 use App\Models\User;
@@ -134,18 +135,14 @@ return "swagger generated";
 
             // }
         }
+
+
+
+
+
+
         $admin->assignRole("superadmin");
 
-
-        SettingLeave::create([
-            'start_month' => 1,
-            'approval_level' => "multiple",
-            'allow_bypass' => 1,
-          "business_id" => NULL,
-          "is_active" => 1,
-          "is_default" => 1,
-          "created_by" => $admin->id,
-        ]);
 
         $social_media_platforms = [
             [
@@ -182,17 +179,159 @@ return "swagger generated";
         ];
 
         // Iterate through the array and create records
-        foreach ($social_media_platforms as $platform) {
+        foreach ($social_media_platforms as $data) {
             SocialSite::create([
-                'name' => $platform['name'],
-                'icon' => $platform['icon'],
-                'link' => $platform['link'],
+                'name' => $data['name'],
+                'icon' => $data['icon'],
+                'link' => $data['link'],
                 "is_active" => 1,
                 "is_default" => 1,
                 "business_id" => NULL,
                 "created_by" => $admin->id
             ]);
         }
+        $default_designations = [
+            [
+                'name' => "CEO",
+                'description' => "Chief Executive Officer",
+            ],
+            [
+                'name' => "HR Manager",
+                'description' => "Human Resources Manager",
+            ],
+            [
+                'name' => "Finance Manager",
+                'description' => "Finance Manager",
+            ],
+            [
+                'name' => "Sales Representative",
+                'description' => "Sales Representative",
+            ],
+            [
+                'name' => "IT Specialist",
+                'description' => "Information Technology Specialist",
+            ],
+            [
+                'name' => "Marketing Coordinator",
+                'description' => "Marketing Coordinator",
+            ],
+            [
+                'name' => "Customer Service Representative",
+                'description' => "Customer Service Representative",
+            ],
+        ];
+
+        // Iterate through the array and create records
+        foreach ($default_designations as $data) {
+            Designation::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
+        $default_employment_statuses = [
+            [
+                'name' => "Full-Time",
+                'color' => "green",
+                'description' => "Employee works the standard number of hours for a full-time position.",
+            ],
+            [
+                'name' => "Part-Time",
+                'color' => "blue",
+                'description' => "Employee works fewer hours than a full-time position.",
+            ],
+            [
+                'name' => "Contractor",
+                'color' => "orange",
+                'description' => "Employee is hired on a contractual basis for a specific project or duration.",
+            ],
+            [
+                'name' => "Temporary",
+                'color' => "yellow",
+                'description' => "Employee is hired for a temporary period, often to cover a specific absence or workload.",
+            ],
+            [
+                'name' => "Intern",
+                'color' => "purple",
+                'description' => "Employee is engaged in a temporary position for gaining practical work experience.",
+            ],
+        ];
+
+        // Iterate through the array and create records
+        foreach ($default_employment_statuses as $data) {
+            EmploymentStatus::create([
+                'name' => $data['name'],
+                'color' => $data["color"],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+        $default_setting_leave_types = [
+            [
+                'name' => "Vacation Leave",
+                'type' => "paid",
+                'amount' => 80,
+            ],
+            [
+                'name' => "Sick Leave",
+                'type' => "paid",
+                'amount' => 40,
+            ],
+            [
+                'name' => "Personal Leave",
+                'type' => "unpaid",
+                'amount' => 30,
+            ],
+            [
+                'name' => "Maternity Leave",
+                'type' => "paid",
+                'amount' => 120,
+            ],
+            [
+                'name' => "Paternity Leave",
+                'type' => "paid",
+                'amount' => 80,
+            ],
+            [
+                'name' => "Bereavement Leave",
+                'type' => "paid",
+                'amount' => 24,
+            ],
+        ];
+
+        // Iterate through the array and create records
+        foreach ($default_setting_leave_types as $data) {
+            SettingLeaveType::create([
+                'name' => $data['name'],
+                'type' => $data["type"],
+                'amount' => $data['amount'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
+
+
+
+        SettingLeave::create([
+            'start_month' => 1,
+            'approval_level' => "multiple",
+            'allow_bypass' => 1,
+          "business_id" => NULL,
+          "is_active" => 1,
+          "is_default" => 1,
+          "created_by" => $admin->id,
+        ]);
+
 
         return "You are done with setup";
     }
