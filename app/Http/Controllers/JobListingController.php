@@ -92,14 +92,9 @@ class JobListingController extends Controller
 
                 $request_data = $request->validated();
 
-                if (!empty($request_data["department_id"])) {
-                    $check_department = $this->checkDepartment($request_data["department_id"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
-                }
+
+
+
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
@@ -198,6 +193,7 @@ class JobListingController extends Controller
                     "id" => $request_data["id"],
                     "business_id" => $business_id
                 ];
+
                 // $job_listing_prev = JobListing::where($job_listing_query_params)
                 //     ->first();
                 // if (!$job_listing_prev) {
@@ -227,11 +223,13 @@ class JobListingController extends Controller
                     // ->with("somthing")
 
                     ->first();
+
                 if (!$job_listing) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
+
 
                 return response($job_listing, 201);
             });

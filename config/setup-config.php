@@ -81,6 +81,7 @@ return [
 "setting_leave_type_update",
 "setting_leave_type_view",
 "setting_leave_type_delete",
+
 "setting_leave_create",
 
 "setting_attendance_create",
@@ -124,6 +125,13 @@ return [
 "social_site_update",
 "social_site_view",
 "social_site_delete",
+
+
+"setting_leave_create",
+
+"setting_attendance_create",
+
+"setting_payroll_create",
 
 
             ],

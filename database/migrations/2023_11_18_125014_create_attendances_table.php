@@ -43,7 +43,7 @@ class CreateAttendancesTable extends Migration
             $table->enum('break_type', ['paid', 'unpaid']);
             $table->integer('break_hours');
 
-            $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending");
+            $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
 
 
 

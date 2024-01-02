@@ -39,7 +39,6 @@ class JobListingCreateRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $exists = DB::table('job_platforms')
                         ->where('id', $value)
-                        ->where('job_platforms.business_id', '=', auth()->user()->business_id)
                         ->exists();
 
                     if (!$exists) {
