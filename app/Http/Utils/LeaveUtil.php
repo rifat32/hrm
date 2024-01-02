@@ -45,21 +45,10 @@ trait LeaveUtil
 
             foreach ($leave_approvals as $single_leave_approval) {
                 $user = User::where([
-                    "id" =>  $single_leave_approval->created_by
+                    // "id" =>  $single_leave_approval->created_by
+                    "id" =>  auth()->user()->id
                 ])
                     ->first();
-
-
-                $user_business_id = auth()->user()->business_id;
-
-                $role_names = $user->getRoleNames()->toArray();
-
-                $modified_role_names = [];
-                foreach ($role_names as $roleName) {
-                    $modified_role_names[] = $roleName . '#' . $user_business_id;
-                }
-
-                $combined_role_names = array_merge($role_names, $modified_role_names);
 
 
 
@@ -75,9 +64,15 @@ trait LeaveUtil
                     break;
                 }
 
-                $roles =  Role::whereIn("name", $combined_role_names)->get();
+                $role_names = $user->getRoleNames()->toArray();
+                // $modified_role_names = [];
+                // foreach ($role_names as $roleName) {
+                //     $modified_role_names[] = $roleName . '#' . $user->business_id;
+                // }
 
+                // $combined_role_names = array_merge($role_names, $modified_role_names);
 
+                $roles =  Role::whereIn("name", $role_names)->get();
                 foreach ($roles as $role) {
 
                     $special_role = $setting_leave->special_roles()->where(["role_id" => $role->id])->first();

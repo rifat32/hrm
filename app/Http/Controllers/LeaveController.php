@@ -207,7 +207,7 @@ class LeaveController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["status"] = "pending";
+                $request_data["status"] = "pending_approval";
 
 
 
@@ -304,10 +304,9 @@ class LeaveController extends Controller
                             "business_id" => $request->user()->business_id
                         ])
                         ->where('holidays.start_date', "<=", $leave_date)
-
                         ->where('holidays.end_date', ">=", $leave_date)
-
                         ->first();
+
 
                         $previous_leave =  Leave::where([
                             "employee_id" => $request_data["employee_id"]
@@ -1899,7 +1898,6 @@ return $employee;
             //  })->count();
 
             $data["data_highlights"]["leave_approved_hours"] = $leaves->filter(function ($leave) {
-
                 return ($leave->status == "approved");
             })->sum('total_leave_hours');
 

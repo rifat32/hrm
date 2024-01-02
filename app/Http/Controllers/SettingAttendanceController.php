@@ -6,7 +6,9 @@ use App\Http\Requests\SettingAttendanceCreateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Role;
 use App\Models\SettingAttendance;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -132,8 +134,45 @@ class SettingAttendanceController extends Controller
                     $request_data
                 );
                 }
+
+
+
+
+
                  $setting_attendance->special_users()->sync($request_data['special_users'],[]);
                  $setting_attendance->special_roles()->sync($request_data['special_roles'],[]);
+
+                 $permission = 'attendance_approve';
+
+                 foreach($request_data['special_users'] as $special_user_id){
+                    $special_user = User::where([
+                        "id" => $special_user_id
+                    ])->first();
+                    if(!$special_user) {
+                          throw new Exception("no special user found");
+                    }
+                    if (!$special_user->hasPermissionTo($permission)) {
+                        $special_user->givePermissionTo($permission);
+                    }
+                 }
+
+                 foreach($request_data['special_roles'] as $special_role_id){
+                    $special_role = Role::where([
+                        "id" => $special_role_id
+                    ])->first();
+                    if(!$special_role) {
+                          throw new Exception("no special role found");
+                    }
+
+                 if (!$special_role->hasPermissionTo($permission)) {
+    $special_role->givePermissionTo($permission);
+}
+                 }
+
+
+
+
+
 
 
                 return response($setting_attendance, 201);

@@ -79,12 +79,12 @@ class SettingAttendanceCreateRequest extends FormRequest
                     if (empty(auth()->user()->business_id)) {
                         if (!(empty($role->business_id) || $role->is_default == 1)) {
                             // $fail("$attribute is invalid.");
-                            $fail("User belongs to another business.");
+                            $fail("Role belongs to another business.");
                         }
                     } else {
                         if ($role->business_id != auth()->user()->business_id) {
                             // $fail("$attribute is invalid.");
-                            $fail("User belongs to another business.");
+                            $fail("Role belongs to another business.");
                         }
                     }
                 },

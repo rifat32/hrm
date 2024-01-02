@@ -27,6 +27,7 @@ class Attendance extends Model
         "total_paid_hours",
         "regular_work_hours",
 
+        "status",
 
 
 

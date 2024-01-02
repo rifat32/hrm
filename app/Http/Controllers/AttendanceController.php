@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AttendanceApproveRequest;
 use App\Http\Requests\AttendanceCreateRequest;
 use App\Http\Requests\AttendanceMultipleCreateRequest;
 use App\Http\Requests\AttendanceUpdateRequest;
 use App\Http\Requests\AttendanceWeeklyCreateRequest;
+use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\Holiday;
+use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\User;
 use App\Models\WorkShift;
@@ -107,7 +110,7 @@ class AttendanceController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-
+                $request_data["status"] = "pending_approval";
 
 
 
@@ -118,6 +121,11 @@ class AttendanceController extends Controller
                     if (!$setting_attendance) {
                         return response()->json(["message" => "Please define attendance setting first"], 400);
                     }
+                if(!isset($setting_attendance->auto_approval)) {
+                    if($setting_attendance->auto_approval) {
+                        $request_data["status"] = "approved";
+                    }
+                }
                     $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                         $query->where('users.id', $request_data["employee_id"]);
                     })->first();
@@ -362,6 +370,7 @@ class AttendanceController extends Controller
 
 
                 $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $work_shift, $setting_attendance) {
+
                     $day_number = Carbon::parse($item["in_date"])->dayOfWeek;
                     $work_shift_details =  $work_shift->details()->where([
                         "day" => $day_number
@@ -406,8 +415,13 @@ class AttendanceController extends Controller
                     $work_hours_delta = 0;
                     $total_paid_hours = 0;
                     $regular_work_hours = 0;
+                    $status = "pending_approval";
 
-
+                    if(!isset($setting_attendance->auto_approval)) {
+                        if($setting_attendance->auto_approval) {
+                            $status = "approved";
+                        }
+                    }
 
                     if(!empty($item["in_time"]) && !empty($item["out_time"])) {
                         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -480,6 +494,7 @@ class AttendanceController extends Controller
                         "break_hours" => $work_shift->break_hours,
                         "total_paid_hours" => $total_paid_hours,
                         "regular_work_hours" => $regular_work_hours,
+                        "status" => $status
                     ];
                 });
 
@@ -598,12 +613,7 @@ class AttendanceController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
-                $check_employee = $this->checkUser($request_data["employee_id"]);
-                if (!$check_employee["ok"]) {
-                    return response()->json([
-                        "message" => $check_employee["message"]
-                    ], $check_employee["status"]);
-                }
+
 
 
                 $attendance_query_params = [
@@ -770,6 +780,143 @@ class AttendanceController extends Controller
         }
     }
 
+       /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/attendances/approve",
+     *      operationId="approveAttendance",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to approve attendances ",
+     *      description="This method is to approve attendances",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+      *      @OA\Property(property="attendance_id", type="number", format="number", example="1"),
+     *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1")
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function approveAttendance(AttendanceApproveRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo("attendance_approve")) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+
+                 $attendance_query_params = [
+                     "id" => $request_data["attendance_id"],
+                     "business_id" => $business_id
+                 ];
+                 $attendance = Attendance::where($attendance_query_params)->first();
+                 if (!$attendance) {
+                    return response()->json([
+                        "message" => "something went wrong."
+                    ], 500);
+                }
+
+                $setting_attendance = SettingAttendance::where([
+                    "business_id" => auth()->user()->business_id
+                ])
+                ->first();
+                if (!$setting_attendance) {
+                    return response()->json(["message" => "Please define attendance setting first"], 400);
+                }
+
+                $user = User::where([
+                    // "id" =>  $single_leave_approval->created_by
+                    "id" =>  auth()->user()->id
+                ])
+                    ->first();
+
+
+
+
+                $special_user = $setting_attendance->special_users()->where(["user_id" => $user->id])->first();
+                if ($special_user) {
+                    if($request_data["is_approved"]) {
+                        $attendance->status = "approved";
+                    }else {
+                        $attendance->status = "rejected";
+                    }
+
+                }
+
+                $role_names = $user->getRoleNames()->toArray();
+
+
+                $roles =  Role::whereIn("name", $role_names)->get();
+                foreach ($roles as $role) {
+                    $special_role = $setting_attendance->special_roles()->where(["role_id" => $role->id])->first();
+                    if ($special_role) {
+                        if($request_data["is_approved"]) {
+                            $attendance->status = "approved";
+                        }else {
+                            $attendance->status = "rejected";
+                        }
+                        break ;
+                    }
+                }
+
+                $attendance->save();
+
+                return response($attendance, 200);
+
+
+
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

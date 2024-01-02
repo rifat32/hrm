@@ -268,7 +268,8 @@ return [
 
                 "setting_attendance_create",
 
-                "attendance_create",
+"attendance_create",
+"attendance_approve",
 "attendance_update",
 "attendance_view",
 "attendance_delete",
@@ -408,6 +409,7 @@ return [
 "setting_attendance_create",
 
 "attendance_create",
+"attendance_approve",
 "attendance_update",
 "attendance_view",
 "attendance_delete",
@@ -548,6 +550,7 @@ return [
 
 "attendance_create",
 "attendance_update",
+"attendance_approve",
 "attendance_view",
 "attendance_delete",
 
@@ -752,6 +755,7 @@ return [
 
 "attendance_create",
 "attendance_update",
+"attendance_approve",
 "attendance_view",
 "attendance_delete",
 
@@ -941,6 +945,7 @@ return [
 
         "attendance_create" => "Can create attendance",
         "attendance_update" => "Can update attendance",
+        "attendance_approve" => "",
         "attendance_view" => "Can view attendance",
         "attendance_delete" => "Can delete attendance",
 
@@ -1141,6 +1146,7 @@ return [
 
         "candidate_create" => "create",
         "candidate_update" => "update",
+        "attendance_approve" => "approve",
         "candidate_view" => "view",
         "candidate_delete" => "delete",
 
@@ -1253,6 +1259,7 @@ return [
                 "employee_address_history_update",
                 "employee_address_history_view",
                 "employee_address_history_delete",
+
             ],
         ],
 
@@ -1616,6 +1623,7 @@ return [
 
                 "attendance_create",
                 "attendance_update",
+                "attendance_approve",
                 "attendance_view",
                 "attendance_delete",
 
