@@ -92,8 +92,19 @@ class SettingAttendanceController extends Controller
                 }
 
                 $request_data = $request->validated();
-                $request_data["created_by"] = $request->user()->id;
+
                 $request_data["is_active"] = 1;
+                $request_data["is_default"] = 0;
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
+
+                if (empty($request->user()->business_id)) {
+
+                    $request_data["business_id"] = NULL;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
+                }
 
                 if(!empty($request_data["alert_area"])){
                     $request_data["alert_area"] = json_encode($request_data["alert_area"]);
@@ -102,30 +113,18 @@ class SettingAttendanceController extends Controller
 
                 if (empty($request->user()->business_id)) {
 
-                $request_data["business_id"] = NULL;
-                $request_data["is_default"] = 1;
-
-                $setting_attendance  =  SettingAttendance::updateOrCreate([
-
-                    "business_id" => $request_data["business_id"],
-
-                    "is_default" => $request_data["is_default"]
-
-                ],
-             $request_data
-
-
-
-            );
-
+                    $check_data =     [
+                        "business_id" => $request_data["business_id"],
+                        "is_default" => $request_data["is_default"]
+               ];
+                $setting_attendance  =  SettingAttendance::updateOrCreate($check_data,$request_data);
 
 
                 } else {
 
 
 
-                    $request_data["business_id"] = $request->user()->business_id;
-                    $request_data["is_default"] = 0;
+
                     $setting_attendance =     SettingAttendance::updateOrCreate([
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]
@@ -245,13 +244,26 @@ class SettingAttendanceController extends Controller
 
              $setting_attendance = SettingAttendance::with("special_users","special_roles")
              ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                 return $query->where('setting_attendances.business_id', NULL)
-                              ->where('setting_attendances.is_default', 1);
-             })
-             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                 return $query->where('setting_attendances.business_id', $request->user()->business_id)
-                 ->where('setting_attendances.is_default', 0);
-             })
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('setting_attendances.business_id', NULL)
+                        ->where('setting_attendances.is_default', 1)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('setting_attendances.is_active', intval($request->is_active));
+                        });
+                } else {
+                    return   $query->where('setting_attendances.business_id', NULL)
+                    ->where('setting_attendances.is_default', 0)
+                    ->where('setting_attendances.created_by', auth()->user()->id);
+                }
+            })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                 return   $query->where('setting_attendances.business_id', auth()->user()->business_id)
+                    ->where('setting_attendances.is_default', 0);
+
+
+                })
+
+
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;

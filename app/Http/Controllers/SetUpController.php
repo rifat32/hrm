@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use App\Models\Role;
+use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
 use App\Models\SocialSite;
@@ -331,6 +332,22 @@ return "swagger generated";
           "is_default" => 1,
           "created_by" => $admin->id,
         ]);
+
+        SettingAttendance::create([
+            'punch_in_time_tolerance' => 0.25,
+            'work_availability_definition' => 80,
+            'punch_in_out_alert' => 0,
+            'punch_in_out_interval' => 0.5,
+            'alert_area' => json_encode(["web","system"]),
+            'auto_approval' => false,
+
+            "business_id" => NULL,
+            "is_active" => 1,
+            "is_default" => 1,
+            "created_by" => $admin->id,
+        ]);
+
+
 
 
         return "You are done with setup";

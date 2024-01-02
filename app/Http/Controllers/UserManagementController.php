@@ -475,6 +475,7 @@ class UserManagementController extends Controller
 
 
             $this->loadDefaultSettingLeave($user->business_id);
+            $this->loadDefaultAttendance($user->business_id);
 
 
 
