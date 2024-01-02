@@ -630,9 +630,7 @@ Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "cr
 Route::post('/v1.0/attendances', [AttendanceController::class, "createAttendance"]);
 Route::post('/v1.0/attendances/multiple', [AttendanceController::class, "createMultipleAttendance"]);
 Route::put('/v1.0/attendances', [AttendanceController::class, "updateAttendance"]);
-
 Route::put('/v1.0/attendances/approve', [AttendanceController::class, "approveAttendance"]);
-
 Route::get('/v1.0/attendances', [AttendanceController::class, "getAttendances"]);
 Route::get('/v2.0/attendances', [AttendanceController::class, "getAttendancesV2"]);
 Route::get('/v3.0/attendances', [AttendanceController::class, "getAttendancesV3"]);

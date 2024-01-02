@@ -785,7 +785,7 @@ class AttendanceController extends Controller
      * @OA\Put(
      *      path="/v1.0/attendances/approve",
      *      operationId="approveAttendance",
-     *      tags={"leaves"},
+     *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -1400,8 +1400,8 @@ class AttendanceController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get leaves  ",
-     *      description="This method is to get leaves ",
+     *      summary="This method is to get attendances  ",
+     *      description="This method is to get attendances ",
      *
 
      *      @OA\Response(
@@ -1443,7 +1443,7 @@ class AttendanceController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+            if (!$request->user()->hasPermissionTo('attendance_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
