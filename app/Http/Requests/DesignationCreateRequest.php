@@ -25,7 +25,7 @@ class DesignationCreateRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'name' => 'required|string',
+          
             'description' => 'nullable|string',
             'name' => [
                 "required",

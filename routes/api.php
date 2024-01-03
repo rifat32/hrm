@@ -29,6 +29,7 @@ use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\JobPlatformController;
+use App\Http\Controllers\JobTypeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NotificationController;
@@ -531,6 +532,21 @@ Route::put('/v1.0/designations/toggle-active', [DesignationController::class, "t
 Route::get('/v1.0/designations', [DesignationController::class, "getDesignations"]);
 Route::get('/v1.0/designations/{id}', [DesignationController::class, "getDesignationById"]);
 Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "deleteDesignationsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end designation management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// designation  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/job-types', [JobTypeController::class, "createJobType"]);
+Route::put('/v1.0/job-types', [JobTypeController::class, "updateJobType"]);
+Route::put('/v1.0/job-types/toggle-active', [JobTypeController::class, "toggleActiveJobType"]);
+Route::get('/v1.0/job-types', [JobTypeController::class, "getJobTypes"]);
+Route::get('/v1.0/job-types/{id}', [JobTypeController::class, "getJobTypeById"]);
+Route::delete('/v1.0/job-types/{ids}', [JobTypeController::class, "deleteJobTypesByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end designation management section

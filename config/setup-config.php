@@ -72,6 +72,12 @@ return [
 "designation_view",
 "designation_delete",
 
+"job_type_create",
+"job_type_update",
+"job_type_view",
+"job_type_delete",
+
+
 "employment_status_create",
 "employment_status_update",
 "employment_status_view",
@@ -108,6 +114,11 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+                "job_type_create",
+"job_type_update",
+"job_type_view",
+"job_type_delete",
 
                 "business_create",
                 "business_update",
@@ -246,6 +257,11 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+                "job_type_create",
+"job_type_update",
+"job_type_view",
+"job_type_delete",
 
 
 
@@ -394,6 +410,11 @@ return [
                 "designation_view",
                 "designation_delete",
 
+                "job_type_create",
+"job_type_update",
+"job_type_view",
+"job_type_delete",
+
                 "employment_status_create",
                 "employment_status_update",
                 "employment_status_view",
@@ -536,6 +557,11 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+                "job_type_create",
+"job_type_update",
+"job_type_view",
+"job_type_delete",
 
                 "employment_status_create",
                 "employment_status_update",
@@ -697,7 +723,7 @@ return [
        "job_listing_view",
        "job_listing_delete",
 
-       "job_platform_create",
+"job_platform_create",
 "job_platform_update",
 "job_platform_view",
 "job_platform_delete",
@@ -743,6 +769,11 @@ return [
        "designation_update",
        "designation_view",
        "designation_delete",
+
+       "job_type_create",
+"job_type_update",
+"job_type_view",
+"job_type_delete",
 
 
 
@@ -929,6 +960,11 @@ return [
         "designation_update" => "Can update designation",
         "designation_view" => "Can view designation",
         "designation_delete" => "Can delete designation",
+
+        "job_type_create" => "",
+"job_type_update" => "",
+"job_type_view" => "",
+"job_type_delete" => "",
 
         "employment_status_create" => "Can create employment status",
         "employment_status_update" => "Can update employment status",
@@ -1140,6 +1176,13 @@ return [
         "designation_update" => "update",
         "designation_view" => "view",
         "designation_delete" => "delete",
+
+        "job_type_create" => "create",
+        "job_type_update" => "update",
+        "job_type_view" => "view",
+        "job_type_delete" => "delete",
+
+
 
         "employment_status_create" => "create",
         "employment_status_update" => "update",
@@ -1541,12 +1584,20 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
-
-
-
-
             ],
         ],
+
+        [
+            "header" => "job_type",
+            "permissions" => [
+                "job_type_create",
+                "job_type_update",
+                "job_type_view",
+                "job_type_delete",
+            ],
+        ],
+
+
 
         [
             "header" => "employment_status",
