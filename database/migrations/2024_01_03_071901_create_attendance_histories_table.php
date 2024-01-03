@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAttendancesTable extends Migration
+class CreateAttendanceHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,23 @@ class CreateAttendancesTable extends Migration
      */
     public function up()
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('attendance_histories', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger("attendance_id")->nullable();
+            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('set null');
+            $table->unsignedBigInteger("actor_id")->nullable();
+            $table->foreign('actor_id')->references('id')->on('users')->onDelete('set null');
+            $table->string('action');
+            $table->date('attendance_created_at');
+            $table->date('attendance_updated_at');
+
+
             $table->text('note')->nullable();
             $table->string('in_geolocation')->nullable();
             $table->string('out_geolocation')->nullable();
+
+
+
 
             $table->unsignedBigInteger("employee_id");
             $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
@@ -63,9 +75,6 @@ class CreateAttendancesTable extends Migration
                 ->references('id')
                 ->on('users')
                 ->onDelete('set null');
-            
-                
-
             $table->timestamps();
         });
     }
@@ -77,6 +86,6 @@ class CreateAttendancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('attendance_histories');
     }
 }

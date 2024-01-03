@@ -12,6 +12,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
+use App\Models\AttendanceHistory;
 use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Role;
@@ -114,70 +115,70 @@ class AttendanceController extends Controller
 
 
 
-                    $setting_attendance = SettingAttendance::where([
-                        "business_id" => auth()->user()->business_id
-                    ])
+                $setting_attendance = SettingAttendance::where([
+                    "business_id" => auth()->user()->business_id
+                ])
                     ->first();
-                    if (!$setting_attendance) {
-                        return response()->json(["message" => "Please define attendance setting first"], 400);
-                    }
-                if(!isset($setting_attendance->auto_approval)) {
-                    if($setting_attendance->auto_approval) {
+                if (!$setting_attendance) {
+                    return response()->json(["message" => "Please define attendance setting first"], 400);
+                }
+                if (!isset($setting_attendance->auto_approval)) {
+                    if ($setting_attendance->auto_approval) {
                         $request_data["status"] = "approved";
                     }
                 }
-                    $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                        $query->where('users.id', $request_data["employee_id"]);
-                    })->first();
-                    if (!$work_shift) {
-                        return response()->json(["message" => "Please define workshift first"], 400);
-                    }
+                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                    $query->where('users.id', $request_data["employee_id"]);
+                })->first();
+                if (!$work_shift) {
+                    return response()->json(["message" => "Please define workshift first"], 400);
+                }
 
-                    $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
-                        "day" => $day_number
-                    ])
-                        ->first();
-                    if (!$work_shift_details) {
+                $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
+                $work_shift_details =  $work_shift->details()->where([
+                    "day" => $day_number
+                ])
+                    ->first();
+                if (!$work_shift_details) {
+                    $error =  [
+                        "message" => ("No work shift details found  day" . $day_number),
+                    ];
+                    throw new Exception(json_encode($error), 400);
+                }
+                if ($work_shift_details->is_weekend) {
+                    $error =  [
+                        "message" => ("there is a weekend on date " . $request_data["in_date"]),
+                    ];
+                    throw new Exception(json_encode($error), 400);
+                }
+                $holiday =   Holiday::where([
+                    "business_id" => auth()->user()->business_id
+                ])
+                    ->where('holidays.start_date', "<=", $request_data["in_date"])
+                    ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                    ->first();
+
+                if ($holiday) {
+                    if ($holiday->is_active) {
                         $error =  [
-                            "message" => ("No work shift details found  day" . $day_number),
+                            "message" => ("there is a holiday on date" . $request_data["in_date"]),
                         ];
                         throw new Exception(json_encode($error), 400);
                     }
-                    if ($work_shift_details->is_weekend) {
-                        $error =  [
-                            "message" => ("there is a weekend on date " . $request_data["in_date"]),
-                        ];
-                        throw new Exception(json_encode($error), 400);
-                    }
-                    $holiday =   Holiday::where([
-                        "business_id" => auth()->user()->business_id
-                    ])
-                        ->where('holidays.start_date', "<=", $request_data["in_date"])
-                        ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
-                        ->first();
-
-                    if ($holiday) {
-                        if ($holiday->is_active) {
-                            $error =  [
-                                "message" => ("there is a holiday on date" . $request_data["in_date"]),
-                            ];
-                            throw new Exception(json_encode($error), 400);
-                        }
-                    }
+                }
 
 
 
 
-                    $request_data["behavior"] = "absent";
-                    $request_data["capacity_hours"] = 0;
-                    $request_data["work_hours_delta"] = 0;
-                    $request_data["total_paid_hours"] = 0;
-                    $request_data["regular_work_hours"] = 0;
-                    $request_data["break_type"] = $work_shift->break_type;
-                    $request_data["break_hours"] = $work_shift->break_hours;
+                $request_data["behavior"] = "absent";
+                $request_data["capacity_hours"] = 0;
+                $request_data["work_hours_delta"] = 0;
+                $request_data["total_paid_hours"] = 0;
+                $request_data["regular_work_hours"] = 0;
+                $request_data["break_type"] = $work_shift->break_type;
+                $request_data["break_hours"] = $work_shift->break_hours;
 
-                    if(!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
+                if (!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
 
 
                     $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -199,11 +200,10 @@ class AttendanceController extends Controller
 
 
 
-                    if(empty($setting_attendance->punch_in_time_tolerance)) {
+                    if (empty($setting_attendance->punch_in_time_tolerance)) {
                         $behavior = "regular";
-                    }
-                    else {
-                        if($tolerance_time > $setting_attendance->punch_in_time_tolerance){
+                    } else {
+                        if ($tolerance_time > $setting_attendance->punch_in_time_tolerance) {
                             $behavior = "late";
                         } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
                             $behavior = "early";
@@ -255,6 +255,14 @@ class AttendanceController extends Controller
 
                 $attendance =  Attendance::create($request_data);
 
+                $attendance_history_data = $attendance->toArray();
+                $attendance_history_data['attendance_id'] = $attendance->id;
+                $attendance_history_data['actor_id'] = auth()->user()->id;
+                $attendance_history_data['action'] = "create";
+                $attendance_history_data['attendance_created_at'] = $attendance->created_at;
+                $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
+
+                $attendance_history = AttendanceHistory::create($attendance_history_data);
 
 
 
@@ -355,7 +363,7 @@ class AttendanceController extends Controller
                 $setting_attendance = SettingAttendance::where([
                     "business_id" => auth()->user()->business_id
                 ])
-                ->first();
+                    ->first();
                 if (!$setting_attendance) {
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
@@ -417,13 +425,13 @@ class AttendanceController extends Controller
                     $regular_work_hours = 0;
                     $status = "pending_approval";
 
-                    if(!isset($setting_attendance->auto_approval)) {
-                        if($setting_attendance->auto_approval) {
+                    if (!isset($setting_attendance->auto_approval)) {
+                        if ($setting_attendance->auto_approval) {
                             $status = "approved";
                         }
                     }
 
-                    if(!empty($item["in_time"]) && !empty($item["out_time"])) {
+                    if (!empty($item["in_time"]) && !empty($item["out_time"])) {
                         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
                         $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                         $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
@@ -441,11 +449,10 @@ class AttendanceController extends Controller
                         $behavior = "absent";
 
 
-                        if(empty($setting_attendance->punch_in_time_tolerance)) {
+                        if (empty($setting_attendance->punch_in_time_tolerance)) {
                             $behavior = "regular";
-                        }
-                        else {
-                            if($tolerance_time > $setting_attendance->punch_in_time_tolerance){
+                        } else {
+                            if ($tolerance_time > $setting_attendance->punch_in_time_tolerance) {
                                 $behavior = "late";
                             } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
                                 $behavior = "early";
@@ -467,7 +474,6 @@ class AttendanceController extends Controller
                         } else {
                             $regular_work_hours = $total_paid_hours;
                         }
-
                     }
 
 
@@ -504,21 +510,34 @@ class AttendanceController extends Controller
                 ])
                     ->first();
 
-                    if(!$employee) {
-                         return response()->json([
-                            "message" => "someting_went_wrong"
-                         ]);
+                if (!$employee) {
+                    return response()->json([
+                        "message" => "someting_went_wrong"
+                    ]);
+                }
+
+
+
+                $created_attendances = $employee->attendances()->createMany($attendances_data);
+                if (!empty($created_attendances)) {
+                    $attendance_history_data = [];
+
+
+                    foreach ($created_attendances as $attendance) {
+                        $history_entry = [
+                            'attendance_id' => $attendance->id,
+                            'actor_id' => auth()->user()->id,
+                            'action' => 'create',
+                            'attendance_created_at' => $attendance->created_at,
+                            'attendance_updated_at' => $attendance->updated_at,
+                        ];
+
+                    $attendance_history_data[] = $history_entry + $attendance->toArray();
                     }
 
+                    $employee->attendance_histories()->createMany($attendance_history_data);
 
 
-                $success =   $employee->attendances()->createMany($attendances_data);
-
-                if ($success) {
-                    // Retrieve the created attendance records
-                    $created_attendances = Attendance::where('employee_id', $request_data["employee_id"])
-                        ->whereIn('in_date', $attendances_data->pluck('in_date'))
-                        ->get();
 
                     // Return the created attendance records in the response
                     return response(['attendances' => $created_attendances], 201);
@@ -526,7 +545,6 @@ class AttendanceController extends Controller
                     // Handle the case where records were not successfully created
                     return response(['error' => 'Failed to create attendance records'], 500);
                 }
-
 
 
                 return response([], 201);
@@ -631,7 +649,7 @@ class AttendanceController extends Controller
                 $setting_attendance = SettingAttendance::where([
                     "business_id" => auth()->user()->business_id
                 ])
-                ->first();
+                    ->first();
                 if (!$setting_attendance) {
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
@@ -684,60 +702,59 @@ class AttendanceController extends Controller
                 $request_data["break_type"] = $work_shift->break_type;
                 $request_data["break_hours"] = $work_shift->break_hours;
 
-                if(!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
+                if (!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
 
-                $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                    $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                    $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                    $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
 
 
-                $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
-                $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
-                $total_present_hours = $out_time->diffInHours($in_time);
+                    $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
+                    $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
+                    $total_present_hours = $out_time->diffInHours($in_time);
 
-                $tolerance_time = $in_time->diffInHours($work_shift_start_at);
+                    $tolerance_time = $in_time->diffInHours($work_shift_start_at);
 
-                $work_hours_delta = $total_present_hours - $capacity_hours;
+                    $work_hours_delta = $total_present_hours - $capacity_hours;
 
-                $total_paid_hours = $total_present_hours;
+                    $total_paid_hours = $total_present_hours;
 
-                $behavior = "absent";
+                    $behavior = "absent";
 
-                if(empty($setting_attendance->punch_in_time_tolerance)) {
-                    $behavior = "regular";
-                }
-                else {
-                    if($tolerance_time > $setting_attendance->punch_in_time_tolerance){
-                        $behavior = "late";
-                    } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
-                        $behavior = "early";
-                    } else {
+                    if (empty($setting_attendance->punch_in_time_tolerance)) {
                         $behavior = "regular";
+                    } else {
+                        if ($tolerance_time > $setting_attendance->punch_in_time_tolerance) {
+                            $behavior = "late";
+                        } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
+                            $behavior = "early";
+                        } else {
+                            $behavior = "regular";
+                        }
                     }
-                }
 
 
 
-                if ($request_data["does_break_taken"]) {
-                    if ($work_shift->break_type == 'unpaid') {
-                        $total_paid_hours -= $work_shift->break_hours;
+                    if ($request_data["does_break_taken"]) {
+                        if ($work_shift->break_type == 'unpaid') {
+                            $total_paid_hours -= $work_shift->break_hours;
+                        }
                     }
+
+
+                    if ($work_hours_delta > 0) {
+                        $regular_work_hours =  $total_paid_hours - $work_hours_delta;
+                    } else {
+                        $regular_work_hours = $total_paid_hours;
+                    }
+
+
+                    $request_data["behavior"] = $behavior;
+                    $request_data["capacity_hours"] = $capacity_hours;
+                    $request_data["work_hours_delta"] = $work_hours_delta;
+                    $request_data["total_paid_hours"] = $total_paid_hours;
+                    $request_data["regular_work_hours"] = $regular_work_hours;
                 }
-
-
-                if ($work_hours_delta > 0) {
-                    $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                }  else {
-                    $regular_work_hours = $total_paid_hours;
-                }
-
-
-                $request_data["behavior"] = $behavior;
-                $request_data["capacity_hours"] = $capacity_hours;
-                $request_data["work_hours_delta"] = $work_hours_delta;
-                $request_data["total_paid_hours"] = $total_paid_hours;
-                $request_data["regular_work_hours"] = $regular_work_hours;
-            }
 
                 $attendance  =  tap(Attendance::where($attendance_query_params))->update(
                     collect($request_data)->only([
@@ -772,6 +789,17 @@ class AttendanceController extends Controller
                     ], 500);
                 }
 
+
+
+                $attendance_history_data = $attendance->toArray();
+                $attendance_history_data['attendance_id'] = $attendance->id;
+                $attendance_history_data['actor_id'] = auth()->user()->id;
+                $attendance_history_data['action'] = "update";
+                $attendance_history_data['attendance_created_at'] = $attendance->created_at;
+                $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
+
+                $attendance_history = AttendanceHistory::create($attendance_history_data);
+
                 return response($attendance, 201);
             });
         } catch (Exception $e) {
@@ -780,7 +808,7 @@ class AttendanceController extends Controller
         }
     }
 
-       /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/attendances/approve",
@@ -795,7 +823,7 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-      *      @OA\Property(property="attendance_id", type="number", format="number", example="1"),
+     *      @OA\Property(property="attendance_id", type="number", format="number", example="1"),
      *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1")
      *
      *         ),
@@ -834,29 +862,29 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function approveAttendance(AttendanceApproveRequest $request)
-     {
+    public function approveAttendance(AttendanceApproveRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             return DB::transaction(function () use ($request) {
-                 if (!$request->user()->hasPermissionTo("attendance_approve")) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
-                 $business_id =  $request->user()->business_id;
-                 $request_data = $request->validated();
-
-
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo("attendance_approve")) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+                $business_id =  $request->user()->business_id;
+                $request_data = $request->validated();
 
 
-                 $attendance_query_params = [
-                     "id" => $request_data["attendance_id"],
-                     "business_id" => $business_id
-                 ];
-                 $attendance = Attendance::where($attendance_query_params)->first();
-                 if (!$attendance) {
+
+
+                $attendance_query_params = [
+                    "id" => $request_data["attendance_id"],
+                    "business_id" => $business_id
+                ];
+                $attendance = Attendance::where($attendance_query_params)->first();
+                if (!$attendance) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
@@ -865,7 +893,7 @@ class AttendanceController extends Controller
                 $setting_attendance = SettingAttendance::where([
                     "business_id" => auth()->user()->business_id
                 ])
-                ->first();
+                    ->first();
                 if (!$setting_attendance) {
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
@@ -881,12 +909,11 @@ class AttendanceController extends Controller
 
                 $special_user = $setting_attendance->special_users()->where(["user_id" => $user->id])->first();
                 if ($special_user) {
-                    if($request_data["is_approved"]) {
+                    if ($request_data["is_approved"]) {
                         $attendance->status = "approved";
-                    }else {
+                    } else {
                         $attendance->status = "rejected";
                     }
-
                 }
 
                 $role_names = $user->getRoleNames()->toArray();
@@ -896,27 +923,34 @@ class AttendanceController extends Controller
                 foreach ($roles as $role) {
                     $special_role = $setting_attendance->special_roles()->where(["role_id" => $role->id])->first();
                     if ($special_role) {
-                        if($request_data["is_approved"]) {
+                        if ($request_data["is_approved"]) {
                             $attendance->status = "approved";
-                        }else {
+                        } else {
                             $attendance->status = "rejected";
                         }
-                        break ;
+                        break;
                     }
                 }
 
                 $attendance->save();
 
+
+                $attendance_history_data = $attendance->toArray();
+                $attendance_history_data['attendance_id'] = $attendance->id;
+                $attendance_history_data['actor_id'] = auth()->user()->id;
+                $attendance_history_data['action'] = "approve";
+                $attendance_history_data['attendance_created_at'] = $attendance->created_at;
+                $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
+
+                $attendance_history = AttendanceHistory::create($attendance_history_data);
+
                 return response($attendance, 200);
-
-
-
-             });
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -1042,9 +1076,9 @@ class AttendanceController extends Controller
                     $query->select('departments.id', 'departments.name');
                 },
             ])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
 
                 ->where(
                     [
@@ -1058,9 +1092,9 @@ class AttendanceController extends Controller
                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
                     });
                 })
-                   ->when(!empty($request->employee_id), function ($query) use ($request) {
-                       return $query->where('employee_id', $request->employee_id);
-                   })
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                    return $query->where('employee_id', $request->employee_id);
+                })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('attendances.created_at', ">=", $request->start_date);
                 })
@@ -1198,7 +1232,7 @@ class AttendanceController extends Controller
             $setting_attendance = SettingAttendance::where([
                 "business_id" => auth()->user()->business_id
             ])
-            ->first();
+                ->first();
             if (!$setting_attendance) {
                 return response()->json(["message" => "Please define attendance setting first"], 400);
             }
@@ -1221,9 +1255,9 @@ class AttendanceController extends Controller
                         "attendances.business_id" => $business_id
                     ]
                 )
-                ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 })
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
                     return $query->where('attendances.employee_id', $request->employee_id);
                 })
@@ -1308,8 +1342,8 @@ class AttendanceController extends Controller
                 $data["data_highlights"]["total_work_availability_per_centum"] = ($total_available_hours / $data["data_highlights"]["total_leave_hours"]) * 100;
             }
 
-            if(!empty($setting_attendance->work_availability_definition)) {
-                if($data["data_highlights"]["total_work_availability_per_centum"] >= $setting_attendance->work_availability_definition) {
+            if (!empty($setting_attendance->work_availability_definition)) {
+                if ($data["data_highlights"]["total_work_availability_per_centum"] >= $setting_attendance->work_availability_definition) {
                     $data["data_highlights"]["work_availability"] = "good";
                 } else {
                     $data["data_highlights"]["work_availability"] = "bad";
@@ -1474,9 +1508,9 @@ class AttendanceController extends Controller
 
                 ]
             )
-            ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
                 ->whereHas("attendances", function ($q) use ($request) {
                     $q->whereNotNull("employee_id")
                         ->when(!empty($request->employee_id), function ($q) use ($request) {
@@ -1556,19 +1590,18 @@ class AttendanceController extends Controller
 
 
                     $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($employee, &$total_paid_hours) {
-                        $attendance = $employee->attendances->first(function ($attendance) use (&$date){
+                        $attendance = $employee->attendances->first(function ($attendance) use (&$date) {
 
                             $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
 
 
                             return $in_date == $date;
-
                         });
 
 
 
 
-                        if($attendance){
+                        if ($attendance) {
                             $total_paid_hours += $attendance->total_paid_hours;
                             return [
 
@@ -1579,9 +1612,6 @@ class AttendanceController extends Controller
                         }
 
                         return  null;
-
-
-
                     })->filter()->values();
 
                     $employee->total_paid_hours = $total_paid_hours;
@@ -1674,9 +1704,9 @@ class AttendanceController extends Controller
                 "id" => $id,
                 "business_id" => $business_id
             ])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
                 ->first();
             if (!$attendance) {
                 return response()->json([
@@ -1768,9 +1798,9 @@ class AttendanceController extends Controller
             $existingIds = Attendance::where([
                 "business_id" => $business_id
             ])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
@@ -1783,6 +1813,30 @@ class AttendanceController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
+
+            $attendances =  Attendance::whereIn("id",$existingIds)->get();
+
+            foreach ($attendances as $attendance) {
+                $history_entry = [
+                    'attendance_id' => $attendance->id,
+                    'actor_id' => auth()->user()->id,
+                    'action' => 'delete',
+                    'attendance_created_at' => $attendance->created_at,
+                    'attendance_updated_at' => $attendance->updated_at,
+                ];
+
+                $attendance_history_data = $history_entry + $attendance->toArray();
+                $attendance_history = AttendanceHistory::create($attendance_history_data);
+            }
+
+
+
+
+
+
+
+
+
             Attendance::destroy($existingIds);
 
 

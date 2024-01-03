@@ -650,6 +650,7 @@ Route::get('/v1.0/histories/user-passport-details', [HistoryDetailsController::c
 Route::get('/v1.0/histories/user-visa-details', [HistoryDetailsController::class, "getUserVisaDetailsHistory"]);
 Route::get('/v1.0/histories/user-sponsorship-details', [HistoryDetailsController::class, "getUserSponsorshipDetailsHistory"]);
 Route::get('/v1.0/histories/user-address-details', [HistoryDetailsController::class, "getUserAddressDetailsHistory"]);
+Route::get('/v1.0/histories/user-attendance-details', [HistoryDetailsController::class, "getUserAttendanceDetailsHistory"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end history details management section

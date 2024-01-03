@@ -789,6 +789,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\Announcement' => __DIR__ . '/../..' . '/app/Models/Announcement.php',
         'App\\Models\\AssetType' => __DIR__ . '/../..' . '/app/Models/AssetType.php',
         'App\\Models\\Attendance' => __DIR__ . '/../..' . '/app/Models/Attendance.php',
+        'App\\Models\\AttendanceHistory' => __DIR__ . '/../..' . '/app/Models/AttendanceHistory.php',
         'App\\Models\\Business' => __DIR__ . '/../..' . '/app/Models/Business.php',
         'App\\Models\\BusinessTier' => __DIR__ . '/../..' . '/app/Models/BusinessTier.php',
         'App\\Models\\Candidate' => __DIR__ . '/../..' . '/app/Models/Candidate.php',

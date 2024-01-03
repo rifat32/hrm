@@ -92,6 +92,10 @@ class User extends Authenticatable
         return $this->hasMany(Attendance::class, 'employee_id', 'id');
     }
 
+    public function attendance_histories() {
+        return $this->hasMany(AttendanceHistory::class, 'employee_id', 'id');
+    }
+
     public function sponsorship_details() {
         return $this->hasOne(EmployeeSponsorship::class, 'employee_id', 'id');
     }

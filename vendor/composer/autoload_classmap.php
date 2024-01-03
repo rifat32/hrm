@@ -174,6 +174,7 @@ return array(
     'App\\Models\\Announcement' => $baseDir . '/app/Models/Announcement.php',
     'App\\Models\\AssetType' => $baseDir . '/app/Models/AssetType.php',
     'App\\Models\\Attendance' => $baseDir . '/app/Models/Attendance.php',
+    'App\\Models\\AttendanceHistory' => $baseDir . '/app/Models/AttendanceHistory.php',
     'App\\Models\\Business' => $baseDir . '/app/Models/Business.php',
     'App\\Models\\BusinessTier' => $baseDir . '/app/Models/BusinessTier.php',
     'App\\Models\\Candidate' => $baseDir . '/app/Models/Candidate.php',
