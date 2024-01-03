@@ -207,7 +207,10 @@ return [
                 "job_listing_view",
                 "job_listing_delete",
 
-                "job_platform_view",
+// "job_platform_create",
+"job_platform_update",
+"job_platform_view",
+// "job_platform_delete",
 
                 "project_create",
                 "project_update",
@@ -354,7 +357,10 @@ return [
                 "job_listing_view",
                 "job_listing_delete",
 
+                // "job_platform_create",
+                "job_platform_update",
                 "job_platform_view",
+                // "job_platform_delete",
 
                 "project_create",
                 "project_update",
@@ -494,7 +500,10 @@ return [
                 "job_listing_view",
                 "job_listing_delete",
 
+                // "job_platform_create",
+                "job_platform_update",
                 "job_platform_view",
+                // "job_platform_delete",
 
                 "project_create",
                 "project_update",
@@ -688,6 +697,12 @@ return [
        "job_listing_view",
        "job_listing_delete",
 
+       "job_platform_create",
+"job_platform_update",
+"job_platform_view",
+"job_platform_delete",
+
+
        "project_create",
        "project_update",
        "project_view",
@@ -715,10 +730,7 @@ return [
        "announcement_delete",
 
 
-       "job_platform_create",
-       "job_platform_update",
-       "job_platform_view",
-       "job_platform_delete",
+
 
        "social_site_create",
 "social_site_update",

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\JobPlatformCreateRequest;
 use App\Http\Requests\JobPlatformUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\DisabledJobPlatform;
 use App\Models\JobListing;
 use App\Models\JobPlatform;
 use Carbon\Carbon;
@@ -85,14 +87,26 @@ class JobPlatformController extends Controller
                 }
 
                 $request_data = $request->validated();
-
-
-
-                $request_data["business_id"] = NULL;
                 $request_data["is_active"] = 1;
-                $request_data["is_default"] = 1;
-
+                $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
+
+                if (empty($request->user()->business_id)) {
+                    $request_data["business_id"] = NULL;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
+                }
+
+
+
+
+                // $request_data["business_id"] = NULL;
+                // $request_data["is_active"] = 1;
+                // $request_data["is_default"] = 1;
+
+                // $request_data["created_by"] = $request->user()->id;
 
                 // if ($request->user()->hasRole('superadmin')) {
                 //     $request_data["business_id"] = NULL;
@@ -200,13 +214,7 @@ class JobPlatformController extends Controller
                     "id" => $request_data["id"],
                     // "business_id" => $business_id
                 ];
-                $job_platform_prev = JobPlatform::where($job_platform_query_params)
-                    ->first();
-                if (!$job_platform_prev) {
-                    return response()->json([
-                        "message" => "no job platform found"
-                    ], 404);
-                }
+
 
                 // if ($request->user()->hasRole('superadmin')) {
                 //     if(!($job_platform_prev->business_id == NULL && $job_platform_prev->is_default == 1)) {
@@ -250,7 +258,173 @@ class JobPlatformController extends Controller
         }
     }
 
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/job-platforms/toggle-active",
+     *      operationId="toggleActiveJobPlatform",
+     *      tags={"job_platforms"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle job platform",
+     *      description="This method is to toggle job platform",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
 
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function toggleActiveJobPlatform(GetIdRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('job_platform_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+             $job_platform =  JobPlatform::where([
+                 "id" => $request_data["id"],
+             ])
+                 ->first();
+             if (!$job_platform) {
+                 return response()->json([
+                     "message" => "no data found"
+                 ], 404);
+             }
+             $should_update = 0;
+             $should_disable = 0;
+             if (empty(auth()->user()->business_id)) {
+
+                 if (auth()->user()->hasRole('superadmin')) {
+                     if (($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                         return response()->json([
+                             "message" => "You do not have permission to update this job platform due to role restrictions."
+                         ], 403);
+                     } else {
+                         $should_update = 1;
+                     }
+                 } else {
+                     if ($job_platform->business_id != NULL) {
+                         return response()->json([
+                             "message" => "You do not have permission to update this job platform due to role restrictions."
+                         ], 403);
+                     } else if ($job_platform->is_default == 0) {
+
+                         if($job_platform->created_by != auth()->user()->id) {
+                             return response()->json([
+                                 "message" => "You do not have permission to update this job platform due to role restrictions."
+                             ], 403);
+                         }
+                         else {
+                             $should_update = 1;
+                         }
+
+
+
+                     }
+                     else {
+                      $should_disable = 1;
+
+                     }
+                 }
+             } else {
+                 if ($job_platform->business_id != NULL) {
+                     if (($job_platform->business_id != auth()->user()->business_id)) {
+                         return response()->json([
+                             "message" => "You do not have permission to update this job platform due to role restrictions."
+                         ], 403);
+                     } else {
+                         $should_update = 1;
+                     }
+                 } else {
+                     if ($job_platform->is_default == 0) {
+                         if ($job_platform->created_by != auth()->user()->created_by) {
+                             return response()->json([
+                                 "message" => "You do not have permission to update this job platform due to role restrictions."
+                             ], 403);
+                         } else {
+                             $should_disable = 1;
+
+                         }
+                     } else {
+                         $should_disable = 1;
+
+                     }
+                 }
+             }
+
+             if ($should_update) {
+                 $job_platform->update([
+                     'is_active' => !$job_platform->is_active
+                 ]);
+             }
+
+             if($should_disable) {
+                 $disabled_job_platform =    DisabledJobPlatform::where([
+                     'job_platform_id' => $job_platform->id,
+                     'business_id' => auth()->user()->business_id,
+                     'created_by' => auth()->user()->id,
+                 ])->first();
+                 if(!$disabled_job_platform) {
+                    DisabledJobPlatform::create([
+                         'job_platform_id' => $job_platform->id,
+                         'business_id' => auth()->user()->business_id,
+                         'created_by' => auth()->user()->id,
+                     ]);
+                 } else {
+                     $disabled_job_platform->delete();
+                 }
+             }
+
+
+             return response()->json(['message' => 'Job platform status updated successfully'], 200);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(
@@ -345,9 +519,98 @@ class JobPlatformController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $created_by  = NULL;
+            if(auth()->user()->business) {
+                $created_by = auth()->user()->business->created_by;
+            }
+
+            $job_platforms = JobPlatform::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('job_platforms.business_id', NULL)
+                        ->where('job_platforms.is_default', 1)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('job_platforms.is_active', intval($request->is_active));
+                        });
+                } else {
+                    return $query
+
+                    ->where(function($query) use($request) {
+                        $query->where('job_platforms.business_id', NULL)
+                        ->where('job_platforms.is_default', 1)
+                        ->where('job_platforms.is_active', 1)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            if(intval($request->is_active)) {
+                                return $query->whereDoesntHave("disabled", function($q) {
+                                    $q->whereIn("disabled_job_platforms.created_by", [auth()->user()->id]);
+                                });
+                            }
+
+                        })
+                        ->orWhere(function ($query) use ($request) {
+                            $query->where('job_platforms.business_id', NULL)
+                                ->where('job_platforms.is_default', 0)
+                                ->where('job_platforms.created_by', auth()->user()->id)
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('job_platforms.is_active', intval($request->is_active));
+                                });
+                        });
+
+                    });
+                }
+            })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                    return $query
+                    ->where(function($query) use($request, $created_by) {
 
 
-            $job_platforms = JobPlatform::when(!empty($request->search_key), function ($query) use ($request) {
+                        $query->where('job_platforms.business_id', NULL)
+                        ->where('job_platforms.is_default', 1)
+                        ->where('job_platforms.is_active', 1)
+                        ->whereDoesntHave("disabled", function($q) use($created_by) {
+                            $q->whereIn("disabled_job_platforms.created_by", [$created_by]);
+                        })
+                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+                            if(intval($request->is_active)) {
+                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                                    $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
+                                });
+                            }
+
+                        })
+
+
+                        ->orWhere(function ($query) use($request, $created_by){
+                            $query->where('job_platforms.business_id', NULL)
+                                ->where('job_platforms.is_default', 0)
+                                ->where('job_platforms.created_by', $created_by)
+                                ->where('job_platforms.is_active', 1)
+
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    if(intval($request->is_active)) {
+                                        return $query->whereDoesntHave("disabled", function($q) {
+                                            $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
+                                        });
+                                    }
+
+                                })
+
+
+                                ;
+                        })
+                        ->orWhere(function ($query) use($request) {
+                            $query->where('job_platforms.business_id', auth()->user()->business_id)
+                                ->where('job_platforms.is_default', 0)
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('job_platforms.is_active', intval($request->is_active));
+                                });;
+                        });
+                    });
+
+
+                })
+
+
+                ->when(!empty($request->search_key), function ($query) use ($request) {
                 return $query->where(function ($query) use ($request) {
                     $term = $request->search_key;
                     $query->where("job_platforms.name", "like", "%" . $term . "%")
@@ -475,6 +738,44 @@ class JobPlatformController extends Controller
                 ], 404);
             }
 
+            if (empty(auth()->user()->business_id)) {
+
+                if (auth()->user()->hasRole('superadmin')) {
+                    if (($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this job platform due to role restrictions."
+                        ], 403);
+                    }
+                } else {
+                    if ($job_platform->business_id != NULL) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this job platform due to role restrictions."
+                        ], 403);
+                    } else if ($job_platform->is_default == 0 && $job_platform->created_by != auth()->user()->id) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this job platform due to role restrictions."
+                            ], 403);
+
+                    }
+                }
+            } else {
+                if ($job_platform->business_id != NULL) {
+                    if (($job_platform->business_id != auth()->user()->business_id)) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this job platform due to role restrictions."
+                        ], 403);
+                    }
+                } else {
+                    if ($job_platform->is_default == 0) {
+                        if ($job_platform->created_by != auth()->user()->created_by) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this job platform due to role restrictions."
+                            ], 403);
+                        }
+                    }
+                }
+            }
+
             return response()->json($job_platform, 200);
         } catch (Exception $e) {
 
@@ -551,12 +852,18 @@ class JobPlatformController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = JobPlatform::whereIn('id', $idsArray)
             ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('job_platforms.business_id', NULL)
-                             ->where('job_platforms.is_default', 1);
+                if ($request->user()->hasRole("superadmin")) {
+                    return $query->where('job_platforms.business_id', NULL)
+                        ->where('job_platforms.is_default', 1);
+                } else {
+                    return $query->where('job_platforms.business_id', NULL)
+                        ->where('job_platforms.is_default', 0)
+                        ->where('job_platforms.created_by', $request->user()->id);
+                }
             })
             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
                 return $query->where('job_platforms.business_id', $request->user()->business_id)
-                ->where('job_platforms.is_default', 0);
+                    ->where('job_platforms.is_default', 0);
             })
                 ->select('id')
                 ->get()

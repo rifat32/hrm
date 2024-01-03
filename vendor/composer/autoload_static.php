@@ -801,6 +801,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\Designation' => __DIR__ . '/../..' . '/app/Models/Designation.php',
         'App\\Models\\DisabledDesignation' => __DIR__ . '/../..' . '/app/Models/DisabledDesignation.php',
         'App\\Models\\DisabledEmploymentStatus' => __DIR__ . '/../..' . '/app/Models/DisabledEmploymentStatus.php',
+        'App\\Models\\DisabledJobPlatform' => __DIR__ . '/../..' . '/app/Models/DisabledJobPlatform.php',
         'App\\Models\\DisabledSettingLeaveType' => __DIR__ . '/../..' . '/app/Models/DisabledSettingLeaveType.php',
         'App\\Models\\EmailTemplate' => __DIR__ . '/../..' . '/app/Models/EmailTemplate.php',
         'App\\Models\\EmailTemplateWrapper' => __DIR__ . '/../..' . '/app/Models/EmailTemplateWrapper.php',

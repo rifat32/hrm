@@ -186,6 +186,7 @@ return array(
     'App\\Models\\Designation' => $baseDir . '/app/Models/Designation.php',
     'App\\Models\\DisabledDesignation' => $baseDir . '/app/Models/DisabledDesignation.php',
     'App\\Models\\DisabledEmploymentStatus' => $baseDir . '/app/Models/DisabledEmploymentStatus.php',
+    'App\\Models\\DisabledJobPlatform' => $baseDir . '/app/Models/DisabledJobPlatform.php',
     'App\\Models\\DisabledSettingLeaveType' => $baseDir . '/app/Models/DisabledSettingLeaveType.php',
     'App\\Models\\EmailTemplate' => $baseDir . '/app/Models/EmailTemplate.php',
     'App\\Models\\EmailTemplateWrapper' => $baseDir . '/app/Models/EmailTemplateWrapper.php',

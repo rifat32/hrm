@@ -494,6 +494,8 @@ Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "dele
 
 Route::post('/v1.0/job-platforms', [JobPlatformController::class, "createJobPlatform"]);
 Route::put('/v1.0/job-platforms', [JobPlatformController::class, "updateJobPlatform"]);
+
+Route::put('/v1.0/job-platforms/toggle-active', [JobPlatformController::class, "toggleActiveJobPlatform"]);
 Route::get('/v1.0/job-platforms', [JobPlatformController::class, "getJobPlatforms"]);
 Route::get('/v1.0/job-platforms/{id}', [JobPlatformController::class, "getJobPlatformById"]);
 Route::delete('/v1.0/job-platforms/{ids}', [JobPlatformController::class, "deleteJobPlatformsByIds"]);

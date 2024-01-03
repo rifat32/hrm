@@ -2549,6 +2549,8 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {
@@ -2569,11 +2571,7 @@ class UserManagementController extends Controller
             )
 
                 ->whereNotIn('id', [$request->user()->id])
-                ->when(!empty($all_manager_department_ids), function ($query) use ($request, $all_manager_department_ids) {
-                    $query->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     });
-                })
+
 
                 ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if (auth()->user()->hasRole("superadmin")) {
@@ -2593,9 +2591,12 @@ class UserManagementController extends Controller
                         });
                     }
                 })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('business_id', auth()->user()->business_id);
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request,$all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
+                        return  $query->where('business_id', auth()->user()->business_id)
+                        ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                            $query->whereIn("departments.id",$all_manager_department_ids);
+                         });;
                     });
                 })
 
