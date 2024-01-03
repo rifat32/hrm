@@ -31,44 +31,62 @@ class DepartmentCreateRequest extends FormRequest
             'name' => 'required|string',
             'location' => 'nullable|string',
             'description' => 'nullable|string',
+
             'manager_id' => [
-                'nullable',
+                'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    if(!empty($value)){
-                    $user  = User::where(["id" => $value])->first();
-                    if (!$user){
-                        // $fail("$attribute is invalid.");
-                        $fail("Manager does not exists.");
-
+                    $all_manager_department_ids = [];
+                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+                    foreach ($manager_departments as $manager_department) {
+                        $all_manager_department_ids[] = $manager_department->id;
+                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                     }
 
-                    if ($user->business_id != auth()->user()->business_id) {
-                         // $fail("$attribute is invalid.");
-                         $fail("Manager belongs to another business.");
+                  $exists =  User::where(
+                    [
+                        "users.id" => $value,
+                        "users.business_id" => auth()->user()->business_id
 
-                    }
-                    if (!($user->hasRole(("business_admin" . "#" . auth()->user()->business_id)) || $user->hasRole(("business_manager" . "#" . auth()->user()->business_id)))){
-                         // $fail("$attribute is invalid.");
-                         $fail("Manager belongs to another business.");
-                    }
+                    ])
+                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->first();
 
-                }
+            if (!$exists) {
+                $fail("$attribute is invalid.");
+                return;
+            }
+
                 },
             ],
 
             'parent_id' => [
-                'nullable',
+                'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    if(!empty($value)){
-                        $exists = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
+                    $all_manager_department_ids = [];
+                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+                    foreach ($manager_departments as $manager_department) {
+                        $all_manager_department_ids[] = $manager_department->id;
+                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                     }
+
+                    if(!empty($value)){
+                        $parent_department = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->first();
+
+                    if (!$parent_department) {
+                        $fail("$attribute is invalid.");
+                        return;
+                    }
+                    if(!in_array($parent_department->id,$all_manager_department_ids)){
+                        $fail("$attribute is invalid. You don't have access to this department.");
+                        return;
+                    }
+
                     }
 
                 },

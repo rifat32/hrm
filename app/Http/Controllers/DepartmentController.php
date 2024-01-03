@@ -337,7 +337,12 @@ class DepartmentController extends Controller
              $request_data = $request->validated();
 
 
-
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
 
             $department = Department::where([
                 "id" => $request_data["id"],
@@ -354,7 +359,11 @@ class DepartmentController extends Controller
                     "message" => "You can not change the status of main parent department."
                 ], 409);
             }
-
+            if(!in_array($department->id,$all_manager_department_ids)){
+                return response()->json([
+                    "message" => "You don't have access to this department"
+                ], 403);
+            }
 
 
              $department->update([
@@ -471,11 +480,20 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
             $departments = Department::where(
                 [
                     "business_id" => $business_id
                 ]
             )
+            ->whereIn("id",$all_manager_department_ids)
 
             ->when(isset($request->show_parent), function ($query) use ($request) {
                 if(intval($request->show_parent)) {
@@ -588,19 +606,22 @@ class DepartmentController extends Controller
                  ], 401);
              }
              $business_id =  $request->user()->business_id;
-             $department = Department::   with([
+             $department = Department::with([
 
                 "manager" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
                 }
 
-            ])->where(
+            ])
+            ->where(
                  [
                      "business_id" => $business_id,
-                     "parent_id" => NULL
+                    //  "parent_id" => NULL,
+                     "manager_id" => auth()->user()->id
                  ]
              )
+
                  ->orderBy("departments.id", "ASC")
                  ->select('departments.*')
                 ->first();
@@ -620,6 +641,106 @@ class DepartmentController extends Controller
 
 
              return response()->json($department, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+      /**
+     *
+     * @OA\Get(
+     *      path="/v3.0/departments",
+     *      operationId="getDepartmentsV3",
+     *      tags={"administrator.department"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="This method is to get departments  ",
+     *      description="This method is to get departments ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getDepartmentsV3(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('department_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  $request->user()->business_id;
+
+             $departments = Department::with([
+
+                "manager" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                }
+
+            ])
+            ->where(
+                 [
+                     "business_id" => $business_id,
+                    //  "parent_id" => NULL,
+                     "manager_id" => auth()->user()->id
+                 ]
+             )
+
+                 ->orderBy("departments.id", "ASC")
+                 ->select('departments.*')
+                ->get();
+
+                foreach($departments as $department){
+                    $department->children_recursive = $department->children_recursive;
+
+                    $department->total_users_counts = User::where([
+                        "business_id" => $business_id
+                    ])
+                    ->count();
+                }
+
+
+
+
+
+
+             return response()->json($departments, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);
@@ -690,6 +811,13 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
             $department =  Department::where([
                 "id" => $id,
                 "business_id" => $business_id
@@ -707,6 +835,11 @@ class DepartmentController extends Controller
                 return response()->json([
                     "message" => "no department found"
                 ], 404);
+            }
+            if(!in_array($department->id,$all_manager_department_ids)){
+                return response()->json([
+                    "message" => "You don't have access to this department"
+                ], 403);
             }
 
             return response()->json($department, 200);
@@ -783,11 +916,19 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
             $idsArray = explode(',', $ids);
             $existingIds = Department::where([
                 "business_id" => $business_id
             ])
             ->whereNotNull('parent_id')
+            ->whereIn("id",$all_manager_department_ids)
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
@@ -800,6 +941,7 @@ class DepartmentController extends Controller
                     "message" => "Some or all of the specified data do not exist. or something else"
                 ], 404);
             }
+
             Department::destroy($existingIds);
 
 
