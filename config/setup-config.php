@@ -77,6 +77,11 @@ return [
 "job_type_view",
 "job_type_delete",
 
+"work_location_create",
+"work_location_update",
+"work_location_view",
+"work_location_delete",
+
 
 "employment_status_create",
 "employment_status_update",
@@ -119,6 +124,11 @@ return [
 "job_type_update",
 "job_type_view",
 "job_type_delete",
+
+"work_location_create",
+"work_location_update",
+"work_location_view",
+"work_location_delete",
 
                 "business_create",
                 "business_update",
@@ -262,6 +272,11 @@ return [
 "job_type_update",
 "job_type_view",
 "job_type_delete",
+
+"work_location_create",
+"work_location_update",
+"work_location_view",
+"work_location_delete",
 
 
 
@@ -415,6 +430,11 @@ return [
 "job_type_view",
 "job_type_delete",
 
+"work_location_create",
+"work_location_update",
+"work_location_view",
+"work_location_delete",
+
                 "employment_status_create",
                 "employment_status_update",
                 "employment_status_view",
@@ -562,6 +582,11 @@ return [
 "job_type_update",
 "job_type_view",
 "job_type_delete",
+
+"work_location_create",
+"work_location_update",
+"work_location_view",
+"work_location_delete",
 
                 "employment_status_create",
                 "employment_status_update",
@@ -775,6 +800,11 @@ return [
 "job_type_view",
 "job_type_delete",
 
+"work_location_create",
+"work_location_update",
+"work_location_view",
+"work_location_delete",
+
 
 
        "employment_status_create",
@@ -965,6 +995,11 @@ return [
 "job_type_update" => "",
 "job_type_view" => "",
 "job_type_delete" => "",
+
+"work_location_create" => "",
+"work_location_update" => "",
+"work_location_view" => "",
+"work_location_delete" => "",
 
         "employment_status_create" => "Can create employment status",
         "employment_status_update" => "Can update employment status",
@@ -1181,6 +1216,12 @@ return [
         "job_type_update" => "update",
         "job_type_view" => "view",
         "job_type_delete" => "delete",
+
+
+        "work_location_create" => "create",
+        "work_location_update" => "update",
+        "work_location_view" => "view",
+        "work_location_delete" => "delete",
 
 
 
@@ -1596,6 +1637,18 @@ return [
                 "job_type_delete",
             ],
         ],
+
+        [
+            "header" => "job_type",
+            "permissions" => [
+                "work_location_create",
+                "work_location_update",
+                "work_location_view",
+                "work_location_delete",
+            ],
+        ],
+
+
 
 
 

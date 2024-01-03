@@ -6,11 +6,11 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DisabledJobType extends Model
+class DisabledWorkLocation extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'job_type_id',
+        'work_location_id',
         'business_id',
         'created_by',
         // Add other fillable columns if needed
@@ -23,9 +23,6 @@ class DisabledJobType extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
-
-
-
 
 
 

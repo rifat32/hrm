@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDisabledJobTypesTable extends Migration
+class CreateDisabledWorkLocationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreateDisabledJobTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('disabled_job_types', function (Blueprint $table) {
+        Schema::create('disabled_work_locations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("job_type_id");
-            $table->foreign('job_type_id')->references('id')->on('job_types')->onDelete('cascade');
+
+            $table->unsignedBigInteger("work_location_id");
+            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('cascade');
 
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('users')->onDelete('cascade');
@@ -38,6 +39,6 @@ class CreateDisabledJobTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('disabled_job_types');
+        Schema::dropIfExists('disabled_work_locations');
     }
 }

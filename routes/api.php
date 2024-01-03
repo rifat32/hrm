@@ -52,6 +52,7 @@ use App\Http\Controllers\UserEducationHistoryController;
 use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserSocialSiteController;
+use App\Http\Controllers\WorkLocationController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
 
@@ -550,6 +551,21 @@ Route::delete('/v1.0/job-types/{ids}', [JobTypeController::class, "deleteJobType
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end designation management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// work locations  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/work_locations', [WorkLocationController::class, "createWorkLocation"]);
+Route::put('/v1.0/work_locations', [WorkLocationController::class, "updateWorkLocation"]);
+Route::put('/v1.0/work_locations/toggle-active', [WorkLocationController::class, "toggleActiveWorkLocation"]);
+Route::get('/v1.0/work_locations', [WorkLocationController::class, "getWorkLocations"]);
+Route::get('/v1.0/work_locations/{id}', [WorkLocationController::class, "getWorkLocationById"]);
+Route::delete('/v1.0/work_locations/{ids}', [WorkLocationController::class, "deleteWorkLocationsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end work locations management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
