@@ -14,18 +14,38 @@ class JobListing extends Model
         'title',
         'description',
         'location',
-        'salary_range',
         'required_skills',
         'application_deadline',
         'posted_on',
         'job_platform_id',
         'department_id',
 
+
+        'minimum_salary',
+        'maximum_salary',
+        'experience_level',
+        'job_type_id',
+        'work_location_id',
+
         "is_active",
         "business_id",
         "created_by"
 
     ];
+
+
+
+    // Define relationships with other tables
+    public function job_type()
+    {
+        return $this->belongsTo(JobType::class, "id",'job_type_id');
+    }
+
+    public function work_location()
+    {
+        return $this->belongsTo(WorkLocation::class, "id" ,'work_location_id');
+    }
+
 
     // Define relationships if needed
 
@@ -36,7 +56,7 @@ class JobListing extends Model
 
     public function department()
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->belongsTo(Department::class, "id" , 'department_id');
     }
 
 

@@ -35,12 +35,18 @@ class JobListingController extends Controller
 *     @OA\Property(property="title", type="string", format="string", example="Software Engineer"),
  *     @OA\Property(property="description", type="string", format="string", example="Exciting opportunity for a skilled developer..."),
  *     @OA\Property(property="location", type="string", format="string", example="City X"),
- *     @OA\Property(property="salary_range", type="string", format="string", example="$80,000 - $100,000"),
  *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
  *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
  *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
  *     @OA\Property(property="job_platform", type="string", format="{}", example={1,2}),
- *     @OA\Property(property="department_id", type="number", format="number", example="1")
+ *     @OA\Property(property="department_id", type="number", format="number", example="1"),
+ * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
+ *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
+ *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
+ *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
+ *     @OA\Property(property="work_location_id", type="integer", format="int", example="456")
+
+ *
  *
      *
      *         ),
@@ -129,12 +135,16 @@ class JobListingController extends Controller
  *     @OA\Property(property="title", type="string", format="string", example="Software Engineer"),
  *     @OA\Property(property="description", type="string", format="string", example="Exciting opportunity for a skilled developer..."),
  *     @OA\Property(property="location", type="string", format="string", example="City X"),
- *     @OA\Property(property="salary_range", type="string", format="string", example="$80,000 - $100,000"),
  *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
  *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
  *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
  *     @OA\Property(property="job_platform_id", type="number", format="number", example="1"),
- *     @OA\Property(property="department_id", type="number", format="number", example="1")
+ *     @OA\Property(property="department_id", type="number", format="number", example="1"),
+ *  * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
+ *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
+ *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
+ *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
+ *     @OA\Property(property="work_location_id", type="integer", format="int", example="456")
  *
 
      *
@@ -207,15 +217,20 @@ class JobListingController extends Controller
                 $job_listing  =  tap(JobListing::where($job_listing_query_params))->update(
                     collect($request_data)->only([
                         'title',
-                        'description',
-                        'location',
-                        'salary_range',
-                        'required_skills',
-                        'application_deadline',
-                        'posted_on',
-                        'job_platform_id',
-                        'department_id',
+        'description',
+        'location',
+        'required_skills',
+        'application_deadline',
+        'posted_on',
+        'job_platform_id',
+        'department_id',
 
+
+        'minimum_salary',
+        'maximum_salary',
+        'experience_level',
+        'job_type_id',
+        'work_location_id',
                         // "is_active",
                         // "business_id",
                         // "created_by"
