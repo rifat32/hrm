@@ -1669,12 +1669,13 @@ class AttendanceController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $business_id =  $request->user()->business_id;
+
             $attendance =  Attendance::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
-            ->whereHas("employee..departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("employee.departments.id",$all_manager_department_ids);
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
              })
                 ->first();
             if (!$attendance) {
@@ -1767,8 +1768,8 @@ class AttendanceController extends Controller
             $existingIds = Attendance::where([
                 "business_id" => $business_id
             ])
-            ->whereHas("employee..departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("employee.departments.id",$all_manager_department_ids);
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
              })
                 ->whereIn('id', $idsArray)
                 ->select('id')

@@ -338,7 +338,7 @@ return "swagger generated";
             'work_availability_definition' => 80,
             'punch_in_out_alert' => 0,
             'punch_in_out_interval' => 0.5,
-            'alert_area' => json_encode(["web","system"]),
+            'alert_area' => (["web","system"]),
             'auto_approval' => false,
 
             "business_id" => NULL,

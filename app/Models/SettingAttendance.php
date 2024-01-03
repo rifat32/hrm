@@ -27,6 +27,12 @@ class SettingAttendance extends Model
         "created_by"
     ];
 
+
+    protected $casts = [
+        'alert_area' => 'array',
+
+    ];
+
     public function special_users() {
         return $this->belongsToMany(User::class, 'setting_attendance_special_users', 'setting_attendance_id', 'user_id');
     }
@@ -37,7 +43,7 @@ class SettingAttendance extends Model
 
 
 
-    
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

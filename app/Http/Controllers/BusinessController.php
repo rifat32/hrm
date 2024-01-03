@@ -411,6 +411,65 @@ if(!$user->hasRole('business_owner')) {
      *
      * }),
      *
+     *     *             @OA\Property(property="work_shift", type="string", format="array",example={
+     * "name":"regular",
+     * "type":"regular",
+     * "description":"description",
+     * "is_personal":1,
+     *  "break_type":"paid",
+     *  "break_hours":0.5,
+     *  "details": {
+     *    *         {
+     *             "day": "0",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "day": "1",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "day": "2",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "day": "3",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "day": "4",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "day": "5",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         },
+     *         {
+     *             "day": "6",
+     *             "start_at": "",
+     *             "end_at": "",
+     *             "is_weekend": 0
+     *         }
+     *
+     *
+     * },
+     *  "start_date":"05-12-2025",
+   *  "end_date":"05-12-2025"
+     *
+     *
+     * }),
+     *
      *  @OA\Property(property="business", type="string", format="array",example={
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
@@ -536,7 +595,7 @@ if(!$user->hasRole('business_owner')) {
         $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1);
 
 
-        
+
 
 
 

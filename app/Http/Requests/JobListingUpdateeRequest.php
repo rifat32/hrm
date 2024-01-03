@@ -46,18 +46,17 @@ class JobListingUpdateeRequest extends FormRequest
             'application_deadline' => 'required|date',
             'posted_on' => 'required|date',
 
-            'job_platform_id' => [
-                'required',
+            'job_platforms' => 'required|array',
+            'job_platforms.*' =>  [
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = DB::table('job_platforms')
-                        ->where('id', $value)
-                        ->where('job_platforms.business_id', '=', auth()->user()->business_id)
-                        ->exists();
+                    ->where('id', $value)
+                    ->exists();
 
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
-                    }
+                if (!$exists) {
+                    $fail("$attribute is invalid.");
+                }
                 },
             ],
 

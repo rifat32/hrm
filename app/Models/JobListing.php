@@ -28,10 +28,11 @@ class JobListing extends Model
     ];
 
     // Define relationships if needed
-    public function job_platform()
-    {
-        return $this->belongsTo(JobPlatform::class, 'job_platform_id');
+
+    public function job_platforms() {
+        return $this->belongsToMany(JobListingJobPlatforms::class, 'job_listing_job_platforms', 'job_listing_id', 'job_platform_id');
     }
+
 
     public function department()
     {
@@ -64,5 +65,5 @@ class JobListing extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
- 
+
 }

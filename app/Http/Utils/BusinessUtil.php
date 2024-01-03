@@ -673,7 +673,7 @@ trait BusinessUtil
        $this->loadDefaultSettingLeave($business_id);
 
 
-
+$this->loadDefaultAttendance($business_id);
 
 
 

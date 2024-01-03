@@ -108,9 +108,9 @@ class SettingAttendanceController extends Controller
                     }
                 }
 
-                if(!empty($request_data["alert_area"])){
-                    $request_data["alert_area"] = json_encode($request_data["alert_area"]);
-                }
+                // if(!empty($request_data["alert_area"])){
+                //     $request_data["alert_area"] = json_encode($request_data["alert_area"]);
+                // }
 
 
                 if (empty($request->user()->business_id)) {

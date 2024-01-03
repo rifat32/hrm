@@ -24,7 +24,7 @@ class SingleFileUploadRequest extends FormRequest
     public function rules()
     {
         return [
-            'file' => 'required|image|max:2048',
+            'file' => 'required|file|max:2048',
         ];
     }
 }

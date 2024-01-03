@@ -39,7 +39,7 @@ class JobListingController extends Controller
  *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
  *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
  *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
- *     @OA\Property(property="job_platform_id", type="number", format="number", example="1"),
+ *     @OA\Property(property="job_platform", type="string", format="{}", example={1,2}),
  *     @OA\Property(property="department_id", type="number", format="number", example="1")
  *
      *
@@ -100,6 +100,8 @@ class JobListingController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $job_listing =  JobListing::create($request_data);
+                $job_listing->job_platforms()->sync($request_data['job_platforms'], []);
+
                 return response($job_listing, 201);
             });
         } catch (Exception $e) {
@@ -229,7 +231,7 @@ class JobListingController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-
+                $job_listing->job_platforms()->sync($request_data['job_platforms'], []);
 
                 return response($job_listing, 201);
             });
@@ -335,7 +337,8 @@ class JobListingController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $job_listings = JobListing::where(
+            $job_listings = JobListing::with("job_platforms")
+            ->where(
                 [
                     "business_id" => $business_id
                 ]
@@ -343,9 +346,10 @@ class JobListingController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("location", "like", "%" . $term . "%")
+                        $query->where("title", "like", "%" . $term . "%")
                             ->orWhere("description", "like", "%" . $term . "%");
+
+
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -445,7 +449,8 @@ class JobListingController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $job_listing =  JobListing::where([
+            $job_listing =  JobListing::with("job_platforms")
+            ->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

@@ -1028,6 +1028,16 @@
                                         "format": "string",
                                         "example": "r"
                                     },
+                                    "in_geolocation": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
+                                    "out_geolocation": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
                                     "employee_id": {
                                         "type": "number",
                                         "format": "number",
@@ -1129,6 +1139,16 @@
                             "schema": {
                                 "properties": {
                                     "note": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
+                                    "in_geolocation": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
+                                    "out_geolocation": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "r"
@@ -1246,12 +1266,101 @@
                                         "example": [
                                             {
                                                 "note": "note",
+                                                "in_geolocation": "in_geolocation",
+                                                "out_geolocation": "out_geolocation",
                                                 "in_time": "08:44:00",
                                                 "out_time": "12:44:00",
                                                 "in_date": "2023-11-18",
                                                 "does_break_taken": 1
                                             }
                                         ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/attendances/approve": {
+            "put": {
+                "tags": [
+                    "attendances"
+                ],
+                "summary": "This method is to approve attendances ",
+                "description": "This method is to approve attendances",
+                "operationId": "approveAttendance",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "attendance_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "is_approved": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -1430,8 +1539,8 @@
                 "tags": [
                     "attendances"
                 ],
-                "summary": "This method is to get leaves  ",
-                "description": "This method is to get leaves ",
+                "summary": "This method is to get attendances  ",
+                "description": "This method is to get attendances ",
                 "operationId": "getAttendancesV3",
                 "parameters": [
                     {
@@ -3551,6 +3660,64 @@
                                             "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
                                             "send_password": 1,
                                             "gender": "male"
+                                        }
+                                    },
+                                    "work_shift": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "name": "regular",
+                                            "type": "regular",
+                                            "description": "description",
+                                            "is_personal": 1,
+                                            "break_type": "paid",
+                                            "break_hours": 0.5,
+                                            "details": [
+                                                {
+                                                    "day": "0",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                },
+                                                {
+                                                    "day": "1",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                },
+                                                {
+                                                    "day": "2",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                },
+                                                {
+                                                    "day": "3",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                },
+                                                {
+                                                    "day": "4",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                },
+                                                {
+                                                    "day": "5",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                },
+                                                {
+                                                    "day": "6",
+                                                    "start_at": "",
+                                                    "end_at": "",
+                                                    "is_weekend": 0
+                                                }
+                                            ],
+                                            "start_date": "05-12-2025",
+                                            "end_date": "05-12-2025"
                                         }
                                     },
                                     "business": {
@@ -7745,6 +7912,13 @@
                         "example": "search_key"
                     },
                     {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "order_by",
                         "in": "query",
                         "description": "order_by",
@@ -7994,6 +8168,88 @@
                 ]
             }
         },
+        "/v1.0/employment-statuses/toggle-active": {
+            "put": {
+                "tags": [
+                    "employee.employment_statuses"
+                ],
+                "summary": "This method is to toggle employment status",
+                "description": "This method is to toggle employment status",
+                "operationId": "toggleActiveEmploymentStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/employment-statuses/{id}": {
             "get": {
                 "tags": [
@@ -8083,6 +8339,442 @@
                         "description": "ids",
                         "required": true,
                         "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/histories/user-passport-details": {
+            "get": {
+                "tags": [
+                    "histories"
+                ],
+                "summary": "This method is to get employee passport history",
+                "description": "This method is to get passport history",
+                "operationId": "getUserPassportDetailsHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/histories/user-visa-details": {
+            "get": {
+                "tags": [
+                    "histories"
+                ],
+                "summary": "This method is to get employee visa history",
+                "description": "This method is to get visa history",
+                "operationId": "getUserVisaDetailsHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/histories/user-sponsorship-details": {
+            "get": {
+                "tags": [
+                    "histories"
+                ],
+                "summary": "This method is to get employee sponsorship history",
+                "description": "This method is to get sponsorship history",
+                "operationId": "getUserSponsorshipDetailsHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/histories/user-address-details": {
+            "get": {
+                "tags": [
+                    "histories"
+                ],
+                "summary": "This method is to get employee address history",
+                "description": "This method is to get address history",
+                "operationId": "getUserAddressDetailsHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
                     }
                 ],
                 "responses": {
@@ -14659,6 +15351,13 @@
                         "example": "search_key"
                     },
                     {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "order_by",
                         "in": "query",
                         "description": "order_by",
@@ -14739,14 +15438,6 @@
                                         "type": "number",
                                         "format": "number",
                                         "example": "Updated Christmas"
-                                    },
-                                    "is_active": {
-                                        "type": "boolean",
-                                        "example": "1"
-                                    },
-                                    "is_earning_enabled": {
-                                        "type": "boolean",
-                                        "example": "1"
                                     },
                                     "name": {
                                         "type": "string",
@@ -16630,6 +17321,528 @@
                 ]
             }
         },
+        "/v1.0/user-address-histories": {
+            "get": {
+                "tags": [
+                    "user_address_histories"
+                ],
+                "summary": "This method is to get user address histories  ",
+                "description": "This method is to get user address histories ",
+                "operationId": "getUserAddressHistories",
+                "parameters": [
+                    {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "user_address_histories"
+                ],
+                "summary": "This method is to update  user address history ",
+                "description": "This method is to update user address history",
+                "operationId": "updateUserAddressHistory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "employee_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Employee ID"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address"
+                                    },
+                                    "address_line_1": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address_line_1"
+                                    },
+                                    "address_line_2": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address_line_2"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Country"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your City"
+                                    },
+                                    "postcode": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your State"
+                                    },
+                                    "lat": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Latitude"
+                                    },
+                                    "long": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Longitude"
+                                    },
+                                    "from_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "Your From Date"
+                                    },
+                                    "to_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "Your To Date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "user_address_histories"
+                ],
+                "summary": "This method is to store user address history",
+                "description": "This method is to store user address history",
+                "operationId": "createUserAddressHistory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Employee ID"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address"
+                                    },
+                                    "address_line_1": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address_line_1"
+                                    },
+                                    "address_line_2": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address_line_2"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Country"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your City"
+                                    },
+                                    "postcode": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your State"
+                                    },
+                                    "lat": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Latitude"
+                                    },
+                                    "long": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Longitude"
+                                    },
+                                    "from_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "Your From Date"
+                                    },
+                                    "to_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "Your To Date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-address-histories/{id}": {
+            "get": {
+                "tags": [
+                    "user_address_histories"
+                ],
+                "summary": "This method is to get user address history by id",
+                "description": "This method is to get user address history by id",
+                "operationId": "getUserAddressHistoryById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-address-histories/{ids}": {
+            "delete": {
+                "tags": [
+                    "user_address_histories"
+                ],
+                "summary": "This method is to delete user address history by id",
+                "description": "This method is to delete user address history by id",
+                "operationId": "deleteUserAddressHistoriesByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/user-assets/single-file-upload": {
             "post": {
                 "tags": [
@@ -17676,6 +18889,548 @@
                 "summary": "This method is to delete user document by id",
                 "description": "This method is to delete user document by id",
                 "operationId": "deleteUserDocumentsByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-education-histories": {
+            "get": {
+                "tags": [
+                    "user_education_histories"
+                ],
+                "summary": "This method is to get user education histories  ",
+                "description": "This method is to get user education histories ",
+                "operationId": "getUserEducationHistories",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "user_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "user_education_histories"
+                ],
+                "summary": "This method is to update  user education history ",
+                "description": "This method is to update user education history",
+                "operationId": "updateUserEducationHistory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": 1
+                                    },
+                                    "degree": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Degree"
+                                    },
+                                    "major": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Major"
+                                    },
+                                    "school_name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your School Name"
+                                    },
+                                    "graduation_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-05-01"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2019-09-01"
+                                    },
+                                    "achievements": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Achievements"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Description"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Country"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your City"
+                                    },
+                                    "postcode": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your State"
+                                    },
+                                    "is_current": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "user_education_histories"
+                ],
+                "summary": "This method is to store user education history",
+                "description": "This method is to store user education history",
+                "operationId": "createUserEducationHistory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": 1
+                                    },
+                                    "degree": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Degree"
+                                    },
+                                    "major": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Major"
+                                    },
+                                    "school_name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your School Name"
+                                    },
+                                    "graduation_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-05-01"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2019-09-01"
+                                    },
+                                    "achievements": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Achievements"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Description"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your address"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your Country"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your City"
+                                    },
+                                    "postcode": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Your State"
+                                    },
+                                    "is_current": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-education-histories/{id}": {
+            "get": {
+                "tags": [
+                    "user_education_histories"
+                ],
+                "summary": "This method is to get user education history by id",
+                "description": "This method is to get user education history by id",
+                "operationId": "getUserEducationHistoryById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-education-histories/{ids}": {
+            "delete": {
+                "tags": [
+                    "user_education_histories"
+                ],
+                "summary": "This method is to delete user education history by id",
+                "description": "This method is to delete user education history by id",
+                "operationId": "deleteUserEducationHistoriesByIds",
                 "parameters": [
                     {
                         "name": "ids",
