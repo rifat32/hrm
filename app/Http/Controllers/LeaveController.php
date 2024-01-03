@@ -15,6 +15,7 @@ use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
+use App\Models\LeaveHistory;
 use App\Models\LeaveRecord;
 use App\Models\Role;
 use App\Models\SettingLeave;
@@ -115,7 +116,6 @@ class LeaveController extends Controller
                     array_push($files, ("/" . $location . "/" . $new_file_name));
                 }
             }
-
 
             return response()->json(["files" => $files], 201);
         } catch (Exception $e) {
@@ -219,6 +219,7 @@ class LeaveController extends Controller
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
+
                 // if (!$wors_shift) {
                 //     $department = Department::whereHas('users', function ($query) use ($request_data) {
                 //         $query->where('id', $request_data["employee_id"]);
@@ -451,7 +452,25 @@ class LeaveController extends Controller
 
 
                 $leave =  Leave::create($request_data);
-                $leave->records()->createMany($leave_record_data_list);
+                $leave_records =   $leave->records()->createMany($leave_record_data_list);
+
+
+
+
+                $leave_history_data = $leave->toArray();
+                $leave_history_data['leave_id'] = $leave->id;
+                $leave_history_data['actor_id'] = auth()->user()->id;
+                $leave_history_data['action'] = "create";
+                $leave_history_data['is_approved'] = NULL;
+                $leave_history_data['attendance_created_at'] = $leave->created_at;
+                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+
+
+                $leave_history = LeaveHistory::create($leave_history_data);
+                $leave_record_history = $leave_records->toArray();
+                $leave_record_history["leave_id"] = $leave_history->id;
+                $leave_history->records()->createMany($leave_record_history);
+
 
 
 
@@ -553,6 +572,21 @@ class LeaveController extends Controller
 
 
 
+                $leave = Leave::where([
+                    "id" => $request_data["leave_id"]
+                ])->first();
+
+                $leave_history_data = $leave->toArray();
+                $leave_history_data['leave_id'] = $leave->id;
+                $leave_history_data['actor_id'] = auth()->user()->id;
+                $leave_history_data['action'] = "approve";
+                $leave_history_data['is_approved'] =  $request_data['is_approved'];
+                $leave_history_data['attendance_created_at'] = $leave->created_at;
+                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history = LeaveHistory::create($leave_history_data);
+
+
+
                 return response($leave_approval, 201);
             });
         } catch (Exception $e) {
@@ -651,8 +685,20 @@ class LeaveController extends Controller
                     ], 400);
                 }
                 $leave->status = "approved";
-
                 $leave->save();
+
+
+
+
+                $leave_history_data = $leave->toArray();
+                $leave_history_data['leave_id'] = $leave->id;
+                $leave_history_data['actor_id'] = auth()->user()->id;
+                $leave_history_data['action'] = "bypass";
+                $leave_history_data['is_approved'] = NULL;
+                $leave_history_data['attendance_created_at'] = $leave->created_at;
+                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+
+
 
 
                 return response($leave, 200);
@@ -1015,7 +1061,24 @@ class LeaveController extends Controller
                     ], 500);
                 }
                 $leave->records()->delete();
-                $leave->records()->createMany($leave_record_data_list);
+
+
+            $leave_records = $leave->records()->createMany($leave_record_data_list);
+
+                $leave_history_data = $leave->toArray();
+                $leave_history_data['leave_id'] = $leave->id;
+                $leave_history_data['actor_id'] = auth()->user()->id;
+                $leave_history_data['action'] = "update";
+                $leave_history_data['is_approved'] = NULL;
+                $leave_history_data['attendance_created_at'] = $leave->created_at;
+                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history = LeaveHistory::create($leave_history_data);
+
+                $leave_record_history = $leave_records->toArray();
+                $leave_record_history["leave_id"] = $leave_history->id;
+                $leave_history->records()->createMany($leave_record_history);
+
+
                 return response($leave, 201);
             });
         } catch (Exception $e) {
@@ -2123,6 +2186,34 @@ return $employee;
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
+
+
+
+            $leaves =  Leave::whereIn("id",$existingIds)->get();
+
+            foreach ($leaves as $leave) {
+                $leave_history_data = $leave->toArray();
+                $leave_history_data['leave_id'] = $leave->id;
+                $leave_history_data['actor_id'] = auth()->user()->id;
+                $leave_history_data['action'] = "update";
+                $leave_history_data['is_approved'] = NULL;
+                $leave_history_data['attendance_created_at'] = $leave->created_at;
+                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history = LeaveHistory::create($leave_history_data);
+
+
+
+                $leave_record_history = $leave->records->toArray();
+                $leave_record_history["leave_id"] = $leave_history->id;
+                $leave_history->records()->createMany($leave_record_history);
+
+
+            }
+
+
+
+
+
             Leave::destroy($existingIds);
 
 

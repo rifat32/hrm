@@ -180,7 +180,6 @@ class AttendanceController extends Controller
 
                 if (!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
 
-
                     $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
                     $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                     $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);

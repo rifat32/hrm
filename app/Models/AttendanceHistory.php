@@ -67,4 +67,15 @@ class AttendanceHistory extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
+    public function getAttendanceCreatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+    public function getAttendanceUpdatedAtAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+
 }

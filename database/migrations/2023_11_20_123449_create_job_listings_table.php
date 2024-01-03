@@ -18,7 +18,11 @@ class CreateJobListingsTable extends Migration
             $table->string("title");
             $table->text("description");
             $table->string("location");
-            $table->string("salary_range");
+
+            $table->float("minimum_salary");
+            $table->float("maximum_salary");
+            $table->string("experience_level");
+
             $table->text("required_skills");
             $table->date("application_deadline");
             $table->date("posted_on");
