@@ -186,6 +186,7 @@ return array(
     'App\\Models\\AttendanceHistory' => $baseDir . '/app/Models/AttendanceHistory.php',
     'App\\Models\\Business' => $baseDir . '/app/Models/Business.php',
     'App\\Models\\BusinessTier' => $baseDir . '/app/Models/BusinessTier.php',
+    'App\\Models\\BusinessTime' => $baseDir . '/app/Models/BusinessTime.php',
     'App\\Models\\Candidate' => $baseDir . '/app/Models/Candidate.php',
     'App\\Models\\Department' => $baseDir . '/app/Models/Department.php',
     'App\\Models\\DepartmentAnnouncement' => $baseDir . '/app/Models/DepartmentAnnouncement.php',

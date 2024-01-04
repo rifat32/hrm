@@ -26,9 +26,9 @@ class TimeOrderRule implements Rule
 
      public function passes($attribute, $value)
     {
-        // // Check if 'opening_time' and 'closing_time' are valid times
-        // $openingTime = strtotime($value->opening_time);
-        // $closingTime = strtotime($value->closing_time);
+        // // Check if 'start_at' and 'end_at' are valid times
+        // $openingTime = strtotime($value->start_at);
+        // $closingTime = strtotime($value->end_at);
 
         // // Check if opening time is less than closing time
         // return $openingTime < $closingTime;

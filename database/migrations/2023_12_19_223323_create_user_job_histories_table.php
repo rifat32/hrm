@@ -27,7 +27,7 @@ class CreateUserJobHistoriesTable extends Migration
             $table->text('responsibilities')->nullable();
             $table->string('supervisor_name')->nullable();
             $table->string('contact_information')->nullable();
-            $table->decimal('salary', 10, 2)->nullable();
+       
             $table->string('work_location')->nullable();
             $table->text('achievements')->nullable();
 

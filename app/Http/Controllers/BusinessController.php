@@ -16,7 +16,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Mail\SendPassword;
 
 use App\Models\Business;
-
+use App\Models\BusinessTime;
 use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
@@ -411,64 +411,18 @@ if(!$user->hasRole('business_owner')) {
      *
      * }),
      *
-     *     *             @OA\Property(property="work_shift", type="string", format="array",example={
-     * "name":"regular",
-     * "type":"regular",
-     * "description":"description",
-     * "is_personal":1,
-     *  "break_type":"paid",
-     *  "break_hours":0.5,
-     *  "details": {
-     *    *         {
-     *             "day": "0",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         },
-     *         {
-     *             "day": "1",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         },
-     *         {
-     *             "day": "2",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         },
-     *         {
-     *             "day": "3",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         },
-     *         {
-     *             "day": "4",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         },
-     *         {
-     *             "day": "5",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         },
-     *         {
-     *             "day": "6",
-     *             "start_at": "",
-     *             "end_at": "",
-     *             "is_weekend": 0
-     *         }
+      *   *      *    @OA\Property(property="times", type="string", format="array",example={
      *
-     *
-     * },
-     *  "start_date":"05-12-2025",
-   *  "end_date":"05-12-2025"
-     *
+    *{"day":0,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
+    *{"day":1,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
+    *{"day":2,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
+     *{"day":3,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
+    *{"day":4,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
+    *{"day":5,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
+    *{"day":6,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true}
      *
      * }),
+     *
      *
      *  @OA\Property(property="business", type="string", format="array",example={
      * "name":"ABCD businesses",
@@ -616,22 +570,37 @@ if(!$user->hasRole('business_owner')) {
 
 
 
+        BusinessTime::where([
+            "business_id" => $business->id
+           ])
+           ->delete();
+           $timesArray = collect($request_data["times"])->unique("day");
+           foreach($timesArray as $business_time) {
+            BusinessTime::create([
+                "business_id" => $business->id,
+                "day"=> $business_time["day"],
+                "start_at"=> $business_time["start_at"],
+                "end_at"=> $business_time["end_at"],
+                "is_weekend"=> $business_time["is_weekend"],
+            ]);
+           }
 
 
 
 
 
-        $request_data["work_shift"]["business_id"] = $user->business_id;
-        $request_data["work_shift"]["is_active"] = true;
-        $request_data["work_shift"]["created_by"] = $user->id;
-        $request_data["work_shift"]["is_business_default"] = 1;
 
-        $request_data["work_shift"]["attendances_count"] = 0;
-        $work_shift =  WorkShift::create($request_data["work_shift"]);
+        // $request_data["work_shift"]["business_id"] = $user->business_id;
+        // $request_data["work_shift"]["is_active"] = true;
+        // $request_data["work_shift"]["created_by"] = $user->id;
+        // $request_data["work_shift"]["is_business_default"] = 1;
+
+        // $request_data["work_shift"]["attendances_count"] = 0;
+        // $work_shift =  WorkShift::create($request_data["work_shift"]);
 
 
 
-        $work_shift->details()->createMany($request_data["work_shift"]['details']);
+        // $work_shift->details()->createMany($request_data["work_shift"]['details']);
 
 
 

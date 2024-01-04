@@ -924,7 +924,7 @@ class UserManagementController extends Controller
                     'designation_id',
                     'employment_status_id',
                     'joining_date',
-                    'salary',
+
                     'emergency_contact_details',
 
                 ])->toArray()
@@ -4079,11 +4079,23 @@ class UserManagementController extends Controller
             //      ], 401);
             //  }
 
-            $users = ActivityLog::where("activity", "!=", "DUMMY activity")
+       $user =     User::where(["id" => $request->employee_id])
+       ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
+             ->first();
+             if(!$user) {
+                return response()->json([
+                    "message" => "User not found"
+                ],404);
+             }
+
+
+
+
+            $activity = ActivityLog::where("activity", "!=", "DUMMY activity")
                 ->where("description", "!=", "DUMMY description")
-                ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 })
+
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
                     return $query->where('user_id', $request->employee_id);
                 })
@@ -4130,7 +4142,7 @@ class UserManagementController extends Controller
                     return $query->get();
                 });;
 
-            return response()->json($users, 200);
+            return response()->json($activity, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

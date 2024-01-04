@@ -466,10 +466,12 @@ class LeaveController extends Controller
                 $leave_history_data['attendance_updated_at'] = $leave->updated_at;
 
 
-                $leave_history = LeaveHistory::create($leave_history_data);
-                $leave_record_history = $leave_records->toArray();
-                $leave_record_history["leave_id"] = $leave_history->id;
-                $leave_history->records()->createMany($leave_record_history);
+                // $leave_history = LeaveHistory::create($leave_history_data);
+                // $leave_record_history = $leave_records->toArray();
+                // $leave_record_history["leave_id"] = $leave_history->id;
+                // $leave_history->records()->createMany($leave_record_history);
+
+
 
 
 
@@ -2195,17 +2197,17 @@ return $employee;
                 $leave_history_data = $leave->toArray();
                 $leave_history_data['leave_id'] = $leave->id;
                 $leave_history_data['actor_id'] = auth()->user()->id;
-                $leave_history_data['action'] = "update";
+                $leave_history_data['action'] = "delete";
                 $leave_history_data['is_approved'] = NULL;
                 $leave_history_data['attendance_created_at'] = $leave->created_at;
                 $leave_history_data['attendance_updated_at'] = $leave->updated_at;
-                $leave_history = LeaveHistory::create($leave_history_data);
+                // $leave_history = LeaveHistory::create($leave_history_data);
 
 
 
-                $leave_record_history = $leave->records->toArray();
-                $leave_record_history["leave_id"] = $leave_history->id;
-                $leave_history->records()->createMany($leave_record_history);
+                // $leave_record_history = $leave->records->toArray();
+                // $leave_record_history["leave_id"] = $leave_history->id;
+                // $leave_history->records()->createMany($leave_record_history);
 
 
             }

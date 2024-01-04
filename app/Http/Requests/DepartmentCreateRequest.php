@@ -33,7 +33,7 @@ class DepartmentCreateRequest extends FormRequest
             'description' => 'nullable|string',
 
             'manager_id' => [
-                'required',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $all_manager_department_ids = [];

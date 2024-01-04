@@ -18,7 +18,6 @@ class UserJobHistory extends Model
         'responsibilities',
         'supervisor_name',
         'contact_information',
-        'salary',
         'work_location',
         'achievements',
         'created_by',

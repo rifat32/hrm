@@ -261,7 +261,13 @@ class AttendanceController extends Controller
                 $attendance_history_data['attendance_created_at'] = $attendance->created_at;
                 $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
 
-                $attendance_history = AttendanceHistory::create($attendance_history_data);
+                // $attendance_history = AttendanceHistory::create($attendance_history_data);
+
+
+
+
+
+                
 
 
 
@@ -534,7 +540,7 @@ class AttendanceController extends Controller
                     $attendance_history_data[] = $history_entry + $attendance->toArray();
                     }
 
-                    $employee->attendance_histories()->createMany($attendance_history_data);
+                    // $employee->attendance_histories()->createMany($attendance_history_data);
 
 
 
@@ -1825,7 +1831,7 @@ class AttendanceController extends Controller
                 ];
 
                 $attendance_history_data = $history_entry + $attendance->toArray();
-                $attendance_history = AttendanceHistory::create($attendance_history_data);
+                // $attendance_history = AttendanceHistory::create($attendance_history_data);
             }
 
 

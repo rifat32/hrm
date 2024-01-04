@@ -104,6 +104,10 @@ return [
 
 "setting_payroll_create",
 
+
+"business_times_update",
+       "business_times_view",
+
             ],
         ],
 
@@ -163,6 +167,10 @@ return [
 "setting_attendance_create",
 
 "setting_payroll_create",
+
+
+"business_times_update",
+       "business_times_view",
 
 
             ],
@@ -333,6 +341,9 @@ return [
 
 
 "setting_payroll_create",
+
+"business_times_update",
+       "business_times_view",
             ],
         ],
 
@@ -871,6 +882,9 @@ return [
 "attendance_delete",
 
 "setting_payroll_create",
+
+"business_times_update",
+       "business_times_view",
 
     ],
     "permissions_titles" => [

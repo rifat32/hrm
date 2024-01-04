@@ -6,29 +6,18 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ActivityLog extends Model
+class BusinessTime extends Model
 {
     use HasFactory;
 
-    protected $connection = 'logs';
-
     protected $fillable = [
-        "api_url",
-        "user",
-        "user_id",
-        "activity",
-        "description",
-        "ip_address",
-        "request_method",
-        "device"
+        "day",
+        "start_at",
+        "end_at",
+        "is_weekend",
+        "business_id",
     ];
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id','id');
-    }
-
-
-
+    
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
@@ -37,4 +26,6 @@ class ActivityLog extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+
+
 }

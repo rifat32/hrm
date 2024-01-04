@@ -78,7 +78,7 @@ class UserJobHistoryUpdateRequest extends FormRequest
             'responsibilities' => 'nullable|string',
             'supervisor_name' => 'nullable|string',
             'contact_information' => 'nullable|string',
-            'salary' => 'nullable|numeric',
+ 
             'work_location' => 'nullable|string',
             'achievements' => 'nullable|string',
         ];

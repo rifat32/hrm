@@ -46,7 +46,6 @@ class UserJobHistoryController extends Controller
  *     @OA\Property(property="responsibilities", type="string", format="string", example="Your Responsibilities"),
  *     @OA\Property(property="supervisor_name", type="string", format="string", example="Supervisor Name"),
  *     @OA\Property(property="contact_information", type="string", format="string", example="Contact Information"),
- *     @OA\Property(property="salary", type="number", format="float", example=50000.00),
  *     @OA\Property(property="work_location", type="string", format="string", example="Work Location"),
  *     @OA\Property(property="achievements", type="string", format="string", example="Your Achievements")
    *
@@ -148,7 +147,7 @@ class UserJobHistoryController extends Controller
  *     @OA\Property(property="responsibilities", type="string", format="string", example="Your Responsibilities"),
  *     @OA\Property(property="supervisor_name", type="string", format="string", example="Supervisor Name"),
  *     @OA\Property(property="contact_information", type="string", format="string", example="Contact Information"),
- *     @OA\Property(property="salary", type="number", format="float", example=50000.00),
+
  *     @OA\Property(property="work_location", type="string", format="string", example="Work Location"),
  *     @OA\Property(property="achievements", type="string", format="string", example="Your Achievements")
  *
@@ -229,7 +228,6 @@ class UserJobHistoryController extends Controller
                         'responsibilities',
                         'supervisor_name',
                         'contact_information',
-                        'salary',
                         'work_location',
                         'achievements',
                         // 'created_by',

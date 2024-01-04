@@ -21,6 +21,7 @@ use App\Http\Controllers\BusinessBackgroundImageController;
 
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessTierController;
+use App\Http\Controllers\BusinessTimesController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
@@ -201,6 +202,9 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
 Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);
+Route::put('/v1.0/users/update-joining-date', [UserManagementController::class, "updateUserJoiningDate"]);
+
+
 Route::put('/v1.0/users/update-emergency-contact', [UserManagementController::class, "updateEmergencyContact"]);
 Route::put('/v1.0/users/store-details', [UserManagementController::class, "storeUserDetails"]);
 Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
@@ -334,6 +338,19 @@ Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class,
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end business management section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// Garage Time Management
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::patch('/v1.0/business-times', [BusinessTimesController::class, "updateBusinessTimes"]);
+Route::get('/v1.0/business-times', [BusinessTimesController::class, "getBusinessTimes"]);
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// Garage Background Image Management
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // businesses Background Image Management

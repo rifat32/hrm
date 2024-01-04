@@ -86,47 +86,52 @@ class AuthRegisterBusinessRequest extends FormRequest
 
 
 
-            'work_shift.name' => 'required|string',
-            'work_shift.description' => 'nullable|string',
-            'work_shift.type' => 'required|string|in:regular,scheduled',
+            // 'work_shift.name' => 'required|string',
+            // 'work_shift.description' => 'nullable|string',
+            // 'work_shift.type' => 'required|string|in:regular,scheduled',
+            // 'work_shift.start_date' => 'nullable|date',
+            // 'work_shift.end_date' => 'nullable|date|after_or_equal:start_date',
+            // 'work_shift.break_type' => 'required|string|in:paid,unpaid',
+            // 'work_shift.break_hours' => 'required|numeric',
+            // 'work_shift.details' => 'required|array|min:7|max:7',
+            // 'work_shift.details.*.day' => 'required|numeric|between:0,6',
+            // 'work_shift.details.*.is_weekend' => 'required|boolean',
+            // 'work_shift.details.*.start_at' => [
+            //     'nullable',
+            //     'date_format:H:i:s',
+            //     function ($attribute, $value, $fail) {
+            //         $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+            //         $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+            //         if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+            //             $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+            //         }
+            //     },
+            // ],
+            // 'work_shift.details.*.end_at' => [
+            //     'nullable',
+            //     'date_format:H:i:s',
+            //     function ($attribute, $value, $fail) {
+            //         $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+            //         $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+            //         if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+            //             $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+            //         }
+            //     },
+            // ],
 
 
-            'work_shift.start_date' => 'nullable|date',
-            'work_shift.end_date' => 'nullable|date|after_or_equal:start_date',
 
 
-            'work_shift.break_type' => 'required|string|in:paid,unpaid',
-            'work_shift.break_hours' => 'required|numeric',
+            "times" => "required|array",
+             "times.*.day" => 'required|numeric',
+             "times.*.start_at" => 'required|date_format:H:i:s',
+             "times.*.end_at" => 'required|date_format:H:i:s',
+             "times.*.is_weekend" => ['required',"boolean"],
 
 
 
-            'work_shift.details' => 'required|array|min:7|max:7',
-            'work_shift.details.*.day' => 'required|numeric|between:0,6',
-            'work_shift.details.*.is_weekend' => 'required|boolean',
-            'work_shift.details.*.start_at' => [
-                'nullable',
-                'date_format:H:i:s',
-                function ($attribute, $value, $fail) {
-                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
-                    $isWeekend = request('details')[$index]['is_weekend'] ?? false;
-
-                    if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
-                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
-                    }
-                },
-            ],
-            'work_shift.details.*.end_at' => [
-                'nullable',
-                'date_format:H:i:s',
-                function ($attribute, $value, $fail) {
-                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
-                    $isWeekend = request('details')[$index]['is_weekend'] ?? false;
-
-                    if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
-                        $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
-                    }
-                },
-            ],
 
 
 
