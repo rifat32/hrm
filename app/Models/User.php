@@ -33,6 +33,7 @@ class User extends Authenticatable
         'employment_status_id',
         'joining_date',
         'salary_per_annum',
+        'weekly_contractual_hours' ,
         'phone',
         'image',
         'address_line_1',
@@ -47,6 +48,8 @@ class User extends Authenticatable
 
         'is_sponsorship_offered',
         "immigration_status",
+
+        'work_location_id',
 
 
 

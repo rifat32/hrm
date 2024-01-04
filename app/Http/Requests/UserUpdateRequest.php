@@ -168,6 +168,7 @@ class UserUpdateRequest extends FormRequest
 
         'joining_date' => "nullable|date",
         'salary_per_annum' => "nullable|numeric",
+        'weekly_contractual_hours' => 'nullable|numeric'
         ];
     }
 

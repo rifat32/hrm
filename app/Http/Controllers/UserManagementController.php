@@ -366,6 +366,8 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
 
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+     *  *               @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
@@ -520,6 +522,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+     *  *  *               @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
@@ -537,6 +540,7 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
      *
      *
      *
@@ -798,6 +802,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+     *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
@@ -1094,6 +1099,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+     *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
@@ -1108,6 +1114,7 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
      *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
      *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
      * {
      * "recruitment_process_id":1,
@@ -1226,11 +1233,19 @@ class UserManagementController extends Controller
             $user  =  tap($user_query)->update(
                 collect($request_data)->only([
                     'first_Name',
-                    'middle_Name',
                     'last_Name',
-                    'employee_id',
-                    'password',
+                    'middle_Name',
+                    "color_theme_name",
+                    'emergency_contact_details',
+                    'gender',
+                    'is_in_employee',
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    'salary_per_annum',
+                    'weekly_contractual_hours',
                     'phone',
+                    'image',
                     'address_line_1',
                     'address_line_2',
                     'country',
@@ -1238,15 +1253,11 @@ class UserManagementController extends Controller
                     'postcode',
                     "lat",
                     "long",
-                    "image",
-                    'gender',
-                    'is_in_employee',
-                    'designation_id',
-                    'employment_status_id',
-                    'joining_date',
-                    'salary',
-                    'emergency_contact_details',
-                    "immigration_status"
+                    'is_sponsorship_offered',
+                    "immigration_status",
+
+                    'work_location_id',
+
 
                 ])->toArray()
             )

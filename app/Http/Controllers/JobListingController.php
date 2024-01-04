@@ -44,7 +44,7 @@ class JobListingController extends Controller
  *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
  *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
  *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
- *     @OA\Property(property="work_location_id", type="integer", format="int", example="456")
+ *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
 
  *
  *
