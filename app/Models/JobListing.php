@@ -17,10 +17,7 @@ class JobListing extends Model
         'required_skills',
         'application_deadline',
         'posted_on',
-        'job_platform_id',
         'department_id',
-
-
         'minimum_salary',
         'maximum_salary',
         'experience_level',

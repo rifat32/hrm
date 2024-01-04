@@ -38,7 +38,7 @@ class JobListingController extends Controller
  *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
  *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
  *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
- *     @OA\Property(property="job_platform", type="string", format="{}", example={1,2}),
+ *     @OA\Property(property="job_platforms", type="string", format="{}", example={1,2}),
  *     @OA\Property(property="department_id", type="number", format="number", example="1"),
  * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
  *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
@@ -138,7 +138,7 @@ class JobListingController extends Controller
  *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
  *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
  *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
- *     @OA\Property(property="job_platform_id", type="number", format="number", example="1"),
+ *     @OA\Property(property="job_platforms", type="string", format="array", example={1,2,3}),
  *     @OA\Property(property="department_id", type="number", format="number", example="1"),
  *  * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
  *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
@@ -222,10 +222,7 @@ class JobListingController extends Controller
         'required_skills',
         'application_deadline',
         'posted_on',
-        'job_platform_id',
         'department_id',
-
-
         'minimum_salary',
         'maximum_salary',
         'experience_level',

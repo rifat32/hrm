@@ -3,32 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GetIdRequest;
-use App\Http\Requests\WorkLocationCreateRequest;
-use App\Http\Requests\WorkLocationUpdateRequest;
+use App\Http\Requests\RecruitmentProcessTypeCreateRequest;
+use App\Http\Requests\RecruitmentProcessTypeUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\DisabledWorkLocation;
+use App\Models\DisabledRecruitmentProcessType;
+use App\Models\RecruitmentProcessType;
 use App\Models\User;
-use App\Models\WorkLocation;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class WorkLocationController extends Controller
+class RecruitmentProcessTypeController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/work-locations",
-     *      operationId="createWorkLocation",
-     *      tags={"work_locations"},
+     *      path="/v1.0/recruitment-process-types",
+     *      operationId="createRecruitmentProcessType",
+     *      tags={"recruitment_process_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store work location",
-     *      description="This method is to store work location",
+     *      summary="This method is to store recruitment process type",
+     *      description="This method is to store recruitment process type",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -74,13 +74,13 @@ class WorkLocationController extends Controller
      *     )
      */
 
-    public function createWorkLocation(WorkLocationCreateRequest $request)
+    public function createRecruitmentProcessType(RecruitmentProcessTypeCreateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('work_location_create')) {
+                if (!$request->user()->hasPermissionTo('recruitment_process_type_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -103,12 +103,12 @@ class WorkLocationController extends Controller
 
 
 
-                $work_location =  WorkLocation::create($request_data);
+                $recruitment_process_type =  RecruitmentProcessType::create($request_data);
 
 
 
 
-                return response($work_location, 201);
+                return response($recruitment_process_type, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -119,14 +119,14 @@ class WorkLocationController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/work-locations",
-     *      operationId="updateWorkLocation",
-     *      tags={"work_locations"},
+     *      path="/v1.0/recruitment-process-types",
+     *      operationId="updateRecruitmentProcessType",
+     *      tags={"recruitment_process_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update work location ",
-     *      description="This method is to update work location",
+     *      summary="This method is to update recruitment process type ",
+     *      description="This method is to update recruitment process type",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -172,13 +172,13 @@ class WorkLocationController extends Controller
      *     )
      */
 
-    public function updateWorkLocation(WorkLocationUpdateRequest $request)
+    public function updateRecruitmentProcessType(RecruitmentProcessTypeUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('work_location_update')) {
+                if (!$request->user()->hasPermissionTo('recruitment_process_type_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -187,11 +187,11 @@ class WorkLocationController extends Controller
 
 
 
-                $work_location_query_params = [
+                $recruitment_process_type_query_params = [
                     "id" => $request_data["id"],
                 ];
 
-                $work_location  =  tap(WorkLocation::where($work_location_query_params))->update(
+                $recruitment_process_type  =  tap(RecruitmentProcessType::where($recruitment_process_type_query_params))->update(
                     collect($request_data)->only([
                         'name',
                         'description',
@@ -205,7 +205,7 @@ class WorkLocationController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$work_location) {
+                if (!$recruitment_process_type) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
@@ -214,7 +214,7 @@ class WorkLocationController extends Controller
 
 
 
-                return response($work_location, 201);
+                return response($recruitment_process_type, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -224,14 +224,14 @@ class WorkLocationController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/work-locations/toggle-active",
-     *      operationId="toggleActiveWorkLocation",
-     *      tags={"work_locations"},
+     *      path="/v1.0/recruitment-process-types/toggle-active",
+     *      operationId="toggleActiveRecruitmentProcessType",
+     *      tags={"recruitment_process_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to toggle work location",
-     *      description="This method is to toggle work location",
+     *      summary="This method is to toggle recruitment process type",
+     *      description="This method is to toggle recruitment process type",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -275,23 +275,23 @@ class WorkLocationController extends Controller
      *     )
      */
 
-    public function toggleActiveWorkLocation(GetIdRequest $request)
+    public function toggleActiveRecruitmentProcessType(GetIdRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_location_update')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_type_update')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $request_data = $request->validated();
 
-            $work_location =  WorkLocation::where([
+            $recruitment_process_type =  RecruitmentProcessType::where([
                 "id" => $request_data["id"],
             ])
                 ->first();
-            if (!$work_location) {
+            if (!$recruitment_process_type) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -301,23 +301,23 @@ class WorkLocationController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($work_location->business_id != NULL || $work_location->is_default != 1)) {
+                    if (($recruitment_process_type->business_id != NULL || $recruitment_process_type->is_default != 1)) {
                         return response()->json([
-                            "message" => "You do not have permission to update this work location due to role restrictions."
+                            "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                         ], 403);
                     } else {
                         $should_update = 1;
                     }
                 } else {
-                    if ($work_location->business_id != NULL) {
+                    if ($recruitment_process_type->business_id != NULL) {
                         return response()->json([
-                            "message" => "You do not have permission to update this work location due to role restrictions."
+                            "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                         ], 403);
-                    } else if ($work_location->is_default == 0) {
+                    } else if ($recruitment_process_type->is_default == 0) {
 
-                        if($work_location->created_by != auth()->user()->id) {
+                        if($recruitment_process_type->created_by != auth()->user()->id) {
                             return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                             ], 403);
                         }
                         else {
@@ -333,19 +333,19 @@ class WorkLocationController extends Controller
                     }
                 }
             } else {
-                if ($work_location->business_id != NULL) {
-                    if (($work_location->business_id != auth()->user()->business_id)) {
+                if ($recruitment_process_type->business_id != NULL) {
+                    if (($recruitment_process_type->business_id != auth()->user()->business_id)) {
                         return response()->json([
-                            "message" => "You do not have permission to update this work location due to role restrictions."
+                            "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                         ], 403);
                     } else {
                         $should_update = 1;
                     }
                 } else {
-                    if ($work_location->is_default == 0) {
-                        if ($work_location->created_by != auth()->user()->created_by) {
+                    if ($recruitment_process_type->is_default == 0) {
+                        if ($recruitment_process_type->created_by != auth()->user()->created_by) {
                             return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                             ], 403);
                         } else {
                             $should_disable = 1;
@@ -359,31 +359,31 @@ class WorkLocationController extends Controller
             }
 
             if ($should_update) {
-                $work_location->update([
-                    'is_active' => !$work_location->is_active
+                $recruitment_process_type->update([
+                    'is_active' => !$recruitment_process_type->is_active
                 ]);
             }
 
             if($should_disable) {
 
-                $disabled_work_location =    DisabledWorkLocation::where([
-                    'work_location_id' => $work_location->id,
+                $disabled_recruitment_process_type =    DisabledRecruitmentProcessType::where([
+                    'recruitment_process_type_id' => $recruitment_process_type->id,
                     'business_id' => auth()->user()->business_id,
                     'created_by' => auth()->user()->id,
                 ])->first();
-                if(!$disabled_work_location) {
-                    DisabledWorkLocation::create([
-                        'work_location_id' => $work_location->id,
+                if(!$disabled_recruitment_process_type) {
+                    DisabledRecruitmentProcessType::create([
+                        'recruitment_process_type_id' => $recruitment_process_type->id,
                         'business_id' => auth()->user()->business_id,
                         'created_by' => auth()->user()->id,
                     ]);
                 } else {
-                    $disabled_work_location->delete();
+                    $disabled_recruitment_process_type->delete();
                 }
             }
 
 
-            return response()->json(['message' => 'WorkLocation status updated successfully'], 200);
+            return response()->json(['message' => 'Recruitment Process Type status updated successfully'], 200);
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -393,9 +393,9 @@ class WorkLocationController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/work-locations",
-     *      operationId="getWorkLocations",
-     *      tags={"work_locations"},
+     *      path="/v1.0/recruitment-process-types",
+     *      operationId="getRecruitmentProcessTypes",
+     *      tags={"recruitment_process_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -443,8 +443,8 @@ class WorkLocationController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get work locations  ",
-     *      description="This method is to get work locations ",
+     *      summary="This method is to get recruitment process types  ",
+     *      description="This method is to get recruitment process types ",
      *
 
      *      @OA\Response(
@@ -481,11 +481,11 @@ class WorkLocationController extends Controller
      *     )
      */
 
-    public function getWorkLocations(Request $request)
+    public function getRecruitmentProcessTypes(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_location_view')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -497,34 +497,34 @@ class WorkLocationController extends Controller
 
 
 
-            $work_locations = WorkLocation::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $recruitment_process_types = DisabledRecruitmentProcessType::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('work_locations.business_id', NULL)
-                        ->where('work_locations.is_default', 1)
+                    return $query->where('recruitment_process_types.business_id', NULL)
+                        ->where('recruitment_process_types.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('work_locations.is_active', intval($request->is_active));
+                            return $query->where('recruitment_process_types.is_active', intval($request->is_active));
                         });
                 } else {
                     return $query
 
                     ->where(function($query) use($request) {
-                        $query->where('work_locations.business_id', NULL)
-                        ->where('work_locations.is_default', 1)
-                        ->where('work_locations.is_active', 1)
+                        $query->where('recruitment_process_types.business_id', NULL)
+                        ->where('recruitment_process_types.is_default', 1)
+                        ->where('recruitment_process_types.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
                             if(intval($request->is_active)) {
                                 return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_work_locations.created_by", [auth()->user()->id]);
+                                    $q->whereIn("disabled_recruitment_process_types.created_by", [auth()->user()->id]);
                                 });
                             }
 
                         })
                         ->orWhere(function ($query) use ($request) {
-                            $query->where('work_locations.business_id', NULL)
-                                ->where('work_locations.is_default', 0)
-                                ->where('work_locations.created_by', auth()->user()->id)
+                            $query->where('recruitment_process_types.business_id', NULL)
+                                ->where('recruitment_process_types.is_default', 0)
+                                ->where('recruitment_process_types.created_by', auth()->user()->id)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('work_locations.is_active', intval($request->is_active));
+                                    return $query->where('recruitment_process_types.is_active', intval($request->is_active));
                                 });
                         });
 
@@ -536,16 +536,16 @@ class WorkLocationController extends Controller
                     ->where(function($query) use($request, $created_by) {
 
 
-                        $query->where('work_locations.business_id', NULL)
-                        ->where('work_locations.is_default', 1)
-                        ->where('work_locations.is_active', 1)
+                        $query->where('recruitment_process_types.business_id', NULL)
+                        ->where('recruitment_process_types.is_default', 1)
+                        ->where('recruitment_process_types.is_active', 1)
                         ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_work_locations.created_by", [$created_by]);
+                            $q->whereIn("disabled_recruitment_process_types.created_by", [$created_by]);
                         })
                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
                             if(intval($request->is_active)) {
                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
+                                    $q->whereIn("disabled_recruitment_process_types.business_id",[auth()->user()->business_id]);
                                 });
                             }
 
@@ -553,15 +553,15 @@ class WorkLocationController extends Controller
 
 
                         ->orWhere(function ($query) use($request, $created_by){
-                            $query->where('work_locations.business_id', NULL)
-                                ->where('work_locations.is_default', 0)
-                                ->where('work_locations.created_by', $created_by)
-                                ->where('work_locations.is_active', 1)
+                            $query->where('recruitment_process_types.business_id', NULL)
+                                ->where('recruitment_process_types.is_default', 0)
+                                ->where('recruitment_process_types.created_by', $created_by)
+                                ->where('recruitment_process_types.is_active', 1)
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     if(intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
+                                            $q->whereIn("disabled_recruitment_process_types.business_id",[auth()->user()->business_id]);
                                         });
                                     }
 
@@ -571,10 +571,10 @@ class WorkLocationController extends Controller
                                 ;
                         })
                         ->orWhere(function ($query) use($request) {
-                            $query->where('work_locations.business_id', auth()->user()->business_id)
-                                ->where('work_locations.is_default', 0)
+                            $query->where('recruitment_process_types.business_id', auth()->user()->business_id)
+                                ->where('recruitment_process_types.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('work_locations.is_active', intval($request->is_active));
+                                    return $query->where('recruitment_process_types.is_active', intval($request->is_active));
                                 });;
                         });
                     });
@@ -584,23 +584,23 @@ class WorkLocationController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("work_locations.name", "like", "%" . $term . "%")
-                            ->orWhere("work_locations.description", "like", "%" . $term . "%");
+                        $query->where("recruitment_process_types.name", "like", "%" . $term . "%")
+                            ->orWhere("recruitment_process_types.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('work_locations.created_at', ">=", $request->start_date);
+                    return $query->where('recruitment_process_types.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('work_locations.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('recruitment_process_types.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("work_locations.id", $request->order_by);
+                    return $query->orderBy("recruitment_process_types.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("work_locations.id", "DESC");
+                    return $query->orderBy("recruitment_process_types.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -610,7 +610,7 @@ class WorkLocationController extends Controller
 
 
 
-            return response()->json($work_locations, 200);
+            return response()->json($recruitment_process_types, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -620,9 +620,9 @@ class WorkLocationController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/work-locations/{id}",
-     *      operationId="getWorkLocationById",
-     *      tags={"work_locations"},
+     *      path="/v1.0/recruitment-process-types/{id}",
+     *      operationId="getRecruitmentProcessTypeById",
+     *      tags={"recruitment_process_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -633,8 +633,8 @@ class WorkLocationController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get work location by id",
-     *      description="This method is to get work location by id",
+     *      summary="This method is to get recruitment process type by id",
+     *      description="This method is to get recruitment process type by id",
      *
 
      *      @OA\Response(
@@ -672,23 +672,23 @@ class WorkLocationController extends Controller
      */
 
 
-    public function getWorkLocationById($id, Request $request)
+    public function getRecruitmentProcessTypeById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_location_view')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_type_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $work_location =  WorkLocation::where([
-                "work_locations.id" => $id,
+            $recruitment_process_type =  DisabledRecruitmentProcessType::where([
+                "recruitment_process_types.id" => $id,
             ])
 
                 ->first();
 
-                if (!$work_location) {
+                if (!$recruitment_process_type) {
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -697,35 +697,35 @@ class WorkLocationController extends Controller
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
-                        if (($work_location->business_id != NULL || $work_location->is_default != 1)) {
+                        if (($recruitment_process_type->business_id != NULL || $recruitment_process_type->is_default != 1)) {
                             return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                             ], 403);
                         }
                     } else {
-                        if ($work_location->business_id != NULL) {
+                        if ($recruitment_process_type->business_id != NULL) {
                             return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                             ], 403);
-                        } else if ($work_location->is_default == 0 && $work_location->created_by != auth()->user()->id) {
+                        } else if ($recruitment_process_type->is_default == 0 && $recruitment_process_type->created_by != auth()->user()->id) {
                                 return response()->json([
-                                    "message" => "You do not have permission to update this work location due to role restrictions."
+                                    "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                                 ], 403);
 
                         }
                     }
                 } else {
-                    if ($work_location->business_id != NULL) {
-                        if (($work_location->business_id != auth()->user()->business_id)) {
+                    if ($recruitment_process_type->business_id != NULL) {
+                        if (($recruitment_process_type->business_id != auth()->user()->business_id)) {
                             return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                             ], 403);
                         }
                     } else {
-                        if ($work_location->is_default == 0) {
-                            if ($work_location->created_by != auth()->user()->created_by) {
+                        if ($recruitment_process_type->is_default == 0) {
+                            if ($recruitment_process_type->created_by != auth()->user()->created_by) {
                                 return response()->json([
-                                    "message" => "You do not have permission to update this work location due to role restrictions."
+                                    "message" => "You do not have permission to update this recruitment process type due to role restrictions."
                                 ], 403);
                             }
                         }
@@ -734,7 +734,7 @@ class WorkLocationController extends Controller
 
 
 
-            return response()->json($work_location, 200);
+            return response()->json($recruitment_process_type, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -745,9 +745,9 @@ class WorkLocationController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/work-locations/{ids}",
-     *      operationId="deleteWorkLocationsByIds",
-     *      tags={"work_locations"},
+     *      path="/v1.0/recruitment-process-types/{ids}",
+     *      operationId="deleteRecruitmentProcessTypesByIds",
+     *      tags={"recruitment_process_types"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -758,8 +758,8 @@ class WorkLocationController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete work location by id",
-     *      description="This method is to delete work location by id",
+     *      summary="This method is to delete recruitment process type by id",
+     *      description="This method is to delete recruitment process type by id",
      *
 
      *      @OA\Response(
@@ -796,32 +796,32 @@ class WorkLocationController extends Controller
      *     )
      */
 
-    public function deleteWorkLocationsByIds(Request $request, $ids)
+    public function deleteRecruitmentProcessTypesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_location_delete')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_type_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = WorkLocation::whereIn('id', $idsArray)
+            $existingIds = DisabledRecruitmentProcessType::whereIn('id', $idsArray)
                 ->when(empty($request->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
-                        return $query->where('work_locations.business_id', NULL)
-                            ->where('work_locations.is_default', 1);
+                        return $query->where('recruitment_process_types.business_id', NULL)
+                            ->where('recruitment_process_types.is_default', 1);
                     } else {
-                        return $query->where('work_locations.business_id', NULL)
-                            ->where('work_locations.is_default', 0)
-                            ->where('work_locations.created_by', $request->user()->id);
+                        return $query->where('recruitment_process_types.business_id', NULL)
+                            ->where('recruitment_process_types.is_default', 0)
+                            ->where('recruitment_process_types.created_by', $request->user()->id);
                     }
                 })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('work_locations.business_id', $request->user()->business_id)
-                        ->where('work_locations.is_default', 0);
+                    return $query->where('recruitment_process_types.business_id', $request->user()->business_id)
+                        ->where('recruitment_process_types.is_default', 0);
                 })
                 ->select('id')
                 ->get()
@@ -835,27 +835,26 @@ class WorkLocationController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::whereIn("work_location_id", $existingIds)->exists();
+            $user_exists =  User::whereIn("recruitment_process_type_id", $existingIds)->exists();
             if ($user_exists) {
-                $conflictingUsers = User::whereIn("work_location_id", $existingIds)->get([
+                $conflictingUsers = User::whereIn("recruitment_process_type_id", $existingIds)->get([
                     'id', 'first_Name',
                     'last_Name',
                 ]);
 
                 return response()->json([
-                    "message" => "Some users are associated with the specified work_locations",
+                    "message" => "Some users are associated with the specified recruitment_process_types",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
 
-            WorkLocation::destroy($existingIds);
-
+            DisabledRecruitmentProcessType::destroy($existingIds);
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
-
             return $this->sendError($e, 500, $request);
         }
     }
+
 }
 

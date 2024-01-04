@@ -38,6 +38,7 @@ use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\RecruitmentProcessTypeController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
@@ -557,17 +558,33 @@ Route::delete('/v1.0/job-types/{ids}', [JobTypeController::class, "deleteJobType
 // work locations  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-Route::post('/v1.0/work_locations', [WorkLocationController::class, "createWorkLocation"]);
-Route::put('/v1.0/work_locations', [WorkLocationController::class, "updateWorkLocation"]);
-Route::put('/v1.0/work_locations/toggle-active', [WorkLocationController::class, "toggleActiveWorkLocation"]);
-Route::get('/v1.0/work_locations', [WorkLocationController::class, "getWorkLocations"]);
-Route::get('/v1.0/work_locations/{id}', [WorkLocationController::class, "getWorkLocationById"]);
-Route::delete('/v1.0/work_locations/{ids}', [WorkLocationController::class, "deleteWorkLocationsByIds"]);
+Route::post('/v1.0/work-locations', [WorkLocationController::class, "createWorkLocation"]);
+Route::put('/v1.0/work-locations', [WorkLocationController::class, "updateWorkLocation"]);
+Route::put('/v1.0/work-locations/toggle-active', [WorkLocationController::class, "toggleActiveWorkLocation"]);
+Route::get('/v1.0/work-locations', [WorkLocationController::class, "getWorkLocations"]);
+Route::get('/v1.0/work-locations/{id}', [WorkLocationController::class, "getWorkLocationById"]);
+Route::delete('/v1.0/work-locations/{ids}', [WorkLocationController::class, "deleteWorkLocationsByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end work locations management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// work locations  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/recruitment-process-types', [RecruitmentProcessTypeController::class, "createRecruitmentProcessType"]);
+Route::put('/v1.0/recruitment-process-types', [RecruitmentProcessTypeController::class, "updateRecruitmentProcessType"]);
+Route::put('/v1.0/recruitment-process-types/toggle-active', [RecruitmentProcessTypeController::class, "toggleActiveRecruitmentProcessType"]);
+Route::get('/v1.0/recruitment-process-types', [RecruitmentProcessTypeController::class, "getRecruitmentProcessTypes"]);
+Route::get('/v1.0/recruitment-process-types/{id}', [RecruitmentProcessTypeController::class, "getRecruitmentProcessTypeById"]);
+Route::delete('/v1.0/recruitment-process-types/{ids}', [RecruitmentProcessTypeController::class, "deleteRecruitmentProcessTypesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end work locations management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // employment status management section

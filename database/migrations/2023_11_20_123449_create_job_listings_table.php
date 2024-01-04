@@ -32,8 +32,7 @@ class CreateJobListingsTable extends Migration
             $table->date("application_deadline");
             $table->date("posted_on");
 
-            $table->unsignedBigInteger("job_platform_id");
-            $table->foreign('job_platform_id')->references('id')->on('job_platforms')->onDelete('cascade');
+          
 
 
             $table->unsignedBigInteger("department_id");

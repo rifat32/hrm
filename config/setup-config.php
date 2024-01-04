@@ -82,6 +82,11 @@ return [
 "work_location_view",
 "work_location_delete",
 
+"recruitment_process_type_create",
+"recruitment_process_type_update",
+"recruitment_process_type_view",
+"recruitment_process_type_delete",
+
 
 "employment_status_create",
 "employment_status_update",
@@ -129,6 +134,11 @@ return [
 "work_location_update",
 "work_location_view",
 "work_location_delete",
+
+"recruitment_process_type_create",
+"recruitment_process_type_update",
+"recruitment_process_type_view",
+"recruitment_process_type_delete",
 
                 "business_create",
                 "business_update",
@@ -277,6 +287,11 @@ return [
 "work_location_update",
 "work_location_view",
 "work_location_delete",
+
+"recruitment_process_type_create",
+"recruitment_process_type_update",
+"recruitment_process_type_view",
+"recruitment_process_type_delete",
 
 
 
@@ -435,6 +450,11 @@ return [
 "work_location_view",
 "work_location_delete",
 
+"recruitment_process_type_create",
+"recruitment_process_type_update",
+"recruitment_process_type_view",
+"recruitment_process_type_delete",
+
                 "employment_status_create",
                 "employment_status_update",
                 "employment_status_view",
@@ -587,6 +607,11 @@ return [
 "work_location_update",
 "work_location_view",
 "work_location_delete",
+
+"recruitment_process_type_create",
+"recruitment_process_type_update",
+"recruitment_process_type_view",
+"recruitment_process_type_delete",
 
                 "employment_status_create",
                 "employment_status_update",
@@ -805,6 +830,11 @@ return [
 "work_location_view",
 "work_location_delete",
 
+"recruitment_process_type_create",
+"recruitment_process_type_update",
+"recruitment_process_type_view",
+"recruitment_process_type_delete",
+
 
 
        "employment_status_create",
@@ -1000,6 +1030,11 @@ return [
 "work_location_update" => "",
 "work_location_view" => "",
 "work_location_delete" => "",
+
+"recruitment_process_type_create" => "",
+"recruitment_process_type_update" => "",
+"recruitment_process_type_view" => "",
+"recruitment_process_type_delete" => "",
 
         "employment_status_create" => "Can create employment status",
         "employment_status_update" => "Can update employment status",
@@ -1222,6 +1257,11 @@ return [
         "work_location_update" => "update",
         "work_location_view" => "view",
         "work_location_delete" => "delete",
+
+        "recruitment_process_type_create" => "create",
+"recruitment_process_type_update" => "update",
+"recruitment_process_type_view" => "view",
+"recruitment_process_type_delete" => "delete",
 
 
 
@@ -1639,7 +1679,7 @@ return [
         ],
 
         [
-            "header" => "job_type",
+            "header" => "work_location",
             "permissions" => [
                 "work_location_create",
                 "work_location_update",
@@ -1647,6 +1687,18 @@ return [
                 "work_location_delete",
             ],
         ],
+
+        [
+            "header" => "recruitment_process_type",
+            "permissions" => [
+                "recruitment_process_type_create",
+                "recruitment_process_type_update",
+                "recruitment_process_type_view",
+                "recruitment_process_type_delete",
+            ],
+        ],
+
+
 
 
 
