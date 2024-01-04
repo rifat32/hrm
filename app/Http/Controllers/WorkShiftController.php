@@ -154,40 +154,53 @@ class WorkShiftController extends Controller
                     if(!$business_time) {
                     $error = [
                             "message" => "The given data was invalid.",
-                            "errors" => [("details".$index."day")=>["no business time found on this day"]]
+                            "errors" => [("details.".$index.".day")=>["no business time found on this day"]]
                      ];
                         throw new Exception(json_encode($error),422);
                     }
 
-                    if($business_time->is_weekend != $detail["is_weekend"]) {
+                    if($business_time->is_weekend == 1 && $detail["is_weekend"] != 1) {
                         $error = [
                                 "message" => "The given data was invalid.",
-                                "errors" => [("details".$index."is_weekend")=>["This is weekend day"]]
+                                "errors" => [("details.".$index.".is_weekend")=>["This is weekend day"]]
                          ];
                             throw new Exception(json_encode($error),422);
                      }
 
 
+                     if(empty($detail["start_at"])) {
+                        $detail["start_at"] =     $business_time->start_at;
 
-                    $request_start_at = Carbon::createFromFormat('H:i:s', $request_data["start_at"]);
-                    $request_end_at = Carbon::createFromFormat('H:i:s', $request_data["end_at"]);
+                     }
+                     if(empty($detail["end_at"])) {
+                        $detail["end_at"] =     $business_time->end_at;
 
+                     }
+
+
+
+                    $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
+                    $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
                     $business_start_at = Carbon::createFromFormat('H:i:s', $business_time->start_at);
                     $business_end_at = Carbon::createFromFormat('H:i:s', $business_time->end_at);
+
 
                     $difference_in_both_request  = $request_start_at->diffInHours($request_end_at);
                     $difference_in_both_start_at  = $business_start_at->diffInHours($request_start_at);
                     $difference_in_end_at_start_at  = $business_end_at->diffInHours($request_start_at);
-
                     $difference_in_both_end_at  = $business_end_at->diffInHours($business_end_at);
                     $difference_in_start_at_end_at  = $business_start_at->diffInHours($request_end_at);
+
+
+
+
 
 
                     if($difference_in_both_request < 0) {
                         $error = [
                             "message" => "The given data was invalid.",
                             "errors" => [
-                                ("details".$index."end_at")=>["end at should be greater than start at"]
+                                ("details.".$index.".end_at")=>["end at should be greater than start at"]
 
                                 ]
                      ];
@@ -198,17 +211,17 @@ class WorkShiftController extends Controller
                     if($difference_in_both_start_at < 0) {
                         $error = [
                             "message" => "The given data was invalid.",
-                            "errors" => [ ("details".$index."start_at")=>["start at should be in business working time"]]
+                            "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time $difference_in_both_start_at"]]
                      ];
                         throw new Exception(json_encode($error),422);
                     }
 
 
 
-                    if($difference_in_end_at_start_at > 0) {
+                    if($difference_in_end_at_start_at < 0) {
                         $error = [
                             "message" => "The given data was invalid.",
-                            "errors" => [ ("details".$index."start_at")=>["start at should be in business working time"]]
+                            "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
                      ];
                         throw new Exception(json_encode($error),422);
                     }
@@ -217,7 +230,7 @@ class WorkShiftController extends Controller
                     if($difference_in_both_end_at > 0) {
                         $error = [
                             "message" => "The given data was invalid.",
-                            "errors" => [ ("details".$index."end_at")=>["end at should be in business working time"]]
+                            "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
                      ];
                         throw new Exception(json_encode($error),422);
                     }
@@ -225,7 +238,7 @@ class WorkShiftController extends Controller
                     if($difference_in_start_at_end_at < 0) {
                         $error = [
                             "message" => "The given data was invalid.",
-                            "errors" => [ ("details".$index."end_at")=>["end at should be in business working time"]]
+                            "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
                      ];
                         throw new Exception(json_encode($error),422);
                     }
@@ -379,12 +392,104 @@ class WorkShiftController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
-                $check_employee = $this->checkEmployees($request_data["users"]);
-                if (!$check_employee["ok"]) {
-                    return response()->json([
-                        "message" => $check_employee["message"]
-                    ], $check_employee["status"]);
-                }
+                foreach($request_data['details'] as $index => $detail) {
+                    $business_time =   BusinessTime::where([
+                           "business_id" => auth()->user()->business_id,
+                           "day" => $detail["day"]
+                       ])
+                       ->first();
+                       if(!$business_time) {
+                       $error = [
+                               "message" => "The given data was invalid.",
+                               "errors" => [("details.".$index.".day")=>["no business time found on this day"]]
+                        ];
+                           throw new Exception(json_encode($error),422);
+                       }
+
+
+                       if($business_time->is_weekend == 1 && $detail["is_weekend"] != 1) {
+                           $error = [
+                                   "message" => "The given data was invalid.",
+                                   "errors" => [("details.".$index.".is_weekend")=>["This is weekend day"]]
+                            ];
+                               throw new Exception(json_encode($error),422);
+                        }
+
+                        if(empty($detail["start_at"])) {
+                            $detail["start_at"] =     $business_time->start_at;
+
+                         }
+                         if(empty($detail["end_at"])) {
+                            $detail["end_at"] =     $business_time->end_at;
+
+                         }
+
+                       $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
+                       $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
+
+                       $business_start_at = Carbon::createFromFormat('H:i:s', $business_time->start_at);
+                       $business_end_at = Carbon::createFromFormat('H:i:s', $business_time->end_at);
+
+                       $difference_in_both_request  = $request_start_at->diffInHours($request_end_at);
+                       $difference_in_both_start_at  = $business_start_at->diffInHours($request_start_at);
+                       $difference_in_end_at_start_at  = $business_end_at->diffInHours($request_start_at);
+
+                       $difference_in_both_end_at  = $business_end_at->diffInHours($business_end_at);
+                       $difference_in_start_at_end_at  = $business_start_at->diffInHours($request_end_at);
+
+
+                       if($difference_in_both_request < 0) {
+                           $error = [
+                               "message" => "The given data was invalid.",
+                               "errors" => [
+                                   ("details.".$index.".end_at")=>["end at should be greater than start at"]
+
+                                   ]
+                        ];
+                           throw new Exception(json_encode($error),422);
+                       }
+
+
+                       if($difference_in_both_start_at < 0) {
+                           $error = [
+                               "message" => "The given data was invalid.",
+                               "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
+                        ];
+                           throw new Exception(json_encode($error),422);
+                       }
+
+
+
+                       if($difference_in_end_at_start_at < 0) {
+                        $error = [
+                            "message" => "The given data was invalid.",
+                            "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
+                     ];
+                        throw new Exception(json_encode($error),422);
+                    }
+
+
+                       if($difference_in_both_end_at > 0) {
+                           $error = [
+                               "message" => "The given data was invalid.",
+                               "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
+                        ];
+                           throw new Exception(json_encode($error),422);
+                       }
+
+                       if($difference_in_start_at_end_at < 0) {
+                           $error = [
+                               "message" => "The given data was invalid.",
+                               "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
+                        ];
+                           throw new Exception(json_encode($error),422);
+                       }
+
+                   }
+
+
+
+
 
 
 

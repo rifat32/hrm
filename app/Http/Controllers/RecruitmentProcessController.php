@@ -498,7 +498,7 @@ class RecruitmentProcessController extends Controller
 
 
 
-            $recruitment_processes = DisabledRecruitmentProcess::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $recruitment_processes = RecruitmentProcess::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('recruitment_processes.business_id', NULL)
                         ->where('recruitment_processes.is_default', 1)
@@ -683,7 +683,7 @@ class RecruitmentProcessController extends Controller
                 ], 401);
             }
 
-            $recruitment_process =  DisabledRecruitmentProcess::where([
+            $recruitment_process =  RecruitmentProcess::where([
                 "recruitment_processes.id" => $id,
             ])
 
@@ -809,7 +809,7 @@ class RecruitmentProcessController extends Controller
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = DisabledRecruitmentProcess::whereIn('id', $idsArray)
+            $existingIds = RecruitmentProcess::whereIn('id', $idsArray)
                 ->when(empty($request->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
                         return $query->where('recruitment_processes.business_id', NULL)
@@ -849,7 +849,7 @@ class RecruitmentProcessController extends Controller
                 ], 409);
             }
 
-            DisabledRecruitmentProcess::destroy($existingIds);
+            RecruitmentProcess::destroy($existingIds);
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {

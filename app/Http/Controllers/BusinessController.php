@@ -413,13 +413,13 @@ if(!$user->hasRole('business_owner')) {
      *
       *   *      *    @OA\Property(property="times", type="string", format="array",example={
      *
-    *{"day":0,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":1,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":2,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-     *{"day":3,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":4,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":5,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true},
-    *{"day":6,"opening_time":"10:10:00","closing_time":"10:15:00","is_closed":true}
+    *{"day":0,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":1,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":2,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":3,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":4,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":5,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":6,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true}
      *
      * }),
      *

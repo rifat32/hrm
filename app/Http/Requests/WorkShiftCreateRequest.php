@@ -60,32 +60,31 @@ class WorkShiftCreateRequest extends FormRequest
             'users.*' => [
                 "numeric",
                 function ($attribute, $value, $fail) {
-                    $user = User::where("id", $value)->first();
+                    $all_manager_department_ids = [];
+                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+                    foreach ($manager_departments as $manager_department) {
+                        $all_manager_department_ids[] = $manager_department->id;
+                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+                    }
 
-                        if (!$user){
-                            // $fail("$attribute is invalid.");
-                            $fail("Employee does not exists.");
-                            return;
+                  $exists =  User::where(
+                    [
+                        "users.id" => $value,
+                        "users.business_id" => auth()->user()->business_id
 
-                        }
-                        if(empty($user->business_id)) {
-                            $fail("Employee belongs to another business.");
-                            return;
-                        }
+                    ])
+                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->first();
 
-                        if ($user->business_id != auth()->user()->business_id) {
-                            // $fail("$attribute is invalid.");
-                            $fail("Employee belongs to another business.");
-                            return;
+            if (!$exists) {
+                $fail("$attribute is invalid.");
+                return;
+            }
 
-                        }
 
-                        if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))  && !$user->hasRole(("business_manager" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))){
-                            // $fail("$attribute is invalid.");
-                            $fail("The user is not a employee");
-                            return;
 
-                        }
                 },
 
             ],

@@ -2837,6 +2837,7 @@ class UserManagementController extends Controller
                         );
                     },
                     "roles",
+                    "recruitment_processes"
                 ]
             )
 
@@ -3066,7 +3067,8 @@ class UserManagementController extends Controller
                     "roles",
                     "sponsorship_details",
                     "passport_details",
-                    "visa_details"
+                    "visa_details",
+                    "recruitment_processes"
 
 
 
@@ -3213,6 +3215,7 @@ class UserManagementController extends Controller
                     "employment_status",
                     "business"
 
+
                 ]
             )
                 ->where([
@@ -3322,7 +3325,8 @@ class UserManagementController extends Controller
                     "sponsorship_details",
                     "passport_details",
                     "visa_details",
-                    "work_shifts"
+                    "work_shifts",
+                    "recruitment_processes"
                 ]
 
             )
