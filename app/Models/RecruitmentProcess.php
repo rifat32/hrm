@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RecruitmentProcessType extends Model
+class RecruitmentProcess extends Model
 {
     use HasFactory;
     protected $fillable = [
@@ -20,7 +20,7 @@ class RecruitmentProcessType extends Model
 
     public function disabled()
     {
-        return $this->hasMany(DisabledRecruitmentProcessType::class, 'recruitment_process_type_id', 'id');
+        return $this->hasMany(DisabledRecruitmentProcess::class, 'recruitment_process_id', 'id');
     }
 
 

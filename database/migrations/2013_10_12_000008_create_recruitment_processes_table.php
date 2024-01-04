@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRecruitmentProcessTypesTable extends Migration
+class CreateRecruitmentProcessesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRecruitmentProcessTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('recruitment_process_types', function (Blueprint $table) {
+        Schema::create('recruitment_processes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
@@ -34,6 +34,6 @@ class CreateRecruitmentProcessTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('recruitment_process_types');
+        Schema::dropIfExists('recruitment_processes');
     }
 }

@@ -82,10 +82,10 @@ return [
 "work_location_view",
 "work_location_delete",
 
-"recruitment_process_type_create",
-"recruitment_process_type_update",
-"recruitment_process_type_view",
-"recruitment_process_type_delete",
+"recruitment_process_create",
+"recruitment_process_update",
+"recruitment_process_view",
+"recruitment_process_delete",
 
 
 "employment_status_create",
@@ -135,10 +135,10 @@ return [
 "work_location_view",
 "work_location_delete",
 
-"recruitment_process_type_create",
-"recruitment_process_type_update",
-"recruitment_process_type_view",
-"recruitment_process_type_delete",
+"recruitment_process_create",
+"recruitment_process_update",
+"recruitment_process_view",
+"recruitment_process_delete",
 
                 "business_create",
                 "business_update",
@@ -288,10 +288,10 @@ return [
 "work_location_view",
 "work_location_delete",
 
-"recruitment_process_type_create",
-"recruitment_process_type_update",
-"recruitment_process_type_view",
-"recruitment_process_type_delete",
+"recruitment_process_create",
+"recruitment_process_update",
+"recruitment_process_view",
+"recruitment_process_delete",
 
 
 
@@ -450,10 +450,10 @@ return [
 "work_location_view",
 "work_location_delete",
 
-"recruitment_process_type_create",
-"recruitment_process_type_update",
-"recruitment_process_type_view",
-"recruitment_process_type_delete",
+"recruitment_process_create",
+"recruitment_process_update",
+"recruitment_process_view",
+"recruitment_process_delete",
 
                 "employment_status_create",
                 "employment_status_update",
@@ -608,10 +608,10 @@ return [
 "work_location_view",
 "work_location_delete",
 
-"recruitment_process_type_create",
-"recruitment_process_type_update",
-"recruitment_process_type_view",
-"recruitment_process_type_delete",
+"recruitment_process_create",
+"recruitment_process_update",
+"recruitment_process_view",
+"recruitment_process_delete",
 
                 "employment_status_create",
                 "employment_status_update",
@@ -830,10 +830,10 @@ return [
 "work_location_view",
 "work_location_delete",
 
-"recruitment_process_type_create",
-"recruitment_process_type_update",
-"recruitment_process_type_view",
-"recruitment_process_type_delete",
+"recruitment_process_create",
+"recruitment_process_update",
+"recruitment_process_view",
+"recruitment_process_delete",
 
 
 
@@ -1031,10 +1031,10 @@ return [
 "work_location_view" => "",
 "work_location_delete" => "",
 
-"recruitment_process_type_create" => "",
-"recruitment_process_type_update" => "",
-"recruitment_process_type_view" => "",
-"recruitment_process_type_delete" => "",
+"recruitment_process_create" => "",
+"recruitment_process_update" => "",
+"recruitment_process_view" => "",
+"recruitment_process_delete" => "",
 
         "employment_status_create" => "Can create employment status",
         "employment_status_update" => "Can update employment status",
@@ -1258,10 +1258,10 @@ return [
         "work_location_view" => "view",
         "work_location_delete" => "delete",
 
-        "recruitment_process_type_create" => "create",
-"recruitment_process_type_update" => "update",
-"recruitment_process_type_view" => "view",
-"recruitment_process_type_delete" => "delete",
+        "recruitment_process_create" => "create",
+"recruitment_process_update" => "update",
+"recruitment_process_view" => "view",
+"recruitment_process_delete" => "delete",
 
 
 
@@ -1689,12 +1689,12 @@ return [
         ],
 
         [
-            "header" => "recruitment_process_type",
+            "header" => "recruitment_process",
             "permissions" => [
-                "recruitment_process_type_create",
-                "recruitment_process_type_update",
-                "recruitment_process_type_view",
-                "recruitment_process_type_delete",
+                "recruitment_process_create",
+                "recruitment_process_update",
+                "recruitment_process_view",
+                "recruitment_process_delete",
             ],
         ],
 

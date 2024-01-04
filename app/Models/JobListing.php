@@ -35,25 +35,25 @@ class JobListing extends Model
     // Define relationships with other tables
     public function job_type()
     {
-        return $this->belongsTo(JobType::class, "id",'job_type_id');
+        return $this->belongsTo(JobType::class, "job_type_id",'id');
     }
 
     public function work_location()
     {
-        return $this->belongsTo(WorkLocation::class, "id" ,'work_location_id');
+        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
     }
 
 
     // Define relationships if needed
 
     public function job_platforms() {
-        return $this->belongsToMany(JobListingJobPlatforms::class, 'job_listing_job_platforms', 'job_listing_id', 'job_platform_id');
+        return $this->belongsToMany(JobPlatform::class, 'job_listing_job_platforms', 'job_listing_id', 'job_platform_id');
     }
 
 
     public function department()
     {
-        return $this->belongsTo(Department::class, "id" , 'department_id');
+        return $this->belongsTo(Department::class, "department_id" , 'id');
     }
 
 

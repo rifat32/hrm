@@ -73,6 +73,11 @@ class User extends Authenticatable
     }
 
 
+    public function recruitment_processes() {
+        return $this->hasMany(UserRecruitmentProcess::class, 'user_id', 'id');
+    }
+
+
     public function designation() {
         return $this->belongsTo(Designation::class, 'designation_id', 'id');
     }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDisabledRecruitmentProcessTypesTable extends Migration
+class CreateDisabledRecruitmentProcessesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateDisabledRecruitmentProcessTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('disabled_recruitment_process_types', function (Blueprint $table) {
+        Schema::create('disabled_recruitment_processes', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger("recruitment_process_type_id");
-            $table->foreign('recruitment_process_type_id')->references('id')->on('recruitment_process_types')->onDelete('cascade');
+            $table->unsignedBigInteger("recruitment_process_id");
+            $table->foreign('recruitment_process_id')->references('id')->on('recruitment_processes')->onDelete('cascade');
 
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('users')->onDelete('cascade');
@@ -28,6 +28,8 @@ class CreateDisabledRecruitmentProcessTypesTable extends Migration
                 ->references('id')
                 ->on('users')
                 ->onDelete('set null');
+
+            
 
             $table->timestamps();
         });
@@ -40,6 +42,6 @@ class CreateDisabledRecruitmentProcessTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('disabled_recruitment_process_types');
+        Schema::dropIfExists('disabled_recruitment_processes');
     }
 }

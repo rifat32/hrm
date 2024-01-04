@@ -72,6 +72,7 @@ class CreateUsersTable extends Migration
 
 
 
+          
 
 
 

@@ -537,6 +537,25 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *
+     *
+     *
+     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
+     * {
+     * "recruitment_process_id":1,
+     * "description":"description",
+     * "attachments":{"/abcd.jpg","/efgh.jpg"}
+     * },
+     *      * {
+     * "recruitment_process_id":1,
+     * "description":"description",
+     * "attachments":{"/abcd.jpg","/efgh.jpg"}
+     * }
+     *
+     *
+     *
+     * }),
+     *
      *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
      *
      * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={}),
@@ -661,6 +680,11 @@ class UserManagementController extends Controller
             $user =  User::create($request_data);
             $user->departments()->sync($request_data['departments'], []);
             $user->assignRole($request_data['role']);
+
+            if(!empty($request_data["recruitment_processes"])) {
+                $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
+            }
+
 
 
             if (in_array($request["immigration_status"], ['sponsored'])) {
@@ -1084,6 +1108,21 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
      *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
+     * {
+     * "recruitment_process_id":1,
+     * "description":"description",
+     * "attachments":{"/abcd.jpg","/efgh.jpg"}
+     * },
+     *      * {
+     * "recruitment_process_id":1,
+     * "description":"description",
+     * "attachments":{"/abcd.jpg","/efgh.jpg"}
+     * }
+     *
+     *
+     *
+     * }),
      *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
      * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
      *
@@ -1290,6 +1329,11 @@ class UserManagementController extends Controller
 
             $user->departments()->sync($request_data['departments'], []);
             $user->syncRoles([$request_data['role']]);
+
+            if(!empty($request_data["recruitment_processes"])) {
+                $user->recruitment_processes()->delete();
+                $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
+            }
 
             if (!empty($request_data["work_shift_id"])) {
                 UserWorkShift::where([

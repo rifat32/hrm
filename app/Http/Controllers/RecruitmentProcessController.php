@@ -3,32 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GetIdRequest;
-use App\Http\Requests\RecruitmentProcessTypeCreateRequest;
-use App\Http\Requests\RecruitmentProcessTypeUpdateRequest;
+use App\Http\Requests\RecruitmentProcessCreateRequest;
+use App\Http\Requests\RecruitmentProcessUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\DisabledRecruitmentProcessType;
-use App\Models\RecruitmentProcessType;
+use App\Models\DisabledRecruitmentProcess;
+use App\Models\RecruitmentProcess;
 use App\Models\User;
+use App\Models\UserRecruitmentProcess;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class RecruitmentProcessTypeController extends Controller
+class RecruitmentProcessController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/recruitment-process-types",
-     *      operationId="createRecruitmentProcessType",
-     *      tags={"recruitment_process_types"},
+     *      path="/v1.0/recruitment-processes",
+     *      operationId="createRecruitmentProcess",
+     *      tags={"recruitment_processes"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store recruitment process type",
-     *      description="This method is to store recruitment process type",
+     *      summary="This method is to store recruitment process ",
+     *      description="This method is to store recruitment process ",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -74,13 +75,13 @@ class RecruitmentProcessTypeController extends Controller
      *     )
      */
 
-    public function createRecruitmentProcessType(RecruitmentProcessTypeCreateRequest $request)
+    public function createRecruitmentProcess(RecruitmentProcessCreateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('recruitment_process_type_create')) {
+                if (!$request->user()->hasPermissionTo('recruitment_process_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -103,12 +104,12 @@ class RecruitmentProcessTypeController extends Controller
 
 
 
-                $recruitment_process_type =  RecruitmentProcessType::create($request_data);
+                $recruitment_process =  RecruitmentProcess::create($request_data);
 
 
 
 
-                return response($recruitment_process_type, 201);
+                return response($recruitment_process, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -119,14 +120,14 @@ class RecruitmentProcessTypeController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/recruitment-process-types",
-     *      operationId="updateRecruitmentProcessType",
-     *      tags={"recruitment_process_types"},
+     *      path="/v1.0/recruitment-processes",
+     *      operationId="updateRecruitmentProcess",
+     *      tags={"recruitment_processes"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update recruitment process type ",
-     *      description="This method is to update recruitment process type",
+     *      summary="This method is to update recruitment process  ",
+     *      description="This method is to update recruitment process ",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -172,13 +173,13 @@ class RecruitmentProcessTypeController extends Controller
      *     )
      */
 
-    public function updateRecruitmentProcessType(RecruitmentProcessTypeUpdateRequest $request)
+    public function updateRecruitmentProcess(RecruitmentProcessUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('recruitment_process_type_update')) {
+                if (!$request->user()->hasPermissionTo('recruitment_process_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -187,11 +188,11 @@ class RecruitmentProcessTypeController extends Controller
 
 
 
-                $recruitment_process_type_query_params = [
+                $recruitment_process_query_params = [
                     "id" => $request_data["id"],
                 ];
 
-                $recruitment_process_type  =  tap(RecruitmentProcessType::where($recruitment_process_type_query_params))->update(
+                $recruitment_process  =  tap(RecruitmentProcess::where($recruitment_process_query_params))->update(
                     collect($request_data)->only([
                         'name',
                         'description',
@@ -205,7 +206,7 @@ class RecruitmentProcessTypeController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$recruitment_process_type) {
+                if (!$recruitment_process) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
@@ -214,7 +215,7 @@ class RecruitmentProcessTypeController extends Controller
 
 
 
-                return response($recruitment_process_type, 201);
+                return response($recruitment_process, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -224,14 +225,14 @@ class RecruitmentProcessTypeController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/recruitment-process-types/toggle-active",
-     *      operationId="toggleActiveRecruitmentProcessType",
-     *      tags={"recruitment_process_types"},
+     *      path="/v1.0/recruitment-processes/toggle-active",
+     *      operationId="toggleActiveRecruitmentProcess",
+     *      tags={"recruitment_processes"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to toggle recruitment process type",
-     *      description="This method is to toggle recruitment process type",
+     *      summary="This method is to toggle recruitment process ",
+     *      description="This method is to toggle recruitment process ",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -275,23 +276,23 @@ class RecruitmentProcessTypeController extends Controller
      *     )
      */
 
-    public function toggleActiveRecruitmentProcessType(GetIdRequest $request)
+    public function toggleActiveRecruitmentProcess(GetIdRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('recruitment_process_type_update')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_update')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $request_data = $request->validated();
 
-            $recruitment_process_type =  RecruitmentProcessType::where([
+            $recruitment_process =  RecruitmentProcess::where([
                 "id" => $request_data["id"],
             ])
                 ->first();
-            if (!$recruitment_process_type) {
+            if (!$recruitment_process) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -301,23 +302,23 @@ class RecruitmentProcessTypeController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($recruitment_process_type->business_id != NULL || $recruitment_process_type->is_default != 1)) {
+                    if (($recruitment_process->business_id != NULL || $recruitment_process->is_default != 1)) {
                         return response()->json([
-                            "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                            "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                         ], 403);
                     } else {
                         $should_update = 1;
                     }
                 } else {
-                    if ($recruitment_process_type->business_id != NULL) {
+                    if ($recruitment_process->business_id != NULL) {
                         return response()->json([
-                            "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                            "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                         ], 403);
-                    } else if ($recruitment_process_type->is_default == 0) {
+                    } else if ($recruitment_process->is_default == 0) {
 
-                        if($recruitment_process_type->created_by != auth()->user()->id) {
+                        if($recruitment_process->created_by != auth()->user()->id) {
                             return response()->json([
-                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                             ], 403);
                         }
                         else {
@@ -333,19 +334,19 @@ class RecruitmentProcessTypeController extends Controller
                     }
                 }
             } else {
-                if ($recruitment_process_type->business_id != NULL) {
-                    if (($recruitment_process_type->business_id != auth()->user()->business_id)) {
+                if ($recruitment_process->business_id != NULL) {
+                    if (($recruitment_process->business_id != auth()->user()->business_id)) {
                         return response()->json([
-                            "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                            "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                         ], 403);
                     } else {
                         $should_update = 1;
                     }
                 } else {
-                    if ($recruitment_process_type->is_default == 0) {
-                        if ($recruitment_process_type->created_by != auth()->user()->created_by) {
+                    if ($recruitment_process->is_default == 0) {
+                        if ($recruitment_process->created_by != auth()->user()->created_by) {
                             return response()->json([
-                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                             ], 403);
                         } else {
                             $should_disable = 1;
@@ -359,31 +360,31 @@ class RecruitmentProcessTypeController extends Controller
             }
 
             if ($should_update) {
-                $recruitment_process_type->update([
-                    'is_active' => !$recruitment_process_type->is_active
+                $recruitment_process->update([
+                    'is_active' => !$recruitment_process->is_active
                 ]);
             }
 
             if($should_disable) {
 
-                $disabled_recruitment_process_type =    DisabledRecruitmentProcessType::where([
-                    'recruitment_process_type_id' => $recruitment_process_type->id,
+                $disabled_recruitment_process =    DisabledRecruitmentProcess::where([
+                    'recruitment_process_id' => $recruitment_process->id,
                     'business_id' => auth()->user()->business_id,
                     'created_by' => auth()->user()->id,
                 ])->first();
-                if(!$disabled_recruitment_process_type) {
-                    DisabledRecruitmentProcessType::create([
-                        'recruitment_process_type_id' => $recruitment_process_type->id,
+                if(!$disabled_recruitment_process) {
+                    DisabledRecruitmentProcess::create([
+                        'recruitment_process_id' => $recruitment_process->id,
                         'business_id' => auth()->user()->business_id,
                         'created_by' => auth()->user()->id,
                     ]);
                 } else {
-                    $disabled_recruitment_process_type->delete();
+                    $disabled_recruitment_process->delete();
                 }
             }
 
 
-            return response()->json(['message' => 'Recruitment Process Type status updated successfully'], 200);
+            return response()->json(['message' => 'Recruitment Process status updated successfully'], 200);
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -393,9 +394,9 @@ class RecruitmentProcessTypeController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/recruitment-process-types",
-     *      operationId="getRecruitmentProcessTypes",
-     *      tags={"recruitment_process_types"},
+     *      path="/v1.0/recruitment-processes",
+     *      operationId="getRecruitmentProcesses",
+     *      tags={"recruitment_processes"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -443,8 +444,8 @@ class RecruitmentProcessTypeController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get recruitment process types  ",
-     *      description="This method is to get recruitment process types ",
+     *      summary="This method is to get recruitment process s  ",
+     *      description="This method is to get recruitment process s ",
      *
 
      *      @OA\Response(
@@ -481,11 +482,11 @@ class RecruitmentProcessTypeController extends Controller
      *     )
      */
 
-    public function getRecruitmentProcessTypes(Request $request)
+    public function getRecruitmentProcesses(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('recruitment_process_type_view')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -497,34 +498,34 @@ class RecruitmentProcessTypeController extends Controller
 
 
 
-            $recruitment_process_types = DisabledRecruitmentProcessType::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $recruitment_processes = DisabledRecruitmentProcess::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('recruitment_process_types.business_id', NULL)
-                        ->where('recruitment_process_types.is_default', 1)
+                    return $query->where('recruitment_processes.business_id', NULL)
+                        ->where('recruitment_processes.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('recruitment_process_types.is_active', intval($request->is_active));
+                            return $query->where('recruitment_processes.is_active', intval($request->is_active));
                         });
                 } else {
                     return $query
 
                     ->where(function($query) use($request) {
-                        $query->where('recruitment_process_types.business_id', NULL)
-                        ->where('recruitment_process_types.is_default', 1)
-                        ->where('recruitment_process_types.is_active', 1)
+                        $query->where('recruitment_processes.business_id', NULL)
+                        ->where('recruitment_processes.is_default', 1)
+                        ->where('recruitment_processes.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
                             if(intval($request->is_active)) {
                                 return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_recruitment_process_types.created_by", [auth()->user()->id]);
+                                    $q->whereIn("disabled_recruitment_processes.created_by", [auth()->user()->id]);
                                 });
                             }
 
                         })
                         ->orWhere(function ($query) use ($request) {
-                            $query->where('recruitment_process_types.business_id', NULL)
-                                ->where('recruitment_process_types.is_default', 0)
-                                ->where('recruitment_process_types.created_by', auth()->user()->id)
+                            $query->where('recruitment_processes.business_id', NULL)
+                                ->where('recruitment_processes.is_default', 0)
+                                ->where('recruitment_processes.created_by', auth()->user()->id)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('recruitment_process_types.is_active', intval($request->is_active));
+                                    return $query->where('recruitment_processes.is_active', intval($request->is_active));
                                 });
                         });
 
@@ -536,16 +537,16 @@ class RecruitmentProcessTypeController extends Controller
                     ->where(function($query) use($request, $created_by) {
 
 
-                        $query->where('recruitment_process_types.business_id', NULL)
-                        ->where('recruitment_process_types.is_default', 1)
-                        ->where('recruitment_process_types.is_active', 1)
+                        $query->where('recruitment_processes.business_id', NULL)
+                        ->where('recruitment_processes.is_default', 1)
+                        ->where('recruitment_processes.is_active', 1)
                         ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_recruitment_process_types.created_by", [$created_by]);
+                            $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
                         })
                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
                             if(intval($request->is_active)) {
                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_recruitment_process_types.business_id",[auth()->user()->business_id]);
+                                    $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
                                 });
                             }
 
@@ -553,15 +554,15 @@ class RecruitmentProcessTypeController extends Controller
 
 
                         ->orWhere(function ($query) use($request, $created_by){
-                            $query->where('recruitment_process_types.business_id', NULL)
-                                ->where('recruitment_process_types.is_default', 0)
-                                ->where('recruitment_process_types.created_by', $created_by)
-                                ->where('recruitment_process_types.is_active', 1)
+                            $query->where('recruitment_processes.business_id', NULL)
+                                ->where('recruitment_processes.is_default', 0)
+                                ->where('recruitment_processes.created_by', $created_by)
+                                ->where('recruitment_processes.is_active', 1)
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     if(intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_recruitment_process_types.business_id",[auth()->user()->business_id]);
+                                            $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
                                         });
                                     }
 
@@ -571,10 +572,10 @@ class RecruitmentProcessTypeController extends Controller
                                 ;
                         })
                         ->orWhere(function ($query) use($request) {
-                            $query->where('recruitment_process_types.business_id', auth()->user()->business_id)
-                                ->where('recruitment_process_types.is_default', 0)
+                            $query->where('recruitment_processes.business_id', auth()->user()->business_id)
+                                ->where('recruitment_processes.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('recruitment_process_types.is_active', intval($request->is_active));
+                                    return $query->where('recruitment_processes.is_active', intval($request->is_active));
                                 });;
                         });
                     });
@@ -584,23 +585,23 @@ class RecruitmentProcessTypeController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("recruitment_process_types.name", "like", "%" . $term . "%")
-                            ->orWhere("recruitment_process_types.description", "like", "%" . $term . "%");
+                        $query->where("recruitment_processes.name", "like", "%" . $term . "%")
+                            ->orWhere("recruitment_processes.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('recruitment_process_types.created_at', ">=", $request->start_date);
+                    return $query->where('recruitment_processes.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('recruitment_process_types.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('recruitment_processes.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("recruitment_process_types.id", $request->order_by);
+                    return $query->orderBy("recruitment_processes.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("recruitment_process_types.id", "DESC");
+                    return $query->orderBy("recruitment_processes.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -610,7 +611,7 @@ class RecruitmentProcessTypeController extends Controller
 
 
 
-            return response()->json($recruitment_process_types, 200);
+            return response()->json($recruitment_processes, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -620,9 +621,9 @@ class RecruitmentProcessTypeController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/recruitment-process-types/{id}",
-     *      operationId="getRecruitmentProcessTypeById",
-     *      tags={"recruitment_process_types"},
+     *      path="/v1.0/recruitment-processes/{id}",
+     *      operationId="getRecruitmentProcessById",
+     *      tags={"recruitment_processes"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -633,8 +634,8 @@ class RecruitmentProcessTypeController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get recruitment process type by id",
-     *      description="This method is to get recruitment process type by id",
+     *      summary="This method is to get recruitment process  by id",
+     *      description="This method is to get recruitment process  by id",
      *
 
      *      @OA\Response(
@@ -672,23 +673,23 @@ class RecruitmentProcessTypeController extends Controller
      */
 
 
-    public function getRecruitmentProcessTypeById($id, Request $request)
+    public function getRecruitmentProcessById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('recruitment_process_type_view')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $recruitment_process_type =  DisabledRecruitmentProcessType::where([
-                "recruitment_process_types.id" => $id,
+            $recruitment_process =  DisabledRecruitmentProcess::where([
+                "recruitment_processes.id" => $id,
             ])
 
                 ->first();
 
-                if (!$recruitment_process_type) {
+                if (!$recruitment_process) {
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -697,35 +698,35 @@ class RecruitmentProcessTypeController extends Controller
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
-                        if (($recruitment_process_type->business_id != NULL || $recruitment_process_type->is_default != 1)) {
+                        if (($recruitment_process->business_id != NULL || $recruitment_process->is_default != 1)) {
                             return response()->json([
-                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                             ], 403);
                         }
                     } else {
-                        if ($recruitment_process_type->business_id != NULL) {
+                        if ($recruitment_process->business_id != NULL) {
                             return response()->json([
-                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                             ], 403);
-                        } else if ($recruitment_process_type->is_default == 0 && $recruitment_process_type->created_by != auth()->user()->id) {
+                        } else if ($recruitment_process->is_default == 0 && $recruitment_process->created_by != auth()->user()->id) {
                                 return response()->json([
-                                    "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                    "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                                 ], 403);
 
                         }
                     }
                 } else {
-                    if ($recruitment_process_type->business_id != NULL) {
-                        if (($recruitment_process_type->business_id != auth()->user()->business_id)) {
+                    if ($recruitment_process->business_id != NULL) {
+                        if (($recruitment_process->business_id != auth()->user()->business_id)) {
                             return response()->json([
-                                "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                             ], 403);
                         }
                     } else {
-                        if ($recruitment_process_type->is_default == 0) {
-                            if ($recruitment_process_type->created_by != auth()->user()->created_by) {
+                        if ($recruitment_process->is_default == 0) {
+                            if ($recruitment_process->created_by != auth()->user()->created_by) {
                                 return response()->json([
-                                    "message" => "You do not have permission to update this recruitment process type due to role restrictions."
+                                    "message" => "You do not have permission to update this recruitment process  due to role restrictions."
                                 ], 403);
                             }
                         }
@@ -734,7 +735,7 @@ class RecruitmentProcessTypeController extends Controller
 
 
 
-            return response()->json($recruitment_process_type, 200);
+            return response()->json($recruitment_process, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -745,9 +746,9 @@ class RecruitmentProcessTypeController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/recruitment-process-types/{ids}",
-     *      operationId="deleteRecruitmentProcessTypesByIds",
-     *      tags={"recruitment_process_types"},
+     *      path="/v1.0/recruitment-processes/{ids}",
+     *      operationId="deleteRecruitmentProcessesByIds",
+     *      tags={"recruitment_processes"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -758,8 +759,8 @@ class RecruitmentProcessTypeController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete recruitment process type by id",
-     *      description="This method is to delete recruitment process type by id",
+     *      summary="This method is to delete recruitment process  by id",
+     *      description="This method is to delete recruitment process  by id",
      *
 
      *      @OA\Response(
@@ -796,32 +797,32 @@ class RecruitmentProcessTypeController extends Controller
      *     )
      */
 
-    public function deleteRecruitmentProcessTypesByIds(Request $request, $ids)
+    public function deleteRecruitmentProcessesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('recruitment_process_type_delete')) {
+            if (!$request->user()->hasPermissionTo('recruitment_process_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = DisabledRecruitmentProcessType::whereIn('id', $idsArray)
+            $existingIds = DisabledRecruitmentProcess::whereIn('id', $idsArray)
                 ->when(empty($request->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
-                        return $query->where('recruitment_process_types.business_id', NULL)
-                            ->where('recruitment_process_types.is_default', 1);
+                        return $query->where('recruitment_processes.business_id', NULL)
+                            ->where('recruitment_processes.is_default', 1);
                     } else {
-                        return $query->where('recruitment_process_types.business_id', NULL)
-                            ->where('recruitment_process_types.is_default', 0)
-                            ->where('recruitment_process_types.created_by', $request->user()->id);
+                        return $query->where('recruitment_processes.business_id', NULL)
+                            ->where('recruitment_processes.is_default', 0)
+                            ->where('recruitment_processes.created_by', $request->user()->id);
                     }
                 })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('recruitment_process_types.business_id', $request->user()->business_id)
-                        ->where('recruitment_process_types.is_default', 0);
+                    return $query->where('recruitment_processes.business_id', $request->user()->business_id)
+                        ->where('recruitment_processes.is_default', 0);
                 })
                 ->select('id')
                 ->get()
@@ -835,20 +836,20 @@ class RecruitmentProcessTypeController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::whereIn("recruitment_process_type_id", $existingIds)->exists();
-            if ($user_exists) {
-                $conflictingUsers = User::whereIn("recruitment_process_type_id", $existingIds)->get([
+            $user_recruitment_process_exists =  UserRecruitmentProcess::whereIn("recruitment_process_id", $existingIds)->exists();
+            if ($user_recruitment_process_exists) {
+                $conflictingUsers = User::whereIn("recruitment_process_id", $existingIds)->get([
                     'id', 'first_Name',
                     'last_Name',
                 ]);
 
                 return response()->json([
-                    "message" => "Some users are associated with the specified recruitment_process_types",
+                    "message" => "Some users are associated with the specified recruitment_processes",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
 
-            DisabledRecruitmentProcessType::destroy($existingIds);
+            DisabledRecruitmentProcess::destroy($existingIds);
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {

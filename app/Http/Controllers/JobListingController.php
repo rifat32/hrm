@@ -349,7 +349,7 @@ class JobListingController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $job_listings = JobListing::with("job_platforms")
+            $job_listings = JobListing::with("job_platforms","job_type","work_location","department")
             ->where(
                 [
                     "business_id" => $business_id
@@ -461,7 +461,7 @@ class JobListingController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $job_listing =  JobListing::with("job_platforms")
+            $job_listing =  JobListing::with("job_platforms","job_type","work_location","department")
             ->where([
                 "id" => $id,
                 "business_id" => $business_id

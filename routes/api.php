@@ -38,7 +38,7 @@ use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\RecruitmentProcessTypeController;
+use App\Http\Controllers\RecruitmentProcessController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
@@ -575,12 +575,12 @@ Route::delete('/v1.0/work-locations/{ids}', [WorkLocationController::class, "del
 // work locations  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-Route::post('/v1.0/recruitment-process-types', [RecruitmentProcessTypeController::class, "createRecruitmentProcessType"]);
-Route::put('/v1.0/recruitment-process-types', [RecruitmentProcessTypeController::class, "updateRecruitmentProcessType"]);
-Route::put('/v1.0/recruitment-process-types/toggle-active', [RecruitmentProcessTypeController::class, "toggleActiveRecruitmentProcessType"]);
-Route::get('/v1.0/recruitment-process-types', [RecruitmentProcessTypeController::class, "getRecruitmentProcessTypes"]);
-Route::get('/v1.0/recruitment-process-types/{id}', [RecruitmentProcessTypeController::class, "getRecruitmentProcessTypeById"]);
-Route::delete('/v1.0/recruitment-process-types/{ids}', [RecruitmentProcessTypeController::class, "deleteRecruitmentProcessTypesByIds"]);
+Route::post('/v1.0/recruitment-processes', [RecruitmentProcessController::class, "createRecruitmentProcess"]);
+Route::put('/v1.0/recruitment-processes', [RecruitmentProcessController::class, "updateRecruitmentProcess"]);
+Route::put('/v1.0/recruitment-processes/toggle-active', [RecruitmentProcessController::class, "toggleActiveRecruitmentProcess"]);
+Route::get('/v1.0/recruitment-processes', [RecruitmentProcessController::class, "getRecruitmentProcesses"]);
+Route::get('/v1.0/recruitment-processes/{id}', [RecruitmentProcessController::class, "getRecruitmentProcessById"]);
+Route::delete('/v1.0/recruitment-processes/{ids}', [RecruitmentProcessController::class, "deleteRecruitmentProcessesByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end work locations management section

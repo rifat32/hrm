@@ -9720,11 +9720,6 @@
                                         "format": "string",
                                         "example": "City X"
                                     },
-                                    "salary_range": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "$80,000 - $100,000"
-                                    },
                                     "required_skills": {
                                         "type": "string",
                                         "format": "string",
@@ -9740,15 +9735,44 @@
                                         "format": "date",
                                         "example": "2023-11-20"
                                     },
-                                    "job_platform_id": {
-                                        "type": "number",
-                                        "format": "number",
-                                        "example": "1"
+                                    "job_platforms": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
                                     },
                                     "department_id": {
                                         "type": "number",
                                         "format": "number",
                                         "example": "1"
+                                    },
+                                    "minimum_salary": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "80000"
+                                    },
+                                    "maximum_salary": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "100000"
+                                    },
+                                    "experience_level": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Mid-level"
+                                    },
+                                    "job_type_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "123"
+                                    },
+                                    "work_location_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": "456"
                                     }
                                 },
                                 "type": "object"
@@ -9855,7 +9879,7 @@
                                         "format": "date",
                                         "example": "2023-11-20"
                                     },
-                                    "job_platform": {
+                                    "job_platforms": {
                                         "type": "string",
                                         "format": "{}",
                                         "example": [
@@ -15125,6 +15149,520 @@
                 "summary": "This method is to delete project listing by id",
                 "description": "This method is to delete project listing by id",
                 "operationId": "deleteProjectsByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/recruitment-processes": {
+            "get": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to get recruitment process s  ",
+                "description": "This method is to get recruitment process s ",
+                "operationId": "getRecruitmentProcesses",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to update recruitment process  ",
+                "description": "This method is to update recruitment process ",
+                "operationId": "updateRecruitmentProcess",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to store recruitment process ",
+                "description": "This method is to store recruitment process ",
+                "operationId": "createRecruitmentProcess",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/recruitment-processes/toggle-active": {
+            "put": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to toggle recruitment process ",
+                "description": "This method is to toggle recruitment process ",
+                "operationId": "toggleActiveRecruitmentProcess",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/recruitment-processes/{id}": {
+            "get": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to get recruitment process  by id",
+                "description": "This method is to get recruitment process  by id",
+                "operationId": "getRecruitmentProcessById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/recruitment-processes/{ids}": {
+            "delete": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to delete recruitment process  by id",
+                "description": "This method is to delete recruitment process  by id",
+                "operationId": "deleteRecruitmentProcessesByIds",
                 "parameters": [
                     {
                         "name": "ids",
@@ -22239,6 +22777,28 @@
                                         "format": "number",
                                         "example": "1"
                                     },
+                                    "recruitment_processes": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "recruitment_process_id": 1,
+                                                "description": "description",
+                                                "attachments": [
+                                                    "/abcd.jpg",
+                                                    "/efgh.jpg"
+                                                ]
+                                            },
+                                            {
+                                                "recruitment_process_id": 1,
+                                                "description": "description",
+                                                "attachments": [
+                                                    "/abcd.jpg",
+                                                    "/efgh.jpg"
+                                                ]
+                                            }
+                                        ]
+                                    },
                                     "departments": {
                                         "type": "string",
                                         "format": "array",
@@ -24259,7 +24819,7 @@
                 ]
             }
         },
-        "/v1.0/work_locations": {
+        "/v1.0/work-locations": {
             "get": {
                 "tags": [
                     "work_locations"
@@ -24543,7 +25103,7 @@
                 ]
             }
         },
-        "/v1.0/work_locations/toggle-active": {
+        "/v1.0/work-locations/toggle-active": {
             "put": {
                 "tags": [
                     "work_locations"
@@ -24625,7 +25185,7 @@
                 ]
             }
         },
-        "/v1.0/work_locations/{id}": {
+        "/v1.0/work-locations/{id}": {
             "get": {
                 "tags": [
                     "work_locations"
@@ -24699,7 +25259,7 @@
                 ]
             }
         },
-        "/v1.0/work_locations/{ids}": {
+        "/v1.0/work-locations/{ids}": {
             "delete": {
                 "tags": [
                     "work_locations"
