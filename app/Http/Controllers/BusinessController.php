@@ -356,7 +356,7 @@ if(!$user->hasRole('business_owner')) {
 
 
 
-        $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1,$business);
+        $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1);
 
 
 
@@ -577,7 +577,7 @@ if(!$user->hasRole('business_owner')) {
             ]);
            }
 
-         $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1,$business);
+         $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1);
 
 
 

@@ -572,7 +572,7 @@ class WorkLocationController extends Controller
                         })
                         ->orWhere(function ($query) use($request) {
                             $query->where('work_locations.business_id', auth()->user()->business_id)
-                                ->where('work_locations.is_default', 0)
+                                // ->where('work_locations.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     return $query->where('work_locations.is_active', intval($request->is_active));
                                 });;

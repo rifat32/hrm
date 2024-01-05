@@ -14,6 +14,7 @@ use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
 use App\Models\User;
+use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use Exception;
 
@@ -628,7 +629,7 @@ trait BusinessUtil
 
     }
 
-    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1,$business)
+    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1)
     {
 
 
@@ -644,6 +645,15 @@ trait BusinessUtil
         DepartmentUser::create([
             "user_id" => $owner_id,
             "department_id" => $department->id
+        ]);
+
+        
+        WorkLocation::create([
+            'name' => ($business_name . " " . "Office"),
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => $business_id,
+            "created_by" => $owner_id
         ]);
 
 
