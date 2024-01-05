@@ -447,7 +447,7 @@ class UserUpdateV2Request extends FormRequest
             'is_sponsorship_offered' => "nullable|boolean",
 
 
-
+            "is_active_visa_details" => "required|boolean",
 
 
 

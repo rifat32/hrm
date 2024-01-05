@@ -29,7 +29,7 @@ class Attendance extends Model
 
         "status",
 
-
+        'work_location_id',
 
         "is_active",
         "business_id",
@@ -38,6 +38,11 @@ class Attendance extends Model
 
     public function employee(){
         return $this->hasOne(User::class,'id', 'employee_id');
+    }
+
+    public function work_location()
+    {
+        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
     }
 
 

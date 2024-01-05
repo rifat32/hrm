@@ -49,7 +49,8 @@ class UserEducationHistoryController extends Controller
  * @OA\Property(property="country", type="string", format="string", example="Your Country"),
  * @OA\Property(property="city", type="string", format="string", example="Your City"),
  * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="is_current", type="boolean", format="boolean", example=false)
+ * @OA\Property(property="is_current", type="boolean", format="boolean", example=false),
+ *  *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
  *
  *
  *
@@ -151,7 +152,8 @@ class UserEducationHistoryController extends Controller
  * @OA\Property(property="country", type="string", format="string", example="Your Country"),
  * @OA\Property(property="city", type="string", format="string", example="Your City"),
  * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="is_current", type="boolean", format="boolean", example=false)
+ * @OA\Property(property="is_current", type="boolean", format="boolean", example=false),
+ *  *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
 *
  *
 
@@ -236,6 +238,7 @@ class UserEducationHistoryController extends Controller
                         'city',
                         'postcode',
                         'is_current',
+                        "attachments"
 
                     ])->toArray()
                 )

@@ -69,6 +69,7 @@ class UserEducationHistoryCreateRequest extends FormRequest
             'city' => 'nullable|string',
             'postcode' => 'nullable|string',
             'is_current' => 'required|boolean',
+            'attachments' => 'present|array',
         ];
     }
 }

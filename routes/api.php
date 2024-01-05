@@ -298,6 +298,7 @@ Route::delete('/v1.0/user-address-histories/{ids}', [UserAddressHistoryControlle
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Route::post('/v1.0/user-assets/single-file-upload', [UserAssetController::class, "createUserAssetFileSingle"]);
 Route::post('/v1.0/user-assets', [UserAssetController::class, "createUserAsset"]);
+Route::put('/v1.0/user-assets/add-existing', [UserAssetController::class, "addExistingUserAsset"]);
 Route::put('/v1.0/user-assets', [UserAssetController::class, "updateUserAsset"]);
 Route::get('/v1.0/user-assets', [UserAssetController::class, "getUserAssets"]);
 Route::get('/v1.0/user-assets/{id}', [UserAssetController::class, "getUserAssetById"]);
@@ -714,7 +715,7 @@ Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAt
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // history details  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
+Route::get('/v1.0/histories/user-assets', [HistoryDetailsController::class, "getUserAssetHistory"]);
 Route::get('/v1.0/histories/user-passport-details', [HistoryDetailsController::class, "getUserPassportDetailsHistory"]);
 Route::get('/v1.0/histories/user-visa-details', [HistoryDetailsController::class, "getUserVisaDetailsHistory"]);
 Route::get('/v1.0/histories/user-sponsorship-details', [HistoryDetailsController::class, "getUserSponsorshipDetailsHistory"]);

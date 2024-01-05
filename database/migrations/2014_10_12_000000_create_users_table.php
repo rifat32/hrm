@@ -37,6 +37,10 @@ class CreateUsersTable extends Migration
             $table->double('weekly_contractual_hours')->nullable()->default(0);
 
 
+            $table->double('is_active_visa_details')->nullable()->default(0);
+
+
+
 
             $table->string('phone')->nullable();
             $table->string('image')->nullable();

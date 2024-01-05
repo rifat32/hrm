@@ -16,7 +16,7 @@ class UserEducationHistory extends Model
         'school_name',
         'graduation_date',
         'start_date',
-     
+
         'achievements',
         'description',
         'address',
@@ -25,8 +25,13 @@ class UserEducationHistory extends Model
         'postcode',
         'is_current',
         'created_by',
+        'attachments',
     ];
 
+    protected $casts = [
+        'attachments' => 'array',
+
+    ];
 
 
     public function user()

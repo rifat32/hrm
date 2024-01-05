@@ -32,6 +32,7 @@ class CreateUserEducationHistoriesTable extends Migration
             $table->string("city")->nullable();
             $table->string("postcode")->nullable();
             $table->boolean('is_current')->default(false);
+            $table->json('attachments')->nullable();
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')

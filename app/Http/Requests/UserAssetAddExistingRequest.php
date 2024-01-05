@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\UserAsset;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserAssetUpdateRequest extends FormRequest
+class UserAssetAddExistingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,7 +16,7 @@ class UserAssetUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return false;
     }
 
     /**
@@ -62,9 +62,9 @@ class UserAssetUpdateRequest extends FormRequest
             'id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+                function ($attribute, $value, $fail) use ($all_manager_department_ids) {
                     $exists = UserAsset::where('id', $value)
-                        ->where('user_assets.user_id', '=', $this->user_id)
+                        ->where('user_assets.business_id', '=', auth()->user()->business_id)
                         ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                             $query->whereIn("departments.id",$all_manager_department_ids);
                          })
@@ -75,14 +75,7 @@ class UserAssetUpdateRequest extends FormRequest
                     }
                 },
             ],
-            'name' => "required|string",
-            'code' => "required|string",
-            "is_working" => "required|boolean",
-            'serial_number' => "required|string",
-            'type' => "required|string",
-            'image' => "nullable|string",
-            'date' => "required|date",
-            'note' => "required|string",
+
         ];
     }
 }

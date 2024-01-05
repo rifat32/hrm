@@ -19,6 +19,7 @@ class UserAsset extends Model
         'image',
         'date',
         'note',
+        "business_id",
         'created_by',
     ];
 

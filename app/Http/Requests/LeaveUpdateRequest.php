@@ -150,7 +150,7 @@ class LeaveUpdateRequest extends FormRequest
             'start_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s',
             'end_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:date',
 
-            'attachments' => 'nullable|array',
+            'attachments' => 'present|array',
         ];
     }
 

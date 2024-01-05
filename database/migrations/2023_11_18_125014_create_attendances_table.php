@@ -21,7 +21,9 @@ class CreateAttendancesTable extends Migration
 
             $table->unsignedBigInteger("employee_id");
             $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
-
+            
+            $table->unsignedBigInteger("work_location_id")->nullable();
+            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('set null');
 
             $table->date('in_date');
 
@@ -63,8 +65,8 @@ class CreateAttendancesTable extends Migration
                 ->references('id')
                 ->on('users')
                 ->onDelete('set null');
-            
-                
+
+
 
             $table->timestamps();
         });

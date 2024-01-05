@@ -53,7 +53,8 @@ class AttendanceController extends Controller
      *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
-     * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1")
+     * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
      *
      *
      *
@@ -267,7 +268,7 @@ class AttendanceController extends Controller
 
 
 
-                
+
 
 
 
@@ -302,7 +303,9 @@ class AttendanceController extends Controller
      *    "in_time" : "08:44:00",
      * "out_time" : "12:44:00",
      * "in_date" : "2023-11-18",
-     * "does_break_taken" : 1
+     * "does_break_taken" : 1,
+     * "work_location_id" : 1
+     *
      *
      * }
      *
@@ -583,7 +586,8 @@ class AttendanceController extends Controller
      *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
-     *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1")
+     *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
+     *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
 
      *
      *         ),
@@ -777,7 +781,8 @@ class AttendanceController extends Controller
                         "break_type",
                         "break_hours",
                         "total_paid_hours",
-                        "regular_work_hours"
+                        "regular_work_hours",
+                        "work_location_id"
 
                         // "is_active",
                         // "business_id",
@@ -1080,6 +1085,7 @@ class AttendanceController extends Controller
                 "employee.departments" => function ($query) {
                     $query->select('departments.id', 'departments.name');
                 },
+                "work_location"
             ])
                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
@@ -1253,6 +1259,7 @@ class AttendanceController extends Controller
                 "employee.departments" => function ($query) {
                     $query->select('departments.id', 'departments.name');
                 },
+                "work_location"
             ])
 
                 ->where(
@@ -1507,6 +1514,7 @@ class AttendanceController extends Controller
                     'departments' => function ($query) use ($request) {
                         $query->select("departments.name");
                     },
+                    "work_location"
 
 
 

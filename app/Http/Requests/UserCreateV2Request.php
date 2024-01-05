@@ -449,6 +449,8 @@ class UserCreateV2Request extends FormRequest
 
         'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
 
+        "is_active_visa_details" => 'required|boolean',
+
         "sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
         "sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
         "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',

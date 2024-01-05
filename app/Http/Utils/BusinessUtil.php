@@ -5,6 +5,7 @@ namespace App\Http\Utils;
 
 use App\Models\Business;
 use App\Models\Department;
+use App\Models\DepartmentUser;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
@@ -631,7 +632,7 @@ trait BusinessUtil
     {
 
 
-        Department::create([
+     $department =  Department::create([
             "name" => $business_name,
             "location" => $address_line_1,
             "is_active" => 1,
@@ -639,6 +640,16 @@ trait BusinessUtil
             "business_id" => $business_id,
             "created_by" => $owner_id
         ]);
+
+        DepartmentUser::create([
+            "user_id" => $owner_id,
+            "department_id" => $department->id
+        ]);
+
+
+
+
+
         $attached_defaults = [];
         $defaultRoles = Role::where([
             "business_id" => NULL,

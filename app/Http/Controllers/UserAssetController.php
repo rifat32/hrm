@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SingleFileUploadRequest;
+use App\Http\Requests\UserAssetAddExistingRequest;
 use App\Http\Requests\UserAssetCreateRequest;
 use App\Http\Requests\UserAssetUpdateRequest;
 use App\Http\Utils\BusinessUtil;
@@ -10,6 +11,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\UserAsset;
+use App\Models\UserAssetHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -195,9 +197,22 @@ class UserAssetController extends Controller
 
 
                   $request_data["created_by"] = $request->user()->id;
+                  $request_data["business_id"] = $request->user()->business_id;
 
                   $user_asset =  UserAsset::create($request_data);
 
+
+
+                  $user_asset_history  =  UserAssetHistory::create([
+                    'user_id' => $user_asset->user_id,
+                    "user_asset_id" => $user_asset->id,
+
+                    "from_date" => now(),
+                    "to_date" => NULL,
+                    'created_by' => $request_data["created_by"]
+
+                  ]
+                  );
 
 
                   return response($user_asset, 201);
@@ -207,6 +222,136 @@ class UserAssetController extends Controller
               return $this->sendError($e, 500, $request);
           }
       }
+
+       /**
+       *
+       * @OA\Put(
+       *      path="/v1.0/user-assets/add-existing",
+       *      operationId="addExistingUserAsset",
+       *      tags={"user_assets"},
+       *       security={
+       *           {"bearerAuth": {}}
+       *       },
+       *      summary="This method is to add existing  user asset ",
+       *      description="This method is to add existing  user asset",
+       *
+       *  @OA\RequestBody(
+       *         required=true,
+       *         @OA\JsonContent(
+  *      @OA\Property(property="asset_id", type="number", format="number", example="1"),
+*     @OA\Property(property="user_id", type="integer", format="int", example=1)
+ *
+
+       *
+       *         ),
+       *      ),
+       *      @OA\Response(
+       *          response=200,
+       *          description="Successful operation",
+       *       @OA\JsonContent(),
+       *       ),
+       *      @OA\Response(
+       *          response=401,
+       *          description="Unauthenticated",
+       * @OA\JsonContent(),
+       *      ),
+       *        @OA\Response(
+       *          response=422,
+       *          description="Unprocesseble Content",
+       *    @OA\JsonContent(),
+       *      ),
+       *      @OA\Response(
+       *          response=403,
+       *          description="Forbidden",
+       *   @OA\JsonContent()
+       * ),
+       *  * @OA\Response(
+       *      response=400,
+       *      description="Bad Request",
+       *   *@OA\JsonContent()
+       *   ),
+       * @OA\Response(
+       *      response=404,
+       *      description="not found",
+       *   *@OA\JsonContent()
+       *   )
+       *      )
+       *     )
+       */
+
+       public function addExistingUserAsset(UserAssetAddExistingRequest $request)
+       {
+
+           try {
+               $this->storeActivity($request, "DUMMY activity","DUMMY description");
+               return DB::transaction(function () use ($request) {
+                   if (!$request->user()->hasPermissionTo('employee_asset_update')) {
+                       return response()->json([
+                           "message" => "You can not perform this action"
+                       ], 401);
+                   }
+
+                   $request_data = $request->validated();
+
+
+
+
+                   $user_asset_query_params = [
+                       "id" => $request_data["id"],
+                   ];
+                   $user_asset_prev = UserAsset::where($user_asset_query_params)
+                       ->first();
+                   if (!$user_asset_prev) {
+                       return response()->json([
+                           "message" => "no user document found"
+                       ], 404);
+                   }
+
+
+                   $user_asset  =  tap(UserAsset::where($user_asset_query_params))->update(
+                       collect($request_data)->only([
+                            'user_id',
+
+
+                       ])->toArray()
+                   )
+                       // ->with("somthing")
+
+                       ->first();
+                   if (!$user_asset) {
+                       return response()->json([
+                           "message" => "something went wrong."
+                       ], 500);
+                   }
+
+                   if($user_asset_prev->user_id != $user_asset->user_id) {
+                    UserAssetHistory::where([
+                        'user_id' => $user_asset_prev->user_id,
+                        "user_asset_id" => $user_asset_prev->id,
+                    ])
+                    ->update([
+                        "to_date" => now(),
+                    ]);
+                    $user_asset_history  =  UserAssetHistory::create([
+                        'user_id' => $user_asset->user_id,
+                        "user_asset_id" => $user_asset_prev->id,
+
+                        "from_date" => now(),
+                        "to_date" => NULL,
+                        'created_by' => $request_data["created_by"]
+
+                      ]
+                      );
+                   }
+
+                   return response($user_asset, 201);
+               });
+           } catch (Exception $e) {
+               error_log($e->getMessage());
+               return $this->sendError($e, 500, $request);
+           }
+       }
+
 
       /**
        *
@@ -295,13 +440,13 @@ class UserAssetController extends Controller
                   $user_asset_query_params = [
                       "id" => $request_data["id"],
                   ];
-                  // $user_asset_prev = UserAsset::where($user_asset_query_params)
-                  //     ->first();
-                  // if (!$user_asset_prev) {
-                  //     return response()->json([
-                  //         "message" => "no user document found"
-                  //     ], 404);
-                  // }
+                  $user_asset_prev = UserAsset::where($user_asset_query_params)
+                      ->first();
+                  if (!$user_asset_prev) {
+                      return response()->json([
+                          "message" => "no user document found"
+                      ], 404);
+                  }
 
                   $user_asset  =  tap(UserAsset::where($user_asset_query_params))->update(
                       collect($request_data)->only([
@@ -327,6 +472,25 @@ class UserAssetController extends Controller
                           "message" => "something went wrong."
                       ], 500);
                   }
+                  if($user_asset_prev->user_id != $user_asset->user_id) {
+                    UserAssetHistory::where([
+                        'user_id' => $user_asset_prev->user_id,
+                        "user_asset_id" => $user_asset_prev->id,
+                    ])
+                    ->update([
+                        "to_date" => now(),
+                    ]);
+                    $user_asset_history  =  UserAssetHistory::create([
+                        'user_id' => $user_asset->user_id,
+                        "user_asset_id" => $user_asset_prev->id,
+
+                        "from_date" => now(),
+                        "to_date" => NULL,
+                        'created_by' => $request_data["created_by"]
+
+                      ]
+                      );
+                   }
 
                   return response($user_asset, 201);
               });
@@ -450,6 +614,10 @@ class UserAssetController extends Controller
                   },
 
               ])
+              ->where([
+                "business_id" => auth()->user()->business_id
+              ])
+
               ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
@@ -464,7 +632,7 @@ class UserAssetController extends Controller
                   //        return $query->where('product_category_id', $request->product_category_id);
                   //    })
 
-                  ->when(!empty($request->user_id), function ($query) use ($request) {
+                  ->when(!empty($request->user_id), function ($query) use ($request,$all_manager_department_ids) {
                       return $query->where('user_assets.user_id', $request->user_id);
                   })
                 //   ->when(empty($request->user_id), function ($query) use ($request) {
@@ -560,7 +728,7 @@ class UserAssetController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+
               $all_manager_department_ids = [];
               $manager_departments = Department::where("manager_id", $request->user()->id)->get();
               foreach ($manager_departments as $manager_department) {
@@ -569,7 +737,7 @@ class UserAssetController extends Controller
               }
               $user_asset =  UserAsset::where([
                   "id" => $id,
-
+                  "business_id" => auth()->user()->business_id
               ])
               ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
@@ -580,6 +748,25 @@ class UserAssetController extends Controller
                       "message" => "no data found"
                   ], 404);
               }
+
+
+
+                // if(!empty($user_asset->user->departments[0])){
+                //     if(!in_array($user_asset->user->departments[0]->id,$all_manager_department_ids)){
+                //         return response()->json([
+                //             "message" => "The use assigned is not in your department"
+                //         ], 409);
+                //     }
+                // } else {
+                //     return response()->json([
+                //         "message" => "The use assigned don't have a department"
+                //     ], 409);
+                // }
+
+
+
+
+
 
               return response()->json($user_asset, 200);
           } catch (Exception $e) {
@@ -654,7 +841,7 @@ class UserAssetController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+
               $all_manager_department_ids = [];
               $manager_departments = Department::where("manager_id", $request->user()->id)->get();
               foreach ($manager_departments as $manager_department) {
@@ -666,6 +853,9 @@ class UserAssetController extends Controller
               ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
+             ->where([
+                "business_id" => auth()->user()->business_id
+              ])
                   ->select('id')
                   ->get()
                   ->pluck('id')

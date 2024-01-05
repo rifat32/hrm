@@ -565,6 +565,7 @@ class UserManagementController extends Controller
      * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={}),
      *
      *  *  * *  @OA\Property(property="immigration_status", type="string", format="string",example="british_citizen"),
+     *         @OA\Property(property="is_active_visa_details", type="boolean", format="boolean",example="1"),
 
      *     @OA\Property(property="sponsorship_details", type="string", format="string", example={
      *    "date_assigned": "2023-01-01",
@@ -1115,6 +1116,7 @@ class UserManagementController extends Controller
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
      *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
      *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     * *         @OA\Property(property="is_active_visa_details", type="boolean", format="boolean",example="1"),
      *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
      * {
      * "recruitment_process_id":1,
@@ -1243,6 +1245,7 @@ class UserManagementController extends Controller
                     'employment_status_id',
                     'joining_date',
                     'salary_per_annum',
+
                     'weekly_contractual_hours',
                     'phone',
                     'image',
@@ -1253,6 +1256,7 @@ class UserManagementController extends Controller
                     'postcode',
                     "lat",
                     "long",
+                    'is_active_visa_details',
                     'is_sponsorship_offered',
                     "immigration_status",
 
@@ -2622,6 +2626,7 @@ class UserManagementController extends Controller
                         );
                     },
                     "roles",
+                    "work_location"
                 ]
             )
 
@@ -2837,7 +2842,8 @@ class UserManagementController extends Controller
                         );
                     },
                     "roles",
-                    "recruitment_processes"
+                    "recruitment_processes",
+                    "work_location"
                 ]
             )
 
@@ -3068,7 +3074,8 @@ class UserManagementController extends Controller
                     "sponsorship_details",
                     "passport_details",
                     "visa_details",
-                    "recruitment_processes"
+                    "recruitment_processes",
+                    "work_location"
 
 
 
@@ -3213,7 +3220,8 @@ class UserManagementController extends Controller
                     "departments",
                     "designation",
                     "employment_status",
-                    "business"
+                    "business",
+                    "work_location"
 
 
                 ]
@@ -3326,7 +3334,8 @@ class UserManagementController extends Controller
                     "passport_details",
                     "visa_details",
                     "work_shifts",
-                    "recruitment_processes"
+                    "recruitment_processes",
+                    "work_location"
                 ]
 
             )

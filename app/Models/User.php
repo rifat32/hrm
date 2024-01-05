@@ -51,7 +51,7 @@ class User extends Authenticatable
         "immigration_status",
 
         'work_location_id',
-
+        "is_active_visa_details",
 
 
 
@@ -62,6 +62,11 @@ class User extends Authenticatable
         "created_by",
          'is_active'
     ];
+
+    public function work_location()
+    {
+        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
+    }
 
     public function business() {
         return $this->belongsTo(Business::class, 'business_id', 'id');
