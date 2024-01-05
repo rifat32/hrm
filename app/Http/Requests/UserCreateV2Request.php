@@ -82,6 +82,7 @@ class UserCreateV2Request extends FormRequest
                 if (!$role){
                          // $fail("$attribute is invalid.")
                          $fail("Role does not exists.");
+                         return;
 
                 }
 
@@ -89,17 +90,20 @@ class UserCreateV2Request extends FormRequest
                     if (empty($role->business_id)){
                         // $fail("$attribute is invalid.")
                       $fail("You don't have this role");
+                      return;
 
                   }
                     if ($role->business_id != auth()->user()->business_id){
                           // $fail("$attribute is invalid.")
                         $fail("You don't have this role");
+                        return;
 
                     }
                 } else {
                     if (!empty($role->business_id)){
                         // $fail("$attribute is invalid.")
                       $fail("You don't have this role");
+                      return;
 
                   }
                 }

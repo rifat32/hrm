@@ -41,21 +41,21 @@ class AttendanceCreateRequest extends FormRequest
                         $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                     }
 
-                  $exists =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
+                    $exists =  User::where(
+                        [
+                            "users.id" => $value,
+                            "users.business_id" => auth()->user()->business_id
 
-                    ])
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->first();
+                        ])
+                        ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                            $query->whereIn("departments.id",$all_manager_department_ids);
+                         })
+                         ->first();
 
-            if (!$exists) {
-                $fail("$attribute is invalid.");
-                return;
-            }
+                if (!$exists) {
+                    $fail("$attribute is invalid.");
+                    return;
+                }
 
 
 

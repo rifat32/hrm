@@ -32,8 +32,8 @@ class WorkShiftUpdateRequest extends FormRequest
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $work_shift = WorkShift::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->exists();
+                        ->where('work_shifts.business_id', '=', auth()->user()->business_id)
+                        ->first();
 
                     if (!$work_shift) {
                         $fail("$attribute is invalid.");
@@ -58,8 +58,8 @@ class WorkShiftUpdateRequest extends FormRequest
 
 
             'type' => 'required|string|in:regular,scheduled',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'departments' => 'present|array',
             'departments.*' => [
                 'numeric',
