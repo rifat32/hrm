@@ -238,7 +238,7 @@ class UserAssetController extends Controller
        *  @OA\RequestBody(
        *         required=true,
        *         @OA\JsonContent(
-  *      @OA\Property(property="asset_id", type="number", format="number", example="1"),
+  *      @OA\Property(property="id", type="number", format="number", example="1"),
 *     @OA\Property(property="user_id", type="integer", format="int", example=1)
  *
 

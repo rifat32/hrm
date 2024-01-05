@@ -135,11 +135,11 @@ class UserCreateV2Request extends FormRequest
                         ->whereHas("details", function($query) use($business_weekend_days) {
 
                             $query->where(function($query) use ($business_weekend_days) {
-                                $query->whereIn("work_shifts.day",$business_weekend_days)
+                                $query->whereIn("work_shift_details.day",$business_weekend_days)
                                 ->where("is_weekend",1);
                             })
                             ->where(function($query) use ($business_weekend_days) {
-                                $query->whereNotIn("work_shifts.day",$business_weekend_days)
+                                $query->whereNotIn("work_shift_details.day",$business_weekend_days)
                                 ->where("is_weekend",0);
                             });
 
