@@ -356,7 +356,7 @@ if(!$user->hasRole('business_owner')) {
 
 
 
-        $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1);
+        $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1,$business);
 
 
 
@@ -491,6 +491,7 @@ if(!$user->hasRole('business_owner')) {
      */
     public function registerUserWithBusiness(AuthRegisterBusinessRequest $request) {
 
+
         try{
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
      return  DB::transaction(function ()use (&$request) {
@@ -546,12 +547,6 @@ if(!$user->hasRole('business_owner')) {
 
 
 
-        $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1);
-
-
-
-
-
 
 
         $user->email_verified_at = now();
@@ -564,9 +559,6 @@ if(!$user->hasRole('business_owner')) {
         $user->resetPasswordExpires = Carbon::now()->subDays(-1);
 
         $user->save();
-
-
-
 
 
 
@@ -584,6 +576,9 @@ if(!$user->hasRole('business_owner')) {
                 "is_weekend"=> $business_time["is_weekend"],
             ]);
            }
+
+         $this->storeDefaultsToBusiness($business->id,$business->name,$business->owner_id,$business->address_line_1,$business);
+
 
 
 

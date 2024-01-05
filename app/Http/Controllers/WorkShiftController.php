@@ -135,6 +135,7 @@ class WorkShiftController extends Controller
     {
 
         try {
+
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             return DB::transaction(function () use ($request) {
@@ -246,10 +247,10 @@ class WorkShiftController extends Controller
                 }
 
 
-
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
+                $request_data["is_default"] = false;
 
                 $request_data["attendances_count"] = 0;
                 $work_shift =  WorkShift::create($request_data);
@@ -384,12 +385,14 @@ class WorkShiftController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('work_shift_update')) {
+
+                if (!$request->user()->hasPermissionTo('work_shift_update') || !$request->user()->hasRole('superadmin')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
+
                 $request_data = $request->validated();
 
                 foreach($request_data['details'] as $index => $detail) {
@@ -495,15 +498,8 @@ class WorkShiftController extends Controller
 
                 $work_shift_query_params = [
                     "id" => $request_data["id"],
-                    "business_id" => $business_id
                 ];
-                $work_shift_prev = WorkShift::where($work_shift_query_params)
-                    ->first();
-                if (!$work_shift_prev) {
-                    return response()->json([
-                        "message" => "no work shift found"
-                    ], 404);
-                }
+
 
                 $work_shift  =  tap(WorkShift::where($work_shift_query_params))->update(
                     collect($request_data)->only([
@@ -531,10 +527,13 @@ class WorkShiftController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
                 $work_shift->departments()->delete();
                 $work_shift->departments()->sync($request_data['departments'], []);
+
                 $work_shift->users()->delete();
                 $work_shift->users()->sync($request_data['users'], []);
+
                 $work_shift->details()->delete();
                 $work_shift->details()->createMany($request_data['details']);
                 return response($work_shift, 201);
@@ -592,8 +591,9 @@ class WorkShiftController extends Controller
      * required=true,
      * example="1"
      * ),
-
-     * *  @OA\Parameter(
+     *
+     *
+     * @OA\Parameter(
      * name="order_by",
      * in="query",
      * description="order_by",
@@ -644,18 +644,61 @@ class WorkShiftController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_shift_view')) {
+            if (!$request->user()->hasPermissionTo('work_shift_view') || !$request->user()->hasRole('superadmin')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+    $business_weekend_days = [];
+
+            if(!empty(auth()->user()->business_id)) {
+                $business_weekend_days = BusinessTime::where([
+                    "is_weekend" => 1,
+                    "business_id" => auth()->user()->business_id,
+                ])
+                ->pluck("day");
+
+            }
+
+
+
             $work_shifts = WorkShift::with("details","departments","users")
-                ->where(
-                [
-                    "work_shifts.business_id" => $business_id
-                ]
-            )
+
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($business_weekend_days) {
+                return $query->where([
+                    "work_shifts.business_id" => auth()->user()->business_id
+                ])
+                ->orWhere(function($query) use($business_weekend_days) {
+
+                    $query
+                    ->where([
+                        "is_default" => 1,
+                        "business_id" => NULL
+                    ])
+                    ->whereHas("details", function($query) use($business_weekend_days) {
+
+                        $query->where(function($query) use ($business_weekend_days) {
+                            $query->whereIn("work_shifts.day",$business_weekend_days)
+                            ->where("is_weekend",1);
+                        })
+                        ->where(function($query) use ($business_weekend_days) {
+                            $query->whereNotIn("work_shifts.day",$business_weekend_days)
+                            ->where("is_weekend",0);
+                        });
+
+                    });
+
+                });
+
+            })
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
+
+                return $query->where([
+                    "work_shifts.is_default" => 1,
+                    "work_shifts.business_id" => NULL
+                ]);
+
+            })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -669,6 +712,12 @@ class WorkShiftController extends Controller
                 ->when(!isset($request->is_personal), function ($query) use ($request) {
                     return $query->where('work_shifts.is_personal', 0);
                 })
+
+
+                ->when(isset($request->is_default), function ($query) use ($request) {
+                    return $query->where('work_shifts.is_default', intval($request->is_personal));
+                })
+
 
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
@@ -945,7 +994,8 @@ class WorkShiftController extends Controller
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = WorkShift::where([
-                "business_id" => $business_id
+                "business_id" => $business_id,
+                "is_default" => 0
             ])
                 ->whereIn('id', $idsArray)
                 ->select('id')

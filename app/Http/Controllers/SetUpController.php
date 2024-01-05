@@ -20,6 +20,7 @@ use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
 use App\Models\SocialSite;
+use App\Models\WorkShift;
 
 class SetUpController extends Controller
 {
@@ -321,8 +322,6 @@ return "swagger generated";
         }
 
 
-
-
         SettingLeave::create([
             'start_month' => 1,
             'approval_level' => "multiple",
@@ -347,6 +346,123 @@ return "swagger generated";
             "created_by" => $admin->id,
         ]);
 
+
+
+
+        $default_work_shift_data_1 = [
+            'name' => 'main work shift',
+            'type' => 'regular',
+            'description' => '',
+            'is_personal' => false,
+            'break_type' => 'unpaid',
+            'break_hours' => 1,
+            "attendances_count" => 0,
+            'details' => [
+                [
+                    'day' => '0',
+                    'start_at' => '',
+                    'end_at' => '',
+                    'is_weekend' => 1,
+                ],
+                [
+                    'day' => '1',
+                    'start_at' => '',
+                    'end_at' => '',
+                    'is_weekend' => 1,
+                ],
+                [
+                    'day' => '2',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '3',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '4',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '5',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '6',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+            ],
+        ];
+
+        $default_work_shift_1 = WorkShift::create($default_work_shift_data_1);
+        $default_work_shift_1->details()->createMany($default_work_shift_data_1['details']);
+
+        $default_work_shift_data_2 = [
+            'name' => 'main work shift',
+            'type' => 'regular',
+            'description' => '',
+            'is_personal' => false,
+            'break_type' => 'unpaid',
+            'break_hours' => 1,
+            "attendances_count" => 0,
+            'details' => [
+                [
+                    'day' => '0',
+                    'start_at' => '',
+                    'end_at' => '',
+                    'is_weekend' => 1,
+                ],
+                [
+                    'day' => '1',
+                    'start_at' => '',
+                    'end_at' => '',
+                    'is_weekend' => 1,
+                ],
+                [
+                    'day' => '2',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '3',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '4',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '5',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+                [
+                    'day' => '6',
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
+                ],
+            ],
+        ];
+
+
+                $default_work_shift_2 = WorkShift::create($default_work_shift_data_2);
+                $default_work_shift_2->details()->createMany($default_work_shift_data_2['details']);
 
 
 

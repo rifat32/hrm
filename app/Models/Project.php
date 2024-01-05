@@ -17,7 +17,6 @@ class Project extends Model
         'end_date',
         'status',
         'department_id',
-
         "is_active",
         "business_id",
         "created_by"

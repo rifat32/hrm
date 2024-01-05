@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Department;
 use App\Models\User;
+use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WorkShiftUpdateRequest extends FormRequest
@@ -26,7 +27,28 @@ class WorkShiftUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required|numeric',
+            'id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $work_shift = WorkShift::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$work_shift) {
+                        $fail("$attribute is invalid.");
+                        return;
+                    }
+                    if($work_shift->is_default == 1 && $work_shift->business_id == NULL && !auth()->user()->hasRole("superadmin")){
+
+                            $fail("$attribute is invalid. you are not a super admin.");
+                            return;
+
+                    }
+
+                },
+            ],
+
             'name' => 'required|string',
             'description' => 'nullable|string',
             'is_personal' => 'required|boolean',

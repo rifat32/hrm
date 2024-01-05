@@ -26,6 +26,8 @@ class CreateWorkShiftsTable extends Migration
             $table->date('end_date')->nullable();
 
 
+            $table->boolean("is_default")->default(false);
+
             $table->boolean("is_active")->default(true);
             $table->boolean("is_business_default")->default(false);
             $table->boolean("is_personal")->default(false);

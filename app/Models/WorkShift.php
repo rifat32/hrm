@@ -23,6 +23,7 @@ class WorkShift extends Model
         'start_date',
         'end_date',
 
+        "is_default",
         "is_active",
         "business_id",
         "created_by"

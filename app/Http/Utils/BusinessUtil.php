@@ -13,6 +13,7 @@ use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
 use App\Models\User;
+use App\Models\WorkShift;
 use Exception;
 
 trait BusinessUtil
@@ -626,7 +627,7 @@ trait BusinessUtil
 
     }
 
-    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1)
+    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1,$business)
     {
 
 
@@ -672,8 +673,24 @@ trait BusinessUtil
 
        $this->loadDefaultSettingLeave($business_id);
 
+       $this->loadDefaultAttendance($business_id);
 
-$this->loadDefaultAttendance($business_id);
+
+
+
+       $default_work_shift_data = [
+        'name' => 'default work shift',
+        'type' => 'regular',
+        'description' => '',
+        'is_personal' => false,
+        'break_type' => 'unpaid',
+        'break_hours' => 1,
+        "attendances_count" => 0,
+        'details' => $business->times->toArray()
+    ];
+
+    $default_work_shift = WorkShift::create($default_work_shift_data);
+    $default_work_shift->details()->createMany($default_work_shift_data['details']);
 
 
 

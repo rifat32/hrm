@@ -93,14 +93,7 @@ class ProjectController extends Controller
 
                 $request_data = $request->validated();
 
-                if (!empty($request_data["parent_id"])) {
-                    $check_department = $this->checkDepartment($request_data["parent_id"]);
-                    if (!$check_department["ok"]) {
-                        return response()->json([
-                            "message" => $check_department["message"]
-                        ], $check_department["status"]);
-                    }
-                }
+
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
@@ -339,7 +332,8 @@ class ProjectController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $projects = Project::where(
+            $projects = Project::with("department")
+            ->where(
                 [
                     "business_id" => $business_id
                 ]
@@ -348,7 +342,6 @@ class ProjectController extends Controller
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("location", "like", "%" . $term . "%")
                             ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })

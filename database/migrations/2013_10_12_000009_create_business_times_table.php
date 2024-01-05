@@ -16,8 +16,8 @@ class CreateBusinessTimesTable extends Migration
         Schema::create('business_times', function (Blueprint $table) {
             $table->id();
             $table->integer("day");
-            $table->time("start_at");
-            $table->time("end_at");
+            $table->time('start_at')->nullable();
+            $table->time('end_at')->nullable();
             $table->boolean("is_weekend");
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
