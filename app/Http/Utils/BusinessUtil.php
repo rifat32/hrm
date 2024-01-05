@@ -629,7 +629,7 @@ trait BusinessUtil
 
     }
 
-    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1)
+    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1,$business)
     {
 
 
@@ -647,7 +647,7 @@ trait BusinessUtil
             "department_id" => $department->id
         ]);
 
-        
+
         WorkLocation::create([
             'name' => ($business_name . " " . "Office"),
             "is_active" => 1,
@@ -707,7 +707,10 @@ trait BusinessUtil
         'break_type' => 'unpaid',
         'break_hours' => 1,
         "attendances_count" => 0,
-        'details' => $business->times->toArray()
+        'details' => $business->times->toArray(),
+        "is_business_default" => 1,
+        "is_default" => 1,
+        "business_id" => $business_id,
     ];
 
     $default_work_shift = WorkShift::create($default_work_shift_data);

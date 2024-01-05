@@ -102,7 +102,7 @@ class AttendanceMultipleCreateRequest extends FormRequest
 
 
             'attendance_details.*.does_break_taken' => "required|boolean",
-            
+
 
             'attendance_details.*.work_location_id' => [
                 "required",
@@ -161,7 +161,7 @@ class AttendanceMultipleCreateRequest extends FormRequest
                                 })
                                 ->orWhere(function ($query) use($value)  {
                                     $query->where("work_locations.id",$value)->where('work_locations.business_id', auth()->user()->business_id)
-                                        ->where('work_locations.is_default', 0)
+                                        // ->where('work_locations.is_default', 0)
                                         ->where('work_locations.is_active', 1);
 
                                 });

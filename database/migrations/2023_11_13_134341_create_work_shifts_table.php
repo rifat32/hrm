@@ -38,7 +38,7 @@ class CreateWorkShiftsTable extends Migration
 
 
 
-            $table->unsignedBigInteger("business_id");
+            $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
             $table->unsignedBigInteger("created_by")->nullable();

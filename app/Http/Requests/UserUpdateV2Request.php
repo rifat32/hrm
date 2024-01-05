@@ -114,22 +114,52 @@ class UserUpdateV2Request extends FormRequest
 
 
 
-        'work_shift_id' => [
-            "nullable",
-            'numeric',
-            function ($attribute, $value, $fail) {
-                if(!empty($value)){
-                    $exists = WorkShift::where('id', $value)
-                    ->where('work_shifts.business_id', '=', auth()->user()->business_id)
-                    ->exists();
+            'work_shift_id' => [
+                "nullable",
+                'numeric',
+                function ($attribute, $value, $fail) {
 
-                if (!$exists) {
-                    $fail("$attribute is invalid.");
-                }
-                }
 
-            },
-        ],
+                    if(!empty($value)){
+                        $business_weekend_days = BusinessTime::where([
+                            "is_weekend" => 1,
+                            "business_id" => auth()->user()->business_id,
+                        ])
+                        ->pluck("day");
+                        $exists = WorkShift::where('id', $value)
+                        ->where([
+                            "work_shifts.business_id" => auth()->user()->business_id
+                        ])
+                        ->orWhere(function($query) use($business_weekend_days) {
+
+                            $query
+                            ->where([
+                                "is_default" => 1,
+                                "business_id" => NULL
+                            ])
+                            ->whereHas("details", function($query) use($business_weekend_days) {
+
+                                $query->where(function($query) use ($business_weekend_days) {
+                                    $query->whereIn("work_shifts.day",$business_weekend_days)
+                                    ->where("is_weekend",1);
+                                })
+                                ->where(function($query) use ($business_weekend_days) {
+                                    $query->whereNotIn("work_shifts.day",$business_weekend_days)
+                                    ->where("is_weekend",0);
+                                });
+
+                            });
+
+                        })
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                    }
+
+                },
+            ],
 
             'departments' => 'required|array',
             'departments.*' =>  ['numeric',
@@ -275,7 +305,7 @@ class UserUpdateV2Request extends FormRequest
                                 })
                                 ->orWhere(function ($query) use($value)  {
                                     $query->where("work_locations.id",$value)->where('work_locations.business_id', auth()->user()->business_id)
-                                        ->where('work_locations.is_default', 0)
+                                        // ->where('work_locations.is_default', 0)
                                         ->where('work_locations.is_active', 1);
 
                                 });

@@ -357,6 +357,7 @@ return "swagger generated";
             'break_type' => 'unpaid',
             'break_hours' => 1,
             "attendances_count" => 0,
+            "is_default"=> 1,
             'details' => [
                 [
                     'day' => '0',
@@ -414,6 +415,7 @@ return "swagger generated";
             'break_type' => 'unpaid',
             'break_hours' => 1,
             "attendances_count" => 0,
+            "is_default"=> 1,
             'details' => [
                 [
                     'day' => '0',

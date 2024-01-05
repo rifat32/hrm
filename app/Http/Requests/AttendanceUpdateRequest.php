@@ -124,7 +124,7 @@ class AttendanceUpdateRequest extends FormRequest
                                 })
                                 ->orWhere(function ($query) use($value)  {
                                     $query->where("work_locations.id",$value)->where('work_locations.business_id', auth()->user()->business_id)
-                                        ->where('work_locations.is_default', 0)
+                                        // ->where('work_locations.is_default', 0)
                                         ->where('work_locations.is_active', 1);
 
                                 });

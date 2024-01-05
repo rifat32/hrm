@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
@@ -31,6 +32,9 @@ class UserCreateV2Request extends FormRequest
      */
     public function rules()
     {
+
+
+
         return [
         'first_Name' => 'required|string|max:255',
         'middle_Name' => 'nullable|string|max:255',
@@ -109,9 +113,39 @@ class UserCreateV2Request extends FormRequest
             "nullable",
             'numeric',
             function ($attribute, $value, $fail) {
+
+
                 if(!empty($value)){
+                    $business_weekend_days = BusinessTime::where([
+                        "is_weekend" => 1,
+                        "business_id" => auth()->user()->business_id,
+                    ])
+                    ->pluck("day");
                     $exists = WorkShift::where('id', $value)
-                    ->where('work_shifts.business_id', '=', auth()->user()->business_id)
+                    ->where([
+                        "work_shifts.business_id" => auth()->user()->business_id
+                    ])
+                    ->orWhere(function($query) use($business_weekend_days) {
+
+                        $query
+                        ->where([
+                            "is_default" => 1,
+                            "business_id" => NULL
+                        ])
+                        ->whereHas("details", function($query) use($business_weekend_days) {
+
+                            $query->where(function($query) use ($business_weekend_days) {
+                                $query->whereIn("work_shifts.day",$business_weekend_days)
+                                ->where("is_weekend",1);
+                            })
+                            ->where(function($query) use ($business_weekend_days) {
+                                $query->whereNotIn("work_shifts.day",$business_weekend_days)
+                                ->where("is_weekend",0);
+                            });
+
+                        });
+
+                    })
                     ->exists();
 
                 if (!$exists) {
@@ -415,7 +449,7 @@ class UserCreateV2Request extends FormRequest
                             })
                             ->orWhere(function ($query) use($value)  {
                                 $query->where("work_locations.id",$value)->where('work_locations.business_id', auth()->user()->business_id)
-                                    ->where('work_locations.is_default', 0)
+                                    // ->where('work_locations.is_default', 0)
                                     ->where('work_locations.is_active', 1);
 
                             });

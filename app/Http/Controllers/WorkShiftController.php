@@ -386,7 +386,7 @@ class WorkShiftController extends Controller
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
 
-                if (!$request->user()->hasPermissionTo('work_shift_update') || !$request->user()->hasRole('superadmin')) {
+                if (!$request->user()->hasPermissionTo('work_shift_update') && !$request->user()->hasRole('superadmin')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -644,7 +644,7 @@ class WorkShiftController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_shift_view') || !$request->user()->hasRole('superadmin')) {
+            if (!$request->user()->hasPermissionTo('work_shift_view') && !$request->user()->hasRole('superadmin')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
