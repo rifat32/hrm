@@ -17,6 +17,10 @@ return [
                 "business_tier_view",
                 "business_tier_delete",
 
+                "work_shift_update",
+                "work_shift_view",
+
+
 
        "user_create",
        "user_update",

@@ -169,16 +169,7 @@ class WorkShiftController extends Controller
                      }
 
 
-                     if(empty($detail["start_at"])) {
-                        $detail["start_at"] =     $business_time->start_at;
-
-                     }
-                     if(empty($detail["end_at"])) {
-                        $detail["end_at"] =     $business_time->end_at;
-
-                     }
-
-
+                     if(!empty($detail["start_at"]) && !empty($detail["end_at"] && !empty($business_time->start_at) && !empty($business_time->end_at)) ) {
 
                     $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
                     $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
@@ -243,6 +234,11 @@ class WorkShiftController extends Controller
                      ];
                         throw new Exception(json_encode($error),422);
                     }
+                     }
+
+
+
+
 
                 }
 
@@ -386,7 +382,7 @@ class WorkShiftController extends Controller
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
 
-                if (!$request->user()->hasPermissionTo('work_shift_update') && !$request->user()->hasRole('superadmin')) {
+                if (!$request->user()->hasPermissionTo('work_shift_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -418,14 +414,7 @@ class WorkShiftController extends Controller
                                throw new Exception(json_encode($error),422);
                         }
 
-                        if(empty($detail["start_at"])) {
-                            $detail["start_at"] =     $business_time->start_at;
-
-                         }
-                         if(empty($detail["end_at"])) {
-                            $detail["end_at"] =     $business_time->end_at;
-
-                         }
+                        if(!empty($detail["start_at"]) && !empty($detail["end_at"] && !empty($business_time->start_at) && !empty($business_time->end_at)) ) {
 
                        $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
                        $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
@@ -487,6 +476,7 @@ class WorkShiftController extends Controller
                         ];
                            throw new Exception(json_encode($error),422);
                        }
+                    }
 
                    }
 
@@ -644,7 +634,7 @@ class WorkShiftController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_shift_view') && !$request->user()->hasRole('superadmin')) {
+            if (!$request->user()->hasPermissionTo('work_shift_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
