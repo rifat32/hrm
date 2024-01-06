@@ -76,7 +76,7 @@ class CreateUsersTable extends Migration
             $table->boolean('is_sponsorship_offered')->default(0)->nullable();
 
             $table->unsignedBigInteger("work_location_id")->nullable();
-            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('set null');
+            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
 
 

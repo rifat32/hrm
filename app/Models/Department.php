@@ -11,7 +11,7 @@ class Department extends Model
     use HasFactory;
     protected $fillable = [
         "name",
-        "location",
+        "work_location_id",
         "description",
         "is_active",
         "manager_id",
@@ -131,6 +131,10 @@ class Department extends Model
     //     return $childrenData;
     // }
 
+    public function work_location()
+    {
+        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
+    }
 
     public function manager(){
         return $this->belongsTo(User::class,'manager_id', 'id');

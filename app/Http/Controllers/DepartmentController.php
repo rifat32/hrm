@@ -35,7 +35,7 @@ class DepartmentController extends Controller
      *         @OA\JsonContent(
 
      *    @OA\Property(property="name", type="string", format="string",example="name"),
-     *    @OA\Property(property="location", type="string", format="string",example="location"),
+     *    @OA\Property(property="work_location_id", type="string", format="string",example="1"),
      *    @OA\Property(property="description", type="string", format="string",example="description"),
      *   *    @OA\Property(property="manager_id", type="number", format="number",example="1"),
      * *   *    @OA\Property(property="parent_id", type="number", format="number",example="1")
@@ -129,7 +129,7 @@ class DepartmentController extends Controller
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
      *    @OA\Property(property="name", type="string", format="string",example="name"),
-     *    @OA\Property(property="location", type="string", format="string",example="location"),
+     *    @OA\Property(property="work_location_id", type="string", format="string",example="1"),
      *    @OA\Property(property="description", type="string", format="string",example="description"),
      *    @OA\Property(property="manager_id", type="number", format="number",example="1"),
      *    @OA\Property(property="parent_id", type="number", format="number",example="1")
@@ -243,7 +243,7 @@ class DepartmentController extends Controller
                 $department  =  tap(Department::where($department_query_params))->update(
                     collect($request_data)->only([
                         "name",
-                        "location",
+                        "work_location",
                         "description",
                         // "is_active",
                         "manager_id",
@@ -507,7 +507,6 @@ class DepartmentController extends Controller
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("location", "like", "%" . $term . "%")
                             ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })

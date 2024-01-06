@@ -10,6 +10,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledJobPlatform;
 use App\Models\JobListing;
+use App\Models\JobListingJobPlatforms;
 use App\Models\JobPlatform;
 use Carbon\Carbon;
 use Exception;
@@ -877,7 +878,7 @@ class JobPlatformController extends Controller
                 ], 404);
             }
 
-            $job_post_exists =  JobListing::whereIn("job_platform_id", $existingIds)->exists();
+            $job_post_exists =  JobListingJobPlatforms::whereIn("job_platform_id", $existingIds)->exists();
             if ($job_post_exists) {
                 // $conflictingSocialSites = UserSocialSite::whereIn("social_site_id", $existingIds)->get([
                 //     'id',

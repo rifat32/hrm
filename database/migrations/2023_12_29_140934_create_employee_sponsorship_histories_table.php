@@ -31,7 +31,7 @@ class CreateEmployeeSponsorshipHistoriesTable extends Migration
             $table->unsignedBigInteger("sponsorship_id")->nullable();
             $table->foreign('sponsorship_id')->references('id')->on('employee_sponsorships')->onDelete('set null');
 
-
+            $table->boolean("is_manual")->default(0);
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')

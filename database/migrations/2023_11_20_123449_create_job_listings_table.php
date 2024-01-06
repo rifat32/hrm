@@ -24,15 +24,16 @@ class CreateJobListingsTable extends Migration
             $table->string("experience_level");
             $table->unsignedBigInteger("job_type_id")->nullable();
             $table->foreign('job_type_id')->references('id')->on('job_types')->onDelete('set null');
-            $table->unsignedBigInteger("work_location_id")->nullable();
-            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('set null');
+            
+            $table->unsignedBigInteger("work_location_id");
+            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
 
             $table->text("required_skills");
             $table->date("application_deadline");
             $table->date("posted_on");
 
-          
+
 
 
             $table->unsignedBigInteger("department_id");

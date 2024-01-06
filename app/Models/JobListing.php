@@ -22,6 +22,7 @@ class JobListing extends Model
         'maximum_salary',
         'experience_level',
         'job_type_id',
+
         'work_location_id',
 
         "is_active",

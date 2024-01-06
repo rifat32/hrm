@@ -19,6 +19,8 @@ class CreateDepartmentHolidaysTable extends Migration
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
             $table->unsignedBigInteger("holiday_id");
             $table->foreign('holiday_id')->references('id')->on('holidays')->onDelete('cascade');
+
+            
             $table->timestamps();
         });
     }

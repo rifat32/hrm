@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserAddressHistoryCreateRequest;
-use App\Http\Requests\UserAddressHistoryUpdateRequest;
+use App\Http\Requests\UserSponsorshipHistoryCreateRequest;
+use App\Http\Requests\UserSponsorshipHistoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
-use App\Models\EmployeeAddressHistory;
+use App\Models\EmloyeeSponsorshipHistory;
+use App\Models\EmployeeSponsorshipHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserAddressHistoryController extends Controller
+class UserSponsorshipHistoryController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
@@ -25,29 +26,30 @@ class UserAddressHistoryController extends Controller
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/user-address-histories",
-     *      operationId="createUserAddressHistory",
-     *      tags={"user_address_histories"},
+     *      path="/v1.0/user-sponsorship-histories",
+     *      operationId="createUserSponsorshipHistory",
+     *      tags={"user_sponsorship_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store user address history",
-     *      description="This method is to store user address history",
+     *      summary="This method is to store user sponsorship history",
+     *      description="This method is to store user sponsorship history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
-* @OA\Property(property="address", type="string", format="string", example="Your address"),
- * @OA\Property(property="address_line_1", type="string", format="string", example="Your address_line_1"),
- * @OA\Property(property="address_line_2", type="string", format="string", example="Your address_line_2"),
- * @OA\Property(property="country", type="string", format="string", example="Your Country"),
- * @OA\Property(property="city", type="string", format="string", example="Your City"),
- * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="lat", type="string", format="string", example="Your Latitude"),
- * @OA\Property(property="long", type="string", format="string", example="Your Longitude"),
- * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
- * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+ *      @OA\Property(property="date_assigned", type="string", format="date", example="Your Date Assigned"),
+ *      @OA\Property(property="expiry_date", type="string", format="date", example="Your Expiry Date"),
+ *      @OA\Property(property="status", type="string", format="string", example="Your Status"),
+ *      @OA\Property(property="note", type="string", format="string", example="Your Note"),
+ *      @OA\Property(property="certificate_number", type="string", format="string", example="Your Certificate Number"),
+ *      @OA\Property(property="current_certificate_status", type="string", format="string", example="Your Current Certificate Status"),
+ *      @OA\Property(property="is_sponsorship_withdrawn", type="string", format="string", example="Your Is Sponsorship Withdrawn"),
+ *      @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+ *      @OA\Property(property="sponsorship_id", type="string", format="string", example="Your Sponsorship ID"),
+ *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+ *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
 
  *
  *
@@ -89,12 +91,12 @@ class UserAddressHistoryController extends Controller
      *     )
      */
 
-    public function createUserAddressHistory(UserAddressHistoryCreateRequest $request)
+    public function createUserSponsorshipHistory(UserSponsorshipHistoryCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_address_history_create')) {
+                if (!$request->user()->hasPermissionTo('employee_sponsorship_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -104,11 +106,11 @@ class UserAddressHistoryController extends Controller
 
                 $request_data["created_by"] = $request->user()->id;
 
-                $user_address_history =  EmployeeAddressHistory::create($request_data);
+                $user_sponsorship_history =  EmployeeSponsorshipHistory::create($request_data);
 
 
 
-                return response($user_address_history, 201);
+                return response($user_sponsorship_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -119,31 +121,33 @@ class UserAddressHistoryController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/user-address-histories",
-     *      operationId="updateUserAddressHistory",
-     *      tags={"user_address_histories"},
+     *      path="/v1.0/user-sponsorship-histories",
+     *      operationId="updateUserSponsorshipHistory",
+     *      tags={"user_sponsorship_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update  user address history ",
-     *      description="This method is to update user address history",
+     *      summary="This method is to update  user sponsorship history ",
+     *      description="This method is to update user sponsorship history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
      *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
-* @OA\Property(property="address", type="string", format="string", example="Your address"),
- * @OA\Property(property="address_line_1", type="string", format="string", example="Your address_line_1"),
- * @OA\Property(property="address_line_2", type="string", format="string", example="Your address_line_2"),
- * @OA\Property(property="country", type="string", format="string", example="Your Country"),
- * @OA\Property(property="city", type="string", format="string", example="Your City"),
- * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="lat", type="string", format="string", example="Your Latitude"),
- * @OA\Property(property="long", type="string", format="string", example="Your Longitude"),
- * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
- * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
-*
+ *      @OA\Property(property="date_assigned", type="string", format="date", example="Your Date Assigned"),
+ *      @OA\Property(property="expiry_date", type="string", format="date", example="Your Expiry Date"),
+ *      @OA\Property(property="status", type="string", format="string", example="Your Status"),
+ *      @OA\Property(property="note", type="string", format="string", example="Your Note"),
+ *      @OA\Property(property="certificate_number", type="string", format="string", example="Your Certificate Number"),
+ *      @OA\Property(property="current_certificate_status", type="string", format="string", example="Your Current Certificate Status"),
+ *      @OA\Property(property="is_sponsorship_withdrawn", type="string", format="string", example="Your Is Sponsorship Withdrawn"),
+ *      @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+ *      @OA\Property(property="sponsorship_id", type="string", format="string", example="Your Sponsorship ID"),
+ *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+ *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
+ *
+ *
  *
 
      *
@@ -183,36 +187,36 @@ class UserAddressHistoryController extends Controller
      *     )
      */
 
-    public function updateUserAddressHistory(UserAddressHistoryUpdateRequest $request)
+    public function updateUserSponsorshipHistory(UserSponsorshipHistoryUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_address_history_update')) {
+                if (!$request->user()->hasPermissionTo('employee_sponsorship_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
                 $request_data = $request->validated();
 
 
 
 
-                $user_address_history_query_params = [
+                $user_sponsorship_history_query_params = [
                     "id" => $request_data["id"],
                     "is_manual" => 1
                 ];
-                // $user_address_history_prev = UserAddressHistory::where($user_address_history_query_params)
+                // $user_sponsorship_history_prev = UserSponsorshipHistory::where($user_sponsorship_history_query_params)
                 //     ->first();
-                // if (!$user_address_history_prev) {
+                // if (!$user_sponsorship_history_prev) {
                 //     return response()->json([
-                //         "message" => "no user address history found"
+                //         "message" => "no user sponsorship history found"
                 //     ], 404);
                 // }
 
-                $user_address_history  =  tap(EmployeeAddressHistory::where($user_address_history_query_params))->update(
+                $user_sponsorship_history  =  tap(EmployeeSponsorshipHistory::where($user_sponsorship_history_query_params))->update(
                     collect($request_data)->only([
                         "address_line_1",
                         "address_line_2",
@@ -230,13 +234,13 @@ class UserAddressHistoryController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$user_address_history) {
+                if (!$user_sponsorship_history) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($user_address_history, 201);
+                return response($user_sponsorship_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -248,9 +252,9 @@ class UserAddressHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-address-histories",
-     *      operationId="getUserAddressHistories",
-     *      tags={"user_address_histories"},
+     *      path="/v1.0/user-sponsorship-histories",
+     *      operationId="getUserSponsorshipHistories",
+     *      tags={"user_sponsorship_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -298,8 +302,8 @@ class UserAddressHistoryController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get user address histories  ",
-     *      description="This method is to get user address histories ",
+     *      summary="This method is to get user sponsorship histories  ",
+     *      description="This method is to get user sponsorship histories ",
      *
 
      *      @OA\Response(
@@ -336,11 +340,11 @@ class UserAddressHistoryController extends Controller
      *     )
      */
 
-    public function getUserAddressHistories(Request $request)
+    public function getUserSponsorshipHistories(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_address_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_sponsorship_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -352,7 +356,7 @@ class UserAddressHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_address_histories = EmployeeAddressHistory::with([
+            $user_sponsorship_histories = EmployeeSponsorshipHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
@@ -366,8 +370,8 @@ class UserAddressHistoryController extends Controller
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("user_address_histories.name", "like", "%" . $term . "%");
-                        //     ->orWhere("user_address_histories.description", "like", "%" . $term . "%");
+                        $query->where("user_sponsorship_histories.name", "like", "%" . $term . "%");
+                        //     ->orWhere("user_sponsorship_histories.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -375,21 +379,21 @@ class UserAddressHistoryController extends Controller
                 //    })
 
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_address_histories.employee_id', $request->employee_id);
+                    return $query->where('user_sponsorship_histories.employee_id', $request->employee_id);
                 })
                 ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_address_histories.employee_id', $request->user()->id);
+                    return $query->where('user_sponsorship_histories.employee_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('user_address_histories.created_at', ">=", $request->start_date);
+                    return $query->where('user_sponsorship_histories.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('user_address_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('user_sponsorship_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("user_address_histories.id", $request->order_by);
+                    return $query->orderBy("user_sponsorship_histories.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("user_address_histories.id", "DESC");
+                    return $query->orderBy("user_sponsorship_histories.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -399,7 +403,7 @@ class UserAddressHistoryController extends Controller
 
 
 
-            return response()->json($user_address_histories, 200);
+            return response()->json($user_sponsorship_histories, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -409,9 +413,9 @@ class UserAddressHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-address-histories/{id}",
-     *      operationId="getUserAddressHistoryById",
-     *      tags={"user_address_histories"},
+     *      path="/v1.0/user-sponsorship-histories/{id}",
+     *      operationId="getUserSponsorshipHistoryById",
+     *      tags={"user_sponsorship_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -422,8 +426,8 @@ class UserAddressHistoryController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get user address history by id",
-     *      description="This method is to get user address history by id",
+     *      summary="This method is to get user sponsorship history by id",
+     *      description="This method is to get user sponsorship history by id",
      *
 
      *      @OA\Response(
@@ -461,11 +465,11 @@ class UserAddressHistoryController extends Controller
      */
 
 
-    public function getUserAddressHistoryById($id, Request $request)
+    public function getUserSponsorshipHistoryById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_address_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_sponsorship_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -477,7 +481,7 @@ class UserAddressHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_address_history =  EmployeeAddressHistory::where([
+            $user_sponsorship_history =  EmployeeSponsorshipHistory::where([
                 "id" => $id,
                 "is_manual" => 1
             ])
@@ -486,13 +490,13 @@ class UserAddressHistoryController extends Controller
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
-            if (!$user_address_history) {
+            if (!$user_sponsorship_history) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($user_address_history, 200);
+            return response()->json($user_sponsorship_history, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -504,9 +508,9 @@ class UserAddressHistoryController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/user-address-histories/{ids}",
-     *      operationId="deleteUserAddressHistoriesByIds",
-     *      tags={"user_address_histories"},
+     *      path="/v1.0/user-sponsorship-histories/{ids}",
+     *      operationId="deleteUserSponsorshipHistoriesByIds",
+     *      tags={"user_sponsorship_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -517,8 +521,8 @@ class UserAddressHistoryController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user address history by id",
-     *      description="This method is to delete user address history by id",
+     *      summary="This method is to delete user sponsorship history by id",
+     *      description="This method is to delete user sponsorship history by id",
      *
 
      *      @OA\Response(
@@ -555,12 +559,12 @@ class UserAddressHistoryController extends Controller
      *     )
      */
 
-    public function deleteUserAddressHistoriesByIds(Request $request, $ids)
+    public function deleteUserSponsorshipHistoriesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_address_history_delete')) {
+            if (!$request->user()->hasPermissionTo('employee_sponsorship_history_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -573,7 +577,7 @@ class UserAddressHistoryController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $idsArray = explode(',', $ids);
-            $existingIds = EmployeeAddressHistory::whereIn('id', $idsArray)
+            $existingIds = EmployeeSponsorshipHistory::whereIn('id', $idsArray)
             ->where(["is_manual" => 1])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
@@ -589,7 +593,7 @@ class UserAddressHistoryController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            EmployeeAddressHistory::destroy($existingIds);
+            EmployeeSponsorshipHistory::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
@@ -598,5 +602,4 @@ class UserAddressHistoryController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-
 }

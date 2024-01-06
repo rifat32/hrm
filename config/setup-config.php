@@ -210,6 +210,11 @@ return [
                 "employee_address_history_view",
                 "employee_address_history_delete",
 
+                "employee_sponsorship_history_create",
+                "employee_sponsorship_history_update",
+                "employee_sponsorship_history_view",
+                "employee_sponsorship_history_delete",
+
 
 
                 "employee_asset_create",
@@ -381,6 +386,12 @@ return [
                 "employee_address_history_view",
                 "employee_address_history_delete",
 
+                "employee_sponsorship_history_create",
+                "employee_sponsorship_history_update",
+                "employee_sponsorship_history_view",
+                "employee_sponsorship_history_delete",
+
+
                 "employee_asset_create",
                 "employee_asset_update",
                 "employee_asset_view",
@@ -538,6 +549,12 @@ return [
                 "employee_address_history_update",
                 "employee_address_history_view",
                 "employee_address_history_delete",
+
+                "employee_sponsorship_history_create",
+                "employee_sponsorship_history_update",
+                "employee_sponsorship_history_view",
+                "employee_sponsorship_history_delete",
+
 
                 "employee_asset_create",
                 "employee_asset_update",
@@ -726,6 +743,12 @@ return [
        "employee_address_history_update",
        "employee_address_history_view",
        "employee_address_history_delete",
+
+       "employee_sponsorship_history_create",
+       "employee_sponsorship_history_update",
+       "employee_sponsorship_history_view",
+       "employee_sponsorship_history_delete",
+
 
        "employee_asset_create",
        "employee_asset_update",
@@ -930,6 +953,12 @@ return [
         "employee_address_history_update" => "",
         "employee_address_history_view" => "",
         "employee_address_history_delete" => "",
+
+        "employee_sponsorship_history_create",
+        "employee_sponsorship_history_update",
+        "employee_sponsorship_history_view",
+        "employee_sponsorship_history_delete",
+
 
 
 
@@ -1149,6 +1178,13 @@ return [
         "employee_address_history_update"  => "update",
         "employee_address_history_view"  => "view",
         "employee_address_history_delete"  => "delete",
+
+
+        "employee_sponsorship_history_create" => "create",
+        "employee_sponsorship_history_update" => "update",
+        "employee_sponsorship_history_view" => "view",
+        "employee_sponsorship_history_delete" => "delete",
+
 
 
 
@@ -1424,6 +1460,21 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "employee_sponsorship_history",
+            "permissions" => [
+
+       "employee_sponsorship_history_create",
+       "employee_sponsorship_history_update",
+       "employee_sponsorship_history_view",
+       "employee_sponsorship_history_delete",
+
+
+            ],
+        ],
+
+
 
 
 

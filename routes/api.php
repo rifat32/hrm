@@ -54,6 +54,7 @@ use App\Http\Controllers\UserEducationHistoryController;
 use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserSocialSiteController;
+use App\Http\Controllers\UserSponsorshipHistoryController;
 use App\Http\Controllers\WorkLocationController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
@@ -278,7 +279,7 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// user education history  management section
+// user address history  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/user-address-histories', [UserAddressHistoryController::class, "createUserAddressHistory"]);
@@ -288,7 +289,22 @@ Route::get('/v1.0/user-address-histories/{id}', [UserAddressHistoryController::c
 Route::delete('/v1.0/user-address-histories/{ids}', [UserAddressHistoryController::class, "deleteUserAddressHistoriesByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// end user education history management section
+// end user address history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user sponsorship history history  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-sponsorship-histories', [UserSponsorshipHistoryController::class, "createUserSponsorshipHistory"]);
+Route::put('/v1.0/user-sponsorship-histories', [UserSponsorshipHistoryController::class, "updateUserSponsorshipHistory"]);
+Route::get('/v1.0/user-sponsorship-histories', [UserSponsorshipHistoryController::class, "getUserSponsorshipHistories"]);
+Route::get('/v1.0/user-sponsorship-histories/{id}', [UserSponsorshipHistoryController::class, "getUserSponsorshipHistoryById"]);
+Route::delete('/v1.0/user-sponsorship-histories/{ids}', [UserSponsorshipHistoryController::class, "deleteUserSponsorshipHistoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user sponsorship  history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledJobType;
+use App\Models\JobListing;
 use App\Models\JobType;
 use App\Models\User;
 use Exception;
@@ -836,16 +837,13 @@ class JobTypeController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::whereIn("job_type_id", $existingIds)->exists();
-            if ($user_exists) {
-                $conflictingUsers = User::whereIn("job_type_id", $existingIds)->get([
-                    'id', 'first_Name',
-                    'last_Name',
-                ]);
+            $job_listing_exists =  JobListing::whereIn("job_type_id", $existingIds)->exists();
+            if ($job_listing_exists) {
+
 
                 return response()->json([
                     "message" => "Some users are associated with the specified job_types",
-                    "conflicting_users" => $conflictingUsers
+
                 ], 409);
             }
 

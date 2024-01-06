@@ -18,6 +18,7 @@ class EmployeeSponsorship extends Model
         "certificate_number",
         "current_certificate_status",
         "is_sponsorship_withdrawn",
+        "is_manual",
         'created_by'
     ];
 
