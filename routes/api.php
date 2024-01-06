@@ -53,6 +53,7 @@ use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserEducationHistoryController;
 use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserPassportHistoryController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\UserSponsorshipHistoryController;
 use App\Http\Controllers\WorkLocationController;
@@ -291,6 +292,23 @@ Route::delete('/v1.0/user-address-histories/{ids}', [UserAddressHistoryControlle
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user address history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user address history  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-passport-histories', [UserPassportHistoryController::class, "createUserPassportHistory"]);
+Route::put('/v1.0/user-passport-histories', [UserPassportHistoryController::class, "updateUserPassportHistory"]);
+Route::get('/v1.0/user-passport-histories', [UserPassportHistoryController::class, "getUserPassportHistories"]);
+Route::get('/v1.0/user-passport-histories/{id}', [UserPassportHistoryController::class, "getUserPassportHistoryById"]);
+Route::delete('/v1.0/user-passport-histories/{ids}', [UserPassportHistoryController::class, "deleteUserPassportHistoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user address history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

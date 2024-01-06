@@ -29,6 +29,7 @@ class CreateEmployeePassportDetailHistoriesTable extends Migration
 
             $table->unsignedBigInteger("passport_detail_id")->nullable();
             $table->foreign('passport_detail_id')->references('id')->on('employee_passport_details')->onDelete('set null');
+            $table->boolean("is_manual")->default(0);
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

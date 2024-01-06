@@ -307,7 +307,9 @@ class HistoryDetailsController extends Controller
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              }
 
-             $employee_passport_details_history = EmployeePassportDetailHistory::when(!empty($request->employee_id), function ($query) use ($request) {
+             $employee_passport_details_history = EmployeePassportDetailHistory::where(["is_manual" => 0])
+
+             ->when(!empty($request->employee_id), function ($query) use ($request) {
                 return $query->where('employee_passport_detail_histories.employee_id', $request->employee_id);
             })
             ->when(empty($request->employee_id), function ($query) use ($request) {

@@ -210,6 +210,11 @@ return [
                 "employee_address_history_view",
                 "employee_address_history_delete",
 
+                "employee_passport_history_create",
+                "employee_passport_history_update",
+                "employee_passport_history_view",
+                "employee_passport_history_delete",
+
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
@@ -386,6 +391,11 @@ return [
                 "employee_address_history_view",
                 "employee_address_history_delete",
 
+                "employee_passport_history_create",
+                "employee_passport_history_update",
+                "employee_passport_history_view",
+                "employee_passport_history_delete",
+
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
@@ -549,6 +559,11 @@ return [
                 "employee_address_history_update",
                 "employee_address_history_view",
                 "employee_address_history_delete",
+
+                "employee_passport_history_create",
+                "employee_passport_history_update",
+                "employee_passport_history_view",
+                "employee_passport_history_delete",
 
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
@@ -743,6 +758,11 @@ return [
        "employee_address_history_update",
        "employee_address_history_view",
        "employee_address_history_delete",
+
+       "employee_passport_history_create",
+                "employee_passport_history_update",
+                "employee_passport_history_view",
+                "employee_passport_history_delete",
 
        "employee_sponsorship_history_create",
        "employee_sponsorship_history_update",
@@ -953,6 +973,11 @@ return [
         "employee_address_history_update" => "",
         "employee_address_history_view" => "",
         "employee_address_history_delete" => "",
+
+        "employee_passport_history_create" => "",
+                "employee_passport_history_update" => "",
+                "employee_passport_history_view" => "",
+                "employee_passport_history_delete" => "",
 
         "employee_sponsorship_history_create",
         "employee_sponsorship_history_update",
@@ -1178,6 +1203,11 @@ return [
         "employee_address_history_update"  => "update",
         "employee_address_history_view"  => "view",
         "employee_address_history_delete"  => "delete",
+
+        "employee_passport_history_create" => "create",
+        "employee_passport_history_update" => "update",
+        "employee_passport_history_view" => "view",
+        "employee_passport_history_delete" => "delete",
 
 
         "employee_sponsorship_history_create" => "create",
@@ -1460,6 +1490,20 @@ return [
 
             ],
         ],
+
+
+        [
+            "header" => "employee_passport_history",
+            "permissions" => [
+
+                "employee_passport_history_create",
+                "employee_passport_history_update",
+                "employee_passport_history_view",
+                "employee_passport_history_delete",
+
+            ],
+        ],
+
 
         [
             "header" => "employee_sponsorship_history",

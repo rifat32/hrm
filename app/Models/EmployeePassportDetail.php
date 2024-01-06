@@ -16,6 +16,7 @@ class EmployeePassportDetail extends Model
         "passport_issue_date",
         "passport_expiry_date",
         "place_of_issue",
+        "is_manual",
         'created_by'
     ];
 
@@ -43,6 +44,6 @@ class EmployeePassportDetail extends Model
     }
 
 
- 
+
 
 }
