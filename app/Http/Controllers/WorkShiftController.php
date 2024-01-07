@@ -609,7 +609,10 @@ if(!$fields_changed){
         $employee_work_shift_history_data["from_date"] = now();
         $employee_work_shift_history_data["to_date"] = NULL;
          $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->users()->attach($work_shift->users()->pluck("id"));
+         $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
+
+
+
 
                 }
 
