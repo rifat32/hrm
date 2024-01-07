@@ -45,10 +45,6 @@ class UserVisaHistoryController extends Controller
 * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
 * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
 * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
-
- *
-
- *
  *
  *
      *

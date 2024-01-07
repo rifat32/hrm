@@ -8,6 +8,9 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessTime;
+use App\Models\EmployeeWorkShiftHistory;
+use App\Models\User;
+use App\Models\UserWorkShift;
 use App\Models\WorkShift;
 use App\Models\WorkShiftDetail;
 use Carbon\Carbon;
@@ -252,7 +255,7 @@ class WorkShiftController extends Controller
                 $work_shift =  WorkShift::create($request_data);
 
                 $work_shift->departments()->sync($request_data['departments'], []);
-                $work_shift->users()->sync($request_data['users'], []);
+                // $work_shift->users()->sync($request_data['users'], []);
                 $work_shift->details()->createMany($request_data['details']);
 
                 return response($work_shift, 201);
@@ -490,10 +493,11 @@ class WorkShiftController extends Controller
                     "id" => $request_data["id"],
                 ];
 
+                $work_shift_prev = WorkShift::where($work_shift_query_params)->first();
 
                 $work_shift  =  tap(WorkShift::where($work_shift_query_params))->update(
                     collect($request_data)->only([
-                        'name',
+        'name',
         'type',
         "description",
         'attendances_count',
@@ -521,11 +525,104 @@ class WorkShiftController extends Controller
                 $work_shift->departments()->delete();
                 $work_shift->departments()->sync($request_data['departments'], []);
 
-                $work_shift->users()->delete();
-                $work_shift->users()->sync($request_data['users'], []);
+                // $work_shift->users()->delete();
+                // $work_shift->users()->sync($request_data['users'], []);
+
+
 
                 $work_shift->details()->delete();
                 $work_shift->details()->createMany($request_data['details']);
+
+
+
+                $fields_to_check = [
+                'name',
+                'type',
+                "description",
+                'attendances_count',
+                'is_personal',
+                'break_type',
+                'break_hours'
+            ];
+                $fields_changed = false; // Initialize to false
+                foreach ($fields_to_check as $field) {
+                    $value1 = $work_shift_prev->$field;
+                    $value2 = $work_shift->$field;
+
+                    if ($value1 !== $value2) {
+                        $fields_changed = true;
+                        break;
+                    }
+                }
+
+
+if(!$fields_changed){
+    $fields_to_check = [
+        'work_shift_id',
+        'day',
+        "start_at",
+        'end_at',
+        'is_weekend',
+    ];
+        $fields_changed = false; // Initialize to false
+        foreach ($fields_to_check as $field) {
+
+            foreach($work_shift_prev->details as $prev_detail){
+
+                foreach($work_shift->details as $current_detail){
+                    $value1 = $work_shift_prev->details->$field;
+                    $value2 = $work_shift->$field;
+
+                    if ($value1 != $value2) {
+                        $fields_changed = true;
+                        break 3;
+                    }
+                }
+
+            }
+
+        }
+
+
+}
+
+
+
+
+
+                if (
+                    $fields_changed
+                ) {
+
+                    EmployeeWorkShiftHistory::where([
+                        "to_date" => NULL
+                    ])
+                    ->whereHas('users',function($query) use($work_shift_prev)  {
+                        $query->whereIn("users.id",$work_shift_prev->users()->pluck("id"));
+                    })
+                    ->update([
+                        "to_date" => now()
+                    ]);
+
+        $employee_work_shift_history_data = $work_shift->toArray();
+        $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+        $employee_work_shift_history_data["from_date"] = now();
+        $employee_work_shift_history_data["to_date"] = NULL;
+         $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history->users()->attach($work_shift->users()->pluck("id"));
+
+                }
+
+
+
+
+
+
+
+
+
+
+
                 return response($work_shift, 201);
             });
         } catch (Exception $e) {
@@ -649,7 +746,6 @@ class WorkShiftController extends Controller
                 ->pluck("day");
 
             }
-
 
 
             $work_shifts = WorkShift::with("details","departments","users")
@@ -994,11 +1090,26 @@ class WorkShiftController extends Controller
                 ->toArray();
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
+
             if (!empty($nonExistingIds)) {
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
+
+            $user_exists =  UserWorkShift::whereIn("user_id", $existingIds)->exists();
+            if ($user_exists) {
+                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
+                    'id', 'first_Name',
+                    'last_Name',
+                ]);
+
+                return response()->json([
+                    "message" => "Some users are associated with the specified work shifts",
+                    "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+
             WorkShift::destroy($existingIds);
 
 

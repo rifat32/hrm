@@ -32,6 +32,7 @@ use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeVisaDetail;
 use App\Models\EmployeeVisaDetailHistory;
+use App\Models\EmployeeWorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
@@ -742,6 +743,23 @@ class UserManagementController extends Controller
                     throw new Exception("Work shift validation failed");
                 }
                 $work_shift->users()->attach($user->id);
+
+
+
+
+                $employee_work_shift_history_data = $work_shift->toArray();
+
+                $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+
+                $employee_work_shift_history_data["from_date"] = now();
+                $employee_work_shift_history_data["to_date"] = NULL;
+
+         $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history->users()->attach($user->id);
+
+
+
+
             } else {
                 $default_work_shift = WorkShift::where([
                     "business_id" => auth()->user()->business_id,
@@ -1351,11 +1369,70 @@ class UserManagementController extends Controller
             }
 
             if (!empty($request_data["work_shift_id"])) {
-                UserWorkShift::where([
-                    "user_id" => $user->id
-                ])
-                    ->delete();
-                $work_shift->users()->attach($user->id);
+
+
+
+
+            $current_workshift =  WorkShift::
+                    where([
+                        "id" => $request_data["work_shift_id"]
+                    ])
+                    ->whereHas('users',function($query) use($user) {
+
+                    $query->where([
+                        "users.id" => $user->id
+                    ]);
+
+                })
+                ->first();
+
+
+                if(!$current_workshift) {
+
+                    UserWorkShift::where([
+                        "user_id" => $user->id
+                    ])
+                        ->delete();
+
+
+                    $work_shift->users()->attach($user->id);
+
+
+
+                    EmployeeWorkShiftHistory::where([
+                        "to_date" => NULL
+                    ])
+                    ->whereHas('users',function($query) use($user) {
+
+                        $query->where([
+                            "users.id" => $user->id
+                        ]);
+
+                    })
+                    ->update([
+                        "to_date" => now()
+                    ]);
+
+
+         $employee_work_shift_history_data = $work_shift->toArray();
+         $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+         $employee_work_shift_history_data["from_date"] = now();
+         $employee_work_shift_history_data["to_date"] = NULL;
+         $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history->users()->attach($user->id);
+
+
+
+
+                }
+
+
+
+
+
+
+
+
             }
 
 
