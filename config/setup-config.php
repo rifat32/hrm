@@ -215,6 +215,11 @@ return [
                 "employee_passport_history_view",
                 "employee_passport_history_delete",
 
+                "employee_visa_history_create",
+                "employee_visa_history_update",
+                "employee_visa_history_view",
+                "employee_visa_history_delete",
+
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
@@ -396,6 +401,11 @@ return [
                 "employee_passport_history_view",
                 "employee_passport_history_delete",
 
+                "employee_visa_history_create",
+                "employee_visa_history_update",
+                "employee_visa_history_view",
+                "employee_visa_history_delete",
+
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
@@ -564,6 +574,11 @@ return [
                 "employee_passport_history_update",
                 "employee_passport_history_view",
                 "employee_passport_history_delete",
+
+                "employee_visa_history_create",
+                "employee_visa_history_update",
+                "employee_visa_history_view",
+                "employee_visa_history_delete",
 
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
@@ -763,6 +778,11 @@ return [
                 "employee_passport_history_update",
                 "employee_passport_history_view",
                 "employee_passport_history_delete",
+
+                "employee_visa_history_create",
+                "employee_visa_history_update",
+                "employee_visa_history_view",
+                "employee_visa_history_delete",
 
        "employee_sponsorship_history_create",
        "employee_sponsorship_history_update",
@@ -978,6 +998,13 @@ return [
                 "employee_passport_history_update" => "",
                 "employee_passport_history_view" => "",
                 "employee_passport_history_delete" => "",
+
+                "employee_visa_history_create" => "",
+                "employee_visa_history_update" => "",
+                "employee_visa_history_view" => "",
+                "employee_visa_history_delete" => "",
+
+
 
         "employee_sponsorship_history_create",
         "employee_sponsorship_history_update",
@@ -1208,6 +1235,14 @@ return [
         "employee_passport_history_update" => "update",
         "employee_passport_history_view" => "view",
         "employee_passport_history_delete" => "delete",
+
+        "employee_visa_history_create" => "create",
+        "employee_visa_history_update" => "update",
+        "employee_visa_history_view" => "view",
+        "employee_visa_history_delete" => "delete",
+
+
+
 
 
         "employee_sponsorship_history_create" => "create",
@@ -1503,6 +1538,17 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "employee_visa_history",
+            "permissions" => [
+        "employee_visa_history_create",
+        "employee_visa_history_update",
+        "employee_visa_history_view",
+        "employee_visa_history_delete",
+            ],
+        ],
+
 
 
         [

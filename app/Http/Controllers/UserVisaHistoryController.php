@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserPassportHistoryCreateRequest;
-use App\Http\Requests\UserPassportHistoryUpdateRequest;
+use App\Http\Requests\UserVisaHistoryCreateRequest;
+use App\Http\Requests\UserVisaHistoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
-use App\Models\EmployeePassportDetailHistory;
+use App\Models\EmployeeVisaDetailHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserPassportHistoryController extends Controller
+class UserVisaHistoryController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
@@ -25,25 +25,27 @@ class UserPassportHistoryController extends Controller
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/user-passport-histories",
-     *      operationId="createUserPassportHistory",
-     *      tags={"user_passport_histories"},
+     *      path="/v1.0/user-visa-histories",
+     *      operationId="createUserVisaHistory",
+     *      tags={"user_visa_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store user passport history",
-     *      description="This method is to store user passport history",
+     *      summary="This method is to store user visa history",
+     *      description="This method is to store user visa history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-* @OA\Property(property="passport_number", type="string", format="string", example="Your Passport Number"),
- * @OA\Property(property="passport_issue_date", type="string", format="date", example="Your Passport Issue Date"),
- * @OA\Property(property="passport_expiry_date", type="string", format="date", example="Your Passport Expiry Date"),
- * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Passport Issue"),
- * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
- * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
- * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="BRP_number", type="string", format="string", example="Your BRP Number"),
+* @OA\Property(property="visa_issue_date", type="string", format="date", example="Your Visa Issue Date"),
+* @OA\Property(property="visa_expiry_date", type="string", format="date", example="Your Visa Expiry Date"),
+* @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Visa Issue"),
+* @OA\Property(property="visa_docs", type="string", format="string", example="Your Visa Documents"),
+* @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+* @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+
  *
 
  *
@@ -86,12 +88,12 @@ class UserPassportHistoryController extends Controller
      *     )
      */
 
-    public function createUserPassportHistory(UserPassportHistoryCreateRequest $request)
+    public function createUserVisaHistory(UserVisaHistoryCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_passport_history_create')) {
+                if (!$request->user()->hasPermissionTo('employee_visa_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -101,11 +103,11 @@ class UserPassportHistoryController extends Controller
 
                 $request_data["created_by"] = $request->user()->id;
 
-                $user_passport_history =  EmployeePassportDetailHistory::create($request_data);
+                $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
 
 
 
-                return response($user_passport_history, 201);
+                return response($user_visa_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -116,26 +118,28 @@ class UserPassportHistoryController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/user-passport-histories",
-     *      operationId="updateUserPassportHistory",
-     *      tags={"user_passport_histories"},
+     *      path="/v1.0/user-visa-histories",
+     *      operationId="updateUserVisaHistory",
+     *      tags={"user_visa_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update  user passport history ",
-     *      description="This method is to update user passport history",
+     *      summary="This method is to update  user visa history ",
+     *      description="This method is to update user visa history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-* @OA\Property(property="passport_number", type="string", format="string", example="Your Passport Number"),
- * @OA\Property(property="passport_issue_date", type="string", format="date", example="Your Passport Issue Date"),
- * @OA\Property(property="passport_expiry_date", type="string", format="date", example="Your Passport Expiry Date"),
- * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Passport Issue"),
- * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
- * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
- * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="BRP_number", type="string", format="string", example="Your BRP Number"),
+* @OA\Property(property="visa_issue_date", type="string", format="date", example="Your Visa Issue Date"),
+* @OA\Property(property="visa_expiry_date", type="string", format="date", example="Your Visa Expiry Date"),
+* @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Visa Issue"),
+* @OA\Property(property="visa_docs", type="string", format="string", example="Your Visa Documents"),
+* @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+* @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+
  *
 *
  *
@@ -177,13 +181,13 @@ class UserPassportHistoryController extends Controller
      *     )
      */
 
-    public function updateUserPassportHistory(UserPassportHistoryUpdateRequest $request)
+    public function updateUserVisaHistory(UserVisaHistoryUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_passport_history_update')) {
+                if (!$request->user()->hasPermissionTo('employee_visa_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -194,45 +198,43 @@ class UserPassportHistoryController extends Controller
 
 
 
-                $user_passport_history_query_params = [
+                $user_visa_history_query_params = [
                     "id" => $request_data["id"],
                     "is_manual" => 1
                 ];
-                // $user_passport_history_prev = UserPassportHistory::where($user_passport_history_query_params)
+                // $user_visa_history_prev = UserVisaHistory::where($user_visa_history_query_params)
                 //     ->first();
-                // if (!$user_passport_history_prev) {
+                // if (!$user_visa_history_prev) {
                 //     return response()->json([
-                //         "message" => "no user passport history found"
+                //         "message" => "no user visa history found"
                 //     ], 404);
                 // }
 
-                $user_passport_history  =  tap(EmployeePassportDetailHistory::where($user_passport_history_query_params))->update(
+                $user_visa_history  =  tap(EmployeeVisaDetailHistory::where($user_visa_history_query_params))->update(
                     collect($request_data)->only([
-                        'passport_number',
-        "passport_issue_date",
-        "passport_expiry_date",
-        "place_of_issue",
+                        'BRP_number',
+                        "visa_issue_date",
+                        "visa_expiry_date",
+                        "place_of_issue",
+                        "visa_docs",
+                        'employee_id',
+                        "from_date",
+                        "to_date",
 
 
-        "from_date",
-        "to_date",
-        "employee_id",
-
-
-        "passport_detail_id",
 
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$user_passport_history) {
+                if (!$user_visa_history) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($user_passport_history, 201);
+                return response($user_visa_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -244,9 +246,9 @@ class UserPassportHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-passport-histories",
-     *      operationId="getUserPassportHistories",
-     *      tags={"user_passport_histories"},
+     *      path="/v1.0/user-visa-histories",
+     *      operationId="getUserVisaHistories",
+     *      tags={"user_visa_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -294,8 +296,8 @@ class UserPassportHistoryController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get user passport histories  ",
-     *      description="This method is to get user passport histories ",
+     *      summary="This method is to get user visa histories  ",
+     *      description="This method is to get user visa histories ",
      *
 
      *      @OA\Response(
@@ -332,11 +334,11 @@ class UserPassportHistoryController extends Controller
      *     )
      */
 
-    public function getUserPassportHistories(Request $request)
+    public function getUserVisaHistories(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_passport_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_visa_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -348,7 +350,7 @@ class UserPassportHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_passport_histories = EmployeePassportDetailHistory::with([
+            $user_visa_histories = EmployeeVisaDetailHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
@@ -362,8 +364,8 @@ class UserPassportHistoryController extends Controller
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("user_passport_detail_histories.name", "like", "%" . $term . "%");
-                        //     ->orWhere("user_passport_detail_histories.description", "like", "%" . $term . "%");
+                        $query->where("user_visa_detail_histories.name", "like", "%" . $term . "%");
+                        //     ->orWhere("user_visa_detail_histories.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -371,30 +373,31 @@ class UserPassportHistoryController extends Controller
                 //    })
 
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_passport_detail_histories.employee_id', $request->employee_id);
+                    return $query->where('user_visa_detail_histories.employee_id', $request->employee_id);
                 })
                 ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_passport_detail_histories.employee_id', $request->user()->id);
+                    return $query->where('user_visa_detail_histories.employee_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('user_passport_detail_histories.created_at', ">=", $request->start_date);
+                    return $query->where('user_visa_detail_histories.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('user_passport_detail_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('user_visa_detail_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("user_passport_detail_histories.id", $request->order_by);
+                    return $query->orderBy("user_visa_detail_histories.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("user_passport_detail_histories.id", "DESC");
+                    return $query->orderBy("user_visa_detail_histories.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });
+                });;
 
 
-            return response()->json($user_passport_histories, 200);
+
+            return response()->json($user_visa_histories, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -404,9 +407,9 @@ class UserPassportHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-passport-histories/{id}",
-     *      operationId="getUserPassportHistoryById",
-     *      tags={"user_passport_histories"},
+     *      path="/v1.0/user-visa-histories/{id}",
+     *      operationId="getUserVisaHistoryById",
+     *      tags={"user_visa_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -417,8 +420,8 @@ class UserPassportHistoryController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get user passport history by id",
-     *      description="This method is to get user passport history by id",
+     *      summary="This method is to get user visa history by id",
+     *      description="This method is to get user visa history by id",
      *
 
      *      @OA\Response(
@@ -456,11 +459,11 @@ class UserPassportHistoryController extends Controller
      */
 
 
-    public function getUserPassportHistoryById($id, Request $request)
+    public function getUserVisaHistoryById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_passport_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_visa_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -472,7 +475,7 @@ class UserPassportHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_passport_history =  EmployeePassportDetailHistory::where([
+            $user_visa_history =  EmployeeVisaDetailHistory::where([
                 "id" => $id,
                 "is_manual" => 1
             ])
@@ -481,13 +484,13 @@ class UserPassportHistoryController extends Controller
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
-            if (!$user_passport_history) {
+            if (!$user_visa_history) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($user_passport_history, 200);
+            return response()->json($user_visa_history, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -499,9 +502,9 @@ class UserPassportHistoryController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/user-passport-histories/{ids}",
-     *      operationId="deleteUserPassportHistoriesByIds",
-     *      tags={"user_passport_histories"},
+     *      path="/v1.0/user-visa-histories/{ids}",
+     *      operationId="deleteUserVisaHistoriesByIds",
+     *      tags={"user_visa_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -512,8 +515,8 @@ class UserPassportHistoryController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user passport history by id",
-     *      description="This method is to delete user passport history by id",
+     *      summary="This method is to delete user visa history by id",
+     *      description="This method is to delete user visa history by id",
      *
 
      *      @OA\Response(
@@ -550,12 +553,12 @@ class UserPassportHistoryController extends Controller
      *     )
      */
 
-    public function deleteUserPassportHistoriesByIds(Request $request, $ids)
+    public function deleteUserVisaHistoriesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_passport_history_delete')) {
+            if (!$request->user()->hasPermissionTo('employee_visa_history_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -568,7 +571,7 @@ class UserPassportHistoryController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $idsArray = explode(',', $ids);
-            $existingIds = EmployeePassportDetailHistory::whereIn('id', $idsArray)
+            $existingIds = EmployeeVisaDetailHistory::whereIn('id', $idsArray)
             ->where(["is_manual" => 1])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
@@ -584,7 +587,7 @@ class UserPassportHistoryController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            EmployeePassportDetailHistory::destroy($existingIds);
+            EmployeeVisaDetailHistory::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
@@ -593,5 +596,4 @@ class UserPassportHistoryController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-
 }

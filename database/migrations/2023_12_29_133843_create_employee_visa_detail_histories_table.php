@@ -28,7 +28,7 @@ class CreateEmployeeVisaDetailHistoriesTable extends Migration
 
             $table->unsignedBigInteger("visa_detail_id")->nullable();
             $table->foreign('visa_detail_id')->references('id')->on('employee_visa_details')->onDelete('set null');
-
+            $table->boolean("is_manual")->default(0);
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

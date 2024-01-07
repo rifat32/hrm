@@ -18,7 +18,7 @@ class EmployeeVisaDetailHistory extends Model
 
 
 
-
+        "is_manual",
         'employee_id',
         "from_date",
         "to_date",

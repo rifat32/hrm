@@ -20,7 +20,7 @@ class EmployeePassportDetailHistory extends Model
         "to_date",
         "employee_id",
 
-
+        "is_manual",
         "passport_detail_id",
         'created_by'
     ];

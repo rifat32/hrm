@@ -19,6 +19,7 @@ class EmployeeSponsorshipHistory extends Model
         "current_certificate_status",
         "is_sponsorship_withdrawn",
 
+        "is_manual",
         'employee_id',
         "sponsorship_id",
         "from_date",
