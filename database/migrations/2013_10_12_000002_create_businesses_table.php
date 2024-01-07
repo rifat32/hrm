@@ -23,8 +23,8 @@ class CreateBusinessesTable extends Migration
             $table->text("additional_information")->nullable();
             $table->string("address_line_1")->nullable();
             $table->string("address_line_2")->nullable();
-            $table->string("lat");
-            $table->string("long");
+            $table->string("lat")->nullable();
+            $table->string("long")->nullable();
             $table->string("country");
             $table->string("city");
             $table->string("postcode")->nullable();

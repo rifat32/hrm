@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\DepartmentUser;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -104,6 +105,11 @@ class DepartmentController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $department =  Department::create($request_data);
+
+                if(!empty($department->manager_id)) {
+                    $department->users()->attach($department->manager_id);
+                }
+
                 return response($department, 201);
             });
         } catch (Exception $e) {
@@ -260,6 +266,25 @@ class DepartmentController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+
+
+
+
+                if ($department_prev->manager_id != $department->manager_id) {
+                    // Remove the previous manager's relationship with the department
+                    DepartmentUser::where([
+                        'department_id' => $department->id,
+                        'user_id'       => $department_prev->manager_id
+                    ])->delete();
+
+                    // Attach the new manager to the department
+                    $department->users()->attach($department->manager_id);
+                }
+
+
+
+
 
                 return response($department, 201);
             });

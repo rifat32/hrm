@@ -632,6 +632,14 @@ trait BusinessUtil
     public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1,$business)
     {
 
+        $work_location =  WorkLocation::create([
+            'name' => ($business_name . " " . "Office"),
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => $business_id,
+            "created_by" => $owner_id
+        ]);
+
 
      $department =  Department::create([
             "name" => $business_name,
@@ -639,6 +647,7 @@ trait BusinessUtil
             "is_active" => 1,
             "manager_id" => $owner_id,
             "business_id" => $business_id,
+            "work_location_id" => $work_location->id,
             "created_by" => $owner_id
         ]);
 
@@ -648,13 +657,6 @@ trait BusinessUtil
         ]);
 
 
-        WorkLocation::create([
-            'name' => ($business_name . " " . "Office"),
-            "is_active" => 1,
-            "is_default" => 1,
-            "business_id" => $business_id,
-            "created_by" => $owner_id
-        ]);
 
 
 

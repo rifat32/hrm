@@ -46,7 +46,6 @@ class UserSponsorshipHistoryController extends Controller
  *      @OA\Property(property="certificate_number", type="string", format="string", example="Your Certificate Number"),
  *      @OA\Property(property="current_certificate_status", type="string", format="string", example="Your Current Certificate Status"),
  *      @OA\Property(property="is_sponsorship_withdrawn", type="string", format="string", example="Your Is Sponsorship Withdrawn"),
- *      @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
  *      @OA\Property(property="sponsorship_id", type="string", format="string", example="Your Sponsorship ID"),
  *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
  *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
@@ -142,7 +141,6 @@ class UserSponsorshipHistoryController extends Controller
  *      @OA\Property(property="certificate_number", type="string", format="string", example="Your Certificate Number"),
  *      @OA\Property(property="current_certificate_status", type="string", format="string", example="Your Current Certificate Status"),
  *      @OA\Property(property="is_sponsorship_withdrawn", type="string", format="string", example="Your Is Sponsorship Withdrawn"),
- *      @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
  *      @OA\Property(property="sponsorship_id", type="string", format="string", example="Your Sponsorship ID"),
  *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
  *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
