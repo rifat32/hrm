@@ -1290,15 +1290,15 @@ class HistoryDetailsController extends Controller
                  })
 
                  ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('leave_histories.created_at', ">=", $request->start_date);
+                     return $query->where('employee_work_shift_histories.created_at', ">=", $request->start_date);
                  })
                  ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('leave_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                     return $query->where('employee_work_shift_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                  })
                  ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("leave_histories.id", $request->order_by);
+                     return $query->orderBy("employee_work_shift_histories.id", $request->order_by);
                  }, function ($query) {
-                     return $query->orderBy("leave_histories.id", "DESC");
+                     return $query->orderBy("employee_work_shift_histories.id", "DESC");
                  })
                  ->when(!empty($request->per_page), function ($query) use ($request) {
                      return $query->paginate($request->per_page);
