@@ -54,6 +54,12 @@ class User extends Authenticatable
         "is_active_visa_details",
 
 
+        'bank_id',
+        'sort_code',
+        'account_number',
+        'account_name',
+
+
 
 
 
@@ -71,6 +77,8 @@ class User extends Authenticatable
     public function business() {
         return $this->belongsTo(Business::class, 'business_id', 'id');
     }
+
+
 
     public function all_users() {
         return $this->hasMany(User::class, 'business_id', 'business_id');

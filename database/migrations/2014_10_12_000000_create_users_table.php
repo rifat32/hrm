@@ -75,9 +75,18 @@ class CreateUsersTable extends Migration
             $table->enum('immigration_status', ['british_citizen', 'ilr', 'immigrant', 'sponsored'])->nullable();
             $table->boolean('is_sponsorship_offered')->default(0)->nullable();
 
-            $table->unsignedBigInteger("work_location_id")->nullable();
+            $table->unsignedBigInteger("work_location_id");
             $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
+
+
+
+
+            $table->unsignedBigInteger("bank_id")->nullable();
+            $table->foreign('bank_id')->references('id')->on('banks')->onDelete('restrict');
+            $table->string("sort_code")->nullable();
+            $table->string("account_number")->nullable();
+            $table->string("account_name")->nullable();
 
 
 

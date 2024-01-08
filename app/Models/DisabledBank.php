@@ -23,4 +23,5 @@ class DisabledBank extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
+    
 }
