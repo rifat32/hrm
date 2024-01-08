@@ -76,6 +76,11 @@ return [
 "designation_view",
 "designation_delete",
 
+"bank_create",
+"bank_update",
+"bank_view",
+"bank_delete",
+
 "job_type_create",
 "job_type_update",
 "job_type_view",
@@ -132,6 +137,12 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+                "bank_create",
+"bank_update",
+"bank_view",
+"bank_delete",
+
 
                 "job_type_create",
 "job_type_update",
@@ -304,6 +315,12 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+                "bank_create",
+"bank_update",
+"bank_view",
+"bank_delete",
+
 
                 "job_type_create",
 "job_type_update",
@@ -486,6 +503,12 @@ return [
                 "designation_view",
                 "designation_delete",
 
+                "bank_create",
+"bank_update",
+"bank_view",
+"bank_delete",
+
+
                 "job_type_create",
 "job_type_update",
 "job_type_view",
@@ -659,6 +682,12 @@ return [
                 "designation_update",
                 "designation_view",
                 "designation_delete",
+
+                "bank_create",
+"bank_update",
+"bank_view",
+"bank_delete",
+
 
                 "job_type_create",
 "job_type_update",
@@ -898,6 +927,12 @@ return [
        "designation_view",
        "designation_delete",
 
+       "bank_create",
+"bank_update",
+"bank_view",
+"bank_delete",
+
+
        "job_type_create",
 "job_type_update",
 "job_type_view",
@@ -1119,6 +1154,12 @@ return [
         "designation_update" => "Can update designation",
         "designation_view" => "Can view designation",
         "designation_delete" => "Can delete designation",
+
+        "bank_create" => "",
+"bank_update" => "",
+"bank_view" => "",
+"bank_delete" => "",
+
 
         "job_type_create" => "",
 "job_type_update" => "",
@@ -1365,6 +1406,14 @@ return [
         "designation_update" => "update",
         "designation_view" => "view",
         "designation_delete" => "delete",
+
+        "bank_create" => "create",
+        "bank_update" => "update",
+        "bank_view" => "view",
+        "bank_delete" => "delete",
+
+
+
 
         "job_type_create" => "create",
         "job_type_update" => "update",
@@ -1826,6 +1875,18 @@ return [
                 "designation_delete",
             ],
         ],
+
+        [
+            "header" => "designation",
+            "permissions" => [
+                "bank_create",
+                "bank_update",
+                "bank_view",
+                "bank_delete",
+            ],
+        ],
+
+
 
         [
             "header" => "job_type",

@@ -122,36 +122,45 @@ class UserUpdateV2Request extends FormRequest
 
 
                     if(!empty($value)){
-                        $business_weekend_days = BusinessTime::where([
-                            "is_weekend" => 1,
-                            "business_id" => auth()->user()->business_id,
-                        ])
-                        ->pluck("day");
+
+
+                         $business_times =    BusinessTime::where([
+                    "is_weekend" => 1,
+                    "business_id" => auth()->user()->business_id,
+                ])->get();
+
+
                         $exists = WorkShift::where('id', $value)
                         ->where([
                             "work_shifts.business_id" => auth()->user()->business_id
                         ])
-                        ->orWhere(function($query) use($business_weekend_days) {
-
-                            $query
-                            ->where([
-                                "is_default" => 1,
-                                "business_id" => NULL
+                        ->orWhere(function($query) use($business_times) {
+                            $query->where([
+                                "business_id" => NULL,
+                                "is_default" => 1
                             ])
-                            ->whereHas("details", function($query) use($business_weekend_days) {
+                            ->whereHas('details', function($query) use($business_times) {
 
-                                $query->where(function($query) use ($business_weekend_days) {
-                                    $query->whereIn("work_shift_details.day",$business_weekend_days)
-                                    ->where("is_weekend",1);
-                                })
-                                ->where(function($query) use ($business_weekend_days) {
-                                    $query->whereNotIn("work_shift_details.day",$business_weekend_days)
-                                    ->where("is_weekend",0);
-                                });
+                            foreach($business_times as $business_time) {
+                                $query->where([
+                                    "day" => $business_time->day,
+                                ]);
+                                if($business_time["is_weekend"]) {
+                                    $query->where([
+                                        "is_weekend" => 1,
+                                    ]);
+                                } else {
+                                    $query->where(function($query) use($business_time) {
+                                        $query->whereTime("start_at", ">=", $business_time->start_at);
+                                        $query->orWhereTime("end_at", "<=", $business_time->end_at);
+                                    });
+                                }
 
-                            });
+                            }
+                        });
 
                         })
+
                         ->exists();
 
                     if (!$exists) {

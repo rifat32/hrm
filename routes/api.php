@@ -4,10 +4,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
-
-
-
-
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardManagementController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmailTemplateWrapperController;
@@ -603,6 +600,22 @@ Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "delete
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end designation management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// bank  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/banks', [BankController::class, "createBank"]);
+Route::put('/v1.0/banks', [BankController::class, "updateBank"]);
+Route::put('/v1.0/banks/toggle-active', [BankController::class, "toggleActiveBank"]);
+Route::get('/v1.0/banks', [BankController::class, "getBanks"]);
+Route::get('/v1.0/banks/{id}', [BankController::class, "getBankById"]);
+Route::delete('/v1.0/banks/{ids}', [BankController::class, "deleteBanksByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end bank management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // designation  management section
