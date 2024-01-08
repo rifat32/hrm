@@ -8,7 +8,9 @@ use App\Models\ActivityLog;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\ErrorLog;
-
+use App\Models\JobPlatform;
+use App\Models\JobType;
+use App\Models\RecruitmentProcess;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -20,6 +22,7 @@ use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
 use App\Models\SocialSite;
+use App\Models\WorkLocation;
 use App\Models\WorkShift;
 
 class SetUpController extends Controller
@@ -234,6 +237,219 @@ return "swagger generated";
                 "created_by" => $admin->id
             ]);
         }
+        $default_job_type = [
+            [
+                'name' => "Full Time Employee",
+                'description' => "An employee who works a standard number of hours per week as defined by the organization."
+            ],
+            [
+                'name' => "Part Time Employee",
+                'description' => "An employee who works fewer hours than a full-time employee, often with a set schedule."
+            ],
+            [
+                'name' => "Contractor",
+                'description' => "An individual hired on a contract basis for a specific project or period, not considered a permanent employee."
+            ],
+            [
+                'name' => "Temporary Employee",
+                'description' => "An employee hired for a short-term period to cover a specific workload or project."
+            ],
+            [
+                'name' => "Freelancer",
+                'description' => "A self-employed individual who provides services to the organization on a project-by-project basis."
+            ],
+            [
+                'name' => "Intern",
+                'description' => "A student or recent graduate gaining practical experience in a specific field, often for a limited duration."
+            ],
+            [
+                'name' => "Remote Worker",
+                'description' => "An employee who works primarily from a location outside the office, such as from home or another remote location."
+            ],
+            // Add more job types as needed
+        ];
+
+        // Iterate through the array and create records
+        foreach ($default_job_type as $data) {
+            JobType::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
+
+
+
+
+
+        $default_work_location = [
+            [
+                'name' => "Office-Based",
+                'description' => "Employees who work primarily at the company's physical office location."
+            ],
+            [
+                'name' => "Remote",
+                'description' => "Employees who work from a location outside the office, such as from home or another remote setting."
+            ],
+            [
+                'name' => "Hybrid",
+                'description' => "Employees who split their work time between the office and remote locations, following a flexible schedule."
+            ],
+            [
+                'name' => "Client Site",
+                'description' => "Employees who work primarily at the location of a client or customer."
+            ],
+            [
+                'name' => "Field-Based",
+                'description' => "Employees whose work involves traveling to various locations, such as sales representatives or field service technicians."
+            ],
+            [
+                'name' => "On-Site",
+                'description' => "Employees who work at a specific site or project location, but not necessarily the main office."
+            ],
+            [
+                'name' => "Shop or Warehouse",
+                'description' => "Employees working in a physical location where products are stored, manufactured, or distributed."
+            ],
+            [
+                'name' => "Flexible Location",
+                'description' => "Employees with the flexibility to choose their work location based on the nature of their tasks or projects."
+            ],
+            // Add more work location types as needed
+        ];
+
+
+
+
+
+        // Iterate through the array and create records
+        foreach ($default_work_location as $data) {
+            WorkLocation::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
+        $default_job_platform = [
+            [
+                'name' => "LinkedIn",
+                'description' => "A professional networking platform widely used for job postings, networking, and recruitment."
+            ],
+            [
+                'name' => "Indeed",
+                'description' => "A popular job search engine that aggregates job listings from various sources, including company websites and job boards."
+            ],
+            [
+                'name' => "Monster",
+                'description' => "An online job portal that connects employers with job seekers, offering a wide range of job postings."
+            ],
+            [
+                'name' => "Reed",
+                'description' => "One of the largest job sites in the UK, providing a platform for employers and job seekers across various industries."
+            ],
+            [
+                'name' => "Glassdoor",
+                'description' => "A platform that not only provides job listings but also offers company reviews, salary information, and interview insights."
+            ],
+            [
+                'name' => "Totaljobs",
+                'description' => "A UK-based job board that features a variety of job listings and career resources for both employers and job seekers."
+            ],
+            [
+                'name' => "Jobsite",
+                'description' => "An online recruitment platform that connects employers with job seekers, offering a range of job opportunities."
+            ],
+            [
+                'name' => "CareerBuilder",
+                'description' => "A global job board and recruitment platform that connects employers with qualified candidates."
+            ],
+            [
+                'name' => "CWJobs",
+                'description' => "Specialized in IT and tech jobs, CWJobs is a platform catering to employers and job seekers in the technology sector."
+            ],
+            // Add more job platforms as needed
+        ];
+
+        // Iterate through the array and create records
+        foreach ($default_job_platform as $data) {
+            JobPlatform::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
+
+        $default_recruitment_process = [
+            [
+                'name' => "Job Requisition",
+                'description' => "Identify the need for a new position or replacement and create a job requisition specifying the role's requirements."
+            ],
+            [
+                'name' => "Job Posting",
+                'description' => "Advertise the job opening through various channels, including the company's website, job boards, and social media."
+            ],
+            [
+                'name' => "Application Screening",
+                'description' => "Review resumes and applications to shortlist candidates who meet the basic qualifications for the position."
+            ],
+            [
+                'name' => "Initial Interview",
+                'description' => "Conduct a preliminary interview to assess candidates' skills, experience, and cultural fit with the organization."
+            ],
+            [
+                'name' => "Skills Assessment",
+                'description' => "Administer tests or exercises to evaluate candidates' technical or job-specific skills relevant to the role."
+            ],
+            [
+                'name' => "Second Interview",
+                'description' => "Invite shortlisted candidates for a more in-depth interview, often involving key team members or department heads."
+            ],
+            [
+                'name' => "Reference Check",
+                'description' => "Contact previous employers or references to verify the candidate's work history, performance, and reliability."
+            ],
+            [
+                'name' => "Job Offer",
+                'description' => "Extend a formal job offer to the selected candidate, including details about compensation, benefits, and start date."
+            ],
+            [
+                'name' => "Negotiation",
+                'description' => "Engage in negotiations with the candidate regarding salary, benefits, and other terms of employment."
+            ],
+            [
+                'name' => "Onboarding",
+                'description' => "Facilitate the onboarding process, including orientation, paperwork, and introductions to team members and company policies."
+            ],
+
+        ];
+
+
+        foreach ($default_recruitment_process as $data) {
+            RecruitmentProcess::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
+
+
+
 
         $default_employment_statuses = [
             [
@@ -275,6 +491,8 @@ return "swagger generated";
                 "created_by" => $admin->id
             ]);
         }
+
+
         $default_setting_leave_types = [
             [
                 'name' => "Vacation Leave",
@@ -367,9 +585,9 @@ return "swagger generated";
                 ],
                 [
                     'day' => '1',
-                    'start_at' => '',
-                    'end_at' => '',
-                    'is_weekend' => 1,
+                    'start_at' => '10:00:00',
+                    'end_at' => '18:00:00',
+                    'is_weekend' => 0,
                 ],
                 [
                     'day' => '2',
@@ -397,9 +615,9 @@ return "swagger generated";
                 ],
                 [
                     'day' => '6',
-                    'start_at' => '10:00:00',
-                    'end_at' => '18:00:00',
-                    'is_weekend' => 0,
+                    'start_at' => '',
+                    'end_at' => '',
+                    'is_weekend' => 1,
                 ],
             ],
         ];
