@@ -12,8 +12,10 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\EmployeeProjectHistory;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\UserProject;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -311,7 +313,77 @@ class ProjectController extends Controller
                  }
 
 
+                 $discharged_projects =  Project::whereHas("users",function($query) use($user){
+                    $query("users.id",$user);
+                 })
+                 ->whereNotIn("id",$request_data['projects'])
+                 ->get();
+
+
+
+                 EmployeeProjectHistory::where([
+                    "employee_id" => $user->id,
+                    "to_date" => now()
+                 ])
+                 ->whereIn("project_id",$discharged_projects->pluck("id"))
+                 ->update([
+                    "to_date" => now()
+                 ])
+                 ;
+
+
+                 foreach($request_data['projects'] as $project_id) {
+                  $project = Project::
+                  whereHas("users",function($query) use($user){
+                    $query("users.id",$user);
+                 })
+                   ->where([
+                    "id" => $project_id
+                   ])
+                    ->first();
+
+
+                    if(!$project) {
+
+                        $project = Project::where([
+                           "id" => $project_id
+                        ])
+                        ->first();
+
+                        if(!$project) {
+                            throw new Exception("some thing went wrong");
+                        }
+
+                        UserProject::create([
+                            "user_id" => $user->id,
+                            "project_id" => $project->id
+                        ]);
+
+
+
+          $employee_project_history_data = $project->toArray();
+          $employee_project_history_data["employee_id"] = $user->id;
+          $employee_project_history_data["from_date"] = now();
+          $employee_project_history_data["to_date"] = NULL;
+
+          EmployeeProjectHistory::create($employee_project_history_data);
+
+
+
+
+
+                    }
+
+
+
+                 }
+
+
+
+
                  $user->projects()->sync($request_data['projects'], []);
+
+
 
                  return response($user, 201);
 
@@ -496,6 +568,13 @@ class ProjectController extends Controller
      * required=true,
      * example="ASC"
      * ),
+     *      * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="1"
+     * ),
 
      *      summary="This method is to get project listings  ",
      *      description="This method is to get project listings ",
@@ -566,6 +645,12 @@ class ProjectController extends Controller
             )  ->whereHas("departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->whereHas('users', function($query) use($request) {
+                        $query->where("users.id",$request->user_id);
+                });
+            })
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -692,6 +777,7 @@ class ProjectController extends Controller
             ->select('projects.*'
              )
                 ->first();
+
             if (!$project) {
                 return response()->json([
                     "message" => "no project listing found"

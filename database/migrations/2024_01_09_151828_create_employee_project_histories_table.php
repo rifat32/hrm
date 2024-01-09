@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProjectsTable extends Migration
+class CreateEmployeeProjectHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,14 @@ class CreateProjectsTable extends Migration
      */
     public function up()
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('employee_project_histories', function (Blueprint $table) {
             $table->id();
-
             $table->string("name");
             $table->text("description")->nullable();
             $table->date("start_date");
             $table->date("end_date");
             $table->enum('status', ['pending','progress', 'completed']);
-         
+
 
 
 
@@ -29,12 +28,20 @@ class CreateProjectsTable extends Migration
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
+
+            $table->date("from_date");
+            $table->date("to_date")->nullable();
+
+            $table->unsignedBigInteger("project_id")->nullable();
+            $table->unsignedBigInteger("employee_id")->nullable();
+
+
+
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')
                 ->on('users')
                 ->onDelete('set null');
-
 
 
             $table->timestamps();
@@ -48,6 +55,6 @@ class CreateProjectsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('employee_project_histories');
     }
 }

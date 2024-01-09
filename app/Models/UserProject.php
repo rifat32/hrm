@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class UserProject extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'project_id'
+    ];
 
     public function getCreatedAtAttribute($value)
     {

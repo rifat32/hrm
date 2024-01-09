@@ -79,6 +79,15 @@ class EmployeeWorkShiftHistory extends Model
         return (new Carbon($value))->format('d-m-Y');
     }
 
+    public function getFromDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+    public function getToDateAttribute($value)
+    {
+        return (new Carbon($value))->format('d-m-Y');
+    }
+
 
 
 }
