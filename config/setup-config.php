@@ -195,6 +195,7 @@ return [
             "role" => "business_owner",
             "permissions" => [
 
+                'business_owner',
 
                 "user_create",
                 "user_update",
@@ -783,6 +784,9 @@ return [
 
     ],
     "permissions" => [
+
+        "business_owner",
+
         "global_business_background_image_create",
         "global_business_background_image_view",
 

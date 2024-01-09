@@ -285,6 +285,7 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 
 Route::post('/v1.0/user-notes', [UserNoteController::class, "createUserNote"]);
 Route::put('/v1.0/user-notes', [UserNoteController::class, "updateUserNote"]);
+Route::put('/v1.0/user-notes/by-business-owner', [UserNoteController::class, "updateUserNoteByBusinessOwner"]);
 Route::get('/v1.0/user-notes', [UserNoteController::class, "getUserNotes"]);
 Route::get('/v1.0/user-notes/{id}', [UserNoteController::class, "getUserNoteById"]);
 Route::delete('/v1.0/user-notes/{ids}', [UserNoteController::class, "deleteUserNotesByIds"]);

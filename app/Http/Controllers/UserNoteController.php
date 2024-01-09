@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserNoteCreateRequest;
+use App\Http\Requests\UserNoteUpdateByBusinessOwnerRequest;
 use App\Http\Requests\UserNoteUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
@@ -225,6 +226,128 @@ class UserNoteController extends Controller
         }
     }
 
+      /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/user-notes/by-business-owner",
+     *      operationId="updateUserNoteByBusinessOwner",
+     *      tags={"user_notes"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update  user note ",
+     *      description="This method is to update user note",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+ * @OA\Property(property="user_id", type="integer", format="int", example=1),
+  * @OA\Property(property="title", type="string", format="string", example="Your title"),
+ * @OA\Property(property="description", type="string", format="string", example="Your Major"),
+ *  * @OA\Property(property="created_at", type="string", format="string", example="your date"),
+ *  * @OA\Property(property="updated_at", type="string", format="string", example="your date")
+*
+ *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserNoteByBusinessOwner(UserNoteUpdateByBusinessOwnerRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('business_owner')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+
+                 $user_note_query_params = [
+                     "id" => $request_data["id"],
+                 ];
+                 // $user_note_prev = UserNote::where($user_note_query_params)
+                 //     ->first();
+                 // if (!$user_note_prev) {
+                 //     return response()->json([
+                 //         "message" => "no user note found"
+                 //     ], 404);
+                 // }
+
+                 UserNote::disableTimestamps();
+
+                 // Update the record
+                 UserNote::where($user_note_query_params)->update(
+                     collect($request_data)->only([
+                         'user_id',
+                         'title',
+                         'description',
+                         'created_at', // If you need to update created_at manually
+                         'updated_at', // If you need to update updated_at manually
+                     ])->toArray()
+                 );
+
+                 // Enable timestamp updates
+                 UserNote::enableTimestamps();
+
+                 // Retrieve the updated record
+                 $user_note = UserNote::where($user_note_query_params)->first();
+
+                 if (!$user_note) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+                 return response($user_note, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
     /**
      *
@@ -375,7 +498,7 @@ class UserNoteController extends Controller
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });;
+                });
 
 
 
@@ -457,7 +580,15 @@ class UserNoteController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_note =  UserNote::where([
+            $user_note =  UserNote::
+            with([
+                "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+
+            ])
+            ->where([
                 "id" => $id,
             ])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
