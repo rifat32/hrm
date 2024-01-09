@@ -11,6 +11,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Department;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
@@ -547,12 +548,24 @@ class ProjectController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+
+
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
+
             $projects = Project::with("department")
             ->where(
                 [
                     "business_id" => $business_id
                 ]
-            )
+            )  ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -574,9 +587,11 @@ class ProjectController extends Controller
                 }, function ($query) {
                     return $query->orderBy("projects.id", "DESC");
                 })
+
                 ->select('projects.*',
 
                  )
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -659,11 +674,21 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
             $business_id =  $request->user()->business_id;
-            $project =  Project::where([
+            $project =  Project::
+            where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
+            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
             ->select('projects.*'
              )
                 ->first();
