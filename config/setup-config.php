@@ -216,6 +216,11 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+                "employee_note_create",
+                "employee_note_update",
+                "employee_note_view",
+                "employee_note_delete",
+
                 "employee_address_history_create",
                 "employee_address_history_update",
                 "employee_address_history_view",
@@ -408,6 +413,12 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+                "employee_note_create",
+                "employee_note_update",
+                "employee_note_view",
+                "employee_note_delete",
+
+
                 "employee_address_history_create",
                 "employee_address_history_update",
                 "employee_address_history_view",
@@ -587,6 +598,12 @@ return [
                 "employee_education_history_update",
                 "employee_education_history_view",
                 "employee_education_history_delete",
+
+                "employee_note_create",
+                "employee_note_update",
+                "employee_note_view",
+                "employee_note_delete",
+
 
                 "employee_address_history_create",
                 "employee_address_history_update",
@@ -797,6 +814,12 @@ return [
        "employee_education_history_update",
        "employee_education_history_view",
        "employee_education_history_delete",
+
+       "employee_note_create",
+       "employee_note_update",
+       "employee_note_view",
+       "employee_note_delete",
+
 
        "employee_address_history_create",
        "employee_address_history_update",
@@ -1023,6 +1046,12 @@ return [
         "employee_education_history_update" => "",
         "employee_education_history_view" => "",
         "employee_education_history_delete" => "",
+
+        "employee_note_create" => "",
+        "employee_note_update" => "",
+        "employee_note_view" => "",
+        "employee_note_delete" => "",
+
 
         "employee_address_history_create" => "",
         "employee_address_history_update" => "",
@@ -1559,10 +1588,33 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+            ],
+        ],
 
+        [
+            "header" => "employee_notes",
+            "permissions" => [
+                "employee_note_create",
+                "employee_note_update",
+                "employee_note_view",
+                "employee_note_delete",
 
             ],
         ],
+
+        [
+            "header" => "employee_education_history",
+            "permissions" => [
+                "employee_note_create",
+                "employee_note_update",
+                "employee_note_view",
+                "employee_note_delete",
+
+            ],
+        ],
+
+
+
 
         [
             "header" => "employee_address_history",

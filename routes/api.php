@@ -50,6 +50,7 @@ use App\Http\Controllers\UserDocumentController;
 use App\Http\Controllers\UserEducationHistoryController;
 use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserNoteController;
 use App\Http\Controllers\UserPassportHistoryController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\UserSponsorshipHistoryController;
@@ -276,6 +277,22 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user education history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user notes management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-notes', [UserNoteController::class, "createUserNote"]);
+Route::put('/v1.0/user-notes', [UserNoteController::class, "updateUserNote"]);
+Route::get('/v1.0/user-notes', [UserNoteController::class, "getUserNotes"]);
+Route::get('/v1.0/user-notes/{id}', [UserNoteController::class, "getUserNoteById"]);
+Route::delete('/v1.0/user-notes/{ids}', [UserNoteController::class, "deleteUserNotesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user notes management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -785,6 +802,8 @@ Route::get('/v1.0/histories/user-attendance-details', [HistoryDetailsController:
 Route::get('/v1.0/histories/user-leave-details', [HistoryDetailsController::class, "getUserLeaveDetailsHistory"]);
 
 Route::get('/v1.0/histories/user-work-shift', [HistoryDetailsController::class, "getUserWorkShiftHistory"]);
+Route::get('/v1.0/histories/user-project', [HistoryDetailsController::class, "getUserProjectHistory"]);
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end history details management section

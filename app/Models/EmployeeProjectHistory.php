@@ -34,6 +34,9 @@ class EmployeeProjectHistory extends Model
     //     return $this->belongsToMany(Department::class, 'department_projects', 'project_id', 'department_id');
     // }
 
+    public function user() {
+        return $this->belongsTo(User::class, 'employee_id', 'id');
+    }
 
 
 
