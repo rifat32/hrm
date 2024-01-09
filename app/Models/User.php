@@ -69,6 +69,15 @@ class User extends Authenticatable
          'is_active'
     ];
 
+
+    public function projects() {
+        return $this->belongsToMany(Project::class, 'user_projects', 'user_id', 'project_id');
+    }
+
+
+
+
+
     public function work_location()
     {
         return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');

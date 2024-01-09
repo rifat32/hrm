@@ -861,11 +861,20 @@ Route::delete('/v1.0/candidates/{ids}', [CandidateController::class, "deleteCand
 // project  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 Route::post('/v1.0/projects', [ProjectController::class, "createProject"]);
+
+Route::put('/v1.0/projects/assign-user', [ProjectController::class, "assignUser"]);
+
+Route::put('/v1.0/projects/assign-project', [ProjectController::class, "assign"]);
+
+
 Route::put('/v1.0/projects', [ProjectController::class, "updateProject"]);
 Route::get('/v1.0/projects', [ProjectController::class, "getProjects"]);
 Route::get('/v1.0/projects/{id}', [ProjectController::class, "getProjectById"]);
 Route::delete('/v1.0/projects/{ids}', [ProjectController::class, "deleteProjectsByIds"]);
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end project  management section

@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+
+use App\Http\Requests\ProjectAssignToUserRequest;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
+use App\Http\Requests\UserAssignToProjectRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Project;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -38,7 +42,7 @@ class ProjectController extends Controller
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
  *     @OA\Property(property="status", type="string", format="string", example="progress"),
- *     @OA\Property(property="department_id", type="number", format="number", example="1")
+ *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
  *
      *
      *         ),
@@ -99,6 +103,7 @@ class ProjectController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $project =  Project::create($request_data);
+                $project->departments()->sync($request_data['departments'], []);
                 return response($project, 201);
             });
         } catch (Exception $e) {
@@ -106,6 +111,216 @@ class ProjectController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+     /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/projects/assign-user",
+     *      operationId="assignUser",
+     *      tags={"project"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update project listing ",
+     *      description="This method is to update project listing",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *    @OA\Property(property="id", type="number", format="number",example="1"),
+     *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
+ *
+ *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function assignUser(UserAssignToProjectRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             // if(!$this->isModuleEnabled("project_and_task_management")) {
+             //     return response()->json(['error' => 'Module is not enabled'], 403);
+             //  }
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('project_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+
+                 $project_query_params = [
+                     "id" => $request_data["id"],
+                     "business_id" => $business_id
+                 ];
+
+
+                 $project  =  Project::where($project_query_params)
+                     ->first();
+
+
+                 if (!$project) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+
+                 $project->users()->sync($request_data['users'], []);
+
+                 return response($project, 201);
+
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/projects/assign-project",
+     *      operationId="assignProject",
+     *      tags={"project"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update project listing ",
+     *      description="This method is to update project listing",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *    @OA\Property(property="id", type="number", format="number",example="1"),
+     *     @OA\Property(property="projects", type="string", format="array", example={1,2,3}),
+ *
+ *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function assignProject(ProjectAssignToUserRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             // if(!$this->isModuleEnabled("project_and_task_management")) {
+             //     return response()->json(['error' => 'Module is not enabled'], 403);
+             //  }
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('project_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+
+                 $user_query_params = [
+                     "id" => $request_data["id"],
+                 ];
+
+
+                 $user  =  User::where($user_query_params)
+                     ->first();
+
+
+                 if (!$user) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+
+                 $user->projects()->sync($request_data['projects'], []);
+
+                 return response($user, 201);
+
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
     /**
      *
@@ -128,7 +343,7 @@ class ProjectController extends Controller
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
  *     @OA\Property(property="status", type="string", format="string", example="progress"),
- *     @OA\Property(property="department_id", type="number", format="number", example="1")
+ *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3})
  *
  *
 
@@ -208,7 +423,7 @@ class ProjectController extends Controller
                         'start_date',
                         'end_date',
                         'status',
-                        'department_id',
+
 
                         // "is_active",
                         // "business_id",

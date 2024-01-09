@@ -31,8 +31,9 @@ class ProjectCreateRequest extends FormRequest
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:pending,progress,completed',
-            'department_id' => [
-                'required',
+
+            'departments' => 'present|array',
+            'departments.*' => [
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $all_manager_department_ids = [];
@@ -42,17 +43,17 @@ class ProjectCreateRequest extends FormRequest
                         $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                     }
                     $department = Department::where('id', $value)
-                    ->where('departments.business_id', '=', auth()->user()->business_id)
-                    ->first();
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->first();
 
-                    if (!$department) {
-                        $fail("$attribute is invalid.");
-                        return;
-                    }
-                    if(!in_array($department->id,$all_manager_department_ids)){
-                        $fail("$attribute is invalid. You don't have access to this department.");
-                        return;
-                    }
+                        if (!$department) {
+                            $fail("$attribute is invalid.");
+                            return;
+                        }
+                        if(!in_array($department->id,$all_manager_department_ids)){
+                            $fail("$attribute is invalid. You don't have access to this department.");
+                            return;
+                        }
                 },
             ],
         ];

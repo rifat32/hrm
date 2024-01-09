@@ -737,7 +737,7 @@ class UserManagementController extends Controller
             if (!empty($request_data["work_shift_id"])) {
                 $work_shift =  WorkShift::where([
                     "id" => $request_data["work_shift_id"],
-                    "business_id" => auth()->user()->business_id
+
                 ])
                     ->first();
                 if (!$work_shift) {

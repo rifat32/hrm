@@ -16,18 +16,19 @@ class Project extends Model
         'start_date',
         'end_date',
         'status',
-        'department_id',
         "is_active",
         "business_id",
         "created_by"
     ];
 
-    // Assuming you have a relationship with the Department model
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
 
+    public function departments() {
+        return $this->belongsToMany(Department::class, 'department_projects', 'project_id', 'department_id');
+    }
+    
+    public function users() {
+        return $this->belongsToMany(User::class, 'user_projects', 'project_id', 'user_id');
+    }
 
 
 
