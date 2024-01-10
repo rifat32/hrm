@@ -338,7 +338,7 @@ class UserAssetController extends Controller
 
                         "from_date" => now(),
                         "to_date" => NULL,
-                        'created_by' => $request_data["created_by"]
+                        'created_by' => $user_asset_prev->created_by
 
                       ]
                       );

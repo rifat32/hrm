@@ -18,14 +18,13 @@ class EmployeeSponsorship extends Model
         "certificate_number",
         "current_certificate_status",
         "is_sponsorship_withdrawn",
-      
+
         'created_by'
     ];
 
 
 
-
-
+  
 
 
 

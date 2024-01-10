@@ -69,6 +69,8 @@ class UserVisaHistoryCreateRequest extends FormRequest
             'visa_docs' => 'required|array',
             'visa_docs.*.file_name' => 'required|string',
             'visa_docs.*.description' => 'required|string',
+
+
         ];
     }
 }

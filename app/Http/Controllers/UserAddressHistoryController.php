@@ -103,6 +103,7 @@ class UserAddressHistoryController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["created_by"] = $request->user()->id;
+                $request_data["is_manual"] = 1;
 
                 $user_address_history =  EmployeeAddressHistory::create($request_data);
 

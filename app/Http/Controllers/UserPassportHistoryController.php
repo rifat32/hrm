@@ -100,6 +100,8 @@ class UserPassportHistoryController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["created_by"] = $request->user()->id;
+                $request_data["is_manual"] = 1;
+
 
                 $user_passport_history =  EmployeePassportDetailHistory::create($request_data);
 

@@ -26,6 +26,11 @@ class EmployeePassportDetailHistory extends Model
     ];
 
 
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by',"id");
+    }
+
     public function employee(){
         return $this->hasOne(User::class,'id', 'employee_id');
     }
