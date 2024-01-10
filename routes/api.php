@@ -965,7 +965,11 @@ Route::delete('/v1.0/products/{id}', [ProductController::class, "deleteProductBy
 
 Route::post('/v1.0/reminders', [ReminderController::class, "createReminder"]);
 Route::put('/v1.0/reminders', [ReminderController::class, "updateReminder"]);
+
+Route::get('/v1.0/reminders-entity-names', [ReminderController::class, "getReminderEntityNames"]);
+
 Route::get('/v1.0/reminders', [ReminderController::class, "getReminders"]);
+
 Route::get('/v1.0/reminders/{id}', [ReminderController::class, "getReminderById"]);
 Route::delete('/v1.0/reminders/{ids}', [ReminderController::class, "deleteRemindersByIds"]);
 

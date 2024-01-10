@@ -353,7 +353,7 @@ class UserVisaHistoryController extends Controller
                 },
 
             ])
-            ->where(["is_manual" => 1])
+            // ->where(["is_manual" => 1])
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
@@ -568,7 +568,7 @@ class UserVisaHistoryController extends Controller
             }
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeVisaDetailHistory::whereIn('id', $idsArray)
-            ->where(["is_manual" => 1])
+            // ->where(["is_manual" => 1])
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })

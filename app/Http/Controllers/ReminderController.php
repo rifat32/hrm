@@ -227,7 +227,6 @@ class ReminderController extends Controller
                 $request_data["db_field_name"] = $reminder_option["db_field_name"];
 
 
-
                 $reminder_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
@@ -256,7 +255,7 @@ class ReminderController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                    
+
                 if (!$reminder) {
                     return response()->json([
                         "message" => "something went wrong."
@@ -270,6 +269,113 @@ class ReminderController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+ /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/reminders-entity-names",
+     *      operationId="getReminderEntityNames",
+     *      tags={"reminders"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get reminders  ",
+     *      description="This method is to get reminders ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getReminderEntityNames(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('reminder_create')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+
+             $reminder_options = config("setup-config.reminder_options");
+
+             $reminder_entity_names = collect($reminder_options)->pluck("entity_name")->toArray();
+
+
+             return response()->json($reminder_entity_names, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**
