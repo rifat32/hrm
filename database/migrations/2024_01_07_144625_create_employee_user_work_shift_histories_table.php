@@ -17,9 +17,9 @@ class CreateEmployeeUserWorkShiftHistoriesTable extends Migration
             $table->id();
 
 
-            $table->unsignedBigInteger("department_id")->nullable();
+            $table->unsignedBigInteger("user_id")->nullable();
 
-            
+
             $table->unsignedBigInteger("work_shift_id")->nullable();
 
 
