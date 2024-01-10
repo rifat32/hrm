@@ -22,100 +22,100 @@ return [
 
 
 
-       "user_create",
-       "user_update",
-       "user_view",
-       "user_delete",
+                "user_create",
+                "user_update",
+                "user_view",
+                "user_delete",
 
-       "role_create",
-       "role_update",
-       "role_view",
-       "role_delete",
+                "role_create",
+                "role_update",
+                "role_view",
+                "role_delete",
 
-       "business_create",
-       "business_update",
-       "business_view",
-       "business_delete",
+                "business_create",
+                "business_update",
+                "business_view",
+                "business_delete",
 
-       "template_create",
-       "template_update",
-       "template_view",
-       "template_delete",
+                "template_create",
+                "template_update",
+                "template_view",
+                "template_delete",
 
-       "payment_type_create",
-       "payment_type_update",
-       "payment_type_view",
-       "payment_type_delete",
-
-
-"product_category_create",
-"product_category_update",
-"product_category_view",
-"product_category_delete",
-
-"product_create",
-"product_update",
-"product_view",
-"product_delete",
-
-"job_platform_create",
-"job_platform_update",
-"job_platform_view",
-"job_platform_delete",
-
-"social_site_create",
-"social_site_update",
-"social_site_view",
-"social_site_delete",
+                "payment_type_create",
+                "payment_type_update",
+                "payment_type_view",
+                "payment_type_delete",
 
 
+                "product_category_create",
+                "product_category_update",
+                "product_category_view",
+                "product_category_delete",
+
+                "product_create",
+                "product_update",
+                "product_view",
+                "product_delete",
+
+                "job_platform_create",
+                "job_platform_update",
+                "job_platform_view",
+                "job_platform_delete",
+
+                "social_site_create",
+                "social_site_update",
+                "social_site_view",
+                "social_site_delete",
 
 
-"designation_create",
-"designation_update",
-"designation_view",
-"designation_delete",
-
-"bank_create",
-"bank_update",
-"bank_view",
-"bank_delete",
-
-"job_type_create",
-"job_type_update",
-"job_type_view",
-"job_type_delete",
-
-"work_location_create",
-"work_location_update",
-"work_location_view",
-"work_location_delete",
-
-"recruitment_process_create",
-"recruitment_process_update",
-"recruitment_process_view",
-"recruitment_process_delete",
 
 
-"employment_status_create",
-"employment_status_update",
-"employment_status_view",
-"employment_status_delete",
+                "designation_create",
+                "designation_update",
+                "designation_view",
+                "designation_delete",
 
-"setting_leave_type_create",
-"setting_leave_type_update",
-"setting_leave_type_view",
-"setting_leave_type_delete",
+                "bank_create",
+                "bank_update",
+                "bank_view",
+                "bank_delete",
 
-"setting_leave_create",
+                "job_type_create",
+                "job_type_update",
+                "job_type_view",
+                "job_type_delete",
 
-"setting_attendance_create",
+                "work_location_create",
+                "work_location_update",
+                "work_location_view",
+                "work_location_delete",
 
-"setting_payroll_create",
+                "recruitment_process_create",
+                "recruitment_process_update",
+                "recruitment_process_view",
+                "recruitment_process_delete",
 
 
-"business_times_update",
-       "business_times_view",
+                "employment_status_create",
+                "employment_status_update",
+                "employment_status_view",
+                "employment_status_delete",
+
+                "setting_leave_type_create",
+                "setting_leave_type_update",
+                "setting_leave_type_view",
+                "setting_leave_type_delete",
+
+                "setting_leave_create",
+
+                "setting_attendance_create",
+
+                "setting_payroll_create",
+
+
+                "business_times_update",
+                "business_times_view",
 
             ],
         ],
@@ -139,25 +139,25 @@ return [
                 "designation_delete",
 
                 "bank_create",
-"bank_update",
-"bank_view",
-"bank_delete",
+                "bank_update",
+                "bank_view",
+                "bank_delete",
 
 
                 "job_type_create",
-"job_type_update",
-"job_type_view",
-"job_type_delete",
+                "job_type_update",
+                "job_type_view",
+                "job_type_delete",
 
-"work_location_create",
-"work_location_update",
-"work_location_view",
-"work_location_delete",
+                "work_location_create",
+                "work_location_update",
+                "work_location_view",
+                "work_location_delete",
 
-"recruitment_process_create",
-"recruitment_process_update",
-"recruitment_process_view",
-"recruitment_process_delete",
+                "recruitment_process_create",
+                "recruitment_process_update",
+                "recruitment_process_view",
+                "recruitment_process_delete",
 
                 "business_create",
                 "business_update",
@@ -165,27 +165,27 @@ return [
                 "business_delete",
 
 
-            "job_platform_create",
-            "job_platform_update",
-            "job_platform_view",
-            "job_platform_delete",
+                "job_platform_create",
+                "job_platform_update",
+                "job_platform_view",
+                "job_platform_delete",
 
 
-"social_site_create",
-"social_site_update",
-"social_site_view",
-"social_site_delete",
+                "social_site_create",
+                "social_site_update",
+                "social_site_view",
+                "social_site_delete",
 
 
-"setting_leave_create",
+                "setting_leave_create",
 
-"setting_attendance_create",
+                "setting_attendance_create",
 
-"setting_payroll_create",
+                "setting_payroll_create",
 
 
-"business_times_update",
-       "business_times_view",
+                "business_times_update",
+                "business_times_view",
 
 
             ],
@@ -282,10 +282,10 @@ return [
                 "job_listing_view",
                 "job_listing_delete",
 
-// "job_platform_create",
-"job_platform_update",
-"job_platform_view",
-// "job_platform_delete",
+                // "job_platform_create",
+                "job_platform_update",
+                "job_platform_view",
+                // "job_platform_delete",
 
                 "project_create",
                 "project_update",
@@ -323,25 +323,25 @@ return [
                 "designation_delete",
 
                 "bank_create",
-"bank_update",
-"bank_view",
-"bank_delete",
+                "bank_update",
+                "bank_view",
+                "bank_delete",
 
 
                 "job_type_create",
-"job_type_update",
-"job_type_view",
-"job_type_delete",
+                "job_type_update",
+                "job_type_view",
+                "job_type_delete",
 
-"work_location_create",
-"work_location_update",
-"work_location_view",
-"work_location_delete",
+                "work_location_create",
+                "work_location_update",
+                "work_location_view",
+                "work_location_delete",
 
-"recruitment_process_create",
-"recruitment_process_update",
-"recruitment_process_view",
-"recruitment_process_delete",
+                "recruitment_process_create",
+                "recruitment_process_update",
+                "recruitment_process_view",
+                "recruitment_process_delete",
 
 
 
@@ -375,17 +375,17 @@ return [
 
                 "setting_attendance_create",
 
-"attendance_create",
-"attendance_approve",
-"attendance_update",
-"attendance_view",
-"attendance_delete",
+                "attendance_create",
+                "attendance_approve",
+                "attendance_update",
+                "attendance_view",
+                "attendance_delete",
 
 
-"setting_payroll_create",
+                "setting_payroll_create",
 
-"business_times_update",
-       "business_times_view",
+                "business_times_update",
+                "business_times_view",
             ],
         ],
 
@@ -516,61 +516,61 @@ return [
                 "designation_delete",
 
                 "bank_create",
-"bank_update",
-"bank_view",
-"bank_delete",
+                "bank_update",
+                "bank_view",
+                "bank_delete",
 
 
                 "job_type_create",
-"job_type_update",
-"job_type_view",
-"job_type_delete",
+                "job_type_update",
+                "job_type_view",
+                "job_type_delete",
 
-"work_location_create",
-"work_location_update",
-"work_location_view",
-"work_location_delete",
+                "work_location_create",
+                "work_location_update",
+                "work_location_view",
+                "work_location_delete",
 
-"recruitment_process_create",
-"recruitment_process_update",
-"recruitment_process_view",
-"recruitment_process_delete",
+                "recruitment_process_create",
+                "recruitment_process_update",
+                "recruitment_process_view",
+                "recruitment_process_delete",
 
                 "employment_status_create",
                 "employment_status_update",
                 "employment_status_view",
                 "employment_status_delete",
 
-"setting_leave_type_create",
-"setting_leave_type_update",
-"setting_leave_type_view",
-"setting_leave_type_delete",
-"setting_leave_create",
+                "setting_leave_type_create",
+                "setting_leave_type_update",
+                "setting_leave_type_view",
+                "setting_leave_type_delete",
+                "setting_leave_create",
 
 
 
-"leave_create",
-"leave_update",
-"leave_approve",
-"leave_view",
-"leave_delete",
+                "leave_create",
+                "leave_update",
+                "leave_approve",
+                "leave_view",
+                "leave_delete",
 
-"candidate_create",
-"candidate_update",
-"candidate_view",
-"candidate_delete",
+                "candidate_create",
+                "candidate_update",
+                "candidate_view",
+                "candidate_delete",
 
 
 
-"setting_attendance_create",
+                "setting_attendance_create",
 
-"attendance_create",
-"attendance_approve",
-"attendance_update",
-"attendance_view",
-"attendance_delete",
+                "attendance_create",
+                "attendance_approve",
+                "attendance_update",
+                "attendance_view",
+                "attendance_delete",
 
-"setting_payroll_create",
+                "setting_payroll_create",
 
 
             ],
@@ -702,61 +702,61 @@ return [
                 "designation_delete",
 
                 "bank_create",
-"bank_update",
-"bank_view",
-"bank_delete",
+                "bank_update",
+                "bank_view",
+                "bank_delete",
 
 
                 "job_type_create",
-"job_type_update",
-"job_type_view",
-"job_type_delete",
+                "job_type_update",
+                "job_type_view",
+                "job_type_delete",
 
-"work_location_create",
-"work_location_update",
-"work_location_view",
-"work_location_delete",
+                "work_location_create",
+                "work_location_update",
+                "work_location_view",
+                "work_location_delete",
 
-"recruitment_process_create",
-"recruitment_process_update",
-"recruitment_process_view",
-"recruitment_process_delete",
+                "recruitment_process_create",
+                "recruitment_process_update",
+                "recruitment_process_view",
+                "recruitment_process_delete",
 
                 "employment_status_create",
                 "employment_status_update",
                 "employment_status_view",
                 "employment_status_delete",
 
-"setting_leave_type_create",
-"setting_leave_type_update",
-"setting_leave_type_view",
-"setting_leave_type_delete",
-"setting_leave_create",
+                "setting_leave_type_create",
+                "setting_leave_type_update",
+                "setting_leave_type_view",
+                "setting_leave_type_delete",
+                "setting_leave_create",
 
 
 
-"leave_create",
-"leave_update",
-"leave_approve",
-"leave_view",
-"leave_delete",
+                "leave_create",
+                "leave_update",
+                "leave_approve",
+                "leave_view",
+                "leave_delete",
 
-"candidate_create",
-"candidate_update",
-"candidate_view",
-"candidate_delete",
+                "candidate_create",
+                "candidate_update",
+                "candidate_view",
+                "candidate_delete",
 
 
 
-"setting_attendance_create",
+                "setting_attendance_create",
 
-"attendance_create",
-"attendance_update",
-"attendance_approve",
-"attendance_view",
-"attendance_delete",
+                "attendance_create",
+                "attendance_update",
+                "attendance_approve",
+                "attendance_view",
+                "attendance_delete",
 
-"setting_payroll_create",
+                "setting_payroll_create",
 
 
             ],
@@ -764,12 +764,7 @@ return [
 
         [
             "role" => "business_employee",
-            "permissions" => [
-
-
-
-
-            ],
+            "permissions" => [],
         ],
 
 
@@ -799,221 +794,221 @@ return [
         "business_tier_view",
         "business_tier_delete",
 
-       "user_create",
-       "user_update",
-       "user_view",
-       "user_delete",
+        "user_create",
+        "user_update",
+        "user_view",
+        "user_delete",
 
-       "employee_document_create",
-       "employee_document_update",
-       "employee_document_view",
-       "employee_document_delete",
+        "employee_document_create",
+        "employee_document_update",
+        "employee_document_view",
+        "employee_document_delete",
 
-       "employee_job_history_create",
-       "employee_job_history_update",
-       "employee_job_history_view",
-       "employee_job_history_delete",
+        "employee_job_history_create",
+        "employee_job_history_update",
+        "employee_job_history_view",
+        "employee_job_history_delete",
 
-       "employee_education_history_create",
-       "employee_education_history_update",
-       "employee_education_history_view",
-       "employee_education_history_delete",
+        "employee_education_history_create",
+        "employee_education_history_update",
+        "employee_education_history_view",
+        "employee_education_history_delete",
 
-       "employee_note_create",
-       "employee_note_update",
-       "employee_note_view",
-       "employee_note_delete",
-
-
-       "employee_address_history_create",
-       "employee_address_history_update",
-       "employee_address_history_view",
-       "employee_address_history_delete",
-
-       "employee_passport_history_create",
-                "employee_passport_history_update",
-                "employee_passport_history_view",
-                "employee_passport_history_delete",
-
-                "employee_visa_history_create",
-                "employee_visa_history_update",
-                "employee_visa_history_view",
-                "employee_visa_history_delete",
-
-       "employee_sponsorship_history_create",
-       "employee_sponsorship_history_update",
-       "employee_sponsorship_history_view",
-       "employee_sponsorship_history_delete",
+        "employee_note_create",
+        "employee_note_update",
+        "employee_note_view",
+        "employee_note_delete",
 
 
-       "employee_asset_create",
-       "employee_asset_update",
-       "employee_asset_view",
-       "employee_asset_delete",
+        "employee_address_history_create",
+        "employee_address_history_update",
+        "employee_address_history_view",
+        "employee_address_history_delete",
 
-       "employee_social_site_create",
-       "employee_social_site_update",
-       "employee_social_site_view",
-       "employee_social_site_delete",
+        "employee_passport_history_create",
+        "employee_passport_history_update",
+        "employee_passport_history_view",
+        "employee_passport_history_delete",
 
+        "employee_visa_history_create",
+        "employee_visa_history_update",
+        "employee_visa_history_view",
+        "employee_visa_history_delete",
 
-       "role_create",
-       "role_update",
-       "role_view",
-       "role_delete",
-
-       "business_create",
-       "business_update",
-       "business_view",
-       "business_delete",
-
-
-       "template_create",
-       "template_update",
-       "template_view",
-       "template_delete",
+        "employee_sponsorship_history_create",
+        "employee_sponsorship_history_update",
+        "employee_sponsorship_history_view",
+        "employee_sponsorship_history_delete",
 
 
+        "employee_asset_create",
+        "employee_asset_update",
+        "employee_asset_view",
+        "employee_asset_delete",
 
-       "payment_type_create",
-       "payment_type_update",
-       "payment_type_view",
-       "payment_type_delete",
-
-
-       "product_category_create",
-       "product_category_update",
-       "product_category_view",
-       "product_category_delete",
-
-       "product_create",
-       "product_update",
-       "product_view",
-       "product_delete",
+        "employee_social_site_create",
+        "employee_social_site_update",
+        "employee_social_site_view",
+        "employee_social_site_delete",
 
 
-       "department_create",
-       "department_update",
-       "department_view",
-       "department_delete",
+        "role_create",
+        "role_update",
+        "role_view",
+        "role_delete",
 
-       "asset_type_create",
-       "asset_type_update",
-       "asset_type_view",
-       "asset_type_delete",
-
-       "job_listing_create",
-       "job_listing_update",
-       "job_listing_view",
-       "job_listing_delete",
-
-"job_platform_create",
-"job_platform_update",
-"job_platform_view",
-"job_platform_delete",
+        "business_create",
+        "business_update",
+        "business_view",
+        "business_delete",
 
 
-       "project_create",
-       "project_update",
-       "project_view",
-       "project_delete",
-
-       "task_create",
-       "task_update",
-       "task_view",
-       "task_delete",
-
-       "holiday_create",
-       "holiday_update",
-       "holiday_view",
-       "holiday_delete",
-
-       "work_shift_create",
-       "work_shift_update",
-       "work_shift_view",
-       "work_shift_delete",
-
-
-       "announcement_create",
-       "announcement_update",
-       "announcement_view",
-       "announcement_delete",
+        "template_create",
+        "template_update",
+        "template_view",
+        "template_delete",
 
 
 
-
-       "social_site_create",
-"social_site_update",
-"social_site_view",
-"social_site_delete",
-
+        "payment_type_create",
+        "payment_type_update",
+        "payment_type_view",
+        "payment_type_delete",
 
 
-       "designation_create",
-       "designation_update",
-       "designation_view",
-       "designation_delete",
+        "product_category_create",
+        "product_category_update",
+        "product_category_view",
+        "product_category_delete",
 
-       "bank_create",
-"bank_update",
-"bank_view",
-"bank_delete",
-
-
-       "job_type_create",
-"job_type_update",
-"job_type_view",
-"job_type_delete",
-
-"work_location_create",
-"work_location_update",
-"work_location_view",
-"work_location_delete",
-
-"recruitment_process_create",
-"recruitment_process_update",
-"recruitment_process_view",
-"recruitment_process_delete",
+        "product_create",
+        "product_update",
+        "product_view",
+        "product_delete",
 
 
+        "department_create",
+        "department_update",
+        "department_view",
+        "department_delete",
 
-       "employment_status_create",
-       "employment_status_update",
-       "employment_status_view",
-       "employment_status_delete",
+        "asset_type_create",
+        "asset_type_update",
+        "asset_type_view",
+        "asset_type_delete",
 
-       "setting_leave_type_create",
-"setting_leave_type_update",
-"setting_leave_type_view",
-"setting_leave_type_delete",
-"setting_leave_create",
+        "job_listing_create",
+        "job_listing_update",
+        "job_listing_view",
+        "job_listing_delete",
 
-
-
-"leave_create",
-"leave_update",
-"leave_approve",
-"leave_view",
-"leave_delete",
-
-"candidate_create",
-"candidate_update",
-"candidate_view",
-"candidate_delete",
+        "job_platform_create",
+        "job_platform_update",
+        "job_platform_view",
+        "job_platform_delete",
 
 
-"setting_attendance_create",
+        "project_create",
+        "project_update",
+        "project_view",
+        "project_delete",
 
-"attendance_create",
-"attendance_update",
-"attendance_approve",
-"attendance_view",
-"attendance_delete",
+        "task_create",
+        "task_update",
+        "task_view",
+        "task_delete",
 
-"setting_payroll_create",
+        "holiday_create",
+        "holiday_update",
+        "holiday_view",
+        "holiday_delete",
 
-"business_times_update",
-       "business_times_view",
+        "work_shift_create",
+        "work_shift_update",
+        "work_shift_view",
+        "work_shift_delete",
+
+
+        "announcement_create",
+        "announcement_update",
+        "announcement_view",
+        "announcement_delete",
+
+
+
+
+        "social_site_create",
+        "social_site_update",
+        "social_site_view",
+        "social_site_delete",
+
+
+
+        "designation_create",
+        "designation_update",
+        "designation_view",
+        "designation_delete",
+
+        "bank_create",
+        "bank_update",
+        "bank_view",
+        "bank_delete",
+
+
+        "job_type_create",
+        "job_type_update",
+        "job_type_view",
+        "job_type_delete",
+
+        "work_location_create",
+        "work_location_update",
+        "work_location_view",
+        "work_location_delete",
+
+        "recruitment_process_create",
+        "recruitment_process_update",
+        "recruitment_process_view",
+        "recruitment_process_delete",
+
+
+
+        "employment_status_create",
+        "employment_status_update",
+        "employment_status_view",
+        "employment_status_delete",
+
+        "setting_leave_type_create",
+        "setting_leave_type_update",
+        "setting_leave_type_view",
+        "setting_leave_type_delete",
+        "setting_leave_create",
+
+
+
+        "leave_create",
+        "leave_update",
+        "leave_approve",
+        "leave_view",
+        "leave_delete",
+
+        "candidate_create",
+        "candidate_update",
+        "candidate_view",
+        "candidate_delete",
+
+
+        "setting_attendance_create",
+
+        "attendance_create",
+        "attendance_update",
+        "attendance_approve",
+        "attendance_view",
+        "attendance_delete",
+
+        "setting_payroll_create",
+
+        "business_times_update",
+        "business_times_view",
 
     ],
     "permissions_titles" => [
@@ -1026,7 +1021,7 @@ return [
 
 
         "business_tier_create" => "Can create business tier",
-        "business_tier_update" => "Can update business tier" ,
+        "business_tier_update" => "Can update business tier",
         "business_tier_view" => "Can view business tier",
         "business_tier_delete" => "Can delete business tier",
 
@@ -1063,14 +1058,14 @@ return [
         "employee_address_history_delete" => "",
 
         "employee_passport_history_create" => "",
-                "employee_passport_history_update" => "",
-                "employee_passport_history_view" => "",
-                "employee_passport_history_delete" => "",
+        "employee_passport_history_update" => "",
+        "employee_passport_history_view" => "",
+        "employee_passport_history_delete" => "",
 
-                "employee_visa_history_create" => "",
-                "employee_visa_history_update" => "",
-                "employee_visa_history_view" => "",
-                "employee_visa_history_delete" => "",
+        "employee_visa_history_create" => "",
+        "employee_visa_history_update" => "",
+        "employee_visa_history_view" => "",
+        "employee_visa_history_delete" => "",
 
 
 
@@ -1177,9 +1172,9 @@ return [
         "job_platform_delete" => "Can delete job platform",
 
         "social_site_create" => "Can create social site",
-"social_site_update"  => "Can update social site",
-"social_site_view" => "Can view social site",
-"social_site_delete" => "Can delete social site",
+        "social_site_update"  => "Can update social site",
+        "social_site_view" => "Can view social site",
+        "social_site_delete" => "Can delete social site",
 
 
 
@@ -1189,25 +1184,25 @@ return [
         "designation_delete" => "Can delete designation",
 
         "bank_create" => "",
-"bank_update" => "",
-"bank_view" => "",
-"bank_delete" => "",
+        "bank_update" => "",
+        "bank_view" => "",
+        "bank_delete" => "",
 
 
         "job_type_create" => "",
-"job_type_update" => "",
-"job_type_view" => "",
-"job_type_delete" => "",
+        "job_type_update" => "",
+        "job_type_view" => "",
+        "job_type_delete" => "",
 
-"work_location_create" => "",
-"work_location_update" => "",
-"work_location_view" => "",
-"work_location_delete" => "",
+        "work_location_create" => "",
+        "work_location_update" => "",
+        "work_location_view" => "",
+        "work_location_delete" => "",
 
-"recruitment_process_create" => "",
-"recruitment_process_update" => "",
-"recruitment_process_view" => "",
-"recruitment_process_delete" => "",
+        "recruitment_process_create" => "",
+        "recruitment_process_update" => "",
+        "recruitment_process_view" => "",
+        "recruitment_process_delete" => "",
 
         "employment_status_create" => "Can create employment status",
         "employment_status_update" => "Can update employment status",
@@ -1460,9 +1455,9 @@ return [
         "work_location_delete" => "delete",
 
         "recruitment_process_create" => "create",
-"recruitment_process_update" => "update",
-"recruitment_process_view" => "view",
-"recruitment_process_delete" => "delete",
+        "recruitment_process_update" => "update",
+        "recruitment_process_view" => "view",
+        "recruitment_process_delete" => "delete",
 
 
 
@@ -1528,8 +1523,8 @@ return [
         [
             "header" => "module",
             "permissions" => [
-       "module_update",
-       "module_view",
+                "module_update",
+                "module_view",
 
             ],
         ],
@@ -1550,10 +1545,10 @@ return [
         [
             "header" => "user",
             "permissions" => [
-       "user_create",
-       "user_update",
-       "user_view",
-       "user_delete",
+                "user_create",
+                "user_update",
+                "user_view",
+                "user_delete",
 
             ],
         ],
@@ -1647,10 +1642,10 @@ return [
         [
             "header" => "employee_visa_history",
             "permissions" => [
-        "employee_visa_history_create",
-        "employee_visa_history_update",
-        "employee_visa_history_view",
-        "employee_visa_history_delete",
+                "employee_visa_history_create",
+                "employee_visa_history_update",
+                "employee_visa_history_view",
+                "employee_visa_history_delete",
             ],
         ],
 
@@ -1660,10 +1655,10 @@ return [
             "header" => "employee_sponsorship_history",
             "permissions" => [
 
-       "employee_sponsorship_history_create",
-       "employee_sponsorship_history_update",
-       "employee_sponsorship_history_view",
-       "employee_sponsorship_history_delete",
+                "employee_sponsorship_history_create",
+                "employee_sponsorship_history_update",
+                "employee_sponsorship_history_view",
+                "employee_sponsorship_history_delete",
 
 
             ],
@@ -1691,9 +1686,9 @@ return [
             "header" => "employee_social_site",
             "permissions" => [
                 "employee_social_site_create",
-        "employee_social_site_update",
-        "employee_social_site_view",
-        "employee_social_site_delete",
+                "employee_social_site_update",
+                "employee_social_site_view",
+                "employee_social_site_delete",
 
             ],
         ],
@@ -1830,9 +1825,9 @@ return [
             "header" => "task",
             "permissions" => [
                 "task_create",
-       "task_update",
-       "task_view",
-       "task_delete",
+                "task_update",
+                "task_view",
+                "task_delete",
 
 
 
@@ -1845,9 +1840,9 @@ return [
             "header" => "holiday",
             "permissions" => [
                 "holiday_create",
-       "holiday_update",
-       "holiday_view",
-       "holiday_delete",
+                "holiday_update",
+                "holiday_view",
+                "holiday_delete",
 
 
 
@@ -1893,10 +1888,10 @@ return [
             "header" => "job_platform",
             "permissions" => [
 
-       "job_platform_create",
-       "job_platform_update",
-       "job_platform_view",
-       "job_platform_delete",
+                "job_platform_create",
+                "job_platform_update",
+                "job_platform_view",
+                "job_platform_delete",
 
 
 
@@ -2128,4 +2123,35 @@ return [
     "business_background_image_location_full" => "business_background_image/business_background_image.jpeg",
 
     "temporary_files_location" => "temporary_files",
+
+
+    "reminder_options"  => [
+        [
+            "entity_name" => "sponsorship_expiry",
+            "db_table_name" => "employee_sponsorships",
+            "db_field_name" => "expiry_date",
+
+        ],
+
+        [
+            "entity_name" => "passport_expiry",
+            "db_table_name" => "employee_passport_details",
+            "db_field_name" => "passport_expiry_date",
+
+        ],
+
+        [
+            "entity_name" => "visa_expiry",
+            "db_table_name" => "employee_visa_details",
+            "db_field_name" => "visa_expiry_date",
+
+        ]
+
+
+        ]
+
+
+
+
+
 ];

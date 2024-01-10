@@ -362,14 +362,14 @@ class UserSponsorshipHistoryController extends Controller
 
             ])
             ->where(["is_manual" => 1])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("user_sponsorship_histories.name", "like", "%" . $term . "%");
-                        //     ->orWhere("user_sponsorship_histories.description", "like", "%" . $term . "%");
+                        $query->where("employee_sponsorship_histories.name", "like", "%" . $term . "%");
+                        //     ->orWhere("employee_sponsorship_histories.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -377,21 +377,21 @@ class UserSponsorshipHistoryController extends Controller
                 //    })
 
                 ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_sponsorship_histories.employee_id', $request->employee_id);
+                    return $query->where('employee_sponsorship_histories.employee_id', $request->employee_id);
                 })
                 ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_sponsorship_histories.employee_id', $request->user()->id);
+                    return $query->where('employee_sponsorship_histories.employee_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('user_sponsorship_histories.created_at', ">=", $request->start_date);
+                    return $query->where('employee_sponsorship_histories.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('user_sponsorship_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('employee_sponsorship_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("user_sponsorship_histories.id", $request->order_by);
+                    return $query->orderBy("employee_sponsorship_histories.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("user_sponsorship_histories.id", "DESC");
+                    return $query->orderBy("employee_sponsorship_histories.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -484,7 +484,7 @@ class UserSponsorshipHistoryController extends Controller
                 "is_manual" => 1
             ])
 
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
@@ -577,7 +577,7 @@ class UserSponsorshipHistoryController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeSponsorshipHistory::whereIn('id', $idsArray)
             ->where(["is_manual" => 1])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->select('id')

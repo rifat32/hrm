@@ -246,14 +246,9 @@ class AttendanceController extends Controller
                 }
 
 
-
-
-
-
-
-
-
                 $attendance =  Attendance::create($request_data);
+
+
 
                 $attendance_history_data = $attendance->toArray();
                 $attendance_history_data['attendance_id'] = $attendance->id;
@@ -500,6 +495,7 @@ class AttendanceController extends Controller
                         "out_geolocation" =>!empty($item["out_geolocation"])?$item["out_geolocation"]:"",
                         "in_time" => $item["in_time"],
                         "out_time" => $item["out_time"],
+                        "work_location_id" => $item["work_location_id"],
                         "in_date" => $item["in_date"],
                         "does_break_taken" => $item["does_break_taken"],
                         "capacity_hours" => $capacity_hours,

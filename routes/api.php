@@ -37,6 +37,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RecruitmentProcessController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
@@ -952,6 +953,24 @@ Route::delete('/v1.0/products/{id}', [ProductController::class, "deleteProductBy
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end product  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// reminders  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+Route::post('/v1.0/reminders', [ReminderController::class, "createReminder"]);
+Route::put('/v1.0/reminders', [ReminderController::class, "updateReminder"]);
+Route::get('/v1.0/reminders', [ReminderController::class, "getReminders"]);
+Route::get('/v1.0/reminders/{id}', [ReminderController::class, "getReminderById"]);
+Route::delete('/v1.0/reminders/{ids}', [ReminderController::class, "deleteRemindersByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end reminders management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

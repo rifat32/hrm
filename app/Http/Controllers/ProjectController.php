@@ -209,6 +209,71 @@ class ProjectController extends Controller
                  }
 
 
+
+
+                 $discharged_users =  User::whereHas("projects",function($query) use($project){
+                    $query->where("users.id",$project->id);
+                 })
+                 ->whereNotIn("id",$request_data['users'])
+                 ->get();
+
+
+
+                 EmployeeProjectHistory::where([
+                    "project_id" => $project->id,
+                    "to_date" => NULL
+                 ])
+                 ->whereIn("project_id",$discharged_users->pluck("id"))
+                 ->update([
+                    "to_date" => now()
+                 ])
+                 ;
+
+
+                 foreach($request_data['users'] as $user_id) {
+                  $user = User::
+                  whereHas("projects",function($query) use($project){
+                    $query->where("projects.id",$project->id);
+                 })
+                   ->where([
+                    "id" => $user_id
+                   ])
+                    ->first();
+
+
+                    if(!$user) {
+
+                        $user = User::where([
+                           "id" => $user_id
+                        ])
+                        ->first();
+
+                        if(!$user) {
+                            throw new Exception("some thing went wrong");
+                        }
+
+                        // UserProject::create([
+                        //     "user_id" => $user->id,
+                        //     "project_id" => $project->id
+                        // ]);
+
+
+
+          $employee_project_history_data = $project->toArray();
+          $employee_project_history_data["employee_id"] = $user->id;
+          $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
+          $employee_project_history_data["from_date"] = now();
+          $employee_project_history_data["to_date"] = NULL;
+
+          EmployeeProjectHistory::create($employee_project_history_data);
+
+
+                    }
+
+
+                 }
+
+
                  $project->users()->sync($request_data['users'], []);
 
                  return response($project, 201);
@@ -314,7 +379,7 @@ class ProjectController extends Controller
 
 
                  $discharged_projects =  Project::whereHas("users",function($query) use($user){
-                    $query("users.id",$user);
+                    $query->where("users.id",$user->id);
                  })
                  ->whereNotIn("id",$request_data['projects'])
                  ->get();
@@ -323,7 +388,7 @@ class ProjectController extends Controller
 
                  EmployeeProjectHistory::where([
                     "employee_id" => $user->id,
-                    "to_date" => now()
+                    "to_date" => NULL
                  ])
                  ->whereIn("project_id",$discharged_projects->pluck("id"))
                  ->update([
@@ -335,7 +400,7 @@ class ProjectController extends Controller
                  foreach($request_data['projects'] as $project_id) {
                   $project = Project::
                   whereHas("users",function($query) use($user){
-                    $query("users.id",$user);
+                    $query->where("users.id",$user->id);
                  })
                    ->where([
                     "id" => $project_id
@@ -354,22 +419,20 @@ class ProjectController extends Controller
                             throw new Exception("some thing went wrong");
                         }
 
-                        UserProject::create([
-                            "user_id" => $user->id,
-                            "project_id" => $project->id
-                        ]);
+                        // UserProject::create([
+                        //     "user_id" => $user->id,
+                        //     "project_id" => $project->id
+                        // ]);
 
 
 
           $employee_project_history_data = $project->toArray();
+          $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
           $employee_project_history_data["employee_id"] = $user->id;
           $employee_project_history_data["from_date"] = now();
           $employee_project_history_data["to_date"] = NULL;
 
           EmployeeProjectHistory::create($employee_project_history_data);
-
-
-
 
 
                     }

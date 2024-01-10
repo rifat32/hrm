@@ -2,49 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserVisaHistoryCreateRequest;
-use App\Http\Requests\UserVisaHistoryUpdateRequest;
+use App\Http\Requests\ReminderCreateRequest;
+use App\Http\Requests\ReminderUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\Department;
-use App\Models\EmployeeVisaDetailHistory;
+use App\Models\Reminder;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserVisaHistoryController extends Controller
+class ReminderController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
-
-
-
 
 
 
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/user-visa-histories",
-     *      operationId="createUserVisaHistory",
-     *      tags={"user_visa_histories"},
+     *      path="/v1.0/reminders",
+     *      operationId="createReminder",
+     *      tags={"reminders"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store user visa history",
-     *      description="This method is to store user visa history",
+     *      summary="This method is to store reminder",
+     *      description="This method is to store reminder",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-* @OA\Property(property="BRP_number", type="string", format="string", example="Your BRP Number"),
-* @OA\Property(property="visa_issue_date", type="string", format="date", example="Your Visa Issue Date"),
-* @OA\Property(property="visa_expiry_date", type="string", format="date", example="Your Visa Expiry Date"),
-* @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Visa Issue"),
-* @OA\Property(property="visa_docs", type="string", format="string", example="Your Visa Documents"),
-* @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
-* @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
-* @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+     *
+     *
+ *     @OA\Property(property="title", type="string", format="string", example="Your Title"),
+ *     @OA\Property(property="entity_name", type="string", format="string", example="Your Entity Name"),
+ *     @OA\Property(property="duration", type="integer", format="int", example=10),
+ *     @OA\Property(property="duration_unit", type="string", format="string", example="days", enum={"days", "weeks", "months"}),
+ *     @OA\Property(property="send_time", type="string", format="string", example="before_expiry", enum={"before_expiry", "after_expiry"}),
+ *     @OA\Property(property="frequency_after_first_reminder", type="integer", format="int", example=2),
+ *     @OA\Property(property="keep_sending_until_update", type="boolean", format="boolean", example=true)
+ *
+ *
+ *
+ *
  *
  *
      *
@@ -84,12 +85,12 @@ class UserVisaHistoryController extends Controller
      *     )
      */
 
-    public function createUserVisaHistory(UserVisaHistoryCreateRequest $request)
+    public function createReminder(ReminderCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_visa_history_create')) {
+                if (!$request->user()->hasPermissionTo('reminder_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -97,13 +98,34 @@ class UserVisaHistoryController extends Controller
 
                 $request_data = $request->validated();
 
+                $reminder_options = config("setup-config.reminder_options");
+
+                $reminder_option = collect($reminder_options)->first(function ($item) use ($request_data) {
+                    return $item['entity_name'] === $request_data["entity_name"];
+                });
+
+                if(empty($reminder_option)) {
+                    $error =  [
+                        "message" => "The given data was invalid.",
+                        "errors" => ["entity_name"=>["Invalid Entity Name."]]
+                 ];
+                    throw new Exception(json_encode($error),422);
+                }
+
+
+                $request_data["db_table_name"] = $reminder_option["db_table_name"];
+                $request_data["db_field_name"] = $reminder_option["db_field_name"];
+
+
+                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
-                $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
+                $reminder =  Reminder::create($request_data);
 
 
 
-                return response($user_visa_history, 201);
+                return response($reminder, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -114,31 +136,26 @@ class UserVisaHistoryController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/user-visa-histories",
-     *      operationId="updateUserVisaHistory",
-     *      tags={"user_visa_histories"},
+     *      path="/v1.0/reminders",
+     *      operationId="updateReminder",
+     *      tags={"reminders"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update  user visa history ",
-     *      description="This method is to update user visa history",
+     *      summary="This method is to update reminder ",
+     *      description="This method is to update reminder",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-* @OA\Property(property="BRP_number", type="string", format="string", example="Your BRP Number"),
-* @OA\Property(property="visa_issue_date", type="string", format="date", example="Your Visa Issue Date"),
-* @OA\Property(property="visa_expiry_date", type="string", format="date", example="Your Visa Expiry Date"),
-* @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Visa Issue"),
-* @OA\Property(property="visa_docs", type="string", format="string", example="Your Visa Documents"),
-* @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
-* @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
-* @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
-
- *
-*
- *
+ *     @OA\Property(property="title", type="string", format="string", example="Your Title"),
+ *     @OA\Property(property="entity_name", type="string", format="string", example="Your Entity Name"),
+ *     @OA\Property(property="duration", type="integer", format="int", example=10),
+ *     @OA\Property(property="duration_unit", type="string", format="string", example="days", enum={"days", "weeks", "months"}),
+ *     @OA\Property(property="send_time", type="string", format="string", example="before_expiry", enum={"before_expiry", "after_expiry"}),
+ *     @OA\Property(property="frequency_after_first_reminder", type="integer", format="int", example=2),
+ *     @OA\Property(property="keep_sending_until_update", type="boolean", format="boolean", example=true)
 
      *
      *         ),
@@ -177,13 +194,13 @@ class UserVisaHistoryController extends Controller
      *     )
      */
 
-    public function updateUserVisaHistory(UserVisaHistoryUpdateRequest $request)
+    public function updateReminder(ReminderUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_visa_history_update')) {
+                if (!$request->user()->hasPermissionTo('reminder_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -191,46 +208,62 @@ class UserVisaHistoryController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
+                $reminder_options = config("setup-config.reminder_options");
+
+                $reminder_option = collect($reminder_options)->first(function ($item) use ($request_data) {
+                    return $item['entity_name'] === $request_data["entity_name"];
+                });
+
+                if(empty($reminder_option)) {
+                    $error =  [
+                        "message" => "The given data was invalid.",
+                        "errors" => ["entity_name"=>["Invalid Entity Name."]]
+                 ];
+                    throw new Exception(json_encode($error),422);
+                }
+
+
+                $request_data["db_table_name"] = $reminder_option["db_table_name"];
+                $request_data["db_field_name"] = $reminder_option["db_field_name"];
 
 
 
-                $user_visa_history_query_params = [
+                $reminder_query_params = [
                     "id" => $request_data["id"],
-                    "is_manual" => 1
+                    "business_id" => $business_id
                 ];
-                // $user_visa_history_prev = UserVisaHistory::where($user_visa_history_query_params)
+                // $reminder_prev = Reminder::where($reminder_query_params)
                 //     ->first();
-                // if (!$user_visa_history_prev) {
+                // if (!$reminder_prev) {
                 //     return response()->json([
-                //         "message" => "no user visa history found"
+                //         "message" => "no reminder found"
                 //     ], 404);
                 // }
 
-                $user_visa_history  =  tap(EmployeeVisaDetailHistory::where($user_visa_history_query_params))->update(
+                $reminder  =  tap(Reminder::where($reminder_query_params))->update(
                     collect($request_data)->only([
-                        'BRP_number',
-                        "visa_issue_date",
-                        "visa_expiry_date",
-                        "place_of_issue",
-                        "visa_docs",
-                        'employee_id',
-                        "from_date",
-                        "to_date",
-
-
-
+                        'title',
+                        'db_table_name',
+                        'db_field_name',
+                        'duration',
+                        'duration_unit',
+                        'send_time',
+                        'frequency_after_first_reminder',
+                        'keep_sending_until_update',
+                        'entity_name',
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$user_visa_history) {
+                    
+                if (!$reminder) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($user_visa_history, 201);
+                return response($reminder, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -242,19 +275,13 @@ class UserVisaHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-visa-histories",
-     *      operationId="getUserVisaHistories",
-     *      tags={"user_visa_histories"},
+     *      path="/v1.0/reminders",
+     *      operationId="getReminders",
+     *      tags={"reminders"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *              @OA\Parameter(
-     *         name="employee_id",
-     *         in="query",
-     *         description="employee_id",
-     *         required=true,
-     *  example="1"
-     *      ),
+
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -292,8 +319,8 @@ class UserVisaHistoryController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get user visa histories  ",
-     *      description="This method is to get user visa histories ",
+     *      summary="This method is to get reminders  ",
+     *      description="This method is to get reminders ",
      *
 
      *      @OA\Response(
@@ -330,60 +357,41 @@ class UserVisaHistoryController extends Controller
      *     )
      */
 
-    public function getUserVisaHistories(Request $request)
+    public function getReminders(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_visa_history_view')) {
+            if (!$request->user()->hasPermissionTo('reminder_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
-            $user_visa_histories = EmployeeVisaDetailHistory::with([
-                "creator" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
-                },
-
-            ])
-            ->where(["is_manual" => 1])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
-            ->when(!empty($request->search_key), function ($query) use ($request) {
+            $reminders = Reminder::where(
+                [
+                    "reminders.business_id" => $business_id
+                ]
+            )
+                ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("employee_visa_detail_histories.name", "like", "%" . $term . "%");
-                        //     ->orWhere("employee_visa_detail_histories.description", "like", "%" . $term . "%");
+                        // $query->where("reminders.name", "like", "%" . $term . "%")
+                        //     ->orWhere("reminders.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
-
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_visa_detail_histories.employee_id', $request->employee_id);
-                })
-                ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_visa_detail_histories.employee_id', $request->user()->id);
-                })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('employee_visa_detail_histories.created_at', ">=", $request->start_date);
+                    return $query->where('reminders.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('employee_visa_detail_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('reminders.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("employee_visa_detail_histories.id", $request->order_by);
+                    return $query->orderBy("reminders.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("employee_visa_detail_histories.id", "DESC");
+                    return $query->orderBy("reminders.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -393,7 +401,7 @@ class UserVisaHistoryController extends Controller
 
 
 
-            return response()->json($user_visa_histories, 200);
+            return response()->json($reminders, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -403,9 +411,9 @@ class UserVisaHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-visa-histories/{id}",
-     *      operationId="getUserVisaHistoryById",
-     *      tags={"user_visa_histories"},
+     *      path="/v1.0/reminders/{id}",
+     *      operationId="getReminderById",
+     *      tags={"reminders"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -416,8 +424,8 @@ class UserVisaHistoryController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get user visa history by id",
-     *      description="This method is to get user visa history by id",
+     *      summary="This method is to get reminder by id",
+     *      description="This method is to get reminder by id",
      *
 
      *      @OA\Response(
@@ -455,38 +463,28 @@ class UserVisaHistoryController extends Controller
      */
 
 
-    public function getUserVisaHistoryById($id, Request $request)
+    public function getReminderById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_visa_history_view')) {
+            if (!$request->user()->hasPermissionTo('reminder_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
-            $user_visa_history =  EmployeeVisaDetailHistory::where([
+            $reminder =  Reminder::where([
                 "id" => $id,
-                "is_manual" => 1
+                "business_id" => $business_id
             ])
-
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
                 ->first();
-            if (!$user_visa_history) {
+            if (!$reminder) {
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
             }
 
-            return response()->json($user_visa_history, 200);
+            return response()->json($reminder, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -498,9 +496,9 @@ class UserVisaHistoryController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/user-visa-histories/{ids}",
-     *      operationId="deleteUserVisaHistoriesByIds",
-     *      tags={"user_visa_histories"},
+     *      path="/v1.0/reminders/{ids}",
+     *      operationId="deleteRemindersByIds",
+     *      tags={"reminders"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -511,8 +509,8 @@ class UserVisaHistoryController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user visa history by id",
-     *      description="This method is to delete user visa history by id",
+     *      summary="This method is to delete reminder by id",
+     *      description="This method is to delete reminder by id",
      *
 
      *      @OA\Response(
@@ -549,29 +547,22 @@ class UserVisaHistoryController extends Controller
      *     )
      */
 
-    public function deleteUserVisaHistoriesByIds(Request $request, $ids)
+    public function deleteRemindersByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_visa_history_delete')) {
+            if (!$request->user()->hasPermissionTo('reminder_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
             $idsArray = explode(',', $ids);
-            $existingIds = EmployeeVisaDetailHistory::whereIn('id', $idsArray)
-            ->where(["is_manual" => 1])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
+            $existingIds = Reminder::where([
+                "business_id" => $business_id
+            ])
+                ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -583,7 +574,7 @@ class UserVisaHistoryController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            EmployeeVisaDetailHistory::destroy($existingIds);
+            Reminder::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
