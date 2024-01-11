@@ -653,137 +653,147 @@ class UserManagementController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('user_create')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
-            }
-            $business_id = $request->user()->business_id;
-
-            $request_data = $request->validated();
 
 
-            if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
-                $error =  [
-                    "message" => "You can not create superadmin.",
-                ];
-                throw new Exception(json_encode($error), 403);
-            }
+            return DB::transaction(function () use($request) {
 
-
-
-
-
-            $request_data['password'] = Hash::make($request['password']);
-            $request_data['is_active'] = true;
-            $request_data['remember_token'] = Str::random(10);
-
-
-            if (!empty($business_id)) {
-                $request_data['business_id'] = $business_id;
-            }
-
-
-            $user =  User::create($request_data);
-            $user->departments()->sync($request_data['departments'], []);
-            $user->assignRole($request_data['role']);
-
-            if(!empty($request_data["recruitment_processes"])) {
-                $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
-            }
-
-
-
-            if (in_array($request["immigration_status"], ['sponsored'])) {
-                if (!empty($request_data["sponsorship_details"])) {
-                    $request_data["sponsorship_details"]["employee_id"] = $user->id;
-                    $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
-
-                    $request_data["sponsorship_details"]["from_date"] = now();
-                    $request_data["sponsorship_details"]["sponsorship_id"] = $employee_sponsorship->id;
-                    $employee_sponsorship_history  =  EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
-
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
+                if (!$request->user()->hasPermissionTo('user_create')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
                 }
-            }
-            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
+                $business_id = $request->user()->business_id;
 
-                if (!empty($request_data["passport_details"])) {
-                    $request_data["passport_details"]["employee_id"] = $user->id;
-                    $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
-                    $request_data["passport_details"]["from_date"] = now();
-                    $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
-                    $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
+                $request_data = $request->validated();
 
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+                if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+                    $error =  [
+                        "message" => "You can not create superadmin.",
+                    ];
+                    throw new Exception(json_encode($error), 403);
                 }
-                if (!empty($request_data["visa_details"])) {
-                    $request_data["visa_details"]["employee_id"] = $user->id;
-                    $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
 
 
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
 
-                    $request_data["visa_details"]["from_date"] = now();
-                    $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
-                    $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+
+
+                $request_data['password'] = Hash::make($request['password']);
+                $request_data['is_active'] = true;
+                $request_data['remember_token'] = Str::random(10);
+
+
+                if (!empty($business_id)) {
+                    $request_data['business_id'] = $business_id;
                 }
-            }
 
 
-            if (!empty($request_data["work_shift_id"])) {
-                $work_shift =  WorkShift::where([
-                    "id" => $request_data["work_shift_id"],
+                $user =  User::create($request_data);
+                $user->departments()->sync($request_data['departments'], []);
+                $user->assignRole($request_data['role']);
 
-                ])
-                    ->first();
-                if (!$work_shift) {
-                    throw new Exception("Work shift validation failed");
+                if(!empty($request_data["recruitment_processes"])) {
+                    $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
                 }
-                $work_shift->users()->attach($user->id);
 
 
 
+                if (in_array($request["immigration_status"], ['sponsored'])) {
+                    if (!empty($request_data["sponsorship_details"])) {
+                        $request_data["sponsorship_details"]["employee_id"] = $user->id;
+                        $request_data["sponsorship_details"]["business_id"] = $user->business_id;
+                        $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
 
-                $employee_work_shift_history_data = $work_shift->toArray();
+                        $request_data["sponsorship_details"]["from_date"] = now();
+                        $request_data["sponsorship_details"]["sponsorship_id"] = $employee_sponsorship->id;
+                        $employee_sponsorship_history  =  EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
 
-                $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-
-                $employee_work_shift_history_data["from_date"] = now();
-                $employee_work_shift_history_data["to_date"] = NULL;
-
-         $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->users()->attach($user->id);
-
-
-
-
-            } else {
-                $default_work_shift = WorkShift::where([
-                    "business_id" => auth()->user()->business_id,
-                    "is_business_default" => 1
-                ])
-                    ->first();
-                if (!$default_work_shift) {
-                    throw new Exception("There is no default workshift for this business");
+                        $ten_years_ago = Carbon::now()->subYears(10);
+                        EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
+                    }
                 }
-                $default_work_shift->users()->attach($user->id);
-            }
-            // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
+
+                    if (!empty($request_data["passport_details"])) {
+                        $request_data["passport_details"]["employee_id"] = $user->id;
+                        $request_data["passport_details"]["business_id"] = $user->business_id;
+                        $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
+                        $request_data["passport_details"]["from_date"] = now();
+                        $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
+                        $employee_passport_details_history  =  EmployeePassportDetailHistory::create($request_data["passport_details"]);
+
+                        $ten_years_ago = Carbon::now()->subYears(10);
+                        EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+                    }
+                    if (!empty($request_data["visa_details"]) && $request_data["is_active_visa_details"]) {
+                        $request_data["visa_details"]["employee_id"] = $user->id;
+                        $request_data["visa_details"]["business_id"] = $user->business_id;
+                        $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
 
 
-            $user->roles = $user->roles->pluck('name');
+                        $ten_years_ago = Carbon::now()->subYears(10);
+                        EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
 
-            // $user->permissions  = $user->getAllPermissions()->pluck('name');
-            // error_log("cccccc");
-            // $data["user"] = $user;
-            // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
-            // $data["roles"] = $user->roles->pluck('name');
-            // $data["token"] = $token;
-            return response($user, 201);
+                        $request_data["visa_details"]["from_date"] = now();
+                        $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
+                        $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+                    }
+                }
+
+
+                if (!empty($request_data["work_shift_id"])) {
+                    $work_shift =  WorkShift::where([
+                        "id" => $request_data["work_shift_id"],
+
+                    ])
+                        ->first();
+                    if (!$work_shift) {
+                        throw new Exception("Work shift validation failed");
+                    }
+                    $work_shift->users()->attach($user->id);
+
+
+
+
+                    $employee_work_shift_history_data = $work_shift->toArray();
+
+                    $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+
+                    $employee_work_shift_history_data["from_date"] = now();
+                    $employee_work_shift_history_data["to_date"] = NULL;
+
+             $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
+             $employee_work_shift_history->users()->attach($user->id);
+
+
+
+
+                } else {
+                    $default_work_shift = WorkShift::where([
+                        "business_id" => auth()->user()->business_id,
+                        "is_business_default" => 1
+                    ])
+                        ->first();
+                    if (!$default_work_shift) {
+                        throw new Exception("There is no default workshift for this business");
+                    }
+                    $default_work_shift->users()->attach($user->id);
+                }
+                // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
+
+
+                $user->roles = $user->roles->pluck('name');
+
+                // $user->permissions  = $user->getAllPermissions()->pluck('name');
+                // error_log("cccccc");
+                // $data["user"] = $user;
+                // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
+                // $data["roles"] = $user->roles->pluck('name');
+                // $data["token"] = $token;
+                return response($user, 201);
+            });
+
+
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -1195,143 +1205,314 @@ class UserManagementController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('user_update')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
+
+return DB::transaction(function() use($request) {
+    if (!$request->user()->hasPermissionTo('user_update')) {
+        return response()->json([
+            "message" => "You can not perform this action"
+        ], 401);
+    }
+    $request_data = $request->validated();
+
+
+
+    $userQuery = User::where([
+        "id" => $request["id"]
+    ]);
+    $updatableUser = $userQuery->first();
+    if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+        return response()->json([
+            "message" => "You can not change the role of super admin"
+        ], 401);
+    }
+    if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+        return response()->json([
+            "message" => "You can not update this user"
+        ], 401);
+    }
+
+
+
+    if (!empty($request_data["work_shift_id"])) {
+        $work_shift =  WorkShift::where([
+            "id" => $request_data["work_shift_id"],
+            "business_id" => auth()->user()->business_id
+        ])
+            ->first();
+        if (!$work_shift) {
+            return response()->json([
+                "message" => "no work shift found"
+            ], 403);
+        }
+    }
+
+
+    if (!empty($request_data['password'])) {
+        $request_data['password'] = Hash::make($request_data['password']);
+    } else {
+        unset($request_data['password']);
+    }
+    $request_data['is_active'] = true;
+    $request_data['remember_token'] = Str::random(10);
+
+
+
+    $user_query  = User::where([
+        "id" => $request_data["id"],
+    ]);
+
+
+
+    $user  =  tap($user_query)->update(
+        collect($request_data)->only([
+            'first_Name',
+            'last_Name',
+            'middle_Name',
+            "color_theme_name",
+            'emergency_contact_details',
+            'gender',
+            'is_in_employee',
+            'designation_id',
+            'employment_status_id',
+            'joining_date',
+            'salary_per_annum',
+
+            'weekly_contractual_hours',
+            'phone',
+            'image',
+            'address_line_1',
+            'address_line_2',
+            'country',
+            'city',
+            'postcode',
+            "lat",
+            "long",
+            'is_active_visa_details',
+            'is_sponsorship_offered',
+            "immigration_status",
+
+            'work_location_id',
+
+
+        ])->toArray()
+    )
+        // ->with("somthing")
+
+        ->first();
+    if (!$user) {
+        return response()->json([
+            "message" => "no user found"
+        ], 404);
+    }
+
+
+
+    $three_years_ago = Carbon::now()->subYears(3);
+    EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
+
+
+
+
+    // history section
+
+    $address_history_data = [
+        'employee_id' => $user->id,
+        'from_date' => now(),
+        'created_by' => $request->user()->id,
+        'address_line_1' => $request_data["address_line_1"],
+        'address_line_2' => $request_data["address_line_2"],
+        'country' => $request_data["country"],
+        'city' => $request_data["city"],
+        'postcode' => $request_data["postcode"],
+        'lat' => $request_data["lat"],
+        'long' => $request_data["long"]
+    ];
+
+    $employee_address_history  =  EmployeeAddressHistory::where([
+        "employee_id" =>   $updatableUser->id,
+        "to_date" => NULL
+    ])
+        ->latest('created_at')
+        ->first();
+
+    if ($employee_address_history) {
+        $fields_to_check = ["address_line_1", "address_line_2", "country", "city", "postcode"];
+
+
+        $fields_changed = false; // Initialize to false
+        foreach ($fields_to_check as $field) {
+            $value1 = $employee_address_history->$field;
+            $value2 = $request_data[$field];
+
+            if ($value1 !== $value2) {
+                $fields_changed = true;
+                break;
             }
-            $request_data = $request->validated();
+        }
 
 
 
-            $userQuery = User::where([
-                "id" => $request["id"]
+
+        if (
+            $fields_changed
+        ) {
+            $employee_address_history->to_date = now();
+            $employee_address_history->save();
+            EmployeeAddressHistory::create($address_history_data);
+        }
+    } else {
+        EmployeeAddressHistory::create($address_history_data);
+    }
+
+    // end history section
+
+
+
+
+
+
+
+
+
+    $user->departments()->sync($request_data['departments'], []);
+    $user->syncRoles([$request_data['role']]);
+
+    if(!empty($request_data["recruitment_processes"])) {
+        $user->recruitment_processes()->delete();
+        $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
+    }
+
+    if (!empty($request_data["work_shift_id"])) {
+
+
+
+
+    $current_workshift =  WorkShift::
+            where([
+                "id" => $request_data["work_shift_id"]
+            ])
+            ->whereHas('users',function($query) use($user) {
+
+            $query->where([
+                "users.id" => $user->id
             ]);
-            $updatableUser = $userQuery->first();
-            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                return response()->json([
-                    "message" => "You can not change the role of super admin"
-                ], 401);
-            }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                return response()->json([
-                    "message" => "You can not update this user"
-                ], 401);
-            }
+
+        })
+        ->first();
+
+
+        if(!$current_workshift) {
+
+            UserWorkShift::where([
+                "user_id" => $user->id
+            ])
+                ->delete();
+
+
+            $work_shift->users()->attach($user->id);
 
 
 
-            if (!empty($request_data["work_shift_id"])) {
-                $work_shift =  WorkShift::where([
-                    "id" => $request_data["work_shift_id"],
-                    "business_id" => auth()->user()->business_id
-                ])
-                    ->first();
-                if (!$work_shift) {
-                    return response()->json([
-                        "message" => "no work shift found"
-                    ], 403);
-                }
-            }
+            EmployeeWorkShiftHistory::where([
+                "to_date" => NULL
+            ])
+            ->whereHas('users',function($query) use($user) {
+
+                $query->where([
+                    "users.id" => $user->id
+                ]);
+
+            })
+            ->update([
+                "to_date" => now()
+            ]);
 
 
-            if (!empty($request_data['password'])) {
-                $request_data['password'] = Hash::make($request_data['password']);
+ $employee_work_shift_history_data = $work_shift->toArray();
+ $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+ $employee_work_shift_history_data["from_date"] = now();
+ $employee_work_shift_history_data["to_date"] = NULL;
+ $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
+ $employee_work_shift_history->users()->attach($user->id);
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+    }
+
+
+
+    if (in_array($request["immigration_status"], ['sponsored'])) {
+        if (!empty($request_data["sponsorship_details"])) {
+            $request_data["sponsorship_details"]["employee_id"] = $user->id;
+
+
+            $employee_sponsorship_query  =  EmployeeSponsorship::where([
+                "employee_id" =>  $request_data["sponsorship_details"]["employee_id"]
+            ]);
+            $employee_sponsorship  = $employee_sponsorship_query->first();
+
+            if ($employee_sponsorship) {
+                $employee_sponsorship_query->update(collect($request_data["sponsorship_details"])->only([
+                    //  'employee_id',
+                    'date_assigned',
+                    'expiry_date',
+                    'status',
+                    'note',
+                    "certificate_number",
+                    "current_certificate_status",
+                    "is_sponsorship_withdrawn",
+                    // 'created_by'
+                ])->toArray());
             } else {
-                unset($request_data['password']);
-            }
-            $request_data['is_active'] = true;
-            $request_data['remember_token'] = Str::random(10);
-
-
-
-            $user_query  = User::where([
-                "id" => $request_data["id"],
-            ]);
-
-
-
-            $user  =  tap($user_query)->update(
-                collect($request_data)->only([
-                    'first_Name',
-                    'last_Name',
-                    'middle_Name',
-                    "color_theme_name",
-                    'emergency_contact_details',
-                    'gender',
-                    'is_in_employee',
-                    'designation_id',
-                    'employment_status_id',
-                    'joining_date',
-                    'salary_per_annum',
-
-                    'weekly_contractual_hours',
-                    'phone',
-                    'image',
-                    'address_line_1',
-                    'address_line_2',
-                    'country',
-                    'city',
-                    'postcode',
-                    "lat",
-                    "long",
-                    'is_active_visa_details',
-                    'is_sponsorship_offered',
-                    "immigration_status",
-
-                    'work_location_id',
-
-
-                ])->toArray()
-            )
-                // ->with("somthing")
-
-                ->first();
-            if (!$user) {
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
+                $request_data["sponsorship_details"]["business_id"] = $user->business_id;
+                $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
             }
 
-
-
-            $three_years_ago = Carbon::now()->subYears(3);
-            EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
 
 
 
 
             // history section
 
-            $address_history_data = [
-                'employee_id' => $user->id,
-                'from_date' => now(),
-                'created_by' => $request->user()->id,
-                'address_line_1' => $request_data["address_line_1"],
-                'address_line_2' => $request_data["address_line_2"],
-                'country' => $request_data["country"],
-                'city' => $request_data["city"],
-                'postcode' => $request_data["postcode"],
-                'lat' => $request_data["lat"],
-                'long' => $request_data["long"]
-            ];
+            $ten_years_ago = Carbon::now()->subYears(10);
+            EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
 
-            $employee_address_history  =  EmployeeAddressHistory::where([
-                "employee_id" =>   $updatableUser->id,
+
+            $request_data["sponsorship_details"]["sponsorship_id"] = $employee_sponsorship->id;
+            $request_data["sponsorship_details"]["from_date"] = now();
+
+
+            $employee_sponsorship_history  =  EmployeeSponsorshipHistory::where([
+                "employee_id" =>  $request_data["sponsorship_details"]["employee_id"],
                 "to_date" => NULL
             ])
                 ->latest('created_at')
                 ->first();
 
-            if ($employee_address_history) {
-                $fields_to_check = ["address_line_1", "address_line_2", "country", "city", "postcode"];
+            if ($employee_sponsorship_history) {
+                $fields_to_check = [
+                    'date_assigned', 'expiry_date', 'status', 'note',  "certificate_number", "current_certificate_status", "is_sponsorship_withdrawn",
 
+                ];
 
                 $fields_changed = false; // Initialize to false
                 foreach ($fields_to_check as $field) {
-                    $value1 = $employee_address_history->$field;
-                    $value2 = $request_data[$field];
-
+                    $value1 = $employee_sponsorship_history->$field;
+                    $value2 = $request_data["sponsorship_details"][$field];
+                    if (in_array($field, ['date_assigned', 'expiry_date'])) {
+                        $value1 = (new Carbon($value1))->format('Y-m-d');
+                        $value2 = (new Carbon($value2))->format('Y-m-d');
+                    }
                     if ($value1 !== $value2) {
                         $fields_changed = true;
                         break;
@@ -1344,12 +1525,12 @@ class UserManagementController extends Controller
                 if (
                     $fields_changed
                 ) {
-                    $employee_address_history->to_date = now();
-                    $employee_address_history->save();
-                    EmployeeAddressHistory::create($address_history_data);
+                    $employee_sponsorship_history->to_date = now();
+                    $employee_sponsorship_history->save();
+                    EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
                 }
             } else {
-                EmployeeAddressHistory::create($address_history_data);
+                EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
             }
 
             // end history section
@@ -1362,378 +1543,138 @@ class UserManagementController extends Controller
 
 
 
-            $user->departments()->sync($request_data['departments'], []);
-            $user->syncRoles([$request_data['role']]);
 
-            if(!empty($request_data["recruitment_processes"])) {
-                $user->recruitment_processes()->delete();
-                $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
+        }
+    }
+
+
+    if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
+
+        if (!empty($request_data["passport_details"])) {
+            $request_data["passport_details"]["employee_id"] = $user->id;
+
+
+
+
+            $employee_passport_details_query  =  EmployeePassportDetail::where([
+                "employee_id" =>  $request_data["passport_details"]["employee_id"]
+            ]);
+
+            $employee_passport_details  =  $employee_passport_details_query->first();
+
+
+
+            if ($employee_passport_details) {
+                $employee_passport_details_query->update(collect($request_data["passport_details"])->only([
+                    // "employee_id",
+                    'passport_number',
+                    "passport_issue_date",
+                    "passport_expiry_date",
+                    "place_of_issue",
+                    // 'created_by'
+                ])->toArray());
+            } else {
+                $request_data["passport_details"]["business_id"] = $user->business_id;
+                $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
             }
 
-            if (!empty($request_data["work_shift_id"])) {
 
 
 
 
-            $current_workshift =  WorkShift::
-                    where([
-                        "id" => $request_data["work_shift_id"]
-                    ])
-                    ->whereHas('users',function($query) use($user) {
 
-                    $query->where([
-                        "users.id" => $user->id
-                    ]);
 
-                })
+
+
+            // history section
+
+            $ten_years_ago = Carbon::now()->subYears(10);
+            EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+            $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
+            $request_data["passport_details"]["from_date"] = now();
+
+
+            $employee_passport_details_history  =  EmployeePassportDetailHistory::where([
+                "employee_id" =>  $request_data["passport_details"]["employee_id"],
+                "to_date" => NULL
+            ])
+                ->latest('created_at')
                 ->first();
 
 
-                if(!$current_workshift) {
 
-                    UserWorkShift::where([
-                        "user_id" => $user->id
-                    ])
-                        ->delete();
-
-
-                    $work_shift->users()->attach($user->id);
-
-
-
-                    EmployeeWorkShiftHistory::where([
-                        "to_date" => NULL
-                    ])
-                    ->whereHas('users',function($query) use($user) {
-
-                        $query->where([
-                            "users.id" => $user->id
-                        ]);
-
-                    })
-                    ->update([
-                        "to_date" => now()
-                    ]);
-
-
-         $employee_work_shift_history_data = $work_shift->toArray();
-         $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-         $employee_work_shift_history_data["from_date"] = now();
-         $employee_work_shift_history_data["to_date"] = NULL;
-         $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->users()->attach($user->id);
-
-
-
-
+            if ($employee_passport_details_history) {
+                $fields_to_check = [
+                    'passport_number', "passport_issue_date", "passport_expiry_date", "place_of_issue", "passport_detail_id",
+                ];
+                $fields_changed = false; // Initialize to false
+                foreach ($fields_to_check as $field) {
+                    $value1 = $employee_passport_details_history->$field;
+                    $value2 = $request_data["passport_details"][$field];
+                    // Convert date strings to a common format for accurate comparison
+                    if (in_array($field, ['passport_issue_date', 'passport_expiry_date'])) {
+                        $value1 = (new Carbon($value1))->format('Y-m-d');
+                        $value2 = (new Carbon($value2))->format('Y-m-d');
+                    }
+                    if ($value1 !== $value2) {
+                        $fields_changed = true;
+                        break; // Exit the loop early if any difference is found
+                    }
                 }
 
 
 
 
 
-
-
-
+                if (
+                    $fields_changed
+                ) {
+                    $employee_passport_details_history->to_date = now();
+                    $employee_passport_details_history->save();
+                    EmployeePassportDetailHistory::create($request_data["passport_details"]);
+                }
+            } else {
+                EmployeePassportDetailHistory::create($request_data["passport_details"]);
             }
 
+            // end history section
 
 
-            if (in_array($request["immigration_status"], ['sponsored'])) {
-                if (!empty($request_data["sponsorship_details"])) {
-                    $request_data["sponsorship_details"]["employee_id"] = $user->id;
 
 
-                    $employee_sponsorship_query  =  EmployeeSponsorship::where([
-                        "employee_id" =>  $request_data["sponsorship_details"]["employee_id"]
-                    ]);
-                    $employee_sponsorship  = $employee_sponsorship_query->first();
 
-                    if ($employee_sponsorship) {
-                        $employee_sponsorship_query->update(collect($request_data["sponsorship_details"])->only([
-                            //  'employee_id',
-                            'date_assigned',
-                            'expiry_date',
-                            'status',
-                            'note',
-                            "certificate_number",
-                            "current_certificate_status",
-                            "is_sponsorship_withdrawn",
-                            // 'created_by'
-                        ])->toArray());
-                    } else {
-                        $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
-                    }
 
 
 
 
 
-                    // history section
+        }
+        if (!empty($request_data["visa_details"]) && $request_data["is_active_visa_details"]) {
 
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
+            $request_data["visa_details"]["employee_id"] = $user->id;
 
 
-                    $request_data["sponsorship_details"]["sponsorship_id"] = $employee_sponsorship->id;
-                    $request_data["sponsorship_details"]["from_date"] = now();
+            $employee_visa_details_query  =  EmployeeVisaDetail::where([
+                "employee_id" =>  $request_data["visa_details"]["employee_id"]
+            ]);
 
+            $employee_visa_details  =  $employee_visa_details_query->first();
 
-                    $employee_sponsorship_history  =  EmployeeSponsorshipHistory::where([
-                        "employee_id" =>  $request_data["sponsorship_details"]["employee_id"],
-                        "to_date" => NULL
-                    ])
-                        ->latest('created_at')
-                        ->first();
-
-                    if ($employee_sponsorship_history) {
-                        $fields_to_check = [
-                            'date_assigned', 'expiry_date', 'status', 'note',  "certificate_number", "current_certificate_status", "is_sponsorship_withdrawn",
-
-                        ];
-
-                        $fields_changed = false; // Initialize to false
-                        foreach ($fields_to_check as $field) {
-                            $value1 = $employee_sponsorship_history->$field;
-                            $value2 = $request_data["sponsorship_details"][$field];
-                            if (in_array($field, ['date_assigned', 'expiry_date'])) {
-                                $value1 = (new Carbon($value1))->format('Y-m-d');
-                                $value2 = (new Carbon($value2))->format('Y-m-d');
-                            }
-                            if ($value1 !== $value2) {
-                                $fields_changed = true;
-                                break;
-                            }
-                        }
-
-
-
-
-                        if (
-                            $fields_changed
-                        ) {
-                            $employee_sponsorship_history->to_date = now();
-                            $employee_sponsorship_history->save();
-                            EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
-                        }
-                    } else {
-                        EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
-                    }
-
-                    // end history section
-
-
-
-
-
-
-
-
-
-
-                }
-            }
-
-
-            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
-
-                if (!empty($request_data["passport_details"])) {
-                    $request_data["passport_details"]["employee_id"] = $user->id;
-
-
-
-
-                    $employee_passport_details_query  =  EmployeePassportDetail::where([
-                        "employee_id" =>  $request_data["passport_details"]["employee_id"]
-                    ]);
-
-                    $employee_passport_details  =  $employee_passport_details_query->first();
-
-
-
-                    if ($employee_passport_details) {
-                        $employee_passport_details_query->update(collect($request_data["passport_details"])->only([
-                            // "employee_id",
-                            'passport_number',
-                            "passport_issue_date",
-                            "passport_expiry_date",
-                            "place_of_issue",
-                            // 'created_by'
-                        ])->toArray());
-                    } else {
-                        $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
-                    }
-
-
-
-
-
-
-
-
-
-                    // history section
-
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
-
-
-                    $request_data["passport_details"]["passport_detail_id"] = $employee_passport_details->id;
-                    $request_data["passport_details"]["from_date"] = now();
-
-
-                    $employee_passport_details_history  =  EmployeePassportDetailHistory::where([
-                        "employee_id" =>  $request_data["passport_details"]["employee_id"],
-                        "to_date" => NULL
-                    ])
-                        ->latest('created_at')
-                        ->first();
-
-
-
-                    if ($employee_passport_details_history) {
-                        $fields_to_check = [
-                            'passport_number', "passport_issue_date", "passport_expiry_date", "place_of_issue", "passport_detail_id",
-                        ];
-                        $fields_changed = false; // Initialize to false
-                        foreach ($fields_to_check as $field) {
-                            $value1 = $employee_passport_details_history->$field;
-                            $value2 = $request_data["passport_details"][$field];
-                            // Convert date strings to a common format for accurate comparison
-                            if (in_array($field, ['passport_issue_date', 'passport_expiry_date'])) {
-                                $value1 = (new Carbon($value1))->format('Y-m-d');
-                                $value2 = (new Carbon($value2))->format('Y-m-d');
-                            }
-                            if ($value1 !== $value2) {
-                                $fields_changed = true;
-                                break; // Exit the loop early if any difference is found
-                            }
-                        }
-
-
-
-
-
-                        if (
-                            $fields_changed
-                        ) {
-                            $employee_passport_details_history->to_date = now();
-                            $employee_passport_details_history->save();
-                            EmployeePassportDetailHistory::create($request_data["passport_details"]);
-                        }
-                    } else {
-                        EmployeePassportDetailHistory::create($request_data["passport_details"]);
-                    }
-
-                    // end history section
-
-
-
-
-
-
-
-
-
-
-                }
-                if (!empty($request_data["visa_details"])) {
-
-                    $request_data["visa_details"]["employee_id"] = $user->id;
-
-
-                    $employee_visa_details_query  =  EmployeeVisaDetail::where([
-                        "employee_id" =>  $request_data["visa_details"]["employee_id"]
-                    ]);
-
-                    $employee_visa_details  =  $employee_visa_details_query->first();
-
-                    if ($employee_visa_details) {
-                        $employee_visa_details_query->update(collect($request_data["visa_details"])->only([
-                            // 'employee_id',
-                            'BRP_number',
-                            "visa_issue_date",
-                            "visa_expiry_date",
-                            "place_of_issue",
-                            "visa_docs",
-                            // 'created_by'
-                        ])->toArray());
-                    } else {
-                        $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
-                    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    // history section
-
-                    $ten_years_ago = Carbon::now()->subYears(10);
-                    EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
-
-
-                    $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
-                    $request_data["visa_details"]["from_date"] = now();
-
-
-                    $employee_visa_details_history  =  EmployeeVisaDetailHistory::where([
-                        "employee_id" =>  $request_data["visa_details"]["employee_id"],
-                        "to_date" => NULL
-                    ])
-                        ->latest('created_at')
-                        ->first();
-
-                    if ($employee_visa_details_history) {
-                        $fields_to_check = [
-                            'BRP_number', "visa_issue_date", "visa_expiry_date", "place_of_issue", "visa_docs",
-                        ];
-
-
-
-                        $fields_changed = false; // Initialize to false
-                        foreach ($fields_to_check as $field) {
-                            $value1 = $employee_visa_details_history->$field;
-                            $value2 = $request_data["visa_details"][$field];
-                            if (in_array($field, ['visa_issue_date', 'visa_expiry_date'])) {
-                                $value1 = (new Carbon($value1))->format('Y-m-d');
-                                $value2 = (new Carbon($value2))->format('Y-m-d');
-                            }
-                            if ($value1 !== $value2) {
-                                $fields_changed = true;
-                                break;
-                            }
-                        }
-
-
-
-
-
-
-
-
-
-                        if (
-                            $fields_changed
-                        ) {
-                            $employee_visa_details_history->to_date = now();
-                            $employee_visa_details_history->save();
-                            EmployeeVisaDetailHistory::create($request_data["visa_details"]);
-                        }
-                    } else {
-                        EmployeeVisaDetailHistory::create($request_data["visa_details"]);
-                    }
-
-                    // end history section
-
-                }
+            if ($employee_visa_details) {
+                $employee_visa_details_query->update(collect($request_data["visa_details"])->only([
+                    // 'employee_id',
+                    'BRP_number',
+                    "visa_issue_date",
+                    "visa_expiry_date",
+                    "place_of_issue",
+                    "visa_docs",
+                    // 'created_by'
+                ])->toArray());
+            } else {
+                $request_data["visa_details"]["business_id"] = $user->business_id;
+                $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
             }
 
 
@@ -1743,7 +1684,81 @@ class UserManagementController extends Controller
 
 
 
-            $user->roles = $user->roles->pluck('name');
+
+
+
+
+
+            // history section
+
+            $ten_years_ago = Carbon::now()->subYears(10);
+            EmployeeVisaDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+            $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
+            $request_data["visa_details"]["from_date"] = now();
+
+
+            $employee_visa_details_history  =  EmployeeVisaDetailHistory::where([
+                "employee_id" =>  $request_data["visa_details"]["employee_id"],
+                "to_date" => NULL
+            ])
+                ->latest('created_at')
+                ->first();
+
+            if ($employee_visa_details_history) {
+                $fields_to_check = [
+                    'BRP_number', "visa_issue_date", "visa_expiry_date", "place_of_issue", "visa_docs",
+                ];
+
+
+
+                $fields_changed = false; // Initialize to false
+                foreach ($fields_to_check as $field) {
+                    $value1 = $employee_visa_details_history->$field;
+                    $value2 = $request_data["visa_details"][$field];
+                    if (in_array($field, ['visa_issue_date', 'visa_expiry_date'])) {
+                        $value1 = (new Carbon($value1))->format('Y-m-d');
+                        $value2 = (new Carbon($value2))->format('Y-m-d');
+                    }
+                    if ($value1 !== $value2) {
+                        $fields_changed = true;
+                        break;
+                    }
+                }
+
+
+
+
+
+
+
+
+
+                if (
+                    $fields_changed
+                ) {
+                    $employee_visa_details_history->to_date = now();
+                    $employee_visa_details_history->save();
+                    EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+                }
+            } else {
+                EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+            }
+
+            // end history section
+
+        }
+    }
+
+
+
+
+
+
+
+
+    $user->roles = $user->roles->pluck('name');
 
 
 
@@ -1754,7 +1769,10 @@ class UserManagementController extends Controller
 
 
 
-            return response($user, 201);
+    return response($user, 201);
+});
+
+
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);

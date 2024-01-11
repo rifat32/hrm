@@ -30,7 +30,7 @@ class CreateNotificationTemplatesTable extends Migration
 
                 [
                     'type' => 'reminder_before_expiry',
-                    "title_template"=> ("[entity_name] Reminder"),
+                    "title_template"=> ("[title]"),
                     "template"=> ("[entity] expires in [duration] days. Renew now."),
                     "link"=> ("/[entity_name]/[entity_id]"),
                     "is_active" => 1
@@ -38,7 +38,7 @@ class CreateNotificationTemplatesTable extends Migration
 
                 [
                     'type' => 'reminder_after_expiry',
-                    "title_template"=> ("[entity_name] Reminder"),
+                    "title_template"=> ("[title]"),
                     "template"=> ("[entity] expired [duration] days ago. Please renew it now."),
                     "link"=> ("/[entity_name]/[entity_id]"),
                     "is_active" => 1

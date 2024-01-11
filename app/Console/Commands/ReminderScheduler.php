@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 class ReminderScheduler extends Command
 {
@@ -61,8 +62,8 @@ $now = now();
             ->first();
     $notification_title = $notification_template->title_template;
     $notification_title =  str_replace(
-        "[entity_name]",
-        ($reminder->entity_name),
+        "[title]",
+        ($reminder->title),
         $notification_title
     );
     $notification_description = $notification_template->template;
@@ -107,25 +108,32 @@ $now = now();
      }
     public function handle()
     {
+        // File::put(storage_path('logs/laravel.log'), '');
         Log::info('Task executed.');
-        $business_ids =  Reminder::groupBy("business_id")->select("business_id")->get();
-        foreach ($business_ids as $business_id) {
+        $businesses =  Reminder::groupBy("business_id")->select("business_id")->get();
+
+        Log::info('got business ids');
+        Log::info(json_encode($businesses));
+        foreach ($businesses as $business) {
             $business = Business::where([
-                "id" => $business_id,
+                "id" => $business->business_id,
                 "is_active" => 1
             ])
                 ->first();
             if (!$business) {
                 continue;
             }
+            Log::info('got business by id');
             $reminders = Reminder::where([
-                "business_id" => $business_id
+                "business_id" => $business->id
             ])
                 ->get();
 
+                Log::info('got reminders');
+
             foreach ($reminders as $reminder) {
 
-
+                Log::info('got reminder');
 
                 if ($reminder->duration_unit == "weeks") {
                     $reminder->duration =  $reminder->duration * 7;
@@ -140,9 +148,11 @@ $now = now();
 
                 $now = Carbon::now();
 
+
+
                 $all_reminder_data = DB::table($table_name)
                     ->where([
-                        "business_id" => $business_id
+                        "business_id" => $business->id
                     ])
                     ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $field_name,$now) {
 
@@ -161,7 +171,12 @@ $now = now();
                     })
                     ->get();
 
+                    Log::info('got all reminder data');
                 foreach ($all_reminder_data as $data) {
+
+                    Log::info('got reminder data');
+
+                    $this->sendNotification($reminder,$data,$business);
 
                     if ($reminder->send_time == "after_expiry") {
 

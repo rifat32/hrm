@@ -16,6 +16,7 @@ class CreateEmployeeSponsorshipsTable extends Migration
         Schema::create('employee_sponsorships', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("employee_id");
+            $table->unsignedBigInteger("business_id");
             $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
             $table->date("date_assigned");
             $table->date("expiry_date");

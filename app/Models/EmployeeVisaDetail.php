@@ -12,6 +12,7 @@ class EmployeeVisaDetail extends Model
 
     protected $fillable = [
         'employee_id',
+        'business_id',
         'BRP_number',
         "visa_issue_date",
         "visa_expiry_date",

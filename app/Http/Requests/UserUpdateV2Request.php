@@ -513,12 +513,12 @@ class UserUpdateV2Request extends FormRequest
 
 
 
-            'visa_details.BRP_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
-            'visa_details.visa_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
-            'visa_details.visa_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
-            'visa_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
-            'visa_details.visa_docs' => 'nullable|required_if:immigration_status,sponsored,immigrant|array',
-            'visa_details.visa_docs.*.file_name' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+            'visa_details.BRP_number' => 'nullable|required_if:is_active_visa_details,1|string',
+            'visa_details.visa_issue_date' => 'nullable|required_if:is_active_visa_details,1|date',
+            'visa_details.visa_expiry_date' => 'nullable|required_if:is_active_visa_details,1|date',
+            'visa_details.place_of_issue' => 'nullable|required_if:is_active_visa_details,1|string',
+            'visa_details.visa_docs' => 'nullable|required_if:is_active_visa_details,1|array',
+            'visa_details.visa_docs.*.file_name' => 'nullable|required_if:is_active_visa_details,1|string',
             'visa_details.visa_docs.*.description' => 'nullable|string',
 
         ];

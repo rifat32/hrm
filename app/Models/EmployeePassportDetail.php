@@ -12,11 +12,11 @@ class EmployeePassportDetail extends Model
 
     protected $fillable = [
         "employee_id",
+        "business_id",
         'passport_number',
         "passport_issue_date",
         "passport_expiry_date",
         "place_of_issue",
-
         'created_by'
     ];
 

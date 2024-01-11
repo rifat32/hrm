@@ -197,6 +197,11 @@ return [
 
                 'business_owner',
 
+                "reminder_create",
+                "reminder_update",
+                "reminder_view",
+                "reminder_delete",
+
                 "user_create",
                 "user_update",
                 "user_view",
@@ -781,6 +786,11 @@ return [
     "permissions" => [
 
         "business_owner",
+
+        "reminder_create",
+        "reminder_update",
+        "reminder_view",
+        "reminder_delete",
 
         "global_business_background_image_create",
         "global_business_background_image_view",
