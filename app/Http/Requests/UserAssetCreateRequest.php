@@ -27,7 +27,7 @@ class UserAssetCreateRequest extends FormRequest
     {
         return [
             'user_id' => [
-                'required',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $all_manager_department_ids = [];

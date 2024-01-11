@@ -700,7 +700,7 @@ class ProjectController extends Controller
             }
 
 
-            $projects = Project::with("department")
+            $projects = Project::with("departments")
             ->where(
                 [
                     "business_id" => $business_id

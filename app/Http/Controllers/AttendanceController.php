@@ -1344,10 +1344,10 @@ class AttendanceController extends Controller
             $total_available_hours = $data["data_highlights"]["total_schedule_hours"] - $data["data_highlights"]["total_leave_hours"];
 
 
-            if ($total_available_hours == 0 || $data["data_highlights"]["total_leave_hours"] == 0) {
+            if ($total_available_hours == 0 || $data["data_highlights"]["total_schedule_hours"] == 0) {
                 $data["data_highlights"]["total_work_availability_per_centum"] = 0;
             } else {
-                $data["data_highlights"]["total_work_availability_per_centum"] = ($total_available_hours / $data["data_highlights"]["total_leave_hours"]) * 100;
+                $data["data_highlights"]["total_work_availability_per_centum"] = ($total_available_hours / $data["data_highlights"]["total_schedule_hours"]) * 100;
             }
 
             if (!empty($setting_attendance->work_availability_definition)) {

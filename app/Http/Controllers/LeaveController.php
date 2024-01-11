@@ -1382,7 +1382,6 @@ class LeaveController extends Controller
                     $query->select(
                         'departments.id',
                         'departments.name',
-                        "departments.location",
                         "departments.description"
                     );
                 },

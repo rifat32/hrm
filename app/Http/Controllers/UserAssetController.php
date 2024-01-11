@@ -328,17 +328,18 @@ class UserAssetController extends Controller
                     UserAssetHistory::where([
                         'user_id' => $user_asset_prev->user_id,
                         "user_asset_id" => $user_asset_prev->id,
+                        "to_date" => NULL
                     ])
                     ->update([
                         "to_date" => now(),
                     ]);
                     $user_asset_history  =  UserAssetHistory::create([
                         'user_id' => $user_asset->user_id,
-                        "user_asset_id" => $user_asset_prev->id,
+                        "user_asset_id" => $user_asset->id,
 
                         "from_date" => now(),
                         "to_date" => NULL,
-                        'created_by' => $user_asset_prev->created_by
+                        'created_by' => $user_asset->created_by
 
                       ]
                       );
@@ -476,17 +477,18 @@ class UserAssetController extends Controller
                     UserAssetHistory::where([
                         'user_id' => $user_asset_prev->user_id,
                         "user_asset_id" => $user_asset_prev->id,
+                        "to_date" => NULL
                     ])
                     ->update([
                         "to_date" => now(),
                     ]);
                     $user_asset_history  =  UserAssetHistory::create([
                         'user_id' => $user_asset->user_id,
-                        "user_asset_id" => $user_asset_prev->id,
+                        "user_asset_id" => $user_asset->id,
 
                         "from_date" => now(),
                         "to_date" => NULL,
-                        'created_by' => $request_data["created_by"]
+                        'created_by' => $user_asset->created_by
 
                       ]
                       );
