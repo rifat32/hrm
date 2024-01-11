@@ -58,21 +58,18 @@ $now = now();
 
 
 
+
         $notification_template = NotificationTemplate::where([
             "type" => $notification_templete_type
         ])
             ->first();
-            Log::info("0");
-            Log::info(json_encode($notification_template));
 
 
 
-            Log::info("1");
-            Log::info(json_encode($notification_template->title_template));
+
 
     $notification_title = $notification_template->title_template;
-    Log::info("2");
-    Log::info(json_encode($notification_title));
+
 
 
     $notification_title =  str_replace(
@@ -86,7 +83,7 @@ $now = now();
         (explode('_', $reminder->entity_name)[0]),
         $notification_description
     );
-    $notification_description = $notification_template->template;
+
     $notification_description =  str_replace(
         "[duration]",
         (abs($days_difference)),
@@ -130,7 +127,7 @@ $now = now();
         $businesses =  Reminder::groupBy("business_id")->select("business_id")->get();
 
 
-        Log::info(json_encode($businesses));
+
         foreach ($businesses as $business) {
             $business = Business::where([
                 "id" => $business->business_id,
@@ -193,7 +190,6 @@ $now = now();
 
 
 
-                    $this->sendNotification($reminder,$data,$business);
 
                     if ($reminder->send_time == "after_expiry") {
 

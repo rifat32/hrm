@@ -451,30 +451,32 @@ return "swagger generated";
 
 
 
+
+
         $default_employment_statuses = [
             [
                 'name' => "Full-Time",
-                'color' => "green",
+                'color' => "#22c55e",
                 'description' => "Employee works the standard number of hours for a full-time position.",
             ],
             [
                 'name' => "Part-Time",
-                'color' => "blue",
+                'color' => "#3b82f6",
                 'description' => "Employee works fewer hours than a full-time position.",
             ],
             [
                 'name' => "Contractor",
-                'color' => "orange",
+                'color' => "#f97316",
                 'description' => "Employee is hired on a contractual basis for a specific project or duration.",
             ],
             [
                 'name' => "Temporary",
-                'color' => "yellow",
+                'color' => "#06b6d4",
                 'description' => "Employee is hired for a temporary period, often to cover a specific absence or workload.",
             ],
             [
                 'name' => "Intern",
-                'color' => "purple",
+                'color' => "#a855f7",
                 'description' => "Employee is engaged in a temporary position for gaining practical work experience.",
             ],
         ];
@@ -568,7 +570,7 @@ return "swagger generated";
 
 
         $default_work_shift_data_1 = [
-            'name' => 'main work shift',
+            'name' => 'Main Work Shift',
             'type' => 'regular',
             'description' => '',
             'is_personal' => false,
