@@ -24,7 +24,7 @@ class LeaveHistory extends Model
         'leave_duration',
         'day_type',
         'leave_type_id',
-        'employee_id',
+        'user_id',
         'date',
         'note',
         'start_date',
@@ -48,7 +48,7 @@ class LeaveHistory extends Model
     }
 
     public function employee() {
-        return $this->belongsTo(User::class, "employee_id","id");
+        return $this->belongsTo(User::class, "user_id","id");
     }
     public function leave_type() {
         return $this->belongsTo(SettingLeaveType::class, "leave_type_id","id");

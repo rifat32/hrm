@@ -19,8 +19,8 @@ class CreateLeavesTable extends Migration
             $table->enum('day_type', ['first_half', 'last_half'])->nullable();
             $table->unsignedBigInteger("leave_type_id");
             $table->foreign('leave_type_id')->references('id')->on('setting_leave_types')->onDelete('restrict');
-            $table->unsignedBigInteger("employee_id");
-            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("user_id");
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('date')->nullable();
             $table->string('note');
             $table->date('start_date')->nullable();

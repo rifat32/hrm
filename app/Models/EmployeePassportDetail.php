@@ -11,7 +11,7 @@ class EmployeePassportDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        "employee_id",
+        "user_id",
         "business_id",
         'passport_number',
         "passport_issue_date",

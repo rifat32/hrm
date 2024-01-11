@@ -19,7 +19,7 @@ class EmployeeVisaDetailHistory extends Model
 
 
         "is_manual",
-        'employee_id',
+        'user_id',
         "from_date",
         "to_date",
         "visa_detail_id",
@@ -33,7 +33,7 @@ class EmployeeVisaDetailHistory extends Model
 
 
     public function employee(){
-        return $this->hasOne(User::class,'id', 'employee_id');
+        return $this->hasOne(User::class,'id', 'user_id');
     }
 
     protected $casts = [

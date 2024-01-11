@@ -32,7 +32,7 @@ class UserAddressHistoryUpdateRequest extends FormRequest
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = EmployeeAddressHistory::where('id', $value)
-                        ->where('employee_address_histories.employee_id', '=', $this->employee_id)
+                        ->where('employee_address_histories.user_id', '=', $this->user_id)
                         ->where('employee_address_histories.is_manual', '=', 1)
                         ->exists();
 
@@ -41,7 +41,7 @@ class UserAddressHistoryUpdateRequest extends FormRequest
                     }
                 },
             ],
-            'employee_id' => [
+            'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {

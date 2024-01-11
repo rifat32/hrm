@@ -33,7 +33,7 @@ class UserSponsorshipHistoryUpdateRequest extends FormRequest
                 function ($attribute, $value, $fail) {
 
                     $exists = EmployeeSponsorshipHistory::where('id', $value)
-                        ->where('employee_sponsorship_histories.employee_id', '=', $this->employee_id)
+                        ->where('employee_sponsorship_histories.user_id', '=', $this->user_id)
                         ->where('employee_sponsorship_histories.is_manual', '=', 1)
                         ->exists();
 
@@ -42,7 +42,7 @@ class UserSponsorshipHistoryUpdateRequest extends FormRequest
                     }
                 },
             ],
-            'employee_id' => [
+            'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {

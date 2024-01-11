@@ -33,7 +33,7 @@ class CreateEmployeeProjectHistoriesTable extends Migration
             $table->date("to_date")->nullable();
 
             $table->unsignedBigInteger("project_id")->nullable();
-            $table->unsignedBigInteger("employee_id")->nullable();
+            $table->unsignedBigInteger("user_id")->nullable();
 
 
 

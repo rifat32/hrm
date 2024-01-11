@@ -38,7 +38,7 @@ class UserSponsorshipHistoryController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+     *  * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
  *      @OA\Property(property="date_assigned", type="string", format="date", example="Your Date Assigned"),
  *      @OA\Property(property="expiry_date", type="string", format="date", example="Your Expiry Date"),
  *      @OA\Property(property="status", type="string", format="string", example="Your Status"),
@@ -133,7 +133,7 @@ class UserSponsorshipHistoryController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-     *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+     *  * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
  *      @OA\Property(property="date_assigned", type="string", format="date", example="Your Date Assigned"),
  *      @OA\Property(property="expiry_date", type="string", format="date", example="Your Expiry Date"),
  *      @OA\Property(property="status", type="string", format="string", example="Your Status"),
@@ -223,7 +223,7 @@ class UserSponsorshipHistoryController extends Controller
                         "postcode",
                         "lat",
                         "long",
-                        'employee_id',
+                        'user_id',
                         "from_date",
                         "to_date",
 
@@ -257,9 +257,9 @@ class UserSponsorshipHistoryController extends Controller
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="employee_id",
+     *         name="user_id",
      *         in="query",
-     *         description="employee_id",
+     *         description="user_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -376,11 +376,11 @@ class UserSponsorshipHistoryController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_sponsorship_histories.employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('employee_sponsorship_histories.user_id', $request->user_id);
                 })
-                ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_sponsorship_histories.employee_id', $request->user()->id);
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('employee_sponsorship_histories.user_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('employee_sponsorship_histories.created_at', ">=", $request->start_date);

@@ -260,7 +260,7 @@ class ProjectController extends Controller
 
 
           $employee_project_history_data = $project->toArray();
-          $employee_project_history_data["employee_id"] = $user->id;
+          $employee_project_history_data["user_id"] = $user->id;
           $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
           $employee_project_history_data["from_date"] = now();
           $employee_project_history_data["to_date"] = NULL;
@@ -387,7 +387,7 @@ class ProjectController extends Controller
 
 
                  EmployeeProjectHistory::where([
-                    "employee_id" => $user->id,
+                    "user_id" => $user->id,
                     "to_date" => NULL
                  ])
                  ->whereIn("project_id",$discharged_projects->pluck("id"))
@@ -428,7 +428,7 @@ class ProjectController extends Controller
 
           $employee_project_history_data = $project->toArray();
           $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
-          $employee_project_history_data["employee_id"] = $user->id;
+          $employee_project_history_data["user_id"] = $user->id;
           $employee_project_history_data["from_date"] = now();
           $employee_project_history_data["to_date"] = NULL;
 

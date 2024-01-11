@@ -17,7 +17,9 @@ class Notification extends Model
         "business_id",
 
 
-
+        'notification_title',
+        'notification_description',
+        'notification_link',
 
         "notification_template_id",
         "status",

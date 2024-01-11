@@ -22,7 +22,7 @@ class AttendanceHistory extends Model
         'note',
         "in_geolocation",
         "out_geolocation",
-        'employee_id',
+        'user_id',
         'in_time',
         'out_time',
         'in_date',
@@ -46,7 +46,7 @@ class AttendanceHistory extends Model
     ];
 
     public function employee(){
-        return $this->hasOne(User::class,'id', 'employee_id');
+        return $this->hasOne(User::class,'id', 'user_id');
     }
 
 

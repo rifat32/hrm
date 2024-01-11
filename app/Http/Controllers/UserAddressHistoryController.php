@@ -37,7 +37,7 @@ class UserAddressHistoryController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+     *  * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
 * @OA\Property(property="address", type="string", format="string", example="Your address"),
  * @OA\Property(property="address_line_1", type="string", format="string", example="Your address_line_1"),
  * @OA\Property(property="address_line_2", type="string", format="string", example="Your address_line_2"),
@@ -133,7 +133,7 @@ class UserAddressHistoryController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-     *  * @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+     *  * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
 * @OA\Property(property="address", type="string", format="string", example="Your address"),
  * @OA\Property(property="address_line_1", type="string", format="string", example="Your address_line_1"),
  * @OA\Property(property="address_line_2", type="string", format="string", example="Your address_line_2"),
@@ -222,7 +222,7 @@ class UserAddressHistoryController extends Controller
                         "postcode",
                         "lat",
                         "long",
-                        'employee_id',
+                        'user_id',
                         "from_date",
                         "to_date",
 
@@ -256,9 +256,9 @@ class UserAddressHistoryController extends Controller
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="employee_id",
+     *         name="user_id",
      *         in="query",
-     *         description="employee_id",
+     *         description="user_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -375,11 +375,11 @@ class UserAddressHistoryController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_address_histories.employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_address_histories.user_id', $request->user_id);
                 })
-                ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_address_histories.employee_id', $request->user()->id);
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_address_histories.user_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('user_address_histories.created_at', ">=", $request->start_date);

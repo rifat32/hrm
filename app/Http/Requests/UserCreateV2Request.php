@@ -41,16 +41,16 @@ class UserCreateV2Request extends FormRequest
 
         'last_Name' => 'required|string|max:255',
 
-        'employee_id' => [
+        'user_id' => [
             "required",
             'string',
             function ($attribute, $value, $fail) {
-                $employee_id_exists =  User::where([
-                    'employee_id'=> $value,
+                $user_id_exists =  User::where([
+                    'user_id'=> $value,
                     "created_by" => auth()->user()->id
                  ]
                  )->exists();
-                 if ($employee_id_exists){
+                 if ($user_id_exists){
                       $fail("The employee id has already been taken.");
                    }
 

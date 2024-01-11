@@ -95,7 +95,7 @@ trait LeaveUtil
             $not_approved_manager_found = false;
 
             $department = Department::whereHas('users', function ($query) use ($leave) {
-                $query->where('departments.id', $leave->employee_id);
+                $query->where('departments.id', $leave->user_id);
             })->first();
 
             if (!$department) {

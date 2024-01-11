@@ -40,18 +40,18 @@ class UserUpdateV2Request extends FormRequest
 
             'last_Name' => 'required|string|max:255',
 
-            'employee_id' => [
+            'user_id' => [
                 "required",
                 'string',
                 function ($attribute, $value, $fail) {
-                    $employee_id_exists =  User::
+                    $user_id_exists =  User::
                     whereNotIn("id",[$this->id])
                     ->where([
-                        'employee_id'=> $value,
+                        'user_id'=> $value,
                         "created_by" => auth()->user()->id
                      ]
                      )->exists();
-                     if ($employee_id_exists){
+                     if ($user_id_exists){
                           $fail("The employee id has already been taken.");
                        }
 

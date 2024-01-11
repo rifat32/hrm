@@ -16,8 +16,8 @@ class CreateEmployeeAddressHistoriesTable extends Migration
         Schema::create('employee_address_histories', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger("employee_id");
-            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("user_id");
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->string("address_line_1")->nullable();
             $table->string("address_line_2")->nullable();

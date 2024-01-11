@@ -25,7 +25,7 @@ class EmployeeProjectHistory extends Model
         "project_id",
         "from_date",
         "to_date",
-        "employee_id",
+        "user_id",
 
 
     ];
@@ -35,7 +35,7 @@ class EmployeeProjectHistory extends Model
     // }
 
     public function user() {
-        return $this->belongsTo(User::class, 'employee_id', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
 

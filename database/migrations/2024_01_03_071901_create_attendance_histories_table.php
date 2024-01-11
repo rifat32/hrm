@@ -31,8 +31,8 @@ class CreateAttendanceHistoriesTable extends Migration
 
 
 
-            $table->unsignedBigInteger("employee_id");
-            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("user_id");
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
 
             $table->date('in_date');

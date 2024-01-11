@@ -49,18 +49,32 @@ class ReminderScheduler extends Command
 $now = now();
         $days_difference = $now->diffInDays($data->$field_name);
 
-        if($days_difference > 0) {
-         $notification_templete_type = "reminder_before_expiry";
-        }else {
+        if($reminder->send_time == "after_expiry") {
             $notification_templete_type = "reminder_after_expiry";
+
+        }else {
+            $notification_templete_type = "reminder_before_expiry";
         }
+
 
 
         $notification_template = NotificationTemplate::where([
             "type" => $notification_templete_type
         ])
             ->first();
+            Log::info("0");
+            Log::info(json_encode($notification_template));
+
+
+
+            Log::info("1");
+            Log::info(json_encode($notification_template->title_template));
+
     $notification_title = $notification_template->title_template;
+    Log::info("2");
+    Log::info(json_encode($notification_title));
+
+
     $notification_title =  str_replace(
         "[title]",
         ($reminder->title),
@@ -91,7 +105,10 @@ $now = now();
         $notification_link
     );
 
-
+    Log::info("33");
+    Log::info(($notification_title));
+    Log::info(($notification_description));
+    Log::info(($notification_link));
         Notification::create([
             "entity_id" => $data->id,
             "entity_name" => $reminder->entity_name,
@@ -112,7 +129,7 @@ $now = now();
         Log::info('Task executed.');
         $businesses =  Reminder::groupBy("business_id")->select("business_id")->get();
 
-        Log::info('got business ids');
+
         Log::info(json_encode($businesses));
         foreach ($businesses as $business) {
             $business = Business::where([
@@ -123,17 +140,17 @@ $now = now();
             if (!$business) {
                 continue;
             }
-            Log::info('got business by id');
+
             $reminders = Reminder::where([
                 "business_id" => $business->id
             ])
                 ->get();
 
-                Log::info('got reminders');
+
 
             foreach ($reminders as $reminder) {
 
-                Log::info('got reminder');
+
 
                 if ($reminder->duration_unit == "weeks") {
                     $reminder->duration =  $reminder->duration * 7;
@@ -171,10 +188,10 @@ $now = now();
                     })
                     ->get();
 
-                    Log::info('got all reminder data');
+
                 foreach ($all_reminder_data as $data) {
 
-                    Log::info('got reminder data');
+
 
                     $this->sendNotification($reminder,$data,$business);
 

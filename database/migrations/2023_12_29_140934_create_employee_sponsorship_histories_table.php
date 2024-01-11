@@ -15,8 +15,8 @@ class CreateEmployeeSponsorshipHistoriesTable extends Migration
     {
         Schema::create('employee_sponsorship_histories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("employee_id");
-            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("user_id");
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date("date_assigned");
             $table->date("expiry_date");
             $table->enum('status', ['pending', 'approved', 'denied', 'visa_granted'])->default("pending");

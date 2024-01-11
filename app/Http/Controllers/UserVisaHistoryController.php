@@ -42,7 +42,7 @@ class UserVisaHistoryController extends Controller
 * @OA\Property(property="visa_expiry_date", type="string", format="date", example="Your Visa Expiry Date"),
 * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Visa Issue"),
 * @OA\Property(property="visa_docs", type="string", format="string", example="Your Visa Documents"),
-* @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
 * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
 * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
  *
@@ -133,7 +133,7 @@ class UserVisaHistoryController extends Controller
 * @OA\Property(property="visa_expiry_date", type="string", format="date", example="Your Visa Expiry Date"),
 * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Visa Issue"),
 * @OA\Property(property="visa_docs", type="string", format="string", example="Your Visa Documents"),
-* @OA\Property(property="employee_id", type="string", format="string", example="Your Employee ID"),
+* @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
 * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
 * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
 
@@ -214,7 +214,7 @@ class UserVisaHistoryController extends Controller
                         "visa_expiry_date",
                         "place_of_issue",
                         "visa_docs",
-                        'employee_id',
+                        'user_id',
                         "from_date",
                         "to_date",
 
@@ -250,9 +250,9 @@ class UserVisaHistoryController extends Controller
      *           {"bearerAuth": {}}
      *       },
      *              @OA\Parameter(
-     *         name="employee_id",
+     *         name="user_id",
      *         in="query",
-     *         description="employee_id",
+     *         description="user_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -369,11 +369,11 @@ class UserVisaHistoryController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_visa_detail_histories.employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('employee_visa_detail_histories.user_id', $request->user_id);
                 })
-                ->when(empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_visa_detail_histories.employee_id', $request->user()->id);
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('employee_visa_detail_histories.user_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('employee_visa_detail_histories.created_at', ">=", $request->start_date);

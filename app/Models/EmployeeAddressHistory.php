@@ -18,7 +18,7 @@ class EmployeeAddressHistory extends Model
         "postcode",
         "lat",
         "long",
-        'employee_id',
+        'user_id',
         "from_date",
         "to_date",
         "is_manual",
@@ -28,7 +28,7 @@ class EmployeeAddressHistory extends Model
 
 
     public function employee(){
-        return $this->hasOne(User::class,'id', 'employee_id');
+        return $this->hasOne(User::class,'id', 'user_id');
     }
 
 

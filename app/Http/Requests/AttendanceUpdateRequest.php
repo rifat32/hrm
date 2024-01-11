@@ -32,7 +32,7 @@ class AttendanceUpdateRequest extends FormRequest
             'in_geolocation' => 'nullable|string',
             'out_geolocation' => 'nullable|string',
 
-            'employee_id' => [
+            'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {

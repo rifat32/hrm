@@ -239,9 +239,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -311,11 +311,11 @@ class HistoryDetailsController extends Controller
 
              $employee_passport_details_history = EmployeePassportDetailHistory::where(["is_manual" => 0])
 
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_passport_detail_histories.employee_id', $request->employee_id);
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_passport_detail_histories.user_id', $request->user_id);
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_passport_detail_histories.employee_id', $request->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_passport_detail_histories.user_id', $request->user()->id);
             })
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
@@ -394,9 +394,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -465,11 +465,11 @@ class HistoryDetailsController extends Controller
 
 
              $employee_visa_details_history = EmployeeVisaDetailHistory::where(["is_manual" => 0])
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_visa_detail_histories.employee_id', $request->employee_id);
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_visa_detail_histories.user_id', $request->user_id);
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_visa_detail_histories.employee_id', $request->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_visa_detail_histories.user_id', $request->user()->id);
             })
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
@@ -548,9 +548,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -618,11 +618,11 @@ class HistoryDetailsController extends Controller
              }
              $employee_sponsorship_details_history = EmployeeSponsorshipHistory::where(["is_manual" => 0])
 
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_sponsorship_histories.employee_id', $request->employee_id);
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_sponsorship_histories.user_id', $request->user_id);
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_sponsorship_histories.employee_id', $request->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_sponsorship_histories.user_id', $request->user()->id);
             })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
@@ -699,9 +699,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -768,11 +768,11 @@ class HistoryDetailsController extends Controller
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              }
              $employee_address_details_history = EmployeeAddressHistory::where(["is_manual" => 0])
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_address_histories.employee_id', $request->employee_id);
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_address_histories.user_id', $request->user_id);
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('employee_address_histories.employee_id', $request->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_address_histories.user_id', $request->user()->id);
             })
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
@@ -854,9 +854,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -934,11 +934,11 @@ class HistoryDetailsController extends Controller
              when(!empty($request->attendance_id), function ($query) use ($request) {
                 return $query->where('attendance_histories.attendance_id', $request->attendance_id);
             })
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('attendance_histories.employee_id', $request->employee_id);
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('attendance_histories.user_id', $request->user_id);
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('attendance_histories.employee_id', $request->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('attendance_histories.user_id', $request->user()->id);
             })
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
@@ -1020,9 +1020,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1100,11 +1100,11 @@ class HistoryDetailsController extends Controller
              ->when(!empty($request->attendance_id), function ($query) use ($request) {
                 return $query->where('leave_histories.leave_id', $request->leave_id);
             })
-             ->when(!empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('leave_histories.employee_id', $request->employee_id);
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('leave_histories.user_id', $request->user_id);
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                return $query->where('leave_histories.employee_id', $request->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('leave_histories.user_id', $request->user()->id);
             })
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
@@ -1187,9 +1187,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1263,17 +1263,17 @@ class HistoryDetailsController extends Controller
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              }
 
-             $employee_work_shift_history = EmployeeWorkShiftHistory::when(!empty($request->employee_id), function ($query) use ($request) {
+             $employee_work_shift_history = EmployeeWorkShiftHistory::when(!empty($request->user_id), function ($query) use ($request) {
 
                 return $query->whereHas('users',function($query) use($request) {
-                     $query->where('employee_user_work_shift_histories.employee_id', $request->employee_id);
+                     $query->where('employee_user_work_shift_histories.user_id', $request->user_id);
                 });
 
 
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
+            ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->whereHas('users',function($query) use($request) {
-                    $query->where('employee_user_work_shift_histories.employee_id', auth()->user()->id);
+                    $query->where('employee_user_work_shift_histories.user_id', auth()->user()->id);
                });
             })
             ->whereHas("users.departments", function($query) use($all_manager_department_ids) {
@@ -1357,9 +1357,9 @@ class HistoryDetailsController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1433,12 +1433,12 @@ class HistoryDetailsController extends Controller
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              }
 
-             $employee_project_history = EmployeeProjectHistory::when(!empty($request->employee_id), function ($query) use ($request) {
-                $query->where('employee_project_histories.employee_id', $request->employee_id);
+             $employee_project_history = EmployeeProjectHistory::when(!empty($request->user_id), function ($query) use ($request) {
+                $query->where('employee_project_histories.user_id', $request->user_id);
 
             })
-            ->when(empty($request->employee_id), function ($query) use ($request) {
-                $query->where('employee_project_histories.employee_id', auth()->user()->id);
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                $query->where('employee_project_histories.user_id', auth()->user()->id);
             })
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);

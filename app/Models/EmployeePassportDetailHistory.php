@@ -18,7 +18,7 @@ class EmployeePassportDetailHistory extends Model
 
         "from_date",
         "to_date",
-        "employee_id",
+        "user_id",
 
         "is_manual",
         "passport_detail_id",
@@ -32,7 +32,7 @@ class EmployeePassportDetailHistory extends Model
     }
 
     public function employee(){
-        return $this->hasOne(User::class,'id', 'employee_id');
+        return $this->hasOne(User::class,'id', 'user_id');
     }
 
     public function getCreatedAtAttribute($value)

@@ -516,7 +516,7 @@ class UserManagementController extends Controller
      *      *            @OA\Property(property="middle_Name", type="string", format="string",example="Al"),
      *
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
-     * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
+     * *            @OA\Property(property="user_id", type="string", format="string",example="045674"),
      *
      *
      *              @OA\Property(property="gender", type="string", format="string",example="male"),
@@ -700,7 +700,7 @@ class UserManagementController extends Controller
 
                 if (in_array($request["immigration_status"], ['sponsored'])) {
                     if (!empty($request_data["sponsorship_details"])) {
-                        $request_data["sponsorship_details"]["employee_id"] = $user->id;
+                        $request_data["sponsorship_details"]["user_id"] = $user->id;
                         $request_data["sponsorship_details"]["business_id"] = $user->business_id;
                         $employee_sponsorship  =  EmployeeSponsorship::create($request_data["sponsorship_details"]);
 
@@ -715,7 +715,7 @@ class UserManagementController extends Controller
                 if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
 
                     if (!empty($request_data["passport_details"])) {
-                        $request_data["passport_details"]["employee_id"] = $user->id;
+                        $request_data["passport_details"]["user_id"] = $user->id;
                         $request_data["passport_details"]["business_id"] = $user->business_id;
                         $employee_passport_details  =  EmployeePassportDetail::create($request_data["passport_details"]);
                         $request_data["passport_details"]["from_date"] = now();
@@ -726,7 +726,7 @@ class UserManagementController extends Controller
                         EmployeePassportDetailHistory::where('to_date', '<=', $ten_years_ago)->delete();
                     }
                     if (!empty($request_data["visa_details"]) && $request_data["is_active_visa_details"]) {
-                        $request_data["visa_details"]["employee_id"] = $user->id;
+                        $request_data["visa_details"]["user_id"] = $user->id;
                         $request_data["visa_details"]["business_id"] = $user->business_id;
                         $employee_visa_details  =  EmployeeVisaDetail::create($request_data["visa_details"]);
 
@@ -824,7 +824,7 @@ class UserManagementController extends Controller
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
      *
      *
-     *      * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
+     *      * *            @OA\Property(property="user_id", type="string", format="string",example="045674"),
      *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
      *    *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
      *                @OA\Property(property="gender", type="string", format="string",example="male"),
@@ -938,7 +938,7 @@ class UserManagementController extends Controller
                     'first_Name',
                     'middle_Name',
                     'last_Name',
-                    'employee_id',
+                    'user_id',
                     'password',
                     'phone',
                     'address_line_1',
@@ -1121,7 +1121,7 @@ class UserManagementController extends Controller
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
      *
      *
-     *      * *            @OA\Property(property="employee_id", type="string", format="string",example="045674"),
+     *      * *            @OA\Property(property="user_id", type="string", format="string",example="045674"),
      *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
      *    *    *            @OA\Property(property="image", type="string", format="string",example="...png"),
      *                @OA\Property(property="gender", type="string", format="string",example="male"),
@@ -1316,7 +1316,7 @@ return DB::transaction(function() use($request) {
     // history section
 
     $address_history_data = [
-        'employee_id' => $user->id,
+        'user_id' => $user->id,
         'from_date' => now(),
         'created_by' => $request->user()->id,
         'address_line_1' => $request_data["address_line_1"],
@@ -1329,7 +1329,7 @@ return DB::transaction(function() use($request) {
     ];
 
     $employee_address_history  =  EmployeeAddressHistory::where([
-        "employee_id" =>   $updatableUser->id,
+        "user_id" =>   $updatableUser->id,
         "to_date" => NULL
     ])
         ->latest('created_at')
@@ -1453,17 +1453,17 @@ return DB::transaction(function() use($request) {
 
     if (in_array($request["immigration_status"], ['sponsored'])) {
         if (!empty($request_data["sponsorship_details"])) {
-            $request_data["sponsorship_details"]["employee_id"] = $user->id;
+            $request_data["sponsorship_details"]["user_id"] = $user->id;
 
 
             $employee_sponsorship_query  =  EmployeeSponsorship::where([
-                "employee_id" =>  $request_data["sponsorship_details"]["employee_id"]
+                "user_id" =>  $request_data["sponsorship_details"]["user_id"]
             ]);
             $employee_sponsorship  = $employee_sponsorship_query->first();
 
             if ($employee_sponsorship) {
                 $employee_sponsorship_query->update(collect($request_data["sponsorship_details"])->only([
-                    //  'employee_id',
+                    //  'user_id',
                     'date_assigned',
                     'expiry_date',
                     'status',
@@ -1493,7 +1493,7 @@ return DB::transaction(function() use($request) {
 
 
             $employee_sponsorship_history  =  EmployeeSponsorshipHistory::where([
-                "employee_id" =>  $request_data["sponsorship_details"]["employee_id"],
+                "user_id" =>  $request_data["sponsorship_details"]["user_id"],
                 "to_date" => NULL
             ])
                 ->latest('created_at')
@@ -1551,13 +1551,13 @@ return DB::transaction(function() use($request) {
     if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
 
         if (!empty($request_data["passport_details"])) {
-            $request_data["passport_details"]["employee_id"] = $user->id;
+            $request_data["passport_details"]["user_id"] = $user->id;
 
 
 
 
             $employee_passport_details_query  =  EmployeePassportDetail::where([
-                "employee_id" =>  $request_data["passport_details"]["employee_id"]
+                "user_id" =>  $request_data["passport_details"]["user_id"]
             ]);
 
             $employee_passport_details  =  $employee_passport_details_query->first();
@@ -1566,7 +1566,7 @@ return DB::transaction(function() use($request) {
 
             if ($employee_passport_details) {
                 $employee_passport_details_query->update(collect($request_data["passport_details"])->only([
-                    // "employee_id",
+                    // "user_id",
                     'passport_number',
                     "passport_issue_date",
                     "passport_expiry_date",
@@ -1597,7 +1597,7 @@ return DB::transaction(function() use($request) {
 
 
             $employee_passport_details_history  =  EmployeePassportDetailHistory::where([
-                "employee_id" =>  $request_data["passport_details"]["employee_id"],
+                "user_id" =>  $request_data["passport_details"]["user_id"],
                 "to_date" => NULL
             ])
                 ->latest('created_at')
@@ -1653,18 +1653,18 @@ return DB::transaction(function() use($request) {
         }
         if (!empty($request_data["visa_details"]) && $request_data["is_active_visa_details"]) {
 
-            $request_data["visa_details"]["employee_id"] = $user->id;
+            $request_data["visa_details"]["user_id"] = $user->id;
 
 
             $employee_visa_details_query  =  EmployeeVisaDetail::where([
-                "employee_id" =>  $request_data["visa_details"]["employee_id"]
+                "user_id" =>  $request_data["visa_details"]["user_id"]
             ]);
 
             $employee_visa_details  =  $employee_visa_details_query->first();
 
             if ($employee_visa_details) {
                 $employee_visa_details_query->update(collect($request_data["visa_details"])->only([
-                    // 'employee_id',
+                    // 'user_id',
                     'BRP_number',
                     "visa_issue_date",
                     "visa_expiry_date",
@@ -1700,7 +1700,7 @@ return DB::transaction(function() use($request) {
 
 
             $employee_visa_details_history  =  EmployeeVisaDetailHistory::where([
-                "employee_id" =>  $request_data["visa_details"]["employee_id"],
+                "user_id" =>  $request_data["visa_details"]["user_id"],
                 "to_date" => NULL
             ])
                 ->latest('created_at')
@@ -1906,7 +1906,7 @@ return DB::transaction(function() use($request) {
             // history section
 
             $address_history_data = [
-                'employee_id' => $user->id,
+                'user_id' => $user->id,
                 'from_date' => now(),
                 'created_by' => $request->user()->id,
                 'address_line_1' => $request_data["address_line_1"],
@@ -1919,7 +1919,7 @@ return DB::transaction(function() use($request) {
             ];
 
             $employee_address_history  =  EmployeeAddressHistory::where([
-                "employee_id" =>   $updatableUser->id,
+                "user_id" =>   $updatableUser->id,
                 "to_date" => NULL
             ])
                 ->latest('created_at')
@@ -2224,7 +2224,7 @@ return DB::transaction(function() use($request) {
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *     @OA\Property(property="employee_id", type="number", format="integer", example="1"),
+     *     @OA\Property(property="user_id", type="number", format="integer", example="1"),
      *     @OA\Property(property="date_assigned", type="string", format="date", example="2023-12-05"),
      *     @OA\Property(property="expiry_date", type="string", format="date", example="2023-12-31"),
      *     @OA\Property(property="status", type="string", format="string", example="pending", enum={"pending", "approved", "denied", "visa_granted"}),
@@ -2312,7 +2312,7 @@ return DB::transaction(function() use($request) {
             }
 
             $user = User::where([
-                "id" => $request["employee_id"]
+                "id" => $request["user_id"]
             ])->first();
 
 
@@ -2330,11 +2330,11 @@ return DB::transaction(function() use($request) {
 
             $employee_sponsorship  =  EmployeeSponsorship::updateOrCreate(
                 [
-                    "employee_id" => $request_data["employee_id"],
+                    "user_id" => $request_data["user_id"],
                 ],
 
                 collect($request_data)->only([
-                    'employee_id',
+                    'user_id',
                     'date_assigned',
                     'expiry_date',
                     'status',
@@ -2343,7 +2343,7 @@ return DB::transaction(function() use($request) {
                 ])->toArray()
 
                 //     [
-                //     "employee_id" => $request_data["employee_id"],
+                //     "user_id" => $request_data["user_id"],
                 //     'date_assigned' =>  $request_data["date_assigned"],
                 //     'expiry_date' =>  $request_data["expiry_date"],
                 //     'status' =>  $request_data["status"],
@@ -2650,7 +2650,7 @@ return DB::transaction(function() use($request) {
             // history section
 
             $address_history_data = [
-                'employee_id' => $user->id,
+                'user_id' => $user->id,
                 'from_date' => now(),
                 'created_by' => $request->user()->id,
                 'address_line_1' => $request_data["address_line_1"],
@@ -2663,7 +2663,7 @@ return DB::transaction(function() use($request) {
             ];
 
             $employee_address_history  =  EmployeeAddressHistory::where([
-                "employee_id" =>   $updatableUser->id,
+                "user_id" =>   $updatableUser->id,
                 "to_date" => NULL
             ])
                 ->latest('created_at')
@@ -3749,7 +3749,7 @@ return DB::transaction(function() use($request) {
             foreach ($leave_types as $key => $leave_type) {
                 $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
                     $query->where([
-                        "employee_id" => $user->id,
+                        "user_id" => $user->id,
                         "leave_type_id" => $leave_type->id
 
                     ]);
@@ -3951,7 +3951,7 @@ return DB::transaction(function() use($request) {
 
 
             $already_taken_leaves =  Leave::where([
-                "employee_id" => $user->id
+                "user_id" => $user->id
             ])
                 ->whereHas('records', function ($query) use ($today, $end_date_of_year) {
                     $query->where('leave_records.date', '>=', $today)
@@ -4166,24 +4166,24 @@ return DB::transaction(function() use($request) {
         $current_number = 1; // Start from 0001
 
         do {
-            $employee_id = $prefix . "-" . str_pad($current_number, 4, '0', STR_PAD_LEFT);
+            $user_id = $prefix . "-" . str_pad($current_number, 4, '0', STR_PAD_LEFT);
             $current_number++; // Increment the current number for the next iteration
         } while (
             DB::table('users')->where([
-                'employee_id' => $employee_id,
+                'user_id' => $user_id,
                 "business_id" => $request->user()->business_id
             ])->exists()
         );
 
 
-        return response()->json(["employee_id" => $employee_id], 200);
+        return response()->json(["user_id" => $user_id], 200);
     }
 
 
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/users/validate/employee-id/{employee_id}",
+     *      path="/v1.0/users/validate/employee-id/{user_id}",
      *      operationId="validateEmployeeId",
      *      tags={"user_management.employee"},
      *       security={
@@ -4191,9 +4191,9 @@ return DB::transaction(function() use($request) {
      *       },
 
      *              @OA\Parameter(
-     *         name="employee_id",
+     *         name="user_id",
      *         in="path",
-     *         description="employee_id",
+     *         description="user_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -4235,21 +4235,21 @@ return DB::transaction(function() use($request) {
      *      )
      *     )
      */
-    public function validateEmployeeId($employee_id, Request $request)
+    public function validateEmployeeId($user_id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            $employee_id_exists =  DB::table('users')->where(
+            $user_id_exists =  DB::table('users')->where(
                 [
-                    'employee_id' => $employee_id,
+                    'user_id' => $user_id,
                     "business_id" => $request->user()->business_id
                 ]
             )->exists();
 
 
 
-            return response()->json(["employee_id_exists" => $employee_id_exists], 200);
+            return response()->json(["user_id_exists" => $user_id_exists], 200);
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -4296,9 +4296,9 @@ return DB::transaction(function() use($request) {
      * example="search_key"
      * ),
      *  * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -4372,7 +4372,7 @@ return DB::transaction(function() use($request) {
             //      ], 401);
             //  }
 
-       $user =     User::where(["id" => $request->employee_id])
+       $user =     User::where(["id" => $request->user_id])
        ->whereHas("departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
@@ -4389,10 +4389,10 @@ return DB::transaction(function() use($request) {
             $activity = ActivityLog::where("activity", "!=", "DUMMY activity")
                 ->where("description", "!=", "DUMMY description")
 
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('user_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_id', $request->user_id);
                 })
-                ->when(empty($request->employee_id), function ($query) use ($request) {
+                ->when(empty($request->user_id), function ($query) use ($request) {
                     return $query->where('user_id', $request->user()->id);
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {

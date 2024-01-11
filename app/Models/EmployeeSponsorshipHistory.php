@@ -20,7 +20,7 @@ class EmployeeSponsorshipHistory extends Model
         "is_sponsorship_withdrawn",
 
         "is_manual",
-        'employee_id',
+        'user_id',
         "sponsorship_id",
         "from_date",
         "to_date",
@@ -34,7 +34,7 @@ class EmployeeSponsorshipHistory extends Model
 
 
     public function employee(){
-        return $this->hasOne(User::class,'id', 'employee_id');
+        return $this->hasOne(User::class,'id', 'user_id');
     }
 
 

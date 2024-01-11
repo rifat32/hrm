@@ -64,7 +64,7 @@ class User extends Authenticatable
 
 
         'business_id',
-        'employee_id',
+        'user_id',
         "created_by",
          'is_active'
     ];
@@ -117,25 +117,25 @@ class User extends Authenticatable
     }
 
     public function leaves() {
-        return $this->hasMany(Leave::class, 'employee_id', 'id');
+        return $this->hasMany(Leave::class, 'user_id', 'id');
     }
     public function attendances() {
-        return $this->hasMany(Attendance::class, 'employee_id', 'id');
+        return $this->hasMany(Attendance::class, 'user_id', 'id');
     }
 
     public function attendance_histories() {
-        return $this->hasMany(AttendanceHistory::class, 'employee_id', 'id');
+        return $this->hasMany(AttendanceHistory::class, 'user_id', 'id');
     }
 
     public function sponsorship_details() {
-        return $this->hasOne(EmployeeSponsorship::class, 'employee_id', 'id');
+        return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
     }
 
     public function passport_details() {
-        return $this->hasOne(EmployeePassportDetail::class, 'employee_id', 'id');
+        return $this->hasOne(EmployeePassportDetail::class, 'user_id', 'id');
     }
     public function visa_details() {
-        return $this->hasOne(EmployeeVisaDetail::class, 'employee_id', 'id');
+        return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
     }
 
 

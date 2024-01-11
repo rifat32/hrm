@@ -27,7 +27,7 @@ class UserVisaHistoryCreateRequest extends FormRequest
     {
         return [
 
-            'employee_id' => [
+            'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {

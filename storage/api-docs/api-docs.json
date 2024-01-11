@@ -935,9 +935,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -1038,7 +1038,7 @@
                                         "format": "string",
                                         "example": "r"
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "number",
                                         "format": "number",
                                         "example": "1"
@@ -1158,7 +1158,7 @@
                                         "format": "string",
                                         "example": "r"
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "number",
                                         "format": "number",
                                         "example": "1"
@@ -1265,7 +1265,7 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "number",
                                         "format": "number",
                                         "example": "1"
@@ -1474,9 +1474,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -1583,9 +1583,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -8810,9 +8810,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -8919,9 +8919,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -9028,9 +9028,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -9137,9 +9137,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -9246,9 +9246,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -9362,9 +9362,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -11583,9 +11583,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -11686,7 +11686,7 @@
                                         "format": "int",
                                         "example": 2
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "integer",
                                         "format": "int",
                                         "example": 2
@@ -11819,7 +11819,7 @@
                                         "format": "int",
                                         "example": 2
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "integer",
                                         "format": "int",
                                         "example": 2
@@ -12132,9 +12132,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -12241,9 +12241,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -12350,9 +12350,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -19094,9 +19094,9 @@
                 "operationId": "getUserAddressHistories",
                 "parameters": [
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },
@@ -19210,7 +19210,7 @@
                                         "format": "number",
                                         "example": "Updated Christmas"
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "Your Employee ID"
@@ -19340,7 +19340,7 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "Your Employee ID"
@@ -22300,7 +22300,7 @@
                                         "format": "string",
                                         "example": "How was this?"
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "045674"
@@ -22861,7 +22861,7 @@
                                         "format": "string",
                                         "example": "How was this?"
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "045674"
@@ -23121,7 +23121,7 @@
                                         "format": "string",
                                         "example": "Al"
                                     },
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "045674"
@@ -23716,7 +23716,7 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "employee_id": {
+                                    "user_id": {
                                         "type": "number",
                                         "format": "integer",
                                         "example": "1"
@@ -24658,7 +24658,7 @@
                 ]
             }
         },
-        "/v1.0/users/validate/employee-id/{employee_id}": {
+        "/v1.0/users/validate/employee-id/{user_id}": {
             "get": {
                 "tags": [
                     "user_management.employee"
@@ -24668,9 +24668,9 @@
                 "operationId": "validateEmployeeId",
                 "parameters": [
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "path",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     }
@@ -24770,9 +24770,9 @@
                         "example": "search_key"
                     },
                     {
-                        "name": "employee_id",
+                        "name": "user_id",
                         "in": "query",
-                        "description": "employee_id",
+                        "description": "user_id",
                         "required": true,
                         "example": "1"
                     },

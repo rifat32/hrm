@@ -24,7 +24,7 @@ class UserStoreDetailsRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'employee_id' => 'required|numeric',
+            'user_id' => 'required|numeric',
             'date_assigned' => 'required|date',
             'expiry_date' => 'required|date',
             'status' => 'required|in:pending,approved,denied,visa_granted',

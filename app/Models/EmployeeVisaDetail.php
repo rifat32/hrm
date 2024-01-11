@@ -11,7 +11,7 @@ class EmployeeVisaDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'business_id',
         'BRP_number',
         "visa_issue_date",

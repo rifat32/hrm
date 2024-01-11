@@ -28,7 +28,7 @@ class AttendanceMultipleCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            'employee_id' => [
+            'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
@@ -87,7 +87,7 @@ class AttendanceMultipleCreateRequest extends FormRequest
                  "required",
                  "date",
                  function ($attribute, $value, $fail) {
-                    $exists = Attendance::where('attendances.employee_id', $this->id)
+                    $exists = Attendance::where('attendances.user_id', $this->id)
                     ->whereDate('attendances.business_id', '=', auth()->user()->business_id)
                     ->exists();
 

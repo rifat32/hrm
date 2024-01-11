@@ -15,8 +15,8 @@ class CreateEmployeeVisaDetailHistoriesTable extends Migration
     {
         Schema::create('employee_visa_detail_histories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("employee_id");
-            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("user_id");
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string("BRP_number");
             $table->date("visa_issue_date");
             $table->date("visa_expiry_date");

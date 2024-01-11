@@ -26,7 +26,7 @@ class UserSponsorshipHistoryCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            'employee_id' => [
+            'user_id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {

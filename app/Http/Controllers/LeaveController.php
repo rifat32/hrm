@@ -143,7 +143,7 @@ class LeaveController extends Controller
      *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
      *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
      *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
-     *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="user_id", type="integer", format="int", example=2),
      *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
      *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
      *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
@@ -214,7 +214,7 @@ class LeaveController extends Controller
 
 
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
@@ -222,7 +222,7 @@ class LeaveController extends Controller
 
                 // if (!$wors_shift) {
                 //     $department = Department::whereHas('users', function ($query) use ($request_data) {
-                //         $query->where('id', $request_data["employee_id"]);
+                //         $query->where('id', $request_data["user_id"]);
                 //     })->first();
 
                 //     if (!$department) {
@@ -263,7 +263,7 @@ class LeaveController extends Controller
                     ->first();
 
                     $previous_leave =  Leave::where([
-                        "employee_id" => $request_data["employee_id"]
+                        "user_id" => $request_data["user_id"]
                     ])
                     ->whereHas('records', function ($query) use ($request_data) {
                         $query->where('leave_records.date',($request_data["date"]));
@@ -310,7 +310,7 @@ class LeaveController extends Controller
 
 
                         $previous_leave =  Leave::where([
-                            "employee_id" => $request_data["employee_id"]
+                            "user_id" => $request_data["user_id"]
                         ])
                         ->whereHas('records', function ($query) use ($leave_date) {
                             $query->where('leave_records.date', $leave_date);
@@ -346,7 +346,7 @@ class LeaveController extends Controller
                     ->first();
 
                     $previous_leave =  Leave::where([
-                        "employee_id" => $request_data["employee_id"]
+                        "user_id" => $request_data["user_id"]
                     ])
                     ->whereHas('records', function ($query) use ($request_data) {
                         $query->where('leave_records.date', $request_data["date"]);
@@ -400,7 +400,7 @@ class LeaveController extends Controller
                     ->first();
 
                     $previous_leave =  Leave::where([
-                        "employee_id" => $request_data["employee_id"]
+                        "user_id" => $request_data["user_id"]
                     ])
                     ->whereHas('records', function ($query) use ($request_data) {
                         $query->where('leave_records.date', $request_data["date"]);
@@ -438,7 +438,7 @@ class LeaveController extends Controller
 
 
                 // $previous_leave =  Leave::where([
-                //     "employee_id" => $request->user()->id
+                //     "user_id" => $request->user()->id
                 // ])
                 // ->whereHas('records', function ($query) use ($leave_record_data) {
                 //     $query->where('leave_records.date', $leave_record_data["date"]);
@@ -730,7 +730,7 @@ class LeaveController extends Controller
      *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
      *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
      *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
-     *   @OA\Property(property="employee_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="user_id", type="integer", format="int", example=2),
      *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
      *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
      *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
@@ -793,7 +793,7 @@ class LeaveController extends Controller
 
 
 
-                $check_employee = $this->checkUser($request_data["employee_id"]);
+                $check_employee = $this->checkUser($request_data["user_id"]);
                 if (!$check_employee["ok"]) {
                     return response()->json([
                         "message" => $check_employee["message"]
@@ -805,7 +805,7 @@ class LeaveController extends Controller
 
 
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["user_id"]);
                 })->first();
 
                 if (!$work_shift) {
@@ -813,7 +813,7 @@ class LeaveController extends Controller
                 }
                 // if (!$wors_shift) {
                 //     $department = Department::whereHas('users', function ($query) use ($request_data) {
-                //         $query->where('id', $request_data["employee_id"]);
+                //         $query->where('id', $request_data["user_id"]);
                 //     })->first();
 
                 //     if (!$department) {
@@ -851,7 +851,7 @@ class LeaveController extends Controller
                     ->first();
 
                     $previous_leave =  Leave::where([
-                        "employee_id" => $request_data["employee_id"]
+                        "user_id" => $request_data["user_id"]
                     ])
                     ->whereNotIn("id",[$request_data["id"]])
                     ->whereHas('records', function ($query) use ($request_data) {
@@ -893,7 +893,7 @@ class LeaveController extends Controller
                         ->first();
 
                         $previous_leave =  Leave::where([
-                            "employee_id" => $request_data["employee_id"]
+                            "user_id" => $request_data["user_id"]
                         ])
                         ->whereNotIn("id",[$request_data["id"]])
                         ->whereHas('records', function ($query) use ($leave_date) {
@@ -929,7 +929,7 @@ class LeaveController extends Controller
                     ->first();
 
                     $previous_leave =  Leave::where([
-                        "employee_id" => $request_data["employee_id"]
+                        "user_id" => $request_data["user_id"]
                     ])
                     ->whereNotIn("id",[$request_data["id"]])
                     ->whereHas('records', function ($query) use ($request_data) {
@@ -980,7 +980,7 @@ class LeaveController extends Controller
                     ->first();
 
                     $previous_leave =  Leave::where([
-                        "employee_id" => $request_data["employee_id"]
+                        "user_id" => $request_data["user_id"]
                     ])
                     ->whereNotIn("id",[$request_data["id"]])
                     ->whereHas('records', function ($query) use ($request_data) {
@@ -1019,7 +1019,7 @@ class LeaveController extends Controller
 
 
                 // // $previous_leave =  Leave::where([
-                // //     "employee_id" => $request_data["employee_id"]
+                // //     "user_id" => $request_data["user_id"]
                 // // ])
                 // // ->whereNotIn("id",[$request_data["id"]])
                 // // ->whereHas('records', function ($query) use ($leave_record_data) {
@@ -1040,7 +1040,7 @@ class LeaveController extends Controller
                         'leave_duration',
                         'day_type',
                         'leave_type_id',
-                        'employee_id',
+                        'user_id',
                         'date',
                         'note',
                         'start_date',
@@ -1130,9 +1130,9 @@ class LeaveController extends Controller
      * example="search_key"
      * ),
      *    * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1219,8 +1219,8 @@ class LeaveController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('leaves.employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('leaves.user_id', $request->user_id);
                 })
 
 
@@ -1299,9 +1299,9 @@ class LeaveController extends Controller
      * example="search_key"
      * ),
      *      *    * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1411,8 +1411,8 @@ class LeaveController extends Controller
                         //     ->orWhere("leaves.description", "like", "%" . $term . "%");
                     });
                 })
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('leaves.employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('leaves.user_id', $request->user_id);
                 })
 
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -1519,9 +1519,9 @@ class LeaveController extends Controller
      * example="search_key"
      * ),
      *      *    * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1610,9 +1610,9 @@ class LeaveController extends Controller
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
             ->whereHas("leaves", function($q) use ($request)  {
-                $q->whereNotNull("employee_id")
-                  ->when(!empty($request->employee_id), function ($q) use ($request) {
-                      $q->where('employee_id', $request->employee_id);
+                $q->whereNotNull("user_id")
+                  ->when(!empty($request->user_id), function ($q) use ($request) {
+                      $q->where('user_id', $request->user_id);
                   })
                   ->when(!empty($request->start_date), function ($q) use ($request) {
                       $q->where('date', '>=', $request->start_date . ' 00:00:00');
@@ -1636,9 +1636,9 @@ class LeaveController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->whereHas("leaves", function($q)use ($request)  {
-                        $q->where('employee_id', $request->employee_id);
+                        $q->where('user_id', $request->user_id);
                     });
                 })
 
@@ -1784,9 +1784,9 @@ return $employee;
      * example="search_key"
      * ),
      *      *    * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1897,8 +1897,8 @@ return $employee;
                          //     ->orWhere("leaves.description", "like", "%" . $term . "%");
                      });
                  })
-                 ->when(!empty($request->employee_id), function ($query) use ($request) {
-                     return $query->where('leaves.employee_id', $request->employee_id);
+                 ->when(!empty($request->user_id), function ($query) use ($request) {
+                     return $query->where('leaves.user_id', $request->user_id);
                  })
 
                  //    ->when(!empty($request->product_category_id), function ($query) use ($request) {

@@ -10,7 +10,7 @@ class EmployeeSponsorship extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'business_id',
         'date_assigned',
         'expiry_date',

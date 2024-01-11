@@ -49,7 +49,7 @@ class AttendanceController extends Controller
      *    *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
      *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
      *
-     *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
+     *     @OA\Property(property="user_id", type="number", format="number", example="1"),
      *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
@@ -129,7 +129,7 @@ class AttendanceController extends Controller
                     }
                 }
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
@@ -289,7 +289,7 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *    @OA\Property(property="employee_id", type="number", format="number", example="1"),
+     *    @OA\Property(property="user_id", type="number", format="number", example="1"),
      *    @OA\Property(property="attendance_details", type="string", format="array", example={
      * {
      *    "note" : "note",
@@ -371,7 +371,7 @@ class AttendanceController extends Controller
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
@@ -486,7 +486,7 @@ class AttendanceController extends Controller
 
                     return [
                         "behavior" => $behavior,
-                        "employee_id" => $request_data["employee_id"],
+                        "user_id" => $request_data["user_id"],
                         "business_id" => auth()->user()->business_id,
                         "is_active" => True,
                         "created_by" => auth()->user()->id,
@@ -510,7 +510,7 @@ class AttendanceController extends Controller
 
 
                 $employee = User::where([
-                    "id" => $request_data["employee_id"]
+                    "id" => $request_data["user_id"]
                 ])
                     ->first();
 
@@ -578,7 +578,7 @@ class AttendanceController extends Controller
      *   *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
      *    *   *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
      *
-     *     @OA\Property(property="employee_id", type="number", format="number", example="1"),
+     *     @OA\Property(property="user_id", type="number", format="number", example="1"),
      *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
@@ -660,7 +660,7 @@ class AttendanceController extends Controller
                 }
 
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["employee_id"]);
+                    $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
@@ -766,7 +766,7 @@ class AttendanceController extends Controller
                         'note',
                         'in_geolocation',
                         'out_geolocation',
-                        'employee_id',
+                        'user_id',
                         'in_time',
                         'out_time',
                         'in_date',
@@ -998,9 +998,9 @@ class AttendanceController extends Controller
      * example="search_key"
      * ),
      *   * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1099,8 +1099,8 @@ class AttendanceController extends Controller
                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
                     });
                 })
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_id', $request->user_id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('attendances.created_at', ">=", $request->start_date);
@@ -1167,9 +1167,9 @@ class AttendanceController extends Controller
      * example="search_key"
      * ),
      *     *      *    * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1266,8 +1266,8 @@ class AttendanceController extends Controller
                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
-                    return $query->where('attendances.employee_id', $request->employee_id);
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('attendances.user_id', $request->user_id);
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -1428,9 +1428,9 @@ class AttendanceController extends Controller
      * example="search_key"
      * ),
      *      *    * *  @OA\Parameter(
-     * name="employee_id",
+     * name="user_id",
      * in="query",
-     * description="employee_id",
+     * description="user_id",
      * required=true,
      * example="1"
      * ),
@@ -1521,9 +1521,9 @@ class AttendanceController extends Controller
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->whereHas("attendances", function ($q) use ($request) {
-                    $q->whereNotNull("employee_id")
-                        ->when(!empty($request->employee_id), function ($q) use ($request) {
-                            $q->where('employee_id', $request->employee_id);
+                    $q->whereNotNull("user_id")
+                        ->when(!empty($request->user_id), function ($q) use ($request) {
+                            $q->where('user_id', $request->user_id);
                         })
                         ->when(!empty($request->start_date), function ($q) use ($request) {
                             $q->where('in_date', '>=', $request->start_date . ' 00:00:00');
@@ -1547,9 +1547,9 @@ class AttendanceController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
-                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->whereHas("attendances", function ($q) use ($request) {
-                        $q->where('employee_id', $request->employee_id);
+                        $q->where('user_id', $request->user_id);
                     });
                 })
 
