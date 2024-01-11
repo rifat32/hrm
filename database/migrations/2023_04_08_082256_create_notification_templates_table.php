@@ -18,6 +18,7 @@ class CreateNotificationTemplatesTable extends Migration
             $table->id();
             $table->string("name")->nullable();
             $table->string("type");
+            $table->text("title_template");
             $table->text("template");
             $table->text("link");
             $table->boolean("is_active");
@@ -27,21 +28,21 @@ class CreateNotificationTemplatesTable extends Migration
         DB::table('notification_templates')->insert(
             array(
 
+                [
+                    'type' => 'reminder_before_expiry',
+                    "title_template"=> ("[entity_name] Reminder"),
+                    "template"=> ("[entity] expires in [duration] days. Renew now."),
+                    "link"=> ("/[entity_name]/[entity_id]"),
+                    "is_active" => 1
+                ],
 
-
-
-
-
-
-
-
-
-
-
-              
-
-
-
+                [
+                    'type' => 'reminder_after_expiry',
+                    "title_template"=> ("[entity_name] Reminder"),
+                    "template"=> ("[entity] expired [duration] days ago. Please renew it now."),
+                    "link"=> ("/[entity_name]/[entity_id]"),
+                    "is_active" => 1
+                ],
             )
         );
     }

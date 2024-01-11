@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Business;
+use App\Models\Notification;
+use App\Models\NotificationTemplate;
 use App\Models\Reminder;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -40,6 +42,69 @@ class ReminderScheduler extends Command
      *
      * @return int
      */
+
+     public function sendNotification($reminder,$data,$business) {
+        $field_name = $reminder->db_field_name;
+$now = now();
+        $days_difference = $now->diffInDays($data->$field_name);
+
+        if($days_difference > 0) {
+         $notification_templete_type = "reminder_before_expiry";
+        }else {
+            $notification_templete_type = "reminder_after_expiry";
+        }
+
+
+        $notification_template = NotificationTemplate::where([
+            "type" => $notification_templete_type
+        ])
+            ->first();
+    $notification_title = $notification_template->title_template;
+    $notification_title =  str_replace(
+        "[entity_name]",
+        ($reminder->entity_name),
+        $notification_title
+    );
+    $notification_description = $notification_template->template;
+    $notification_description =  str_replace(
+        "[entity]",
+        (explode('_', $reminder->entity_name)[0]),
+        $notification_description
+    );
+    $notification_description = $notification_template->template;
+    $notification_description =  str_replace(
+        "[duration]",
+        (abs($days_difference)),
+        $notification_description
+    );
+
+    $notification_link = $notification_template->link;
+    $notification_link =  str_replace(
+        "[entity_name]",
+        ($reminder->entity_name),
+        $notification_link
+    );
+    $notification_link =  str_replace(
+        "[entity_id]",
+        ($data->id),
+        $notification_link
+    );
+
+
+        Notification::create([
+            "entity_id" => $data->id,
+            "entity_name" => $reminder->entity_name,
+            'notification_title' => $notification_title,
+            'notification_description' => $notification_description,
+            'notification_link' => $notification_link,
+            "sender_id" => 1,
+            "receiver_id" => $business->owner_id,
+            "business_id" => $business->id,
+            "notification_template_id" => $notification_template->id,
+            "status" => "unread",
+        ]);
+
+     }
     public function handle()
     {
         Log::info('Task executed.');
@@ -106,6 +171,10 @@ class ReminderScheduler extends Command
                         if ($reminder_date->eq($data->$field_name)) {
 
                             // send notification or email based on setting
+                             // send notification or email based on setting
+                        $this->sendNotification($reminder,$data,$business);
+
+
 
                         } else if ($reminder_date->gt($data->$field_name)) {
                             if ($reminder->keep_sending_until_update == 1 && !empty($reminder->frequency_after_first_reminder)) {
@@ -113,12 +182,17 @@ class ReminderScheduler extends Command
                                 $days_difference = $reminder_date->diffInDays($data->$field_name);
                                 if ((($days_difference % $reminder->frequency_after_first_reminder) == 0)) {
                                     // send notification or email based on setting
+                                       // send notification or email based on setting
+                        $this->sendNotification($reminder,$data,$business);
+
                                 }
                             }
                         }
                     } else if ($reminder->send_time == "before_expiry") {
 
                         // send notification or email based on setting
+                        $this->sendNotification($reminder,$data,$business);
+
 
                     }
                 }
