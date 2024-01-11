@@ -733,40 +733,22 @@ class DepartmentController extends Controller
              $business_id =  $request->user()->business_id;
 
              $departments = Department::with([
-
-                "manager" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
-                }
-
+                'manager',
+                'recursiveChildren.manager',
+                'recursiveChildren.recursiveChildren',
             ])
-            ->where(
-                 [
-                     "business_id" => $business_id,
-                    //  "parent_id" => NULL,
-                     "manager_id" => auth()->user()->id
-                 ]
-             )
+            ->where([
+                'business_id' => $business_id,
+                'manager_id' => auth()->user()->id,
+            ])
+            ->orderBy('id', 'ASC')
+            ->get();
 
-                 ->orderBy("departments.id", "ASC")
-                 ->select('departments.*')
-                ->get();
+            foreach ($departments as $department) {
+                $department->total_users_count = $department->getTotalUsersCountAttribute();
+            }
 
-                foreach($departments as $department){
-                    $department->children_recursive = $department->children_recursive;
-
-                    $department->total_users_counts = User::where([
-                        "business_id" => $business_id
-                    ])
-                    ->count();
-                }
-
-
-
-
-
-
-             return response()->json($departments, 200);
+            return response()->json($departments, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);

@@ -49,6 +49,22 @@ class Department extends Model
     }
 
 
+
+
+
+
+
+    public function recursiveChildren()
+    {
+        return $this->children()->with('recursiveChildren');
+    }
+
+    public function getTotalUsersCountAttribute()
+    {
+        return DepartmentUser::where('department_id', $this->id)->count();
+    }
+
+
     // public function parentRecursive()
     // {
     //     return $this->belongsTo(Department::class, 'parent_id', 'id')->with('parentRecursive');
@@ -104,9 +120,9 @@ class Department extends Model
 
 
         )
-        ->where([
-            "is_active" => 1
-        ])
+        // ->where([
+        //     "is_active" => 1
+        // ])
         ->addSelect([
             'total_users_count' => DepartmentUser::selectRaw('COUNT(*)')
                 ->whereColumn('departments.id', 'department_id')
@@ -145,10 +161,7 @@ class Department extends Model
     public function users() {
         return $this->belongsToMany(User::class, 'department_users', 'department_id', 'user_id');
     }
-    public function getTotalUsersCountAttribute()
-    {
-        return $this->users()->count();
-    }
+
 
     public function announcements() {
         return $this->belongsToMany(Announcement::class, 'department_announcements', 'department_id', 'announcement_id');
