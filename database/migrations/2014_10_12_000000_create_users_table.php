@@ -79,6 +79,10 @@ class CreateUsersTable extends Migration
             $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
 
+            $table->unsignedBigInteger("recruitment_process_id")->nullable();
+            $table->foreign('recruitment_process_id')->references('id')->on('recruitment_processes')->onDelete('restrict');
+
+
 
 
 

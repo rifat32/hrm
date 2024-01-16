@@ -29,6 +29,10 @@ class Candidate extends Model
         "created_by"
     ];
 
+    protected $casts = [
+        'attachments' => 'array',
+
+    ];
 
     public function getCreatedAtAttribute($value)
     {
@@ -54,5 +58,5 @@ class Candidate extends Model
 
 
 
-   
+
 }

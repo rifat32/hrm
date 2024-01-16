@@ -1867,7 +1867,7 @@ return $employee;
                      $query->select(
                          'departments.id',
                          'departments.name',
-                         "departments.location",
+                        //  "departments.location",
                          "departments.description"
                      );
                  },
