@@ -31,7 +31,7 @@ class JobListingCreateRequest extends FormRequest
         return [
             'title' => 'required|string',
             'description' => 'required|string',
-            'location' => 'required|string',
+          
             'minimum_salary' => 'required|numeric',
             'maximum_salary' => 'required|numeric',
             'experience_level' => 'required|string',

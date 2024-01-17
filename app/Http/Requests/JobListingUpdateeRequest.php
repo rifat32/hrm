@@ -43,7 +43,7 @@ class JobListingUpdateeRequest extends FormRequest
             ],
             'title' => 'required|string',
             'description' => 'required|string',
-            'location' => 'required|string',
+       
 
             'minimum_salary' => 'required|numeric',
             'maximum_salary' => 'required|numeric',

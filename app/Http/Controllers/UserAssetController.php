@@ -620,9 +620,16 @@ class UserAssetController extends Controller
                 "business_id" => auth()->user()->business_id
               ])
 
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+              ->where(function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->orWhere('user_assets.user_id', NULL)
+                 ;
+
+              })
+
+
               ->when(!empty($request->search_key), function ($query) use ($request) {
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;

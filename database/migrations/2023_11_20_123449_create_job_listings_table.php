@@ -17,14 +17,14 @@ class CreateJobListingsTable extends Migration
             $table->id();
             $table->string("title");
             $table->text("description");
-            $table->string("location");
+            // $table->string("location");
 
             $table->float("minimum_salary");
             $table->float("maximum_salary");
             $table->string("experience_level");
             $table->unsignedBigInteger("job_type_id")->nullable();
             $table->foreign('job_type_id')->references('id')->on('job_types')->onDelete('set null');
-            
+
             $table->unsignedBigInteger("work_location_id");
             $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
