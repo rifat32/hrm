@@ -12,7 +12,8 @@ class UserNote extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'description'
+        'description',
+        'created_by'
     ];
 
 
@@ -25,6 +26,10 @@ class UserNote extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by',"id");
+    }
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by',"id");
     }
 
     public function getCreatedAtAttribute($value)

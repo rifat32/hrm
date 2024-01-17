@@ -187,6 +187,8 @@ class UserNoteController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
+                $request_data["updated_by"] = $request->user()->id;
+
 
 
 
@@ -206,6 +208,7 @@ class UserNoteController extends Controller
                         'user_id',
                         'title',
                         'description',
+                        'updated_by'
                     ])->toArray()
                 )
                     // ->with("somthing")
@@ -300,8 +303,9 @@ class UserNoteController extends Controller
                  }
                  $business_id =  $request->user()->business_id;
                  $request_data = $request->validated();
+                 $request_data["updated_by"] = $request->user()->id;
 
-
+                
 
 
                  $user_note_query_params = [
@@ -325,6 +329,7 @@ class UserNoteController extends Controller
                          'description',
                          'created_at', // If you need to update created_at manually
                          'updated_at', // If you need to update updated_at manually
+                         'updated_by'
                      ])->toArray()
                  );
 
@@ -461,6 +466,11 @@ class UserNoteController extends Controller
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
                 },
+                "updater" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+
 
             ])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
@@ -583,6 +593,10 @@ class UserNoteController extends Controller
             $user_note =  UserNote::
             with([
                 "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "updater" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
                 },
