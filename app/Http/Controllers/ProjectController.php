@@ -700,7 +700,7 @@ class ProjectController extends Controller
             }
 
 
-            $projects = Project::with("departments")
+            $projects = Project::with("departments","users")
             ->where(
                 [
                     "business_id" => $business_id
@@ -823,7 +823,7 @@ class ProjectController extends Controller
                 ], 401);
             }
             $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            $manager_departments = Department::with("users")->where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());

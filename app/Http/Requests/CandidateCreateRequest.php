@@ -34,7 +34,7 @@ class CandidateCreateRequest extends FormRequest
             'application_date' => 'required|date',
             'interview_date' => 'nullable|date|after:application_date',
             'feedback' => 'required|string',
-            'status' => 'required|in:review,interviewed,hired',
+            'status' => 'required|in:review,interviewed,hired,rejected',
             'job_listing_id' => [
                 'required',
                 'numeric',
@@ -57,7 +57,7 @@ class CandidateCreateRequest extends FormRequest
     {
         return [
 
-            'status.in' => 'Invalid value for status. Valid values are: review, interviewed, hired.',
+            'status.in' => 'Invalid value for status. Valid values are: review, interviewed, hired, rejected.',
             // ... other custom messages
         ];
     }

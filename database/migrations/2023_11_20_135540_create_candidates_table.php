@@ -24,7 +24,7 @@ class CreateCandidatesTable extends Migration
             $table->date("application_date");
             $table->date("interview_date")->nullable();
             $table->text("feedback");
-            $table->enum('status', ['review', 'interviewed', 'hired']);
+            $table->enum('status', ['review', 'interviewed', 'hired','rejected']);
 
 
             $table->unsignedBigInteger("job_listing_id");
