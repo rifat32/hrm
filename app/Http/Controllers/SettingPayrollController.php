@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SettingPayrunCreateRequest;
 use App\Http\Requests\SettingPayslipCreateRequest;
+use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
 use App\Models\SettingPayrun;
 use App\Models\SettingPayslip;
 use Carbon\Carbon;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class SettingPayrollController extends Controller
 {
+    use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(

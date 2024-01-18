@@ -503,7 +503,7 @@ class UserCreateV2Request extends FormRequest
         "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',
         "sponsorship_details.note" => 'nullable|required_if:immigration_status,sponsored|string',
         "sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
-        "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied',
+        "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal',
         "sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
 
 
@@ -536,7 +536,7 @@ class UserCreateV2Request extends FormRequest
 
             'immigration_status.in' => 'Invalid value for status. Valid values are: british_citizen, ilr, immigrant, sponsored.',
             'sponsorship_details.status.in' => 'Invalid value for status. Valid values are: pending,approved,denied,visa_granted.',
-            'sponsorship_details.current_certificate_status.in' => 'Invalid value for status. Valid values are: pending,approved,denied.',
+            'sponsorship_details.current_certificate_status.in' => 'Invalid value for status. Valid values are: unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal.',
 
             // ... other custom messages
         ];

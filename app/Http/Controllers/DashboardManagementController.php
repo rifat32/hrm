@@ -1149,11 +1149,21 @@ class DashboardManagementController extends Controller
             ->where('is_active', 1);
 
         $data["total_data_count"] = $data_query->count();
-        $data["today_data_count"] = $data_query->whereBetween('created_at', [$today, ($today . ' 23:59:59')])->count();
-        $data["this_week_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
-        $data["previous_week_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
-        $data["this_month_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
-        $data["previous_month_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->startOfDay(), $today->endOfDay()])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('created_at', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('created_at', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
         return $data;
     }
@@ -1227,7 +1237,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today, ($today . ' 23:59:59')])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today->startOfDay(), $today->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1273,7 +1283,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('application_deadline', [$today, ($today . ' 23:59:59')])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('application_deadline', [$today->startOfDay(), $today->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('application_deadline', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1320,7 +1330,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today, ($today . ' 23:59:59')])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1341,7 +1351,7 @@ class DashboardManagementController extends Controller
         foreach($expires_in_days as $expires_in_day){
             $query_day = Carbon::now()->addDays($expires_in_day);
             $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
-            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('application_deadline', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
+            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('passport_expiry_date', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
         }
 
         return $data;
@@ -1373,7 +1383,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('visa_expiry_date', [$today, ($today . ' 23:59:59')])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('visa_expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1426,7 +1436,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today, ($today . ' 23:59:59')])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1452,10 +1462,62 @@ class DashboardManagementController extends Controller
 
         return $data;
     }
+    public function sponsorships(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $current_certificate_status
+    ) {
+
+        $data_query  = EmployeeSponsorship::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+        ->where([
+            "current_certificate_status"=>$current_certificate_status,
+            "business_id"=>auth()->user()->business_id
+        ]);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('expiry_date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('expiry_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+        return $data;
+    }
+
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-owner-dashboard",
+     *      path="/v1.0/business-user-dashboard",
      *      operationId="getBusinessUserDashboardData",
      *      tags={"dashboard_management.business_user"},
      *       security={
@@ -1645,9 +1707,62 @@ class DashboardManagementController extends Controller
                 $all_manager_department_ids
             );
 
+            $data["visa_expires_in"] = $this->visa_expires_in(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+            $data["sponsorship_expires_in"] = $this->sponsorship_expires_in(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
 
 
 
+
+            $sponsorship_statuses = ['unassigned', 'assigned', 'visa_applied','visa_rejected','visa_grantes','withdrawal'];
+            foreach ($sponsorship_statuses as $sponsorship_status) {
+                $data[("sponsorships_" . $sponsorship_status)] = $this->sponsorships(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    $sponsorship_status
+                );
+            }
 
 
 

@@ -1007,7 +1007,7 @@ Route::get('/v1.0/data-collector-dashboard', [DashboardManagementController::cla
 
 
 
-Route::get('/v1.0/business-owner-dashboard', [DashboardManagementController::class, "getBusinessUserDashboardData"]);
+Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::class, "getBusinessUserDashboardData"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end dashboard section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

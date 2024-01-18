@@ -23,7 +23,13 @@ class CreateEmployeeSponsorshipsTable extends Migration
             $table->enum('status', ['pending', 'approved', 'denied', 'visa_granted'])->default("pending");
             $table->text("note");
             $table->text("certificate_number");
-            $table->enum('current_certificate_status', ['pending', 'approved', 'denied'])->default("pending");
+            $table->enum('current_certificate_status', ['unassigned', 'assigned', 'visa_applied','visa_rejected','visa_grantes','withdrawal'])->default("unassigned");
+
+
+
+
+
+
             $table->boolean("is_sponsorship_withdrawn");
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
