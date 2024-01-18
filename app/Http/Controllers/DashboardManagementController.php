@@ -8,6 +8,8 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
 use App\Models\Candidate;
 use App\Models\Department;
+use App\Models\EmployeePassportDetail;
+use App\Models\JobListing;
 use App\Models\LeaveRecord;
 use App\Models\User;
 use Carbon\Carbon;
@@ -1261,41 +1263,130 @@ class DashboardManagementController extends Controller
         $start_date_of_previous_week,
         $end_date_of_previous_week,
         $all_manager_department_ids,
-        $status
     ) {
 
-        $data_query  = LeaveRecord::whereHas("leave.employee.departments", function ($query) use ($all_manager_department_ids) {
-            $query->whereIn("departments.id", $all_manager_department_ids);
-        })
-            ->whereHas("leave", function ($query) use ($status) {
-                $query->where([
-                    "leaves.business_id" => auth()->user()->business_id,
-                    "leaves.status" => $status
-                ]);
-            });
+        $data_query  = JobListing::where("application_deadline",">=", today())
+        ->where("business_id",auth()->user()->business_id);
 
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today, ($today . ' 23:59:59')])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('application_deadline', [$today, ($today . ' 23:59:59')])->count();
 
         $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('application_deadline', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
         $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('application_deadline', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
-        $data["previous_week_data_count"] = clone $data_query;
-        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
 
         $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('application_deadline', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
         $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('application_deadline', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
-        $data["previous_month_data_count"] = clone $data_query;
-        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+
+        return $data;
+    }
+    public function passport_expires_in(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+    ) {
+
+        $data_query  = EmployeePassportDetail::where("passport_expiry_date",">=", today())
+        ->where("business_id",auth()->user()->business_id);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today, ($today . ' 23:59:59')])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+        $expires_in_days = [15,30,60];
+        foreach($expires_in_days as $expires_in_day){
+            $query_day = Carbon::now()->addDays($expires_in_day);
+            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('application_deadline', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
+        }
+
+        return $data;
+    }
+
+    public function visa_expires_in(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+    ) {
+
+        $data_query  = EmployeePassportDetail::where("passport_expiry_date",">=", today())
+        ->where("business_id",auth()->user()->business_id);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today, ($today . ' 23:59:59')])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+        $expires_in_days = [15,30,60];
+        foreach($expires_in_days as $expires_in_day){
+            $query_day = Carbon::now()->addDays($expires_in_day);
+            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('application_deadline', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
+        }
 
         return $data;
     }
@@ -1456,33 +1547,46 @@ class DashboardManagementController extends Controller
 
 
 
+            $data["open_roles"] = $this->open_roles(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
 
 
-            // affiliation expiry
-            // $data["employees"] = $this->affiliation_expirings($business);
 
-            //    end affiliation expiry
-            //   upcoming_jobs
-            $data["upcoming_jobs"] = $this->upcoming_jobs($business);
-
-            //  end  upcoming_jobs
-
-            // completed bookings
-            $data["completed_bookings"] = $this->completed_bookings($business);
-            // end completed bookings
-
-            // winned jobs
-            $data["winned_jobs"] = $this->winned_jobs($business);
-            // end winned jobs
-
-            //   jobs
-            $data["pre_bookings"] = $this->pre_bookings($business);
-            // end jobs
+            $data["passport_expires_in"] = $this->passport_expires_in(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
 
 
-            // applied jobs
-            $data["applied_jobs"] = $this->applied_jobs($business);
-            // end applied jobs
+
+
+
 
 
             return response()->json($data, 200);
