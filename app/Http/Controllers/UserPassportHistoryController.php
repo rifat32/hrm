@@ -211,18 +211,14 @@ class UserPassportHistoryController extends Controller
                 $user_passport_history  =  tap(EmployeePassportDetailHistory::where($user_passport_history_query_params))->update(
                     collect($request_data)->only([
                         'passport_number',
-        "passport_issue_date",
-        "passport_expiry_date",
-        "place_of_issue",
+                        "passport_issue_date",
+                        "passport_expiry_date",
+                        "place_of_issue",
 
 
-        "from_date",
-        "to_date",
-        "user_id",
-
-
-        "passport_detail_id",
-
+                        "from_date",
+                        "to_date",
+                        "user_id",
                     ])->toArray()
                 )
                     // ->with("somthing")

@@ -216,16 +216,19 @@ class UserSponsorshipHistoryController extends Controller
 
                 $user_sponsorship_history  =  tap(EmployeeSponsorshipHistory::where($user_sponsorship_history_query_params))->update(
                     collect($request_data)->only([
-                        "address_line_1",
-                        "address_line_2",
-                        "country",
-                        "city",
-                        "postcode",
-                        "lat",
-                        "long",
-                        'user_id',
-                        "from_date",
-                        "to_date",
+                        'date_assigned',
+        'expiry_date',
+        'status',
+        'note',
+        "certificate_number",
+        "current_certificate_status",
+        "is_sponsorship_withdrawn",
+
+        "is_manual",
+        'user_id',
+        "sponsorship_id",
+        "from_date",
+        "to_date",
 
                     ])->toArray()
                 )

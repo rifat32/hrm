@@ -4425,7 +4425,9 @@ return DB::transaction(function() use($request) {
                     "request_method",
                     "device",
                     "created_at",
-                    "updated_at"
+                    "updated_at",
+                    "user",
+                    "user_id",
 
                 )
 

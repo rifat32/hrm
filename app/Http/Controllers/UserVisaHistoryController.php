@@ -210,13 +210,17 @@ class UserVisaHistoryController extends Controller
                 $user_visa_history  =  tap(EmployeeVisaDetailHistory::where($user_visa_history_query_params))->update(
                     collect($request_data)->only([
                         'BRP_number',
-                        "visa_issue_date",
-                        "visa_expiry_date",
-                        "place_of_issue",
-                        "visa_docs",
-                        'user_id',
-                        "from_date",
-                        "to_date",
+        "visa_issue_date",
+        "visa_expiry_date",
+        "place_of_issue",
+        "visa_docs",
+
+
+
+        "is_manual",
+        'user_id',
+        "from_date",
+        "to_date",
 
 
 
