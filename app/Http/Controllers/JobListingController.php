@@ -214,7 +214,7 @@ class JobListingController extends Controller
 
                 $job_listing  =  tap(JobListing::where($job_listing_query_params))->update(
                     collect($request_data)->only([
-                        'title',
+        'title',
         'description',
         'required_skills',
         'application_deadline',

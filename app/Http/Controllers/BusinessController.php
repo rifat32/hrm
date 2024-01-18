@@ -865,7 +865,24 @@ if(!$user->hasRole('business_owner')) {
 
   // end business info ##############
 
+  if(!empty($request_data["times"])) {
+    BusinessTime::where([
+        "business_id" => $business->id
+       ])
+       ->delete();
 
+       $timesArray = collect($request_data["times"])->unique("day");
+       foreach($timesArray as $business_time) {
+        BusinessTime::create([
+            "business_id" => $business->id,
+            "day"=> $business_time["day"],
+            "start_at"=> $business_time["start_at"],
+            "end_at"=> $business_time["end_at"],
+            "is_weekend"=> $business_time["is_weekend"],
+        ]);
+       }
+
+  }
 
 
 
@@ -1430,6 +1447,7 @@ if(!$user->hasRole('business_owner')) {
 
             $business = Business::with(
                 "owner",
+                "times"
                 // "default_work_shift.details"
 
             )->where([

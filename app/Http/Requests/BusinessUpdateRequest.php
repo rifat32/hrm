@@ -77,7 +77,34 @@ class BusinessUpdateRequest extends FormRequest
 
 
 
+            "times" => "present|array",
+            "times.*.day" => 'required|numeric',
+            "times.*.is_weekend" => ['required',"boolean"],
 
+            'times.*.start_at' => [
+               'nullable',
+               'date_format:H:i:s',
+               function ($attribute, $value, $fail) {
+                   $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                   $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+                   if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+                       $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+                   }
+               },
+           ],
+           'times.*.end_at' => [
+               'nullable',
+               'date_format:H:i:s',
+               function ($attribute, $value, $fail) {
+                   $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                   $isWeekend = request('details')[$index]['is_weekend'] ?? false;
+
+                   if (request('type') === 'scheduled' && $isWeekend == 0 && empty($value)) {
+                       $fail("The $attribute field is required when type is scheduled and is_weekend is 0.");
+                   }
+               },
+           ],
 
 
 

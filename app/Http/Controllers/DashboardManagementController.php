@@ -8,6 +8,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
 use App\Models\Candidate;
 use App\Models\Department;
+use App\Models\LeaveRecord;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardManagementController extends Controller
 {
-    use ErrorUtil, BusinessUtil,UserActivityUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil;
 
     /**
      *
@@ -88,8 +89,8 @@ class DashboardManagementController extends Controller
 
     public function getBusinessOwnerDashboardDataJobList($business_id, Request $request)
     {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -102,7 +103,7 @@ class DashboardManagementController extends Controller
             }
 
             $prebookingQuery = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-            ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+                ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
                 ->where([
                     "users.city" => $business->city
                 ])
@@ -134,10 +135,9 @@ class DashboardManagementController extends Controller
 
                 ->get();
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
@@ -198,90 +198,89 @@ class DashboardManagementController extends Controller
 
     public function getBusinessOwnerDashboardDataJobApplications($business_id, Request $request)
     {
-        try{
-        $this->storeActivity($request, "DUMMY activity","DUMMY description");
-        $business = Business::where([
-            "id" => $business_id,
-            "owner_id" => $request->user()->id
-        ])
-            ->first();
-        if (!$business) {
-            return response()->json([
-                "message" => "you are not the owner of the business or the request business does not exits"
-            ], 404);
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $business = Business::where([
+                "id" => $business_id,
+                "owner_id" => $request->user()->id
+            ])
+                ->first();
+            if (!$business) {
+                return response()->json([
+                    "message" => "you are not the owner of the business or the request business does not exits"
+                ], 404);
+            }
+
+            $data["total_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
+                ->where([
+                    "users.city" => $business->city
+                ])
+                //  ->whereNotIn('job_bids.business_id', [$business->id])
+                ->where('pre_bookings.status', "pending")
+                ->groupBy("pre_bookings.id")
+
+
+                ->count();
+
+            $data["weekly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
+                ->where([
+                    "users.city" => $business->city
+                ])
+                //  ->whereNotIn('job_bids.business_id', [$business->id])
+                ->where('pre_bookings.status', "pending")
+                ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+                ->groupBy("pre_bookings.id")
+                ->count();
+            $data["monthly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
+                ->where([
+                    "users.city" => $business->city
+                ])
+                //  ->whereNotIn('job_bids.business_id', [$business->id])
+                ->where('pre_bookings.status', "pending")
+                ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+                ->groupBy("pre_bookings.id")
+                ->count();
+
+
+
+
+            $data["applied_total_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
+                ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+                ->where([
+                    "users.city" => $business->city
+                ])
+                ->whereIn('job_bids.business_id', [$business->id])
+                ->where('pre_bookings.status', "pending")
+                ->groupBy("pre_bookings.id")
+
+                ->count();
+            $data["applied_weekly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
+                ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+                ->where([
+                    "users.city" => $business->city
+                ])
+                ->whereIn('job_bids.business_id', [$business->id])
+                ->where('pre_bookings.status', "pending")
+                ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+                ->groupBy("pre_bookings.id")
+
+                ->count();
+            $data["applied_monthly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
+                ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+                ->where([
+                    "users.city" => $business->city
+                ])
+                ->whereIn('job_bids.business_id', [$business->id])
+                ->where('pre_bookings.status', "pending")
+                ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+                ->groupBy("pre_bookings.id")
+
+                ->count();
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
-        $data["total_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->where([
-            "users.city" => $business->city
-        ])
-            //  ->whereNotIn('job_bids.business_id', [$business->id])
-            ->where('pre_bookings.status', "pending")
-            ->groupBy("pre_bookings.id")
-
-
-            ->count();
-
-        $data["weekly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->where([
-            "users.city" => $business->city
-        ])
-            //  ->whereNotIn('job_bids.business_id', [$business->id])
-            ->where('pre_bookings.status', "pending")
-            ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->groupBy("pre_bookings.id")
-            ->count();
-        $data["monthly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->where([
-            "users.city" => $business->city
-        ])
-            //  ->whereNotIn('job_bids.business_id', [$business->id])
-            ->where('pre_bookings.status', "pending")
-            ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
-            ->groupBy("pre_bookings.id")
-            ->count();
-
-
-
-
-        $data["applied_total_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
-            ->where([
-                "users.city" => $business->city
-            ])
-            ->whereIn('job_bids.business_id', [$business->id])
-            ->where('pre_bookings.status', "pending")
-            ->groupBy("pre_bookings.id")
-
-            ->count();
-        $data["applied_weekly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
-            ->where([
-                "users.city" => $business->city
-            ])
-            ->whereIn('job_bids.business_id', [$business->id])
-            ->where('pre_bookings.status', "pending")
-            ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->groupBy("pre_bookings.id")
-
-            ->count();
-        $data["applied_monthly_jobs"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
-            ->where([
-                "users.city" => $business->city
-            ])
-            ->whereIn('job_bids.business_id', [$business->id])
-            ->where('pre_bookings.status', "pending")
-            ->whereBetween('pre_bookings.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
-            ->groupBy("pre_bookings.id")
-
-            ->count();
-
-        return response()->json($data, 200);
-    }catch(Exception $e) {
-  return $this->sendError($e, 500,$request);
-    }
-
     }
 
     /**
@@ -340,8 +339,8 @@ class DashboardManagementController extends Controller
 
     public function getBusinessOwnerDashboardDataWinnedJobApplications($business_id, Request $request)
     {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -383,10 +382,9 @@ class DashboardManagementController extends Controller
 
 
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
@@ -447,8 +445,8 @@ class DashboardManagementController extends Controller
 
     public function getBusinessOwnerDashboardDataCompletedBookings($business_id, Request $request)
     {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -485,10 +483,9 @@ class DashboardManagementController extends Controller
 
 
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
@@ -557,8 +554,8 @@ class DashboardManagementController extends Controller
 
     public function getBusinessOwnerDashboardDataUpcomingJobs($business_id, $duration, Request $request)
     {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -588,10 +585,9 @@ class DashboardManagementController extends Controller
 
 
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
     /**
@@ -657,8 +653,8 @@ class DashboardManagementController extends Controller
 
     public function getBusinessOwnerDashboardDataExpiringAffiliations($business_id, $duration, Request $request)
     {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $business = Business::where([
                 "id" => $business_id,
                 "owner_id" => $request->user()->id
@@ -680,10 +676,9 @@ class DashboardManagementController extends Controller
 
 
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
@@ -702,7 +697,7 @@ class DashboardManagementController extends Controller
         $endDateOfPreviousWeek = Carbon::now()->endOfWeek()->subWeek(1);
 
         $data["total_count"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+            ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
                 "users.city" => $business->city
             ])
@@ -716,7 +711,7 @@ class DashboardManagementController extends Controller
 
 
         $data["this_week_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+            ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
                 "users.city" => $business->city
             ])
@@ -725,11 +720,11 @@ class DashboardManagementController extends Controller
 
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
             ->groupBy("pre_bookings.id")
-            ->select("job_bids.id","job_bids.created_at","job_bids.updated_at")
+            ->select("job_bids.id", "job_bids.created_at", "job_bids.updated_at")
             ->get();
 
         $data["previous_week_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+            ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
                 "users.city" => $business->city
             ])
@@ -738,13 +733,13 @@ class DashboardManagementController extends Controller
 
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
             ->groupBy("pre_bookings.id")
-            ->select("job_bids.id","job_bids.created_at","job_bids.updated_at")
+            ->select("job_bids.id", "job_bids.created_at", "job_bids.updated_at")
             ->get();
 
 
 
         $data["this_month_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+            ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
                 "users.city" => $business->city
             ])
@@ -752,11 +747,11 @@ class DashboardManagementController extends Controller
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
             ->groupBy("pre_bookings.id")
-            ->select("job_bids.id","job_bids.created_at","job_bids.updated_at")
+            ->select("job_bids.id", "job_bids.created_at", "job_bids.updated_at")
             ->get();
 
         $data["previous_month_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
+            ->leftJoin('job_bids', 'pre_bookings.id', '=', 'job_bids.pre_booking_id')
             ->where([
                 "users.city" => $business->city
             ])
@@ -764,13 +759,13 @@ class DashboardManagementController extends Controller
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
             ->groupBy("pre_bookings.id")
-            ->select("job_bids.id","job_bids.created_at","job_bids.updated_at")
+            ->select("job_bids.id", "job_bids.created_at", "job_bids.updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
 
         return $data;
     }
@@ -788,9 +783,9 @@ class DashboardManagementController extends Controller
 
         $data["total_count"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
 
-        ->where([
-            "users.city" => $business->city
-        ])
+            ->where([
+                "users.city" => $business->city
+            ])
             //  ->whereNotIn('job_bids.business_id', [$business->id])
             ->where('pre_bookings.status', "pending")
             ->count();
@@ -799,52 +794,52 @@ class DashboardManagementController extends Controller
 
         $data["this_week_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
 
-        ->where([
-            "users.city" => $business->city
-        ])
+            ->where([
+                "users.city" => $business->city
+            ])
 
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
-            ->select("pre_bookings.id","pre_bookings.created_at","pre_bookings.updated_at")
+            ->select("pre_bookings.id", "pre_bookings.created_at", "pre_bookings.updated_at")
             ->get();
 
         $data["previous_week_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->where([
-            "users.city" => $business->city
-        ])
+            ->where([
+                "users.city" => $business->city
+            ])
 
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
-            ->select("pre_bookings.id","pre_bookings.created_at","pre_bookings.updated_at")
+            ->select("pre_bookings.id", "pre_bookings.created_at", "pre_bookings.updated_at")
             ->get();
 
 
 
         $data["this_month_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->where([
-            "users.city" => $business->city
-        ])
+            ->where([
+                "users.city" => $business->city
+            ])
 
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
-            ->select("pre_bookings.id","pre_bookings.created_at","pre_bookings.updated_at")
+            ->select("pre_bookings.id", "pre_bookings.created_at", "pre_bookings.updated_at")
             ->get();
 
         $data["previous_month_data"] = Candidate::leftJoin('users', 'pre_bookings.customer_id', '=', 'users.id')
-        ->where([
-            "users.city" => $business->city
-        ])
+            ->where([
+                "users.city" => $business->city
+            ])
 
             ->where('pre_bookings.status', "pending")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
-            ->select("pre_bookings.id","pre_bookings.created_at","pre_bookings.updated_at")
+            ->select("pre_bookings.id", "pre_bookings.created_at", "pre_bookings.updated_at")
             ->get();
 
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
 
         return $data;
     }
@@ -882,7 +877,7 @@ class DashboardManagementController extends Controller
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
             ->groupBy("pre_bookings.id")
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
         $data["previous_week_data"] = Candidate::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
             ->where([
@@ -891,7 +886,7 @@ class DashboardManagementController extends Controller
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
             ->groupBy("pre_bookings.id")
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
 
 
@@ -903,7 +898,7 @@ class DashboardManagementController extends Controller
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
             ->groupBy("pre_bookings.id")
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
 
         $data["previous_month_data"] = Candidate::leftJoin('bookings', 'pre_bookings.id', '=', 'bookings.pre_booking_id')
@@ -913,13 +908,13 @@ class DashboardManagementController extends Controller
             ->where('pre_bookings.status', "booked")
             ->whereBetween('pre_bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
             ->groupBy("pre_bookings.id")
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
 
         return $data;
     }
@@ -955,7 +950,7 @@ class DashboardManagementController extends Controller
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
         $data["previous_week_data"] = Candidate::where([
             "bookings.status" => "converted_to_job",
@@ -963,7 +958,7 @@ class DashboardManagementController extends Controller
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
 
 
@@ -974,7 +969,7 @@ class DashboardManagementController extends Controller
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
         $data["previous_month_data"] = Candidate::where([
             "bookings.status" => "converted_to_job",
@@ -982,13 +977,13 @@ class DashboardManagementController extends Controller
 
         ])
             ->whereBetween('bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
-            ->select("bookings.id","bookings.created_at","bookings.updated_at")
+            ->select("bookings.id", "bookings.created_at", "bookings.updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
 
@@ -1033,14 +1028,14 @@ class DashboardManagementController extends Controller
             "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDate, $endDateOfThisWeek])
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
             ->get();
         $data["next_week_data"] = Candidate::where([
             "jobs.status" => "pending",
             "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDateOfNextWeek, $endDateOfNextWeek])
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
             ->get();
 
         $data["this_month_data"] = Candidate::where([
@@ -1048,21 +1043,21 @@ class DashboardManagementController extends Controller
             "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDate, $endDateOfThisMonth])
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
             ->get();
         $data["next_month_data"] = Candidate::where([
             "jobs.status" => "pending",
             "jobs.business_id" => $business->id
 
         ])->whereBetween('jobs.job_start_date', [$startDateOfNextMonth, $endDateOfNextMonth])
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
             ->get();
 
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["next_week_data_count"] = $data["next_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["next_month_data_count"] = $data["next_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["next_week_data_count"] = $data["next_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["next_month_data_count"] = $data["next_month_data"]->count();
 
         return $data;
     }
@@ -1082,76 +1077,226 @@ class DashboardManagementController extends Controller
 
 
         $data["total_data_count"] = Candidate::where([
-            "business_affiliations.business_id"=>$business->id
+            "business_affiliations.business_id" => $business->id
         ])
-        ->count();
+            ->count();
 
 
         $data["this_week_data"] = Candidate::where([
-            "business_affiliations.business_id"=>$business->id
+            "business_affiliations.business_id" => $business->id
         ])
-        ->whereBetween('business_affiliations.end_date', [$startDate, $endDateOfThisWeek])
+            ->whereBetween('business_affiliations.end_date', [$startDate, $endDateOfThisWeek])
 
-        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
+            ->select("business_affiliations.id", "business_affiliations.created_at", "business_affiliations.updated_at")
             ->get();
         $data["next_week_data"] = Candidate::where([
-            "business_affiliations.business_id"=>$business->id
+            "business_affiliations.business_id" => $business->id
         ])
-        ->whereBetween('business_affiliations.end_date', [$startDateOfNextWeek, $endDateOfNextWeek])
+            ->whereBetween('business_affiliations.end_date', [$startDateOfNextWeek, $endDateOfNextWeek])
 
-        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
+            ->select("business_affiliations.id", "business_affiliations.created_at", "business_affiliations.updated_at")
             ->get();
 
         $data["this_month_data"] = Candidate::where([
-            "business_affiliations.business_id"=>$business->id
+            "business_affiliations.business_id" => $business->id
         ])
-        ->whereBetween('business_affiliations.end_date', [$startDate, $endDateOfThisMonth])
-        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
+            ->whereBetween('business_affiliations.end_date', [$startDate, $endDateOfThisMonth])
+            ->select("business_affiliations.id", "business_affiliations.created_at", "business_affiliations.updated_at")
             ->get();
 
         $data["next_month_data"] = Candidate::where([
-            "business_affiliations.business_id"=>$business->id
+            "business_affiliations.business_id" => $business->id
         ])
-        ->whereBetween('business_affiliations.end_date', [$startDateOfNextMonth, $endDateOfNextMonth])
-        ->select("business_affiliations.id","business_affiliations.created_at","business_affiliations.updated_at")
+            ->whereBetween('business_affiliations.end_date', [$startDateOfNextMonth, $endDateOfNextMonth])
+            ->select("business_affiliations.id", "business_affiliations.created_at", "business_affiliations.updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["next_week_data_count"] = $data["next_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["next_month_data_count"] = $data["next_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["next_week_data_count"] = $data["next_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["next_month_data_count"] = $data["next_month_data"]->count();
 
 
         return $data;
     }
 
     public function employees(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
         $start_date_of_this_month,
         $end_date_of_this_month,
         $start_date_of_previous_month,
         $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
         $start_date_of_this_week,
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
         $all_manager_department_ids
-    )
-    {
+    ) {
 
-
-
-        $data_query  = User::whereHas("departments", function($query) use($all_manager_department_ids) {
-           $query->whereIn("departments.id",$all_manager_department_ids);
+        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
             ->where('is_in_employee', 1)
             ->where('is_active', 1);
 
         $data["total_data_count"] = $data_query->count();
-        $data["this_week_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_this_week, $end_date_of_this_week])->count();
-        $data["previous_week_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_previous_week, $end_date_of_previous_week])->count();
-        $data["this_month_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_this_month, $end_date_of_this_month])->count();
-        $data["previous_month_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_previous_month, $end_date_of_previous_month])->count();
+        $data["today_data_count"] = $data_query->whereBetween('created_at', [$today, ($today . ' 23:59:59')])->count();
+        $data["this_week_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["previous_week_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+        $data["this_month_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["previous_month_data_count"] = $data_query->whereBetween('created_at', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+        return $data;
+    }
+
+    // public function approved_leaves(
+    //     $today,
+    //     $start_date_of_this_month,
+    //     $end_date_of_this_month,
+    //     $start_date_of_previous_month,
+    //     $end_date_of_previous_month,
+    //     $start_date_of_this_week,
+    //     $end_date_of_this_week,
+    //     $start_date_of_previous_week,
+    //     $end_date_of_previous_week,
+    //     $all_manager_department_ids
+    // )
+    // {
+
+
+
+    //     $data_query  = LeaveRecord::whereHas("leave.employee.departments", function($query) use($all_manager_department_ids) {
+    //        $query->whereIn("departments.id",$all_manager_department_ids);
+    //     })
+    //     ->whereHas("leave", function($query) use($all_manager_department_ids) {
+    //         $query->where([
+    //             "leaves.business_id" => auth()->user()->business_id,
+    //             "leaves.status" => "approved"
+    //             ]);
+    //      })
+    //         ->whereNotIn('id', [auth()->user()->id])
+    //         ->where('is_in_employee', 1)
+    //         ->where('is_active', 1);
+
+    //     $data["total_data_count"] = $data_query->count();
+    //     $data["today_data_count"] = $data_query->whereBetween('date', [$today, ($today . ' 23:59:59')])->count();
+    //     $data["this_week_data_count"] = $data_query->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+    //     $data["previous_week_data_count"] = $data_query->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+    //     $data["this_month_data_count"] = $data_query->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+    //     $data["previous_month_data_count"] = $data_query->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+    //     return $data;
+    // }
+    public function leaves(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status
+    ) {
+
+        $data_query  = LeaveRecord::whereHas("leave.employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+            ->whereHas("leave", function ($query) use ($status) {
+                $query->where([
+                    "leaves.business_id" => auth()->user()->business_id,
+                    "leaves.status" => $status
+                ]);
+            });
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today, ($today . ' 23:59:59')])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+        return $data;
+    }
+
+    public function open_roles(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status
+    ) {
+
+        $data_query  = LeaveRecord::whereHas("leave.employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+            ->whereHas("leave", function ($query) use ($status) {
+                $query->where([
+                    "leaves.business_id" => auth()->user()->business_id,
+                    "leaves.status" => $status
+                ]);
+            });
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today, ($today . ' 23:59:59')])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
         return $data;
     }
     /**
@@ -1206,8 +1351,8 @@ class DashboardManagementController extends Controller
     public function getBusinessUserDashboardData(Request $request)
     {
 
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             $business_id = auth()->user()->business_id;
             if (!$business_id) {
@@ -1215,15 +1360,31 @@ class DashboardManagementController extends Controller
                     "message" => "You are not a business owner"
                 ], 401);
             }
+            $today = today();
+
+            $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+            $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
             $start_date_of_this_month = Carbon::now()->startOfMonth();
             $end_date_of_this_month = Carbon::now()->endOfMonth();
             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
             $end_date_of_previous_month = Carbon::now()->endOfMonth()->subMonth(1);
 
+            $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+            $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
             $start_date_of_this_week = Carbon::now()->startOfWeek();
             $end_date_of_this_week = Carbon::now()->endOfWeek();
             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+
+
+
+
+
+
+
 
             $business = Business::where([
                 "id" => $business_id,
@@ -1243,16 +1404,58 @@ class DashboardManagementController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $data["employees"] = $this->employees(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
                 $start_date_of_this_month,
                 $end_date_of_this_month,
                 $start_date_of_previous_month,
                 $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
                 $start_date_of_this_week,
                 $end_date_of_this_week,
                 $start_date_of_previous_week,
                 $end_date_of_previous_week,
                 $all_manager_department_ids
-        );
+            );
+
+            //     $data["approved_leaves"] = $this->approved_leaves(
+            //         $today,
+            //         $start_date_of_this_month,
+            //         $end_date_of_this_month,
+            //         $start_date_of_previous_month,
+            //         $end_date_of_previous_month,
+            //         $start_date_of_this_week,
+            //         $end_date_of_this_week,
+            //         $start_date_of_previous_week,
+            //         $end_date_of_previous_week,
+            //         $all_manager_department_ids
+            // );
+
+            $leave_statuses = ['pending_approval', 'progress', 'approved', 'rejected'];
+            foreach ($leave_statuses as $leave_status) {
+                $data[("leaves_" . $leave_status)] = $this->leaves(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    $leave_status
+                );
+            }
+
+
+
 
 
             // affiliation expiry
@@ -1283,12 +1486,11 @@ class DashboardManagementController extends Controller
 
 
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
-    public function businesses($created_by_filter=0)
+    public function businesses($created_by_filter = 0)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
@@ -1303,9 +1505,9 @@ class DashboardManagementController extends Controller
 
 
         $total_data_count_query = new Candidate();
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
 
@@ -1315,57 +1517,56 @@ class DashboardManagementController extends Controller
 
         $this_week_data_query = Business::whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
 
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["this_week_data"] = $this_week_data_query->select("id","created_at","updated_at")->get();
+        $data["this_week_data"] = $this_week_data_query->select("id", "created_at", "updated_at")->get();
 
 
 
 
-        $previous_week_data_query = Business::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
-        ;
+        $previous_week_data_query = Business::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
 
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $previous_week_data_query =  $previous_week_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
 
-        $data["previous_week_data"] = $total_data_count_query->select("id","created_at","updated_at")->get();
+        $data["previous_week_data"] = $total_data_count_query->select("id", "created_at", "updated_at")->get();
 
 
 
 
-        $this_month_data_query =Business::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
+        $this_month_data_query = Business::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
 
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["this_month_data"] = $this_month_data_query->select("id","created_at","updated_at")->get();
+        $data["this_month_data"] = $this_month_data_query->select("id", "created_at", "updated_at")->get();
 
 
 
 
-        $previous_month_data_query =Business::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
+        $previous_month_data_query = Business::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
 
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["previous_month_data"] = $previous_month_data_query->select("id","created_at","updated_at")->get();
+        $data["previous_month_data"] = $previous_month_data_query->select("id", "created_at", "updated_at")->get();
 
 
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
     public function fuel_stations($created_by_filter = 0)
@@ -1382,59 +1583,59 @@ class DashboardManagementController extends Controller
 
 
         $total_data_count_query = new Candidate();
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
         $data["total_data_count"] = $total_data_count_query->count();
 
 
         $this_week_data_query = Candidate::whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["this_week_data"] = $this_week_data_query->select("id","created_at","updated_at")
-        ->get();
+        $data["this_week_data"] = $this_week_data_query->select("id", "created_at", "updated_at")
+            ->get();
 
 
         $previous_week_data_query = Candidate::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $previous_week_data_query =  $previous_week_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["previous_week_data"] = $previous_week_data_query->select("id","created_at","updated_at")
-        ->get();
+        $data["previous_week_data"] = $previous_week_data_query->select("id", "created_at", "updated_at")
+            ->get();
 
 
         $this_month_data_query =  Candidate::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["this_month_data"] = $this_month_data_query->select("id","created_at","updated_at")
-        ->get();
+        $data["this_month_data"] = $this_month_data_query->select("id", "created_at", "updated_at")
+            ->get();
 
         $previous_month_data_query =  Candidate::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
-                "created_by" =>auth()->user()->id
+                "created_by" => auth()->user()->id
             ]);
         }
-        $data["previous_month_data"] = $previous_month_data_query->select("id","created_at","updated_at")
-        ->get();
+        $data["previous_month_data"] = $previous_month_data_query->select("id", "created_at", "updated_at")
+            ->get();
 
 
 
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
 
@@ -1452,40 +1653,40 @@ class DashboardManagementController extends Controller
 
 
 
-        $data["total_data_count"] = User::with("roles")->whereHas("roles", function($q) {
+        $data["total_data_count"] = User::with("roles")->whereHas("roles", function ($q) {
             $q->whereIn("name", ["customer"]);
         })->count();
 
 
-        $data["this_week_data"] = User::with("roles")->whereHas("roles", function($q) {
+        $data["this_week_data"] = User::with("roles")->whereHas("roles", function ($q) {
             $q->whereIn("name", ["customer"]);
         })->whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
-        $data["previous_week_data"] = User::with("roles")->whereHas("roles", function($q) {
+        $data["previous_week_data"] = User::with("roles")->whereHas("roles", function ($q) {
             $q->whereIn("name", ["customer"]);
         })->whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
 
 
-        $data["this_month_data"] = User::with("roles")->whereHas("roles", function($q) {
+        $data["this_month_data"] = User::with("roles")->whereHas("roles", function ($q) {
             $q->whereIn("name", ["customer"]);
         })->whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
-        $data["previous_month_data"] = User::with("roles")->whereHas("roles", function($q) {
+        $data["previous_month_data"] = User::with("roles")->whereHas("roles", function ($q) {
             $q->whereIn("name", ["customer"]);
         })->whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
     public function overall_customer_jobs()
@@ -1506,27 +1707,27 @@ class DashboardManagementController extends Controller
 
 
         $data["this_week_data"] = Candidate::whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
         $data["previous_week_data"] = Candidate::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
 
 
         $data["this_month_data"] = Candidate::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
         $data["previous_month_data"] = Candidate::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
 
@@ -1544,9 +1745,9 @@ class DashboardManagementController extends Controller
 
 
         $total_data_count_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id');
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
         $data["total_data_count"] = $total_data_count_query->count();
@@ -1554,27 +1755,27 @@ class DashboardManagementController extends Controller
 
 
         $this_week_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
-        ->whereBetween('bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
-        if($created_by_filter) {
+            ->whereBetween('bookings.created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
+        if ($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
-        $data["this_week_data"] = $this_week_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
-        ->get();
+        $data["this_week_data"] = $this_week_data_query->select("bookings.id", "bookings.created_at", "bookings.updated_at")
+            ->get();
 
 
 
 
         $previous_week_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
-        ->whereBetween('bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
-        if($created_by_filter) {
+            ->whereBetween('bookings.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
+        if ($created_by_filter) {
             $previous_week_data_query =  $previous_week_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
-        $data["previous_week_data"] = $previous_week_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
-        ->get();
+        $data["previous_week_data"] = $previous_week_data_query->select("bookings.id", "bookings.created_at", "bookings.updated_at")
+            ->get();
 
 
 
@@ -1582,31 +1783,31 @@ class DashboardManagementController extends Controller
 
 
         $this_month_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
-        ->whereBetween('bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
-        if($created_by_filter) {
+            ->whereBetween('bookings.created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
+        if ($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
-        $data["this_month_data"] = $this_month_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
-        ->get();
+        $data["this_month_data"] = $this_month_data_query->select("bookings.id", "bookings.created_at", "bookings.updated_at")
+            ->get();
 
 
         $previous_month_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'bookings.business_id')
-        ->whereBetween('bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
-        if($created_by_filter) {
+            ->whereBetween('bookings.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
+        if ($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
-        $data["previous_month_data"] = $previous_month_data_query->select("bookings.id","bookings.created_at","bookings.updated_at")
-        ->get();
+        $data["previous_month_data"] = $previous_month_data_query->select("bookings.id", "bookings.created_at", "bookings.updated_at")
+            ->get();
 
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
 
@@ -1624,9 +1825,9 @@ class DashboardManagementController extends Controller
 
 
         $total_data_count_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id');
-        if($created_by_filter) {
+        if ($created_by_filter) {
             $total_data_count_query =  $total_data_count_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
         $data["total_data_count"] = $total_data_count_query->count();
@@ -1636,64 +1837,64 @@ class DashboardManagementController extends Controller
 
 
         $this_week_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
-        ->whereBetween('jobs.created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
-        if($created_by_filter) {
+            ->whereBetween('jobs.created_at', [$startDateOfThisWeek, $endDateOfThisWeek]);
+        if ($created_by_filter) {
             $this_week_data_query =  $this_week_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
         $data["this_week_data"] = $this_week_data_query
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
-        ->get();
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
+            ->get();
 
 
 
 
         $previous_week_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
-        ->whereBetween('jobs.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
-        if($created_by_filter) {
+            ->whereBetween('jobs.created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek]);
+        if ($created_by_filter) {
             $previous_week_data_query =  $previous_week_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
         $data["previous_week_data"] = $previous_week_data_query
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
-        ->get();
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
+            ->get();
 
 
 
 
 
         $this_month_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
-        ->whereBetween('jobs.created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
-        if($created_by_filter) {
+            ->whereBetween('jobs.created_at', [$startDateOfThisMonth, $endDateOfThisMonth]);
+        if ($created_by_filter) {
             $this_month_data_query =  $this_month_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
         $data["this_month_data"] = $this_month_data_query
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
-        ->get();
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
+            ->get();
 
 
 
         $previous_month_data_query =  Candidate::leftJoin('businesses', 'businesses.id', '=', 'jobs.business_id')
-        ->whereBetween('jobs.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
-        if($created_by_filter) {
+            ->whereBetween('jobs.created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth]);
+        if ($created_by_filter) {
             $previous_month_data_query =  $previous_month_data_query->where([
-                "businesses.created_by" =>auth()->user()->id
+                "businesses.created_by" => auth()->user()->id
             ]);
         }
         $data["previous_month_data"] = $previous_month_data_query
-        ->select("jobs.id","jobs.created_at","jobs.updated_at")
-        ->get();
+            ->select("jobs.id", "jobs.created_at", "jobs.updated_at")
+            ->get();
 
 
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
 
@@ -1717,29 +1918,29 @@ class DashboardManagementController extends Controller
 
 
         $data["this_week_data"] = Candidate::whereBetween('created_at', [$startDateOfThisWeek, $endDateOfThisWeek])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
         $data["previous_week_data"] = Candidate::whereBetween('created_at', [$startDateOfPreviousWeek, $endDateOfPreviousWeek])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
 
 
         $data["this_month_data"] = Candidate::whereBetween('created_at', [$startDateOfThisMonth, $endDateOfThisMonth])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
         $data["previous_month_data"] = Candidate::whereBetween('created_at', [$startDateOfPreviousMonth, $endDateOfPreviousMonth])
-            ->select("id","created_at","updated_at")
+            ->select("id", "created_at", "updated_at")
             ->get();
 
-            $data["this_week_data_count"] = $data["this_week_data"]->count();
-            $data["previous_week_data_count"] = $data["previous_week_data"]->count();
-            $data["this_month_data_count"] = $data["this_month_data"]->count();
-            $data["previous_month_data_count"] = $data["previous_month_data"]->count();
+        $data["this_week_data_count"] = $data["this_week_data"]->count();
+        $data["previous_week_data_count"] = $data["previous_week_data"]->count();
+        $data["this_month_data_count"] = $data["this_month_data"]->count();
+        $data["previous_month_data_count"] = $data["previous_month_data"]->count();
         return $data;
     }
-      /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/superadmin-dashboard",
@@ -1787,10 +1988,10 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-    public function getSuperAdminDashboardData( Request $request)
+    public function getSuperAdminDashboardData(Request $request)
     {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasRole('superadmin')) {
                 return response()->json([
                     "message" => "You are not a superadmin"
@@ -1819,13 +2020,12 @@ class DashboardManagementController extends Controller
 
 
             return response()->json($data, 200);
-        }catch(Exception $e) {
-      return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
-        /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/data-collector-dashboard",
@@ -1873,23 +2073,23 @@ class DashboardManagementController extends Controller
      *     )
      */
 
-     public function getDataCollectorDashboardData( Request $request)
-     {
-         try{
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasRole('data_collector')) {
-                 return response()->json([
-                     "message" => "You are not a superadmin"
-                 ], 401);
-             }
+    public function getDataCollectorDashboardData(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasRole('data_collector')) {
+                return response()->json([
+                    "message" => "You are not a superadmin"
+                ], 401);
+            }
 
-             $data["businesses"] = $this->businesses(1);
+            $data["businesses"] = $this->businesses(1);
 
-             $data["fuel_stations"] = $this->fuel_stations(1);
+            $data["fuel_stations"] = $this->fuel_stations(1);
 
-             $data["overall_bookings"] = $this->overall_bookings(1);
+            $data["overall_bookings"] = $this->overall_bookings(1);
 
-             $data["overall_jobs"] = $this->overall_jobs(1);
+            $data["overall_jobs"] = $this->overall_jobs(1);
 
             //  $data["customers"] = $this->customers();
 
@@ -1904,13 +2104,9 @@ class DashboardManagementController extends Controller
 
 
 
-             return response()->json($data, 200);
-         }catch(Exception $e) {
-       return $this->sendError($e, 500,$request);
-         }
-
-     }
-
-
-
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
+    }
 }
