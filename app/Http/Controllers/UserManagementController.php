@@ -4373,9 +4373,15 @@ return DB::transaction(function() use($request) {
             //  }
 
        $user =     User::where(["id" => $request->user_id])
-       ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+       ->when(!auth()->user()->hasRole("superadmin"),function($query) use($all_manager_department_ids) {
+        $query->whereHas("departments", function($query) use($all_manager_department_ids) {
+            $query->whereIn("departments.id",$all_manager_department_ids);
+         });
+       })
+
+
+
+
              ->first();
              if(!$user) {
                 return response()->json([
