@@ -1225,10 +1225,10 @@ class LeaveController extends Controller
 
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('leaves.created_at', ">=", ($request->start_date));
+                    $query->where('leaves.start_date', '<=', $request->start_date . ' 00:00:00');
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('leaves.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    $query->where('leaves.end_date', '>=', $request->end_date . ' 23:59:59');
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("leaves.id", $request->order_by);
@@ -1419,10 +1419,12 @@ class LeaveController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('leaves.created_at', ">=", ($request->start_date));
+                    $query->where('leaves.start_date', '<=', $request->start_date . ' 00:00:00');
+
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('leaves.created_at', "<=", ($request->end_date . ' 23:59:59'));
+
+                    $query->where('leaves.end_date', '>=', $request->end_date . ' 23:59:59');
                 })
 
 
@@ -1592,10 +1594,10 @@ class LeaveController extends Controller
                 [
                     'leaves' => function ($query) use ($request) {
                 $query->when(!empty($request->start_date), function ($query) use ($request) {
-                        return $query->where('date', '>=', ($request->start_date . ' 00:00:00'));
+                        return $query->where('start_date', '<=', ($request->start_date . ' 00:00:00'));
                     })
                     ->when(!empty($request->end_date), function ($query) use ($request) {
-                        return $query->where('date', '<=', ($request->end_date . ' 23:59:59'));
+                        return $query->where('end_date', '=>', ($request->end_date . ' 23:59:59'));
                     });
             },
             'departments' => function ($query) use ($request) {
@@ -1615,10 +1617,10 @@ class LeaveController extends Controller
                       $q->where('user_id', $request->user_id);
                   })
                   ->when(!empty($request->start_date), function ($q) use ($request) {
-                      $q->where('date', '>=', $request->start_date . ' 00:00:00');
+                      $q->where('start_date', '<=', $request->start_date . ' 00:00:00');
                   })
                   ->when(!empty($request->end_date), function ($q) use ($request) {
-                      $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
+                      $q->where('end_date', '>=', ($request->end_date . ' 23:59:59'));
                   });
             })
                 ->where(
@@ -1905,10 +1907,11 @@ return $employee;
                  //        return $query->where('product_category_id', $request->product_category_id);
                  //    })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('leaves.created_at', ">=", ($request->start_date));
+                    $query->where('leaves.start_date', '<=', $request->start_date . ' 00:00:00');
+
                  })
                  ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('leaves.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    $query->where('leaves.end_date', '>=', $request->end_date . ' 23:59:59');
                  })
 
 

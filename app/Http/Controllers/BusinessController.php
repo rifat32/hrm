@@ -7,6 +7,7 @@ use App\Http\Requests\BusinessCreateRequest;
 
 use App\Http\Requests\BusinessUpdateRequest;
 use App\Http\Requests\BusinessUpdateSeparateRequest;
+use App\Http\Requests\CheckScheduleConflictRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\MultipleImageUploadRequest;
 use App\Http\Requests\GetIdRequest;
@@ -378,6 +379,133 @@ if(!$user->hasRole('business_owner')) {
         }
 
     }
+
+
+
+     /**
+        *
+     * @OA\Post(
+     *      path="/v1.0/auth/check-schedule-conflict",
+     *      operationId="checkScheduleConflict",
+     *      tags={"business_management"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user with business",
+     *      description="This method is to store user with business",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+     *
+      *      @OA\Property(property="times", type="string", format="array",example={
+     *
+    *{"day":0,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":1,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":2,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":3,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":4,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":5,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+    *{"day":6,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true}
+     *
+     * }),
+     *
+     *
+
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function checkScheduleConflict(CheckScheduleConflictRequest $request) {
+
+
+        try{
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+     return  DB::transaction(function ()use (&$request) {
+
+    //     if(!$request->user()->hasPermissionTo('business_create')){
+    //         return response()->json([
+    //            "message" => "You can not perform this action"
+    //         ],401);
+    //    }
+        $request_data = $request->validated();
+
+        $conflicted_work_shift_ids = collect();
+
+        foreach($request_data["times"] as $time) {
+            $work_shift_ids = WorkShift::where([
+                "business_id" => auth()->business_id
+            ])
+            ->whereHas('details', function ($query) use ($time) {
+                $query->where('work_shift_detail.day',($time["day"]))
+                ->when(!empty($time["is_weekend"]), function($query) {
+                    $query->where('work_shift_detail.is_weekend',1);
+                })
+                ->where(function($query) use($time) {
+                    $query->whereTime('work_shift_detail.start_at', '<=', ($time["start_at"]))
+                          ->orWhereTime('work_shift_detail.end_at', '>=', ($time["end_at"]));
+
+                });
+            })
+            ->pluck("id");
+            $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
+
+        }
+        $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
+
+
+        return response([
+            "conflicted_work_shifts" => $conflicted_work_shift_ids
+        ], 200);
+        });
+        } catch(Exception $e){
+
+        return $this->sendError($e,500,$request);
+        }
+
+    }
+
+
+
+
+
 
 
      /**
