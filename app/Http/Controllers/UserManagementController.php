@@ -3868,9 +3868,6 @@ foreach ($assigned_departments as $assigned_department) {
             $today = Carbon::now()->startOfYear()->format('Y-m-d');
             $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
 
-
-
-
             $holidays = Holiday::where([
                 "business_id" => $user->business_id
             ])

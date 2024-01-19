@@ -241,6 +241,16 @@ class LeaveController extends Controller
                 //     }
                 // }
                 $leave_record_data_list = [];
+                $all_parent_department_ids = [];
+$assigned_departments = Department::whereHas("users", function($query) use ($request_data) {
+         $query->where("users.id",$request_data['user_id']);
+})->get();
+
+
+foreach ($assigned_departments as $assigned_department) {
+    $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+}
+
                 if ($request_data["leave_duration"] == "single_day") {
 
 
@@ -262,6 +272,21 @@ class LeaveController extends Controller
                     ])
                     ->where('holidays.start_date', "<=", $request_data["date"])
                     ->where('holidays.end_date', ">=", $request_data["date"] . ' 23:59:59')
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data['user_id']
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -271,7 +296,7 @@ class LeaveController extends Controller
                         $query->where('leave_records.date',($request_data["date"]));
                     })->first();
 
-                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)  || auth()->user()->hasRole("business_owner") ) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = ($request_data["date"]);
@@ -308,6 +333,21 @@ class LeaveController extends Controller
                         ])
                         ->where('holidays.start_date', "<=", $leave_date)
                         ->where('holidays.end_date', ">=", $leave_date)
+                        ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                            $query->whereHas("users", function ($query) use ($request_data) {
+                                $query->where([
+                                    "users.id" => $request_data['user_id']
+                                ]);
+                            })
+                            ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                    $query->whereIn("departmants.id", $all_parent_department_ids);
+                                })
+
+                            ->orWhere(function ($query) {
+                                $query->whereDoesntHave("users")
+                                    ->whereDoesntHave("departments");
+                            });
+                    })
                         ->first();
 
 
@@ -319,7 +359,7 @@ class LeaveController extends Controller
                         })->first();
 
 
-                        if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
                             $leave_record_data["start_time"] = $work_shift_details->start_at;
                             $leave_record_data["end_time"] = $work_shift_details->end_at;
                             $leave_record_data["date"] = $leave_date;
@@ -342,9 +382,23 @@ class LeaveController extends Controller
                     $holiday =   Holiday::where([
                         "business_id" => $request->user()->business_id
                     ])
-                    ->where('holidays.start_date', "<=", $request_data["date"])
+                   ->where('holidays.start_date', "<=", $request_data["date"])
                    ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
+                   ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                    $query->whereHas("users", function ($query) use ($request_data) {
+                        $query->where([
+                            "users.id" => $request_data['user_id']
+                        ]);
+                    })
+                    ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                            $query->whereIn("departmants.id", $all_parent_department_ids);
+                        })
 
+                    ->orWhere(function ($query) {
+                        $query->whereDoesntHave("users")
+                            ->whereDoesntHave("departments");
+                    });
+            })
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -355,7 +409,7 @@ class LeaveController extends Controller
                     })->first();
 
 
-                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
                         $start_at = $work_shift_details->start_at;
                         $end_at = $work_shift_details->end_at;
                         if ($request_data["day_type"] == "first_half") {
@@ -399,6 +453,21 @@ class LeaveController extends Controller
                     ->where('holidays.start_date', "<=", $request_data["date"])
 
                     ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data['user_id']
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -409,7 +478,7 @@ class LeaveController extends Controller
                     })->first();
 
 
-                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
@@ -834,6 +903,17 @@ class LeaveController extends Controller
                 //         return response()->json(["message" => "Please define workshift first"], 400);
                 //     }
                 // }
+
+                $all_parent_department_ids = [];
+                $assigned_departments = Department::whereHas("users", function($query) use ($request_data) {
+                         $query->where("users.id",$request_data['user_id']);
+                })->get();
+
+
+                foreach ($assigned_departments as $assigned_department) {
+                    $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+                }
+
                 $leave_record_data_list = [];
                 if ($request_data["leave_duration"] == "single_day") {
                     $dateString = $request_data["date"];
@@ -853,6 +933,21 @@ class LeaveController extends Controller
                     ])
                     ->where('holidays.start_date', "<=", $request_data["date"])
                     ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data['user_id']
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -864,7 +959,7 @@ class LeaveController extends Controller
                     })->first();
 
 
-                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
@@ -895,6 +990,21 @@ class LeaveController extends Controller
                         ])
                         ->where('holidays.start_date', "<=", $leave_date)
                         ->where('holidays.end_date', ">=", $leave_date)
+                        ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                            $query->whereHas("users", function ($query) use ($request_data) {
+                                $query->where([
+                                    "users.id" => $request_data['user_id']
+                                ]);
+                            })
+                            ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                    $query->whereIn("departmants.id", $all_parent_department_ids);
+                                })
+
+                            ->orWhere(function ($query) {
+                                $query->whereDoesntHave("users")
+                                    ->whereDoesntHave("departments");
+                            });
+                    })
                         ->first();
 
                         $previous_leave =  Leave::where([
@@ -905,7 +1015,7 @@ class LeaveController extends Controller
                             $query->where('leave_records.date', $leave_date);
                         })->first();
 
-                        if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
                             $leave_record_data["start_time"] = $work_shift_details->start_at;
                             $leave_record_data["end_time"] = $work_shift_details->end_at;
                             $leave_record_data["date"] = $leave_date;
@@ -931,6 +1041,21 @@ class LeaveController extends Controller
                     ])
                     ->where('holidays.start_date', "<=",$request_data["date"])
                     ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data['user_id']
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -941,7 +1066,7 @@ class LeaveController extends Controller
                         $query->where('leave_records.date', $request_data["date"]);
                     })->first();
 
-                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
                         $start_at = $work_shift_details->start_at;
                         $end_at = $work_shift_details->end_at;
                         if ($request_data["day_type"] == "first_half") {
@@ -982,6 +1107,21 @@ class LeaveController extends Controller
                     ])
                     ->where('holidays.start_date', "<=", $request_data["date"])
                     ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data['user_id']
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                     $previous_leave =  Leave::where([
@@ -993,7 +1133,7 @@ class LeaveController extends Controller
                     })->first();
 
 
-                    if (!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) {
+                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];

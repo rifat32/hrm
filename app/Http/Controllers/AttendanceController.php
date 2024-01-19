@@ -143,27 +143,51 @@ class AttendanceController extends Controller
                     "day" => $day_number
                 ])
                     ->first();
-                if (!$work_shift_details) {
+                if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
                     $error =  [
                         "message" => ("No work shift details found  day" . $day_number),
                     ];
                     throw new Exception(json_encode($error), 400);
                 }
-                if ($work_shift_details->is_weekend) {
+                if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
                     $error =  [
                         "message" => ("there is a weekend on date " . $request_data["in_date"]),
                     ];
                     throw new Exception(json_encode($error), 400);
+                }
+                $all_parent_department_ids = [];
+                $assigned_departments = Department::whereHas("users", function($query) use ($request_data) {
+                         $query->where("users.id",$request_data["user_id"]);
+                })->get();
+
+
+                foreach ($assigned_departments as $assigned_department) {
+                    $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                 }
                 $holiday =   Holiday::where([
                     "business_id" => auth()->user()->business_id
                 ])
                     ->where('holidays.start_date', "<=", $request_data["in_date"])
                     ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data["user_id"]
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                 if ($holiday) {
-                    if ($holiday->is_active) {
+                    if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
                         $error =  [
                             "message" => ("there is a holiday on date" . $request_data["in_date"]),
                         ];
@@ -395,7 +419,7 @@ class AttendanceController extends Controller
                     ])
                         ->first();
 
-                    if (!$work_shift_details) {
+                    if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
                         $error =  [
                             "message" => ("No work shift details found  day" . $day_number),
                         ];
@@ -404,22 +428,47 @@ class AttendanceController extends Controller
 
 
 
-                    if ($work_shift_details->is_weekend) {
+                    if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
                         $error =  [
                             "message" => ("there is a weekend on date" . $item["in_date"]),
                         ];
                         throw new Exception(json_encode($error), 400);
                     }
 
+
+                    $all_parent_department_ids = [];
+$assigned_departments = Department::whereHas("users", function($query) use ($request_data) {
+         $query->where("users.id",$request_data["user_id"]);
+})->get();
+
+
+foreach ($assigned_departments as $assigned_department) {
+    $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+}
                     $holiday =   Holiday::where([
                         "business_id" => auth()->user()->business_id
                     ])
                         ->where('holidays.start_date', "<=", $item["in_date"])
                         ->where('holidays.end_date', ">=", $item["in_date"] . ' 23:59:59')
+                        ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                            $query->whereHas("users", function ($query) use ($request_data) {
+                                $query->where([
+                                    "users.id" => $request_data["user_id"]
+                                ]);
+                            })
+                            ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                    $query->whereIn("departmants.id", $all_parent_department_ids);
+                                })
+
+                            ->orWhere(function ($query) {
+                                $query->whereDoesntHave("users")
+                                    ->whereDoesntHave("departments");
+                            });
+                    })
                         ->first();
 
                     if ($holiday) {
-                        if ($holiday->is_active) {
+                        if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
                             $error =  [
                                 "message" => ("there is a holiday on date" . $item["in_date"]),
                             ];
@@ -680,27 +729,52 @@ class AttendanceController extends Controller
                     "day" => $day_number
                 ])
                     ->first();
-                if (!$work_shift_details) {
+                if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
                     $error =  [
                         "message" => ("No work shift details found  day" . $day_number),
                     ];
                     throw new Exception(json_encode($error), 400);
                 }
-                if ($work_shift_details->is_weekend) {
+                if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
                     $error =  [
                         "message" => ("there is a weekend on date" . $request_data["in_date"]),
                     ];
                     throw new Exception(json_encode($error), 400);
                 }
+
+                $all_parent_department_ids = [];
+$assigned_departments = Department::whereHas("users", function($query) use ($request_data) {
+         $query->where("users.id",$request_data["user_id"]);
+})->get();
+
+
+foreach ($assigned_departments as $assigned_department) {
+    $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+}
                 $holiday =   Holiday::where([
                     "business_id" => auth()->user()->business_id
                 ])
                     ->where('holidays.start_date', "<=", $request_data["in_date"])
                     ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                    ->where(function ($query) use ($request_data,$all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data["user_id"]
+                            ]);
+                        })
+                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departmants.id", $all_parent_department_ids);
+                            })
+
+                        ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+                })
                     ->first();
 
                 if ($holiday) {
-                    if ($holiday->is_active) {
+                    if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
                         $error =  [
                             "message" => ("there is a holiday on date" . $request_data["in_date"]),
                         ];
