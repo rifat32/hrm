@@ -750,6 +750,9 @@ class UserManagementController extends Controller
                     if (!$work_shift) {
                         throw new Exception("Work shift validation failed");
                     }
+                    if (!$work_shift->is_active) {
+                        return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+                    }
                     $work_shift->users()->attach($user->id);
 
 
@@ -777,6 +780,11 @@ class UserManagementController extends Controller
                     if (!$default_work_shift) {
                         throw new Exception("There is no default workshift for this business");
                     }
+
+                    if (!$default_work_shift->is_active) {
+                        return response()->json(["message" => ("Please activate the work shift named '". $default_work_shift->name . "'")], 400);
+                    }
+
                     $default_work_shift->users()->attach($user->id);
                 }
                 // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
@@ -1244,6 +1252,10 @@ return DB::transaction(function() use($request) {
                 "message" => "no work shift found"
             ], 403);
         }
+        if (!$work_shift->is_active) {
+            return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+        }
+
     }
 
 
@@ -3888,7 +3900,17 @@ return DB::transaction(function() use($request) {
                 ->where([
                     "is_active" => 1
                 ])
+                ->where(function($query) use($id) {
+                    $query->whereHas("users", function($query) use($id) {
+                          $query->where([
+                            "user_holidays.user_id" => $id
+                          ]);
+                    })
+                    ->orWhereDoesntHave("users");
+                })
+
                 ->get();
+
 
 
 
@@ -3917,8 +3939,7 @@ return DB::transaction(function() use($request) {
             $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
                 $query->where('users.id', $user->id);
             })
-
-                ->first();
+            ->first();
 
             $weekends = $work_shift->details()->where([
                 "is_weekend" => 1

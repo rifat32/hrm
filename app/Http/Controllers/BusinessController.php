@@ -469,18 +469,19 @@ if(!$user->hasRole('business_owner')) {
 
         $conflicted_work_shift_ids = collect();
 
-        foreach($request_data["times"] as $time) {
+        $timesArray = collect($request_data["times"])->unique("day");
+        foreach($timesArray as $business_time) {
             $work_shift_ids = WorkShift::where([
                 "business_id" => auth()->business_id
             ])
-            ->whereHas('details', function ($query) use ($time) {
-                $query->where('work_shift_detail.day',($time["day"]))
+            ->whereHas('details', function ($query) use ($business_time) {
+                $query->where('work_shift_detail.day',($business_time["day"]))
                 ->when(!empty($time["is_weekend"]), function($query) {
                     $query->where('work_shift_detail.is_weekend',1);
                 })
-                ->where(function($query) use($time) {
-                    $query->whereTime('work_shift_detail.start_at', '<=', ($time["start_at"]))
-                          ->orWhereTime('work_shift_detail.end_at', '>=', ($time["end_at"]));
+                ->where(function($query) use($business_time) {
+                    $query->whereTime('work_shift_detail.start_at', '<=', ($business_time["start_at"]))
+                          ->orWhereTime('work_shift_detail.end_at', '>=', ($business_time["end_at"]));
 
                 });
             })
@@ -995,6 +996,43 @@ if(!$user->hasRole('business_owner')) {
   // end business info ##############
 
   if(!empty($request_data["times"])) {
+
+    $timesArray = collect($request_data["times"])->unique("day");
+
+
+    $conflicted_work_shift_ids = collect();
+
+    foreach($timesArray as $business_time) {
+        $work_shift_ids = WorkShift::where([
+            "business_id" => auth()->business_id
+        ])
+        ->whereHas('details', function ($query) use ($business_time) {
+            $query->where('work_shift_detail.day',($business_time["day"]))
+            ->when(!empty($time["is_weekend"]), function($query) {
+                $query->where('work_shift_detail.is_weekend',1);
+            })
+            ->where(function($query) use($business_time) {
+                $query->whereTime('work_shift_detail.start_at', '<=', ($business_time["start_at"]))
+                      ->orWhereTime('work_shift_detail.end_at', '>=', ($business_time["end_at"]));
+
+            });
+        })
+        ->pluck("id");
+        $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
+
+    }
+    $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
+
+    if(!empty($conflicted_work_shift_ids)) {
+        WorkShift::whereIn("id",$conflicted_work_shift_ids)->update([
+            "is_active" => 0
+        ]);
+    }
+
+
+
+
+
     BusinessTime::where([
         "business_id" => $business->id
        ])
@@ -1010,6 +1048,7 @@ if(!$user->hasRole('business_owner')) {
             "is_weekend"=> $business_time["is_weekend"],
         ]);
        }
+
 
   }
 

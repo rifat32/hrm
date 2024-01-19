@@ -7,6 +7,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessTime;
+use App\Models\WorkShift;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -88,16 +89,45 @@ class BusinessTimesController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $updatableData = $request->validated();
+                $request_data = $request->validated();
+
+                $timesArray = collect($request_data["times"])->unique("day");
 
 
+                $conflicted_work_shift_ids = collect();
+
+                foreach($timesArray as $business_time) {
+                    $work_shift_ids = WorkShift::where([
+                        "business_id" => auth()->business_id
+                    ])
+                    ->whereHas('details', function ($query) use ($business_time) {
+                        $query->where('work_shift_detail.day',($business_time["day"]))
+                        ->when(!empty($time["is_weekend"]), function($query) {
+                            $query->where('work_shift_detail.is_weekend',1);
+                        })
+                        ->where(function($query) use($business_time) {
+                            $query->whereTime('work_shift_detail.start_at', '<=', ($business_time["start_at"]))
+                                  ->orWhereTime('work_shift_detail.end_at', '>=', ($business_time["end_at"]));
+
+                        });
+                    })
+                    ->pluck("id");
+                    $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
+
+                }
+                $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
+
+                if(!empty($conflicted_work_shift_ids)) {
+                    WorkShift::whereIn("id",$conflicted_work_shift_ids)->update([
+                        "is_active" => 0
+                    ]);
+                }
 
 
         BusinessTime::where([
                 "business_id" => auth()->user()->business_id
                ])
                ->delete();
-               $timesArray = collect($updatableData["times"])->unique("day");
                foreach($timesArray as $business_time) {
                 BusinessTime::create([
                     "business_id" => auth()->user()->business_id,

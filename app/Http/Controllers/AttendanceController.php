@@ -134,6 +134,9 @@ class AttendanceController extends Controller
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
+                if (!$work_shift->is_active) {
+                    return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+                }
 
                 $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
                 $work_shift_details =  $work_shift->details()->where([
@@ -373,10 +376,14 @@ class AttendanceController extends Controller
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["user_id"]);
                 })->first();
+
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
 
+                if (!$work_shift->is_active) {
+                    return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+                }
 
 
 
@@ -665,7 +672,9 @@ class AttendanceController extends Controller
                 if (!$work_shift) {
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
-
+                if (!$work_shift->is_active) {
+                    return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+                }
                 $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
                 $work_shift_details =  $work_shift->details()->where([
                     "day" => $day_number
