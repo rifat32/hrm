@@ -12,8 +12,13 @@ class Holiday extends Model
     protected $fillable = [
         'name', 'description', 'start_date', 'end_date', 'repeats_annually',  'is_active', 'business_id', "created_by",
     ];
+
     public function departments() {
         return $this->belongsToMany(Department::class, 'department_holidays', 'holiday_id', 'department_id');
+    }
+
+    public function users() {
+        return $this->belongsToMany(User::class, 'user_holidays', 'holiday_id', 'user_id');
     }
     public function creator() {
         return $this->belongsTo(User::class, "created_by","id");
@@ -48,6 +53,6 @@ class Holiday extends Model
 
 
 
-  
+
 
 }

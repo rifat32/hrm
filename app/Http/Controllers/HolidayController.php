@@ -36,6 +36,8 @@ class HolidayController extends Controller
  *             @OA\Property(property="start_date", type="string", format="date", example="2023-12-25"),
  *             @OA\Property(property="end_date", type="string", format="date", example="2023-12-25"),
  *             @OA\Property(property="repeats_annually", type="boolean", format="boolean", example=false),
+ *  *     @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+ *  *     @OA\Property(property="users", type="string", format="array", example={1,2,3})
  *
  *
      *
@@ -99,6 +101,11 @@ class HolidayController extends Controller
 
 
                  $holiday->departments()->sync($request_data['departments'],[]);
+                 $holiday->users()->sync($request_data['users'],[]);
+
+
+
+
 
                 return response($holiday, 201);
             });
@@ -129,6 +136,8 @@ class HolidayController extends Controller
  *             @OA\Property(property="start_date", type="string", format="date", example="2023-12-25"),
  *             @OA\Property(property="end_date", type="string", format="date", example="2023-12-25"),
  *             @OA\Property(property="repeats_annually", type="boolean", format="boolean", example=false),
+ *  *  *     @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+ *  *     @OA\Property(property="users", type="string", format="array", example={1,2,3})
 
      *
      *         ),
@@ -216,6 +225,7 @@ class HolidayController extends Controller
                     ], 500);
                 }
                 $holiday->departments()->sync($request_data['departments'],[]);
+                $holiday->users()->sync($request_data['users'],[]);
                 return response($holiday, 201);
             });
         } catch (Exception $e) {
@@ -327,7 +337,8 @@ class HolidayController extends Controller
                 },
                 "departments" => function ($query) {
                     $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
-                }
+                },
+                "users"
             ])
             ->where(
                 [
@@ -442,7 +453,8 @@ class HolidayController extends Controller
                 },
                 "departments" => function ($query) {
                     $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
-                }
+                },
+                "users"
             ])->where([
                 "id" => $id,
                 "business_id" => $business_id
