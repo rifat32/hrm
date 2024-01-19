@@ -490,9 +490,10 @@ if(!$user->hasRole('business_owner')) {
         }
         $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
 
+     $conflicted_work_shifts =   WorkShift::whereIn("id",$conflicted_work_shift_ids)->get();
 
         return response([
-            "conflicted_work_shifts" => $conflicted_work_shift_ids
+            "conflicted_work_shifts" => $conflicted_work_shifts
         ], 200);
         });
         } catch(Exception $e){
