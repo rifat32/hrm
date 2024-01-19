@@ -80,17 +80,15 @@ class User extends Authenticatable
     }
 
 
-
-
     public function work_location()
     {
         return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
     }
 
+
     public function business() {
         return $this->belongsTo(Business::class, 'business_id', 'id');
     }
-
 
 
     public function all_users() {
@@ -140,6 +138,13 @@ class User extends Authenticatable
     }
     public function visa_details() {
         return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
+    }
+
+    public function scopeWhereHasRecursiveHolidays($query, $today)
+    {
+        $query->whereHas('departments', function ($subQuery) use ($today) {
+            $subQuery->whereHasRecursiveHolidays($today);
+        });
     }
 
 

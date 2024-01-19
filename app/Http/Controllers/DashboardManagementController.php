@@ -1232,158 +1232,275 @@ class DashboardManagementController extends Controller
             ->where('is_in_employee', 1)
             ->where('is_active', 1);
 
-        $data["total_data_count"] = $data_query->count();
+
+        // $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]
 
         ->where(function($query) use ($today) {
-            $query->whereHas('holidays', function ($query) use ($today) {
-                $query->where('start_date', "<=",  $today->startOfDay());
-                $query->where('end_date', ">=",  $today->endOfDay());
 
-            })->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                $query->where('start_date', "<=",  $today->startOfDay());
-                $query->where('end_date', ">=",  $today->endOfDay());
+            $query->where(function($query) use ($today) {
+                $query->whereHas('holidays', function ($query) use ($today) {
+                    $query->where('holidays.start_date', "<=",  $today->startOfDay())
+                    ->where('holidays.end_date', ">=",  $today->endOfDay());
+
+                })
+                ->orWhere(function($query) use($today) {
+                      $query->whereHasRecursiveHolidays($today);
+                });
+
+                // ->whereHas('departments.holidays', function ($query) use ($today) {
+                //     $query->where('holidays.start_date', "<=",  $today->startOfDay())
+                //     ->where('holidays.end_date', ">=",  $today->endOfDay());
+                // });
+
+            })
+            ->where(function($query) use ($today) {
+                $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
+                    $query->where('holidays.start_date', "<=",  $today->startOfDay())
+                          ->where('holidays.end_date', ">=",  $today->endOfDay())
+                          ->orWhere(function ($query) {
+                            $query->whereDoesntHave("users")
+                                ->whereDoesntHave("departments");
+                        });
+
+
+                });
+            });
+
+
+
+
+
+        })
+        ->orWhere(
+            function($query) use ($today) {
+            $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
+                $query->where('holidays.start_date', "<=",  $today->startOfDay());
+                $query->where('holidays.end_date', ">=",  $today->endOfDay());
                 $query->doesntHave('users');
 
             });
-        })
+
+        }
+        )
 
        ->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]
-        ->where(function($query) use ($start_date_of_next_week,$end_date_of_next_week) {
-            $query->whereHas('holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
-                $query->where('start_date', "<=",  $start_date_of_next_week);
-                $query->where('end_date', ">=",  $end_date_of_next_week . ' 23:59:59');
-            })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
-                $query->where('start_date', "<=",  $start_date_of_next_week);
-                $query->where('end_date', ">=",  $end_date_of_next_week . ' 23:59:59');
-                $query->doesntHave('users');
+        // $data["next_week_data_count"] = clone $data_query;
+        // $data["next_week_data_count"] = $data["next_week_data_count"]
 
-            });
-        })
+        // ->where(function($query) use ($start_date_of_next_week,$end_date_of_next_week) {
+        //     $query->whereHas('departments.holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_next_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_week . ' 23:59:59');
+        //     })->orWhereDoesntHave('departments.holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_next_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_week . ' 23:59:59');
+        //         $query->doesntHave('departments');
 
+        //     });
+        // })
+        // ->orWhere(function($query) use ($start_date_of_next_week,$end_date_of_next_week) {
+        //     $query->whereHas('holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_next_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_week . ' 23:59:59');
+        //     })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_next_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_week . ' 23:59:59');
+        //         $query->doesntHave('users');
 
-        ->count();
+        //     });
+        // })
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]
+        // ->count();
 
-        ->where(function($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
-            $query->whereHas('holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
-                $query->where('start_date', "<=",  $start_date_of_this_week);
-                $query->where('end_date', ">=",  $end_date_of_this_week . ' 23:59:59');
-            })->orWhereDoesntHave('holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
+        // $data["this_week_data_count"] = clone $data_query;
+        // $data["this_week_data_count"] = $data["this_week_data_count"]
 
-                $query->where('start_date', "<=",  $start_date_of_this_week);
-                $query->where('end_date', ">=",  $end_date_of_this_week . ' 23:59:59');
-                $query->doesntHave('users');
+        // ->where(function($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
+        //     $query->whereHas('departments.holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_week . ' 23:59:59');
+        //     })->orWhereDoesntHave('departments.holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_week . ' 23:59:59');
+        //         $query->doesntHave('departments');
+        //     });
+        // })
 
+        // ->orWhere(function($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
+        //     $query->whereHas('holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_week . ' 23:59:59');
+        //     })->orWhereDoesntHave('holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
 
-            });
-        })
-
-
-
-        ->count();
-
-        $data["previous_week_data_count"] = clone $data_query;
-        $data["previous_week_data_count"] = $data["previous_week_data_count"]
-        ->where(function($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
-            $query->whereHas('holidays', function ($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
-                $query->where('start_date', "<=",  $start_date_of_previous_week);
-                $query->where('end_date', ">=",  $end_date_of_previous_week . ' 23:59:59');
-            })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
-
-                $query->where('start_date', "<=",  $start_date_of_previous_week);
-                $query->where('end_date', ">=",  $end_date_of_previous_week . ' 23:59:59');
-                $query->doesntHave('users');
-
-            });
-        })
-
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_week . ' 23:59:59');
+        //         $query->doesntHave('users');
 
 
-        ->count();
-
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]
-        ->where(function($query) use ($start_date_of_next_month,$end_date_of_next_month) {
-            $query->whereHas('holidays', function ($query) use ( $start_date_of_next_month,$end_date_of_next_month) {
-                $query->where('start_date', "<=",  $start_date_of_next_month);
-                $query->where('end_date', ">=",  $end_date_of_next_month . ' 23:59:59');
-            })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_next_month,$end_date_of_next_month) {
-
-                 $query->where('start_date', "<=",  $start_date_of_next_month);
-                $query->where('end_date', ">=",  $end_date_of_next_month . ' 23:59:59');
-                $query->doesntHave('users');
-
-
-            });
-        })
-
-
-        ->count();
-
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]
-        ->where(function($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
-            $query->whereHas('holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
-
-
-                $query->where('start_date', "<=",  $start_date_of_this_month);
-                $query->where('end_date', ">=",  $end_date_of_this_month . ' 23:59:59');
-
-
-            })->orWhereDoesntHave('holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
-
-                $query->where('start_date', "<=",  $start_date_of_this_month);
-                $query->where('end_date', ">=",  $end_date_of_this_month . ' 23:59:59');
-                $query->doesntHave('users');
-
-
-            });
+        //     });
+        // })
 
 
 
-        })
+        // ->count();
 
+        // $data["previous_week_data_count"] = clone $data_query;
+        // $data["previous_week_data_count"] = $data["previous_week_data_count"]
+        // ->where(function($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
+        //     $query->whereHas('departments.holidays', function ($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_week . ' 23:59:59');
+        //     })->orWhereDoesntHave('departments.holidays', function ($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
 
-        ->count();
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_week . ' 23:59:59');
+        //         $query->doesntHave('departments');
 
-        $data["previous_month_data_count"] = clone $data_query;
-        $data["previous_month_data_count"] = $data["previous_month_data_count"]
+        //     });
+        // })
+        // ->orWhere(function($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
+        //     $query->whereHas('holidays', function ($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_week . ' 23:59:59');
+        //     })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_previous_week,$end_date_of_previous_week) {
 
-        ->where(function($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
-            $query ->whereHas('holidays', function ($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_week);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_week . ' 23:59:59');
+        //         $query->doesntHave('users');
 
-                $query->where('start_date', "<=",  $start_date_of_previous_month);
-                $query->where('end_date', ">=",  $end_date_of_previous_month . ' 23:59:59');
-
-
-
-
-            })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
-
-                $query->where('start_date', "<=",  $start_date_of_previous_month);
-                $query->where('end_date', ">=",  $end_date_of_previous_month . ' 23:59:59');
-                $query->doesntHave('users');
-
-            });
-
-
-
-        })
-
-
-
+        //     });
+        // })
 
 
 
-        ->count();
+        // ->count();
+
+        // $data["next_month_data_count"] = clone $data_query;
+        // $data["next_month_data_count"] = $data["next_month_data_count"]
+        // ->where(function($query) use ($start_date_of_next_month,$end_date_of_next_month) {
+        //     $query->whereHas('departments.holidays', function ($query) use ( $start_date_of_next_month,$end_date_of_next_month) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_next_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_month . ' 23:59:59');
+        //     })->orWhereDoesntHave('departments.holidays', function ($query) use ($start_date_of_next_month,$end_date_of_next_month) {
+
+        //          $query->where('holidays.start_date', "<=",  $start_date_of_next_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_month . ' 23:59:59');
+        //         $query->doesntHave('departments');
+
+
+        //     });
+        // })
+        // ->orWhere(function($query) use ($start_date_of_next_month,$end_date_of_next_month) {
+        //     $query->whereHas('holidays', function ($query) use ( $start_date_of_next_month,$end_date_of_next_month) {
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_next_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_month . ' 23:59:59');
+        //     })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_next_month,$end_date_of_next_month) {
+
+        //          $query->where('holidays.start_date', "<=",  $start_date_of_next_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_next_month . ' 23:59:59');
+        //         $query->doesntHave('users');
+
+
+        //     });
+        // })
+
+
+        // ->count();
+
+        // $data["this_month_data_count"] = clone $data_query;
+        // $data["this_month_data_count"] = $data["this_month_data_count"]
+        // ->where(function($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
+        //     $query->whereHas('departments.holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
+
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_month . ' 23:59:59');
+
+
+        //     })->orWhereDoesntHave('departments.holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_month . ' 23:59:59');
+        //         $query->doesntHave('departments');
+
+
+        //     });
+
+        // })
+
+        // ->orWhere(function($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
+        //     $query->whereHas('holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
+
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_month . ' 23:59:59');
+
+
+        //     })->orWhereDoesntHave('holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_this_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_this_month . ' 23:59:59');
+        //         $query->doesntHave('users');
+
+
+        //     });
+
+        // })
+
+        // ->count();
+
+
+        // $data["previous_month_data_count"] = clone $data_query;
+        // $data["previous_month_data_count"] = $data["previous_month_data_count"]
+
+        // ->where(function($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+        //     $query ->whereHas('departments.holidays', function ($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_month . ' 23:59:59');
+
+
+        //     })->orWhereDoesntHave('departments.holidays', function ($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_month . ' 23:59:59');
+        //         $query->doesntHave('departments');
+
+        //     });
+
+
+
+        // })
+
+        // ->orWhere(function($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+        //     $query ->whereHas('holidays', function ($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_month . ' 23:59:59');
+
+
+
+
+        //     })->orWhereDoesntHave('holidays', function ($query) use ($start_date_of_previous_month,$end_date_of_previous_month) {
+
+        //         $query->where('holidays.start_date', "<=",  $start_date_of_previous_month);
+        //         $query->where('holidays.end_date', ">=",  $end_date_of_previous_month . ' 23:59:59');
+        //         $query->doesntHave('users');
+
+        //     });
+
+
+
+        // })
+
+
+
+
+        // ->count();
 
         return $data;
     }

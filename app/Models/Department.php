@@ -48,7 +48,24 @@ class Department extends Model
         }
     }
 
+    public function getAllParentIds()
+    {
+        $parentIds = [];
+        $this->getParentIdsRecursive($this, $parentIds);
 
+        return $parentIds;
+    }
+
+    protected function getParentIdsRecursive($department, &$parentIds)
+    {
+        if ($department->parent) {
+            // Include the parent ID
+            $parentIds[] = $department->parent->id;
+
+            // Recursively get the parent IDs of the current parent
+            $this->getParentIdsRecursive($department->parent, $parentIds);
+        }
+    }
 
 
 
@@ -172,6 +189,17 @@ class Department extends Model
 
 
 
+    public function scopeWhereHasRecursiveHolidays($query, $today)
+    {
+        $query->whereHas('holidays', function ($subQuery) use ($today) {
+            $subQuery->where('start_date', '<=', $today->startOfDay())
+                     ->where('end_date', '>=', $today->endOfDay());
+        })->orWhere(function ($query) use ($today) {
+            $query->whereHas('parent', function ($subQuery) use ($today) {
+                $subQuery->whereHasRecursiveHolidays($today);
+            });
+        });
+    }
 
 
     public function getCreatedAtAttribute($value)

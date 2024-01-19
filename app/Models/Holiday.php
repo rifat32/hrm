@@ -20,6 +20,8 @@ class Holiday extends Model
     public function users() {
         return $this->belongsToMany(User::class, 'user_holidays', 'holiday_id', 'user_id');
     }
+
+
     public function creator() {
         return $this->belongsTo(User::class, "created_by","id");
     }
