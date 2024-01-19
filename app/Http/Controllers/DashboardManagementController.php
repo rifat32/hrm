@@ -1206,6 +1206,107 @@ class DashboardManagementController extends Controller
 
     //     return $data;
     // }
+
+    public function on_holiday(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+    ) {
+
+        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+            ->whereNotIn('id', [auth()->user()->id])
+            ->where('is_in_employee', 1)
+            ->where('is_active', 1);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]
+        ->whereHas('holidays', function ($query) use ($today) {
+            $query->whereBetween('date', [$today->startOfDay(), $today->endOfDay()]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today) {
+            $query->whereBetween('date', [$today->startOfDay(), $today->endOfDay()])->doesntHave('users');
+        })
+       ->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]
+        ->whereHas('holidays', function ($query) use ($today, $start_date_of_next_week,$end_date_of_next_week) {
+            $query->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today, $start_date_of_next_week,$end_date_of_next_week) {
+            $query->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->doesntHave('users');
+        })
+        ->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]
+        ->whereHas('holidays', function ($query) use ($today, $start_date_of_this_week,$end_date_of_this_week) {
+            $query->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today, $start_date_of_this_week,$end_date_of_this_week) {
+            $query->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->doesntHave('users');
+        })
+        ->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]
+        ->whereHas('holidays', function ($query) use ($today, $start_date_of_previous_week,$end_date_of_previous_week) {
+            $query->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today, $start_date_of_previous_week,$end_date_of_previous_week) {
+            $query->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->doesntHave('users');
+        })
+        ->count();
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]
+        ->whereHas('holidays', function ($query) use ($today, $start_date_of_next_month,$end_date_of_next_month) {
+            $query->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today, $start_date_of_next_month,$end_date_of_next_month) {
+            $query->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->doesntHave('users');
+        })
+
+        ->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]
+        ->whereHas('holidays', function ($query) use ($today, $start_date_of_this_month,$end_date_of_this_month) {
+            $query->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today, $start_date_of_this_month,$end_date_of_this_month) {
+            $query->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->doesntHave('users');
+        })
+
+        ->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]
+        ->whereHas('holidays', function ($query) use ($today, $start_date_of_previous_month,$end_date_of_previous_month) {
+            $query->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')]);
+        })->orWhereDoesntHave('holidays', function ($query) use ($today, $start_date_of_previous_month,$end_date_of_previous_month) {
+            $query->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->doesntHave('users');
+        })
+
+
+        ->count();
+
+        return $data;
+    }
+
+
+
+
     public function leaves(
         $today,
         $start_date_of_next_month,
@@ -1647,6 +1748,24 @@ class DashboardManagementController extends Controller
             //         $end_date_of_previous_week,
             //         $all_manager_department_ids
             // );
+
+            $data["on_holiday"] = $this->on_holiday(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
 
             $leave_statuses = ['pending_approval', 'progress', 'approved', 'rejected'];
             foreach ($leave_statuses as $leave_status) {
