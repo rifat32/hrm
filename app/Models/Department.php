@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Department extends Model
 {
     use HasFactory;
@@ -189,17 +190,24 @@ class Department extends Model
 
 
 
-    public function scopeWhereHasRecursiveHolidays($query, $today)
+    public function scopeWhereHasRecursiveHolidays($query, $today, $depth = 5)
     {
+        if ($depth <= 0) {
+            return; // Stop recursion if depth limit is reached
+        }
+
         $query->whereHas('holidays', function ($subQuery) use ($today) {
             $subQuery->where('start_date', '<=', $today->startOfDay())
                      ->where('end_date', '>=', $today->endOfDay());
-        })->orWhere(function ($query) use ($today) {
-            $query->whereHas('parent', function ($subQuery) use ($today) {
-                $subQuery->whereHasRecursiveHolidays($today);
+        })->orWhere(function ($query) use ($today, $depth) {
+            $query->whereHas('parent', function ($subQuery) use ($today, $depth) {
+                $subQuery->whereNotNull('parent_id');
+                $subQuery->whereHasRecursiveHolidays($today, $depth - 1); // Decrease depth
             });
         });
     }
+
+
 
 
     public function getCreatedAtAttribute($value)

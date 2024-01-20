@@ -888,7 +888,8 @@ Route::post('/v1.0/projects', [ProjectController::class, "createProject"]);
 
 Route::put('/v1.0/projects/assign-user', [ProjectController::class, "assignUser"]);
 
-Route::put('/v1.0/projects/assign-project', [ProjectController::class, "assign"]);
+Route::put('/v1.0/projects/assign-project', [ProjectController::class, "assignProject"]);
+Route::put('/v1.0/projects/discharge-project', [ProjectController::class, "dischargeProject"]);
 
 
 Route::put('/v1.0/projects', [ProjectController::class, "updateProject"]);

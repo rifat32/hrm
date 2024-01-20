@@ -1224,13 +1224,18 @@ class DashboardManagementController extends Controller
         $all_manager_department_ids
 
     ) {
+        $total_departments = Department::where([
+            "business_id" => auth()->user()->business_id,
+            "is_active" => 1
+        ])->count();
 
         $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
             ->where('is_in_employee', 1)
-            ->where('is_active', 1);
+            ->where('is_active', 1)
+            ->where("business_id",auth()->user()->id);
 
 
         // $data["total_data_count"] = $data_query->count();
@@ -1238,53 +1243,57 @@ class DashboardManagementController extends Controller
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]
 
-        ->where(function($query) use ($today) {
+        ->where(function($query) use ($today, $total_departments)  {
+                 $query->where(function($query) use ($today, $total_departments) {
 
-            $query->where(function($query) use ($today) {
-                $query->whereHas('holidays', function ($query) use ($today) {
-                    $query->where('holidays.start_date', "<=",  $today->startOfDay())
-                    ->where('holidays.end_date', ">=",  $today->endOfDay());
+                    $query->where(function($query) use ($today,$total_departments) {
+                        $query->whereHas('holidays', function ($query) use ($today) {
+                            $query->where('holidays.start_date', "<=",  $today->startOfDay())
+                            ->where('holidays.end_date', ">=",  $today->endOfDay());
 
-                })
-                ->orWhere(function($query) use($today) {
-                      $query->whereHasRecursiveHolidays($today);
-                });
-
-                // ->whereHas('departments.holidays', function ($query) use ($today) {
-                //     $query->where('holidays.start_date', "<=",  $today->startOfDay())
-                //     ->where('holidays.end_date', ">=",  $today->endOfDay());
-                // });
-
-            })
-            ->where(function($query) use ($today) {
-                $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                    $query->where('holidays.start_date', "<=",  $today->startOfDay())
-                          ->where('holidays.end_date', ">=",  $today->endOfDay())
-                          ->orWhere(function ($query) {
-                            $query->whereDoesntHave("users")
-                                ->whereDoesntHave("departments");
+                        })
+                        ->orWhere(function($query) use($today, $total_departments) {
+                              $query->whereHasRecursiveHolidays($today,$total_departments);
                         });
 
+                        // ->whereHas('departments.holidays', function ($query) use ($today) {
+                        //     $query->where('holidays.start_date', "<=",  $today->startOfDay())
+                        //     ->where('holidays.end_date', ">=",  $today->endOfDay());
+                        // });
 
-                });
-            });
+                    })
+                    ->where(function($query) use ($today) {
+                        $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
+                            $query->where('holidays.start_date', "<=",  $today->startOfDay())
+                                  ->where('holidays.end_date', ">=",  $today->endOfDay())
+                                  ->orWhere(function ($query) {
+                                    $query->whereDoesntHave("users")
+                                        ->whereDoesntHave("departments");
+                                });
+
+
+                        });
+                    });
 
 
 
 
 
+                })
+                ->orWhere(
+                    function($query) use ($today) {
+                    $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
+                        $query->where('holidays.start_date', "<=",  $today->startOfDay());
+                        $query->where('holidays.end_date', ">=",  $today->endOfDay());
+                        $query->doesntHave('users');
+
+                    });
+
+                }
+            );
         })
-        ->orWhere(
-            function($query) use ($today) {
-            $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                $query->where('holidays.start_date', "<=",  $today->startOfDay());
-                $query->where('holidays.end_date', ">=",  $today->endOfDay());
-                $query->doesntHave('users');
 
-            });
 
-        }
-        )
 
        ->count();
 

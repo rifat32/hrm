@@ -377,27 +377,24 @@ class ProjectController extends Controller
                      ], 500);
                  }
 
-
-                 $discharged_projects =  Project::whereHas("users",function($query) use($user){
-                    $query->where("users.id",$user->id);
-                 })
-                 ->whereNotIn("id",$request_data['projects'])
-                 ->get();
-
-
-
-                 EmployeeProjectHistory::where([
-                    "user_id" => $user->id,
-                    "to_date" => NULL
-                 ])
-                 ->whereIn("project_id",$discharged_projects->pluck("id"))
-                 ->update([
-                    "to_date" => now()
-                 ])
-                 ;
+              // need this in remove api
+                //  $discharged_projects =  Project::whereHas("users",function($query) use($user){
+                //     $query->where("users.id",$user->id);
+                //  })
+                //  ->whereNotIn("id",$request_data['projects'])
+                //  ->get();
+                //  EmployeeProjectHistory::where([
+                //     "user_id" => $user->id,
+                //     "to_date" => NULL
+                //  ])
+                //  ->whereIn("project_id",$discharged_projects->pluck("id"))
+                //  ->update([
+                //     "to_date" => now()
+                //  ])
+                //  ;
 
 
-                 foreach($request_data['projects'] as $project_id) {
+                 foreach($request_data['projects'] as $index=>$project_id) {
                   $project = Project::
                   whereHas("users",function($query) use($user){
                     $query->where("users.id",$user->id);
@@ -407,8 +404,16 @@ class ProjectController extends Controller
                    ])
                     ->first();
 
+                    if($project) {
+                            $error = [ "message" => "The given data was invalid.",
+                                       "errors" => [("projects.".$index)=>["The project is already belongs to that user."]]
+                                       ];
+                                           throw new Exception(json_encode($error),422);
 
-                    if(!$project) {
+                    }
+
+
+
 
                         $project = Project::where([
                            "id" => $project_id
@@ -434,6 +439,139 @@ class ProjectController extends Controller
 
           EmployeeProjectHistory::create($employee_project_history_data);
 
+                 }
+
+
+
+
+                 $user->projects()->sync($request_data['projects'], []);
+
+
+
+                 return response($user, 201);
+
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+ /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/projects/discharge-project",
+     *      operationId="dischargeProject",
+     *      tags={"project"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update project listing ",
+     *      description="This method is to update project listing",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *    @OA\Property(property="id", type="number", format="number",example="1"),
+     *     @OA\Property(property="projects", type="string", format="array", example={1,2,3}),
+ *
+ *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function dischargeProject(ProjectAssignToUserRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             // if(!$this->isModuleEnabled("project_and_task_management")) {
+             //     return response()->json(['error' => 'Module is not enabled'], 403);
+             //  }
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('project_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $request_data = $request->validated();
+                 $user_query_params = [
+                     "id" => $request_data["id"],
+                 ];
+                 $user  =  User::where($user_query_params)
+                     ->first();
+                 if (!$user) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+                 $discharged_projects =  Project::whereHas("users",function($query) use($user){
+                    $query->where("users.id",$user->id);
+                 })
+                 ->whereIn("id",$request_data['projects'])
+                 ->get();
+                 EmployeeProjectHistory::where([
+                    "user_id" => $user->id,
+                    "to_date" => NULL
+                 ])
+                 ->whereIn("project_id",$discharged_projects->pluck("id"))
+                 ->update([
+                    "to_date" => now()
+                 ])
+                 ;
+
+
+                 foreach($request_data['projects'] as $index=>$project_id) {
+                  $project = Project::
+                  whereHas("users",function($query) use($user){
+                    $query->where("users.id",$user->id);
+                 })
+                   ->where([
+                    "id" => $project_id
+                   ])
+                    ->first();
+
+
+                    if(!$project) {
+
+                 $error = [ "message" => "The given data was invalid.",
+                            "errors" => [("projects.".$index)=>["The project is not belongs to that user."]]
+                            ];
+                                throw new Exception(json_encode($error),422);
+
 
                     }
 
@@ -444,7 +582,7 @@ class ProjectController extends Controller
 
 
 
-                 $user->projects()->sync($request_data['projects'], []);
+                 $user->projects()->detach($request_data['projects']);
 
 
 
@@ -829,8 +967,8 @@ class ProjectController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $business_id =  $request->user()->business_id;
-            $project =  Project::
-            where([
+            $project =  Project::with("departments","users")
+            ->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

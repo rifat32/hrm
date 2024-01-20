@@ -140,10 +140,10 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
     }
 
-    public function scopeWhereHasRecursiveHolidays($query, $today)
+    public function scopeWhereHasRecursiveHolidays($query, $today,$depth = 5)
     {
-        $query->whereHas('departments', function ($subQuery) use ($today) {
-            $subQuery->whereHasRecursiveHolidays($today);
+        $query->whereHas('departments', function ($subQuery) use ($today,$depth) {
+            $subQuery->whereHasRecursiveHolidays($today,$depth);
         });
     }
 
