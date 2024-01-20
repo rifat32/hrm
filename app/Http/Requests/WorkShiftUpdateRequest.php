@@ -26,6 +26,15 @@ class WorkShiftUpdateRequest extends FormRequest
      */
     public function rules()
     {
+
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
+
+
         return [
             'id' => [
                 'required',
@@ -63,26 +72,27 @@ class WorkShiftUpdateRequest extends FormRequest
             'departments' => 'present|array',
             'departments.*' => [
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->exists();
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
-                    if (!$exists) {
-                        $fail("$attribute is invalid.");
-                    }
+                    $department = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->first();
+
+                        if (!$department) {
+                            $fail("$attribute is invalid.");
+                            return;
+                        }
+                        if(!in_array($department->id,$all_manager_department_ids)){
+                            $fail("$attribute is invalid. You don't have access to this department.");
+                            return;
+                        }
                 },
             ],
             'users' => 'present|array',
             'users.*' => [
                 "numeric",
-                function ($attribute, $value, $fail) {
-                    $all_manager_department_ids = [];
-                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                    foreach ($manager_departments as $manager_department) {
-                        $all_manager_department_ids[] = $manager_department->id;
-                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                    }
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+
 
                   $exists =  User::where(
                     [

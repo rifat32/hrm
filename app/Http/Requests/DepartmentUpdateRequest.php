@@ -27,20 +27,22 @@ class DepartmentUpdateRequest extends FormRequest
      */
     public function rules()
     {
+
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
         return [
             'id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail)use($all_manager_department_ids){
 
 
                     if(!empty($value)){
-                        $all_manager_department_ids = [];
-                        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                        foreach ($manager_departments as $manager_department) {
-                            $all_manager_department_ids[] = $manager_department->id;
-                            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                        }
+
                         $department = Department::where('id', $value)
                         ->where('departments.business_id', '=', auth()->user()->business_id)
                         ->whereNotIn("id",[$value])
@@ -135,13 +137,7 @@ class DepartmentUpdateRequest extends FormRequest
             'manager_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $all_manager_department_ids = [];
-                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                    foreach ($manager_departments as $manager_department) {
-                        $all_manager_department_ids[] = $manager_department->id;
-                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                    }
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
                   $exists =  User::where(
                     [
@@ -164,16 +160,11 @@ class DepartmentUpdateRequest extends FormRequest
             'parent_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
 
                     if(!empty($value)){
-                        $all_manager_department_ids = [];
-                        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                        foreach ($manager_departments as $manager_department) {
-                            $all_manager_department_ids[] = $manager_department->id;
-                            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                        }
+
                         $parent_department = Department::where('id', $value)
                         ->where('departments.business_id', '=', auth()->user()->business_id)
                         ->first();

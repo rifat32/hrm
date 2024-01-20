@@ -119,14 +119,14 @@ class SettingAttendanceController extends Controller
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]
                ];
+               if (!$request->user()->hasRole('superadmin')) {
+                $check_data["created_by"] =    $request_data["created_by"];
+                    }
+
                 $setting_attendance  =  SettingAttendance::updateOrCreate($check_data,$request_data);
 
 
                 } else {
-
-
-
-
                     $setting_attendance =     SettingAttendance::updateOrCreate([
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]

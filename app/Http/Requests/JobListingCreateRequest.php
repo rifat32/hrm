@@ -28,10 +28,16 @@ class JobListingCreateRequest extends FormRequest
      */
     public function rules()
     {
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
         return [
             'title' => 'required|string',
             'description' => 'required|string',
-          
+
             'minimum_salary' => 'required|numeric',
             'maximum_salary' => 'required|numeric',
             'experience_level' => 'required|string',
@@ -119,13 +125,8 @@ class JobListingCreateRequest extends FormRequest
             'department_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $all_manager_department_ids = [];
-                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                    foreach ($manager_departments as $manager_department) {
-                        $all_manager_department_ids[] = $manager_department->id;
-                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                    }
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+
                     $department = Department::where('id', $value)
                     ->where('departments.business_id', '=', auth()->user()->business_id)
                     ->first();

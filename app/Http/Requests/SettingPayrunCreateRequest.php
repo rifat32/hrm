@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingPayrunCreateRequest extends FormRequest
@@ -23,10 +25,64 @@ class SettingPayrunCreateRequest extends FormRequest
      */
     public function rules()
     {
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
         return [
             'payrun_period' => 'required|in:monthly,weekly',
             'consider_type' => 'required|in:hour,daily_log,none',
             'consider_overtime' => 'required|boolean',
+
+            'restricted_users' => 'present|array',
+            'restricted_users.*' => [
+                "numeric",
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+
+
+                  $exists =  User::where(
+                    [
+                        "users.id" => $value,
+                        "users.business_id" => auth()->user()->business_id
+
+                    ])
+                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->first();
+
+            if (!$exists) {
+                $fail("$attribute is invalid.");
+                return;
+            }
+
+
+
+                },
+
+            ],
+
+            'restricted_departments' => 'present|array',
+            'restricted_departments.*' => [
+                'numeric',
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+                    $department = Department::where('id', $value)
+                        ->where('departments.business_id', '=', auth()->user()->business_id)
+                        ->first();
+
+                        if (!$department) {
+                            $fail("$attribute is invalid.");
+                            return;
+                        }
+                        if(!in_array($department->id,$all_manager_department_ids)){
+                            $fail("$attribute is invalid. You don't have access to this department.");
+                            return;
+                        }
+                },
+            ]
+
         ];
     }
 

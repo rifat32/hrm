@@ -19,6 +19,18 @@ class SettingPayrun extends Model
         "is_default",
         "created_by"
     ];
+
+
+    public function restricted_users() {
+        return $this->belongsToMany(User::class, 'setting_payrun_restricted_users', 'setting_payrun_id', 'user_id');
+    }
+    public function restricted_departments() {
+        return $this->belongsToMany(Department::class, 'setting_payrun_restricted_departments', 'setting_payrun_id', 'department_id');
+    }
+
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

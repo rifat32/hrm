@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use App\Models\EmploymentStatus;
 use App\Models\Role;
 use App\Models\User;
@@ -26,34 +27,42 @@ class SettingLeaveCreateRequest extends FormRequest
      */
     public function rules()
     {
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
         return [
             'start_month' => 'required|integer|min:0|max:11',
             'approval_level' => 'required|string|in:single,multiple', // Adjust the valid values as needed
             'allow_bypass' => 'required|boolean',
             'special_users' => 'present|array',
             'special_users.*' => [
-                'numeric',
-                function ($attribute, $value, $fail) {
+                "numeric",
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
-                    $user = User::where("id", $value)
-                        ->first();
-                    if (!$user) {
-                        // $fail("$attribute is invalid.");
-                        $fail("User does not exists.");
-                    }
 
-                    if (empty(auth()->user()->business_id)) {
-                        if (!empty($user->business_id)) {
-                            // $fail("$attribute is invalid.");
-                            $fail("User belongs to another business.");
-                        }
-                    } else {
-                        if ($user->business_id != auth()->user()->business_id) {
-                            // $fail("$attribute is invalid.");
-                            $fail("User belongs to another business.");
-                        }
-                    }
+                  $exists =  User::where(
+                    [
+                        "users.id" => $value,
+                        "users.business_id" => auth()->user()->business_id
+
+                    ])
+                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->first();
+
+            if (!$exists) {
+                $fail("$attribute is invalid.");
+                return;
+            }
+
+
+
                 },
+
             ],
 
 

@@ -33,6 +33,12 @@ class UserCreateV2Request extends FormRequest
     public function rules()
     {
 
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
 
 
         return [
@@ -170,15 +176,22 @@ class UserCreateV2Request extends FormRequest
         ],
 
         'departments' => 'required|array',
-        'departments.*' =>  ['numeric',
-            function ($attribute, $value, $fail) {
-                $exists = Department::where('id', $value)
-                    ->where('departments.business_id', '=', auth()->user()->business_id)
-                    ->exists();
+        'departments.*' =>  [
+            'numeric',
+            function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
-                if (!$exists) {
-                    $fail("$attribute is invalid.");
-                }
+                $department = Department::where('id', $value)
+                    ->where('departments.business_id', '=', auth()->user()->business_id)
+                    ->first();
+
+                    if (!$department) {
+                        $fail("$attribute is invalid.");
+                        return;
+                    }
+                    if(!in_array($department->id,$all_manager_department_ids)){
+                        $fail("$attribute is invalid. You don't have access to this department.");
+                        return;
+                    }
             },
         ],
 
