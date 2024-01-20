@@ -33,12 +33,12 @@ class SettingPayrollController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *     @OA\Property(property="payrun_period", type="string", example="monthly"),
- *     @OA\Property(property="consider_type", type="string", example="hour"),
- *     @OA\Property(property="consider_overtime", type="boolean", example=true),
- * *     @OA\Property(property="restricted_users", type="string", format="array", example={1,2,3}),
- *     @OA\Property(property="restricted_departments", type="string", format="array", example={1,2,3})
- *
+     *     @OA\Property(property="payrun_period", type="string", example="monthly"),
+     *     @OA\Property(property="consider_type", type="string", example="hour"),
+     *     @OA\Property(property="consider_overtime", type="boolean", example=true),
+     * *     @OA\Property(property="restricted_users", type="string", format="array", example={1,2,3}),
+     *     @OA\Property(property="restricted_departments", type="string", format="array", example={1,2,3})
+     *
      *
      *         ),
      *      ),
@@ -76,229 +76,215 @@ class SettingPayrollController extends Controller
      *     )
      */
 
-     public function createSettingPayrun(SettingPayrunCreateRequest $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             return DB::transaction(function () use ($request) {
-                 if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
+    public function createSettingPayrun(SettingPayrunCreateRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
 
-                 $request_data["is_active"] = 1;
-                 $request_data["is_default"] = 0;
-                 $request_data["created_by"] = $request->user()->id;
-                 $request_data["business_id"] = $request->user()->business_id;
-
-                 if (empty($request->user()->business_id)) {
-
-                     $request_data["business_id"] = NULL;
-                     if ($request->user()->hasRole('superadmin')) {
-                         $request_data["is_default"] = 1;
-                     }
-                 }
+                $request_data["is_active"] = 1;
 
 
 
 
-if (empty($request->user()->business_id)) {
 
-    $check_data =     [
-        "business_id" => $request_data["business_id"],
-        "is_default" => $request_data["is_default"]
-];
-if (!$request->user()->hasRole('superadmin')) {
-$check_data["created_by"] =    $request_data["created_by"];
+                if (empty($request->user()->business_id)) {
+
+                    $request_data["business_id"] = NULL;
+                    $request_data["is_default"] = 0;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
+                    $check_data =     [
+                        "business_id" => $request_data["business_id"],
+                        "is_default" => $request_data["is_default"]
+                    ];
+                    if (!$request->user()->hasRole('superadmin')) {
+                        $check_data["created_by"] =    auth()->user()->id;
+                    }
+                } else {
+                    $request_data["business_id"] = auth()->user()->business_id;
+                    $request_data["is_default"] = 0;
+                    $check_data =     [
+                        "business_id" => $request_data["business_id"],
+                        "is_default" => $request_data["is_default"]
+                    ];
+                }
+
+                $setting_payrun =     SettingPayrun::updateOrCreate($check_data, $request_data);
+                $setting_payrun->restricted_users()->sync($request_data['restricted_users'], []);
+                $setting_payrun->restricted_departments()->sync($request_data['restricted_departments'], []);
+
+
+
+
+                return response($setting_payrun, 201);
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
     }
 
-$setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
 
 
-} else {
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/setting-payrun",
+     *      operationId="getSettingPayrun",
+     *      tags={"settings.setting_payroll.payrun"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
-    $setting_payrun =     SettingPayrun::updateOrCreate([
-        "business_id" => $request_data["business_id"],
-        "is_default" => $request_data["is_default"]
-    ],
-    $request_data
-);
-}
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
 
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
 
+     *      summary="This method is to get setting payrun  ",
+     *      description="This method is to get setting payrun ",
+     *
 
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
 
- $setting_payrun->restricted_users()->sync($request_data['restricted_users'],[]);
- $setting_payrun->restricted_departments()->sync($request_data['restricted_departments'],[]);
-
-
-
-
-                 return response($setting_payrun, 201);
-             });
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
-
-
-
-       /**
-      *
-      * @OA\Get(
-      *      path="/v1.0/setting-payrun",
-      *      operationId="getSettingPayrun",
-      *      tags={"settings.setting_payroll.payrun"},
-      *       security={
-      *           {"bearerAuth": {}}
-      *       },
-
-      *              @OA\Parameter(
-      *         name="per_page",
-      *         in="query",
-      *         description="per_page",
-      *         required=true,
-      *  example="6"
-      *      ),
-
-      *      * *  @OA\Parameter(
-      * name="start_date",
-      * in="query",
-      * description="start_date",
-      * required=true,
-      * example="2019-06-29"
-      * ),
-      * *  @OA\Parameter(
-      * name="end_date",
-      * in="query",
-      * description="end_date",
-      * required=true,
-      * example="2019-06-29"
-      * ),
-      * *  @OA\Parameter(
-      * name="search_key",
-      * in="query",
-      * description="search_key",
-      * required=true,
-      * example="search_key"
-      * ),
-      * *  @OA\Parameter(
-      * name="order_by",
-      * in="query",
-      * description="order_by",
-      * required=true,
-      * example="ASC"
-      * ),
-
-      *      summary="This method is to get setting payrun  ",
-      *      description="This method is to get setting payrun ",
-      *
-
-      *      @OA\Response(
-      *          response=200,
-      *          description="Successful operation",
-      *       @OA\JsonContent(),
-      *       ),
-      *      @OA\Response(
-      *          response=401,
-      *          description="Unauthenticated",
-      * @OA\JsonContent(),
-      *      ),
-      *        @OA\Response(
-      *          response=422,
-      *          description="Unprocesseble Content",
-      *    @OA\JsonContent(),
-      *      ),
-      *      @OA\Response(
-      *          response=403,
-      *          description="Forbidden",
-      *   @OA\JsonContent()
-      * ),
-      *  * @OA\Response(
-      *      response=400,
-      *      description="Bad Request",
-      *   *@OA\JsonContent()
-      *   ),
-      * @OA\Response(
-      *      response=404,
-      *      description="not found",
-      *   *@OA\JsonContent()
-      *   )
-      *      )
-      *     )
-      */
-
-      public function getSettingPayrun(Request $request)
-      {
-          try {
-              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
-                  return response()->json([
-                      "message" => "You can not perform this action"
-                  ], 401);
-              }
+    public function getSettingPayrun(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-              $setting_payrun = SettingPayrun::with("restricted_users","restricted_departments")
-              ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                 if (auth()->user()->hasRole('superadmin')) {
-                     return $query->where('setting_attendances.business_id', NULL)
-                         ->where('setting_attendances.is_default', 1)
-                         ->when(isset($request->is_active), function ($query) use ($request) {
-                             return $query->where('setting_attendances.is_active', intval($request->is_active));
-                         });
-                 } else {
-                     return   $query->where('setting_attendances.business_id', NULL)
-                     ->where('setting_attendances.is_default', 0)
-                     ->where('setting_attendances.created_by', auth()->user()->id);
-                 }
-             })
-                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                  return   $query->where('setting_attendances.business_id', auth()->user()->business_id)
-                     ->where('setting_attendances.is_default', 0);
+            $setting_payrun = SettingPayrun::with("restricted_users", "restricted_departments")
+                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                    if (auth()->user()->hasRole('superadmin')) {
+                        return $query->where('setting_attendances.business_id', NULL)
+                            ->where('setting_attendances.is_default', 1)
+                            ->when(isset($request->is_active), function ($query) use ($request) {
+                                return $query->where('setting_attendances.is_active', intval($request->is_active));
+                            });
+                    } else {
+                        return   $query->where('setting_attendances.business_id', NULL)
+                            ->where('setting_attendances.is_default', 0)
+                            ->where('setting_attendances.created_by', auth()->user()->id);
+                    }
+                })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                    return   $query->where('setting_attendances.business_id', auth()->user()->business_id)
+                        ->where('setting_attendances.is_default', 0);
+                })
 
-
-                 })
-
-                  ->when(!empty($request->search_key), function ($query) use ($request) {
-                      return $query->where(function ($query) use ($request) {
-                          $term = $request->search_key;
-                         //  $query->where("setting_payruns.name", "like", "%" . $term . "%");
-                      });
-                  })
-                  //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                  //        return $query->where('product_category_id', $request->product_category_id);
-                  //    })
-                  ->when(!empty($request->start_date), function ($query) use ($request) {
-                      return $query->where('setting_payruns.created_at', ">=", $request->start_date);
-                  })
-                  ->when(!empty($request->end_date), function ($query) use ($request) {
-                      return $query->where('setting_payruns.created_at', "<=", ($request->end_date . ' 23:59:59'));
-                  })
-                  ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                      return $query->orderBy("setting_payruns.id", $request->order_by);
-                  }, function ($query) {
-                      return $query->orderBy("setting_payruns.id", "DESC");
-                  })
-                  ->when(!empty($request->per_page), function ($query) use ($request) {
-                      return $query->paginate($request->per_page);
-                  }, function ($query) {
-                      return $query->get();
-                  });;
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        //  $query->where("setting_payruns.name", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('setting_payruns.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('setting_payruns.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("setting_payruns.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("setting_payruns.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
 
 
 
-              return response()->json($setting_payrun, 200);
-          } catch (Exception $e) {
+            return response()->json($setting_payrun, 200);
+        } catch (Exception $e) {
 
-              return $this->sendError($e, 500, $request);
-          }
-      }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-   /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/v1.0/setting-payslip/upload-logo",
      *      operationId="createSettingPayslipUploadLogo",
@@ -309,19 +295,19 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
      *      summary="This method is to store payslip logo",
      *      description="This method is to store payslip logo",
      *
-   *  @OA\RequestBody(
-        *   * @OA\MediaType(
-*     mediaType="multipart/form-data",
-*     @OA\Schema(
-*         required={"image"},
-*         @OA\Property(
-*             description="image to upload",
-*             property="image",
-*             type="file",
-*             collectionFormat="multi",
-*         )
-*     )
-* )
+     *  @OA\RequestBody(
+     *   * @OA\MediaType(
+     *     mediaType="multipart/form-data",
+     *     @OA\Schema(
+     *         required={"image"},
+     *         @OA\Property(
+     *             description="image to upload",
+     *             property="image",
+     *             type="file",
+     *             collectionFormat="multi",
+     *         )
+     *     )
+     * )
 
 
 
@@ -360,35 +346,33 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
      *     )
      */
 
-     public function createSettingPayslipUploadLogo(ImageUploadRequest $request)
-     {
-         try{
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if(!$request->user()->hasPermissionTo('setting_payroll_create')){
-                  return response()->json([
-                     "message" => "You can not perform this action"
-                  ],401);
-             }
+    public function createSettingPayslipUploadLogo(ImageUploadRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $insertableData = $request->validated();
+            $insertableData = $request->validated();
 
-             $location =  config("setup-config.payslip_logo_location");
-
-
-             $new_file_name = time() . '_' . str_replace(' ', '_', $insertableData["image"]->getClientOriginalName());
-             $insertableData["image"]->move(public_path($location), $new_file_name);
+            $location =  config("setup-config.payslip_logo_location");
 
 
-             return response()->json(["image" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
+            $new_file_name = time() . '_' . str_replace(' ', '_', $insertableData["image"]->getClientOriginalName());
+            $insertableData["image"]->move(public_path($location), $new_file_name);
 
 
-         } catch(Exception $e){
-             error_log($e->getMessage());
-             return $this->sendError($e,500,$request);
-         }
-     }
+            return response()->json(["image" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-      /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/setting-payslip",
@@ -403,10 +387,10 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- *     @OA\Property(property="logo", type="string", format="string", example="test.jpg"),
- *     @OA\Property(property="title", type="string", format="string", example="test"),
- *     @OA\Property(property="address", type="string", format="string", example="dhaka")
- *
+     *     @OA\Property(property="logo", type="string", format="string", example="test.jpg"),
+     *     @OA\Property(property="title", type="string", format="string", example="test"),
+     *     @OA\Property(property="address", type="string", format="string", example="dhaka")
+     *
      *
      *         ),
      *      ),
@@ -447,7 +431,7 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
     public function createSettingPayslip(SettingPayslipCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
                     return response()->json([
@@ -461,31 +445,30 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
 
                 if (empty($request->user()->business_id)) {
 
-                $request_data["business_id"] = NULL;
-                $request_data["is_default"] = 1;
+                    $request_data["business_id"] = NULL;
+                    $request_data["is_default"] = 1;
 
-                $setting_payslip  =  SettingPayslip::updateOrCreate([
-                    "business_id" => $request_data["business_id"],
-                    "is_default" => $request_data["is_default"]
-                ],
+                    $setting_payslip  =  SettingPayslip::updateOrCreate(
+                        [
+                            "business_id" => $request_data["business_id"],
+                            "is_default" => $request_data["is_default"]
+                        ],
 
-             $request_data
-
-
-
-            );
+                        $request_data
 
 
 
+                    );
                 } else {
                     $request_data["business_id"] = $request->user()->business_id;
                     $request_data["is_default"] = 0;
-                    $setting_payslip =     SettingPayslip::updateOrCreate([
-                        "business_id" => $request_data["business_id"],
-                        "is_default" => $request_data["is_default"]
-                    ],
-                    $request_data
-                );
+                    $setting_payslip =     SettingPayslip::updateOrCreate(
+                        [
+                            "business_id" => $request_data["business_id"],
+                            "is_default" => $request_data["is_default"]
+                        ],
+                        $request_data
+                    );
                 }
 
 
@@ -500,7 +483,7 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
 
 
 
-      /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/setting-payslip",
@@ -585,63 +568,57 @@ $setting_payrun  =  SettingPayrun::updateOrCreate($check_data,$request_data);
      *     )
      */
 
-     public function getSettingPayslip(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getSettingPayslip(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $setting_payslip = SettingPayslip::when(empty($request->user()->business_id), function ($query) use ($request) {
-                 return $query->where('setting_payslips.business_id', NULL)
-                              ->where('setting_payslips.is_default', 1);
-             })
-             ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                 return $query->where('setting_payslips.business_id', $request->user()->business_id)
-                 ->where('setting_payslips.is_default', 0);
-             })
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
+            $setting_payslip = SettingPayslip::when(empty($request->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_payslips.business_id', NULL)
+                    ->where('setting_payslips.is_default', 1);
+            })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                    return $query->where('setting_payslips.business_id', $request->user()->business_id)
+                        ->where('setting_payslips.is_default', 0);
+                })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
                         //  $query->where("setting_payslips.name", "like", "%" . $term . "%");
-                     });
-                 })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('setting_payslips.created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('setting_payslips.created_at', "<=", ($request->end_date . ' 23:59:59'));
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("setting_payslips.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("setting_payslips.id", "DESC");
-                 })
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });;
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('setting_payslips.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('setting_payslips.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("setting_payslips.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("setting_payslips.id", "DESC");
+                })
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });;
 
 
 
-             return response()->json($setting_payslip, 200);
-         } catch (Exception $e) {
+            return response()->json($setting_payslip, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
-
-
-
-
-
-
+            return $this->sendError($e, 500, $request);
+        }
+    }
 }

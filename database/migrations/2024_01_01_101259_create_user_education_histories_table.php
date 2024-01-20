@@ -27,7 +27,7 @@ class CreateUserEducationHistoriesTable extends Migration
             $table->date('start_date');
             $table->text('achievements')->nullable();
             $table->text('description')->nullable();
-            $table->string("address");
+            $table->string("address")->nullable();
             $table->string("country")->nullable();
             $table->string("city")->nullable();
             $table->string("postcode")->nullable();

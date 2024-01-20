@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
+use App\Models\SettingPayrun;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
@@ -538,17 +539,29 @@ trait BusinessUtil
 
     public function loadDefaultSettingLeave($business_id = NULL) {
     // load setting leave
+
     $default_setting_leave_query = [
         "business_id" => NULL,
         "is_active" => 1,
-        "is_default" => 1
+        "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
     ];
-    if(!auth()->user()->hasRole("superadmin")) {
-        $default_setting_leave_query["is_default"] = 0;
+
+    if (!auth()->user()->hasRole("superadmin")) {
         $default_setting_leave_query["created_by"] = auth()->user()->id;
     }
 
-    $defaultSettingLeaves = SettingLeave::where($default_setting_leave_query)->get();
+    $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
+
+    // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
+    if ($defaultSettingLeaves->isEmpty() && !auth()->user()->hasRole("superadmin")) {
+        unset($default_setting_leave_query['created_by']);
+        $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
+    }
+
+
+
+
+
     foreach ($defaultSettingLeaves as $defaultSettingLeave) {
         $insertableData = [
             'start_month' => $defaultSettingLeave->start_month,
@@ -581,20 +594,30 @@ trait BusinessUtil
     }
 
 
-    public function loadDefaultAttendance($business_id = NULL) {
+    public function loadDefaultAttendanceSetting($business_id = NULL) {
           // load setting attendance
 
           $default_setting_attendance_query = [
             "business_id" => NULL,
             "is_active" => 1,
-            "is_default" => 1
+            "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
         ];
-        if(!auth()->user()->hasRole("superadmin")) {
-            $default_setting_attendance_query["is_default"] = 0;
+
+        if (!auth()->user()->hasRole("superadmin")) {
             $default_setting_attendance_query["created_by"] = auth()->user()->id;
         }
 
-          $defaultSettingAttendances = SettingAttendance::where($default_setting_attendance_query)->get();
+        $defaultSettingAttendances = SettingPayrun::where($default_setting_attendance_query)->get();
+
+        // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
+        if ($defaultSettingAttendances->isEmpty() && !auth()->user()->hasRole("superadmin")) {
+            unset($default_setting_attendance_query['created_by']);
+            $defaultSettingAttendances = SettingPayrun::where($default_setting_attendance_query)->get();
+        }
+
+
+
+
 
 
 
@@ -628,6 +651,54 @@ trait BusinessUtil
         // end load setting attendance
 
     }
+    public function loadDefaultPayrunSetting($business_id = NULL) {
+        // load setting attendance
+
+        $default_setting_payrun_query = [
+            "business_id" => NULL,
+            "is_active" => 1,
+            "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
+        ];
+
+        if (!auth()->user()->hasRole("superadmin")) {
+            $default_setting_payrun_query["created_by"] = auth()->user()->id;
+        }
+
+        $defaultSettingPayruns = SettingPayrun::where($default_setting_payrun_query)->get();
+
+        // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
+        if ($defaultSettingPayruns->isEmpty() && !auth()->user()->hasRole("superadmin")) {
+            unset($default_setting_payrun_query['created_by']);
+            $defaultSettingPayruns = SettingPayrun::where($default_setting_payrun_query)->get();
+        }
+
+
+      foreach ($defaultSettingPayruns as $defaultSettingPayrun) {
+          $insertableData = [
+              'payrun_period' => $defaultSettingPayrun->payrun_period,
+              'consider_type' => $defaultSettingPayrun->consider_type,
+              'consider_overtime' => $defaultSettingPayrun->consider_overtime,
+
+              "created_by" => auth()->user()->id,
+              "is_active" => 1,
+              "is_default" => 0,
+              "business_id" => $business_id,
+          ];
+
+          $setting_payrun  = SettingPayrun::create($insertableData);
+
+
+
+
+        //   $business_owner_role_id = Role::where([
+        //       "name" => ("business_owner#" . $business_id)
+        //   ])
+        //   ->pluck("id");
+        //   $setting_attendance->special_roles()->sync($business_owner_role_id, []);
+      }
+    }
+
+      // end load setting attendance
 
     public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1,$business)
     {
@@ -696,9 +767,9 @@ trait BusinessUtil
 
        $this->loadDefaultSettingLeave($business_id);
 
-       $this->loadDefaultAttendance($business_id);
+       $this->loadDefaultAttendanceSetting($business_id);
 
-
+       $this->loadDefaultPayrunSetting($business_id);
 
 
        $default_work_shift_data = [

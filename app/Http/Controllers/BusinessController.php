@@ -1138,7 +1138,7 @@ if(!$user->hasRole('business_owner')) {
             $businessQuery  = Business::where(["id" => $request_data["id"]]);
             if(!auth()->user()->hasRole('superadmin')) {
                 $businessQuery = $businessQuery->where(function ($query) {
-                return   $query->where('business_id', auth()->user()->business_id)
+                return   $query->where('id', auth()->user()->business_id)
                     ->orWhere('created_by', auth()->user()->id)
                     ->orWhere('owner_id', auth()->user()->id);
                 });

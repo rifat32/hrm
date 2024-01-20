@@ -96,44 +96,34 @@ class SettingAttendanceController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["is_active"] = 1;
-                $request_data["is_default"] = 0;
-                $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+
+
+
+
 
                 if (empty($request->user()->business_id)) {
-
                     $request_data["business_id"] = NULL;
+                    $request_data["is_default"] = 0;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
                     }
-                }
-
-                // if(!empty($request_data["alert_area"])){
-                //     $request_data["alert_area"] = json_encode($request_data["alert_area"]);
-                // }
-
-
-                if (empty($request->user()->business_id)) {
-
                     $check_data =     [
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]
-               ];
-               if (!$request->user()->hasRole('superadmin')) {
-                $check_data["created_by"] =    $request_data["created_by"];
+                    ];
+                    if (!$request->user()->hasRole('superadmin')) {
+                        $check_data["created_by"] =    auth()->user()->id;
                     }
-
-                $setting_attendance  =  SettingAttendance::updateOrCreate($check_data,$request_data);
-
-
                 } else {
-                    $setting_attendance =     SettingAttendance::updateOrCreate([
+                    $request_data["business_id"] = auth()->user()->business_id;
+                    $request_data["is_default"] = 0;
+                    $check_data =     [
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]
-                    ],
-                    $request_data
-                );
+                    ];
                 }
+
+                $setting_attendance =     SettingAttendance::updateOrCreate($check_data, $request_data);
 
 
 

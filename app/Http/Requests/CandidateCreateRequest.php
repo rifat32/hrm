@@ -29,12 +29,18 @@ class CandidateCreateRequest extends FormRequest
             'email' => 'required|email',
             'phone' => 'required|string',
             'experience_years' => 'required|integer',
-            'education_level' => 'required|string',
+            'education_level' => 'nullable|string|in:no_formal_education,primary_education,secondary_education_or_high_school,ged,vocational_qualification,bachelor_degree,master_degree,doctorate_or_higher',
+
+            "job_platform" => "required|string",
+
+
             'cover_letter' => 'nullable|string',
             'application_date' => 'required|date',
             'interview_date' => 'nullable|date|after:application_date',
             'feedback' => 'required|string',
-            'status' => 'required|in:review,interviewed,hired,rejected',
+
+
+            'status' => 'required|in:applied,progress, interview_stage_1, interview_stage_2, final_interview, rejected, job_offered, hired',
             'job_listing_id' => [
                 'required',
                 'numeric',

@@ -21,6 +21,7 @@ use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
+use App\Models\SettingPayrun;
 use App\Models\SocialSite;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
@@ -550,6 +551,16 @@ return "swagger generated";
         ]);
 
 
+        SettingPayrun::create([
+            'payrun_period' => "weekly",
+            'consider_type' => "daily_log",
+            'consider_overtime' => 1,
+
+            "business_id" => NULL,
+            "is_active" => 1,
+            "is_default" => 1,
+            "created_by" => $admin->id,
+        ]);
 
 
         $default_work_shift_data_1 = [

@@ -16,6 +16,7 @@ class Candidate extends Model
         'phone',
         'experience_years',
         'education_level',
+        "job_platform",
         'cover_letter',
         'application_date',
         'interview_date',
@@ -33,6 +34,8 @@ class Candidate extends Model
         'attachments' => 'array',
 
     ];
+
+
 
     public function getCreatedAtAttribute($value)
     {

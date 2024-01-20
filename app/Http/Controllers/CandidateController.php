@@ -138,6 +138,7 @@ class CandidateController extends Controller
  *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
  *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
  *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
+ *  *  *     @OA\Property(property="job_platform", type="string", format="string", example="facebook"),
  *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
  *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
  *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
@@ -218,6 +219,108 @@ class CandidateController extends Controller
         }
     }
 
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/client/candidates",
+     *      operationId="createCandidateClient",
+     *      tags={"candidates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store candidate",
+     *      description="This method is to store candidate",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+*     @OA\Property(property="name", type="string", format="string", example="John Doe"),
+ *     @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+ *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
+ *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
+ *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
+ *  *  *     @OA\Property(property="job_platform", type="string", format="string", example="facebook"),
+ *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
+ *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
+ *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
+ *     @OA\Property(property="feedback", type="string", format="string", example="Positive feedback..."),
+ *     @OA\Property(property="status", type="string", format="string", example="review"),
+ *     @OA\Property(property="job_listing_id", type="integer", format="int", example=1),
+ *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *
+ *
+ *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createCandidateClient(CandidateCreateRequest $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('candidate_create')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+
+
+
+
+
+                 $request_data["business_id"] = $request->user()->business_id;
+                 $request_data["is_active"] = true;
+                 $request_data["created_by"] = $request->user()->id;
+
+                 $candidate =  Candidate::create($request_data);
+
+
+
+                 return response($candidate, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
     /**
      *
      * @OA\Put(
@@ -239,6 +342,8 @@ class CandidateController extends Controller
  *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
  *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
  *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
+ *  *     @OA\Property(property="job_platform", type="string", format="string", example="facebook"),
+ *
  *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
  *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
  *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
@@ -320,6 +425,7 @@ class CandidateController extends Controller
                         'phone',
                         'experience_years',
                         'education_level',
+                        "job_platform",
                         'cover_letter',
                         'application_date',
                         'interview_date',

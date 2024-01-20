@@ -19,12 +19,39 @@ class CreateCandidatesTable extends Migration
             $table->string("email");
             $table->string("phone");
             $table->integer("experience_years");
-            $table->string("education_level");
+
+            $table->enum('education_level', [
+                'no_formal_education',
+                'primary_education',
+                'secondary_education_or_high_school',
+                'ged',
+                'vocational_qualification',
+                'bachelor_degree',
+                'master_degree',
+                'doctorate_or_higher'
+            ])->nullable();
+
+            $table->string("job_platform");
+
+
+
             $table->string("cover_letter")->nullable();
             $table->date("application_date");
             $table->date("interview_date")->nullable();
             $table->text("feedback");
-            $table->enum('status', ['review', 'interviewed', 'hired','rejected']);
+
+            $table->enum('status', [
+                'applied',
+                'progress',
+                'interview_stage_1',
+                'interview_stage_2',
+                'final_interview',
+                'rejected',
+                'job_offered',
+                'hired'
+            ])->default('applied');
+
+
 
 
             $table->unsignedBigInteger("job_listing_id");

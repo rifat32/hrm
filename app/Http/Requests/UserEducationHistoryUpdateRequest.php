@@ -78,7 +78,7 @@ class UserEducationHistoryUpdateRequest extends FormRequest
             'start_date' => 'required|date',
             'achievements' => 'nullable|string',
             'description' => 'nullable|string',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
             'country' => 'nullable|string',
             'city' => 'nullable|string',
             'postcode' => 'nullable|string',

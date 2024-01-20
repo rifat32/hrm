@@ -90,50 +90,35 @@ class SettingLeaveController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["is_active"] = 1;
-                $request_data["is_default"] = 0;
-                $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+
+
+
+
 
                 if (empty($request->user()->business_id)) {
+
                     $request_data["business_id"] = NULL;
+                    $request_data["is_default"] = 0;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
                     }
-                }
-
-
-
-
-                if (empty($request->user()->business_id)) {
-
-               $check_data =     [
+                    $check_data =     [
                         "business_id" => $request_data["business_id"],
                         "is_default" => $request_data["is_default"]
-               ];
-               if (!$request->user()->hasRole('superadmin')) {
-        $check_data["created_by"] =    $request_data["created_by"];
-            }
-
-
-                    $setting_leave  =  SettingLeave::updateOrCreate(
-                        $check_data
-                        ,
-
-                        $request_data
-
-                    );
+                    ];
+                    if (!$request->user()->hasRole('superadmin')) {
+                        $check_data["created_by"] =    auth()->user()->id;
+                    }
                 } else {
-
-                    $setting_leave =     SettingLeave::updateOrCreate(
-                        [
-                            "business_id" => $request_data["business_id"],
-                            "is_default" => $request_data["is_default"]
-                        ],
-                        $request_data
-                    );
-
-
+                    $request_data["business_id"] = auth()->user()->business_id;
+                    $request_data["is_default"] = 0;
+                    $check_data =     [
+                        "business_id" => $request_data["business_id"],
+                        "is_default" => $request_data["is_default"]
+                    ];
                 }
+
+                $setting_leave =     SettingLeave::updateOrCreate($check_data, $request_data);
 
                 $setting_leave->special_users()->sync($request_data['special_users'],[]);
                 $setting_leave->special_roles()->sync($request_data['special_roles'],[]);
