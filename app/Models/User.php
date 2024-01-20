@@ -20,7 +20,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-
+    protected $appends = ['has_this_project'];
     protected $guard_name = "api";
     protected $fillable = [
         'first_Name',
@@ -68,6 +68,28 @@ class User extends Authenticatable
         "created_by",
          'is_active'
     ];
+
+  public function getHasThisProjectAttribute($value) {
+    $request = request();
+    // You can now use $currentRequest as the request object
+    $has_this_project = $request->input('has_this_project');
+
+
+    if(empty($has_this_project)) {
+        return NULL;
+    }
+    $project = Project::
+    whereHas("users",function($query) {
+      $query->where("users.id",$this->id);
+   })
+     ->where([
+      "id" => $has_this_project
+     ])
+      ->first();
+
+      return $project?1:0;
+
+    }
 
 
     public function projects() {

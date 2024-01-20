@@ -23,7 +23,7 @@ use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
 use App\Models\ActivityLog;
-use App\Models\Booking;
+
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
@@ -2745,6 +2745,14 @@ class UserManagementController extends Controller
      * name="is_in_employee",
      * in="query",
      * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="has_this_project",
+     * in="query",
+     * description="has_this_project",
      * required=true,
      * example="1"
      * ),
