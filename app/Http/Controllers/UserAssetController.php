@@ -519,6 +519,15 @@ class UserAssetController extends Controller
        *         required=true,
        *  example="1"
        *      ),
+       *
+       *    @OA\Parameter(
+       *         name="type",
+       *         in="query",
+       *         description="type",
+       *         required=true,
+       *  example="1"
+       *      ),
+       *
        *              @OA\Parameter(
        *         name="per_page",
        *         in="query",
@@ -620,6 +629,7 @@ class UserAssetController extends Controller
                 "business_id" => auth()->user()->business_id
               ])
 
+
               ->where(function($query) use($all_manager_department_ids) {
                 $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
@@ -634,6 +644,9 @@ class UserAssetController extends Controller
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;
                           $query->where("user_assets.name", "like", "%" . $term . "%");
+                          $query->orWhere("user_assets.code", "like", "%" . $term . "%");
+                          $query->orWhere("user_assets.serial_number", "like", "%" . $term . "%");
+
                           //     ->orWhere("user_assets.description", "like", "%" . $term . "%");
                       });
                   })
@@ -641,9 +654,13 @@ class UserAssetController extends Controller
                   //        return $query->where('product_category_id', $request->product_category_id);
                   //    })
 
-                  ->when(!empty($request->user_id), function ($query) use ($request,$all_manager_department_ids) {
+                  ->when(!empty($request->user_id), function ($query) use ($request) {
                       return $query->where('user_assets.user_id', $request->user_id);
                   })
+                  ->when(!empty($request->type), function ($query) use ($request) {
+                    return $query->where('user_assets.type', $request->type);
+                })
+
                 //   ->when(empty($request->user_id), function ($query) use ($request) {
                 //       return $query->where('user_assets.user_id', $request->user()->id);
                 //   })

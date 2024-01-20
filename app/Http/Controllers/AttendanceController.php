@@ -1087,6 +1087,23 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="1"
      * ),
+     *  *   * *  @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     *  *   * *  @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="status",
+     * required=true,
+     * example="pending_approval"
+     * ),
+     *
+     *
+     *
      *
      * *  @OA\Parameter(
      * name="order_by",
@@ -1183,13 +1200,22 @@ foreach ($assigned_departments as $assigned_department) {
                     });
                 })
                 ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_id', $request->user_id);
+                    return $query->where('attendances.user_id', $request->user_id);
                 })
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('attendances.status', $request->status);
+                })
+                ->when(!empty($request->department_id), function ($query) use ($request) {
+                    return $query->whereHas("employee.departments", function ($query) use ($request) {
+                        $query->where("departments.id", $request->department_id);
+                    });
+                })
+
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('attendances.created_at', ">=", $request->start_date);
+                    return $query->where('attendances.in_date', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('attendances.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('attendances.in_date', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("attendances.id", $request->order_by);

@@ -908,7 +908,7 @@ if(!$fields_changed){
             $business_id =  $request->user()->business_id;
             $work_shift =  WorkShift::with("details")->where([
                 "id" => $id,
-                "business_id" => $business_id
+                // "business_id" => $business_id
             ])
                 ->first();
             if (!$work_shift) {

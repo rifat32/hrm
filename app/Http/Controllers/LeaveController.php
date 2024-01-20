@@ -1281,8 +1281,24 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="1"
      * ),
+     * @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
      *
-     * *  @OA\Parameter(
+     * @OA\Parameter(
+     * name="leave_type_id",
+     * in="query",
+     * description="leave_type_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     * @OA\Parameter(
      * name="order_by",
      * in="query",
      * description="order_by",
@@ -1344,6 +1360,7 @@ foreach ($assigned_departments as $assigned_department) {
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
 
+
             $business_id =  $request->user()->business_id;
             $leaves = Leave::where(
                 [
@@ -1367,6 +1384,16 @@ foreach ($assigned_departments as $assigned_department) {
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('leaves.user_id', $request->user_id);
                 })
+                ->when(!empty($request->leave_type_id), function ($query) use ($request) {
+                    return $query->where('leaves.leave_type_id', $request->leave_type_id);
+                })
+
+                ->when(!empty($request->department_id), function ($query) use ($request) {
+                    return $query->whereHas("employee.departments", function($query) use($request) {
+                        $query->where("departments.id",$request->department_id);
+                     });
+                })
+
 
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {

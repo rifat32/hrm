@@ -30,8 +30,10 @@ class CreateUsersTable extends Migration
             $table->boolean('is_in_employee')->nullable()->default(false);
             $table->unsignedBigInteger('designation_id')->nullable();
             $table->foreign('designation_id')->references('id')->on('designations')->onDelete('restrict');
+
             $table->unsignedBigInteger('employment_status_id')->nullable();
             $table->foreign('employment_status_id')->references('id')->on('employment_statuses')->onDelete('restrict');
+
             $table->date('joining_date')->nullable()->default(today());
             $table->double('salary_per_annum')->nullable()->default(0);
             $table->double('weekly_contractual_hours')->nullable()->default(0);

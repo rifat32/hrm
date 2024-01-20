@@ -2765,6 +2765,75 @@ class UserManagementController extends Controller
      * example="1"
      * ),
      *
+     *  *      *     @OA\Parameter(
+     * name="employment_status_id",
+     * in="query",
+     * description="employment_status_id",
+     * required=true,
+     * example="1"
+     * ),
+     *      *  *      *     @OA\Parameter(
+     * name="immigration_status",
+     * in="query",
+     * description="immigration_status",
+     * required=true,
+     * example="1"
+     * ),
+     *    *
+     *  @OA\Parameter(
+     * name="sponsorship_status",
+     * in="query",
+     * description="sponsorship_status",
+     * required=true,
+     * example="sponsorship_status"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_note",
+     * in="query",
+     * description="sponsorship_note",
+     * required=true,
+     * example="sponsorship_note"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_certificate_number",
+     * in="query",
+     * description="sponsorship_certificate_number",
+     * required=true,
+     * example="sponsorship_certificate_number"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_current_certificate_status",
+     * in="query",
+     * description="sponsorship_current_certificate_status",
+     * required=true,
+     * example="sponsorship_current_certificate_status"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_is_sponsorship_withdrawn",
+     * in="query",
+     * description="sponsorship_is_sponsorship_withdrawn",
+     * required=true,
+     * example="0"
+     * ),
+     *
+     *
+     *
+     *
+     *
+     *  *      *     @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     * @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
      *
      *      *   * *  @OA\Parameter(
      * name="is_active",
@@ -2904,6 +2973,55 @@ class UserManagementController extends Controller
                 ->when(isset($request->is_in_employee), function ($query) use ($request) {
                     return $query->where('is_in_employee', intval($request->is_in_employee));
                 })
+                ->when(!empty($request->employment_status_id), function ($query) use ($request) {
+                    return $query->where('employment_status_id', ($request->employment_status_id));
+                })
+                ->when(!empty($request->immigration_status), function ($query) use ($request) {
+                    return $query->where('immigration_status', ($request->immigration_status));
+                })
+                ->when(!empty($request->sponsorship_status), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.status",$request->sponsorship_status);
+                    });
+                })
+                ->when(!empty($request->sponsorship_note), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.note",$request->sponsorship_note);
+                    });
+                })
+                ->when(!empty($request->sponsorship_certificate_number), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.certificate_number",$request->sponsorship_certificate_number);
+                    });
+                })
+                ->when(!empty($request->sponsorship_current_certificate_status), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.current_certificate_status",$request->sponsorship_current_certificate_status);
+                    });
+                })
+                ->when(!isset($request->sponsorship_is_sponsorship_withdrawn), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.is_sponsorship_withdrawn",intval($request->sponsorship_is_sponsorship_withdrawn));
+                    });
+                })
+
+
+
+
+
+
+                ->when(isset($request->project_id), function ($query) use ($request) {
+                    return $query->whereHas("projects",function($query) use($request) {
+                        $query->where("projects.id",$request->project_id);
+                    });
+                })
+                ->when(!empty($request->department_id), function ($query) use ($request) {
+                    return $query->whereHas("departments", function($query) use($request) {
+                        $query->where("departments.id",$request->department_id);
+                     });
+                })
+
+
                 ->when(isset($request->is_active), function ($query) use ($request) {
                     return $query->where('is_active', intval($request->is_active));
                 })
