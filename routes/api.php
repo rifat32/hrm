@@ -887,6 +887,7 @@ Route::delete('/v1.0/candidates/{ids}', [CandidateController::class, "deleteCand
 Route::post('/v1.0/projects', [ProjectController::class, "createProject"]);
 
 Route::put('/v1.0/projects/assign-user', [ProjectController::class, "assignUser"]);
+Route::put('/v1.0/projects/discharge-user', [ProjectController::class, "dischargeUser"]);
 
 Route::put('/v1.0/projects/assign-project', [ProjectController::class, "assignProject"]);
 Route::put('/v1.0/projects/discharge-project', [ProjectController::class, "dischargeProject"]);
