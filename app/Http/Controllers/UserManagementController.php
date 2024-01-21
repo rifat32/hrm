@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\File;
+use Barryvdh\DomPDF\Facade as PDF;
 // eeeeee
 class UserManagementController extends Controller
 {
@@ -2828,6 +2829,20 @@ class UserManagementController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -3300,10 +3315,6 @@ class UserManagementController extends Controller
 
 
 
-
-
-
-
                 ->when(!empty($request->start_passport_issue_date), function ($query) use ($request) {
                     return $query->whereHas("passport_details", function ($query) use ($request) {
                         $query->where("employee_passport_details.passport_issue_date", ">=", $request->start_passport_issue_date);
@@ -3314,8 +3325,6 @@ class UserManagementController extends Controller
                         $query->where("employee_passport_details.passport_issue_date", "<=", $request->end_passport_issue_date . ' 23:59:59');
                     });
                 })
-
-
 
 
                 ->when(!empty($request->start_passport_expiry_date), function ($query) use ($request) {
@@ -3382,7 +3391,25 @@ class UserManagementController extends Controller
                     return $query->get();
                 });
 
-            return response()->json($users, 200);
+
+
+                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                    if (strtoupper($request->response_type) == 'PDF') {
+                        $pdf = PDF::loadView('pdf.users', $users);
+                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                    } else {
+                        // Logic for CSV generation (you can use a library like maatwebsite/excel)
+                        // Example: return Excel::download(new UsersExport($users), 'users.csv');
+                    }
+                } else {
+                    return response()->json($users, 200);
+                }
+
+
+
+
+
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

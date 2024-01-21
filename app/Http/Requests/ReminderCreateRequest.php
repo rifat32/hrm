@@ -28,7 +28,7 @@ class ReminderCreateRequest extends FormRequest
             'duration' => 'required|numeric',
             'duration_unit' => 'required|in:days,weeks,months',
             'send_time' => 'required|in:before_expiry,after_expiry',
-            'frequency_after_first_reminder' => 'required:send_time,after_expiry|integer',
+            'frequency_after_first_reminder' => 'required|integer',
             'keep_sending_until_update' => 'required|boolean',
             'entity_name' => 'required|string',
 
@@ -37,7 +37,8 @@ class ReminderCreateRequest extends FormRequest
     public function messages()
     {
         return [
-            'duration_unit.in' => 'The :attribute must be either "before_expiry" or "after_expiry ".',
+            'duration_unit.in' => 'The :attribute valid values are days, weeks, months.',
+            'send_time.in' => 'The :attribute valid values are before_expiry, after_expiry.'
         ];
     }
 }
