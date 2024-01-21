@@ -54,7 +54,8 @@ class AttendanceController extends Controller
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
-     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
      *
      *
      *
@@ -326,7 +327,9 @@ class AttendanceController extends Controller
      * "out_time" : "12:44:00",
      * "in_date" : "2023-11-18",
      * "does_break_taken" : 1,
-     * "work_location_id" : 1
+     * "work_location_id" : 1,
+     * "project_id" : 1
+     *
      *
      *
      * }
@@ -552,6 +555,7 @@ foreach ($assigned_departments as $assigned_department) {
                         "in_time" => $item["in_time"],
                         "out_time" => $item["out_time"],
                         "work_location_id" => $item["work_location_id"],
+                        "project_id" => $item["project_id"],
                         "in_date" => $item["in_date"],
                         "does_break_taken" => $item["does_break_taken"],
                         "capacity_hours" => $capacity_hours,
@@ -639,7 +643,9 @@ foreach ($assigned_departments as $assigned_department) {
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
-     *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
+     *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     * *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+     *
 
      *
      *         ),
@@ -861,7 +867,8 @@ foreach ($assigned_departments as $assigned_department) {
                         "break_hours",
                         "total_paid_hours",
                         "regular_work_hours",
-                        "work_location_id"
+                        "work_location_id",
+                        "project_id",
 
                         // "is_active",
                         // "business_id",
@@ -1094,6 +1101,20 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="1"
      * ),
+     * @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="1"
+     * ),
+     *  * @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="1"
+     * ),
      *     *  *   * *  @OA\Parameter(
      * name="status",
      * in="query",
@@ -1181,7 +1202,8 @@ foreach ($assigned_departments as $assigned_department) {
                 "employee.departments" => function ($query) {
                     $query->select('departments.id', 'departments.name');
                 },
-                "work_location"
+                "work_location",
+                "project"
             ])
                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
@@ -1202,6 +1224,13 @@ foreach ($assigned_departments as $assigned_department) {
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('attendances.user_id', $request->user_id);
                 })
+                ->when(!empty($request->project_id), function ($query) use ($request) {
+                    return $query->where('attendances.project_id', $request->project_id);
+                })
+                ->when(!empty($request->work_location_id), function ($query) use ($request) {
+                    return $query->where('attendances.work_location_id', $request->work_location_id);
+                })
+
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('attendances.status', $request->status);
                 })
@@ -1364,7 +1393,8 @@ foreach ($assigned_departments as $assigned_department) {
                 "employee.departments" => function ($query) {
                     $query->select('departments.id', 'departments.name');
                 },
-                "work_location"
+                "work_location",
+                "project"
             ])
 
                 ->where(
@@ -1619,7 +1649,8 @@ foreach ($assigned_departments as $assigned_department) {
                     'departments' => function ($query) use ($request) {
                         $query->select("departments.name");
                     },
-                    "work_location"
+                    "work_location",
+                    "project"
 
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Department;
+use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
@@ -78,6 +79,22 @@ class AttendanceCreateRequest extends FormRequest
 
             'in_date' => 'required|date',
             'does_break_taken' => "required|boolean",
+
+            'project_id' => [
+                'present',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Project::
+                        where('id', $value)
+                        ->where('projects.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
+
             'work_location_id' => [
                 "required",
                 'numeric',

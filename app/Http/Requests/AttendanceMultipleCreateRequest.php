@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Attendance;
 use App\Models\Department;
+use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,7 +28,7 @@ class AttendanceMultipleCreateRequest extends FormRequest
      */
     public function rules()
     {
-        
+
         $all_manager_department_ids = [];
         $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
         foreach ($manager_departments as $manager_department) {
@@ -106,6 +107,22 @@ class AttendanceMultipleCreateRequest extends FormRequest
 
 
             'attendance_details.*.does_break_taken' => "required|boolean",
+
+
+            'attendance_details.*.project_id' => [
+                'present',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Project::
+                        where('id', $value)
+                        ->where('projects.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("$attribute is invalid.");
+                    }
+                },
+            ],
 
 
             'attendance_details.*.work_location_id' => [

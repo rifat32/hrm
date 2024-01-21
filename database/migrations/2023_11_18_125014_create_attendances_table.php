@@ -25,6 +25,10 @@ class CreateAttendancesTable extends Migration
             $table->unsignedBigInteger("work_location_id");
             $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
+            $table->unsignedBigInteger("project_id")->nullable();
+
+
+
             $table->date('in_date');
 
             $table->boolean("does_break_taken");

@@ -30,6 +30,7 @@ class Attendance extends Model
         "status",
 
         'work_location_id',
+        'project_id',
 
         "is_active",
         "business_id",
@@ -44,6 +45,13 @@ class Attendance extends Model
     {
         return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
     }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, "project_id" ,'id');
+    }
+
+
 
 
     public function getCreatedAtAttribute($value)
