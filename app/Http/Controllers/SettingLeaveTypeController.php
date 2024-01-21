@@ -295,7 +295,7 @@ class SettingLeaveTypeController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('setting_leave_type_update')) {
+             if (!$request->user()->hasPermissionTo('setting_leave_type_activate')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);

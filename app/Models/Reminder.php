@@ -18,7 +18,8 @@ class Reminder extends Model
         'frequency_after_first_reminder',
         'keep_sending_until_update',
         'entity_name',
-        "business_id"
+        "business_id",
+        "created_by"
     ];
 
     protected $casts = [

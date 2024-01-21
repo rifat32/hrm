@@ -284,7 +284,7 @@ class EmploymentStatusController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('employment_status_update')) {
+             if (!$request->user()->hasPermissionTo('employment_status_activate')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);

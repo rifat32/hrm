@@ -60,13 +60,14 @@ return [
 
                 "job_platform_create",
                 "job_platform_update",
+                // "job_platform_activate",
                 "job_platform_view",
-                "job_platform_delete",
+                // "job_platform_delete",
 
                 "social_site_create",
                 "social_site_update",
                 "social_site_view",
-                "social_site_delete",
+                // "social_site_delete",
 
 
 
@@ -74,38 +75,38 @@ return [
                 "designation_create",
                 "designation_update",
                 "designation_view",
-                "designation_delete",
+                // "designation_delete",
 
                 "bank_create",
                 "bank_update",
                 "bank_view",
-                "bank_delete",
+                // "bank_delete",
 
                 "job_type_create",
                 "job_type_update",
                 "job_type_view",
-                "job_type_delete",
+                // "job_type_delete",
 
                 "work_location_create",
                 "work_location_update",
                 "work_location_view",
-                "work_location_delete",
+                // "work_location_delete",
 
                 "recruitment_process_create",
                 "recruitment_process_update",
                 "recruitment_process_view",
-                "recruitment_process_delete",
+                // "recruitment_process_delete",
 
 
                 "employment_status_create",
                 "employment_status_update",
                 "employment_status_view",
-                "employment_status_delete",
+                // "employment_status_delete",
 
                 "setting_leave_type_create",
                 "setting_leave_type_update",
                 "setting_leave_type_view",
-                "setting_leave_type_delete",
+                // "setting_leave_type_delete",
 
                 "setting_leave_create",
 
@@ -136,28 +137,28 @@ return [
                 "designation_create",
                 "designation_update",
                 "designation_view",
-                "designation_delete",
+                // "designation_delete",
 
                 "bank_create",
                 "bank_update",
                 "bank_view",
-                "bank_delete",
+                // "bank_delete",
 
 
                 "job_type_create",
                 "job_type_update",
                 "job_type_view",
-                "job_type_delete",
+                // "job_type_delete",
 
                 "work_location_create",
                 "work_location_update",
                 "work_location_view",
-                "work_location_delete",
+                // "work_location_delete",
 
                 "recruitment_process_create",
                 "recruitment_process_update",
                 "recruitment_process_view",
-                "recruitment_process_delete",
+                // "recruitment_process_delete",
 
                 "business_create",
                 "business_update",
@@ -168,13 +169,19 @@ return [
                 "job_platform_create",
                 "job_platform_update",
                 "job_platform_view",
-                "job_platform_delete",
+                // "job_platform_delete",
 
 
                 "social_site_create",
                 "social_site_update",
                 "social_site_view",
-                "social_site_delete",
+                // "social_site_delete",
+
+
+                "setting_leave_type_create",
+                "setting_leave_type_update",
+                "setting_leave_type_view",
+                // "setting_leave_type_delete",
 
 
                 "setting_leave_create",
@@ -186,6 +193,14 @@ return [
 
                 "business_times_update",
                 "business_times_view",
+
+                "employment_status_create",
+                "employment_status_update",
+                // "employment_status_activate",
+                "employment_status_view",
+                // "employment_status_delete",
+
+
 
 
             ],
@@ -289,6 +304,7 @@ return [
 
                 // "job_platform_create",
                 "job_platform_update",
+                "job_platform_activate",
                 "job_platform_view",
                 // "job_platform_delete",
 
@@ -325,26 +341,31 @@ return [
                 "designation_create",
                 "designation_update",
                 "designation_view",
+                "designation_activate",
                 "designation_delete",
 
                 "bank_create",
                 "bank_update",
+                "bank_activate",
                 "bank_view",
                 "bank_delete",
 
 
                 "job_type_create",
                 "job_type_update",
+                "job_type_activate",
                 "job_type_view",
                 "job_type_delete",
 
                 "work_location_create",
                 "work_location_update",
+                "work_location_activate",
                 "work_location_view",
                 "work_location_delete",
 
                 "recruitment_process_create",
                 "recruitment_process_update",
+                "recruitment_process_activate",
                 "recruitment_process_view",
                 "recruitment_process_delete",
 
@@ -353,6 +374,7 @@ return [
 
                 "employment_status_create",
                 "employment_status_update",
+                "employment_status_activate",
                 "employment_status_view",
                 "employment_status_delete",
 
@@ -360,6 +382,8 @@ return [
                 "setting_leave_type_update",
                 "setting_leave_type_view",
                 "setting_leave_type_delete",
+                "setting_leave_type_activate",
+
                 "setting_leave_create",
 
 
@@ -485,6 +509,7 @@ return [
 
                 // "job_platform_create",
                 "job_platform_update",
+                "job_platform_activate",
                 "job_platform_view",
                 // "job_platform_delete",
 
@@ -518,36 +543,43 @@ return [
                 "designation_create",
                 "designation_update",
                 "designation_view",
+                "designation_activate",
                 "designation_delete",
 
                 "bank_create",
                 "bank_update",
+                "bank_activate",
                 "bank_view",
                 "bank_delete",
 
 
                 "job_type_create",
                 "job_type_update",
+                "job_type_activate",
                 "job_type_view",
                 "job_type_delete",
 
                 "work_location_create",
                 "work_location_update",
+                "work_location_activate",
                 "work_location_view",
                 "work_location_delete",
 
                 "recruitment_process_create",
                 "recruitment_process_update",
+                "recruitment_process_activate",
                 "recruitment_process_view",
                 "recruitment_process_delete",
 
                 "employment_status_create",
                 "employment_status_update",
+                "employment_status_activate",
                 "employment_status_view",
                 "employment_status_delete",
 
                 "setting_leave_type_create",
                 "setting_leave_type_update",
+                "setting_leave_type_activate",
                 "setting_leave_type_view",
                 "setting_leave_type_delete",
                 "setting_leave_create",
@@ -671,6 +703,7 @@ return [
 
                 // "job_platform_create",
                 "job_platform_update",
+                "job_platform_activate",
                 "job_platform_view",
                 // "job_platform_delete",
 
@@ -704,36 +737,43 @@ return [
                 "designation_create",
                 "designation_update",
                 "designation_view",
+                "designation_activate",
                 "designation_delete",
 
                 "bank_create",
                 "bank_update",
+                "bank_activate",
                 "bank_view",
                 "bank_delete",
 
 
                 "job_type_create",
                 "job_type_update",
+                "job_type_activate",
                 "job_type_view",
                 "job_type_delete",
 
                 "work_location_create",
                 "work_location_update",
+                "work_location_activate",
                 "work_location_view",
                 "work_location_delete",
 
                 "recruitment_process_create",
                 "recruitment_process_update",
+                "recruitment_process_activate",
                 "recruitment_process_view",
                 "recruitment_process_delete",
 
                 "employment_status_create",
                 "employment_status_update",
+                "employment_status_activate",
                 "employment_status_view",
                 "employment_status_delete",
 
                 "setting_leave_type_create",
                 "setting_leave_type_update",
+                "setting_leave_type_activate",
                 "setting_leave_type_view",
                 "setting_leave_type_delete",
                 "setting_leave_create",
@@ -914,6 +954,7 @@ return [
 
         "job_platform_create",
         "job_platform_update",
+        "job_platform_activate",
         "job_platform_view",
         "job_platform_delete",
 
@@ -957,26 +998,31 @@ return [
         "designation_create",
         "designation_update",
         "designation_view",
+        "designation_activate",
         "designation_delete",
 
         "bank_create",
         "bank_update",
+        "bank_activate",
         "bank_view",
         "bank_delete",
 
 
         "job_type_create",
         "job_type_update",
+        "job_type_activate",
         "job_type_view",
         "job_type_delete",
 
         "work_location_create",
         "work_location_update",
+        "work_location_activate",
         "work_location_view",
         "work_location_delete",
 
         "recruitment_process_create",
         "recruitment_process_update",
+        "recruitment_process_activate",
         "recruitment_process_view",
         "recruitment_process_delete",
 
@@ -984,11 +1030,13 @@ return [
 
         "employment_status_create",
         "employment_status_update",
+        "employment_status_activate",
         "employment_status_view",
         "employment_status_delete",
 
         "setting_leave_type_create",
         "setting_leave_type_update",
+        "setting_leave_type_activate",
         "setting_leave_type_view",
         "setting_leave_type_delete",
         "setting_leave_create",
@@ -1178,6 +1226,7 @@ return [
 
         "job_platform_create" => "Can create job platform",
         "job_platform_update" => "Can update job platform",
+        "job_platform_activate" => "",
         "job_platform_view" => "Can view job platform",
         "job_platform_delete" => "Can delete job platform",
 
@@ -1192,37 +1241,45 @@ return [
         "designation_update" => "Can update designation",
         "designation_view" => "Can view designation",
         "designation_delete" => "Can delete designation",
+        "designation_activate" => "",
 
         "bank_create" => "",
         "bank_update" => "",
         "bank_view" => "",
+        "bank_activate" => "",
         "bank_delete" => "",
 
 
         "job_type_create" => "",
         "job_type_update" => "",
+        "job_type_activate" => "",
         "job_type_view" => "",
         "job_type_delete" => "",
 
         "work_location_create" => "",
         "work_location_update" => "",
+        "work_location_activate" => "",
         "work_location_view" => "",
         "work_location_delete" => "",
 
         "recruitment_process_create" => "",
         "recruitment_process_update" => "",
+        "recruitment_process_activate" => "",
         "recruitment_process_view" => "",
         "recruitment_process_delete" => "",
 
         "employment_status_create" => "Can create employment status",
         "employment_status_update" => "Can update employment status",
+        "employment_status_activate" => "",
         "employment_status_view" => "Can view employment status",
         "employment_status_delete" => "Can delete employment status",
 
         "setting_leave_type_create" => "Can create setting leave type",
         "setting_leave_type_update" => "Can update setting leave type",
+        "setting_leave_type_activate" => "",
         "setting_leave_type_view" => "Can view setting leave type",
         "setting_leave_type_delete" => "Can delete setting leave type",
+
         "setting_leave_create" => "Can create setting leave",
 
 
@@ -1431,6 +1488,7 @@ return [
 
         "job_platform_create" => "create",
         "job_platform_update" => "update",
+        "job_platform_activate" => "activate",
         "job_platform_view" => "view",
         "job_platform_delete" => "delete",
 
@@ -1442,11 +1500,14 @@ return [
 
         "designation_create" => "create",
         "designation_update" => "update",
+        "designation_activate" => "activate",
         "designation_view" => "view",
         "designation_delete" => "delete",
 
+
         "bank_create" => "create",
         "bank_update" => "update",
+        "bank_activate" => "activate",
         "bank_view" => "view",
         "bank_delete" => "delete",
 
@@ -1455,17 +1516,20 @@ return [
 
         "job_type_create" => "create",
         "job_type_update" => "update",
+        "job_type_activate" => "activate",
         "job_type_view" => "view",
         "job_type_delete" => "delete",
 
 
         "work_location_create" => "create",
         "work_location_update" => "update",
+        "work_location_activate" => "activate",
         "work_location_view" => "view",
         "work_location_delete" => "delete",
 
         "recruitment_process_create" => "create",
         "recruitment_process_update" => "update",
+        "recruitment_process_activate" => "activate",
         "recruitment_process_view" => "view",
         "recruitment_process_delete" => "delete",
 
@@ -1473,11 +1537,13 @@ return [
 
         "employment_status_create" => "create",
         "employment_status_update" => "update",
+        "employment_status_activate" => "activate",
         "employment_status_view" => "view",
         "employment_status_delete" => "delete",
 
         "setting_leave_type_create" => "create",
         "setting_leave_type_update" => "update",
+        "setting_leave_type_activate" => "activate",
         "setting_leave_type_view" => "view",
         "setting_leave_type_delete" => "delete",
 
@@ -1900,6 +1966,7 @@ return [
 
                 "job_platform_create",
                 "job_platform_update",
+                "job_platform_activate",
                 "job_platform_view",
                 "job_platform_delete",
 
@@ -1932,16 +1999,18 @@ return [
             "permissions" => [
                 "designation_create",
                 "designation_update",
+                "designation_activate",
                 "designation_view",
                 "designation_delete",
             ],
         ],
 
         [
-            "header" => "designation",
+            "header" => "bank",
             "permissions" => [
                 "bank_create",
                 "bank_update",
+                "bank_activate",
                 "bank_view",
                 "bank_delete",
             ],
@@ -1954,6 +2023,7 @@ return [
             "permissions" => [
                 "job_type_create",
                 "job_type_update",
+                "job_type_activate",
                 "job_type_view",
                 "job_type_delete",
             ],
@@ -1964,6 +2034,7 @@ return [
             "permissions" => [
                 "work_location_create",
                 "work_location_update",
+                "work_location_activate",
                 "work_location_view",
                 "work_location_delete",
             ],
@@ -1974,6 +2045,7 @@ return [
             "permissions" => [
                 "recruitment_process_create",
                 "recruitment_process_update",
+                "recruitment_process_activate",
                 "recruitment_process_view",
                 "recruitment_process_delete",
             ],
@@ -1990,6 +2062,7 @@ return [
             "permissions" => [
                 "employment_status_create",
                 "employment_status_update",
+                "employment_status_activate",
                 "employment_status_view",
                 "employment_status_delete",
 
@@ -2004,14 +2077,9 @@ return [
             "permissions" => [
                 "setting_leave_type_create",
                 "setting_leave_type_update",
+                "setting_leave_type_activate",
                 "setting_leave_type_view",
                 "setting_leave_type_delete",
-
-
-
-
-
-
             ],
         ],
         [

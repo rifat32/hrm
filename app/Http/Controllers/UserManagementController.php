@@ -14,6 +14,7 @@ use App\Http\Requests\UserStoreDetailsRequest;
 use App\Http\Requests\UserUpdateAddressRequest;
 use App\Http\Requests\UserUpdateBankDetailsRequest;
 use App\Http\Requests\UserUpdateEmergencyContactRequest;
+use App\Http\Requests\UserUpdateJoiningDateRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
@@ -1959,7 +1960,7 @@ class UserManagementController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/users/update-bank-details'",
+     *      path="/v1.0/users/update-bank-details",
      *      operationId="updateUserBankDetails",
      *      tags={"user_management.employee"},
      *       security={
@@ -2080,6 +2081,120 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+       /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/update-joining-date",
+     *      operationId="updateUserJoiningDate",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user address",
+     *      description="This method is to update user address",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+
+     *  @OA\Property(property="id", type="string", format="number",example="1"),
+     *  @OA\Property(property="joining_date", type="string", format="string",example="joining_date")
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserJoiningDate(UserUpdateJoiningDateRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+
+             $user_query  = User::where([
+                 "id" => $request_data["id"],
+             ]);
+
+
+
+
+             $user = tap($user_query)->update(
+                 collect($request_data)->only([
+                     'joining_date'
+                 ])->toArray()
+             )
+                 // ->with("somthing")
+                 ->first();
+
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *
@@ -2999,18 +3114,13 @@ class UserManagementController extends Controller
                         $query->where("employee_sponsorships.current_certificate_status",$request->sponsorship_current_certificate_status);
                     });
                 })
-                ->when(!isset($request->sponsorship_is_sponsorship_withdrawn), function ($query) use ($request) {
+                ->when(isset($request->sponsorship_is_sponsorship_withdrawn), function ($query) use ($request) {
                     return $query->whereHas("sponsorship_details",function($query) use($request) {
                         $query->where("employee_sponsorships.is_sponsorship_withdrawn",intval($request->sponsorship_is_sponsorship_withdrawn));
                     });
                 })
 
-
-
-
-
-
-                ->when(isset($request->project_id), function ($query) use ($request) {
+                ->when(!empty($request->project_id), function ($query) use ($request) {
                     return $query->whereHas("projects",function($query) use($request) {
                         $query->where("projects.id",$request->project_id);
                     });

@@ -280,7 +280,7 @@ class WorkLocationController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_location_update')) {
+            if (!$request->user()->hasPermissionTo('work_location_activate')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
