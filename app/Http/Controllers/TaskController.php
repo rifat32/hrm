@@ -272,6 +272,13 @@ class TaskController extends Controller
      *         required=true,
      *  example="1"
      *      ),
+     *      *    @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="status",
+     *         required=true,
+     *  example="pending"
+     *      ),
 
      *      * *  @OA\Parameter(
      * name="start_date",
@@ -353,7 +360,9 @@ class TaskController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $tasks = Task::where(
+            $tasks = Task::with("assigned_by","assignees")
+
+            ->where(
                 [
                     "business_id" => $business_id
                 ]
@@ -373,6 +382,10 @@ class TaskController extends Controller
                 ->when(!empty($request->project_id), function ($query) use ($request) {
                     return $query->where('project_id' , $request->project_id);
                 })
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('status' , $request->status);
+                })
+
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('created_at', ">=", $request->start_date);
                 })
@@ -470,7 +483,8 @@ class TaskController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $task =  Task::where([
+            $task =  Task::with("assigned_by","assignees")
+            ->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

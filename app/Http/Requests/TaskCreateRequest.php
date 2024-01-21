@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,7 @@ class TaskCreateRequest extends FormRequest
             'start_date' => 'required|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'end_date' => 'nullable|date|after_or_equal:due_date',
-            'status' => 'required|in:pending,progress,completed',
+            'status' => 'required|in:pending, in_progress, done, in_review, approved, cancelled, rejected, draft',
             'project_id' => [
                 'required',
                 'numeric',
@@ -49,8 +50,8 @@ class TaskCreateRequest extends FormRequest
                 'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    $exists = DB::table('tasks')
-                        ->where('id', $value)
+                    $exists = Task::
+                          where('id', $value)
                         ->where('tasks.business_id', '=', auth()->user()->business_id)
                         ->exists();
 
@@ -59,7 +60,7 @@ class TaskCreateRequest extends FormRequest
                     }
                 },
             ],
-            "assignees" => "present|array",
+            "assignees" => "required|array",
             "assignees.*" => [
                 'numeric',
                 function ($attribute, $value, $fail) {
@@ -84,7 +85,7 @@ class TaskCreateRequest extends FormRequest
         return [
             'due_date.after_or_equal' => 'Due date must be after or equal to the start date.',
             'end_date.after_or_equal' => 'End date must be after or equal to the due date.',
-            'status.in' => 'Invalid value for status. Valid values are: pending, progress, completed.',
+            'status.in' => 'Invalid value for status. Valid values are: pending, in_progress, done, in_review, approved, cancelled, rejected, draft.',
             'project_id.exists' => 'Invalid project selected.',
             'parent_task_id.exists' => 'Invalid parent task selected.',
 

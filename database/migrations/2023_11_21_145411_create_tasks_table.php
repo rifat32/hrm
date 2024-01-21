@@ -21,14 +21,25 @@ class CreateTasksTable extends Migration
             $table->date("start_date");
             $table->date("due_date")->nullable();
             $table->date("end_date")->nullable();
-            $table->enum('status', ['pending','progress', 'completed']);
+            $table->enum('status', ['pending','in_progress','done','in_review','approved','cancelled','rejected','draft'])->default("pending");
+
+
+
+
+
+
+
+
+
+
+
             $table->unsignedBigInteger("project_id");
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->unsignedBigInteger("parent_task_id")->nullable();
             $table->foreign('parent_task_id')->references('id')->on('tasks')->onDelete('cascade');
 
 
-            
+
             $table->unsignedBigInteger("assigned_by")->nullable();
             $table->foreign('assigned_by')->references('id')->on('users')->onDelete('set null');
 

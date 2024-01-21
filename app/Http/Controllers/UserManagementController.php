@@ -2930,9 +2930,134 @@ class UserManagementController extends Controller
      * required=true,
      * example="0"
      * ),
+     *  * *  @OA\Parameter(
+     * name="start_joining_date",
+     * in="query",
+     * description="start_joining_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *  *  * *  @OA\Parameter(
+     * name="end_joining_date",
+     * in="query",
+     * description="end_joining_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *  *   @OA\Parameter(
+     * name="start_sponsorship_date_assigned",
+     * in="query",
+     * description="start_sponsorship_date_assigned",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_sponsorship_date_assigned",
+     * in="query",
+     * description="end_sponsorship_date_assigned",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *    *  *   @OA\Parameter(
+     * name="start_sponsorship_expiry_date",
+     * in="query",
+     * description="start_sponsorship_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_sponsorship_expiry_date",
+     * in="query",
+     * description="end_sponsorship_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *   @OA\Parameter(
+     * name="sponsorship_expires_in_day",
+     * in="query",
+     * description="sponsorship_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
      *
      *
+     *      *    *  *   @OA\Parameter(
+     * name="start_passport_issue_date",
+     * in="query",
+     * description="start_passport_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
      *
+     *   @OA\Parameter(
+     * name="end_passport_issue_date",
+     * in="query",
+     * description="end_passport_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="start_passport_expiry_date",
+     * in="query",
+     * description="start_passport_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_passport_expiry_date",
+     * in="query",
+     * description="end_passport_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *   *    *   @OA\Parameter(
+     * name="passport_expires_in_day",
+     * in="query",
+     * description="passport_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *     * @OA\Parameter(
+     * name="start_visa_issue_date",
+     * in="query",
+     * description="start_visa_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_visa_issue_date",
+     * in="query",
+     * description="end_visa_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *      *     * @OA\Parameter(
+     * name="start_visa_expiry_date",
+     * in="query",
+     * description="start_visa_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_visa_expiry_date",
+     * in="query",
+     * description="end_visa_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *     @OA\Parameter(
+     * name="visa_expires_in_day",
+     * in="query",
+     * description="visa_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
      *
      *
      *  *      *     @OA\Parameter(
@@ -3021,6 +3146,7 @@ class UserManagementController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
+            $today = today();
 
             $users = User::with(
                 [
@@ -3132,8 +3258,107 @@ class UserManagementController extends Controller
                 })
 
 
+
                 ->when(isset($request->is_active), function ($query) use ($request) {
                     return $query->where('is_active', intval($request->is_active));
+                })
+
+                ->when(!empty($request->start_joining_date), function ($query) use ($request) {
+                    return $query->where('joining_date', ">=", $request->start_joining_date);
+                })
+                ->when(!empty($request->end_joining_date), function ($query) use ($request) {
+                    return $query->where('joining_date', "<=", ($request->end_joining_date.  ' 23:59:59'));
+                })
+                ->when(!empty($request->start_sponsorship_date_assigned), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.date_assigned",">=",($request->start_sponsorship_date_assigned));
+                    });
+                })
+                ->when(!empty($request->end_sponsorship_date_assigned), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details",function($query) use($request) {
+                        $query->where("employee_sponsorships.date_assigned","<=",($request->end_sponsorship_date_assigned . ' 23:59:59'));
+                    });
+                })
+
+
+                ->when(!empty($request->start_sponsorship_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
+                        $query->where("employee_sponsorships.expiry_date", ">=", $request->start_sponsorship_expiry_date);
+                    });
+                })
+                ->when(!empty($request->end_sponsorship_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
+                        $query->where("employee_sponsorships.expiry_date", "<=", $request->end_sponsorship_expiry_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->sponsorship_expires_in_day), function ($query) use ($request,$today) {
+                    return $query->whereHas("sponsorship_details", function ($query) use ($request,$today) {
+                        $query_day = Carbon::now()->addDays($request->sponsorship_expires_in_day);
+                        $query->whereBetween("employee_sponsorships.expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                    });
+                })
+
+
+
+
+
+
+
+                ->when(!empty($request->start_passport_issue_date), function ($query) use ($request) {
+                    return $query->whereHas("passport_details", function ($query) use ($request) {
+                        $query->where("employee_passport_details.passport_issue_date", ">=", $request->start_passport_issue_date);
+                    });
+                })
+                ->when(!empty($request->end_passport_issue_date), function ($query) use ($request) {
+                    return $query->whereHas("passport_details", function ($query) use ($request) {
+                        $query->where("employee_passport_details.passport_issue_date", "<=", $request->end_passport_issue_date . ' 23:59:59');
+                    });
+                })
+
+
+
+
+                ->when(!empty($request->start_passport_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("passport_details", function ($query) use ($request) {
+                        $query->where("employee_passport_details.passport_expiry_date", ">=", $request->start_passport_expiry_date);
+                    });
+                })
+                ->when(!empty($request->end_passport_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("passport_details", function ($query) use ($request) {
+                        $query->where("employee_passport_details.", "<=", $request->end_passport_expiry_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->passport_expires_in_day), function ($query) use ($request,$today) {
+                    return $query->whereHas("passport_details", function ($query) use ($request,$today) {
+                        $query_day = Carbon::now()->addDays($request->passport_expires_in_day);
+                        $query->whereBetween("employee_passport_details.passport_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                    });
+                })
+                ->when(!empty($request->start_visa_issue_date), function ($query) use ($request) {
+                    return $query->whereHas("visa_details", function ($query) use ($request) {
+                        $query->where("employee_visa_details.visa_issue_date", ">=", $request->start_visa_issue_date);
+                    });
+                })
+                ->when(!empty($request->end_visa_issue_date), function ($query) use ($request) {
+                    return $query->whereHas("visa_details", function ($query) use ($request) {
+                        $query->where("employee_visa_details.visa_issue_date", "<=", $request->end_visa_issue_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->start_visa_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("visa_details", function ($query) use ($request) {
+                        $query->where("employee_visa_details.visa_expiry_date", ">=", $request->start_visa_expiry_date);
+                    });
+                })
+                ->when(!empty($request->end_visa_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("visa_details", function ($query) use ($request) {
+                        $query->where("employee_visa_details.visa_expiry_date", "<=", $request->end_visa_expiry_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->visa_expires_in_day), function ($query) use ($request,$today) {
+                    return $query->whereHas("visa_details", function ($query) use ($request,$today) {
+                        $query_day = Carbon::now()->addDays($request->visa_expires_in_day);
+                        $query->whereBetween("employee_visa_details.visa_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                    });
                 })
 
 
