@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UsersExport;
 use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\GuestUserRegisterRequest;
 use App\Http\Requests\ImageUploadRequest;
@@ -56,7 +57,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\File;
-use Barryvdh\DomPDF\Facade as PDF;
+Use PDF;
+use Maatwebsite\Excel\Facades\Excel;
 // eeeeee
 class UserManagementController extends Controller
 {
@@ -2907,7 +2909,7 @@ class UserManagementController extends Controller
      * in="query",
      * description="immigration_status",
      * required=true,
-     * example="1"
+     * example="immigration_status"
      * ),
      *    *
      *  @OA\Parameter(
@@ -3334,7 +3336,7 @@ class UserManagementController extends Controller
                 })
                 ->when(!empty($request->end_passport_expiry_date), function ($query) use ($request) {
                     return $query->whereHas("passport_details", function ($query) use ($request) {
-                        $query->where("employee_passport_details.", "<=", $request->end_passport_expiry_date . ' 23:59:59');
+                        $query->where("employee_passport_details.passport_expiry_date", "<=", $request->end_passport_expiry_date . ' 23:59:59');
                     });
                 })
                 ->when(!empty($request->passport_expires_in_day), function ($query) use ($request,$today) {
@@ -3395,11 +3397,11 @@ class UserManagementController extends Controller
 
                 if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                     if (strtoupper($request->response_type) == 'PDF') {
-                        $pdf = PDF::loadView('pdf.users', $users);
+                        $pdf = PDF::loadView('pdf.users', ["users"=>$users]);
                         return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                    } else {
-                        // Logic for CSV generation (you can use a library like maatwebsite/excel)
-                        // Example: return Excel::download(new UsersExport($users), 'users.csv');
+                    } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                        return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
                     }
                 } else {
                     return response()->json($users, 200);

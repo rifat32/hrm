@@ -39,7 +39,7 @@
             @foreach($users as $user)
                 <tr>
                     <td>{{ $user->id }}</td>
-                    <td>{{ ($user->first_Name . $user->last_Name . $user->last_Name )}}</td>
+                    <td>{{ ($user->first_Name ." " . $user->last_Name . " " . $user->last_Name )}}</td>
                     <td>{{ $user->email }}</td>
                     <!-- Add more columns as needed -->
                 </tr>
