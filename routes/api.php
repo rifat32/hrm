@@ -33,6 +33,7 @@ use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
+use App\Http\Controllers\PayrunController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
@@ -217,7 +218,6 @@ Route::get('/v1.0/users/validate/employee-id/{user_id}', [UserManagementControll
 
 Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
 Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
-
 Route::get('/v1.0/users/get-schedule-information/{id}', [UserManagementController::class, "getScheduleInformationByUserId"]);
 
 
@@ -827,6 +827,24 @@ Route::post('/v1.0/setting-payrun', [SettingPayrollController::class, "createSet
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end setting payrun management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// department  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/payruns', [PayrunController::class, "createPayrun"]);
+Route::put('/v1.0/payruns', [PayrunController::class, "updatePayrun"]);
+Route::put('/v1.0/payruns/toggle-active', [PayrunController::class, "toggleActivePayrun"]);
+Route::get('/v1.0/payruns', [PayrunController::class, "getPayruns"]);
+Route::get('/v1.0/payruns/{id}', [PayrunController::class, "getPayrunById"]);
+Route::delete('/v1.0/payruns/{ids}', [PayrunController::class, "deletePayrunsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end department  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

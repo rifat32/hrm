@@ -5160,9 +5160,9 @@ class UserManagementController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            //  if(!$this->isModuleEnabled("user_activity")) {
-            //     return response()->json(['messege' => 'Module is not enabled'], 403);
-            //  }
+             if(!$this->isModuleEnabled("user_activity")) {
+                return response()->json(['messege' => 'Module is not enabled'], 403);
+             }
 
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();

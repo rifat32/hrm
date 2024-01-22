@@ -86,9 +86,9 @@ class TaskController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            // if(!$this->isModuleEnabled("project_and_task_management")) {
-            //     return response()->json(['error' => 'Module is not enabled'], 403);
-            //  }
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
 
             return DB::transaction(function () use ($request) {
 
@@ -184,9 +184,9 @@ class TaskController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            // if(!$this->isModuleEnabled("project_and_task_management")) {
-            //     return response()->json(['error' => 'Module is not enabled'], 403);
-            //  }
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('task_update')) {
                     return response()->json([
@@ -351,9 +351,9 @@ class TaskController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            // if(!$this->isModuleEnabled("project_and_task_management")) {
-            //     return response()->json(['error' => 'Module is not enabled'], 403);
-            //  }
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             if (!$request->user()->hasPermissionTo('task_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -474,9 +474,9 @@ class TaskController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            // if(!$this->isModuleEnabled("project_and_task_management")) {
-            //     return response()->json(['error' => 'Module is not enabled'], 403);
-            //  }
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             if (!$request->user()->hasPermissionTo('task_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -565,9 +565,9 @@ class TaskController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            // if(!$this->isModuleEnabled("project_and_task_management")) {
-            //     return response()->json(['error' => 'Module is not enabled'], 403);
-            //  }
+            if(!$this->isModuleEnabled("project_and_task_management")) {
+                return response()->json(['error' => 'Module is not enabled'], 403);
+             }
             if (!$request->user()->hasPermissionTo('task_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

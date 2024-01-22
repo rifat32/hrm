@@ -8,11 +8,11 @@ use App\Models\Module;
 trait ModuleUtil
 {
     // this function do all the task and returns transaction id or -1
-    public function isModuleEnabled($moduleName)
+    public function isModuleEnabled($module_name)
     {
         $user = auth()->user();
         $query_params = [
-            'name' => $moduleName,
+            'name' => $module_name,
             'is_default' => 1,
             'business_tier_id' => null,
         ];

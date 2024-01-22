@@ -14,13 +14,15 @@ class CreatePayrunsTable extends Migration
     public function up()
     {
         Schema::create('payruns', function (Blueprint $table) {
-            $table->id(); // Auto-incremental primary key
+            $table->id(); 
             $table->enum('period_type', ['weekly', 'monthly', 'customized'])->default('weekly');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->enum('consider_type', ['hour', 'daily_log','none']);
             $table->boolean('consider_overtime');
             $table->text('notes')->nullable();
+
+
             $table->boolean('is_active');
 
 

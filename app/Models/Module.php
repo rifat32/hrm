@@ -18,6 +18,7 @@ class Module extends Model
         'created_by'
     ];
 
+
     public function business_tier(){
         return $this->belongsTo(businessTier::class,'business_tier_id', 'id');
     }

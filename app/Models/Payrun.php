@@ -23,6 +23,14 @@ class Payrun extends Model
         "created_by"
     ];
 
+    public function departments() {
+        return $this->belongsToMany(Department::class, 'payrun_departments', 'payrun_id', 'department_id');
+    }
+    public function users() {
+        return $this->belongsToMany(User::class, 'payrun_users', 'payrun_id', 'user_id');
+    }
+
+
     public function getStartDateAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

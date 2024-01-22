@@ -292,6 +292,12 @@ return [
                 "department_delete",
 
 
+                "payrun_create",
+                "payrun_update",
+                "payrun_view",
+                "payrun_delete",
+
+
                 "asset_type_create",
                 "asset_type_update",
                 "asset_type_view",
@@ -333,11 +339,6 @@ return [
                 "announcement_view",
                 "announcement_delete",
 
-
-
-
-
-
                 "designation_create",
                 "designation_update",
                 "designation_view",
@@ -349,7 +350,6 @@ return [
                 "bank_activate",
                 "bank_view",
                 "bank_delete",
-
 
                 "job_type_create",
                 "job_type_update",
@@ -490,12 +490,17 @@ return [
                 "product_category_view",
                 "global_business_background_image_view",
 
-
-
                 "department_create",
                 "department_update",
                 "department_view",
                 "department_delete",
+
+
+
+                "payrun_create",
+                "payrun_update",
+                "payrun_view",
+                "payrun_delete",
 
                 "asset_type_create",
                 "asset_type_update",
@@ -552,7 +557,6 @@ return [
                 "bank_view",
                 "bank_delete",
 
-
                 "job_type_create",
                 "job_type_update",
                 "job_type_activate",
@@ -584,8 +588,6 @@ return [
                 "setting_leave_type_delete",
                 "setting_leave_create",
 
-
-
                 "leave_create",
                 "leave_update",
                 "leave_approve",
@@ -597,8 +599,6 @@ return [
                 "candidate_view",
                 "candidate_delete",
 
-
-
                 "setting_attendance_create",
 
                 "attendance_create",
@@ -608,7 +608,6 @@ return [
                 "attendance_delete",
 
                 "setting_payroll_create",
-
 
             ],
         ],
@@ -942,6 +941,11 @@ return [
         "department_view",
         "department_delete",
 
+        "payrun_create",
+        "payrun_update",
+        "payrun_view",
+        "payrun_delete",
+
         "asset_type_create",
         "asset_type_update",
         "asset_type_view",
@@ -984,7 +988,6 @@ return [
         "announcement_update",
         "announcement_view",
         "announcement_delete",
-
 
 
 
@@ -1182,6 +1185,11 @@ return [
         "department_view" => "Can view department",
         "department_delete" => "Can delete department",
 
+        "payrun_create" => "",
+        "payrun_update" => "",
+        "payrun_view" => "",
+        "payrun_delete" => "",
+
         "asset_type_create" => "",
         "asset_type_update" => "",
         "asset_type_view" => "",
@@ -1341,6 +1349,7 @@ return [
         "user_delete" => "delete",
 
 
+
         "business_tier_create" => "create",
         "business_tier_update" => "update",
         "business_tier_view" => "view",
@@ -1442,6 +1451,11 @@ return [
         "department_update" => "update",
         "department_view" => "view",
         "department_delete" => "delete",
+
+        "payrun_create" => "create",
+        "payrun_update" => "update",
+        "payrun_view" => "view",
+        "payrun_delete" => "delete",
 
         "asset_type_create" => "create",
         "asset_type_update" => "update",

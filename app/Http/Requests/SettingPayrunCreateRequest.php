@@ -35,8 +35,9 @@ class SettingPayrunCreateRequest extends FormRequest
             'payrun_period' => 'required|in:monthly,weekly',
             'consider_type' => 'required|in:hour,daily_log,none',
             'consider_overtime' => 'required|boolean',
-
             'restricted_users' => 'present|array',
+
+
             'restricted_users.*' => [
                 "numeric",
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {

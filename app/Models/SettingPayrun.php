@@ -21,6 +21,7 @@ class SettingPayrun extends Model
     ];
 
 
+
     public function restricted_users() {
         return $this->belongsToMany(User::class, 'setting_payrun_restricted_users', 'setting_payrun_id', 'user_id');
     }

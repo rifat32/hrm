@@ -942,9 +942,30 @@
                         "example": "1"
                     },
                     {
+                        "name": "work_location_id",
+                        "in": "query",
+                        "description": "work_location_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "department_id",
                         "in": "query",
                         "description": "department_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "description": "project_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "work_location_id",
+                        "in": "query",
+                        "description": "work_location_id",
                         "required": true,
                         "example": "1"
                     },
@@ -1081,6 +1102,11 @@
                                         "type": "integer",
                                         "format": "int",
                                         "example": "1"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -1201,6 +1227,11 @@
                                         "type": "integer",
                                         "format": "int",
                                         "example": "1"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -1296,7 +1327,8 @@
                                                 "out_time": "12:44:00",
                                                 "in_date": "2023-11-18",
                                                 "does_break_taken": 1,
-                                                "work_location_id": 1
+                                                "work_location_id": 1,
+                                                "project_id": 1
                                             }
                                         ]
                                     }
@@ -14967,6 +14999,575 @@
                 ]
             }
         },
+        "/v1.0/payruns": {
+            "get": {
+                "tags": [
+                    "administrator.payruns"
+                ],
+                "summary": "This method is to get payruns  ",
+                "description": "This method is to get payruns ",
+                "operationId": "getPayruns",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "administrator.payruns"
+                ],
+                "summary": "This method is to update payrun ",
+                "description": "This method is to update payrun",
+                "operationId": "updatePayrun",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "period_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "weekly"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-01"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-31"
+                                    },
+                                    "consider_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "hour"
+                                    },
+                                    "consider_overtime": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Some notes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "administrator.payruns"
+                ],
+                "summary": "This method is to store payrun",
+                "description": "This method is to store payrun",
+                "operationId": "createPayrun",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "period_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "weekly"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-01"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-31"
+                                    },
+                                    "consider_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "hour"
+                                    },
+                                    "consider_overtime": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Some notes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payruns/toggle-active": {
+            "put": {
+                "tags": [
+                    "user_management"
+                ],
+                "summary": "This method is to toggle payrun activity",
+                "description": "This method is to toggle payrun activity",
+                "operationId": "toggleActivePayrun",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "first_Name",
+                                    "last_Name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "address_line_1",
+                                    "address_line_2",
+                                    "country",
+                                    "city",
+                                    "postcode",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payruns/{id}": {
+            "get": {
+                "tags": [
+                    "administrator.payruns"
+                ],
+                "summary": "This method is to get payrun by id",
+                "description": "This method is to get payrun by id",
+                "operationId": "getPayrunById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payruns/{ids}": {
+            "delete": {
+                "tags": [
+                    "administrator.payruns"
+                ],
+                "summary": "This method is to delete payrun by id",
+                "description": "This method is to delete payrun by id",
+                "operationId": "deletePayrunsByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/product-categories": {
             "put": {
                 "tags": [
@@ -20776,6 +21377,20 @@
                         "example": "6"
                     },
                     {
+                        "name": "project_id",
+                        "in": "query",
+                        "description": "project_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "status",
+                        "required": true,
+                        "example": "pending"
+                    },
+                    {
                         "name": "start_date",
                         "in": "query",
                         "description": "start_date",
@@ -21883,6 +22498,13 @@
                         "example": "1"
                     },
                     {
+                        "name": "status",
+                        "in": "query",
+                        "description": "status",
+                        "required": true,
+                        "example": "status"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
@@ -22012,6 +22634,11 @@
                                         "format": "boolean",
                                         "example": "1"
                                     },
+                                    "status": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "status"
+                                    },
                                     "serial_number": {
                                         "type": "string",
                                         "format": "string",
@@ -22131,6 +22758,11 @@
                                         "type": "boolean",
                                         "format": "boolean",
                                         "example": "1"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "status"
                                     },
                                     "serial_number": {
                                         "type": "string",
@@ -24316,6 +24948,20 @@
                 "operationId": "getUsers",
                 "parameters": [
                     {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
@@ -24376,7 +25022,7 @@
                         "in": "query",
                         "description": "immigration_status",
                         "required": true,
-                        "example": "1"
+                        "example": "immigration_status"
                     },
                     {
                         "name": "sponsorship_status",
@@ -24412,6 +25058,125 @@
                         "description": "sponsorship_is_sponsorship_withdrawn",
                         "required": true,
                         "example": "0"
+                    },
+                    {
+                        "name": "start_joining_date",
+                        "in": "query",
+                        "description": "start_joining_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_joining_date",
+                        "in": "query",
+                        "description": "end_joining_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_sponsorship_date_assigned",
+                        "in": "query",
+                        "description": "start_sponsorship_date_assigned",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_sponsorship_date_assigned",
+                        "in": "query",
+                        "description": "end_sponsorship_date_assigned",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_sponsorship_expiry_date",
+                        "in": "query",
+                        "description": "start_sponsorship_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_sponsorship_expiry_date",
+                        "in": "query",
+                        "description": "end_sponsorship_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "sponsorship_expires_in_day",
+                        "in": "query",
+                        "description": "sponsorship_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "start_passport_issue_date",
+                        "in": "query",
+                        "description": "start_passport_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_passport_issue_date",
+                        "in": "query",
+                        "description": "end_passport_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_passport_expiry_date",
+                        "in": "query",
+                        "description": "start_passport_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_passport_expiry_date",
+                        "in": "query",
+                        "description": "end_passport_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "passport_expires_in_day",
+                        "in": "query",
+                        "description": "passport_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "start_visa_issue_date",
+                        "in": "query",
+                        "description": "start_visa_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_visa_issue_date",
+                        "in": "query",
+                        "description": "end_visa_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_visa_expiry_date",
+                        "in": "query",
+                        "description": "start_visa_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_visa_expiry_date",
+                        "in": "query",
+                        "description": "end_visa_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "visa_expires_in_day",
+                        "in": "query",
+                        "description": "visa_expires_in_day",
+                        "required": true,
+                        "example": "50"
                     },
                     {
                         "name": "project_id",
@@ -25861,7 +26626,7 @@
                 ]
             }
         },
-        "/v1.0/users/update-bank-details'": {
+        "/v1.0/users/update-bank-details": {
             "put": {
                 "tags": [
                     "user_management.employee"
@@ -25899,6 +26664,93 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "account_name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/users/update-joining-date": {
+            "put": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to update user address",
+                "description": "This method is to update user address",
+                "operationId": "updateUserJoiningDate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "joining_date": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "joining_date"
                                     }
                                 },
                                 "type": "object"
@@ -26808,6 +27660,94 @@
                         "description": "id",
                         "required": true,
                         "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/users/get-schedule-information/{id}": {
+            "get": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to get user by id",
+                "description": "This method is to get user by id",
+                "operationId": "getScheduleInformationByUserId",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "start_date"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "end_date"
                     }
                 ],
                 "responses": {

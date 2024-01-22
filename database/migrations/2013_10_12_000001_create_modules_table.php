@@ -53,14 +53,14 @@ class CreateModulesTable extends Migration
            [
             "name" => "project_and_task_management",
             "is_enabled" => 1,
-            "is_default" => 1,
+            "is_default" => 0,
             "business_tier_id" => 1,
            ],
 
            [
             "name" => "user_activity",
             "is_enabled" => 1,
-            "is_default" => 1,
+            "is_default" => 0,
             "business_tier_id" => 1,
            ],
         ));
