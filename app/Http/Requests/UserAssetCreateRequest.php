@@ -60,6 +60,7 @@ class UserAssetCreateRequest extends FormRequest
             ],
             'name' => "required|string",
             "is_working" => "required|boolean",
+            "status" => "required|string|in:available,assigned,damaged,lost,reserved,repair_waiting",
             'code' => "required|string",
             'serial_number' => "required|string",
             'type' => "required|string",

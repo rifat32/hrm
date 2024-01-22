@@ -16,6 +16,7 @@ class UserAsset extends Model
         'serial_number',
         'type',
         "is_working",
+        "status",
         'image',
         'date',
         'note',

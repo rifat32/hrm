@@ -134,6 +134,8 @@ class UserAssetController extends Controller
  *     @OA\Property(property="name", type="string", format="string", example="Your Name"),
  *     @OA\Property(property="code", type="string", format="string", example="Your Code"),
  *     @OA\Property(property="is_working", type="boolean", format="boolean", example="1"),
+ *  *     @OA\Property(property="status", type="string", format="string", example="status"),
+ *
  *     @OA\Property(property="serial_number", type="string", format="string", example="Your Serial Number"),
  *     @OA\Property(property="type", type="string", format="string", example="Your Type"),
  *     @OA\Property(property="image", type="string", format="string", example="Your Image URL"),
@@ -375,6 +377,7 @@ class UserAssetController extends Controller
  *     @OA\Property(property="code", type="string", format="string", example="Your Code"),
  *
  *  *     @OA\Property(property="is_working", type="boolean", format="boolean", example="1"),
+ *  *  *     @OA\Property(property="status", type="string", format="string", example="status"),
  *
  *     @OA\Property(property="serial_number", type="string", format="string", example="Your Serial Number"),
  *     @OA\Property(property="type", type="string", format="string", example="Your Type"),
@@ -456,7 +459,7 @@ class UserAssetController extends Controller
                           'code',
                           'serial_number',
                           'is_working',
-
+                          "status",
                           'type',
                           'image',
                           'date',
@@ -526,6 +529,13 @@ class UserAssetController extends Controller
        *         description="type",
        *         required=true,
        *  example="1"
+       *      ),
+       *    @OA\Parameter(
+       *         name="status",
+       *         in="query",
+       *         description="status",
+       *         required=true,
+       *         example="status"
        *      ),
        *
        *              @OA\Parameter(
@@ -660,6 +670,11 @@ class UserAssetController extends Controller
                   ->when(!empty($request->type), function ($query) use ($request) {
                     return $query->where('user_assets.type', $request->type);
                 })
+                
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('user_assets.status', $request->status);
+                })
+
 
                 //   ->when(empty($request->user_id), function ($query) use ($request) {
                 //       return $query->where('user_assets.user_id', $request->user()->id);

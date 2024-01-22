@@ -24,10 +24,12 @@ class CreateUserAssetsTable extends Migration
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
+
             $table->string("name");
             $table->string("code");
             $table->string("serial_number");
             $table->boolean("is_working");
+            $table->enum('status', ['available', 'assigned', 'damaged', 'lost', 'reserved', 'repair_waiting'])->default('available');
             $table->string("type");
             $table->string("image")->nullable();
             $table->date("date");

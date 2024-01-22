@@ -78,6 +78,8 @@ class UserAssetUpdateRequest extends FormRequest
             'name' => "required|string",
             'code' => "required|string",
             "is_working" => "required|boolean",
+            "status" => "required|string|in:available,assigned,damaged,lost,reserved,repair_waiting",
+
             'serial_number' => "required|string",
             'type' => "required|string",
             'image' => "nullable|string",

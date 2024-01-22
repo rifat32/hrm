@@ -1094,6 +1094,13 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="1"
      * ),
+     *     *   * *  @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="1"
+     * ),
      *  *   * *  @OA\Parameter(
      * name="department_id",
      * in="query",
@@ -1224,6 +1231,10 @@ foreach ($assigned_departments as $assigned_department) {
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('attendances.user_id', $request->user_id);
                 })
+                ->when(!empty($request->work_location_id), function ($query) use ($request) {
+                    return $query->where('attendances.user_id', $request->work_location_id);
+                })
+
                 ->when(!empty($request->project_id), function ($query) use ($request) {
                     return $query->where('attendances.project_id', $request->project_id);
                 })
