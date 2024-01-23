@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\Department;
+use App\Models\PayrunDepartment;
+use App\Models\PayrunUser;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -32,7 +34,7 @@ class PayrunCreateRequest extends FormRequest
             $all_manager_department_ids[] = $manager_department->id;
             $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
         }
-        
+
         return [
             'period_type' => 'required|in:weekly,monthly,customized',
             'start_date' => 'nullable|required_if:period_type,customized|date',
@@ -46,6 +48,7 @@ class PayrunCreateRequest extends FormRequest
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
                     $department = Department::where('id', $value)
+                       
                         ->where('departments.business_id', '=', auth()->user()->business_id)
                         ->first();
 
@@ -57,6 +60,14 @@ class PayrunCreateRequest extends FormRequest
                             $fail("$attribute is invalid. You don't have access to this department.");
                             return;
                         }
+                        $payrun_department = PayrunDepartment::where([
+                            "department_id" => $department->id
+                        ])
+                        ->first();
+                        if($payrun_department) {
+                            $fail("$attribute is invalid. Payrun already created for this department.");
+                            return;
+                        }
                 },
             ],
             'users' => 'present|array',
@@ -65,21 +76,33 @@ class PayrunCreateRequest extends FormRequest
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
 
-                  $exists =  User::where(
+                  $user =  User::where(
                     [
                         "users.id" => $value,
                         "users.business_id" => auth()->user()->business_id
-
                     ])
+                   
                     ->whereHas("departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
                      ->first();
 
-            if (!$exists) {
+            if (!$user) {
                 $fail("$attribute is invalid.");
                 return;
             }
+
+
+            
+            $payrun_user = PayrunUser::where([
+                "user_id" => $user->id
+            ])
+            ->first();
+            if($payrun_user) {
+                $fail("$attribute is invalid. Payrun already created for this user.");
+                return;
+            }
+
 
 
 

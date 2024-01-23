@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 class PayrunController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
+
     /**
      *
      * @OA\Post(
@@ -42,7 +43,6 @@ class PayrunController extends Controller
      * @OA\Property(property="consider_overtime", type="boolean", format="boolean", example=true),
      * @OA\Property(property="notes", type="string", format="string", example="Some notes"),
      *      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
-
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      *
      *

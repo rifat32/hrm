@@ -3121,6 +3121,14 @@ class UserManagementController extends Controller
      * example="1"
      * ),
      *
+     * *      *   * *  @OA\Parameter(
+     * name="doesnt_have_payrun",
+     * in="query",
+     * description="doesnt_have_payrun",
+     * required=true,
+     * example="1"
+     * ),
+     *
      *      *   * *  @OA\Parameter(
      * name="is_active",
      * in="query",
@@ -3409,6 +3417,15 @@ class UserManagementController extends Controller
                         $query->whereBetween("employee_visa_details.visa_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
                     });
                 })
+                ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
+                    if(intval($request->doesnt_have_payrun)) {
+                        return $query->whereDoesntHave("payrun_users");
+                    } else {
+                        return $query;
+                    }
+
+                })
+
 
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {

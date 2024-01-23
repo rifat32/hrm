@@ -449,6 +449,22 @@ class DepartmentController extends Controller
      * required=true,
      * example="1"
      * ),
+     *   *  * *  @OA\Parameter(
+     * name="doesnt_have_payrun",
+     * in="query",
+     * description="doesnt_have_payrun",
+     * required=true,
+     * example="1"
+     * ),
+     *    *   *  * *  @OA\Parameter(
+     * name="hide_parent",
+     * in="query",
+     * description="hide_parent",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -519,10 +535,23 @@ class DepartmentController extends Controller
                     "business_id" => $business_id
                 ]
             )
-            ->whereIn("id",$all_manager_department_ids)
 
-            ->when(isset($request->show_parent), function ($query) use ($request) {
-                if(intval($request->show_parent)) {
+            ->whereIn("id",$all_manager_department_ids)
+            ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
+                if(intval($request->doesnt_have_payrun)) {
+                    return $query->whereDoesntHave("payrun_departments");
+                } else {
+                    return $query;
+                }
+
+            })
+
+
+
+
+
+            ->when(isset($request->hide_parent), function ($query) use ($request) {
+                if(intval($request->hide_parent)) {
                     return $query->whereNotNull("parent_id");
                 } else {
                     return $query;

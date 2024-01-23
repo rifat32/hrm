@@ -91,6 +91,12 @@ class User extends Authenticatable
 
     }
 
+    public function payrun_users()
+    {
+        return $this->hasOne(PayrunUser::class, "user_id" ,'id');
+    }
+
+
 
     public function projects() {
         return $this->belongsToMany(Project::class, 'user_projects', 'user_id', 'project_id');

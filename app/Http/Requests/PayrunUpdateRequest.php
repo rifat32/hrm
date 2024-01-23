@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\Department;
 use App\Models\Payrun;
+use App\Models\PayrunDepartment;
+use App\Models\PayrunUser;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -65,6 +67,7 @@ class PayrunUpdateRequest extends FormRequest
 
                     $department = Department::where('id', $value)
                         ->where('departments.business_id', '=', auth()->user()->business_id)
+
                         ->first();
 
                         if (!$department) {
@@ -75,6 +78,15 @@ class PayrunUpdateRequest extends FormRequest
                             $fail("$attribute is invalid. You don't have access to this department.");
                             return;
                         }
+                       $payrun_department = PayrunDepartment::where([
+                            "department_id" => $department->id
+                        ])
+                        ->whereNotIn("payrun_id",[$this->id])
+                        ->first();
+                        if($payrun_department) {
+                            $fail("$attribute is invalid. Payrun already created for this department.");
+                            return;
+                        }
                 },
             ],
             'users' => 'present|array',
@@ -83,23 +95,32 @@ class PayrunUpdateRequest extends FormRequest
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
 
-                  $exists =  User::where(
+                  $user =  User::where(
                     [
                         "users.id" => $value,
                         "users.business_id" => auth()->user()->business_id
 
                     ])
+
                     ->whereHas("departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
                      ->first();
 
-            if (!$exists) {
+            if (!$user) {
                 $fail("$attribute is invalid.");
                 return;
             }
 
-
+            $payrun_user = PayrunUser::where([
+                "user_id" => $user->id
+            ])
+            ->whereNotIn("payrun_id",[$this->id])
+            ->first();
+            if($payrun_user) {
+                $fail("$attribute is invalid. Payrun already created for this user.");
+                return;
+            }
 
                 },
 
