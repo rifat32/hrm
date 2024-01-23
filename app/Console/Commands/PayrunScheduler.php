@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\PayrunJob;
 use Illuminate\Console\Command;
 
 class PayrunScheduler extends Command
@@ -37,6 +38,7 @@ class PayrunScheduler extends Command
      */
     public function handle()
     {
+        dispatch(new PayrunJob());
         return 0;
     }
 }

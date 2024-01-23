@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\PayrunJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -21,6 +22,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('reminder:send')->everyMinute();
 
         $schedule->command('payrun:run')->everyMinute();
+
+     
 
     }
 

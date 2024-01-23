@@ -475,13 +475,13 @@ if(!$user->hasRole('business_owner')) {
                 "business_id" => auth()->business_id
             ])
             ->whereHas('details', function ($query) use ($business_time) {
-                $query->where('work_shift_detail.day',($business_time["day"]))
+                $query->where('work_shift_details.day',($business_time["day"]))
                 ->when(!empty($time["is_weekend"]), function($query) {
-                    $query->where('work_shift_detail.is_weekend',1);
+                    $query->where('work_shift_details.is_weekend',1);
                 })
                 ->where(function($query) use($business_time) {
-                    $query->whereTime('work_shift_detail.start_at', '<=', ($business_time["start_at"]))
-                          ->orWhereTime('work_shift_detail.end_at', '>=', ($business_time["end_at"]));
+                    $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
+                          ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
 
                 });
             })
@@ -1004,16 +1004,16 @@ if(!$user->hasRole('business_owner')) {
 
     foreach($timesArray as $business_time) {
         $work_shift_ids = WorkShift::where([
-            "business_id" => auth()->business_id
+            "business_id" => auth()->user()->business_id
         ])
         ->whereHas('details', function ($query) use ($business_time) {
-            $query->where('work_shift_detail.day',($business_time["day"]))
+            $query->where('work_shift_details.day',($business_time["day"]))
             ->when(!empty($time["is_weekend"]), function($query) {
-                $query->where('work_shift_detail.is_weekend',1);
+                $query->where('work_shift_details.is_weekend',1);
             })
             ->where(function($query) use($business_time) {
-                $query->whereTime('work_shift_detail.start_at', '<=', ($business_time["start_at"]))
-                      ->orWhereTime('work_shift_detail.end_at', '>=', ($business_time["end_at"]));
+                $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
+                      ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
 
             });
         })
