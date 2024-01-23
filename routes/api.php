@@ -156,7 +156,7 @@ Route::delete('/v1.0/business-tiers/{ids}', [BusinessTierController::class, "del
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // notification management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    Route::get('/v1.0/notifications/{perPage}', [NotificationController::class, "getNotifications"]);
+    Route::get('/v1.0/notifications', [NotificationController::class, "getNotifications"]);
 
     Route::get('/v1.0/notifications/{business_id}/{perPage}', [NotificationController::class, "getNotificationsByBusinessId"]);
 

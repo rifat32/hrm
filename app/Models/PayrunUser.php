@@ -12,6 +12,14 @@ class PayrunUser extends Model
     protected $fillable = [
         'payrun_id', 'user_id'
     ];
+
+
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

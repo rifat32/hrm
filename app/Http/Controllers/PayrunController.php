@@ -11,6 +11,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Payrun;
 use App\Models\PayrunDepartment;
+use App\Models\PayrunUser;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -94,9 +95,6 @@ class PayrunController extends Controller
                 }
 
                 $request_data = $request->validated();
-
-
-
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -325,8 +323,18 @@ class PayrunController extends Controller
             ->exists();
 
 
+            $payrun_user_exists = PayrunUser::where([
+                "payrun_id" => $payrun->id
+            ])
+            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                 $query->whereIn("departments.id",$all_manager_department_ids);
+            })
+            ->exists();
 
-            if((!$payrun_department_exists && !auth()->user()->hasRole("business_owner"))){
+
+
+
+            if((!$payrun_department_exists) && !$payrun_user_exists){
                 return response()->json([
                     "message" => "You don't have access to this payrun"
                 ], 403);
@@ -460,11 +468,17 @@ class PayrunController extends Controller
                     "business_id" => $business_id
                 ]
             )
-            ->when(!auth()->user()->hasRole("business_owner"), function($query) use($all_manager_department_ids) {
+            ->where(function($query) use($all_manager_department_ids) {
                 $query->whereHas("departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
             })
+
+
+
                 // ->when(!empty($request->search_key), function ($query) use ($request) {
                 //     return $query->where(function ($query) use ($request) {
                 //         $term = $request->search_key;
@@ -574,7 +588,8 @@ class PayrunController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
 
-           $payrun = Payrun::where([
+           $payrun = Payrun::with("users","departments")
+           ->where([
                "id" => $id,
                "business_id" => auth()->user()->business_id
            ])
@@ -586,19 +601,30 @@ class PayrunController extends Controller
            }
 
 
-            $payrun_department_exists = PayrunDepartment::where([
-               "payrun_id" => $payrun->id
-           ])
-           ->whereIn("department_id",$all_manager_department_ids)
-           ->exists();
+           $payrun_department_exists = PayrunDepartment::where([
+            "payrun_id" => $payrun->id
+        ])
+        ->whereIn("department_id",$all_manager_department_ids)
+        ->exists();
+
+
+        $payrun_user_exists = PayrunUser::where([
+            "payrun_id" => $payrun->id
+        ])
+        ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+             $query->whereIn("departments.id",$all_manager_department_ids);
+        })
+        ->exists();
 
 
 
-           if((!$payrun_department_exists && !auth()->user()->hasRole("business_owner"))){
-               return response()->json([
-                   "message" => "You don't have access to this payrun"
-               ], 403);
-           }
+
+        if((!$payrun_department_exists) && !$payrun_user_exists){
+            return response()->json([
+                "message" => "You don't have access to this payrun"
+            ], 403);
+        }
+
 
 
 
@@ -689,8 +715,11 @@ class PayrunController extends Controller
             $existingIds = Payrun::where([
                 "business_id" => $business_id
             ])
-            ->when(!auth()->user()->hasRole("business_owner"), function($query) use($all_manager_department_ids) {
+            ->where(function($query) use($all_manager_department_ids) {
                 $query->whereHas("departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
             })
