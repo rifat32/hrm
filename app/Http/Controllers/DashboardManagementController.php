@@ -2186,9 +2186,9 @@ class DashboardManagementController extends Controller
      *
      *
  *     @OA\Property(property="widgets", type="string", format="array", example={
- *    "id":1,
+ *    {"id":1,
  *    "widget_name":"passport",
- *    "widget_order":1
+ *    "widget_order":1}
  * }),
  *
  *

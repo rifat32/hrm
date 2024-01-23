@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\PayrunJob;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class PayrunScheduler extends Command
 {
@@ -38,6 +39,7 @@ class PayrunScheduler extends Command
      */
     public function handle()
     {
+        Log::info("Payrun Job is not running");
         dispatch(new PayrunJob());
         return 0;
     }
