@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Console\\Commands\\DeleteFilesScheduler' => $baseDir . '/app/Console/Commands/DeleteFilesScheduler.php',
+    'App\\Console\\Commands\\PayrunScheduler' => $baseDir . '/app/Console/Commands/PayrunScheduler.php',
     'App\\Console\\Commands\\ReminderScheduler' => $baseDir . '/app/Console/Commands/ReminderScheduler.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
@@ -197,6 +198,7 @@ return array(
     'App\\Http\\Requests\\UserVisaHistoryCreateRequest' => $baseDir . '/app/Http/Requests/UserVisaHistoryCreateRequest.php',
     'App\\Http\\Requests\\UserVisaHistoryUpdateRequest' => $baseDir . '/app/Http/Requests/UserVisaHistoryUpdateRequest.php',
     'App\\Http\\Requests\\VideoUploadRequest' => $baseDir . '/app/Http/Requests/VideoUploadRequest.php',
+    'App\\Http\\Requests\\WidgetCreateRequest' => $baseDir . '/app/Http/Requests/WidgetCreateRequest.php',
     'App\\Http\\Requests\\WorkLocationCreateRequest' => $baseDir . '/app/Http/Requests/WorkLocationCreateRequest.php',
     'App\\Http\\Requests\\WorkLocationUpdateRequest' => $baseDir . '/app/Http/Requests/WorkLocationUpdateRequest.php',
     'App\\Http\\Requests\\WorkShiftCreateRequest' => $baseDir . '/app/Http/Requests/WorkShiftCreateRequest.php',
@@ -207,6 +209,7 @@ return array(
     'App\\Http\\Utils\\LeaveUtil' => $baseDir . '/app/Http/Utils/LeaveUtil.php',
     'App\\Http\\Utils\\ModuleUtil' => $baseDir . '/app/Http/Utils/ModuleUtil.php',
     'App\\Http\\Utils\\UserActivityUtil' => $baseDir . '/app/Http/Utils/UserActivityUtil.php',
+    'App\\Jobs\\PayrunJob' => $baseDir . '/app/Jobs/PayrunJob.php',
     'App\\Mail\\DynamicMail' => $baseDir . '/app/Mail/DynamicMail.php',
     'App\\Mail\\ForgetPasswordMail' => $baseDir . '/app/Mail/ForgetPasswordMail.php',
     'App\\Mail\\SendPassword' => $baseDir . '/app/Mail/SendPassword.php',

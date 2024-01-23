@@ -698,6 +698,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
 
     public static $classMap = array (
         'App\\Console\\Commands\\DeleteFilesScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/DeleteFilesScheduler.php',
+        'App\\Console\\Commands\\PayrunScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/PayrunScheduler.php',
         'App\\Console\\Commands\\ReminderScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/ReminderScheduler.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
@@ -888,6 +889,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Http\\Requests\\UserVisaHistoryCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserVisaHistoryCreateRequest.php',
         'App\\Http\\Requests\\UserVisaHistoryUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserVisaHistoryUpdateRequest.php',
         'App\\Http\\Requests\\VideoUploadRequest' => __DIR__ . '/../..' . '/app/Http/Requests/VideoUploadRequest.php',
+        'App\\Http\\Requests\\WidgetCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/WidgetCreateRequest.php',
         'App\\Http\\Requests\\WorkLocationCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/WorkLocationCreateRequest.php',
         'App\\Http\\Requests\\WorkLocationUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/WorkLocationUpdateRequest.php',
         'App\\Http\\Requests\\WorkShiftCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/WorkShiftCreateRequest.php',
@@ -898,6 +900,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Http\\Utils\\LeaveUtil' => __DIR__ . '/../..' . '/app/Http/Utils/LeaveUtil.php',
         'App\\Http\\Utils\\ModuleUtil' => __DIR__ . '/../..' . '/app/Http/Utils/ModuleUtil.php',
         'App\\Http\\Utils\\UserActivityUtil' => __DIR__ . '/../..' . '/app/Http/Utils/UserActivityUtil.php',
+        'App\\Jobs\\PayrunJob' => __DIR__ . '/../..' . '/app/Jobs/PayrunJob.php',
         'App\\Mail\\DynamicMail' => __DIR__ . '/../..' . '/app/Mail/DynamicMail.php',
         'App\\Mail\\ForgetPasswordMail' => __DIR__ . '/../..' . '/app/Mail/ForgetPasswordMail.php',
         'App\\Mail\\SendPassword' => __DIR__ . '/../..' . '/app/Mail/SendPassword.php',
