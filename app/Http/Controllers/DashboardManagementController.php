@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\WidgetCreateRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
 use App\Models\Candidate;
+use App\Models\DashboardWidget;
 use App\Models\Department;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeeSponsorship;
@@ -1883,7 +1885,7 @@ class DashboardManagementController extends Controller
             $business_id = auth()->user()->business_id;
             if (!$business_id) {
                 return response()->json([
-                    "message" => "You are not a business owner"
+                    "message" => "You are not a business user"
                 ], 401);
             }
             $today = today();
@@ -1912,17 +1914,27 @@ class DashboardManagementController extends Controller
 
 
 
-            $business = Business::where([
-                "id" => $business_id,
-                "owner_id" => $request->user()->id
-            ])
-                ->first();
+            // $business = Business::where([
+            //     "id" => $business_id,
+            //     "owner_id" => $request->user()->id
+            // ])
+            //     ->first();
 
-            if (!$business) {
-                return response()->json([
-                    "message" => "you are not the owner of the business or the request business does not exits"
-                ], 404);
-            }
+            // if (!$business) {
+            //     return response()->json([
+            //         "message" => "you are not the owner of the business or the request business does not exits"
+            //     ], 404);
+            // }
+
+      $dashboard_widgets =  DashboardWidget::where([
+                "user_id" => auth()->user()->id
+            ])
+            ->get()
+            ->keyBy('widget_name');
+
+            $data["dashboard_widgets"] = $dashboard_widgets;
+
+
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {
@@ -1945,6 +1957,13 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
+
+            $widget = $dashboard_widgets->get("employees");
+            if($widget) {
+                $data["employees"]["id"] = $widget->id;
+                $data["employees"]["widget_order"] = $widget->id;
+            }
+            $data["employees"]["widget_name"] = "employees";
 
             //     $data["approved_leaves"] = $this->approved_leaves(
             //         $today,
@@ -1976,6 +1995,13 @@ class DashboardManagementController extends Controller
                 $all_manager_department_ids,
 
             );
+            $widget = $dashboard_widgets->get("on_holiday");
+            if($widget) {
+                $data["on_holiday"]["id"] = $widget->id;
+                $data["on_holiday"]["widget_order"] = $widget->id;
+            }
+            $data["on_holiday"]["widget_name"] = "on_holiday";
+
 
             $leave_statuses = ['pending_approval', 'progress', 'approved', 'rejected'];
             foreach ($leave_statuses as $leave_status) {
@@ -1996,6 +2022,12 @@ class DashboardManagementController extends Controller
                     $all_manager_department_ids,
                     $leave_status
                 );
+                $widget = $dashboard_widgets->get(("leaves_" . $leave_status));
+                if($widget) {
+                    $data[("leaves_" . $leave_status)]["id"] = $widget->id;
+                    $data[("leaves_" . $leave_status)]["widget_order"] = $widget->id;
+                }
+                $data[("leaves_" . $leave_status)]["widget_name"] = ("leaves_" . $leave_status);
             }
 
 
@@ -2016,7 +2048,12 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
-
+            $widget = $dashboard_widgets->get("open_roles");
+            if($widget) {
+                $data["open_roles"]["id"] = $widget->id;
+                $data["open_roles"]["widget_order"] = $widget->id;
+            }
+            $data["open_roles"]["widget_name"] = "open_roles";
 
 
             $data["passport_expires_in"] = $this->passport_expires_in(
@@ -2035,6 +2072,13 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
+            $widget = $dashboard_widgets->get("passport_expires_in");
+            if($widget) {
+                $data["passport_expires_in"]["id"] = $widget->id;
+                $data["passport_expires_in"]["widget_order"] = $widget->id;
+            }
+            $data["passport_expires_in"]["widget_name"] = "passport_expires_in";
+
 
             $data["visa_expires_in"] = $this->visa_expires_in(
                 $today,
@@ -2052,6 +2096,13 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
+            $widget = $dashboard_widgets->get("visa_expires_in");
+            if($widget) {
+                $data["visa_expires_in"]["id"] = $widget->id;
+                $data["visa_expires_in"]["widget_order"] = $widget->id;
+            }
+            $data["visa_expires_in"]["widget_name"] = "visa_expires_in";
+
             $data["sponsorship_expires_in"] = $this->sponsorship_expires_in(
                 $today,
                 $start_date_of_next_month,
@@ -2068,7 +2119,12 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
-
+            $widget = $dashboard_widgets->get("sponsorship_expires_in");
+            if($widget) {
+                $data["sponsorship_expires_in"]["id"] = $widget->id;
+                $data["sponsorship_expires_in"]["widget_order"] = $widget->id;
+            }
+            $data["sponsorship_expires_in"]["widget_name"] = "sponsorship_expires_in";
 
 
 
@@ -2091,6 +2147,12 @@ class DashboardManagementController extends Controller
                     $all_manager_department_ids,
                     $sponsorship_status
                 );
+                $widget = $dashboard_widgets->get(("sponsorships_" . $sponsorship_status));
+                if($widget) {
+                    $data[("sponsorships_" . $sponsorship_status)]["id"] = $widget->id;
+                    $data[("sponsorships_" . $sponsorship_status)]["widget_order"] = $widget->id;
+                }
+                $data[("sponsorships_" . $sponsorship_status)]["widget_name"] = ("sponsorships_" . $sponsorship_status);
             }
 
 
@@ -2100,6 +2162,213 @@ class DashboardManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
+
+
+
+ /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/dashboard-widgets",
+     *      operationId="createDashboardWidget",
+     *      tags={"dashboard_management.dashboard_widgets"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store dashboard widgets",
+     *      description="This method is to store dashboard widgets",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *
+     *
+ *     @OA\Property(property="widgets", type="string", format="array", example={
+ *    "id":1,
+ *    "widget_name":"passport",
+ *    "widget_order":1
+ * }),
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createDashboardWidget(WidgetCreateRequest $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             return DB::transaction(function () use ($request) {
+
+                $request_data = $request->validated();
+
+                foreach ($request_data["widgets"] as $widget) {
+                    $widget["user_id"] = auth()->user()->id;
+
+                    DashboardWidget::updateOrCreate(
+                        [
+                            "widget_name" => $widget["widget_name"],
+                            "user_id" => $widget["user_id"],
+                        ],
+                        $widget
+                    );
+                }
+
+                return response(["ok" => true], 201);
+             });
+
+
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+ /**
+     *
+     *     @OA\Delete(
+    *      path="/v1.0/dashboard-widgets/{ids}",
+     *      operationId="deleteDashboardWidgetsByIds",
+     *      tags={"dashboard_management.dashboard_widgets"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="ids",
+     *         in="path",
+     *         description="ids",
+     *         required=true,
+     *  example="1,2,3"
+     *      ),
+     *      summary="This method is to delete widget by id",
+     *      description="This method is to delete widget by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function deleteDashboardWidgetsByIds(Request $request, $ids)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+             $idsArray = explode(',', $ids);
+             $existingIds = DashboardWidget::where([
+                 "user_id" => auth()->user()->id
+             ])
+                 ->whereIn('id', $idsArray)
+                 ->select('id')
+                 ->get()
+                 ->pluck('id')
+                 ->toArray();
+             $nonExistingIds = array_diff($idsArray, $existingIds);
+
+             if (!empty($nonExistingIds)) {
+                 return response()->json([
+                     "message" => "Some or all of the specified data do not exist."
+                 ], 404);
+             }
+             DashboardWidget::destroy($existingIds);
+
+
+             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function businesses($created_by_filter = 0)
     {
         $startDateOfThisMonth = Carbon::now()->startOfMonth();

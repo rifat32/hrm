@@ -2882,6 +2882,35 @@ class UserManagementController extends Controller
      * ),
      *
      * @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *  * @OA\Parameter(
+     * name="designation_id",
+     * in="query",
+     * description="designation_id",
+     * required=true,
+     * example="1"
+     * ),
+     *    *  * @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     *    *  * @OA\Parameter(
+     * name="holiday_id",
+     * in="query",
+     * description="holiday_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
      * name="has_this_project",
      * in="query",
      * description="has_this_project",
@@ -3274,8 +3303,17 @@ class UserManagementController extends Controller
                     });
                 })
 
-
-
+                ->when(!empty($request->designation_id), function ($query) use ($request) {
+                    return $query->where('designation_id', ($request->designation_id));
+                })
+                ->when(!empty($request->work_location_id), function ($query) use ($request) {
+                    return $query->where('work_location_id', ($request->work_location_id));
+                })
+                ->when(!empty($request->holiday_id), function ($query) use ($request) {
+                    return $query->whereHas("holidays", function ($query) use ($request) {
+                        $query->where("holidays.id", $request->holiday_id);
+                    });
+                })
                 ->when(isset($request->is_active), function ($query) use ($request) {
                     return $query->where('is_active', intval($request->is_active));
                 })

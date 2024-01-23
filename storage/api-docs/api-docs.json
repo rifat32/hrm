@@ -6845,6 +6845,91 @@
                 ]
             }
         },
+        "/v1.0/dashboard-widgets": {
+            "post": {
+                "tags": [
+                    "dashboard_management.dashboard_widgets"
+                ],
+                "summary": "This method is to store dashboard widgets",
+                "description": "This method is to store dashboard widgets",
+                "operationId": "createDashboardWidget",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "widgets": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "widget_name": "passport",
+                                            "widget_order": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/superadmin-dashboard": {
             "get": {
                 "tags": [
@@ -15154,6 +15239,24 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "Some notes"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "users": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -15259,6 +15362,24 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "Some notes"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "users": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -24993,6 +25114,34 @@
                         "name": "is_in_employee",
                         "in": "query",
                         "description": "is_in_employee",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "is_in_employee",
+                        "in": "query",
+                        "description": "is_in_employee",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "designation_id",
+                        "in": "query",
+                        "description": "designation_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "work_location_id",
+                        "in": "query",
+                        "description": "work_location_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "holiday_id",
+                        "in": "query",
+                        "description": "holiday_id",
                         "required": true,
                         "example": "1"
                     },

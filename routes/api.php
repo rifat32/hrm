@@ -8,14 +8,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardManagementController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmailTemplateWrapperController;
-
-
-
-
 use App\Http\Controllers\BusinessBackgroundImageController;
-
-
-
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessTierController;
 use App\Http\Controllers\BusinessTimesController;
@@ -1028,7 +1021,8 @@ Route::get('/v1.0/superadmin-dashboard', [DashboardManagementController::class, 
 Route::get('/v1.0/data-collector-dashboard', [DashboardManagementController::class, "getDataCollectorDashboardData"]);
 
 
-
+Route::post('/v1.0/dashboard-widgets', [DashboardManagementController::class, "createDashboardWidget"]);
+Route::delete('/v1.0/dashboard-widgets/{ids}', [DashboardManagementController::class, "deleteDashboardWidgetsByIds"]);
 Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::class, "getBusinessUserDashboardData"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end dashboard section
