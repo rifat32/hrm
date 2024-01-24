@@ -17,7 +17,7 @@ class SwaggerLoginController extends Controller
         }
         return response()->json([
             "message" => "Invalid Credentials"
-        ],;
+        ],422);
 
 
 

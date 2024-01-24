@@ -694,6 +694,15 @@ foreach ($assigned_departments as $assigned_department) {
 
                 $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"]);
                 if (!$process_leave_approval["success"]) {
+
+                    $this->storeError(
+                        $process_leave_approval["message"]
+                        ,
+                        $process_leave_approval["status"]
+                        ,
+                        "front end error",
+                        "front end error"
+                       );
                     return response([
                         "message" => $process_leave_approval["message"]
                     ], $process_leave_approval["status"]);
@@ -934,14 +943,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
 
-                $check_employee = $this->checkUser($request_data["user_id"]);
-                if (!$check_employee["ok"]) {
-                    return response()->json([
-                        "message" => $check_employee["message"]
-                    ], $check_employee["status"]);
-                }
-
-
+            
 
 
 
@@ -1906,7 +1908,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
             ])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
             ->whereHas("leaves", function($q) use ($request)  {
