@@ -178,6 +178,13 @@ class PaymentTypeController extends Controller
 
                     ->first();
                     if(!$payment_type) {
+                        $this->storeError(
+                            "no data found"
+                            ,
+                            404,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "no payment type found"
                             ],404);

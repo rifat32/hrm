@@ -304,6 +304,13 @@ class UserAssetController extends Controller
                    $user_asset_prev = UserAsset::where($user_asset_query_params)
                        ->first();
                    if (!$user_asset_prev) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                        return response()->json([
                            "message" => "no user document found"
                        ], 404);
@@ -447,6 +454,13 @@ class UserAssetController extends Controller
                   $user_asset_prev = UserAsset::where($user_asset_query_params)
                       ->first();
                   if (!$user_asset_prev) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                       return response()->json([
                           "message" => "no user document found"
                       ], 404);
@@ -670,7 +684,7 @@ class UserAssetController extends Controller
                   ->when(!empty($request->type), function ($query) use ($request) {
                     return $query->where('user_assets.type', $request->type);
                 })
-                
+
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('user_assets.status', $request->status);
                 })
@@ -785,6 +799,13 @@ class UserAssetController extends Controller
              })
                   ->first();
               if (!$user_asset) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                   return response()->json([
                       "message" => "no data found"
                   ], 404);
@@ -904,6 +925,13 @@ class UserAssetController extends Controller
               $nonExistingIds = array_diff($idsArray, $existingIds);
 
               if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                   return response()->json([
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);

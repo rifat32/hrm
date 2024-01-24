@@ -305,7 +305,7 @@ class UserNoteController extends Controller
                  $request_data = $request->validated();
                  $request_data["updated_by"] = $request->user()->id;
 
-                
+
 
 
                  $user_note_query_params = [
@@ -610,6 +610,13 @@ class UserNoteController extends Controller
            })
                 ->first();
             if (!$user_note) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -707,6 +714,13 @@ class UserNoteController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

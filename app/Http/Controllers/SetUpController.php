@@ -33,14 +33,20 @@ class SetUpController extends Controller
     public function getFrontEndErrorLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $error_logs = ErrorLog::
-        whereIn("status_code",[422,403,400,409])
+        whereIn("status_code",[422,403,400,404,409])
+        ->when(!empty($request->status), function ($query) use($request){
+            $query->where("status_code",$request->status);
+        })
         ->orderbyDesc("id")->paginate(10);
         return view("error-log",compact("error_logs"));
     }
 
     public function getErrorLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
-        $error_logs = ErrorLog::orderbyDesc("id")->paginate(10);
+        $error_logs = ErrorLog::when(!empty($request->status), function ($query) use($request){
+            $query->where("status_code",$request->status);
+        })
+        ->orderbyDesc("id")->paginate(10);
         return view("error-log",compact("error_logs"));
     }
     public function getActivityLogs(Request $request) {
@@ -579,6 +585,7 @@ return "swagger generated";
             'break_type' => 'unpaid',
             'break_hours' => 1,
             "attendances_count" => 0,
+            "is_active" => 1,
             "is_default"=> 1,
             'details' => [
                 [
@@ -637,6 +644,7 @@ return "swagger generated";
             'break_type' => 'unpaid',
             'break_hours' => 1,
             "attendances_count" => 0,
+            "is_active" => 1,
             "is_default"=> 1,
             'details' => [
                 [

@@ -194,6 +194,13 @@ class RolesController extends Controller
 
         if(!$role)
         {
+            $this->storeError(
+                "no data found"
+                ,
+                404,
+                "front end error",
+                "front end error"
+               );
            return response()->json([
               "message" => "No role found"
            ],404);
@@ -506,6 +513,13 @@ class RolesController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the data they can not be deleted or not exists."
                 ], 404);

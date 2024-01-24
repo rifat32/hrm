@@ -294,6 +294,13 @@ class JobTypeController extends Controller
             ])
                 ->first();
             if (!$job_type) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -721,6 +728,13 @@ class JobTypeController extends Controller
                 ->first();
 
                 if (!$job_type) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -892,6 +906,13 @@ class JobTypeController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -900,7 +921,13 @@ class JobTypeController extends Controller
             $job_listing_exists =  JobListing::whereIn("job_type_id", $existingIds)->exists();
             if ($job_listing_exists) {
 
-
+                $this->storeError(
+                    "Some users are associated with the specified job_types"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some users are associated with the specified job_types",
 

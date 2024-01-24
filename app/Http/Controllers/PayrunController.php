@@ -310,6 +310,13 @@ class PayrunController extends Controller
             ])
                 ->first();
             if (!$payrun) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no payrun found"
                 ], 404);
@@ -601,6 +608,13 @@ class PayrunController extends Controller
            ])
                ->first();
            if (!$payrun) {
+            $this->storeError(
+                "no data found"
+                ,
+                404,
+                "front end error",
+                "front end error"
+               );
                return response()->json([
                    "message" => "no payrun found"
                ], 404);
@@ -744,6 +758,13 @@ class PayrunController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist. or something else"
                 ], 404);

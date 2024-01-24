@@ -883,6 +883,13 @@ if(!$user->hasRole('business_owner')) {
     }
     $userPrev = $userPrev->first();
      if(!$userPrev) {
+        $this->storeError(
+            "no data found"
+            ,
+            404,
+            "front end error",
+            "front end error"
+           );
             return response()->json([
                "message" => "no user found with this id"
             ],404);
@@ -1148,6 +1155,13 @@ if(!$user->hasRole('business_owner')) {
 
 
             if (!$business) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no business found"
                 ], 404);
@@ -1307,6 +1321,13 @@ if(!$user->hasRole('business_owner')) {
 
             ->first();
             if(!$business) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "massage" => "no business found"
                 ],404);
@@ -1716,6 +1737,13 @@ if(!$user->hasRole('business_owner')) {
            $nonExistingIds = array_diff($idsArray, $existingIds);
 
            if (!empty($nonExistingIds)) {
+            $this->storeError(
+                "no data found"
+                ,
+                404,
+                "front end error",
+                "front end error"
+               );
                return response()->json([
                    "message" => "Some or all of the specified data do not exist."
                ], 404);

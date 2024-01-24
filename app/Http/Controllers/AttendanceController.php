@@ -113,7 +113,9 @@ class AttendanceController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["status"] = "pending_approval";
+
+                $request_data["status"] = (auth()->user()->hasRole("business_owner")?"approved" :"pending_approval");
+
 
 
 
@@ -122,6 +124,12 @@ class AttendanceController extends Controller
                 ])
                     ->first();
                 if (!$setting_attendance) {
+                    $this->storeError(
+                        "Please define attendance setting first",
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
                 if (!isset($setting_attendance->auto_approval)) {
@@ -133,9 +141,21 @@ class AttendanceController extends Controller
                     $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
+                    $this->storeError(
+                        "Please define workshift first",
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
                 if (!$work_shift->is_active) {
+                    $this->storeError(
+                        ("Please activate the work shift named '". $work_shift->name . "'"),
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
                 }
 
@@ -145,12 +165,26 @@ class AttendanceController extends Controller
                 ])
                     ->first();
                 if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
+                    $this->storeError(
+                        ("No work shift details found  day" . $day_number)
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     $error =  [
                         "message" => ("No work shift details found  day" . $day_number),
                     ];
                     throw new Exception(json_encode($error), 400);
                 }
                 if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
+                    $this->storeError(
+                        ("there is a weekend on date " . $request_data["in_date"])
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     $error =  [
                         "message" => ("there is a weekend on date " . $request_data["in_date"]),
                     ];
@@ -189,6 +223,13 @@ class AttendanceController extends Controller
 
                 if ($holiday) {
                     if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
+                        $this->storeError(
+                            ("there is a holiday on date" . $request_data["in_date"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         $error =  [
                             "message" => ("there is a holiday on date" . $request_data["in_date"]),
                         ];
@@ -398,6 +439,13 @@ class AttendanceController extends Controller
                 ])
                     ->first();
                 if (!$setting_attendance) {
+                    $this->storeError(
+                        "Please define attendance setting first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
@@ -405,10 +453,24 @@ class AttendanceController extends Controller
                 })->first();
 
                 if (!$work_shift) {
+                    $this->storeError(
+                        "Please define workshift first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
 
                 if (!$work_shift->is_active) {
+                    $this->storeError(
+                        ("Please activate the work shift named '". $work_shift->name . "'")
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
                 }
 
@@ -423,6 +485,14 @@ class AttendanceController extends Controller
                         ->first();
 
                     if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
+
+                        $this->storeError(
+                            ("No work shift details found  day" . $day_number)
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         $error =  [
                             "message" => ("No work shift details found  day" . $day_number),
                         ];
@@ -432,6 +502,13 @@ class AttendanceController extends Controller
 
 
                     if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
+                        $this->storeError(
+                            ("there is a weekend on date" . $item["in_date"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         $error =  [
                             "message" => ("there is a weekend on date" . $item["in_date"]),
                         ];
@@ -472,6 +549,13 @@ foreach ($assigned_departments as $assigned_department) {
 
                     if ($holiday) {
                         if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
+                            $this->storeError(
+                                ("there is a holiday on date" . $item["in_date"])
+                                ,
+                                400,
+                                "front end error",
+                                "front end error"
+                               );
                             $error =  [
                                 "message" => ("there is a holiday on date" . $item["in_date"]),
                             ];
@@ -485,7 +569,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $work_hours_delta = 0;
                     $total_paid_hours = 0;
                     $regular_work_hours = 0;
-                    $status = "pending_approval";
+                    $status = (auth()->user()->hasRole("business_owner")?"approved" :"pending_approval");
 
                     if (!isset($setting_attendance->auto_approval)) {
                         if ($setting_attendance->auto_approval) {
@@ -708,6 +792,13 @@ foreach ($assigned_departments as $assigned_department) {
                 $attendance_prev = Attendance::where($attendance_query_params)
                     ->first();
                 if (!$attendance_prev) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no attendance found"
                     ], 404);
@@ -718,6 +809,13 @@ foreach ($assigned_departments as $assigned_department) {
                 ])
                     ->first();
                 if (!$setting_attendance) {
+                    $this->storeError(
+                        "Please define attendance setting first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
 
@@ -725,9 +823,23 @@ foreach ($assigned_departments as $assigned_department) {
                     $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
+                    $this->storeError(
+                        "Please define workshift first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
                 if (!$work_shift->is_active) {
+                    $this->storeError(
+                        ("Please activate the work shift named '". $work_shift->name . "'")
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
                 }
                 $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
@@ -736,12 +848,26 @@ foreach ($assigned_departments as $assigned_department) {
                 ])
                     ->first();
                 if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
+                    $this->storeError(
+                        ("No work shift details found  day" . $day_number)
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     $error =  [
                         "message" => ("No work shift details found  day" . $day_number),
                     ];
                     throw new Exception(json_encode($error), 400);
                 }
                 if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
+                    $this->storeError(
+                        ("there is a weekend on date" . $request_data["in_date"])
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     $error =  [
                         "message" => ("there is a weekend on date" . $request_data["in_date"]),
                     ];
@@ -781,6 +907,13 @@ foreach ($assigned_departments as $assigned_department) {
 
                 if ($holiday) {
                     if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
+                        $this->storeError(
+                            ("there is a holiday on date" . $request_data["in_date"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         $error =  [
                             "message" => ("there is a holiday on date" . $request_data["in_date"]),
                         ];
@@ -991,6 +1124,13 @@ foreach ($assigned_departments as $assigned_department) {
                 ])
                     ->first();
                 if (!$setting_attendance) {
+                    $this->storeError(
+                        "Please define attendance setting first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
 
@@ -1390,6 +1530,13 @@ foreach ($assigned_departments as $assigned_department) {
             ])
                 ->first();
             if (!$setting_attendance) {
+                $this->storeError(
+                    "Please define attendance setting first"
+                    ,
+                    400,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(["message" => "Please define attendance setting first"], 400);
             }
             $attendances = Attendance::with([
@@ -1869,6 +2016,13 @@ foreach ($assigned_departments as $assigned_department) {
                 })
                 ->first();
             if (!$attendance) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -1969,6 +2123,13 @@ foreach ($assigned_departments as $assigned_department) {
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

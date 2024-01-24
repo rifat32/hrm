@@ -609,6 +609,13 @@ class JobListingController extends Controller
              )
                 ->first();
             if (!$job_listing) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no job listing found"
                 ], 404);
@@ -700,6 +707,13 @@ class JobListingController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

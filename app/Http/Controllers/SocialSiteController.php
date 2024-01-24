@@ -205,6 +205,13 @@ class SocialSiteController extends Controller
                 $social_site_prev = SocialSite::where($social_site_query_params)
                     ->first();
                 if (!$social_site_prev) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no social site  found"
                     ], 404);
@@ -475,6 +482,13 @@ class SocialSiteController extends Controller
             // })
                 ->first();
             if (!$social_site) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -570,6 +584,13 @@ class SocialSiteController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -580,6 +601,13 @@ class SocialSiteController extends Controller
                 // $conflictingSocialSites = UserSocialSite::whereIn("social_site_id", $existingIds)->get([
                 //     'id',
                 // ]);
+                $this->storeError(
+                    "Some user's are using some of these social sites."
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some user's are using some of these social sites.",
                     // "conflicting_users" => $conflictingSocialSites

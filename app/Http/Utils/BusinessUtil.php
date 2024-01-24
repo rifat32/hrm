@@ -782,6 +782,7 @@ trait BusinessUtil
         "attendances_count" => 0,
         'details' => $business->times->toArray(),
         "is_business_default" => 1,
+        "is_active",
         "is_default" => 1,
         "business_id" => $business_id,
     ];

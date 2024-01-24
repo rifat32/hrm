@@ -296,6 +296,13 @@ class EmploymentStatusController extends Controller
              ])
                  ->first();
              if (!$employment_status) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                  return response()->json([
                      "message" => "no data found"
                  ], 404);
@@ -722,6 +729,13 @@ class EmploymentStatusController extends Controller
             ])
                 ->first();
                 if (!$employment_status) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -892,6 +906,13 @@ class EmploymentStatusController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -901,7 +922,13 @@ class EmploymentStatusController extends Controller
             if($user_exists) {
                 $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
                 'last_Name',]);
-
+                $this->storeError(
+                    "Some users are associated with the specified employment statuses"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some users are associated with the specified employment statuses",
                     "conflicting_users" => $conflictingUsers
@@ -912,7 +939,13 @@ class EmploymentStatusController extends Controller
             $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
             if($paid_employment_status_exists) {
                 $conflictingPaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
-
+                $this->storeError(
+                    "Some leave settings are associated with the specified employment statuses"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
                     "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatus
@@ -922,7 +955,13 @@ class EmploymentStatusController extends Controller
             $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
             if($unpaid_employment_status_exists) {
                 $conflictingUnpaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
-
+                $this->storeError(
+                    "Some leave settings are associated with the specified employment statuses"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
                     "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatus

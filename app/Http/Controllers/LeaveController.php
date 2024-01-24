@@ -207,7 +207,7 @@ class LeaveController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["status"] = "pending_approval";
+                $request_data["status"] = (auth()->user()->hasRole("business_owner")?"approved" :"pending_approval");
 
 
 
@@ -217,9 +217,23 @@ class LeaveController extends Controller
                     $query->where('users.id', $request_data["user_id"]);
                 })->first();
                 if (!$work_shift) {
+                    $this->storeError(
+                        "Please define workshift first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
                 if (!$work_shift->is_active) {
+                    $this->storeError(
+                        ("Please activate the work shift named '". $work_shift->name . "'")
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
                 }
                 // if (!$wors_shift) {
@@ -264,6 +278,13 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
                         ->first();
                     if (!$work_shift_details) {
+                        $this->storeError(
+                            "No work shift details found"
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
 
@@ -325,6 +346,13 @@ foreach ($assigned_departments as $assigned_department) {
                         ])
                             ->first();
                         if (!$work_shift_details) {
+                            $this->storeError(
+                                "No work shift details found"
+                                ,
+                                400,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json(["message" => "No work shift details found"], 400);
                         }
 
@@ -377,6 +405,13 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
                         ->first();
                     if (!$work_shift_details) {
+                        $this->storeError(
+                            "No work shift details found"
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
                     $holiday =   Holiday::where([
@@ -437,12 +472,33 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
                         ->first();
                     if (!$work_shift_details) {
+                        $this->storeError(
+                            "No work shift details found"
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
                     if (!$request_data["start_time"] < $work_shift_details->start_at) {
+                        $this->storeError(
+                            ("The employee does not start working at " . $request_data["start_time"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"])], 400);
                     }
                     if (!$request_data["end_time"] > $work_shift_details->end_at) {
+                        $this->storeError(
+                            ("The employee does not close working at " . $request_data["end_time"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
                     }
 
@@ -741,6 +797,13 @@ foreach ($assigned_departments as $assigned_department) {
                 ])->first();
 
                 if (!$setting_leave->allow_bypass) {
+                    $this->storeError(
+                        "bypass not allowed"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response([
                         "message" => "bypass not allowed"
                     ], 400);
@@ -753,6 +816,13 @@ foreach ($assigned_departments as $assigned_department) {
                     ->first();
 
                 if (!$leave) {
+                    $this->storeError(
+                        "no leave found"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response([
                         "message" => "no leave found"
                     ], 400);
@@ -880,9 +950,23 @@ foreach ($assigned_departments as $assigned_department) {
                 })->first();
 
                 if (!$work_shift) {
+                    $this->storeError(
+                        "Please define workshift first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
                 if (!$work_shift->is_active) {
+                    $this->storeError(
+                        ("Please activate the work shift named '". $work_shift->name . "'")
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
                 }
                 // if (!$wors_shift) {
@@ -925,6 +1009,13 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
                         ->first();
                     if (!$work_shift_details) {
+                        $this->storeError(
+                            "No work shift details found"
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
 
@@ -983,6 +1074,13 @@ foreach ($assigned_departments as $assigned_department) {
                         ])
                             ->first();
                         if (!$work_shift_details) {
+                            $this->storeError(
+                                "No work shift details found"
+                                ,
+                                400,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json(["message" => "No work shift details found"], 400);
                         }
                         $holiday =   Holiday::where([
@@ -1034,6 +1132,13 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
                         ->first();
                     if (!$work_shift_details) {
+                        $this->storeError(
+                            "No work shift details found"
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
                     $holiday =   Holiday::where([
@@ -1093,12 +1198,33 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
                         ->first();
                     if (!$work_shift_details) {
+                        $this->storeError(
+                            "No work shift details found"
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
                     if (!$request_data["start_time"] < $work_shift_details->start_at) {
+                        $this->storeError(
+                            ("The employee does not start working at " . $request_data["start_time"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"])], 400);
                     }
                     if (!$request_data["end_time"] > $work_shift_details->end_at) {
+                        $this->storeError(
+                            ("The employee does not close working at " . $request_data["end_time"])
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
                     }
 
@@ -2258,6 +2384,13 @@ return $employee;
              })
                 ->first();
             if (!$leave) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -2358,6 +2491,13 @@ return $employee;
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

@@ -311,6 +311,13 @@ $user_created_date = strtotime($user->created_at);
 $datediff = $now - $user_created_date;
 
             if(!$user->email_verified_at && (($datediff / (60 * 60 * 24))>1)){
+                $this->storeError(
+                    'please activate your email first'
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response(['message' => 'please activate your email first'], 409);
             }
 
@@ -480,6 +487,13 @@ $datediff = $now - $user_created_date;
             $site_redirect_token_db = (json_decode($user->site_redirect_token,true));
 
             if($site_redirect_token_db["token"] !== $request_data["site_redirect_token"]) {
+                $this->storeError(
+                    "invalid token"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                return response()
                ->json([
                   "message" => "invalid token"
@@ -491,6 +505,13 @@ $datediff = $now - $user_created_date;
             $timediff = $now - $site_redirect_token_db["created_at"];
 
             if ($timediff > 20){
+                $this->storeError(
+                    'token expired'
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response(['message' => 'token expired'], 409);
             }
 
@@ -571,6 +592,13 @@ $datediff = $now - $user_created_date;
 
             $user = User::where(["email" => $request_data["email"]])->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(["message" => "no user found"], 404);
             }
 
@@ -671,6 +699,13 @@ $datediff = $now - $user_created_date;
 
             $user = User::where(["id" => $request_data["id"]])->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(["message" => "no user found"], 404);
             }
 
@@ -769,6 +804,13 @@ $datediff = $now - $user_created_date;
 
             $user = User::where(["email" => $request_data["email"]])->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(["message" => "no user found"], 404);
             }
 
@@ -872,6 +914,13 @@ $datediff = $now - $user_created_date;
                     ->where("resetPasswordExpires", ">", now())
                     ->first();
                 if (!$user) {
+                    $this->storeError(
+                        "Invalid Token Or Token Expired"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "Invalid Token Or Token Expired"
                     ], 400);
@@ -1124,6 +1173,13 @@ try{
 
 
     if (!Hash::check($client_request["current_password"],$user->password)) {
+        $this->storeError(
+            "Invalid password"
+            ,
+            400,
+            "front end error",
+            "front end error"
+           );
         return response()->json([
             "message" => "Invalid password"
         ], 400);

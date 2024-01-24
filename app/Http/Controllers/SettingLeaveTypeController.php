@@ -307,6 +307,13 @@ class SettingLeaveTypeController extends Controller
             ])
                 ->first();
             if (!$setting_leave_type) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -512,6 +519,13 @@ class SettingLeaveTypeController extends Controller
             })
                 ->first();
             if (!$setting_leave_type) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ] , 404);
@@ -827,6 +841,13 @@ class SettingLeaveTypeController extends Controller
             ])
                 ->first();
                 if (!$setting_leave_type) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -998,6 +1019,13 @@ class SettingLeaveTypeController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -1007,6 +1035,13 @@ class SettingLeaveTypeController extends Controller
             if($leave_exists) {
                 $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
 
+                $this->storeError(
+                    "Some leaves are associated with the specified setting_leave_types"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some leaves are associated with the specified setting_leave_types",
                     "conflicting_leaves" => $conflictingLeaves

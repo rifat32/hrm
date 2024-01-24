@@ -293,6 +293,13 @@ class RecruitmentProcessController extends Controller
             ])
                 ->first();
             if (!$recruitment_process) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -720,6 +727,13 @@ class RecruitmentProcessController extends Controller
                 ->first();
 
                 if (!$recruitment_process) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -891,6 +905,13 @@ class RecruitmentProcessController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -903,6 +924,13 @@ class RecruitmentProcessController extends Controller
                     'last_Name',
                 ]);
 
+                $this->storeError(
+                    "Some users are associated with the specified recruitment_processes"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some users are associated with the specified recruitment_processes",
                     "conflicting_users" => $conflictingUsers

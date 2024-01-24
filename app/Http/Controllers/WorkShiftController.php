@@ -912,6 +912,13 @@ if(!$fields_changed){
             ])
                 ->first();
             if (!$work_shift) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no work shift found"
                 ], 404);
@@ -1038,6 +1045,13 @@ if(!$fields_changed){
 
 
              if (!$work_shift) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                  return response()->json([
                      "message" => "no work shift found for the user"
                  ], 404);
@@ -1129,6 +1143,13 @@ if(!$fields_changed){
 
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -1141,6 +1162,13 @@ if(!$fields_changed){
                     'last_Name',
                 ]);
 
+                $this->storeError(
+                    "Some users are associated with the specified work shifts"
+                    ,
+                    409,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some users are associated with the specified work shifts",
                     "conflicting_users" => $conflictingUsers

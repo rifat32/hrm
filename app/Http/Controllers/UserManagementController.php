@@ -767,6 +767,13 @@ class UserManagementController extends Controller
                         throw new Exception("Work shift validation failed");
                     }
                     if (!$work_shift->is_active) {
+                        $this->storeError(
+                            ("Please activate the work shift named '" . $work_shift->name . "'")
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
                     }
                     $work_shift->users()->attach($user->id);
@@ -794,6 +801,13 @@ class UserManagementController extends Controller
                     }
 
                     if (!$default_work_shift->is_active) {
+                        $this->storeError(
+                            ("Please activate the work shift named '" . $default_work_shift->name . "'")
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("Please activate the work shift named '" . $default_work_shift->name . "'")], 400);
                     }
 
@@ -981,6 +995,13 @@ class UserManagementController extends Controller
 
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1076,6 +1097,13 @@ class UserManagementController extends Controller
             $user = $userQuery->first();
 
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1270,6 +1298,13 @@ class UserManagementController extends Controller
                         ], 403);
                     }
                     if (!$work_shift->is_active) {
+                        $this->storeError(
+                            ("Please activate the work shift named '" . $work_shift->name . "'")
+                            ,
+                            400,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
                     }
                 }
@@ -1328,6 +1363,13 @@ class UserManagementController extends Controller
 
                     ->first();
                 if (!$user) {
+                    $this->storeError(
+                        "no data found"
+                        ,
+                        404,
+                        "front end error",
+                        "front end error"
+                       );
                     return response()->json([
                         "message" => "no user found"
                     ], 404);
@@ -1909,6 +1951,13 @@ class UserManagementController extends Controller
                 // ->with("somthing")
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2085,6 +2134,13 @@ class UserManagementController extends Controller
                 // ->with("somthing")
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2204,6 +2260,13 @@ class UserManagementController extends Controller
                 ->first();
 
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2320,6 +2383,13 @@ class UserManagementController extends Controller
 
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2621,6 +2691,13 @@ class UserManagementController extends Controller
 
             $user =  $userQuery->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2764,6 +2841,13 @@ class UserManagementController extends Controller
 
 
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4009,6 +4093,13 @@ class UserManagementController extends Controller
                 })
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4123,6 +4214,13 @@ class UserManagementController extends Controller
                 })
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4227,6 +4325,13 @@ class UserManagementController extends Controller
                 })
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4406,6 +4511,13 @@ class UserManagementController extends Controller
                 ->first();
 
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4482,7 +4594,16 @@ class UserManagementController extends Controller
                 $query->where('users.id', $user->id);
             })
                 ->first();
-
+                if (!$work_shift) {
+                    $this->storeError(
+                        "Please define workshift first"
+                        ,
+                        400,
+                        "front end error",
+                        "front end error"
+                       );
+                    return response()->json(["message" => "Please define workshift first"], 400);
+                }
             $weekends = $work_shift->details()->where([
                 "is_weekend" => 1
             ])
@@ -4656,6 +4777,13 @@ class UserManagementController extends Controller
                 ->first();
 
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4686,9 +4814,24 @@ class UserManagementController extends Controller
                 ->first();
 
             if (!$work_shift) {
+                $this->storeError(
+                    "Please define workshift first"
+                    ,
+                    400,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(["message" => "Please define workshift first"], 400);
             }
             if (!$work_shift->is_active) {
+                $this->storeError(
+                    ("Please activate the work shift named '" . $work_shift->name . "'")
+                    ,
+                    400,
+                    "front end error",
+                    "front end error"
+                   );
+
                 return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
             }
 
@@ -4945,6 +5088,13 @@ class UserManagementController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -5271,6 +5421,13 @@ class UserManagementController extends Controller
 
                 ->first();
             if (!$user) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "User not found"
                 ], 404);

@@ -534,6 +534,13 @@ class NotificationController extends Controller
             ])->first();
 
             if(!$notification) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
                 return response(["message" => "Notification not found"], 404);
             }
 
