@@ -14,6 +14,7 @@ class ActivityLog extends Model
 
     protected $fillable = [
         "api_url",
+        "token",
         "user",
         "user_id",
         "activity",

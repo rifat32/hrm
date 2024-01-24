@@ -410,6 +410,15 @@ class JobListingController extends Controller
      *         required=true,
      *  example="6"
      *      ),
+     *
+     *      *              @OA\Parameter(
+     *         name="business_id",
+     *         in="query",
+     *         description="business_id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
 
      *      * *  @OA\Parameter(
      * name="start_date",
@@ -482,12 +491,16 @@ class JobListingController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('job_listing_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
+
+
+             $business_id =  $request->business_id;
+             if(!$business_id) {
+                $error = [ "message" => "The given data was invalid.",
+                "errors" => ["business_id"=>["The business id field is required."]]
+                ];
+                    throw new Exception(json_encode($error),422);
              }
-             $business_id =  $request->user()->business_id;
+
              $job_listings = JobListing::with("job_platforms","job_type","work_location","department")
              ->where(
                  [

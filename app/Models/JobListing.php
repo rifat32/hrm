@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class JobListing extends Model
 {
     use HasFactory;
+    protected $appends = ['total_candidates'];
 
     protected $fillable = [
         'title',
@@ -28,7 +29,10 @@ class JobListing extends Model
 
     ];
 
-
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class, "job_listing_id",'id');
+    }
 
     // Define relationships with other tables
     public function job_type()
@@ -54,7 +58,9 @@ class JobListing extends Model
         return $this->belongsTo(Department::class, "department_id" , 'id');
     }
 
-
+    public function getTotalCandidatesAttribute($value) {
+           return $this->candidates()->count();
+    }
 
 
     public function getCreatedAtAttribute($value)

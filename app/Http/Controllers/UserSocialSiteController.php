@@ -347,18 +347,20 @@ UserSocialSite::where([
               }
 
               $user_social_sites = SocialSite::where('is_active', 1)
-              ->with(['user_social_site' => function ($query) use ($request) {
-                  $query->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_social_sites.user_id', $request->user_id);
+              ->with(['user_social_site' => function ($query) use ($request, $all_manager_department_ids) {
+                  $query->when(!empty($request->user_id), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where('user_social_sites.user_id', $request->user_id)
+                    ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     });
+
                 })
                 ->when(empty($request->user_id), function ($query) use ($request) {
                     return $query->where('user_social_sites.user_id', $request->user()->id);
                 })
                 ;
               }])
-              ->whereHas("user_social_site.user.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+
               ->when(!empty($request->search_key), function ($query) use ($request) {
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;

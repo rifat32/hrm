@@ -179,7 +179,7 @@ class UserUpdateV2Request extends BaseFormRequest
                 },
             ],
 
-            'departments' => 'required|array',
+            'departments' => 'required|array|size:1',
             'departments.*' =>  [
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {

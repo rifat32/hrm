@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 trait LeaveUtil
 {
+    use ErrorUtil;
 
     public function processLeaveApproval($leave_id) {
         $leave = Leave::where([
@@ -25,12 +26,38 @@ trait LeaveUtil
         ])
             ->first();
         if (!$leave) {
+
+            $this->storeError(
+                "No leave request found",
+                400,
+                "front end error",
+                "front end error"
+               );
+
             return [
                 "success" => false,
                 "message" => "No leave request found",
                 "status" => 400
             ];
         }
+
+        if (!$leave->employee) {
+            $this->storeError(
+                "No Employee for the leave found"
+                ,
+                400,
+                "front end error",
+                "front end error"
+               );
+            return [
+                "success" => false,
+                "message" =>   "No Employee for the leave found",
+                "status" => 400
+            ];
+        }
+
+
+
         $leave->status = "progress";
         $setting_leave = SettingLeave::where([
             "business_id" => auth()->user()->business_id,
@@ -95,8 +122,16 @@ trait LeaveUtil
             $not_approved_manager_found = false;
 
             $department = Department::whereHas('users', function ($query) use ($leave) {
-                $query->where('departments.id', $leave->user->department_id);
+                $query->where('departments.id', $leave->employee->departments[0]->id);
             })->first();
+
+            $this->storeError(
+                "Hey please specify department for the employee first!"
+                ,
+                400,
+                "front end error",
+                "front end error"
+               );
 
             if (!$department) {
                 return [

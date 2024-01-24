@@ -13,6 +13,8 @@ class ErrorLog extends Model
     protected $connection = 'logs';
     protected $fillable = [
         "api_url",
+        "token",
+        "fields",
         "user",
         "user_id",
         "message",

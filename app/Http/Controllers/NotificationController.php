@@ -119,10 +119,10 @@ class NotificationController extends Controller
             ]
         )
         ->when(!empty($request->start_date), function ($query) use ($request) {
-            return $query->where('notifications.start_date', ">=", $request->start_date);
+            return $query->where('notifications.created_at', ">=", $request->start_date);
         })
         ->when(!empty($request->end_date), function ($query) use ($request) {
-            return $query->where('notifications.end_date', "<=", ($request->end_date . ' 23:59:59'));
+            return $query->where('notifications.created_at', "<=", ($request->end_date . ' 23:59:59'));
         })
         ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
             return $query->orderBy("notifications.id", $request->order_by);

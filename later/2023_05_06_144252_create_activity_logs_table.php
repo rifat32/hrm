@@ -17,6 +17,10 @@ class CreateActivityLogsTable extends Migration
             $table->id();
 
             $table->string("api_url")->nullable();
+            $table->string("token")->nullable();
+            $table->text("fields")->nullable();
+
+
 
             $table->text("user")->nullable();
             $table->unsignedBigInteger("user_id")->nullable();

@@ -34,7 +34,9 @@
                     <td>{{$error_log->id}} </td>
                     <td>{{$error_log->api_url}} </td>
 
-<td> {{ ($error_log->ERRuser->first_Name ." ". $error_log->ERRuser->last_Name ." ". $error_log->ERRuser->last_Name )}} </td>
+<td> @if ($error_log->ERRuser)
+    {{ ($error_log->ERRuser->first_Name ." ". $error_log->ERRuser->last_Name ." ". $error_log->ERRuser->last_Name )}}
+@endif </td>
 <td>{{$error_log->user_id}} </td>
 <td>{{$error_log->message}} </td>
 <td>{{$error_log->status_code}} </td>
