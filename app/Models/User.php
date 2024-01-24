@@ -20,6 +20,10 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+    protected $connection = 'mysql';
+
+
     protected $appends = ['has_this_project'];
     protected $guard_name = "api";
     protected $fillable = [
