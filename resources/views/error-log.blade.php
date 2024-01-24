@@ -25,6 +25,8 @@
 <th>status_code</th>
 <th>line</th>
 <th>file</th>
+<th>fields</th>
+<th>token</th>
 <th>ip_address</th>
 <th>request_method</th>
             </thead>
@@ -42,6 +44,8 @@
 <td>{{$error_log->status_code}} </td>
 <td>{{$error_log->line}} </td>
 <td>{{$error_log->file}} </td>
+<td>{{$error_log->fields}} </td>
+<td>{{$error_log->token}} </td>
 <td>{{$error_log->ip_address}} </td>
 <td>{{$error_log->request_method}} </td>
                 </tr>

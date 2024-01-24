@@ -34,7 +34,7 @@ trait ErrorUtil
 
         $errorLog = [
             "api_url" => $request->fullUrl(),
-            "fields" => request()->all(),
+            "fields" => json_encode(request()->all()),
             "token" => $token,
 
             "user" => !empty($user) ? (json_encode($user)) : "",
@@ -62,7 +62,7 @@ trait ErrorUtil
 
         $errorLog = [
             "api_url" => request()->fullUrl(),
-            "fields" => request()->all(),
+            "fields" => json_encode(request()->all()),
             "token" => $token,
             "user" => !empty($user) ? (json_encode($user)) : "",
             "user_id" => !empty($user) ? $user->id : "",
