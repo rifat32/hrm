@@ -4553,7 +4553,7 @@ class UserManagementController extends Controller
                         ]);
                     })
                         ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                            $query->whereIn("departmants.id", $all_parent_department_ids);
+                            $query->whereIn("departments.id", $all_parent_department_ids);
                         })
 
                         ->orWhere(function ($query) {
@@ -4851,7 +4851,7 @@ class UserManagementController extends Controller
                         ]);
                     })
                         ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                            $query->whereIn("departmants.id", $all_parent_department_ids);
+                            $query->whereIn("departments.id", $all_parent_department_ids);
                         })
 
                         ->orWhere(function ($query) {
