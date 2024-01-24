@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\EmploymentStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
-class EmploymentStatusUpdateRequest extends FormRequest
+class EmploymentStatusUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

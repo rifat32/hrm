@@ -6,7 +6,7 @@ use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
-class TaskUpdateRequest extends FormRequest
+class TaskUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

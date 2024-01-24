@@ -7,7 +7,7 @@ use App\Models\EmployeePassportDetailHistory;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserPassportHistoryUpdateRequest extends FormRequest
+class UserPassportHistoryUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

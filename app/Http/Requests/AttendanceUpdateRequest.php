@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\WorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceUpdateRequest extends FormRequest
+class AttendanceUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

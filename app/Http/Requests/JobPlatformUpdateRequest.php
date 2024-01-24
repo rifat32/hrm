@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\JobPlatform;
 use Illuminate\Foundation\Http\FormRequest;
 
-class JobPlatformUpdateRequest extends FormRequest
+class JobPlatformUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

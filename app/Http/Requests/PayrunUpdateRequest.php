@@ -9,7 +9,7 @@ use App\Models\PayrunUser;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PayrunUpdateRequest extends FormRequest
+class PayrunUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

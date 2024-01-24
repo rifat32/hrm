@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\UserSocialSite;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserSocialSiteUpdateRequest extends FormRequest
+class UserSocialSiteUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

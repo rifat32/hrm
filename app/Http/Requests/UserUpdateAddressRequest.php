@@ -6,7 +6,7 @@ use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserUpdateAddressRequest extends FormRequest
+class UserUpdateAddressRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\RecruitmentProcess;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RecruitmentProcessCreateRequest extends FormRequest
+class RecruitmentProcessCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

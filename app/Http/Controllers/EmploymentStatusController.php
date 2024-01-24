@@ -306,6 +306,12 @@ class EmploymentStatusController extends Controller
 
                  if (auth()->user()->hasRole('superadmin')) {
                      if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                          return response()->json([
                              "message" => "You do not have permission to update this employment status due to role restrictions."
                          ], 403);
@@ -314,12 +320,24 @@ class EmploymentStatusController extends Controller
                      }
                  } else {
                      if ($employment_status->business_id != NULL) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                          return response()->json([
                              "message" => "You do not have permission to update this employment status due to role restrictions."
                          ], 403);
                      } else if ($employment_status->is_default == 0) {
 
                          if($employment_status->created_by != auth()->user()->id) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                              return response()->json([
                                  "message" => "You do not have permission to update this employment status due to role restrictions."
                              ], 403);
@@ -339,6 +357,12 @@ class EmploymentStatusController extends Controller
              } else {
                  if ($employment_status->business_id != NULL) {
                      if (($employment_status->business_id != auth()->user()->business_id)) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                          return response()->json([
                              "message" => "You do not have permission to update this employment status due to role restrictions."
                          ], 403);
@@ -348,6 +372,12 @@ class EmploymentStatusController extends Controller
                  } else {
                      if ($employment_status->is_default == 0) {
                          if ($employment_status->created_by != auth()->user()->created_by) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                              return response()->json([
                                  "message" => "You do not have permission to update this employment status due to role restrictions."
                              ], 403);
@@ -701,16 +731,34 @@ class EmploymentStatusController extends Controller
 
                     if (auth()->user()->hasRole('superadmin')) {
                         if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this employment status due to role restrictions."
                             ], 403);
                         }
                     } else {
                         if ($employment_status->business_id != NULL) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this employment status due to role restrictions."
                             ], 403);
                         } else if ($employment_status->is_default == 0 && $employment_status->created_by != auth()->user()->id) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                                 return response()->json([
                                     "message" => "You do not have permission to update this employment status due to role restrictions."
                                 ], 403);
@@ -720,6 +768,12 @@ class EmploymentStatusController extends Controller
                 } else {
                     if ($employment_status->business_id != NULL) {
                         if (($employment_status->business_id != auth()->user()->business_id)) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this employment status due to role restrictions."
                             ], 403);
@@ -727,6 +781,12 @@ class EmploymentStatusController extends Controller
                     } else {
                         if ($employment_status->is_default == 0) {
                             if ($employment_status->created_by != auth()->user()->created_by) {
+                                $this->storeError(
+                                    "You do not have permission to update this due to role restrictions.",
+                                    403,
+                                    "front end error",
+                                    "front end error"
+                                   );
                                 return response()->json([
                                     "message" => "You do not have permission to update this employment status due to role restrictions."
                                 ], 403);

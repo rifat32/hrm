@@ -11,7 +11,7 @@ use App\Rules\TimeValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator;
 
-class AuthRegisterBusinessRequest extends FormRequest
+class AuthRegisterBusinessRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -127,7 +127,7 @@ class AuthRegisterBusinessRequest extends FormRequest
             "times" => "required|array",
              "times.*.day" => 'required|numeric',
              "times.*.is_weekend" => ['required',"boolean"],
-       
+
              'times.*.start_at' => [
                 'nullable',
                 'date_format:H:i:s',

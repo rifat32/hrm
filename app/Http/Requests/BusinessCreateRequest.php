@@ -9,7 +9,7 @@ use App\Rules\TimeValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator;
 
-class BusinessCreateRequest extends FormRequest
+class BusinessCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -13,7 +13,7 @@ use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserCreateV2Request extends FormRequest
+class UserCreateV2Request extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

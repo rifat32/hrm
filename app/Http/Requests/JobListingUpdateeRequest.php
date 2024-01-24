@@ -8,7 +8,7 @@ use App\Models\WorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
-class JobListingUpdateeRequest extends FormRequest
+class JobListingUpdateeRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -43,7 +43,7 @@ class JobListingUpdateeRequest extends FormRequest
             ],
             'title' => 'required|string',
             'description' => 'required|string',
-       
+
 
             'minimum_salary' => 'required|numeric',
             'maximum_salary' => 'required|numeric',

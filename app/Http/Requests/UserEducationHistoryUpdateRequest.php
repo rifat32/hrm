@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\UserEducationHistory;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserEducationHistoryUpdateRequest extends FormRequest
+class UserEducationHistoryUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -88,7 +88,14 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
             if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(['error' => 'Module is not enabled'], 403);
              }
             return DB::transaction(function () use ($request) {
@@ -178,6 +185,12 @@ class ProjectController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                  return response()->json(['error' => 'Module is not enabled'], 403);
               }
              return DB::transaction(function () use ($request) {
@@ -358,6 +371,12 @@ class ProjectController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                  return response()->json(['error' => 'Module is not enabled'], 403);
               }
              return DB::transaction(function () use ($request) {
@@ -512,6 +531,12 @@ class ProjectController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                  return response()->json(['error' => 'Module is not enabled'], 403);
               }
              return DB::transaction(function () use ($request) {
@@ -683,6 +708,12 @@ class ProjectController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
              if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                  return response()->json(['error' => 'Module is not enabled'], 403);
               }
              return DB::transaction(function () use ($request) {
@@ -828,6 +859,12 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(['error' => 'Module is not enabled'], 403);
              }
             return DB::transaction(function () use ($request) {
@@ -984,6 +1021,12 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(['error' => 'Module is not enabled'], 403);
              }
             if (!$request->user()->hasPermissionTo('project_view')) {
@@ -1117,6 +1160,12 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(['error' => 'Module is not enabled'], 403);
              }
             if (!$request->user()->hasPermissionTo('project_view')) {
@@ -1218,6 +1267,12 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             if(!$this->isModuleEnabled("project_and_task_management")) {
+                $this->storeError(
+                    'Module is not enabled',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(['error' => 'Module is not enabled'], 403);
              }
 

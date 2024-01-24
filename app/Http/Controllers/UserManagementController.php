@@ -446,6 +446,12 @@ class UserManagementController extends Controller
 
 
             if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+                $this->storeError(
+                    "You can not create superadmin.",
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 $error =  [
                     "message" => "You can not create superadmin.",
                 ];
@@ -672,6 +678,12 @@ class UserManagementController extends Controller
 
 
                 if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+                    $this->storeError(
+                        "You can not create superadmin.",
+                        403,
+                        "front end error",
+                        "front end error"
+                       );
                     $error =  [
                         "message" => "You can not create superadmin.",
                     ];
@@ -1246,6 +1258,13 @@ class UserManagementController extends Controller
                     ])
                         ->first();
                     if (!$work_shift) {
+                        $this->storeError(
+                            "no work shift found"
+                            ,
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "no work shift found"
                         ], 403);
@@ -5216,6 +5235,13 @@ class UserManagementController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
              if(!$this->isModuleEnabled("user_activity")) {
+                $this->storeError(
+                    'Module is not enabled'
+                    ,
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json(['messege' => 'Module is not enabled'], 403);
              }
 

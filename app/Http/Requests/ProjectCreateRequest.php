@@ -6,7 +6,7 @@ use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
-class ProjectCreateRequest extends FormRequest
+class ProjectCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -335,6 +335,12 @@ class PayrunController extends Controller
 
 
             if((!$payrun_department_exists) && !$payrun_user_exists){
+                $this->storeError(
+                    "You don't have access to this payrun",
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "You don't have access to this payrun"
                 ], 403);
@@ -620,6 +626,12 @@ class PayrunController extends Controller
 
 
         if((!$payrun_department_exists) && !$payrun_user_exists){
+            $this->storeError(
+                "You don't have access to this payrun",
+                403,
+                "front end error",
+                "front end error"
+               );
             return response()->json([
                 "message" => "You don't have access to this payrun"
             ], 403);

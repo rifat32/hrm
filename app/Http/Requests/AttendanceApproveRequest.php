@@ -6,7 +6,7 @@ use App\Models\Attendance;
 use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceApproveRequest extends FormRequest
+class AttendanceApproveRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

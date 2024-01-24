@@ -6,7 +6,7 @@ use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserEducationHistoryCreateRequest extends FormRequest
+class UserEducationHistoryCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

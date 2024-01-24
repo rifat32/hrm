@@ -30,6 +30,14 @@ class SetUpController extends Controller
 {
     use ErrorUtil, UserActivityUtil;
 
+    public function getFrontEndErrorLogs(Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        $error_logs = ErrorLog::
+        whereIn("status_code",[422,403,400,409])
+        ->orderbyDesc("id")->paginate(10);
+        return view("error-log",compact("error_logs"));
+    }
+
     public function getErrorLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $error_logs = ErrorLog::orderbyDesc("id")->paginate(10);

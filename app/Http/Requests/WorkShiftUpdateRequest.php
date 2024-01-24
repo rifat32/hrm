@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
-class WorkShiftUpdateRequest extends FormRequest
+class WorkShiftUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

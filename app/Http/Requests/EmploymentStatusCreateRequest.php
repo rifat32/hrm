@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\EmploymentStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
-class EmploymentStatusCreateRequest extends FormRequest
+class EmploymentStatusCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -37,7 +37,7 @@ class EmploymentStatusCreateRequest extends FormRequest
                         }
 
                         $exists = EmploymentStatus::where("employment_statuses.name",$value)
-               
+
 
                         ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
                             if (auth()->user()->hasRole('superadmin')) {

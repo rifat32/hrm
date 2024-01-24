@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\UserNote;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserNoteUpdateByBusinessOwnerRequest extends FormRequest
+class UserNoteUpdateByBusinessOwnerRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

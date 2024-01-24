@@ -6,7 +6,7 @@ use App\Models\Department;
 use App\Models\Leave;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LeaveBypassRequest extends FormRequest
+class LeaveBypassRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

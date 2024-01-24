@@ -8,7 +8,7 @@ use App\Models\SettingLeaveType;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LeaveUpdateRequest extends FormRequest
+class LeaveUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

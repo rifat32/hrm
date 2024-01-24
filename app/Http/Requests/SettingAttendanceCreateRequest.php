@@ -7,7 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class SettingAttendanceCreateRequest extends FormRequest
+class SettingAttendanceCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

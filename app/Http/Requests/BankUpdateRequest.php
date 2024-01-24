@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Bank;
 use Illuminate\Foundation\Http\FormRequest;
 
-class BankUpdateRequest extends FormRequest
+class BankUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -9,7 +9,7 @@ use App\Models\Role;
 use App\Models\WorkShift;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserCreateRequest extends FormRequest
+class UserCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

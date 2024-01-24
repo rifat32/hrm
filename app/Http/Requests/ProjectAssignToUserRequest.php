@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
-class ProjectAssignToUserRequest extends FormRequest
+class ProjectAssignToUserRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

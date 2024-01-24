@@ -7,7 +7,7 @@ use App\Models\EmployeeAddressHistory;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserAddressHistoryUpdateRequest extends FormRequest
+class UserAddressHistoryUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

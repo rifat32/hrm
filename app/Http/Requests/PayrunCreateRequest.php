@@ -8,7 +8,7 @@ use App\Models\PayrunUser;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PayrunCreateRequest extends FormRequest
+class PayrunCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -48,7 +48,7 @@ class PayrunCreateRequest extends FormRequest
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
                     $department = Department::where('id', $value)
-                       
+
                         ->where('departments.business_id', '=', auth()->user()->business_id)
                         ->first();
 
@@ -81,7 +81,7 @@ class PayrunCreateRequest extends FormRequest
                         "users.id" => $value,
                         "users.business_id" => auth()->user()->business_id
                     ])
-                   
+
                     ->whereHas("departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
@@ -93,7 +93,7 @@ class PayrunCreateRequest extends FormRequest
             }
 
 
-            
+
             $payrun_user = PayrunUser::where([
                 "user_id" => $user->id
             ])

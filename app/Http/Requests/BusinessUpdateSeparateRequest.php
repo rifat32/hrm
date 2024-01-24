@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Rules\SomeTimes;
 use Illuminate\Foundation\Http\FormRequest;
 
-class BusinessUpdateSeparateRequest extends FormRequest
+class BusinessUpdateSeparateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

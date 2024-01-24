@@ -304,6 +304,12 @@ class DesignationController extends Controller
 
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($designation->business_id != NULL || $designation->is_default != 1)) {
+                        $this->storeError(
+                            "You do not have permission to update this designation due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
@@ -312,12 +318,24 @@ class DesignationController extends Controller
                     }
                 } else {
                     if ($designation->business_id != NULL) {
+                        $this->storeError(
+                            "You do not have permission to update this designation due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
                     } else if ($designation->is_default == 0) {
 
                         if($designation->created_by != auth()->user()->id) {
+                            $this->storeError(
+                                "You do not have permission to update this designation due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
@@ -337,6 +355,12 @@ class DesignationController extends Controller
             } else {
                 if ($designation->business_id != NULL) {
                     if (($designation->business_id != auth()->user()->business_id)) {
+                        $this->storeError(
+                            "You do not have permission to update this designation due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
                         ], 403);
@@ -346,6 +370,12 @@ class DesignationController extends Controller
                 } else {
                     if ($designation->is_default == 0) {
                         if ($designation->created_by != auth()->user()->created_by) {
+                            $this->storeError(
+                                "You do not have permission to update this designation due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
@@ -700,16 +730,35 @@ class DesignationController extends Controller
 
                     if (auth()->user()->hasRole('superadmin')) {
                         if (($designation->business_id != NULL || $designation->is_default != 1)) {
+                            $this->storeError(
+                                "You do not have permission to update this designation due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
                         }
                     } else {
                         if ($designation->business_id != NULL) {
+                            $this->storeError(
+                                "You do not have permission to update this designation due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
                         } else if ($designation->is_default == 0 && $designation->created_by != auth()->user()->id) {
+                            $this->storeError(
+                                "You do not have permission to update this designation due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                                 return response()->json([
                                     "message" => "You do not have permission to update this designation due to role restrictions."
                                 ], 403);
@@ -719,6 +768,12 @@ class DesignationController extends Controller
                 } else {
                     if ($designation->business_id != NULL) {
                         if (($designation->business_id != auth()->user()->business_id)) {
+                            $this->storeError(
+                                "You do not have permission to update this designation due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this designation due to role restrictions."
                             ], 403);
@@ -726,6 +781,12 @@ class DesignationController extends Controller
                     } else {
                         if ($designation->is_default == 0) {
                             if ($designation->created_by != auth()->user()->created_by) {
+                                $this->storeError(
+                                    "You do not have permission to update this designation due to role restrictions.",
+                                    403,
+                                    "front end error",
+                                    "front end error"
+                                   );
                                 return response()->json([
                                     "message" => "You do not have permission to update this designation due to role restrictions."
                                 ], 403);

@@ -340,6 +340,12 @@ class JobPlatformController extends Controller
 
                  if (auth()->user()->hasRole('superadmin')) {
                      if (($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                          return response()->json([
                              "message" => "You do not have permission to update this job platform due to role restrictions."
                          ], 403);
@@ -348,12 +354,24 @@ class JobPlatformController extends Controller
                      }
                  } else {
                      if ($job_platform->business_id != NULL) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                          return response()->json([
                              "message" => "You do not have permission to update this job platform due to role restrictions."
                          ], 403);
                      } else if ($job_platform->is_default == 0) {
 
                          if($job_platform->created_by != auth()->user()->id) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                              return response()->json([
                                  "message" => "You do not have permission to update this job platform due to role restrictions."
                              ], 403);
@@ -373,6 +391,12 @@ class JobPlatformController extends Controller
              } else {
                  if ($job_platform->business_id != NULL) {
                      if (($job_platform->business_id != auth()->user()->business_id)) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                          return response()->json([
                              "message" => "You do not have permission to update this job platform due to role restrictions."
                          ], 403);
@@ -382,6 +406,12 @@ class JobPlatformController extends Controller
                  } else {
                      if ($job_platform->is_default == 0) {
                          if ($job_platform->created_by != auth()->user()->created_by) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                              return response()->json([
                                  "message" => "You do not have permission to update this job platform due to role restrictions."
                              ], 403);
@@ -743,16 +773,34 @@ class JobPlatformController extends Controller
 
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "You do not have permission to update this job platform due to role restrictions."
                         ], 403);
                     }
                 } else {
                     if ($job_platform->business_id != NULL) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "You do not have permission to update this job platform due to role restrictions."
                         ], 403);
                     } else if ($job_platform->is_default == 0 && $job_platform->created_by != auth()->user()->id) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                             return response()->json([
                                 "message" => "You do not have permission to update this job platform due to role restrictions."
                             ], 403);
@@ -762,6 +810,12 @@ class JobPlatformController extends Controller
             } else {
                 if ($job_platform->business_id != NULL) {
                     if (($job_platform->business_id != auth()->user()->business_id)) {
+                        $this->storeError(
+                            "You do not have permission to update this due to role restrictions.",
+                            403,
+                            "front end error",
+                            "front end error"
+                           );
                         return response()->json([
                             "message" => "You do not have permission to update this job platform due to role restrictions."
                         ], 403);
@@ -769,6 +823,12 @@ class JobPlatformController extends Controller
                 } else {
                     if ($job_platform->is_default == 0) {
                         if ($job_platform->created_by != auth()->user()->created_by) {
+                            $this->storeError(
+                                "You do not have permission to update this due to role restrictions.",
+                                403,
+                                "front end error",
+                                "front end error"
+                               );
                             return response()->json([
                                 "message" => "You do not have permission to update this job platform due to role restrictions."
                             ], 403);

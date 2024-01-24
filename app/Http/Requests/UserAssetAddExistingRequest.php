@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\UserAsset;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserAssetAddExistingRequest extends FormRequest
+class UserAssetAddExistingRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

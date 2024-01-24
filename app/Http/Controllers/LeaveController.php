@@ -1780,7 +1780,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
             ])
-            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
             ->whereHas("leaves", function($q) use ($request)  {
@@ -2347,7 +2347,7 @@ return $employee;
             $existingIds = Leave::where([
                 "business_id" => $business_id
             ])
-            ->whereHas("departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                 ->whereIn('id', $idsArray)

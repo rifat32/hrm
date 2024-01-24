@@ -6,7 +6,7 @@ use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
-class TaskCreateRequest extends FormRequest
+class TaskCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

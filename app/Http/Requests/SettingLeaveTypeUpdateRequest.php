@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\SettingLeaveType;
 use Illuminate\Foundation\Http\FormRequest;
 
-class SettingLeaveTypeUpdateRequest extends FormRequest
+class SettingLeaveTypeUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

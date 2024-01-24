@@ -7,7 +7,7 @@ use App\Models\EmployeeVisaDetailHistory;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserVisaHistoryUpdateRequest extends FormRequest
+class UserVisaHistoryUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

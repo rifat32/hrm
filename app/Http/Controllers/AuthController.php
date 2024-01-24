@@ -219,6 +219,13 @@ class AuthController extends Controller
                 $diffInMinutes = $now->diffInMinutes($lastFailedAttempt);
 
                 if ($diffInMinutes < 15) {
+
+
+                    $this->storeError('You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.',
+                     403,
+                     "front end error", "front end error"
+                    );
+
                     return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
                 } else {
                     $user->login_attempts = 0;
@@ -240,6 +247,10 @@ class AuthController extends Controller
                         $diffInMinutes = $now->diffInMinutes($lastFailedAttempt);
 
                         if ($diffInMinutes < 15) {
+                            $this->storeError('You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.',
+                            403,
+                            "front end error", "front end error"
+                           );
                             return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
                         } else {
                             $user->login_attempts = 0;
@@ -255,6 +266,13 @@ class AuthController extends Controller
             $user = auth()->user();
 
             if(!$user->is_active) {
+
+                $this->storeError('User not active',
+                403,
+                "front end error",
+                "front end error"
+               );
+
                 return response(['message' => 'User not active'], 403);
             }
 
@@ -264,9 +282,20 @@ class AuthController extends Controller
                  ])
                  ->first();
                  if(!$business) {
+                    $this->storeError('Your business not found',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
+
                     return response(['message' => 'Your business not found'], 403);
                  }
                  if(!$business->is_active) {
+                    $this->storeError('business not active',
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                     return response(['message' => 'Business not active'], 403);
                 }
 

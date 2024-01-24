@@ -3,9 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Department;
-use Illuminate\Foundation\Http\FormRequest;
+// use Illuminate\Foundation\Http\FormRequest;
 
-class AnnouncementUpdateRequest extends FormRequest
+class AnnouncementUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

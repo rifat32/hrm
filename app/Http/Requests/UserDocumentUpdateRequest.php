@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\UserDocument;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserDocumentUpdateRequest extends FormRequest
+class UserDocumentUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

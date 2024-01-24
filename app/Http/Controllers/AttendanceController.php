@@ -1661,7 +1661,7 @@ foreach ($assigned_departments as $assigned_department) {
                         $query->select("departments.name");
                     },
                     "work_location",
-                    "project"
+                    "projects"
 
 
 

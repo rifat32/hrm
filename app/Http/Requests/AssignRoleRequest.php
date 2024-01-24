@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AssignRoleRequest extends FormRequest
+class AssignRoleRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

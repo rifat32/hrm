@@ -232,20 +232,20 @@ class SettingPayrollController extends Controller
             $setting_payrun = SettingPayrun::with("restricted_users", "restricted_departments")
                 ->when(empty($request->user()->business_id), function ($query) use ($request) {
                     if (auth()->user()->hasRole('superadmin')) {
-                        return $query->where('setting_attendances.business_id', NULL)
-                            ->where('setting_attendances.is_default', 1)
+                        return $query->where('setting_payruns.business_id', NULL)
+                            ->where('setting_payruns.is_default', 1)
                             ->when(isset($request->is_active), function ($query) use ($request) {
-                                return $query->where('setting_attendances.is_active', intval($request->is_active));
+                                return $query->where('setting_payruns.is_active', intval($request->is_active));
                             });
                     } else {
-                        return   $query->where('setting_attendances.business_id', NULL)
-                            ->where('setting_attendances.is_default', 0)
-                            ->where('setting_attendances.created_by', auth()->user()->id);
+                        return   $query->where('setting_payruns.business_id', NULL)
+                            ->where('setting_payruns.is_default', 0)
+                            ->where('setting_payruns.created_by', auth()->user()->id);
                     }
                 })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return   $query->where('setting_attendances.business_id', auth()->user()->business_id)
-                        ->where('setting_attendances.is_default', 0);
+                    return   $query->where('setting_payruns.business_id', auth()->user()->business_id)
+                        ->where('setting_payruns.is_default', 0);
                 })
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {

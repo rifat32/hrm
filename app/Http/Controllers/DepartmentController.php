@@ -876,6 +876,12 @@ class DepartmentController extends Controller
                 ], 404);
             }
             if(!in_array($department->id,$all_manager_department_ids)){
+                $this->storeError(
+                    "You don't have access to this department",
+                    403,
+                    "front end error",
+                    "front end error"
+                   );
                 return response()->json([
                     "message" => "You don't have access to this department"
                 ], 403);

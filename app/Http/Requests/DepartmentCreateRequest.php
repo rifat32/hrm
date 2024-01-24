@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class DepartmentCreateRequest extends FormRequest
+class DepartmentCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

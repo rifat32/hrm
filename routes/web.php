@@ -23,6 +23,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/frontend-error-log', [SetUpController::class, "getFrontEndErrorLogs"])->name("frontend-error-log");
+
 Route::get('/error-log', [SetUpController::class, "getErrorLogs"])->name("error-log");
 
 Route::get('/activity-log', [SetUpController::class, "getActivityLogs"])->name("activity-log");

@@ -2,11 +2,19 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Department;
-use Illuminate\Foundation\Http\FormRequest;
 
-class AnnouncementCreateRequest extends FormRequest
+use App\Models\Department;
+
+
+
+
+
+
+class AnnouncementCreateRequest extends BaseFormRequest
 {
+
+
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -56,4 +64,8 @@ class AnnouncementCreateRequest extends FormRequest
             ]
         ];
     }
+
+
+
+
 }

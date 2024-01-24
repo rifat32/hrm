@@ -6,7 +6,7 @@ use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserJobHistoryCreateRequest extends FormRequest
+class UserJobHistoryCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -64,7 +64,7 @@ class UserJobHistoryCreateRequest extends FormRequest
             'responsibilities' => 'nullable|string',
             'supervisor_name' => 'nullable|string',
             'contact_information' => 'nullable|string',
-            
+
             'work_location' => 'nullable|string',
             'achievements' => 'nullable|string',
         ];

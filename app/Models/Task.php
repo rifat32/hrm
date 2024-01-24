@@ -37,13 +37,14 @@ class Task extends Model
 
     public function assigned_by()
     {
-        return $this->belongsTo(User::class, 'assigned_by');
+        return $this->belongsTo(User::class, 'assigned_by','id');
     }
-
 
     public function assignees() {
-        return $this->belongsToMany(TaskAssignee::class, 'task_assignees', 'task_id', 'assignee_id');
+        return $this->belongsToMany(User::class, 'task_assignees', 'task_id', 'assignee_id');
     }
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
