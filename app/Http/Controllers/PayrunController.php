@@ -102,9 +102,14 @@ class PayrunController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $payrun =  Payrun::create($request_data);
 
+                $request_data['departments'] = Department::where([
+                    "business_id" => auth()->user()->business_id
+                ])
+                ->pluck("id");
+
 
                 $payrun->departments()->sync($request_data['departments'], []);
-                $payrun->users()->sync($request_data['users'], []);
+                // $payrun->users()->sync($request_data['users'], []);
 
                 return response($payrun, 201);
             });
@@ -215,8 +220,8 @@ class PayrunController extends Controller
                 }
 
 
-                $payrun->departments()->sync($request_data['departments'], []);
-                $payrun->users()->sync($request_data['users'], []);
+                // $payrun->departments()->sync($request_data['departments'], []);
+                // $payrun->users()->sync($request_data['users'], []);
 
 
 

@@ -60,7 +60,7 @@ class PayrunUpdateRequest extends BaseFormRequest
             'consider_type' => 'required|in:hour,daily_log,none',
             'consider_overtime' => 'required|boolean',
             'notes' => 'nullable|string',
-            'departments' => 'present|array',
+            'departments' => 'present|array|size:0',
             'departments.*' => [
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
@@ -89,7 +89,7 @@ class PayrunUpdateRequest extends BaseFormRequest
                         }
                 },
             ],
-            'users' => 'present|array',
+            'users' => 'present|array|size:0',
             'users.*' => [
                 "numeric",
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
