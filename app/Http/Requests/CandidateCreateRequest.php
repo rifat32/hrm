@@ -40,7 +40,7 @@ class CandidateCreateRequest extends BaseFormRequest
             'feedback' => 'required|string',
 
 
-            'status' => 'required|in:applied,progress, interview_stage_1, interview_stage_2, final_interview, rejected, job_offered, hired',
+            'status' => 'required|in:applied,progress,interview_stage_1,interview_stage_2,final_interview,rejected,job_offered,hired',
             'job_listing_id' => [
                 'required',
                 'numeric',
@@ -64,6 +64,7 @@ class CandidateCreateRequest extends BaseFormRequest
         return [
 
             'status.in' => 'Invalid value for status. Valid values are: applied,progress, interview_stage_1, interview_stage_2, final_interview, rejected, job_offered, hired.',
+            'education_level.in' => 'Invalid value for status. Valid values are: no_formal_education,primary_education,secondary_education_or_high_school,ged,vocational_qualification,bachelor_degree,master_degree,doctorate_or_higher.',
             // ... other custom messages
         ];
     }
