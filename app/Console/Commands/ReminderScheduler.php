@@ -3,9 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Models\Business;
+use App\Models\Department;
 use App\Models\Notification;
 use App\Models\NotificationTemplate;
 use App\Models\Reminder;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +47,20 @@ class ReminderScheduler extends Command
      */
 
      public function sendNotification($reminder,$data,$business) {
+
+        $user = User::where([
+            "id" => $data->user_id
+        ])
+        ->first();
+
+        $dapartments = Department::whereHas("users", function($query) use($user) {
+               $query->where("users.id",$user->id);
+        })
+        ->get();
+        $manager_ids = $dapartments->pluck("manager_id");
+
+
+
         $field_name = $reminder->db_field_name;
 $now = now();
         $days_difference = $now->diffInDays($data->$field_name);
@@ -106,6 +122,21 @@ $now = now();
     Log::info(($notification_title));
     Log::info(($notification_description));
     Log::info(($notification_link));
+
+    foreach($manager_ids as $manager_id){
+        Notification::create([
+            "entity_id" => $data->id,
+            "entity_name" => $reminder->entity_name,
+            'notification_title' => $notification_title,
+            'notification_description' => $notification_description,
+            'notification_link' => $notification_link,
+            "sender_id" => 1,
+            "receiver_id" => $manager_id,
+            "business_id" => $business->id,
+            "notification_template_id" => $notification_template->id,
+            "status" => "unread",
+        ]);
+    }
         Notification::create([
             "entity_id" => $data->id,
             "entity_name" => $reminder->entity_name,
@@ -146,7 +177,6 @@ $now = now();
 
 
             foreach ($reminders as $reminder) {
-
 
 
                 if ($reminder->duration_unit == "weeks") {

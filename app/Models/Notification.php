@@ -15,6 +15,8 @@ class Notification extends Model
         "receiver_id",
         "customer_id",
         "business_id",
+        "entity_name",
+        "entity_id",
 
 
         'notification_title',
