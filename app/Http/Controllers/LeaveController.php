@@ -317,7 +317,22 @@ foreach ($assigned_departments as $assigned_department) {
                         $query->where('leave_records.date',($request_data["date"]));
                     })->first();
 
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)  || auth()->user()->hasRole("business_owner") ) {
+                    // if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)  || auth()->user()->hasRole("business_owner") ) {
+
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)  ) {
+
+
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+
+
+
+
+
+
+                            $leave_record_data["leave_hours"] =  $capacity_hours;
+                            $leave_record_data["capacity_hours"] =  $capacity_hours;
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = ($request_data["date"]);
@@ -387,7 +402,18 @@ foreach ($assigned_departments as $assigned_department) {
                         })->first();
 
 
-                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
+                    //    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
+
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
+
+
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                            $leave_record_data["leave_hours"] =  $capacity_hours;
+                            $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+
                             $leave_record_data["start_time"] = $work_shift_details->start_at;
                             $leave_record_data["end_time"] = $work_shift_details->end_at;
                             $leave_record_data["date"] = $leave_date;
@@ -444,16 +470,33 @@ foreach ($assigned_departments as $assigned_department) {
                     })->first();
 
 
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
+                    // if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
+
+
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) ) {
+
                         $start_at = $work_shift_details->start_at;
                         $end_at = $work_shift_details->end_at;
                         if ($request_data["day_type"] == "first_half") {
                             $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
-                            $work_shift_details->start_at = $middle_time;
+                            $start_at = $middle_time;
                         } elseif ($request_data["day_type"] == "last_half") {
                             $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
-                            $work_shift_details->end_at = $middle_time;
+                            $end_at = $middle_time;
                         }
+
+
+                        $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                        $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                        $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                        $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+                        $leave_start_at = Carbon::createFromFormat('H:i:s', $start_at);
+                        $leave_end_at = Carbon::createFromFormat('H:i:s', $end_at);
+                        $leave_hours = $leave_end_at->diffInHours($leave_start_at);
+                        $leave_record_data["leave_hours"] =  $leave_hours;
+
+
 
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
@@ -534,9 +577,24 @@ foreach ($assigned_departments as $assigned_department) {
                     })->first();
 
 
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
-                        $leave_record_data["start_time"] = $work_shift_details->start_at;
-                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+                    // if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
+
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) ) {
+
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                            $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+                            $leave_start_at = Carbon::createFromFormat('H:i:s', $request_data["start_time"]);
+                            $leave_end_at = Carbon::createFromFormat('H:i:s', $request_data["end_time"]);
+                            $leave_hours = $leave_end_at->diffInHours($leave_start_at);
+                            $leave_record_data["leave_hours"] =  $leave_hours;
+
+
+
+                        $leave_record_data["start_time"] = $request_data["start_time"];
+                        $leave_record_data["end_time"] = $request_data["end_time"];
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
@@ -1052,7 +1110,16 @@ foreach ($assigned_departments as $assigned_department) {
                     })->first();
 
 
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) ) {
+
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                            $leave_record_data["leave_hours"] =  $capacity_hours;
+                            $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+
+
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
                         $leave_record_data["date"] = $request_data["date"];
@@ -1115,7 +1182,19 @@ foreach ($assigned_departments as $assigned_department) {
                             $query->where('leave_records.date', $leave_date);
                         })->first();
 
-                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
+
+
+                            if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) ) {
+
+
+
+                                $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                                $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                                $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                                $leave_record_data["leave_hours"] =  $capacity_hours;
+                                $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+
                             $leave_record_data["start_time"] = $work_shift_details->start_at;
                             $leave_record_data["end_time"] = $work_shift_details->end_at;
                             $leave_record_data["date"] = $leave_date;
@@ -1173,7 +1252,12 @@ foreach ($assigned_departments as $assigned_department) {
                         $query->where('leave_records.date', $request_data["date"]);
                     })->first();
 
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner")) {
+
+
+
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
+
+
                         $start_at = $work_shift_details->start_at;
                         $end_at = $work_shift_details->end_at;
                         if ($request_data["day_type"] == "first_half") {
@@ -1183,6 +1267,21 @@ foreach ($assigned_departments as $assigned_department) {
                             $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
                             $work_shift_details->end_at = $middle_time;
                         }
+
+                        $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                        $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                        $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                        $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+                        $leave_start_at = Carbon::createFromFormat('H:i:s', $start_at);
+                        $leave_end_at = Carbon::createFromFormat('H:i:s', $end_at);
+                        $leave_hours = $leave_end_at->diffInHours($leave_start_at);
+                        $leave_record_data["leave_hours"] =  $leave_hours;
+
+
+
+
+
 
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
                         $leave_record_data["end_time"] = $work_shift_details->end_at;
@@ -1261,9 +1360,21 @@ foreach ($assigned_departments as $assigned_department) {
                     })->first();
 
 
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) || auth()->user()->hasRole("business_owner") ) {
-                        $leave_record_data["start_time"] = $work_shift_details->start_at;
-                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+
+                        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
+
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                            $leave_record_data["capacity_hours"] =  $capacity_hours;
+
+                            $leave_start_at = Carbon::createFromFormat('H:i:s', $request_data["start_time"]);
+                            $leave_end_at = Carbon::createFromFormat('H:i:s', $request_data["end_time"]);
+                            $leave_hours = $leave_end_at->diffInHours($leave_start_at);
+                            $leave_record_data["leave_hours"] =  $leave_hours;
+
+                        $leave_record_data["start_time"] = $request_data["start_time"];
+                        $leave_record_data["end_time"] = $request_data["end_time"];
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }

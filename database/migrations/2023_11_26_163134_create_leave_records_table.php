@@ -20,6 +20,9 @@ class CreateLeaveRecordsTable extends Migration
             $table->date("date");
             $table->time("start_time");
             $table->time("end_time");
+            $table->integer("capacity_hours");
+            $table->integer("leave_hours");
+
             $table->timestamps();
         });
     }

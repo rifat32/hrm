@@ -24,7 +24,7 @@ class Leave extends Model
         "status",
         "is_active",
         "business_id",
-        "created_by"
+        "created_by",
     ];
 
 

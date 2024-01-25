@@ -15,6 +15,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\Department;
 use App\Models\Holiday;
+use App\Models\LeaveRecord;
 use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\User;
@@ -1888,40 +1889,139 @@ foreach ($assigned_departments as $assigned_department) {
                 // }
 
 
+        $leave_records = LeaveRecord::
+             whereHas("leave.leave_type", function($query) {
+                  $query->where("setting_leave_types.type","paid");
+             })
+            ->when(!empty($request->user_id), function ($q) use ($request) {
+                $q->whereHas('leave',    function($query) use($request) {
+                    $query->where("leaves.user_id",  $request->user_id);
 
-                $employees->each(function ($employee) use ($dateArray) {
+                } );
+            })
+            ->when(!empty($request->start_date), function ($q) use ($request) {
+                $q->where('date', '>=', $request->start_date . ' 00:00:00');
+            })
+            ->when(!empty($request->end_date), function ($q) use ($request) {
+                $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
+            })
+            ->get();
+
+
+
+
+
+
+
+
+
+
+                $employees->each(function ($employee) use ($dateArray, $leave_records) {
                     // Get leaves for the current employee
-
-
                     $total_paid_hours = 0;
+                    $total_leave_hours = 0;
+                    $total_capacity_hours = 0;
+                    $total_balance_hours = 0;
 
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($employee, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours) {
 
-                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($employee, &$total_paid_hours) {
                         $attendance = $employee->attendances->first(function ($attendance) use (&$date) {
-
                             $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
-
-
                             return $in_date == $date;
+                        });
+
+                        $leave_record = $leave_records->first(function ($leave_record) use (&$date) {
+                            $date = Carbon::parse($leave_record->date)->format("Y-m-d");
+                            return $date == $date;
                         });
 
 
 
+                        if ($leave_record) {
+                            $total_leave_hours += $leave_record->leave_hours;
+                            if($attendance) {
+                                $total_paid_hours += $attendance->total_paid_hours;
+                                $total_balance_hours += $attendance->total_paid_hours;
+                            }
+                            else {
+                                $total_capacity_hours += $leave_record->capacity_hours;
 
-                        if ($attendance) {
-                            $total_paid_hours += $attendance->total_paid_hours;
+                            }
                             return [
-
                                 'date' => Carbon::parse($date)->format("d-m-Y"),
-                                'is_present' => 1,
-                                'paid_hours' => $attendance->total_paid_hours
+                                'is_present' => 0,
+                                'paid_hours' => $leave_record->leave_hours,
+                                'capacity_hours' => $leave_record->capacity_hours
                             ];
                         }
+
+
+
+                        if ($attendance) {
+
+                            $total_paid_hours += $attendance->total_paid_hours;
+                            $total_capacity_hours += $attendance->capacity_hours;
+
+
+                            if($attendance->work_hours_delta > 0) {
+                                $total_balance_hours +=  $attendance->work_hours_delta;
+                            }
+
+                            return [
+                                'date' => Carbon::parse($date)->format("d-m-Y"),
+                                'is_present' => 1,
+                                'paid_hours' => $attendance->total_paid_hours,
+                                'capacity_hours' => $attendance->total_capacity_hours
+                            ];
+                        }
+
+
+
+
+
+
+
+
 
                         return  null;
                     })->filter()->values();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    $employee->total_balance_hours = $total_balance_hours;
+                    $employee->total_leave_hours = $total_leave_hours;
                     $employee->total_paid_hours = $total_paid_hours;
+                    $employee->total_capacity_hours = $total_capacity_hours;
                     $employee->unsetRelation('attendances');
                     return $employee;
                 });

@@ -14,6 +14,8 @@ class LeaveRecordHistory extends Model
         'date',
         'start_time',
         'end_time',
+        "capacity_hours",
+        "leave_hours"
 
     ];
     public function getDurationAttribute()
@@ -35,12 +37,6 @@ class LeaveRecordHistory extends Model
     {
         return (new Carbon($value))->format('d-m-Y');
     }
-
-
-
-
-
-
 
 
     public function getDateAttribute($value)

@@ -14,6 +14,8 @@ class LeaveRecord extends Model
         'date',
         'start_time',
         'end_time',
+        "capacity_hours",
+        "leave_hours",
 
     ];
     public function getDurationAttribute()
@@ -27,6 +29,7 @@ class LeaveRecord extends Model
     public function leave(){
         return $this->belongsTo(Leave::class,'leave_id', 'id');
     }
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');
