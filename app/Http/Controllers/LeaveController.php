@@ -1351,7 +1351,7 @@ foreach ($assigned_departments as $assigned_department) {
 
                 $leave_record_history = $leave_records->toArray();
                 $leave_record_history["leave_id"] = $leave_history->id;
-                $leave_history->records()->createMany($leave_record_history);
+                $leave_history->records()->createMany($leave_record_data_list);
 
 
                 return response($leave, 201);

@@ -475,6 +475,13 @@ class CandidateController extends Controller
      *         required=true,
      *  example="6"
      *      ),
+     *    *      * *  @OA\Parameter(
+     * name="job_listing_id",
+     * in="query",
+     * description="job_listing_id",
+     * required=true,
+     * example="1"
+     * ),
 
      *      * *  @OA\Parameter(
      * name="start_date",
@@ -553,11 +560,15 @@ class CandidateController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $candidates = Candidate::where(
+            $candidates = Candidate::
+            with("job_listing")
+
+            ->where(
                 [
                     "candidates.business_id" => $business_id
                 ]
             )
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -574,6 +585,10 @@ class CandidateController extends Controller
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('candidates.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
+                ->when(!empty($request->job_listing_id), function ($query) use ($request) {
+                    return $query->where('candidates.job_listing_id',$request->job_listing_id);
+                })
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("candidates.id", $request->order_by);
                 }, function ($query) {
@@ -659,7 +674,8 @@ class CandidateController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $candidate =  Candidate::where([
+            $candidate =  Candidate:: with("job_listing")
+            ->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

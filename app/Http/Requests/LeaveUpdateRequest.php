@@ -145,8 +145,8 @@ class LeaveUpdateRequest extends BaseFormRequest
             'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
             'note' => 'required|string',
 
-            'start_date' => 'nullable|required_if:leave_duration,multiple_day|date_format:d-m-Y',
-            'end_date' => 'nullable|required_if:leave_duration,multiple_day|date_format:d-m-Y|after_or_equal:start_date',
+            'start_date' => 'nullable|required_if:leave_duration,multiple_day',
+            'end_date' => 'nullable|required_if:leave_duration,multiple_day|after_or_equal:start_date',
 
             'start_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s',
             'end_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:date',

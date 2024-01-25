@@ -63,7 +63,7 @@ class CandidateCreateRequest extends BaseFormRequest
     {
         return [
 
-            'status.in' => 'Invalid value for status. Valid values are: review, interviewed, hired, rejected.',
+            'status.in' => 'Invalid value for status. Valid values are: applied,progress, interview_stage_1, interview_stage_2, final_interview, rejected, job_offered, hired.',
             // ... other custom messages
         ];
     }

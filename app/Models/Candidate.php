@@ -35,6 +35,10 @@ class Candidate extends Model
 
     ];
 
+    public function job_listing()
+    {
+        return $this->belongsTo(JobListing::class, "job_listing_id",'id');
+    }
 
 
     public function getCreatedAtAttribute($value)
