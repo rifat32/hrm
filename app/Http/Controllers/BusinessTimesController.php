@@ -6,6 +6,7 @@ use App\Http\Requests\BusinessTimesUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Business;
 use App\Models\BusinessTime;
 use App\Models\WorkShift;
 use Exception;
@@ -98,7 +99,7 @@ class BusinessTimesController extends Controller
 
                 foreach($timesArray as $business_time) {
                     $work_shift_ids = WorkShift::where([
-                        "business_id" => auth()->business_id
+                        "business_id" => auth()->user()->business_id
                     ])
                     ->whereHas('details', function ($query) use ($business_time) {
                         $query->where('work_shift_detail.day',($business_time["day"]))
@@ -124,7 +125,7 @@ class BusinessTimesController extends Controller
                 }
 
 
-        BusinessTime::where([
+              BusinessTime::where([
                 "business_id" => auth()->user()->business_id
                ])
                ->delete();
@@ -136,7 +137,31 @@ class BusinessTimesController extends Controller
                     "end_at"=> $business_time["end_at"],
                     "is_weekend"=> $business_time["is_weekend"],
                 ]);
+
                }
+
+
+     $business = Business::where([
+    "business_id" => auth()->user()->business_id
+])
+->first();
+               $default_work_shift_data = [
+                'name' => 'default work shift',
+                'type' => 'regular',
+                'description' => '',
+                'is_personal' => false,
+                'break_type' => 'unpaid',
+                'break_hours' => 1,
+                "attendances_count" => 0,
+                'details' => $business->times->toArray(),
+                "is_business_default" => 1,
+                "is_active",
+                "is_default" => 1,
+                "business_id" => $business->id,
+            ];
+
+            $default_work_shift = WorkShift::create($default_work_shift_data);
+            $default_work_shift->details()->createMany($default_work_shift_data['details']);
 
 
                 return response(["message" => "data inserted"], 201);

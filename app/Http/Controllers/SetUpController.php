@@ -693,8 +693,8 @@ return "swagger generated";
         ];
 
 
-                $default_work_shift_2 = WorkShift::create($default_work_shift_data_2);
-                $default_work_shift_2->details()->createMany($default_work_shift_data_2['details']);
+                // $default_work_shift_2 = WorkShift::create($default_work_shift_data_2);
+                // $default_work_shift_2->details()->createMany($default_work_shift_data_2['details']);
 
 
 

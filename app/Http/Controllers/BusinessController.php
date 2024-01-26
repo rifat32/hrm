@@ -472,7 +472,7 @@ if(!$user->hasRole('business_owner')) {
         $timesArray = collect($request_data["times"])->unique("day");
         foreach($timesArray as $business_time) {
             $work_shift_ids = WorkShift::where([
-                "business_id" => auth()->business_id
+                "business_id" => auth()->user()->business_id
             ])
             ->whereHas('details', function ($query) use ($business_time) {
                 $query->where('work_shift_details.day',($business_time["day"]))

@@ -144,28 +144,30 @@ class UserUpdateV2Request extends BaseFormRequest
                         ])
                         ->orWhere(function($query) use($business_times) {
                             $query->where([
+                                "is_active" => 1,
                                 "business_id" => NULL,
                                 "is_default" => 1
                             ])
-                            ->whereHas('details', function($query) use($business_times) {
+                        //     ->whereHas('details', function($query) use($business_times) {
 
-                            foreach($business_times as $business_time) {
-                                $query->where([
-                                    "day" => $business_time->day,
-                                ]);
-                                if($business_time["is_weekend"]) {
-                                    $query->where([
-                                        "is_weekend" => 1,
-                                    ]);
-                                } else {
-                                    $query->where(function($query) use($business_time) {
-                                        $query->whereTime("start_at", ">=", $business_time->start_at);
-                                        $query->orWhereTime("end_at", "<=", $business_time->end_at);
-                                    });
-                                }
+                        //     foreach($business_times as $business_time) {
+                        //         $query->where([
+                        //             "day" => $business_time->day,
+                        //         ]);
+                        //         if($business_time["is_weekend"]) {
+                        //             $query->where([
+                        //                 "is_weekend" => 1,
+                        //             ]);
+                        //         } else {
+                        //             $query->where(function($query) use($business_time) {
+                        //                 $query->whereTime("start_at", ">=", $business_time->start_at);
+                        //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
+                        //             });
+                        //         }
 
-                            }
-                        });
+                        //     }
+                        // })
+                        ;
 
                         })
 

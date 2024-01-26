@@ -1209,7 +1209,7 @@ class DashboardManagementController extends Controller
     //     return $data;
     // }
 
-    public function on_holiday(
+    public function employee_on_holiday(
         $today,
         $start_date_of_next_month,
         $end_date_of_next_month,
@@ -1616,7 +1616,7 @@ class DashboardManagementController extends Controller
 
         return $data;
     }
-    public function passport_expires_in(
+    public function upcoming_passport_expiries(
         $today,
         $start_date_of_next_month,
         $end_date_of_next_month,
@@ -1670,7 +1670,7 @@ class DashboardManagementController extends Controller
         return $data;
     }
 
-    public function visa_expires_in(
+    public function upcoming_visa_expiries(
         $today,
         $start_date_of_next_month,
         $end_date_of_next_month,
@@ -1722,7 +1722,7 @@ class DashboardManagementController extends Controller
 
         return $data;
     }
-    public function sponsorship_expires_in(
+    public function upcoming_sponsorship_expiries(
         $today,
         $start_date_of_next_month,
         $end_date_of_next_month,
@@ -1932,7 +1932,7 @@ class DashboardManagementController extends Controller
             ->get()
             ->keyBy('widget_name');
 
-            $data["dashboard_widgets"] = $dashboard_widgets;
+            // $data["dashboard_widgets"] = $dashboard_widgets;
 
 
             $all_manager_department_ids = [];
@@ -1959,10 +1959,17 @@ class DashboardManagementController extends Controller
             );
 
             $widget = $dashboard_widgets->get("employees");
+
+            $data["employees"]["id"] = 1;
             if($widget) {
-                $data["employees"]["id"] = $widget->id;
-                $data["employees"]["widget_order"] = $widget->id;
+                $data["employees"]["widget_id"] = $widget->id;
+                $data["employees"]["widget_order"] = $widget->widget_order;
             }
+            else {
+                $data["employees"]["widget_id"] = 0;
+                $data["employees"]["widget_order"] = 0;
+            }
+
             $data["employees"]["widget_name"] = "employees";
 
             //     $data["approved_leaves"] = $this->approved_leaves(
@@ -1978,7 +1985,7 @@ class DashboardManagementController extends Controller
             //         $all_manager_department_ids
             // );
 
-            $data["on_holiday"] = $this->on_holiday(
+            $data["employee_on_holiday"] = $this->employee_on_holiday(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
@@ -1995,17 +2002,25 @@ class DashboardManagementController extends Controller
                 $all_manager_department_ids,
 
             );
-            $widget = $dashboard_widgets->get("on_holiday");
+            $widget = $dashboard_widgets->get("employee_on_holiday");
+
+
+            $data["employee_on_holiday"]["id"] = 2;
             if($widget) {
-                $data["on_holiday"]["id"] = $widget->id;
-                $data["on_holiday"]["widget_order"] = $widget->id;
+                $data["employee_on_holiday"]["widget_id"] = $widget->id;
+                $data["employee_on_holiday"]["widget_order"] = $widget->widget_order;
             }
-            $data["on_holiday"]["widget_name"] = "on_holiday";
+            else {
+                $data["employee_on_holiday"]["widget_id"] = 0;
+                $data["employee_on_holiday"]["widget_order"] = 0;
+            }
+
+            $data["employee_on_holiday"]["widget_name"] = "employee_on_holiday";
 
 
-            $leave_statuses = ['pending_approval', 'progress', 'approved', 'rejected'];
-            foreach ($leave_statuses as $leave_status) {
-                $data[("leaves_" . $leave_status)] = $this->leaves(
+            $leave_statuses = ['pending_approval','progress', 'approved','rejected'];
+            foreach ($leave_statuses as $index=>$leave_status) {
+                $data[($leave_status . "_leaves")] = $this->leaves(
                     $today,
                     $start_date_of_next_month,
                     $end_date_of_next_month,
@@ -2022,12 +2037,22 @@ class DashboardManagementController extends Controller
                     $all_manager_department_ids,
                     $leave_status
                 );
-                $widget = $dashboard_widgets->get(("leaves_" . $leave_status));
+                $widget = $dashboard_widgets->get(($leave_status . "_leaves"));
+
+
+
+                $data[($leave_status . "_leaves")]["id"] = 3 + $index;
                 if($widget) {
-                    $data[("leaves_" . $leave_status)]["id"] = $widget->id;
-                    $data[("leaves_" . $leave_status)]["widget_order"] = $widget->id;
+                    $data[($leave_status . "_leaves")]["widget_id"] = $widget->id;
+                    $data[($leave_status . "_leaves")]["widget_order"] = $widget->widget_order;
                 }
-                $data[("leaves_" . $leave_status)]["widget_name"] = ("leaves_" . $leave_status);
+                else {
+                    $data[($leave_status . "_leaves")]["widget_id"] = 0;
+                    $data[($leave_status . "_leaves")]["widget_order"] = 0;
+                }
+
+
+                $data[($leave_status . "_leaves")]["widget_name"] = ($leave_status . "_leaves");
             }
 
 
@@ -2049,14 +2074,23 @@ class DashboardManagementController extends Controller
                 $all_manager_department_ids
             );
             $widget = $dashboard_widgets->get("open_roles");
+
+
+            $data["open_roles"]["id"] = 4 + $index;
             if($widget) {
-                $data["open_roles"]["id"] = $widget->id;
-                $data["open_roles"]["widget_order"] = $widget->id;
+                $data["open_roles"]["widget_id"] = $widget->id;
+                $data["open_roles"]["widget_order"] = $widget->widget_order;
             }
+            else {
+                $data["open_roles"]["widget_id"] = 0;
+                $data["open_roles"]["widget_order"] = 0;
+            }
+
+
             $data["open_roles"]["widget_name"] = "open_roles";
 
 
-            $data["passport_expires_in"] = $this->passport_expires_in(
+            $data["upcoming_passport_expiries"] = $this->upcoming_passport_expiries(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
@@ -2072,15 +2106,27 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
-            $widget = $dashboard_widgets->get("passport_expires_in");
+            $widget = $dashboard_widgets->get("upcoming_passport_expiries");
+
+
+            $data["upcoming_passport_expiries"]["id"] = 5 + $index;
             if($widget) {
-                $data["passport_expires_in"]["id"] = $widget->id;
-                $data["passport_expires_in"]["widget_order"] = $widget->id;
+                $data["upcoming_passport_expiries"]["widget_id"] = $widget->id;
+                $data["upcoming_passport_expiries"]["widget_order"] = $widget->widget_order;
             }
-            $data["passport_expires_in"]["widget_name"] = "passport_expires_in";
+            else {
+                $data["upcoming_passport_expiries"]["widget_id"] = 0;
+                $data["upcoming_passport_expiries"]["widget_order"] = 0;
+            }
 
 
-            $data["visa_expires_in"] = $this->visa_expires_in(
+
+
+
+            $data["upcoming_passport_expiries"]["widget_name"] = "upcoming_passport_expiries";
+
+
+            $data["upcoming_visa_expiries"] = $this->upcoming_visa_expiries(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
@@ -2096,14 +2142,27 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
-            $widget = $dashboard_widgets->get("visa_expires_in");
-            if($widget) {
-                $data["visa_expires_in"]["id"] = $widget->id;
-                $data["visa_expires_in"]["widget_order"] = $widget->id;
-            }
-            $data["visa_expires_in"]["widget_name"] = "visa_expires_in";
+            $widget = $dashboard_widgets->get("upcoming_visa_expiries");
 
-            $data["sponsorship_expires_in"] = $this->sponsorship_expires_in(
+
+            $data["upcoming_visa_expiries"]["id"] = 6 + $index;
+            if($widget) {
+                $data["upcoming_visa_expiries"]["widget_id"] = $widget->id;
+                $data["upcoming_visa_expiries"]["widget_order"] = $widget->widget_order;
+            }
+            else {
+                $data["upcoming_visa_expiries"]["widget_id"] = 0;
+                $data["upcoming_visa_expiries"]["widget_order"] = 0;
+            }
+
+
+            $data["upcoming_visa_expiries"]["widget_name"] = "upcoming_visa_expiries";
+
+
+
+
+
+            $data["upcoming_sponsorship_expiries"] = $this->upcoming_sponsorship_expiries(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
@@ -2119,18 +2178,29 @@ class DashboardManagementController extends Controller
                 $end_date_of_previous_week,
                 $all_manager_department_ids
             );
-            $widget = $dashboard_widgets->get("sponsorship_expires_in");
+            $widget = $dashboard_widgets->get("upcoming_sponsorship_expiries");
+
+
+
+            $data["upcoming_sponsorship_expiries"]["id"] = 7  + $index;
             if($widget) {
-                $data["sponsorship_expires_in"]["id"] = $widget->id;
-                $data["sponsorship_expires_in"]["widget_order"] = $widget->id;
+                $data["upcoming_sponsorship_expiries"]["widget_id"] = $widget->id;
+                $data["upcoming_sponsorship_expiries"]["widget_order"] = $widget->widget_order;
             }
-            $data["sponsorship_expires_in"]["widget_name"] = "sponsorship_expires_in";
+            else {
+                $data["upcoming_sponsorship_expiries"]["widget_id"] = 0;
+                $data["upcoming_sponsorship_expiries"]["widget_order"] = 0;
+            }
+
+
+
+            $data["upcoming_sponsorship_expiries"]["widget_name"] = "upcoming_sponsorship_expiries";
 
 
 
             $sponsorship_statuses = ['unassigned', 'assigned', 'visa_applied','visa_rejected','visa_grantes','withdrawal'];
-            foreach ($sponsorship_statuses as $sponsorship_status) {
-                $data[("sponsorships_" . $sponsorship_status)] = $this->sponsorships(
+            foreach ($sponsorship_statuses as $index2=>$sponsorship_status) {
+                $data[($sponsorship_status . "_sponsorships")] = $this->sponsorships(
                     $today,
                     $start_date_of_next_month,
                     $end_date_of_next_month,
@@ -2147,12 +2217,21 @@ class DashboardManagementController extends Controller
                     $all_manager_department_ids,
                     $sponsorship_status
                 );
-                $widget = $dashboard_widgets->get(("sponsorships_" . $sponsorship_status));
+                $widget = $dashboard_widgets->get(($sponsorship_status . "_sponsorships"));
+
+
+                $data[($sponsorship_status . "_sponsorships")]["id"] = 8 + $index + $index2;
                 if($widget) {
-                    $data[("sponsorships_" . $sponsorship_status)]["id"] = $widget->id;
-                    $data[("sponsorships_" . $sponsorship_status)]["widget_order"] = $widget->id;
+                    $data[($sponsorship_status . "_sponsorships")]["widget_id"] = $widget->id;
+                    $data[($sponsorship_status . "_sponsorships")]["widget_order"] = $widget->widget_order;
                 }
-                $data[("sponsorships_" . $sponsorship_status)]["widget_name"] = ("sponsorships_" . $sponsorship_status);
+                else {
+                    $data[($sponsorship_status . "_sponsorships")]["widget_id"] = 0;
+                    $data[($sponsorship_status . "_sponsorships")]["widget_order"] = 0;
+                }
+
+
+                $data[($sponsorship_status . "_sponsorships")]["widget_name"] = ($sponsorship_status . "_sponsorships");
             }
 
 

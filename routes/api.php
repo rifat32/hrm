@@ -540,6 +540,8 @@ Route::delete('/v1.0/holidays/{ids}', [HolidayController::class, "deleteHolidays
 
 Route::post('/v1.0/work-shifts', [WorkShiftController::class, "createWorkShift"]);
 Route::put('/v1.0/work-shifts', [WorkShiftController::class, "updateWorkShift"]);
+Route::put('/v1.0/work-shifts/toggle-active', [WorkShiftController::class, "toggleActiveWorkShift"]);
+
 Route::get('/v1.0/work-shifts', [WorkShiftController::class, "getWorkShifts"]);
 Route::get('/v1.0/work-shifts/{id}', [WorkShiftController::class, "getWorkShiftById"]);
 

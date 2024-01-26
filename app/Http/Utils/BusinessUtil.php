@@ -4,6 +4,7 @@ namespace App\Http\Utils;
 
 
 use App\Models\Business;
+use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\Designation;
@@ -17,6 +18,7 @@ use App\Models\SettingPayrun;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
+use Carbon\Carbon;
 use Exception;
 
 trait BusinessUtil
@@ -537,67 +539,69 @@ trait BusinessUtil
 
 
 
-    public function loadDefaultSettingLeave($business_id = NULL) {
-    // load setting leave
+    public function loadDefaultSettingLeave($business_id = NULL)
+    {
+        // load setting leave
 
-    $default_setting_leave_query = [
-        "business_id" => NULL,
-        "is_active" => 1,
-        "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
-    ];
-
-    if (!auth()->user()->hasRole("superadmin")) {
-        $default_setting_leave_query["created_by"] = auth()->user()->id;
-    }
-
-    $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
-
-    // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
-    if ($defaultSettingLeaves->isEmpty() && !auth()->user()->hasRole("superadmin")) {
-        unset($default_setting_leave_query['created_by']);
-        $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
-    }
-
-
-
-
-
-    foreach ($defaultSettingLeaves as $defaultSettingLeave) {
-        $insertableData = [
-            'start_month' => $defaultSettingLeave->start_month,
-            'approval_level' => $defaultSettingLeave->approval_level,
-            'allow_bypass' => $defaultSettingLeave->allow_bypass,
-            "created_by" => auth()->user()->id,
+        $default_setting_leave_query = [
+            "business_id" => NULL,
             "is_active" => 1,
-            "is_default" => 0,
-            "business_id" => $business_id,
+            "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
         ];
 
-        $setting_leave  = SettingLeave::create($insertableData);
+        if (!auth()->user()->hasRole("superadmin")) {
+            $default_setting_leave_query["created_by"] = auth()->user()->id;
+        }
 
-        $business_owner_role_id = Role::where([
-            "name" => ("business_owner#" . $business_id)
-        ])
-        ->pluck("id");
+        $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
 
-        $setting_leave->special_roles()->sync($business_owner_role_id, []);
+        // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
+        if ($defaultSettingLeaves->isEmpty() && !auth()->user()->hasRole("superadmin")) {
+            unset($default_setting_leave_query['created_by']);
+            $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
+        }
 
 
-        $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
-        $setting_leave->paid_leave_employment_statuses()->sync($default_paid_leave_employment_statuses, []);
 
-        $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
-        $setting_leave->unpaid_leave_employment_statuses()->sync($default_unpaid_leave_employment_statuses, []);
+
+
+        foreach ($defaultSettingLeaves as $defaultSettingLeave) {
+            $insertableData = [
+                'start_month' => $defaultSettingLeave->start_month,
+                'approval_level' => $defaultSettingLeave->approval_level,
+                'allow_bypass' => $defaultSettingLeave->allow_bypass,
+                "created_by" => auth()->user()->id,
+                "is_active" => 1,
+                "is_default" => 0,
+                "business_id" => $business_id,
+            ];
+
+            $setting_leave  = SettingLeave::create($insertableData);
+
+            $business_owner_role_id = Role::where([
+                "name" => ("business_owner#" . $business_id)
+            ])
+                ->pluck("id");
+
+            $setting_leave->special_roles()->sync($business_owner_role_id, []);
+
+
+            $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
+            $setting_leave->paid_leave_employment_statuses()->sync($default_paid_leave_employment_statuses, []);
+
+            $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
+            $setting_leave->unpaid_leave_employment_statuses()->sync($default_unpaid_leave_employment_statuses, []);
+        }
+
+        // end load setting leave
     }
 
-    // end load setting leave
-    }
 
+    public function loadDefaultAttendanceSetting($business_id = NULL)
+    {
+        // load setting attendance
 
-    public function loadDefaultAttendanceSetting($business_id = NULL) {
-          // load setting attendance
-
-          $default_setting_attendance_query = [
+        $default_setting_attendance_query = [
             "business_id" => NULL,
             "is_active" => 1,
             "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
@@ -644,14 +648,15 @@ trait BusinessUtil
             $business_owner_role_id = Role::where([
                 "name" => ("business_owner#" . $business_id)
             ])
-            ->pluck("id");
+                ->pluck("id");
             $setting_attendance->special_roles()->sync($business_owner_role_id, []);
         }
 
         // end load setting attendance
 
     }
-    public function loadDefaultPayrunSetting($business_id = NULL) {
+    public function loadDefaultPayrunSetting($business_id = NULL)
+    {
         // load setting attendance
 
         $default_setting_payrun_query = [
@@ -673,34 +678,34 @@ trait BusinessUtil
         }
 
 
-      foreach ($defaultSettingPayruns as $defaultSettingPayrun) {
-          $insertableData = [
-              'payrun_period' => $defaultSettingPayrun->payrun_period,
-              'consider_type' => $defaultSettingPayrun->consider_type,
-              'consider_overtime' => $defaultSettingPayrun->consider_overtime,
+        foreach ($defaultSettingPayruns as $defaultSettingPayrun) {
+            $insertableData = [
+                'payrun_period' => $defaultSettingPayrun->payrun_period,
+                'consider_type' => $defaultSettingPayrun->consider_type,
+                'consider_overtime' => $defaultSettingPayrun->consider_overtime,
 
-              "created_by" => auth()->user()->id,
-              "is_active" => 1,
-              "is_default" => 0,
-              "business_id" => $business_id,
-          ];
+                "created_by" => auth()->user()->id,
+                "is_active" => 1,
+                "is_default" => 0,
+                "business_id" => $business_id,
+            ];
 
-          $setting_payrun  = SettingPayrun::create($insertableData);
-
-
+            $setting_payrun  = SettingPayrun::create($insertableData);
 
 
-        //   $business_owner_role_id = Role::where([
-        //       "name" => ("business_owner#" . $business_id)
-        //   ])
-        //   ->pluck("id");
-        //   $setting_attendance->special_roles()->sync($business_owner_role_id, []);
-      }
+
+
+            //   $business_owner_role_id = Role::where([
+            //       "name" => ("business_owner#" . $business_id)
+            //   ])
+            //   ->pluck("id");
+            //   $setting_attendance->special_roles()->sync($business_owner_role_id, []);
+        }
     }
 
-      // end load setting attendance
+    // end load setting attendance
 
-    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1,$business)
+    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1, $business)
     {
 
         $work_location =  WorkLocation::create([
@@ -712,7 +717,7 @@ trait BusinessUtil
         ]);
 
 
-     $department =  Department::create([
+        $department =  Department::create([
             "name" => $business_name,
             "location" => $address_line_1,
             "is_active" => 1,
@@ -765,36 +770,251 @@ trait BusinessUtil
 
 
 
-       $this->loadDefaultSettingLeave($business_id);
+        $this->loadDefaultSettingLeave($business_id);
 
-       $this->loadDefaultAttendanceSetting($business_id);
+        $this->loadDefaultAttendanceSetting($business_id);
 
-       $this->loadDefaultPayrunSetting($business_id);
-
-
-       $default_work_shift_data = [
-        'name' => 'default work shift',
-        'type' => 'regular',
-        'description' => '',
-        'is_personal' => false,
-        'break_type' => 'unpaid',
-        'break_hours' => 1,
-        "attendances_count" => 0,
-        'details' => $business->times->toArray(),
-        "is_business_default" => 1,
-        "is_active",
-        "is_default" => 1,
-        "business_id" => $business_id,
-    ];
-
-    $default_work_shift = WorkShift::create($default_work_shift_data);
-    $default_work_shift->details()->createMany($default_work_shift_data['details']);
+        $this->loadDefaultPayrunSetting($business_id);
 
 
+        $default_work_shift_data = [
+            'name' => 'default work shift',
+            'type' => 'regular',
+            'description' => '',
+            'is_personal' => false,
+            'break_type' => 'unpaid',
+            'break_hours' => 1,
+            "attendances_count" => 0,
+            'details' => $business->times->toArray(),
+            "is_business_default" => 1,
+            "is_active",
+            "is_default" => 1,
+            "business_id" => $business_id,
+        ];
 
+        $default_work_shift = WorkShift::create($default_work_shift_data);
+        $default_work_shift->details()->createMany($default_work_shift_data['details']);
+    }
 
 
 
 
+
+    public function checkWorkShiftDetails($details)
+    {
+
+        foreach ($details as $index => $detail) {
+            $business_time =   BusinessTime::where([
+                "business_id" => auth()->user()->business_id,
+                "day" => $detail["day"]
+            ])
+                ->first();
+            if (!$business_time) {
+                $error = [
+                    "message" => "The given data was invalid.",
+                    "errors" => [("details." . $index . ".day") => ["no business time found on this day"]]
+                ];
+                return [
+                    "ok" => false,
+                    "status" => 422,
+                    "error" => $error
+                ];
+            }
+
+            if ($business_time->is_weekend == 1 && $detail["is_weekend"] != 1) {
+                $error = [
+                    "message" => "The given data was invalid.",
+                    "errors" => [("details." . $index . ".is_weekend") => ["This is weekend day"]]
+                ];
+                return [
+                    "ok" => false,
+                    "status" => 422,
+                    "error" => $error
+                ];
+            }
+
+
+            if (!empty($detail["start_at"]) && !empty($detail["end_at"] && !empty($business_time->start_at) && !empty($business_time->end_at))) {
+
+                $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
+                $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
+                $business_start_at = Carbon::createFromFormat('H:i:s', $business_time->start_at);
+                $business_end_at = Carbon::createFromFormat('H:i:s', $business_time->end_at);
+
+
+                $difference_in_both_request  = $request_start_at->diffInHours($request_end_at);
+                $difference_in_both_start_at  = $business_start_at->diffInHours($request_start_at);
+                $difference_in_end_at_start_at  = $business_end_at->diffInHours($request_start_at);
+                $difference_in_both_end_at  = $business_end_at->diffInHours($business_end_at);
+                $difference_in_start_at_end_at  = $business_start_at->diffInHours($request_end_at);
+
+
+
+
+
+
+                if ($difference_in_both_request < 0) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [
+                            ("details." . $index . ".end_at") => ["end at should be greater than start at"]
+
+                        ]
+                    ];
+                    return [
+                        "ok" => false,
+                        "status" => 422,
+                        "error" => $error
+                    ];
+                }
+
+
+                if ($difference_in_both_start_at < 0) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("details." . $index . ".start_at") => ["start at should be in business working time $difference_in_both_start_at"]]
+                    ];
+                    return [
+                        "ok" => false,
+                        "status" => 422,
+                        "error" => $error
+                    ];
+                }
+
+
+
+                if ($difference_in_end_at_start_at < 0) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("details." . $index . ".start_at") => ["start at should be in business working time"]]
+                    ];
+                    return [
+                        "ok" => false,
+                        "status" => 422,
+                        "error" => $error
+                    ];
+                }
+
+
+                if ($difference_in_both_end_at > 0) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("details." . $index . ".end_at") => ["end at should be in business working time"]]
+                    ];
+                    return [
+                        "ok" => false,
+                        "status" => 422,
+                        "error" => $error
+                    ];
+                }
+
+                if ($difference_in_start_at_end_at < 0) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("details." . $index . ".end_at") => ["end at should be in business working time"]]
+                    ];
+                    return [
+                        "ok" => false,
+                        "status" => 422,
+                        "error" => $error
+                    ];
+                }
+            }
+        }
+
+        // foreach($request_data['details'] as $index => $detail) {
+        //     $business_time =   BusinessTime::where([
+        //            "business_id" => auth()->user()->business_id,
+        //            "day" => $detail["day"]
+        //        ])
+        //        ->first();
+        //        if(!$business_time) {
+        //        $error = [
+        //                "message" => "The given data was invalid.",
+        //                "errors" => [("details.".$index.".day")=>["no business time found on this day"]]
+        //         ];
+        //            throw new Exception(json_encode($error),422);
+        //        }
+
+
+        //        if($business_time->is_weekend == 1 && $detail["is_weekend"] != 1) {
+        //            $error = [
+        //                    "message" => "The given data was invalid.",
+        //                    "errors" => [("details.".$index.".is_weekend")=>["This is weekend day"]]
+        //             ];
+        //                throw new Exception(json_encode($error),422);
+        //         }
+
+        //         if(!empty($detail["start_at"]) && !empty($detail["end_at"] && !empty($business_time->start_at) && !empty($business_time->end_at)) ) {
+
+        //        $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
+        //        $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
+
+        //        $business_start_at = Carbon::createFromFormat('H:i:s', $business_time->start_at);
+        //        $business_end_at = Carbon::createFromFormat('H:i:s', $business_time->end_at);
+
+        //        $difference_in_both_request  = $request_start_at->diffInHours($request_end_at);
+        //        $difference_in_both_start_at  = $business_start_at->diffInHours($request_start_at);
+        //        $difference_in_end_at_start_at  = $business_end_at->diffInHours($request_start_at);
+
+        //        $difference_in_both_end_at  = $business_end_at->diffInHours($business_end_at);
+        //        $difference_in_start_at_end_at  = $business_start_at->diffInHours($request_end_at);
+
+
+        //        if($difference_in_both_request < 0) {
+        //            $error = [
+        //                "message" => "The given data was invalid.",
+        //                "errors" => [
+        //                    ("details.".$index.".end_at")=>["end at should be greater than start at"]
+
+        //                    ]
+        //         ];
+        //            throw new Exception(json_encode($error),422);
+        //        }
+
+
+        //        if($difference_in_both_start_at < 0) {
+        //            $error = [
+        //                "message" => "The given data was invalid.",
+        //                "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
+        //         ];
+        //            throw new Exception(json_encode($error),422);
+        //        }
+
+
+
+        //        if($difference_in_end_at_start_at < 0) {
+        //         $error = [
+        //             "message" => "The given data was invalid.",
+        //             "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
+        //      ];
+        //         throw new Exception(json_encode($error),422);
+        //     }
+
+
+        //        if($difference_in_both_end_at > 0) {
+        //            $error = [
+        //                "message" => "The given data was invalid.",
+        //                "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
+        //         ];
+        //            throw new Exception(json_encode($error),422);
+        //        }
+
+        //        if($difference_in_start_at_end_at < 0) {
+        //            $error = [
+        //                "message" => "The given data was invalid.",
+        //                "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
+        //         ];
+        //            throw new Exception(json_encode($error),422);
+        //        }
+        //     }
+
+
+
+        //    }
+
+        return [
+            "ok" => true,
+        ];
     }
 }

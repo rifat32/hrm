@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\WorkShiftCreateRequest;
 use App\Http\Requests\WorkShiftUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessTime;
+use App\Models\Department;
 use App\Models\EmployeeWorkShiftHistory;
 use App\Models\User;
 use App\Models\UserWorkShift;
@@ -149,101 +151,18 @@ class WorkShiftController extends Controller
                 }
                 $request_data = $request->validated();
 
-                foreach($request_data['details'] as $index => $detail) {
-                 $business_time =   BusinessTime::where([
-                        "business_id" => auth()->user()->business_id,
-                        "day" => $detail["day"]
-                    ])
-                    ->first();
-                    if(!$business_time) {
-                    $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [("details.".$index.".day")=>["no business time found on this day"]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-
-                    if($business_time->is_weekend == 1 && $detail["is_weekend"] != 1) {
-                        $error = [
-                                "message" => "The given data was invalid.",
-                                "errors" => [("details.".$index.".is_weekend")=>["This is weekend day"]]
-                         ];
-                            throw new Exception(json_encode($error),422);
-                     }
-
-
-                     if(!empty($detail["start_at"]) && !empty($detail["end_at"] && !empty($business_time->start_at) && !empty($business_time->end_at)) ) {
-
-                    $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
-                    $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
-                    $business_start_at = Carbon::createFromFormat('H:i:s', $business_time->start_at);
-                    $business_end_at = Carbon::createFromFormat('H:i:s', $business_time->end_at);
-
-
-                    $difference_in_both_request  = $request_start_at->diffInHours($request_end_at);
-                    $difference_in_both_start_at  = $business_start_at->diffInHours($request_start_at);
-                    $difference_in_end_at_start_at  = $business_end_at->diffInHours($request_start_at);
-                    $difference_in_both_end_at  = $business_end_at->diffInHours($business_end_at);
-                    $difference_in_start_at_end_at  = $business_start_at->diffInHours($request_end_at);
-
-
-
-
-
-
-                    if($difference_in_both_request < 0) {
-                        $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [
-                                ("details.".$index.".end_at")=>["end at should be greater than start at"]
-
-                                ]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-
-
-                    if($difference_in_both_start_at < 0) {
-                        $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time $difference_in_both_start_at"]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-
-
-
-                    if($difference_in_end_at_start_at < 0) {
-                        $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-
-
-                    if($difference_in_both_end_at > 0) {
-                        $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-
-                    if($difference_in_start_at_end_at < 0) {
-                        $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-                     }
-
-
-
-
-
+           $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
+                if(!$check_work_shift_details["ok"]) {
+                    $this->storeError(
+                        json_encode($check_work_shift_details["error"]),
+                        $check_work_shift_details["status"],
+                        "front end error",
+                        "front end error"
+                       );
+                    throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
                 }
+
+
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -394,95 +313,19 @@ class WorkShiftController extends Controller
 
                 $request_data = $request->validated();
 
-                foreach($request_data['details'] as $index => $detail) {
-                    $business_time =   BusinessTime::where([
-                           "business_id" => auth()->user()->business_id,
-                           "day" => $detail["day"]
-                       ])
-                       ->first();
-                       if(!$business_time) {
-                       $error = [
-                               "message" => "The given data was invalid.",
-                               "errors" => [("details.".$index.".day")=>["no business time found on this day"]]
-                        ];
-                           throw new Exception(json_encode($error),422);
-                       }
-
-
-                       if($business_time->is_weekend == 1 && $detail["is_weekend"] != 1) {
-                           $error = [
-                                   "message" => "The given data was invalid.",
-                                   "errors" => [("details.".$index.".is_weekend")=>["This is weekend day"]]
-                            ];
-                               throw new Exception(json_encode($error),422);
-                        }
-
-                        if(!empty($detail["start_at"]) && !empty($detail["end_at"] && !empty($business_time->start_at) && !empty($business_time->end_at)) ) {
-
-                       $request_start_at = Carbon::createFromFormat('H:i:s', $detail["start_at"]);
-                       $request_end_at = Carbon::createFromFormat('H:i:s', $detail["end_at"]);
-
-                       $business_start_at = Carbon::createFromFormat('H:i:s', $business_time->start_at);
-                       $business_end_at = Carbon::createFromFormat('H:i:s', $business_time->end_at);
-
-                       $difference_in_both_request  = $request_start_at->diffInHours($request_end_at);
-                       $difference_in_both_start_at  = $business_start_at->diffInHours($request_start_at);
-                       $difference_in_end_at_start_at  = $business_end_at->diffInHours($request_start_at);
-
-                       $difference_in_both_end_at  = $business_end_at->diffInHours($business_end_at);
-                       $difference_in_start_at_end_at  = $business_start_at->diffInHours($request_end_at);
-
-
-                       if($difference_in_both_request < 0) {
-                           $error = [
-                               "message" => "The given data was invalid.",
-                               "errors" => [
-                                   ("details.".$index.".end_at")=>["end at should be greater than start at"]
-
-                                   ]
-                        ];
-                           throw new Exception(json_encode($error),422);
-                       }
-
-
-                       if($difference_in_both_start_at < 0) {
-                           $error = [
-                               "message" => "The given data was invalid.",
-                               "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
-                        ];
-                           throw new Exception(json_encode($error),422);
-                       }
 
 
 
-                       if($difference_in_end_at_start_at < 0) {
-                        $error = [
-                            "message" => "The given data was invalid.",
-                            "errors" => [ ("details.".$index.".start_at")=>["start at should be in business working time"]]
-                     ];
-                        throw new Exception(json_encode($error),422);
-                    }
-
-
-                       if($difference_in_both_end_at > 0) {
-                           $error = [
-                               "message" => "The given data was invalid.",
-                               "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
-                        ];
-                           throw new Exception(json_encode($error),422);
-                       }
-
-                       if($difference_in_start_at_end_at < 0) {
-                           $error = [
-                               "message" => "The given data was invalid.",
-                               "errors" => [ ("details.".$index.".end_at")=>["end at should be in business working time"]]
-                        ];
-                           throw new Exception(json_encode($error),422);
-                       }
-                    }
-
-                   }
-
+                $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
+                if(!$check_work_shift_details["ok"]) {
+                    $this->storeError(
+                        json_encode($check_work_shift_details["error"]),
+                        $check_work_shift_details["status"],
+                        "front end error",
+                        "front end error"
+                       );
+                    throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+                }
 
 
 
@@ -635,6 +478,138 @@ if(!$fields_changed){
     }
 
 
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/work-shifts/toggle-active",
+     *      operationId="toggleActiveWorkShift",
+     *      tags={"administrator.work_shift"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle work shift activity",
+     *      description="This method is to toggle work shift activity",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function toggleActiveWorkShift(GetIdRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+
+            $work_shift = WorkShift::where([
+                "id" => $request_data["id"],
+                "business_id" => auth()->user()->business_id
+            ])
+            ->whereHas("departments",function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+            })
+
+                ->first();
+            if (!$work_shift) {
+                $this->storeError(
+                    "no data found"
+                    ,
+                    404,
+                    "front end error",
+                    "front end error"
+                   );
+                return response()->json([
+                    "message" => "no department found"
+                ], 404);
+            }
+
+if(!$work_shift->is_active) {
+// Assuming you have a 'Details' model for your 'details' table
+// Transform the retrieved data into the required structure using the collection
+$details = $work_shift->details->map(function ($detail) {
+    return [
+        'day' => $detail->day,
+        'is_weekend' => (bool) $detail->is_weekend,
+        'start_at' => $detail->start_at,
+        'end_at' => $detail->end_at,
+    ];
+});
+$check_work_shift_details =  $this->checkWorkShiftDetails($details);
+if(!$check_work_shift_details["ok"]) {
+    $this->storeError(
+        json_encode($check_work_shift_details["error"]),
+        $check_work_shift_details["status"],
+        "front end error",
+        "front end error"
+       );
+    throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+}
+
+}
+
+
+             $work_shift->update([
+                 'is_active' => !$work_shift->is_active
+             ]);
+
+             return response()->json(['message' => 'department status updated successfully'], 200);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(
@@ -754,28 +729,30 @@ if(!$fields_changed){
                 ])
                 ->orWhere(function($query) use($business_times) {
                     $query->where([
+                        "is_active" => 1,
                         "business_id" => NULL,
                         "is_default" => 1
                     ])
-                    ->whereHas('details', function($query) use($business_times) {
+                //     ->whereHas('details', function($query) use($business_times) {
 
-                    foreach($business_times as $business_time) {
-                        $query->where([
-                            "day" => $business_time->day,
-                        ]);
-                        if($business_time["is_weekend"]) {
-                            $query->where([
-                                "is_weekend" => 1,
-                            ]);
-                        } else {
-                            $query->where(function($query) use($business_time) {
-                                $query->whereTime("start_at", ">=", $business_time->start_at);
-                                $query->orWhereTime("end_at", "<=", $business_time->end_at);
-                            });
-                        }
+                //     foreach($business_times as $business_time) {
+                //         $query->where([
+                //             "day" => $business_time->day,
+                //         ]);
+                //         if($business_time["is_weekend"]) {
+                //             $query->where([
+                //                 "is_weekend" => 1,
+                //             ]);
+                //         } else {
+                //             $query->where(function($query) use($business_time) {
+                //                 $query->whereTime("start_at", ">=", $business_time->start_at);
+                //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
+                //             });
+                //         }
 
-                    }
-                });
+                //     }
+                // })
+                ;
 
                 });
             })
@@ -1015,28 +992,30 @@ if(!$fields_changed){
 
             ->orWhere(function($query) use($business_times) {
                 $query->where([
+                    "is_active" => 1,
                     "business_id" => NULL,
                     "is_default" => 1
                 ])
-                ->whereHas('details', function($query) use($business_times) {
+            //     ->whereHas('details', function($query) use($business_times) {
 
-                foreach($business_times as $business_time) {
-                    $query->where([
-                        "day" => $business_time->day,
-                    ]);
-                    if($business_time["is_weekend"]) {
-                        $query->where([
-                            "is_weekend" => 1,
-                        ]);
-                    } else {
-                        $query->where(function($query) use($business_time) {
-                            $query->whereTime("start_at", ">=", $business_time->start_at);
-                            $query->orWhereTime("end_at", "<=", $business_time->end_at);
-                        });
-                    }
+            //     foreach($business_times as $business_time) {
+            //         $query->where([
+            //             "day" => $business_time->day,
+            //         ]);
+            //         if($business_time["is_weekend"]) {
+            //             $query->where([
+            //                 "is_weekend" => 1,
+            //             ]);
+            //         } else {
+            //             $query->where(function($query) use($business_time) {
+            //                 $query->whereTime("start_at", ">=", $business_time->start_at);
+            //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
+            //             });
+            //         }
 
-                }
-            });
+            //     }
+            // })
+            ;
 
             })
 

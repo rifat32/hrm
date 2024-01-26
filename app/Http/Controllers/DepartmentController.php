@@ -313,7 +313,7 @@ class DepartmentController extends Controller
      * @OA\Put(
      *      path="/v1.0/departments/toggle-active",
      *      operationId="toggleActiveDepartment",
-     *      tags={"user_management"},
+     *      tags={"administrator.department"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
