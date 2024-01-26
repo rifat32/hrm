@@ -3,9 +3,8 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class UsersExport implements FromCollection, WithHeadings
+class AttendancesExport implements FromCollection
 {
     protected $users;
 
@@ -31,7 +30,7 @@ class UsersExport implements FromCollection, WithHeadings
     {
         if ($this->users instanceof \Illuminate\Support\Collection) {
 
-            $result = collect($this->users)->map(function ($user, $index) {
+            return collect($this->users)->map(function ($user, $index) {
                 return [
                     // $index+1,
                     ($user->first_Name ." " . $user->last_Name . " " . $user->last_Name ),
@@ -46,8 +45,6 @@ class UsersExport implements FromCollection, WithHeadings
             });
 
 
-
-            return $result;
 
 
 

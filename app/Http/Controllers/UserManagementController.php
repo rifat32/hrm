@@ -4124,6 +4124,15 @@ class UserManagementController extends Controller
             // });
             $user->work_shift = $user->work_shifts()->first();
 
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', ])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.user', ["user" => $user]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                }
+            } else {
+                return response()->json($user, 200);
+            }
+
             return response()->json($user, 200);
         } catch (Exception $e) {
 
@@ -4248,18 +4257,11 @@ class UserManagementController extends Controller
             $user->department_ids = $user->departments->pluck("id");
 
 
+
+
+
+
             return response()->json($user, 200);
-
-            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', ])) {
-                if (strtoupper($request->response_type) == 'PDF') {
-                    $pdf = PDF::loadView('pdf.user', ["user" => $user]);
-                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                }
-            } else {
-                return response()->json($user, 200);
-            }
-
-
 
 
         } catch (Exception $e) {

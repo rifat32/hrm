@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    
+    {{$user->id}}
 
 </body>
 </html>

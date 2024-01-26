@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LeavesExport;
 use App\Http\Requests\LeaveApproveRequest;
 use App\Http\Requests\LeaveBypassRequest;
 use App\Http\Requests\LeaveCreateRequest;
@@ -25,6 +26,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PDF;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class LeaveController extends Controller
 {
@@ -1662,9 +1666,20 @@ foreach ($assigned_departments as $assigned_department) {
 
                  }
 
+                 if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                    if (strtoupper($request->response_type) == 'PDF') {
+                        $pdf = PDF::loadView('pdf.leaves', ["leaves" => $leaves]);
+                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                    } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                        return Excel::download(new LeavesExport($leaves), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
+                    }
+                } else {
+                    return response()->json($leaves, 200);
+                }
 
 
-            return response()->json($leaves, 200);
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
