@@ -4008,6 +4008,7 @@ class UserManagementController extends Controller
      *
      * @OA\Get(
      *      path="/v1.0/users/{id}",
+     *
      *      operationId="getUserById",
      *      tags={"user_management"},
      *       security={
@@ -4019,6 +4020,20 @@ class UserManagementController extends Controller
      *         description="id",
      *         required=true,
      *  example="6"
+     *      ),
+     *   *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf, json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
      *      ),
 
      *      summary="This method is to get user by id",
@@ -4234,6 +4249,19 @@ class UserManagementController extends Controller
 
 
             return response()->json($user, 200);
+
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', ])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.user', ["user" => $user]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                }
+            } else {
+                return response()->json($user, 200);
+            }
+
+
+
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

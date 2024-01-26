@@ -125,8 +125,8 @@
                     </td>
                     <td class="employee_id">{{ $user->user_id }}</td>
                     <td class="email">{{ $user->email }}</td>
-                    <td class="designation">{{ processString($user->designation->name) }}</td>
-                    <td class="role">{{ $user->roles[0]->name }}</td>
+                    <td class="designation">{{ ($user->designation->name) }}</td>
+                    <td class="role">{{ processString($user->roles[0]->name) }}</td>
                     <td class="status">{{ $user->is_active ? "Active":"De-active" }}</td>
                 </tr>
             @endforeach
