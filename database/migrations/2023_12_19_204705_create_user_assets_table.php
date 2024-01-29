@@ -33,7 +33,7 @@ class CreateUserAssetsTable extends Migration
             $table->string("type");
             $table->string("image")->nullable();
             $table->date("date");
-            $table->string("note");
+            $table->text("note");
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

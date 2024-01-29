@@ -22,6 +22,19 @@ class CreateUserAssetHistoriesTable extends Migration
             $table->unsignedBigInteger("user_asset_id")->nullable();
             $table->foreign('user_asset_id')->references('id')->on('user_assets')->onDelete('set null');
 
+            $table->unsignedBigInteger("business_id");
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
+            $table->string("name");
+            $table->string("code");
+            $table->string("serial_number");
+            $table->boolean("is_working");
+            $table->enum('status', ['available', 'assigned', 'damaged', 'lost', 'reserved', 'repair_waiting'])->default('available');
+            $table->string("type");
+            $table->string("image")->nullable();
+            $table->date("date");
+            $table->text("note");
 
 
             $table->date("from_date");

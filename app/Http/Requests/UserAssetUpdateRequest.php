@@ -87,4 +87,14 @@ class UserAssetUpdateRequest extends BaseFormRequest
             'note' => "required|string",
         ];
     }
+    public function messages()
+    {
+        return [
+
+            'status' => 'Invalid value for status. Valid values are: ssigned, damaged, lost, reserved, repair_waiting.',
+
+
+            // ... other custom messages
+        ];
+    }
 }

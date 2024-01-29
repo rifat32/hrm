@@ -209,6 +209,19 @@ class UserAssetController extends Controller
                     'user_id' => $user_asset->user_id,
                     "user_asset_id" => $user_asset->id,
 
+
+        'name' => $user_asset->name,
+        'code' => $user_asset->code,
+        'serial_number' => $user_asset->serial_number,
+        'type' => $user_asset->type,
+        "is_working" => $user_asset->is_working,
+        "status" => $user_asset->status,
+        'image' => $user_asset->image,
+        'date' => $user_asset->date,
+        'note' => $user_asset->note,
+        "business_id" => $user_asset->business_id,
+
+
                     "from_date" => now(),
                     "to_date" => NULL,
                     'created_by' => $request_data["created_by"]
@@ -345,6 +358,17 @@ class UserAssetController extends Controller
                     $user_asset_history  =  UserAssetHistory::create([
                         'user_id' => $user_asset->user_id,
                         "user_asset_id" => $user_asset->id,
+
+                        'name' => $user_asset->name,
+                        'code' => $user_asset->code,
+                        'serial_number' => $user_asset->serial_number,
+                        'type' => $user_asset->type,
+                        "is_working" => $user_asset->is_working,
+                        "status" => $user_asset->status,
+                        'image' => $user_asset->image,
+                        'date' => $user_asset->date,
+                        'note' => $user_asset->note,
+                        "business_id" => $user_asset->business_id,
 
                         "from_date" => now(),
                         "to_date" => NULL,
@@ -502,6 +526,17 @@ class UserAssetController extends Controller
                     $user_asset_history  =  UserAssetHistory::create([
                         'user_id' => $user_asset->user_id,
                         "user_asset_id" => $user_asset->id,
+
+                        'name' => $user_asset->name,
+                        'code' => $user_asset->code,
+                        'serial_number' => $user_asset->serial_number,
+                        'type' => $user_asset->type,
+                        "is_working" => $user_asset->is_working,
+                        "status" => $user_asset->status,
+                        'image' => $user_asset->image,
+                        'date' => $user_asset->date,
+                        'note' => $user_asset->note,
+                        "business_id" => $user_asset->business_id,
 
                         "from_date" => now(),
                         "to_date" => NULL,

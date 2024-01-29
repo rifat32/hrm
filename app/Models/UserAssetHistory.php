@@ -14,6 +14,17 @@ class UserAssetHistory extends Model
         'user_id',
         "user_asset_id",
 
+        'name',
+        'code',
+        'serial_number',
+        'type',
+        "is_working",
+        "status",
+        'image',
+        'date',
+        'note',
+        "business_id",
+
         "from_date",
         "to_date",
         'created_by'
