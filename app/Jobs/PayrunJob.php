@@ -63,10 +63,13 @@ class PayrunJob implements ShouldQueue
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
             ])
-            ->get();
-            
-            foreach($employees as $employee) {
+                ->get();
 
+            foreach ($employees as $employee) {
+                $salary_per_annum = $employee->salary_per_annum; // in euros
+                $weekly_contractual_hours = $employee->weekly_contractual_hours;
+                $weeksPerYear = 52;
+                $hourly_salary = $salary_per_annum / ($weeksPerYear * $weekly_contractual_hours);
             }
 
 

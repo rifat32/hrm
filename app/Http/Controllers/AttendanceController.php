@@ -1600,9 +1600,24 @@ class AttendanceController extends Controller
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });;
+                });
 
 
+                // $leave_records = LeaveRecord::whereHas("leave", function ($query) {
+                //     $query->where("leaves.status","approved" );
+                // })
+                // ->when(!empty($request->user_id), function ($q) use ($request) {
+                //     $q->whereHas('leave',    function ($query) use ($request) {
+                //         $query->where("leaves.user_id",  $request->user_id);
+                //     });
+                // })
+                // ->when(!empty($request->start_date), function ($q) use ($request) {
+                //     $q->where('date', '>=', $request->start_date . ' 00:00:00');
+                // })
+                // ->when(!empty($request->end_date), function ($q) use ($request) {
+                //     $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
+                // })
+                // ->get();
 
             //  foreach ($attendances as $attendance) {
             //     $attendance->total_leave_hours = $attendance->records->sum(function ($record) {
@@ -1645,6 +1660,12 @@ class AttendanceController extends Controller
 
                 return $attendance->work_hours_delta < 0;
             })->sum("work_hours_delta"));
+
+
+            // $data["data_highlights"]["leave_records"] = $leave_records->sum("leave_hours");
+
+
+
 
 
             $total_available_hours = $data["data_highlights"]["total_schedule_hours"] - $data["data_highlights"]["total_leave_hours"];
@@ -1932,6 +1953,9 @@ class AttendanceController extends Controller
                 $leave_records = LeaveRecord::whereHas("leave.leave_type", function ($query) {
                         $query->where("setting_leave_types.type", "paid");
                     })
+                    ->whereHas("leave", function ($query) {
+                        $query->where("leaves.status","approved" );
+                    })
                     ->when(!empty($request->user_id), function ($q) use ($request) {
                         $q->whereHas('leave',    function ($query) use ($request) {
                             $query->where("leaves.user_id",  $request->user_id);
@@ -1944,6 +1968,13 @@ class AttendanceController extends Controller
                         $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
                     })
                     ->get();
+
+
+
+
+
+
+
 
 
                 $attendances = Attendance::
@@ -1968,7 +1999,41 @@ class AttendanceController extends Controller
                     $total_balance_hours = 0;
 
 
-                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ( $attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours) {
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ( $attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours, $employee) {
+                            $all_parent_department_ids = [];
+                            $assigned_departments = Department::whereHas("users", function ($query) use ($employee) {
+                                $query->where("users.id", $employee->id);
+                            })->get();
+                        foreach ($assigned_departments as $assigned_department) {
+                            $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+                        }
+
+                        $holiday = Holiday::where([
+                            "business_id" => auth()->user()->business_id
+                        ])
+                        ->where('holidays.start_date', '>=', $date . ' 00:00:00')
+                        ->where('holidays.end_date', '<=', ($date . ' 23:59:59'))
+                        ->where([
+                                "is_active" => 1
+                            ])
+
+                        ->where(function ($query) use ($employee, $all_parent_department_ids) {
+                                $query->whereHas("users", function ($query) use ($employee) {
+                                    $query->where([
+                                        "users.id" => $employee->id
+                                    ]);
+                                })
+                                    ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                        $query->whereIn("departments.id", $all_parent_department_ids);
+                                    })
+
+                                    ->orWhere(function ($query) {
+                                        $query->whereDoesntHave("users")
+                                            ->whereDoesntHave("departments");
+                                    });
+                            })
+
+                            ->first();
 
                         $attendance = $attendances->first(function ($attendance) use (&$date) {
                             $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
@@ -1982,39 +2047,37 @@ class AttendanceController extends Controller
 
 
 
+
+
                         $result_is_present = 0;
                         $result_paid_hours = 0;
                         $result_capacity_hours = 0;
                         $result_balance_hours = 0;
 
                         if ($leave_record) {
-
-                            $leave_start_at = Carbon::createFromFormat('H:i:s', $leave_record->start_time);
-                            $leave_end_at = Carbon::createFromFormat('H:i:s', $leave_record->end_time);
-                            $leave_record->leave_hours = $leave_end_at->diffInHours($leave_start_at);
-                           $leave_record->save();
-
-
                             $total_leave_hours += $leave_record->leave_hours;
                             if (!$attendance) {
                                 $total_capacity_hours += $leave_record->capacity_hours;
                             }
-
                             $result_paid_hours += $leave_record->leave_hours;
                             $result_capacity_hours = $leave_record->capacity_hours;
-
                         }
 
+                        if ($holiday) {
+                            $total_leave_hours += $leave_record->leave_hours;
+                            if (!$attendance) {
+                                $total_capacity_hours += $leave_record->capacity_hours;
+                            }
+                            $result_paid_hours += $leave_record->leave_hours;
+                            $result_capacity_hours = $leave_record->capacity_hours;
+                        }
+// aaaa
 
 
                         if ($attendance) {
 
                             $total_paid_hours += $attendance->total_paid_hours;
                             $total_capacity_hours += $attendance->capacity_hours;
-
-
-
-
 
                             if($leave_record) {
                                 $total_balance_hours +=  $attendance->total_paid_hours;
@@ -2023,9 +2086,6 @@ class AttendanceController extends Controller
                                 $total_balance_hours +=  $attendance->work_hours_delta;
                                 $result_balance_hours += $attendance->work_hours_delta;
                             }
-
-
-
 
                             $result_is_present = 1;
                             $result_paid_hours += $attendance->total_paid_hours;
