@@ -168,7 +168,8 @@ class UserUpdateRequest extends BaseFormRequest
 
         'joining_date' => "nullable|date",
         'salary_per_annum' => "nullable|numeric",
-        'weekly_contractual_hours' => 'nullable|numeric'
+        'weekly_contractual_hours' => 'nullable|numeric',
+        "minimum_working_days_per_week" => 'nullable|numeric|max:7',
         ];
     }
 

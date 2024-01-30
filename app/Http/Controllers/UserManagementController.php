@@ -372,7 +372,9 @@ class UserManagementController extends Controller
      *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
 
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
-     *  *               @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *  *            @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *               @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *
      *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
@@ -535,6 +537,8 @@ class UserManagementController extends Controller
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *  *  *               @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     * *  *  *               @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
      *            @OA\Property(property="email", type="string", format="string",example="rifatalashwad0@gmail.com"),
@@ -865,6 +869,8 @@ class UserManagementController extends Controller
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *     *           @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="10"),
+     *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
@@ -1176,6 +1182,8 @@ class UserManagementController extends Controller
      *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *      *           @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
      * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
@@ -1341,6 +1349,7 @@ class UserManagementController extends Controller
                         'salary_per_annum',
 
                         'weekly_contractual_hours',
+                        'minimum_working_days_per_week',
                         'phone',
                         'image',
                         'address_line_1',

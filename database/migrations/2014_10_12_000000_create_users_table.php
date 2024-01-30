@@ -37,6 +37,7 @@ class CreateUsersTable extends Migration
             $table->date('joining_date')->nullable()->default(today());
             $table->double('salary_per_annum')->nullable()->default(0);
             $table->double('weekly_contractual_hours')->nullable()->default(0);
+            $table->integer('minimum_working_days_per_week')->nullable()->default(0);
 
 
             $table->double('is_active_visa_details')->nullable()->default(0);

@@ -1949,7 +1949,7 @@ class AttendanceController extends Controller
                 $employee_ids = $employees->pluck("id");
 
 
-                $leave_records = LeaveRecord::whereHas("leave.leave_type", function ($query) use($employee_ids) {
+                $leave_records = LeaveRecord::whereHas("leave.leave_type", function ($query)  {
                     $query->where("setting_leave_types.type", "paid");
                 })
                     ->whereHas('leave',    function ($query) use ($employee_ids)  {
@@ -2003,11 +2003,14 @@ class AttendanceController extends Controller
 
                     $total_paid_hours = 0;
                     $total_paid_leave_hours = 0;
+                    $total_paid_holiday_hours = 0;
                     $total_leave_hours = 0;
+
                     $total_capacity_hours = 0;
                     $total_balance_hours = 0;
 
-                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours, $employee, $work_shift, $all_parent_department_ids) {
+
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours,&$total_paid_holiday_hours, $employee, $work_shift, $all_parent_department_ids) {
 
                         $day_number = Carbon::parse($date)->dayOfWeek;
                         $work_shift_details =  $work_shift->details()->where([
@@ -2067,14 +2070,11 @@ class AttendanceController extends Controller
                             if(($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
                                  return false;
                             }
-
                             $total_leave_hours += $leave_record->leave_hours;
                             if($leave_record->leave->leave_type->type != "paid") {
                                 return false;
                             }
-
                            return true;
-
                         });
 
 
@@ -2083,46 +2083,45 @@ class AttendanceController extends Controller
                         $result_balance_hours = 0;
 
                         if ($paid_leave_record) {
-                            $total_paid_leave_hours += $paid_leave_record->leave_hours;
-
-                            $result_paid_hours += $paid_leave_record->leave_hours;
-                            $total_paid_hours +=  $paid_leave_record->leave_hours;
-
+                            $paid_leave_hours =  $paid_leave_record->leave_hours;
+                            $total_paid_leave_hours += $paid_leave_hours;
+                            $result_paid_hours += $paid_leave_hours;
+                            $total_paid_hours +=  $paid_leave_hours;
                         }
-
-
                         if ($holiday) {
-
-                            $total_paid_leave_hours += $paid_leave_record->leave_hours;
-
-                            $result_paid_hours += $paid_leave_record->leave_hours;
-                            $total_paid_hours +=  $paid_leave_record->leave_hours;
-
-
+                            if ($is_weekend) {
+                                $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+                            } else {
+                                $holiday_hours = $capacity_hours;
+                            }
+                            $total_paid_holiday_hours += $holiday_hours;
+                            $result_paid_hours += $holiday_hours;
+                            $total_paid_hours += $holiday_hours;
                         }
-
-
-
-                        if ($attendance) {
+                        if ($attendance ) {
                             if($attendance->total_paid_hours > 0) {
                                 $result_is_present = 1;
-                                $total_paid_hours += $attendance->total_paid_hours;
-                                $result_paid_hours += $attendance->total_paid_hours;
+                                $total_attendance_hours = $attendance->total_paid_hours;
+
+                                if ($paid_leave_record || $holiday || $is_weekend) {
+                                    $result_balance_hours = $total_attendance_hours;
+                                } elseif ($attendance->work_hours_delta > 0) {
+                                    $result_balance_hours = $attendance->work_hours_delta;
+                                }
+
+
+                                $total_paid_hours += $total_attendance_hours;
+                                $total_balance_hours += $result_balance_hours;
                             }
 
-                            if ($paid_leave_record || $holiday || $is_weekend) {
-                                $total_balance_hours +=  $attendance->total_paid_hours;
-                                $result_balance_hours = $attendance->total_paid_hours;
-                            } else if ($attendance->work_hours_delta > 0) {
-                                $total_balance_hours +=  $attendance->work_hours_delta;
-                                $result_balance_hours = $attendance->work_hours_delta;
-                            }
+
+
+
+
+
                         }
 
-
-
-
-                        if ($paid_leave_record || $attendance) {
+                        if ($paid_leave_record || $attendance || $holiday) {
                             return [
                                 'date' => Carbon::parse($date)->format("d-m-Y"),
                                 'is_present' => $result_is_present,
@@ -2147,6 +2146,8 @@ class AttendanceController extends Controller
                     $employee->total_balance_hours = $total_balance_hours;
                     $employee->total_leave_hours = $total_leave_hours;
                     $employee->total_paid_leave_hours = $total_paid_leave_hours;
+                    $employee->total_paid_holiday_hours = $total_paid_holiday_hours;
+
                     $employee->total_paid_hours = $total_paid_hours;
                     $employee->total_capacity_hours = $total_capacity_hours;
                     return $employee;
