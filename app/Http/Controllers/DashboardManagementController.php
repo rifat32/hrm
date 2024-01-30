@@ -1153,7 +1153,9 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+
 
         $data["this_week_data_count"] = clone $data_query;
         $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
@@ -1250,8 +1252,8 @@ class DashboardManagementController extends Controller
 
                     $query->where(function($query) use ($today,$total_departments) {
                         $query->whereHas('holidays', function ($query) use ($today) {
-                            $query->where('holidays.start_date', "<=",  $today->startOfDay())
-                            ->where('holidays.end_date', ">=",  $today->endOfDay());
+                            $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
+                            ->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
 
                         })
                         ->orWhere(function($query) use($today, $total_departments) {
@@ -1259,15 +1261,15 @@ class DashboardManagementController extends Controller
                         });
 
                         // ->whereHas('departments.holidays', function ($query) use ($today) {
-                        //     $query->where('holidays.start_date', "<=",  $today->startOfDay())
-                        //     ->where('holidays.end_date', ">=",  $today->endOfDay());
+                        //     $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
+                        //     ->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
                         // });
 
                     })
                     ->where(function($query) use ($today) {
                         $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                            $query->where('holidays.start_date', "<=",  $today->startOfDay())
-                                  ->where('holidays.end_date', ">=",  $today->endOfDay())
+                            $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
+                                  ->where('holidays.end_date', ">=",  $today->copy()->endOfDay())
                                   ->orWhere(function ($query) {
                                     $query->whereDoesntHave("users")
                                         ->whereDoesntHave("departments");
@@ -1285,8 +1287,8 @@ class DashboardManagementController extends Controller
                 ->orWhere(
                     function($query) use ($today) {
                     $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                        $query->where('holidays.start_date', "<=",  $today->startOfDay());
-                        $query->where('holidays.end_date', ">=",  $today->endOfDay());
+                        $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay());
+                        $query->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
                         $query->doesntHave('users');
 
                     });
@@ -1550,7 +1552,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1596,7 +1598,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('application_deadline', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('application_deadline', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('application_deadline', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1643,7 +1645,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1696,7 +1698,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('visa_expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('visa_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1749,7 +1751,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
@@ -1804,7 +1806,7 @@ class DashboardManagementController extends Controller
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->startOfDay(), $today->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();

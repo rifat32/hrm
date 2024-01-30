@@ -25685,6 +25685,11 @@
                                         "format": "string",
                                         "example": "10"
                                     },
+                                    "overtime_rate": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
                                     "joining_date": {
                                         "type": "string",
                                         "format": "date",
@@ -25894,6 +25899,11 @@
                                         "example": "10"
                                     },
                                     "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
+                                    "overtime_rate": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "5"
@@ -26256,6 +26266,11 @@
                                         "format": "string",
                                         "example": "5"
                                     },
+                                    "overtime_rate": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
                                     "joining_date": {
                                         "type": "string",
                                         "format": "date",
@@ -26507,6 +26522,11 @@
                                         "example": "10"
                                     },
                                     "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
+                                    "overtime_rate": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "5"

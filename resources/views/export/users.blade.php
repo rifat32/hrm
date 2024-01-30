@@ -7,16 +7,16 @@
     @php
         // Define a function within the Blade file
         function processString($inputString) {
-            // Remove underscore
-            $withoutUnderscore = str_replace('_', '', $inputString);
 
-            // Remove everything from the pound sign (#) and onwards
-            $finalString = explode('#', $withoutUnderscore)[0];
+            $finalString = explode('#', $inputString)[0];
+
+        $finalString = str_replace('business_', '', $finalString);
+        $finalString = str_replace('_', '', $finalString);
 
             // Capitalize the string
-            $capitalizedString = ucwords($finalString);
+            $finalString = ucwords($finalString);
 
-            return $capitalizedString;
+            return $finalString;
         }
     @endphp
 
@@ -36,7 +36,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size:10px;
+            font-size:800px;
 
 
         }
@@ -96,33 +96,17 @@
 <body>
 
     <table style="margin-top:-30px">
-       <tbody>
+       <thead>
           <tr>
-            @if ($business->logo)
-            <td rowspan="2">
-                <img class="logo" src="{{public_path($business->logo)}}" >
-            </td>
-            @endif
-            <td></td>
+            <th class="file_title">Employee List: </th>
           </tr>
-          <tr>
-            <td class="file_title">Employee List </td>
-          </tr>
-          <tr>
-            <td>
-                <span class="business_name">{{$business->name}}</span>
-                <address class="business_address">{{$business->address_line_1}}</address>
-            </td>
-
-          </tr>
-        </tbody>
+        </thead>
     </table>
 
 
     <table>
         <thead>
             <tr class="table_head_row">
-                <th></th>
                 <th>Employee</th>
                 <th>Employee ID</th>
                 <th>Email</th>
@@ -134,7 +118,7 @@
         <tbody>
             @foreach($users as $index=>$user)
                 <tr class="table_row">
-                    <td class="employee_index" style="padding:0px 10px">{{ $index+1 }}</td>
+
                     <td class="employee">
                         {{ ($user->first_Name ." ". $user->last_Name ." ". $user->last_Name )}}
                     </td>
