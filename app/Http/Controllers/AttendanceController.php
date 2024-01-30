@@ -1184,7 +1184,7 @@ class AttendanceController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
- *   *              @OA\Parameter(
+     *   *              @OA\Parameter(
      *         name="response_type",
      *         in="query",
      *         description="response_type: in pdf,csv,json",
@@ -1408,17 +1408,17 @@ class AttendanceController extends Controller
                     return $query->get();
                 });;
 
-                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                    if (strtoupper($request->response_type) == 'PDF') {
-                        $pdf = PDF::loadView('pdf.attendances', ["attendances" => $attendances]);
-                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'attendance') . '.pdf'));
-                    } elseif (strtoupper($request->response_type) === 'CSV') {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.attendances', ["attendances" => $attendances]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'attendance') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
 
-                        return Excel::download(new AttendancesExport($attendances), ((!empty($request->file_name) ? $request->file_name : 'attendance') . '.csv'));
-                    }
-                } else {
-                    return response()->json($attendances, 200);
+                    return Excel::download(new AttendancesExport($attendances), ((!empty($request->file_name) ? $request->file_name : 'attendance') . '.csv'));
                 }
+            } else {
+                return response()->json($attendances, 200);
+            }
 
             return response()->json($attendances, 200);
         } catch (Exception $e) {
@@ -1603,21 +1603,21 @@ class AttendanceController extends Controller
                 });
 
 
-                // $leave_records = LeaveRecord::whereHas("leave", function ($query) {
-                //     $query->where("leaves.status","approved" );
-                // })
-                // ->when(!empty($request->user_id), function ($q) use ($request) {
-                //     $q->whereHas('leave',    function ($query) use ($request) {
-                //         $query->where("leaves.user_id",  $request->user_id);
-                //     });
-                // })
-                // ->when(!empty($request->start_date), function ($q) use ($request) {
-                //     $q->where('date', '>=', $request->start_date . ' 00:00:00');
-                // })
-                // ->when(!empty($request->end_date), function ($q) use ($request) {
-                //     $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
-                // })
-                // ->get();
+            // $leave_records = LeaveRecord::whereHas("leave", function ($query) {
+            //     $query->where("leaves.status","approved" );
+            // })
+            // ->when(!empty($request->user_id), function ($q) use ($request) {
+            //     $q->whereHas('leave',    function ($query) use ($request) {
+            //         $query->where("leaves.user_id",  $request->user_id);
+            //     });
+            // })
+            // ->when(!empty($request->start_date), function ($q) use ($request) {
+            //     $q->where('date', '>=', $request->start_date . ' 00:00:00');
+            // })
+            // ->when(!empty($request->end_date), function ($q) use ($request) {
+            //     $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
+            // })
+            // ->get();
 
             //  foreach ($attendances as $attendance) {
             //     $attendance->total_leave_hours = $attendance->records->sum(function ($record) {
@@ -1937,9 +1937,6 @@ class AttendanceController extends Controller
                 $startDate = Carbon::parse(($request->start_date . ' 00:00:00'));
                 $endDate = Carbon::parse(($request->end_date . ' 23:59:59'));
                 $dateArray = [];
-
-
-
                 for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
                     $dateArray[] = $date->format('Y-m-d');
                 }
@@ -1949,75 +1946,101 @@ class AttendanceController extends Controller
                 //     $startDate->addDay();
                 // }
 
+                $employee_ids = $employees->pluck("id");
 
-                $leave_records = LeaveRecord::whereHas("leave.leave_type", function ($query) {
-                        $query->where("setting_leave_types.type", "paid");
+
+                $leave_records = LeaveRecord::whereHas("leave.leave_type", function ($query) use($employee_ids) {
+                    $query->where("setting_leave_types.type", "paid");
+                })
+                    ->whereHas('leave',    function ($query) use ($employee_ids)  {
+                        $query->whereIn("leaves.user_id",  $employee_ids)
+                        ->where("leaves.status", "approved");
                     })
-                    ->whereHas("leave", function ($query) {
-                        $query->where("leaves.status","approved" );
-                    })
-                    ->when(!empty($request->user_id), function ($q) use ($request) {
-                        $q->whereHas('leave',    function ($query) use ($request) {
-                            $query->where("leaves.user_id",  $request->user_id);
-                        });
-                    })
-                    ->when(!empty($request->start_date), function ($q) use ($request) {
-                        $q->where('date', '>=', $request->start_date . ' 00:00:00');
-                    })
-                    ->when(!empty($request->end_date), function ($q) use ($request) {
-                        $q->where('date', '<=', ($request->end_date . ' 23:59:59'));
-                    })
+                    ->where('date', '>=', $request->start_date . ' 00:00:00')
+                    ->where('date', '<=', ($request->end_date . ' 23:59:59'))
                     ->get();
-
-
-
-
-
-
-
 
 
                 $attendances = Attendance::
-                   when(!empty($request->user_id), function ($q) use ($request) {
+                  whereIn('attendances.user_id', $employee_ids)
+                ->where('attendances.in_date', '>=', $request->start_date . ' 00:00:00')
+                ->where('attendances.in_date', '<=', ($request->end_date . ' 23:59:59'))
+                ->get();
 
-                    $q->where('attendances.user_id', $request->user_id);
-
-                    })
-                    ->when(!empty($request->start_date), function ($q) use ($request) {
-                        $q->where('attendances.in_date', '>=', $request->start_date . ' 00:00:00');
-                    })
-                    ->when(!empty($request->end_date), function ($q) use ($request) {
-                        $q->where('attendances.in_date', '<=', ($request->end_date . ' 23:59:59'));
-                    })
-                    ->get();
-
-                $employees->each(function ($employee) use ($dateArray,$attendances ,$leave_records) {
+                $employees->each(function ($employee) use ($dateArray, $attendances, $leave_records) {
                     // Get leaves for the current employee
+
+
+                    $all_parent_department_ids = [];
+                    $assigned_departments = Department::whereHas("users", function ($query) use ($employee) {
+                        $query->where("users.id", $employee->id);
+                    })->get();
+                    foreach ($assigned_departments as $assigned_department) {
+                        $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+                    }
+                    $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
+                        $query->where('users.id', $employee->id);
+                    })->first();
+
+                    if (!$work_shift) {
+                        return false;
+                    }
+
+                    if (!$work_shift->is_active) {
+                        return false;
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
                     $total_paid_hours = 0;
+                    $total_paid_leave_hours = 0;
                     $total_leave_hours = 0;
                     $total_capacity_hours = 0;
                     $total_balance_hours = 0;
 
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours, $employee, $work_shift, $all_parent_department_ids) {
 
-                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ( $attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours, $employee) {
-                            $all_parent_department_ids = [];
-                            $assigned_departments = Department::whereHas("users", function ($query) use ($employee) {
-                                $query->where("users.id", $employee->id);
-                            })->get();
-                        foreach ($assigned_departments as $assigned_department) {
-                            $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+                        $day_number = Carbon::parse($date)->dayOfWeek;
+                        $work_shift_details =  $work_shift->details()->where([
+                            "day" => $day_number
+                        ])
+                            ->first();
+                        $is_weekend = 1;
+                        $capacity_hours = 0;
+                        if ($work_shift_details) {
+                            $is_weekend = $work_shift_details->is_weekend;
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
                         }
+
+                        if(!$is_weekend) {
+                            $total_capacity_hours += $capacity_hours;
+                        }
+  // aaaa
+
+
+
 
                         $holiday = Holiday::where([
                             "business_id" => auth()->user()->business_id
                         ])
-                        ->where('holidays.start_date', '>=', $date . ' 00:00:00')
-                        ->where('holidays.end_date', '<=', ($date . ' 23:59:59'))
-                        ->where([
+                            ->where('holidays.start_date', '>=', $date . ' 00:00:00')
+                            ->where('holidays.end_date', '<=', ($date . ' 23:59:59'))
+                            ->where([
                                 "is_active" => 1
                             ])
 
-                        ->where(function ($query) use ($employee, $all_parent_department_ids) {
+                            ->where(function ($query) use ($employee, $all_parent_department_ids) {
                                 $query->whereHas("users", function ($query) use ($employee) {
                                     $query->where([
                                         "users.id" => $employee->id
@@ -2034,82 +2057,88 @@ class AttendanceController extends Controller
                             })
 
                             ->first();
-
-                        $attendance = $attendances->first(function ($attendance) use (&$date) {
+                        $attendance = $attendances->first(function ($attendance) use ($date, $employee) {
                             $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
-                            return $in_date == $date;
+                            return (($in_date == $date) && ($attendance->user_id == $employee->id));
                         });
 
-                        $leave_record = $leave_records->first(function ($leave_record) use (&$date) {
+                        $paid_leave_record = $leave_records->first(function ($leave_record) use ($date,$employee,&$total_leave_hours)  {
                             $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
-                            return $date == $leave_date;
+                            if(($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
+                                 return false;
+                            }
+
+                            $total_leave_hours += $leave_record->leave_hours;
+                            if($leave_record->leave->leave_type->type != "paid") {
+                                return false;
+                            }
+
+                           return true;
+
                         });
-
-
-
 
 
                         $result_is_present = 0;
                         $result_paid_hours = 0;
-                        $result_capacity_hours = 0;
                         $result_balance_hours = 0;
 
-                        if ($leave_record) {
-                            $total_leave_hours += $leave_record->leave_hours;
-                            if (!$attendance) {
-                                $total_capacity_hours += $leave_record->capacity_hours;
-                            }
-                            $result_paid_hours += $leave_record->leave_hours;
-                            $result_capacity_hours = $leave_record->capacity_hours;
+                        if ($paid_leave_record) {
+                            $total_paid_leave_hours += $paid_leave_record->leave_hours;
+
+                            $result_paid_hours += $paid_leave_record->leave_hours;
+                            $total_paid_hours +=  $paid_leave_record->leave_hours;
+
                         }
 
+
                         if ($holiday) {
-                            $total_leave_hours += $leave_record->leave_hours;
-                            if (!$attendance) {
-                                $total_capacity_hours += $leave_record->capacity_hours;
-                            }
-                            $result_paid_hours += $leave_record->leave_hours;
-                            $result_capacity_hours = $leave_record->capacity_hours;
+
+                            $total_paid_leave_hours += $paid_leave_record->leave_hours;
+
+                            $result_paid_hours += $paid_leave_record->leave_hours;
+                            $total_paid_hours +=  $paid_leave_record->leave_hours;
+
+
                         }
-// aaaa
+
 
 
                         if ($attendance) {
-
-                            $total_paid_hours += $attendance->total_paid_hours;
-                            $total_capacity_hours += $attendance->capacity_hours;
-
-                            if($leave_record) {
-                                $total_balance_hours +=  $attendance->total_paid_hours;
-                                $result_balance_hours += $attendance->total_paid_hours;
-                            } else if($attendance->work_hours_delta > 0) {
-                                $total_balance_hours +=  $attendance->work_hours_delta;
-                                $result_balance_hours += $attendance->work_hours_delta;
+                            if($attendance->total_paid_hours > 0) {
+                                $result_is_present = 1;
+                                $total_paid_hours += $attendance->total_paid_hours;
+                                $result_paid_hours += $attendance->total_paid_hours;
                             }
 
-                            $result_is_present = 1;
-                            $result_paid_hours += $attendance->total_paid_hours;
-                            $result_capacity_hours = $attendance->total_capacity_hours;
-
+                            if ($paid_leave_record || $holiday || $is_weekend) {
+                                $total_balance_hours +=  $attendance->total_paid_hours;
+                                $result_balance_hours = $attendance->total_paid_hours;
+                            } else if ($attendance->work_hours_delta > 0) {
+                                $total_balance_hours +=  $attendance->work_hours_delta;
+                                $result_balance_hours = $attendance->work_hours_delta;
+                            }
                         }
 
 
 
 
-                        if($leave_record || $attendance) {
+                        if ($paid_leave_record || $attendance) {
                             return [
                                 'date' => Carbon::parse($date)->format("d-m-Y"),
                                 'is_present' => $result_is_present,
                                 'paid_hours' => $result_paid_hours,
-                                'capacity_hours' => $result_capacity_hours,
-                                "result_balance_hours" => $result_balance_hours
+                                "result_balance_hours" => $result_balance_hours,
+                                'capacity_hours' => $capacity_hours,
                             ];
                         }
 
 
 
                         return  null;
-                    })->filter()->values();
+                    }
+                    )
+                    ->filter()
+                    ->values();
 
 
 
@@ -2117,15 +2146,11 @@ class AttendanceController extends Controller
 
                     $employee->total_balance_hours = $total_balance_hours;
                     $employee->total_leave_hours = $total_leave_hours;
+                    $employee->total_paid_leave_hours = $total_paid_leave_hours;
                     $employee->total_paid_hours = $total_paid_hours;
                     $employee->total_capacity_hours = $total_capacity_hours;
                     return $employee;
                 });
-
-
-
-
-
             }
 
 
