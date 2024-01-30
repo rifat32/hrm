@@ -40,6 +40,7 @@ class User extends Authenticatable
         'salary_per_annum',
         'weekly_contractual_hours',
         'minimum_working_days_per_week',
+        'overtime_rate',
         'phone',
         'image',
         'address_line_1',
@@ -51,7 +52,6 @@ class User extends Authenticatable
         "long",
         'email',
         'password',
-
         'is_sponsorship_offered',
         "immigration_status",
 

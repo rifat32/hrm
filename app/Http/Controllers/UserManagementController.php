@@ -374,6 +374,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *  *            @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      *               @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *     @OA\Property(property="overtime_rate", type="string", format="string",example="5"),
      *
      *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
@@ -538,6 +539,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *  *  *               @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      * *  *  *               @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *   *     @OA\Property(property="overtime_rate", type="string", format="string",example="5"),
      *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
      *
@@ -870,6 +872,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      *     *           @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="10"),
+     *   *     @OA\Property(property="overtime_rate", type="string", format="string",example="5"),
      *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
@@ -1183,6 +1186,7 @@ class UserManagementController extends Controller
      *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
      *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
      *      *           @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *   *     @OA\Property(property="overtime_rate", type="string", format="string",example="5"),
      *
      *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
 
@@ -1350,6 +1354,7 @@ class UserManagementController extends Controller
 
                         'weekly_contractual_hours',
                         'minimum_working_days_per_week',
+                        'overtime_rate',
                         'phone',
                         'image',
                         'address_line_1',

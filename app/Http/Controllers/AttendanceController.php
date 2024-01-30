@@ -1850,47 +1850,6 @@ class AttendanceController extends Controller
                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ->where(function ($query) use ($request) {
-                    $query->whereHas("attendances", function ($q) use ($request) {
-                        $q->whereNotNull("user_id")
-                            ->when(!empty($request->user_id), function ($q) use ($request) {
-                                $q->where('user_id', $request->user_id);
-                            })
-                            ->when(!empty($request->start_date), function ($q) use ($request) {
-                                $q->where('in_date', '>=', $request->start_date . ' 00:00:00');
-                            })
-                            ->when(!empty($request->end_date), function ($q) use ($request) {
-                                $q->where('in_date', '<=', ($request->end_date . ' 23:59:59'));
-                            });
-                    })
-                        ->orWhere(
-
-                            function ($query) use ($request) {
-                                $query->whereHas("leaves.leave_type", function ($query) {
-                                    $query->where("setting_leave_types.type", "paid");
-                                })
-                                    ->when(!empty($request->user_id), function ($q) use ($request) {
-                                        $q->whereHas('leaves',    function ($query) use ($request) {
-                                            $query->where("leaves.user_id",  $request->user_id);
-                                        });
-                                    })
-                                    ->when(!empty($request->start_date), function ($q) use ($request) {
-                                        $q->whereHas('leaves.records',    function ($query) use ($request) {
-                                            $query->where('leave_records.date', '>=', $request->start_date . ' 00:00:00');
-                                        });
-                                    })
-                                    ->when(!empty($request->end_date), function ($q) use ($request) {
-                                        $q->whereHas('leaves.records',    function ($query) use ($request) {
-                                            $query->where('leave_records.date', '<=', ($request->end_date . ' 23:59:59'));
-                                        });
-                                    });
-                            }
-
-
-
-
-                        );
-                })
 
                 ->where(
                     [
@@ -1962,7 +1921,8 @@ class AttendanceController extends Controller
 
 
                 $attendances = Attendance::
-                  whereIn('attendances.user_id', $employee_ids)
+                  where("attendances.status", "approved")
+                ->whereIn('attendances.user_id', $employee_ids)
                 ->where('attendances.in_date', '>=', $request->start_date . ' 00:00:00')
                 ->where('attendances.in_date', '<=', ($request->end_date . ' 23:59:59'))
                 ->get();
@@ -2031,9 +1991,6 @@ class AttendanceController extends Controller
                         }
   // aaaa
 
-
-
-
                         $holiday = Holiday::where([
                             "business_id" => auth()->user()->business_id
                         ])
@@ -2058,7 +2015,6 @@ class AttendanceController extends Controller
                                             ->whereDoesntHave("departments");
                                     });
                             })
-
                             ->first();
                         $attendance = $attendances->first(function ($attendance) use ($date, $employee) {
                             $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
@@ -2114,11 +2070,6 @@ class AttendanceController extends Controller
                                 $total_balance_hours += $result_balance_hours;
                             }
 
-
-
-
-
-
                         }
 
                         if ($paid_leave_record || $attendance || $holiday) {
@@ -2139,18 +2090,14 @@ class AttendanceController extends Controller
                     ->filter()
                     ->values();
 
-
-
-
-
                     $employee->total_balance_hours = $total_balance_hours;
                     $employee->total_leave_hours = $total_leave_hours;
                     $employee->total_paid_leave_hours = $total_paid_leave_hours;
                     $employee->total_paid_holiday_hours = $total_paid_holiday_hours;
-
                     $employee->total_paid_hours = $total_paid_hours;
                     $employee->total_capacity_hours = $total_capacity_hours;
                     return $employee;
+
                 });
             }
 

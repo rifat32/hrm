@@ -37,17 +37,17 @@ class CreateAttendancesTable extends Migration
             $table->time('in_time')->nullable();
             $table->time('out_time')->nullable();
 
-            $table->integer('capacity_hours');
+            $table->double('capacity_hours');
 
             $table->enum('behavior', ['absent', 'late','regular','early']);
 
 
-            $table->integer('work_hours_delta');
-            $table->integer('regular_work_hours');
-            $table->integer('total_paid_hours');
+            $table->double('work_hours_delta');
+            $table->double('regular_work_hours');
+            $table->double('total_paid_hours');
 
             $table->enum('break_type', ['paid', 'unpaid']);
-            $table->integer('break_hours');
+            $table->double('break_hours');
 
             $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
 

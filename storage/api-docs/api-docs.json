@@ -12954,6 +12954,20 @@
                 "operationId": "getLeaves",
                 "parameters": [
                     {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
@@ -25666,6 +25680,11 @@
                                         "format": "string",
                                         "example": "10"
                                     },
+                                    "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "10"
+                                    },
                                     "joining_date": {
                                         "type": "string",
                                         "format": "date",
@@ -25873,6 +25892,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "10"
+                                    },
+                                    "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
                                     },
                                     "joining_date": {
                                         "type": "string",
@@ -26227,6 +26251,11 @@
                                         "format": "string",
                                         "example": "10"
                                     },
+                                    "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
                                     "joining_date": {
                                         "type": "string",
                                         "format": "date",
@@ -26476,6 +26505,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "10"
+                                    },
+                                    "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
                                     },
                                     "joining_date": {
                                         "type": "string",

@@ -15,7 +15,7 @@ class CreateSettingAttendancesTable extends Migration
     {
         Schema::create('setting_attendances', function (Blueprint $table) {
             $table->id();
-            $table->integer('punch_in_time_tolerance')->nullable();
+            $table->double('punch_in_time_tolerance')->nullable();
             $table->integer('work_availability_definition')->nullable();
             $table->boolean('punch_in_out_alert')->nullable();
             $table->integer('punch_in_out_interval')->nullable();

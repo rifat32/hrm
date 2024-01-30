@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Attendance;
 use App\Models\Payrun;
 use App\Models\User;
 use Carbon\Carbon;
@@ -70,6 +71,25 @@ class PayrunJob implements ShouldQueue
                 $weekly_contractual_hours = $employee->weekly_contractual_hours;
                 $weeksPerYear = 52;
                 $hourly_salary = $salary_per_annum / ($weeksPerYear * $weekly_contractual_hours);
+
+
+
+                $attendances = Attendance::
+                where("attendances.status", "approved")
+              ->where('attendances.user_id', $employee->id)
+              ->where('attendances.in_date', '<=', today()->endOfDay())
+              ->get();
+
+
+
+
+
+
+
+
+
+
+
             }
 
 

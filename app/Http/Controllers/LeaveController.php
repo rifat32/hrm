@@ -1487,7 +1487,20 @@ foreach ($assigned_departments as $assigned_department) {
      *       security={
      *           {"bearerAuth": {}}
      *       },
-
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
