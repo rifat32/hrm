@@ -34,7 +34,7 @@ class UserAssetUpdateRequest extends BaseFormRequest
         }
         return [
             'user_id' => [
-                'required',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
@@ -63,11 +63,16 @@ class UserAssetUpdateRequest extends BaseFormRequest
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
-                    $exists = UserAsset::where('id', $value)
-                        ->where('user_assets.user_id', '=', $this->user_id)
-                        ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                            $query->whereIn("departments.id",$all_manager_department_ids);
-                         })
+                    $exists = UserAsset:: where(
+                        [
+                            "user_assets.id" => $value,
+                            "user_assets.business_id" => auth()->user()->business_id
+
+                        ])
+                        // ->where('user_assets.user_id', '=', $this->user_id)
+                        // ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                        //     $query->whereIn("departments.id",$all_manager_department_ids);
+                        //  })
                         ->exists();
 
                     if (!$exists) {
@@ -91,7 +96,7 @@ class UserAssetUpdateRequest extends BaseFormRequest
     {
         return [
 
-            'status' => 'Invalid value for status. Valid values are: ssigned, damaged, lost, reserved, repair_waiting.',
+            'status.in' => 'Invalid value for status. Valid values are: assigned, damaged, lost, reserved, repair_waiting.',
 
 
             // ... other custom messages

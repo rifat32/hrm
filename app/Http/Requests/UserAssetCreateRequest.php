@@ -73,7 +73,7 @@ class UserAssetCreateRequest extends BaseFormRequest
     {
         return [
 
-            'status' => 'Invalid value for status. Valid values are: ssigned, damaged, lost, reserved, repair_waiting.',
+            'status.in' => 'Invalid value for status. Valid values are: assigned, damaged, lost, reserved, repair_waiting.',
 
 
             // ... other custom messages

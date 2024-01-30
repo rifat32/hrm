@@ -829,9 +829,14 @@ class UserAssetController extends Controller
                   "id" => $id,
                   "business_id" => auth()->user()->business_id
               ])
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+              ->where(function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->orWhere('user_assets.user_id', NULL)
+                 ;
+
+              })
                   ->first();
               if (!$user_asset) {
                 $this->storeError(
@@ -947,9 +952,14 @@ class UserAssetController extends Controller
               }
               $idsArray = explode(',', $ids);
               $existingIds = UserAsset::whereIn('id', $idsArray)
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+              ->where(function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->orWhere('user_assets.user_id', NULL)
+                 ;
+
+              })
              ->where([
                 "business_id" => auth()->user()->business_id
               ])

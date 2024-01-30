@@ -114,7 +114,7 @@ class NotificationController extends Controller
 
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-            $data["notifications"] = Notification::where([
+            $data["notifications"] = Notification::with("sender","business")->where([
                 "receiver_id" => $request->user()->id
             ]
         )

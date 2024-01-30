@@ -13,7 +13,6 @@ class Notification extends Model
     protected $fillable = [
         "sender_id",
         "receiver_id",
-        "customer_id",
         "business_id",
         "entity_name",
         "entity_id",
@@ -22,7 +21,7 @@ class Notification extends Model
         'notification_title',
         'notification_description',
         'notification_link',
-
+        "is_system_generated",
         "notification_template_id",
         "status",
 
@@ -30,12 +29,16 @@ class Notification extends Model
 
 
 
+    
 
     public function template(){
         return $this->belongsTo(NotificationTemplate::class,'notification_template_id', 'id');
     }
-    public function customer(){
-        return $this->belongsTo(User::class,'customer_id', 'id')->withTrashed();
+    public function sender(){
+        return $this->belongsTo(User::class,'sender_id', 'id')->withTrashed();
+    }
+    public function receiver(){
+        return $this->belongsTo(User::class,'receiver_id', 'id')->withTrashed();
     }
     public function business(){
         return $this->belongsTo(Business::class,'business_id', 'id')->withTrashed();

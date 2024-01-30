@@ -46,115 +46,83 @@ class ReminderScheduler extends Command
      * @return int
      */
 
-     public function sendNotification($reminder,$data,$business) {
+    public function sendNotification($reminder, $data, $business)
+    {
 
         $user = User::where([
             "id" => $data->user_id
         ])
-        ->first();
+            ->first();
 
-        $dapartments = Department::whereHas("users", function($query) use($user) {
-               $query->where("users.id",$user->id);
+        $dapartments = Department::whereHas("users", function ($query) use ($user) {
+            $query->where("users.id", $user->id);
         })
-        ->get();
+            ->get();
         $manager_ids = $dapartments->pluck("manager_id");
 
 
 
         $field_name = $reminder->db_field_name;
-$now = now();
+        $now = now();
         $days_difference = $now->diffInDays($data->$field_name);
 
-        if($reminder->send_time == "after_expiry") {
-            $notification_templete_type = "reminder_after_expiry";
+        if ($reminder->send_time == "after_expiry") {
 
-        }else {
-            $notification_templete_type = "reminder_before_expiry";
+            $notification_description =   (explode('_', $reminder->entity_name)[0]) . " expired " . (abs($days_difference)) . " days ago. Please renew it now.";
+            $notification_link = ($reminder->entity_name) . "/" . ($data->id);
+        } else {
+            $notification_description =    (explode('_', $reminder->entity_name)[0]) .  " expires in " . (abs($days_difference)) . " days. Renew now.";
+            $notification_link = ($reminder->entity_name) . "/" . ($data->id);
         }
 
 
 
 
-        $notification_template = NotificationTemplate::where([
-            "type" => $notification_templete_type
-        ])
-            ->first();
 
 
 
 
 
-    $notification_title = $notification_template->title_template;
 
+        Log::info("33");
 
+        Log::info(($notification_description));
+        Log::info(($notification_link));
 
-    $notification_title =  str_replace(
-        "[title]",
-        ($reminder->title),
-        $notification_title
-    );
-    $notification_description = $notification_template->template;
-    $notification_description =  str_replace(
-        "[entity]",
-        (explode('_', $reminder->entity_name)[0]),
-        $notification_description
-    );
+        foreach ($manager_ids as $manager_id) {
+            Notification::create([
+                "entity_id" => $data->id,
+                "entity_name" => $reminder->entity_name,
+                'notification_title' => $reminder->title,
+                'notification_description' => $notification_description,
+                'notification_link' => $notification_link,
+                "sender_id" => 1,
+                "receiver_id" => $manager_id,
+                "business_id" => $business->id,
 
-    $notification_description =  str_replace(
-        "[duration]",
-        (abs($days_difference)),
-        $notification_description
-    );
-
-    $notification_link = $notification_template->link;
-    $notification_link =  str_replace(
-        "[entity_name]",
-        ($reminder->entity_name),
-        $notification_link
-    );
-    $notification_link =  str_replace(
-        "[entity_id]",
-        ($data->id),
-        $notification_link
-    );
-
-    Log::info("33");
-    Log::info(($notification_title));
-    Log::info(($notification_description));
-    Log::info(($notification_link));
-
-    foreach($manager_ids as $manager_id){
+                "is_system_generated" => 1,
+                "status" => "unread",
+            ]);
+        }
         Notification::create([
             "entity_id" => $data->id,
             "entity_name" => $reminder->entity_name,
-            'notification_title' => $notification_title,
-            'notification_description' => $notification_description,
-            'notification_link' => $notification_link,
-            "sender_id" => 1,
-            "receiver_id" => $manager_id,
-            "business_id" => $business->id,
-            "notification_template_id" => $notification_template->id,
-            "status" => "unread",
-        ]);
-    }
-        Notification::create([
-            "entity_id" => $data->id,
-            "entity_name" => $reminder->entity_name,
-            'notification_title' => $notification_title,
+            'notification_title' => $reminder->title,
             'notification_description' => $notification_description,
             'notification_link' => $notification_link,
             "sender_id" => 1,
             "receiver_id" => $business->owner_id,
             "business_id" => $business->id,
-            "notification_template_id" => $notification_template->id,
+            "is_system_generated" => 1,
+
             "status" => "unread",
         ]);
-
-     }
+    }
     public function handle()
     {
         // File::put(storage_path('logs/laravel.log'), '');
-        Log::info('Task executed.');
+
+        Log::info('reminder is sending...');
         $businesses =  Reminder::groupBy("business_id")->select("business_id")->get();
 
 
@@ -198,14 +166,14 @@ $now = now();
                     ->where([
                         "business_id" => $business->id
                     ])
-                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $field_name,$now) {
+                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $field_name, $now) {
 
 
                         return $query->where([
                             ($field_name) => $now->copy()->addDays($reminder->duration)
                         ]);
                     })
-                    ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $field_name,$now) {
+                    ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $field_name, $now) {
 
                         return $query->where(
                             ($field_name),
@@ -229,29 +197,23 @@ $now = now();
                         if ($reminder_date->eq($data->$field_name)) {
 
                             // send notification or email based on setting
-                             // send notification or email based on setting
-                        $this->sendNotification($reminder,$data,$business);
-
-
-
+                            // send notification or email based on setting
+                            $this->sendNotification($reminder, $data, $business);
                         } else if ($reminder_date->gt($data->$field_name)) {
                             if ($reminder->keep_sending_until_update == 1 && !empty($reminder->frequency_after_first_reminder)) {
 
                                 $days_difference = $reminder_date->diffInDays($data->$field_name);
                                 if ((($days_difference % $reminder->frequency_after_first_reminder) == 0)) {
                                     // send notification or email based on setting
-                                       // send notification or email based on setting
-                        $this->sendNotification($reminder,$data,$business);
-
+                                    // send notification or email based on setting
+                                    $this->sendNotification($reminder, $data, $business);
                                 }
                             }
                         }
                     } else if ($reminder->send_time == "before_expiry") {
 
                         // send notification or email based on setting
-                        $this->sendNotification($reminder,$data,$business);
-
-
+                        $this->sendNotification($reminder, $data, $business);
                     }
                 }
             }

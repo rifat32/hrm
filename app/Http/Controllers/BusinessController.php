@@ -738,9 +738,13 @@ if(!$user->hasRole('business_owner')) {
 
 
 
-        // if(env("SEND_EMAIL") == true) {
+        if(env("SEND_EMAIL") == true) {
             Mail::to($request_data['user']['email'])->send(new SendPassword($user,$password));
-        // }
+        }
+
+
+
+        
     // }
 
         return response([

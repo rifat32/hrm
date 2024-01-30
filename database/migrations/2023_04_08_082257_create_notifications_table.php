@@ -33,10 +33,11 @@ class CreateNotificationsTable extends Migration
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
+            $table->boolean("is_system_generated")->nullable();
 
 
 
-            $table->unsignedBigInteger("notification_template_id");
+            $table->unsignedBigInteger("notification_template_id")->nullable();
             $table->foreign('notification_template_id')->references('id')->on('notification_templates')->onDelete('cascade');
 
 

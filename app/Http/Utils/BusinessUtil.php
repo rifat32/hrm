@@ -553,12 +553,12 @@ trait BusinessUtil
             $default_setting_leave_query["created_by"] = auth()->user()->id;
         }
 
-        $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
+        $defaultSettingLeaves = SettingLeave::where($default_setting_leave_query)->get();
 
         // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
         if ($defaultSettingLeaves->isEmpty() && !auth()->user()->hasRole("superadmin")) {
             unset($default_setting_leave_query['created_by']);
-            $defaultSettingLeaves = SettingPayrun::where($default_setting_leave_query)->get();
+            $defaultSettingLeaves = SettingLeave::where($default_setting_leave_query)->get();
         }
 
 
@@ -566,6 +566,7 @@ trait BusinessUtil
 
 
         foreach ($defaultSettingLeaves as $defaultSettingLeave) {
+            error_log($defaultSettingLeave);
             $insertableData = [
                 'start_month' => $defaultSettingLeave->start_month,
                 'approval_level' => $defaultSettingLeave->approval_level,
