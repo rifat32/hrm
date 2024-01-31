@@ -269,11 +269,11 @@ class PayrunJob implements ShouldQueue
                         }
 
 
-                        $leave_record = $approved_leave_records->first(function ($leave_record) use ($in_date,)  {
+                        $leave_record = $approved_leave_records->first(function ($leave_record) use ($in_date)  {
                             $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
                            return $in_date != $leave_date;
                         });
-                        $holiday = $holidays->first(function ($holiday) use ($in_date,)  {
+                        $holiday = $holidays->first(function ($holiday) use ($in_date)  {
                             $start_date = Carbon::parse($holiday->start_date);
                             $end_date = Carbon::parse($holiday->end_date);
                             $in_date = Carbon::parse($in_date);
@@ -293,7 +293,7 @@ class PayrunJob implements ShouldQueue
                             } elseif ($approved_attendance->work_hours_delta > 0) {
                                 $result_balance_hours = $approved_attendance->work_hours_delta;
                             }
-                            
+
                             $total_paid_hours += $total_attendance_hours;
                             $total_balance_hours += $result_balance_hours;
                         }
