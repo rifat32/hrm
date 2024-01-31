@@ -36,7 +36,7 @@ class TaskUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -56,7 +56,7 @@ class TaskUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -70,7 +70,7 @@ class TaskUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -83,7 +83,7 @@ class TaskUpdateRequest extends BaseFormRequest
                         ->where('users.business_id', '=', auth()->user()->business_id)
                         ->exists();
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ]

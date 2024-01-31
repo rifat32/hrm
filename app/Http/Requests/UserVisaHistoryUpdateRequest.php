@@ -37,7 +37,7 @@ class UserVisaHistoryUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -64,7 +64,7 @@ class UserVisaHistoryUpdateRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 

@@ -53,11 +53,11 @@ class PayrunCreateRequest extends BaseFormRequest
                         ->first();
 
                         if (!$department) {
-                            $fail("$attribute is invalid.");
+                            $fail($attribute . " is invalid.");
                             return;
                         }
                         if(!in_array($department->id,$all_manager_department_ids)){
-                            $fail("$attribute is invalid. You don't have access to this department.");
+                            $fail($attribute . " is invalid. You don't have access to this department.");
                             return;
                         }
                         $payrun_department = PayrunDepartment::where([
@@ -65,7 +65,7 @@ class PayrunCreateRequest extends BaseFormRequest
                         ])
                         ->first();
                         if($payrun_department) {
-                            $fail("$attribute is invalid. Payrun already created for this department.");
+                            $fail($attribute . " is invalid. Payrun already created for this department.");
                             return;
                         }
                 },
@@ -88,7 +88,7 @@ class PayrunCreateRequest extends BaseFormRequest
                      ->first();
 
             if (!$user) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 
@@ -99,7 +99,7 @@ class PayrunCreateRequest extends BaseFormRequest
             ])
             ->first();
             if($payrun_user) {
-                $fail("$attribute is invalid. Payrun already created for this user.");
+                $fail($attribute . " is invalid. Payrun already created for this user.");
                 return;
             }
 

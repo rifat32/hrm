@@ -37,7 +37,7 @@ class BankUpdateRequest extends BaseFormRequest
                     $bank = Bank::where($bank_query_params)
                         ->first();
                     if (!$bank) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no bank found");
                             return 0;
 
@@ -46,14 +46,14 @@ class BankUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($bank->business_id != NULL || $bank->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this bank due to role restrictions.");
 
                           }
 
                         } else {
                             if(($bank->business_id != NULL || $bank->is_default != 0 || $bank->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this bank due to role restrictions.");
 
                           }
@@ -61,7 +61,7 @@ class BankUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($bank->business_id != auth()->user()->business_id || $bank->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this bank due to role restrictions.");
                         }
                     }
@@ -142,7 +142,7 @@ class BankUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

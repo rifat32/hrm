@@ -61,7 +61,7 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 
@@ -82,17 +82,17 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
 
 
                     if (!$role) {
-                        // $fail("$attribute is invalid.");
+                        // $fail($attribute . " is invalid.");
                         $fail("Role does not exists.");
                     }
                     if (empty(auth()->user()->business_id)) {
                         if (!(empty($role->business_id) || $role->is_default == 1)) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("Role belongs to another business.");
                         }
                     } else {
                         if ($role->business_id != auth()->user()->business_id) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("Role belongs to another business.");
                         }
                     }

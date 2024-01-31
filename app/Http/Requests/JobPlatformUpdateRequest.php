@@ -36,7 +36,7 @@ class JobPlatformUpdateRequest extends BaseFormRequest
                     $job_platform = JobPlatform::where($job_platform_query_params)
                         ->first();
                     if (!$job_platform) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no job platform found");
                             return 0;
 
@@ -45,14 +45,14 @@ class JobPlatformUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this job platform due to role restrictions.");
 
                           }
 
                         } else {
                             if(($job_platform->business_id != NULL || $job_platform->is_default != 0 || $job_platform->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this job platform due to role restrictions.");
 
                           }
@@ -60,7 +60,7 @@ class JobPlatformUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($job_platform->business_id != auth()->user()->business_id || $job_platform->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this job platform due to role restrictions.");
                         }
                     }
@@ -137,7 +137,7 @@ class JobPlatformUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

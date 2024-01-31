@@ -45,12 +45,12 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                         ->first();
 
                     if (!$work_shift) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                         return;
                     }
                     if($work_shift->is_default == 1 && $work_shift->business_id == NULL && !auth()->user()->hasRole("superadmin")){
 
-                            $fail("$attribute is invalid. you are not a super admin.");
+                            $fail($attribute . " is invalid. you are not a super admin.");
                             return;
 
                     }
@@ -79,11 +79,11 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                         ->first();
 
                         if (!$department) {
-                            $fail("$attribute is invalid.");
+                            $fail($attribute . " is invalid.");
                             return;
                         }
                         if(!in_array($department->id,$all_manager_department_ids)){
-                            $fail("$attribute is invalid. You don't have access to this department.");
+                            $fail($attribute . " is invalid. You don't have access to this department.");
                             return;
                         }
                 },
@@ -106,7 +106,7 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 

@@ -51,7 +51,7 @@ class UserPassportHistoryCreateRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 

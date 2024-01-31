@@ -37,14 +37,14 @@ class AssetTypeUpdateRequest extends BaseFormRequest
                     $asset_type = AssetType::where($asset_type_query_params)
                         ->first();
                     if (!$asset_type) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no asset type found");
                             return 0;
 
                     }
 
                         if(($asset_type->business_id != auth()->user()->business_id)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this designation due to role restrictions.");
                         }
 

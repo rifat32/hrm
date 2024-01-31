@@ -40,7 +40,7 @@ class JobTypeUpdateRequest extends BaseFormRequest
                     $job_type = JobType::where($job_type_query_params)
                         ->first();
                     if (!$job_type) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no job type found");
                             return 0;
 
@@ -49,14 +49,14 @@ class JobTypeUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($job_type->business_id != NULL || $job_type->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this job type due to role restrictions.");
 
                           }
 
                         } else {
                             if(($job_type->business_id != NULL || $job_type->is_default != 0 || $job_type->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this job type due to role restrictions.");
 
                           }
@@ -64,7 +64,7 @@ class JobTypeUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($job_type->business_id != auth()->user()->business_id || $job_type->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this job type due to role restrictions.");
                         }
                     }
@@ -145,7 +145,7 @@ class JobTypeUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

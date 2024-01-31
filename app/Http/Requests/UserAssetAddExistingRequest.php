@@ -51,7 +51,7 @@ class UserAssetAddExistingRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 
@@ -71,7 +71,7 @@ class UserAssetAddExistingRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],

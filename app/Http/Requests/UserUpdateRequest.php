@@ -58,25 +58,25 @@ class UserUpdateRequest extends BaseFormRequest
 
 
                 if (!$role){
-                         // $fail("$attribute is invalid.")
+                         // $fail($attribute . " is invalid.")
                          $fail("Role does not exists.");
 
                 }
 
                 if(!empty(auth()->user()->business_id)) {
                     if (empty($role->business_id)){
-                        // $fail("$attribute is invalid.")
+                        // $fail($attribute . " is invalid.")
                       $fail("You don't have this role");
 
                   }
                     if ($role->business_id != auth()->user()->business_id){
-                          // $fail("$attribute is invalid.")
+                          // $fail($attribute . " is invalid.")
                         $fail("You don't have this role");
 
                     }
                 } else {
                     if (!empty($role->business_id)){
-                        // $fail("$attribute is invalid.")
+                        // $fail($attribute . " is invalid.")
                       $fail("You don't have this role");
 
                   }
@@ -159,7 +159,7 @@ class UserUpdateRequest extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
                 }
 

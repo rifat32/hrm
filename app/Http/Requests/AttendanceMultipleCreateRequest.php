@@ -56,7 +56,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 
@@ -81,7 +81,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                     $inTime = request('attendance_details')[$index]['in_time'] ?? false;
 
                     if ($value !== null && strtotime($value) < strtotime($inTime)) {
-                        $fail("$attribute must be after or equal to in_time.");
+                        $fail($attribute . " must be after or equal to in_time.");
                     }
 
 
@@ -97,7 +97,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                     ->exists();
 
                 if ($exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
 
                 },
@@ -119,7 +119,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -190,7 +190,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
 
                 },

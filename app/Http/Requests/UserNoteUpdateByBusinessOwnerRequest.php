@@ -42,7 +42,7 @@ class UserNoteUpdateByBusinessOwnerRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -64,7 +64,7 @@ class UserNoteUpdateByBusinessOwnerRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 

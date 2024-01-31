@@ -10,6 +10,7 @@ use App\Models\LeaveRecord;
 use App\Models\LeaveRecordArrear;
 use App\Models\Payrun;
 use App\Models\User;
+use App\Models\WorkShift;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -87,6 +88,20 @@ class PayrunJob implements ShouldQueue
                     ->get();
 
                 foreach ($employees as $employee) {
+                    $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
+                        $query->where('users.id', $employee->id);
+                    })->first();
+
+                    if (!$work_shift) {
+                        return false;
+                    }
+
+                    if (!$work_shift->is_active) {
+                        return false;
+                    }
+                    $work_shift_details = $work_shift->details()->get()->keyBy('day');
+
+
                     $all_parent_department_ids = [];
                     $assigned_departments = Department::whereHas("users", function ($query) use ($employee) {
                         $query->where("users.id", $employee->id);
@@ -117,7 +132,7 @@ class PayrunJob implements ShouldQueue
                                 });
 
 
-                        })
+                     })
                         ->get();
 
                     foreach ($attendance_arrears as $attendance_arrear) {
@@ -182,7 +197,7 @@ class PayrunJob implements ShouldQueue
 
 
 
-                        $approved_leave_records = LeaveRecord::
+                    $approved_leave_records = LeaveRecord::
                         whereDoesntHave("payroll")
                         ->whereHas('leave',    function ($query) use ($employee)  {
                             $query->where("leaves.user_id",  $employee->id);
@@ -237,6 +252,22 @@ class PayrunJob implements ShouldQueue
                     ->get();
 
 
+                    foreach($approved_attendances as $approved_attendance) {
+                        if($approved_attendance->total_paid_hours > 0) {
+
+                            $total_attendance_hours = $approved_attendance->total_paid_hours;
+
+                            if ($paid_leave_record || $holiday || $is_weekend) {
+                                $result_balance_hours = $total_attendance_hours;
+                            } elseif ($attendance->work_hours_delta > 0) {
+                                $result_balance_hours = $attendance->work_hours_delta;
+                            }
+
+
+                            $total_paid_hours += $total_attendance_hours;
+                            $total_balance_hours += $result_balance_hours;
+                        }
+                    }
 
 
 

@@ -40,7 +40,7 @@ class DesignationUpdateRequest extends BaseFormRequest
                     $designation = Designation::where($designation_query_params)
                         ->first();
                     if (!$designation) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no designation found");
                             return 0;
 
@@ -49,14 +49,14 @@ class DesignationUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($designation->business_id != NULL || $designation->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this designation due to role restrictions.");
 
                           }
 
                         } else {
                             if(($designation->business_id != NULL || $designation->is_default != 0 || $designation->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this designation due to role restrictions.");
 
                           }
@@ -64,7 +64,7 @@ class DesignationUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($designation->business_id != auth()->user()->business_id || $designation->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this designation due to role restrictions.");
                         }
                     }
@@ -145,7 +145,7 @@ class DesignationUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

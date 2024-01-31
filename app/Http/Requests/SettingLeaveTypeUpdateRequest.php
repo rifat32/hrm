@@ -36,7 +36,7 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
                     $setting_leave_type = SettingLeaveType::where($setting_leave_type_query_params)
                         ->first();
                     if (!$setting_leave_type) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no leave type found");
                             return 0;
 
@@ -45,14 +45,14 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this leave type due to role restrictions.");
 
                           }
 
                         } else {
                             if(($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 0 || $setting_leave_type->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this leave type due to role restrictions.");
 
                           }
@@ -60,7 +60,7 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($setting_leave_type->business_id != auth()->user()->business_id || $setting_leave_type->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this leave type status due to role restrictions.");
                         }
                     }
@@ -137,7 +137,7 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

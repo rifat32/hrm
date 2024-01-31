@@ -41,7 +41,7 @@ class LeaveUpdateRequest extends BaseFormRequest
                     $exists = Leave::where('id', $value)
                         ->exists();
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -112,7 +112,7 @@ class LeaveUpdateRequest extends BaseFormRequest
                 ->exists();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
             }
                 },
             ],
@@ -134,7 +134,7 @@ class LeaveUpdateRequest extends BaseFormRequest
                      ->first();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
                 return;
             }
 

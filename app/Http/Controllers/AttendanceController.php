@@ -1951,7 +1951,7 @@ class AttendanceController extends Controller
                     }
 
 
-
+                    $work_shift_details = $work_shift->details()->get()->keyBy('day');
 
 
 
@@ -1970,19 +1970,23 @@ class AttendanceController extends Controller
                     $total_balance_hours = 0;
 
 
-                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours,&$total_paid_holiday_hours, $employee, $work_shift, $all_parent_department_ids) {
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours,&$total_paid_holiday_hours, $employee, $work_shift, $all_parent_department_ids,$work_shift_details) {
 
                         $day_number = Carbon::parse($date)->dayOfWeek;
-                        $work_shift_details =  $work_shift->details()->where([
-                            "day" => $day_number
-                        ])
-                            ->first();
+
+                        $work_shift_detail = $work_shift_details->get($day_number);
+                        // $work_shift_details =  $work_shift->details()->where([
+                        //     "day" => $day_number
+                        // ])
+                        //     ->first();
+
+
                         $is_weekend = 1;
                         $capacity_hours = 0;
-                        if ($work_shift_details) {
-                            $is_weekend = $work_shift_details->is_weekend;
-                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                        if ($work_shift_detail) {
+                            $is_weekend = $work_shift_detail->is_weekend;
+                            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
+                            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
                             $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
                         }
 

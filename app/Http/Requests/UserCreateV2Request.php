@@ -86,7 +86,7 @@ class UserCreateV2Request extends BaseFormRequest
 
 
                 if (!$role){
-                         // $fail("$attribute is invalid.")
+                         // $fail($attribute . " is invalid.")
                          $fail("Role does not exists.");
                          return;
 
@@ -94,20 +94,20 @@ class UserCreateV2Request extends BaseFormRequest
 
                 if(!empty(auth()->user()->business_id)) {
                     if (empty($role->business_id)){
-                        // $fail("$attribute is invalid.")
+                        // $fail($attribute . " is invalid.")
                       $fail("You don't have this role");
                       return;
 
                   }
                     if ($role->business_id != auth()->user()->business_id){
-                          // $fail("$attribute is invalid.")
+                          // $fail($attribute . " is invalid.")
                         $fail("You don't have this role");
                         return;
 
                     }
                 } else {
                     if (!empty($role->business_id)){
-                        // $fail("$attribute is invalid.")
+                        // $fail($attribute . " is invalid.")
                       $fail("You don't have this role");
                       return;
 
@@ -170,7 +170,7 @@ class UserCreateV2Request extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
                 }
 
@@ -187,11 +187,11 @@ class UserCreateV2Request extends BaseFormRequest
                     ->first();
 
                     if (!$department) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                         return;
                     }
                     if(!in_array($department->id,$all_manager_department_ids)){
-                        $fail("$attribute is invalid. You don't have access to this department.");
+                        $fail($attribute . " is invalid. You don't have access to this department.");
                         return;
                     }
             },
@@ -267,7 +267,7 @@ class UserCreateV2Request extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
 
 
@@ -338,7 +338,7 @@ class UserCreateV2Request extends BaseFormRequest
                 ->exists();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
             }
 
 
@@ -411,7 +411,7 @@ class UserCreateV2Request extends BaseFormRequest
                 ->exists();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
             }
 
 
@@ -485,7 +485,7 @@ class UserCreateV2Request extends BaseFormRequest
                 ->exists();
 
             if (!$exists) {
-                $fail("$attribute is invalid.");
+                $fail($attribute . " is invalid.");
             }
 
             },

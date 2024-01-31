@@ -38,7 +38,7 @@ class WorkLocationUpdateRequest extends BaseFormRequest
                     $work_location = WorkLocation::where($work_location_query_params)
                         ->first();
                     if (!$work_location) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no work location found");
                             return 0;
 
@@ -47,14 +47,14 @@ class WorkLocationUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($work_location->business_id != NULL || $work_location->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this work location due to role restrictions.");
 
                           }
 
                         } else {
                             if(($work_location->business_id != NULL || $work_location->is_default != 0 || $work_location->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this work location due to role restrictions.");
 
                           }
@@ -62,7 +62,7 @@ class WorkLocationUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($work_location->business_id != auth()->user()->business_id || $work_location->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this work location due to role restrictions.");
                         }
                     }
@@ -143,7 +143,7 @@ class WorkLocationUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

@@ -34,7 +34,7 @@ class AssignRoleRequest extends BaseFormRequest
                     $role  = Role::where(["name" => $value])->first();
 
                     if (!$role){
-                             // $fail("$attribute is invalid.")
+                             // $fail($attribute . " is invalid.")
                              $fail("Role does not exists.");
                              return;
 
@@ -42,20 +42,20 @@ class AssignRoleRequest extends BaseFormRequest
 
                     if(!empty(auth()->user()->business_id)) {
                         if (empty($role->business_id)){
-                            // $fail("$attribute is invalid.")
+                            // $fail($attribute . " is invalid.")
                           $fail("You don't have this role");
                           return;
 
                       }
                         if ($role->business_id != auth()->user()->business_id){
-                              // $fail("$attribute is invalid.")
+                              // $fail($attribute . " is invalid.")
                             $fail("You don't have this role");
                             return;
 
                         }
                     } else {
                         if (!empty($role->business_id)){
-                            // $fail("$attribute is invalid.")
+                            // $fail($attribute . " is invalid.")
                           $fail("You don't have this role");
                           return;
 

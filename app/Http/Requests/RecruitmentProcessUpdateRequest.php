@@ -37,7 +37,7 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
                     $recruitment_process = RecruitmentProcess::where($recruitment_process_query_params)
                         ->first();
                     if (!$recruitment_process) {
-                            // $fail("$attribute is invalid.");
+                            // $fail($attribute . " is invalid.");
                             $fail("no recruitment process  found");
                             return 0;
 
@@ -46,14 +46,14 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
 
                         if(auth()->user()->hasRole('superadmin')) {
                             if(($recruitment_process->business_id != NULL || $recruitment_process->is_default != 1)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this recruitment process  due to role restrictions.");
 
                           }
 
                         } else {
                             if(($recruitment_process->business_id != NULL || $recruitment_process->is_default != 0 || $recruitment_process->created_by != auth()->user()->id)) {
-                                // $fail("$attribute is invalid.");
+                                // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this recruitment process  due to role restrictions.");
 
                           }
@@ -61,7 +61,7 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
 
                     } else {
                         if(($recruitment_process->business_id != auth()->user()->business_id || $recruitment_process->is_default != 0)) {
-                               // $fail("$attribute is invalid.");
+                               // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this recruitment process  due to role restrictions.");
                         }
                     }
@@ -142,7 +142,7 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
                         ->exists();
 
                     if ($exists) {
-                        $fail("$attribute is already exist.");
+                        $fail($attribute . " is already exist.");
                     }
 
 

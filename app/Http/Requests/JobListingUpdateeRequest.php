@@ -37,7 +37,7 @@ class JobListingUpdateeRequest extends BaseFormRequest
                         ->exists();
 
                     if (!$exists) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                     }
                 },
             ],
@@ -66,7 +66,7 @@ class JobListingUpdateeRequest extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
                 },
             ],
@@ -86,11 +86,11 @@ class JobListingUpdateeRequest extends BaseFormRequest
                     ->first();
 
                     if (!$department) {
-                        $fail("$attribute is invalid.");
+                        $fail($attribute . " is invalid.");
                         return;
                     }
                     if(!in_array($department->id,$all_manager_department_ids)){
-                        $fail("$attribute is invalid. You don't have access to this department.");
+                        $fail($attribute . " is invalid. You don't have access to this department.");
                         return;
                     }
                 },
@@ -162,7 +162,7 @@ class JobListingUpdateeRequest extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
 
                 },
@@ -232,7 +232,7 @@ class JobListingUpdateeRequest extends BaseFormRequest
                     ->exists();
 
                 if (!$exists) {
-                    $fail("$attribute is invalid.");
+                    $fail($attribute . " is invalid.");
                 }
 
                 },
