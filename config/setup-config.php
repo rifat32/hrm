@@ -1576,7 +1576,7 @@ return [
 
         "candidate_create" => "create",
         "candidate_update" => "update",
-        "attendance_approve" => "approve",
+     
         "candidate_view" => "view",
         "candidate_delete" => "delete",
 
@@ -1588,6 +1588,7 @@ return [
 
         "attendance_create" => "create",
         "attendance_update" => "update",
+        "attendance_approve" => "approve",
         "attendance_view" => "view",
         "attendance_delete" => "delete",
 
