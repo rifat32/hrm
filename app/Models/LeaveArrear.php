@@ -6,23 +6,22 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PayrollHoliday extends Model
+class LeaveArrear extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'payroll_id',
-        'holiday_id',
+        'leave_id',
+        "status",
     ];
 
-    public function payroll()
+    public function leave()
     {
-        return $this->belongsTo(Payroll::class, 'payroll_id');
+        return $this->belongsTo(Leave::class, "leave_id" ,'id');
     }
 
-    public function holiday()
-    {
-        return $this->belongsTo(Holiday::class, 'holiday_id');
-    }
+
+
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

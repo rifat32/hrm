@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Attendance;
+use App\Models\AttendanceArrear;
 use App\Models\Payrun;
 use App\Models\User;
 use Carbon\Carbon;
@@ -39,25 +40,34 @@ class PayrunJob implements ShouldQueue
 
         foreach ($payruns as $payrun) {
 
+            $start_date = $payrun->start_date;
+            $end_date = $payrun->end_date;
+
             if (!$payrun->business_id) {
                 continue;
             }
             // Set end_date based on period_type
             switch ($payrun->period_type) {
                 case 'weekly':
-
-                    $payrun->end_date = Carbon::now()->startOfWeek();
+                    $start_date = Carbon::now()->startOfWeek()->subWeek(1);
+                    $end_date = Carbon::now()->startOfWeek();
                     break;
                 case 'monthly':
-                    $payrun->end_date = Carbon::now()->startOfMonth();;
+                    $start_date = Carbon::now()->startOfMonth()->addMonth(1);
+                    $end_date = Carbon::now()->startOfMonth();
                     break;
-                    // Add additional cases for other period types if needed
+
             }
-            if (!$payrun->end_date) {
-                continue;
+            if (!$start_date || !$end_date) {
+                continue; // Skip to the next iteration
             }
-            if (!$payrun->end_date->isToday()) {
-                continue;
+
+            // Convert end_date to Carbon instance
+            $end_date = Carbon::parse($end_date);
+
+            // Check if end_date is today
+            if (!$end_date->isToday()) {
+                continue; // Skip to the next iteration
             }
 
             $employees = User::where([
@@ -74,11 +84,44 @@ class PayrunJob implements ShouldQueue
 
 
 
-                $attendances = Attendance::
-                where("attendances.status", "approved")
-              ->where('attendances.user_id', $employee->id)
-              ->where('attendances.in_date', '<=', today()->endOfDay())
-              ->get();
+                $unapproved_attendances = Attendance::
+                whereDoesntHave("payroll")
+               ->where("attendances.status", "approved")
+               ->where('attendances.user_id', $employee->id)
+               ->where('attendances.in_date', '<=', today()->endOfDay())
+               ->where('attendances.in_date', '>=', $start_date)
+               ->get();
+
+
+               foreach($unapproved_attendances as $unapproved_attendance) {
+                AttendanceArrear::create([
+                      "status" => "pending_approval",
+                      "attendance_id" => $unapproved_attendance->id
+                ]);
+               }
+
+                $approved_attendances = Attendance::
+                 whereDoesntHave("payroll")
+                ->where("attendances.status", "approved")
+                ->where('attendances.user_id', $employee->id)
+                ->where(function($query) use($start_date) {
+                    $query->where(function($query) use($start_date) {
+                        $query->where('attendances.in_date', '<=', today()->endOfDay())
+                        ->where('attendances.in_date', '>=', $start_date);
+                    })
+                    ->orWhere(function($query) {
+                        $query->whereHas("arrear",function($query){
+                               $query->where("attendance_arrears.status","approved");
+                        });
+                    })
+                    ;
+                })
+                ->get();
+                
+
+
+
+
 
 
 

@@ -37,6 +37,16 @@ class Attendance extends Model
         "created_by"
     ];
 
+
+    public function arrear(){
+        return $this->hasOne(AttendanceArrear::class,'attendance_id', 'id');
+    }
+    public function payroll()
+    {
+        return $this->hasOne(PayrollAttendance::class, "attendance_id" ,'id');
+    }
+
+
     public function employee(){
         return $this->hasOne(User::class,'id', 'user_id');
     }
