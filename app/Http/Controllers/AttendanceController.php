@@ -2045,11 +2045,16 @@ class AttendanceController extends Controller
                             $total_paid_hours +=  $paid_leave_hours;
                         }
                         if ($holiday) {
-                            if ($is_weekend) {
-                                $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
-                            } else {
-                                $holiday_hours = $capacity_hours;
-                            }
+                            $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+                            // if ($is_weekend) {
+                            //     $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+                            // } else {
+                            //     $holiday_hours = $capacity_hours;
+                            // }
+
+
+
+
                             $total_paid_holiday_hours += $holiday_hours;
                             $result_paid_hours += $holiday_hours;
                             $total_paid_hours += $holiday_hours;

@@ -6,17 +6,17 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LeaveArrear extends Model
+class LeaveRecordArrear extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'leave_id',
+        'leave_record_id',
         "status",
     ];
 
     public function leave()
     {
-        return $this->belongsTo(Leave::class, "leave_id" ,'id');
+        return $this->belongsTo(LeaveRecord::class, "leave_record_id" ,'id');
     }
 
 

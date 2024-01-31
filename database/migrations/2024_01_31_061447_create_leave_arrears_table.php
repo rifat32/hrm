@@ -15,8 +15,8 @@ class CreateLeaveArrearsTable extends Migration
     {
         Schema::create('leave_arrears', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("leaves_id");
-            $table->foreign('leaves_id')->references('id')->on('leaves')->onDelete('cascade');
+            $table->unsignedBigInteger("leave_record_id");
+            $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('cascade');
             $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
 
             $table->timestamps();

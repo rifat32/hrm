@@ -30,6 +30,14 @@ class LeaveRecord extends Model
         return $this->belongsTo(Leave::class,'leave_id', 'id');
     }
 
+    public function arrear(){
+        return $this->hasOne(LeaveRecordArrear::class,'leave_record_id', 'id');
+    }
+    public function payroll()
+    {
+        return $this->hasOne(PayrollLeaveRecord::class, "leave_record_id" ,'id');
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return (new Carbon($value))->format('d-m-Y');

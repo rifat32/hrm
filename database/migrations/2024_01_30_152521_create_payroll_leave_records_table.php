@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePayrollLeavesTable extends Migration
+class CreatePayrollLeaveRecordTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreatePayrollLeavesTable extends Migration
      */
     public function up()
     {
-        Schema::create('payroll_leaves', function (Blueprint $table) {
+        Schema::create('payroll_leave_records', function (Blueprint $table) {
             $table->id();
 
             $table->unsignedBigInteger("payroll_id");
             $table->foreign('payroll_id')->references('id')->on('payrolls')->onDelete('cascade');
-            $table->unsignedBigInteger("leaves_id");
-            $table->foreign('leaves_id')->references('id')->on('leaves')->onDelete('restrict');
+
+            $table->unsignedBigInteger("leave_record_id");
+            $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('restrict');
 
 
             $table->timestamps();
@@ -33,6 +34,6 @@ class CreatePayrollLeavesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payroll_leaves');
+        Schema::dropIfExists('payroll_leave_records');
     }
 }
