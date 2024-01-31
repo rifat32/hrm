@@ -260,6 +260,12 @@ class AttendanceController extends Controller
                     $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
                     $total_present_hours = $out_time->diffInHours($in_time);
 
+
+
+
+
+
+
                     $tolerance_time = $in_time->diffInHours($work_shift_start_at);
 
 
@@ -1993,7 +1999,6 @@ class AttendanceController extends Controller
                         if(!$is_weekend) {
                             $total_capacity_hours += $capacity_hours;
                         }
-  // aaaa
 
                         $holiday = Holiday::where([
                             "business_id" => auth()->user()->business_id
@@ -2025,25 +2030,50 @@ class AttendanceController extends Controller
                             return (($in_date == $date) && ($attendance->user_id == $employee->id));
                         });
 
-                        $paid_leave_record = $leave_records->first(function ($leave_record) use ($date,$employee,&$total_leave_hours)  {
+                        // $paid_leave_record = $leave_records->first(function ($leave_record) use ($date,$employee,&$total_leave_hours)  {
+                        //     $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
+                        //     if(($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
+                        //          return false;
+                        //     }
+                        //     $total_leave_hours += $leave_record->leave_hours;
+                        //     if($leave_record->leave->leave_type->type != "paid") {
+                        //         return false;
+                        //     }
+                        //    return true;
+                        // });
+                        $leave_record = $leave_records->first(function ($leave_record) use ($date,$employee,&$total_leave_hours)  {
                             $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
                             if(($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
                                  return false;
                             }
                             $total_leave_hours += $leave_record->leave_hours;
-                            if($leave_record->leave->leave_type->type != "paid") {
-                                return false;
-                            }
+                            // if($leave_record->leave->leave_type->type != "paid") {
+                            //     return false;
+                            // }
                            return true;
                         });
+                        // $leave_record = $leave_records->first(function ($leave_record) use ($date,$employee,&$total_leave_hours)  {
+                        //     $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
+                        //     if(($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
+                        //          return false;
+                        //     }
+
+                        //     $total_leave_hours += $leave_record->leave_hours;
+
+
+                        //     if($leave_record->leave->leave_type->type != "paid") {
+                        //         return false;
+                        //     }
+                        //    return true;
+                        // });
 
 
                         $result_is_present = 0;
                         $result_paid_hours = 0;
                         $result_balance_hours = 0;
 
-                        if ($paid_leave_record) {
-                            $paid_leave_hours =  $paid_leave_record->leave_hours;
+                        if ($leave_record->leave->leave_type->type == "paid") {
+                            $paid_leave_hours =  $leave_record->leave_hours;
                             $total_paid_leave_hours += $paid_leave_hours;
                             $result_paid_hours += $paid_leave_hours;
                             $total_paid_hours +=  $paid_leave_hours;
@@ -2068,7 +2098,7 @@ class AttendanceController extends Controller
                                 $result_is_present = 1;
                                 $total_attendance_hours = $attendance->total_paid_hours;
 
-                                if ($paid_leave_record || $holiday || $is_weekend) {
+                                if ($leave_record || $holiday || $is_weekend) {
                                     $result_balance_hours = $total_attendance_hours;
                                 } elseif ($attendance->work_hours_delta > 0) {
                                     $result_balance_hours = $attendance->work_hours_delta;
@@ -2081,7 +2111,7 @@ class AttendanceController extends Controller
 
                         }
 
-                        if ($paid_leave_record || $attendance || $holiday) {
+                        if ($leave_record || $attendance || $holiday) {
                             return [
                                 'date' => Carbon::parse($date)->format("d-m-Y"),
                                 'is_present' => $result_is_present,
