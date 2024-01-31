@@ -49,7 +49,6 @@ class PayrunJob implements ShouldQueue
         DB::transaction(function () {
             $payruns = Payrun::where('is_active', true)->get();
 
-
             foreach ($payruns as $payrun) {
 
                 $start_date = $payrun->start_date;
@@ -253,6 +252,8 @@ class PayrunJob implements ShouldQueue
 
 
                     foreach($approved_attendances as $approved_attendance) {
+                        $in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
+
                         if($approved_attendance->total_paid_hours > 0) {
 
                             $total_attendance_hours = $approved_attendance->total_paid_hours;
