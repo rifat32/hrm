@@ -69,7 +69,7 @@ class ForgetPasswordMail extends Mailable
 
 
 
-        $html_content =  str_replace("[ForgotPasswordLink]", ($front_end_url.'/auth/forgot-password?token='.$this->user->resetPasswordToken), $html_content );
+        $html_content =  str_replace("[ForgotPasswordLink]", ($front_end_url.'/auth/change-password?token='.$this->user->resetPasswordToken), $html_content );
 
 
 

@@ -254,11 +254,11 @@ class PayrunJob implements ShouldQueue
                     $total_paid_hours = 0;
                     $total_balance_hours = 0;
 
-                    foreach($approved_attendances as $approved_attendance) {
-                        $in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
-                        $day_number = Carbon::parse($in_date)->dayOfWeek;
-                        $work_shift_detail = $work_shift_details->get($day_number);
 
+                    $approved_attendances->each(function ($approved_attendance) use (&$total_paid_hours,&$total_balance_hours,$work_shift_details,$approved_leave_records,$holidays) {
+                        $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
+                        $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
+                        $work_shift_detail = $work_shift_details->get($day_number);
                         $is_weekend = 1;
                         $capacity_hours = 0;
                         if ($work_shift_detail) {
@@ -268,38 +268,36 @@ class PayrunJob implements ShouldQueue
                             $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
                         }
 
-
-                        $leave_record = $approved_leave_records->first(function ($leave_record) use ($in_date)  {
+                        $leave_record = $approved_leave_records->first(function ($leave_record) use ($attendance_in_date)  {
                             $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
-                           return $in_date != $leave_date;
+                           return $attendance_in_date == $leave_date;
                         });
-                        $holiday = $holidays->first(function ($holiday) use ($in_date)  {
+                        $holiday = $holidays->first(function ($holiday) use ($attendance_in_date)  {
                             $start_date = Carbon::parse($holiday->start_date);
                             $end_date = Carbon::parse($holiday->end_date);
-                            $in_date = Carbon::parse($in_date);
+                            $in_date = Carbon::parse($attendance_in_date);
 
                             // Check if $in_date is within the range of start_date and end_date
                             return $in_date->between($start_date, $end_date, true);
                         });
 
-
-
                         if($approved_attendance->total_paid_hours > 0) {
-
                             $total_attendance_hours = $approved_attendance->total_paid_hours;
-
                             if ($leave_record || $holiday || $is_weekend) {
                                 $result_balance_hours = $total_attendance_hours;
                             } elseif ($approved_attendance->work_hours_delta > 0) {
                                 $result_balance_hours = $approved_attendance->work_hours_delta;
                             }
-
                             $total_paid_hours += $total_attendance_hours;
                             $total_balance_hours += $result_balance_hours;
                         }
-                    }
+                    });
 
-
+                    $approved_leave_records->each(function ($approved_leave_record) use (&$total_paid_hours) {
+                        if ($approved_leave_record->leave->leave_type->type == "paid") {
+                            $total_paid_hours += $approved_leave_record->leave_hours;
+                        }
+                    });
 
 
 
@@ -311,6 +309,10 @@ class PayrunJob implements ShouldQueue
 
 
                 }
+
+
+
+
 
 
 
