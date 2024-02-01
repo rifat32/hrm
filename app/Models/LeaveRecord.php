@@ -33,7 +33,7 @@ class LeaveRecord extends Model
     public function arrear(){
         return $this->hasOne(LeaveRecordArrear::class,'leave_record_id', 'id');
     }
-    public function payroll()
+    public function payroll_leave_record()
     {
         return $this->hasOne(PayrollLeaveRecord::class, "leave_record_id" ,'id');
     }

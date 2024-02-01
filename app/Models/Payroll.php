@@ -37,6 +37,23 @@ class Payroll extends Model
         return $this->belongsTo(Payrun::class, 'payrun_id');
     }
 
+    public function payroll_attendances()
+    {
+        return $this->hasMany(PayrollAttendance::class, "payroll_id" ,'id');
+    }
+
+    public function payroll_leave_records()
+    {
+        return $this->hasMany(PayrollLeaveRecord::class, "payroll_id" ,'id');
+    }
+
+     public function payroll_holidays()
+    {
+        return $this->hasMany(PayrollHoliday::class, "payroll_id" ,'id');
+    }
+
+
+
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');

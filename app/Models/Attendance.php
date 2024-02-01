@@ -41,7 +41,7 @@ class Attendance extends Model
     public function arrear(){
         return $this->hasOne(AttendanceArrear::class,'attendance_id', 'id');
     }
-    public function payroll()
+    public function payroll_attendance()
     {
         return $this->hasOne(PayrollAttendance::class, "attendance_id" ,'id');
     }

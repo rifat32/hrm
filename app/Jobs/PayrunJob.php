@@ -93,11 +93,11 @@ class PayrunJob implements ShouldQueue
                     })->first();
 
                     if (!$work_shift) {
-                        return false;
+                       continue;
                     }
 
                     if (!$work_shift->is_active) {
-                        return false;
+                        continue;
                     }
                     $work_shift_details = $work_shift->details()->get()->keyBy('day');
 
@@ -113,14 +113,13 @@ class PayrunJob implements ShouldQueue
                     $weekly_contractual_hours = $employee->weekly_contractual_hours;
                     $weeks_per_year = 52;
                     $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
-                    $overtime_salary = $employee->overtime_rate?$employee->overtime_rate:$hourly_salary;
+                    $overtime_salary = $employee->overtime_rate ? $employee->overtime_rate : $hourly_salary;
 
                     $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
 
 
 
-                    $attendance_arrears = Attendance::
-                    whereDoesntHave("payroll")
+                    $attendance_arrears = Attendance::whereDoesntHave("payroll_attendance")
                         ->where('attendances.user_id', $employee->id)
 
                         ->where(function ($query) use ($start_date) {
@@ -129,13 +128,11 @@ class PayrunJob implements ShouldQueue
                                     ->where('attendances.in_date', '<=', today()->endOfDay())
                                     ->where('attendances.in_date', '>=', $start_date);
                             })
-                            ->orWhere(function ($query) use ($start_date) {
+                                ->orWhere(function ($query) use ($start_date) {
                                     $query->whereDoesntHave("arrear")
                                         ->where('attendances.in_date', '<=', $start_date);
                                 });
-
-
-                     })
+                        })
                         ->get();
 
                     foreach ($attendance_arrears as $attendance_arrear) {
@@ -146,21 +143,19 @@ class PayrunJob implements ShouldQueue
                     }
 
 
-                    $leave_arrears = LeaveRecord::
-                    whereDoesntHave("payroll")
-                    ->whereHas('leave',    function ($query) use ($employee)  {
-                        $query->where("leaves.user_id",  $employee->id);
-                    })
+                    $leave_arrears = LeaveRecord::whereDoesntHave("payroll_leave_record")
+                        ->whereHas('leave',    function ($query) use ($employee) {
+                            $query->where("leaves.user_id",  $employee->id);
+                        })
 
                         ->where(function ($query) use ($start_date) {
                             $query->where(function ($query) use ($start_date) {
                                 $query
-                                ->whereHas('leave',    function ($query)  {
-                                    $query->whereNotIn("leaves.status", ["approved"]);
-                                })
+                                    ->whereHas('leave',    function ($query) {
+                                        $query->whereNotIn("leaves.status", ["approved"]);
+                                    })
                                     ->where('leave_records.date', '<=', today()->endOfDay())
                                     ->where('leave_records.date', '>=', $start_date);
-
                             })
                                 ->orWhere(function ($query) use ($start_date) {
                                     $query->whereDoesntHave("arrear")
@@ -180,15 +175,14 @@ class PayrunJob implements ShouldQueue
 
 
 
-                    $approved_attendances = Attendance::
-                    whereDoesntHave("payroll")
+                    $approved_attendances = Attendance::whereDoesntHave("payroll_attendance")
                         ->where('attendances.user_id', $employee->id)
                         ->where(function ($query) use ($start_date) {
                             $query->where(function ($query) use ($start_date) {
                                 $query
-                                ->where("attendances.status", "approved")
-                                ->where('attendances.in_date', '<=', today()->endOfDay())
-                                ->where('attendances.in_date', '>=', $start_date);
+                                    ->where("attendances.status", "approved")
+                                    ->where('attendances.in_date', '<=', today()->endOfDay())
+                                    ->where('attendances.in_date', '>=', $start_date);
                             })
                                 ->orWhere(function ($query) {
                                     $query->whereHas("arrear", function ($query) {
@@ -200,28 +194,27 @@ class PayrunJob implements ShouldQueue
 
 
 
-                    $approved_leave_records = LeaveRecord::
-                        whereDoesntHave("payroll")
-                        ->whereHas('leave',    function ($query) use ($employee)  {
+                    $approved_leave_records = LeaveRecord::whereDoesntHave("payroll_leave_record")
+                        ->whereHas('leave',    function ($query) use ($employee) {
                             $query->where("leaves.user_id",  $employee->id);
                         })
-                            ->where(function ($query) use ($start_date) {
-                                $query->where(function ($query) use ($start_date) {
-                                    $query
-                                    ->whereHas('leave',    function ($query)   {
+                        ->where(function ($query) use ($start_date) {
+                            $query->where(function ($query) use ($start_date) {
+                                $query
+                                    ->whereHas('leave',    function ($query) {
                                         $query
-                                        ->where("leaves.status", "approved");
+                                            ->where("leaves.status", "approved");
                                     })
                                     ->where('leave_records.date', '<=', today()->endOfDay())
                                     ->where('leave_records.date', '>=', $start_date);
-                                })
-                                    ->orWhere(function ($query) {
-                                        $query->whereHas("arrear", function ($query) {
-                                            $query->where("leave_record_arrears.status", "approved");
-                                        });
-                                    });
                             })
-                            ->get();
+                                ->orWhere(function ($query) {
+                                    $query->whereHas("arrear", function ($query) {
+                                        $query->where("leave_record_arrears.status", "approved");
+                                    });
+                                });
+                        })
+                        ->get();
 
 
 
@@ -230,8 +223,8 @@ class PayrunJob implements ShouldQueue
                     $holidays = Holiday::where([
                         "business_id" => auth()->user()->business_id
                     ])
-                    ->where('holidays.end_date', '<=', today()->endOfDay())
-                    ->where('holidays.end_date', '>=', $start_date)
+                        ->where('holidays.end_date', '<=', today()->endOfDay())
+                        ->where('holidays.end_date', '>=', $start_date)
                         ->where([
                             "is_active" => 1
                         ])
@@ -252,14 +245,24 @@ class PayrunJob implements ShouldQueue
                                 });
                         })
 
-                    ->get();
+                        ->get();
 
 
                     $total_paid_hours = 0;
                     $total_balance_hours = 0;
 
 
-                    $approved_attendances->each(function ($approved_attendance) use (&$total_paid_hours,&$total_balance_hours,$work_shift_details,$approved_leave_records,$holidays) {
+
+
+
+                    $payroll_attendances_data = collect();
+                    $payroll_leave_records_data = collect();
+                    $payroll_holidays_data = collect();
+
+                    $approved_attendances->each(function ($approved_attendance) use (&$total_paid_hours, &$total_balance_hours, $work_shift_details, $approved_leave_records, $holidays, &$payroll_attendances_data) {
+                        $payroll_attendances_data->push(["attendances" => $approved_attendance->id]);
+
+
                         $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
                         $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
                         $work_shift_detail = $work_shift_details->get($day_number);
@@ -272,11 +275,11 @@ class PayrunJob implements ShouldQueue
                             $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
                         }
 
-                        $leave_record = $approved_leave_records->first(function ($leave_record) use ($attendance_in_date)  {
+                        $leave_record = $approved_leave_records->first(function ($leave_record) use ($attendance_in_date) {
                             $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
-                           return $attendance_in_date == $leave_date;
+                            return $attendance_in_date == $leave_date;
                         });
-                        $holiday = $holidays->first(function ($holiday) use ($attendance_in_date)  {
+                        $holiday = $holidays->first(function ($holiday) use ($attendance_in_date) {
                             $start_date = Carbon::parse($holiday->start_date);
                             $end_date = Carbon::parse($holiday->end_date);
                             $in_date = Carbon::parse($attendance_in_date);
@@ -285,7 +288,7 @@ class PayrunJob implements ShouldQueue
                             return $in_date->between($start_date, $end_date, true);
                         });
 
-                        if($approved_attendance->total_paid_hours > 0) {
+                        if ($approved_attendance->total_paid_hours > 0) {
                             $total_attendance_hours = $approved_attendance->total_paid_hours;
                             if ($leave_record || $holiday || $is_weekend) {
                                 $result_balance_hours = $total_attendance_hours;
@@ -297,8 +300,12 @@ class PayrunJob implements ShouldQueue
                         }
                     });
 
-                    $approved_leave_records->each(function ($approved_leave_record) use (&$total_paid_hours) {
+
+
+
+                    $approved_leave_records->each(function ($approved_leave_record) use (&$total_paid_hours, &$payroll_leave_records_data) {
                         if ($approved_leave_record->leave->leave_type->type == "paid") {
+                            $payroll_leave_records_data->push(["leave_record_id" => $approved_leave_record->id]);
                             $total_paid_hours += $approved_leave_record->leave_hours;
                         }
                     });
@@ -306,7 +313,7 @@ class PayrunJob implements ShouldQueue
 
                     $date_range = collect();
 
-                    $holidays->each(function ($holiday) use (&$date_range) {
+                    $holidays->each(function ($holiday) use (&$date_range, $payroll_holidays_data) {
                         $start_date = Carbon::parse($holiday->start_date);
                         $end_date = Carbon::parse($holiday->end_date);
 
@@ -314,6 +321,7 @@ class PayrunJob implements ShouldQueue
                             $current_date = $start_date->format("Y-m-d");
                             // Check if the date is not already in the collection before adding
                             if (!$date_range->contains($current_date)) {
+                                $payroll_holidays_data->push(["holiday_id" => $holiday->id]);
                                 $date_range->push($current_date);
                             }
 
@@ -325,38 +333,31 @@ class PayrunJob implements ShouldQueue
 
 
 
-                  $payroll_data =  [
-                        'user_id' =>$employee->id,
+                    $payroll_data =  [
+                        'user_id' => $employee->id,
                         "payrun_id" => $payrun->id,
                         'regular_hours' => $total_paid_hours - $total_balance_hours,
-                        'overtime_hours'=> $total_balance_hours,
+                        'overtime_hours' => $total_balance_hours,
                         'regular_hours_salary' => ($total_paid_hours - $total_balance_hours) * $hourly_salary,
                         'overtime_hours_salary' => $total_balance_hours * $overtime_salary,
                         'status' => "pending_approval",
                         'is_active' => 1,
                         'business_id' => $employee->business_id,
-                  ];
-                  $payroll = Payroll::create($payroll_data);
+                    ];
 
 
-
-
-
+                    $payroll = Payroll::create($payroll_data);
+                    $payroll->payroll_holidays()->create($payroll_holidays_data);
+                    $payroll->payroll_leave_records()->create($payroll_leave_records_data);
+                    $payroll->payroll_attendances()->create($payroll_attendances_data);
                 }
-
-
-
-
-
-
-
-
-
-
-
-                // Save the updated payrun
-                $payrun->save();
             }
+
+
+
+
+
+
         });
     }
 }
