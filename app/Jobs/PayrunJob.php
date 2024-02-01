@@ -227,7 +227,7 @@ class PayrunJob implements ShouldQueue
                         "business_id" => auth()->user()->business_id
                     ])
                     ->where('holidays.end_date', '<=', today()->endOfDay())
-                    // ->where('holidays.end_date', '>=', $start_date)
+                    ->where('holidays.end_date', '>=', $start_date)
                         ->where([
                             "is_active" => 1
                         ])
@@ -300,8 +300,24 @@ class PayrunJob implements ShouldQueue
                     });
 
 
+                    $date_range = collect();
 
+                    $holidays->each(function ($holiday) use (&$date_range) {
+                        $start_date = Carbon::parse($holiday->start_date);
+                        $end_date = Carbon::parse($holiday->end_date);
 
+                        while ($start_date->lte($end_date)) {
+                            $current_date = $start_date->format("Y-m-d");
+                            // Check if the date is not already in the collection before adding
+                            if (!$date_range->contains($current_date)) {
+                                $date_range->push($current_date);
+                            }
+
+                            $start_date->addDay();
+                        }
+                    });
+
+                    $total_paid_hours += $date_range->count() *  $hourly_salary;
 
 
 
