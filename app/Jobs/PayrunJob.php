@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\LeaveRecord;
 use App\Models\LeaveRecordArrear;
+use App\Models\Payroll;
 use App\Models\Payrun;
 use App\Models\User;
 use App\Models\WorkShift;
@@ -110,9 +111,12 @@ class PayrunJob implements ShouldQueue
                     }
                     $salary_per_annum = $employee->salary_per_annum; // in euros
                     $weekly_contractual_hours = $employee->weekly_contractual_hours;
-                    $weeksPerYear = 52;
-                    $hourly_salary = $salary_per_annum / ($weeksPerYear * $weekly_contractual_hours);
+                    $weeks_per_year = 52;
+                    $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
+                    $overtime_salary = $employee->overtime_rate?$employee->overtime_rate:$hourly_salary;
+
                     $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+
 
 
                     $attendance_arrears = Attendance::
@@ -317,8 +321,22 @@ class PayrunJob implements ShouldQueue
                         }
                     });
 
-                    $total_paid_hours += $date_range->count() *  $hourly_salary;
+                    $total_paid_hours += $date_range->count() *  $holiday_hours;
 
+
+
+                  $payroll_data =  [
+                        'user_id' =>$employee->id,
+                        "payrun_id" => $payrun->id,
+                        'regular_hours' => $total_paid_hours - $total_balance_hours,
+                        'overtime_hours'=> $total_balance_hours,
+                        'regular_hours_salary' => ($total_paid_hours - $total_balance_hours) * $hourly_salary,
+                        'overtime_hours_salary' => $total_balance_hours * $overtime_salary,
+                        'status' => "pending_approval",
+                        'is_active' => 1,
+                        'business_id' => $employee->business_id,
+                  ];
+                  $payroll = Payroll::create($payroll_data);
 
 
 
