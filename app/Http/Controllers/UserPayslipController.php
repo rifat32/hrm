@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SingleFileUploadRequest;
 use App\Http\Requests\UserPayslipCreateRequest;
+use App\Http\Requests\UserPayslipUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -125,20 +126,14 @@ class UserPayslipController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- * @OA\Property(property="user_id", type="integer", format="int", example=1),
- * @OA\Property(property="degree", type="string", format="string", example="Your Degree"),
- * @OA\Property(property="major", type="string", format="string", example="Your Major"),
- * @OA\Property(property="school_name", type="string", format="string", example="Your School Name"),
- * @OA\Property(property="graduation_date", type="string", format="date", example="2023-05-01"),
- * @OA\Property(property="start_date", type="string", format="date", example="2019-09-01"),
- * @OA\Property(property="achievements", type="string", format="string", example="Your Achievements"),
- * @OA\Property(property="description", type="string", format="string", example="Your Description"),
- *  * @OA\Property(property="address", type="string", format="string", example="Your address"),
- * @OA\Property(property="country", type="string", format="string", example="Your Country"),
- * @OA\Property(property="city", type="string", format="string", example="Your City"),
- * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="is_current", type="boolean", format="boolean", example=false),
- *  *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *     @OA\Property(property="user_id", type="integer", format="int", example=1),
+ *     @OA\Property(property="payroll_id", type="integer", format="int", example=null),
+ *     @OA\Property(property="month", type="integer", format="int", example=1),
+ *     @OA\Property(property="year", type="integer", format="int", example=2024),
+ *     @OA\Property(property="payment_amount", type="number", format="double", example=1000.00),
+ *     @OA\Property(property="payment_date", type="string", format="date", example="2024-02-02"),
+ *     @OA\Property(property="payslip_file", type="string", format="string", example="path/to/payslip.pdf"),
+ *  *   @OA\Property(property="payment_record_file", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
  *
  *
  *
@@ -184,7 +179,7 @@ class UserPayslipController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_education_history_create')) {
+                if (!$request->user()->hasPermissionTo('employee_payslip_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -192,9 +187,9 @@ class UserPayslipController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["created_by"] = $request->user()->id;
-                $user_education_history =  Payslip::create($request_data);
+                $user_payslip =  Payslip::create($request_data);
 
-                return response($user_education_history, 201);
+                return response($user_payslip, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -205,33 +200,27 @@ class UserPayslipController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/user-education-histories",
-     *      operationId="updateUserEducationHistory",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-payslips",
+     *      operationId="updateUserPayslip",
+     *      tags={"user_payslips"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update  user education history ",
-     *      description="This method is to update user education history",
+     *      summary="This method is to update  user payslip  ",
+     *      description="This method is to update user payslip ",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- * @OA\Property(property="user_id", type="integer", format="int", example=1),
- * @OA\Property(property="degree", type="string", format="string", example="Your Degree"),
- * @OA\Property(property="major", type="string", format="string", example="Your Major"),
- * @OA\Property(property="school_name", type="string", format="string", example="Your School Name"),
- * @OA\Property(property="graduation_date", type="string", format="date", example="2023-05-01"),
- * @OA\Property(property="start_date", type="string", format="date", example="2019-09-01"),
- * @OA\Property(property="achievements", type="string", format="string", example="Your Achievements"),
- * @OA\Property(property="description", type="string", format="string", example="Your Description"),
- *  * @OA\Property(property="address", type="string", format="string", example="Your address"),
- * @OA\Property(property="country", type="string", format="string", example="Your Country"),
- * @OA\Property(property="city", type="string", format="string", example="Your City"),
- * @OA\Property(property="postcode", type="string", format="string", example="Your State"),
- * @OA\Property(property="is_current", type="boolean", format="boolean", example=false),
- *  *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+*     @OA\Property(property="user_id", type="integer", format="int", example=1),
+ *     @OA\Property(property="payroll_id", type="integer", format="int", example=null),
+ *     @OA\Property(property="month", type="integer", format="int", example=1),
+ *     @OA\Property(property="year", type="integer", format="int", example=2024),
+ *     @OA\Property(property="payment_amount", type="number", format="double", example=1000.00),
+ *     @OA\Property(property="payment_date", type="string", format="date", example="2024-02-02"),
+ *     @OA\Property(property="payslip_file", type="string", format="string", example="path/to/payslip.pdf"),
+ *  *   @OA\Property(property="payment_record_file", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
 *
  *
 
@@ -272,13 +261,13 @@ class UserPayslipController extends Controller
      *     )
      */
 
-    public function updateUserEducationHistory(UserEducationHistoryUpdateRequest $request)
+    public function updateUserPayslip(UserPayslipUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_education_history_update')) {
+                if (!$request->user()->hasPermissionTo('employee_payslip_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -289,7 +278,7 @@ class UserPayslipController extends Controller
 
 
 
-                $user_education_history_query_params = [
+                $user_payslip_query_params = [
                     "id" => $request_data["id"],
                 ];
                 // $user_education_history_prev = UserEducationHistory::where($user_education_history_query_params)
@@ -300,36 +289,30 @@ class UserPayslipController extends Controller
                 //     ], 404);
                 // }
 
-                $user_education_history  =  tap(Payslip::where($user_education_history_query_params))->update(
+                $user_payslip  =  tap(Payslip::where($user_payslip_query_params))->update(
                     collect($request_data)->only([
                         'user_id',
-                        'degree',
-                        'major',
-                        'school_name',
-                        'graduation_date',
-                        'start_date',
-
-                        'achievements',
-                        'description',
-                        'address',
-                        'country',
-                        'city',
-                        'postcode',
-                        'is_current',
-                        "attachments"
+                         'month',
+                          'year',
+                           'payment_amount',
+                            'payment_date',
+                             'payslip_file',
+                              'payment_record_file',
+                               "payroll_id",
+                                // "created_by"
 
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$user_education_history) {
+                if (!$user_payslip) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($user_education_history, 201);
+                return response($user_payslip, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -341,9 +324,9 @@ class UserPayslipController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-education-histories",
-     *      operationId="getUserEducationHistories",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-payslips",
+     *      operationId="getUserPayslips",
+     *      tags={"user_payslips"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -391,8 +374,8 @@ class UserPayslipController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get user education histories  ",
-     *      description="This method is to get user education histories ",
+     *      summary="This method is to get user payslip ",
+     *      description="This method is to get user  payslip ",
      *
 
      *      @OA\Response(
@@ -429,11 +412,11 @@ class UserPayslipController extends Controller
      *     )
      */
 
-    public function getUserEducationHistories(Request $request)
+    public function getUserPayslips(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_education_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_payslip_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -445,7 +428,7 @@ class UserPayslipController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_education_histories = Payslip::with([
+            $user_payslips = Payslip::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
@@ -455,10 +438,11 @@ class UserPayslipController extends Controller
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
+
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("user_education_histories.name", "like", "%" . $term . "%");
+                        $query->where("payslips.name", "like", "%" . $term . "%");
                         //     ->orWhere("user_education_histories.description", "like", "%" . $term . "%");
                     });
                 })
@@ -467,21 +451,21 @@ class UserPayslipController extends Controller
                 //    })
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_education_histories.user_id', $request->user_id);
+                    return $query->where('payslips.user_id', $request->user_id);
                 })
                 ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_education_histories.user_id', $request->user()->id);
+                    return $query->where('payslips.user_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('user_education_histories.created_at', ">=", $request->start_date);
+                    return $query->where('payslips.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('user_education_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('payslips.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("user_education_histories.id", $request->order_by);
+                    return $query->orderBy("payslips.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("user_education_histories.id", "DESC");
+                    return $query->orderBy("payslips.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -491,7 +475,7 @@ class UserPayslipController extends Controller
 
 
 
-            return response()->json($user_education_histories, 200);
+            return response()->json($user_payslips, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -501,9 +485,9 @@ class UserPayslipController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-education-histories/{id}",
-     *      operationId="getUserEducationHistoryById",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-payslips/{id}",
+     *      operationId="getUserPayslipById",
+     *      tags={"user_payslips"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -514,8 +498,8 @@ class UserPayslipController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get user education history by id",
-     *      description="This method is to get user education history by id",
+     *      summary="This method is to get user payslip by id",
+     *      description="This method is to get user payslip by id",
      *
 
      *      @OA\Response(
@@ -553,11 +537,11 @@ class UserPayslipController extends Controller
      */
 
 
-    public function getUserEducationHistoryById($id, Request $request)
+    public function getUserPayslipById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_education_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_payslip_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -569,14 +553,14 @@ class UserPayslipController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_education_history =  Payslip::where([
+            $user_payslip =  Payslip::where([
                 "id" => $id,
             ])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
-            if (!$user_education_history) {
+            if (!$user_payslip) {
                 $this->storeError(
                     "no data found"
                     ,
@@ -589,7 +573,7 @@ class UserPayslipController extends Controller
                 ], 404);
             }
 
-            return response()->json($user_education_history, 200);
+            return response()->json($user_payslip, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -601,9 +585,9 @@ class UserPayslipController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/user-education-histories/{ids}",
-     *      operationId="deleteUserEducationHistoriesByIds",
-     *      tags={"user_education_histories"},
+     *      path="/v1.0/user-payslips/{ids}",
+     *      operationId="deleteUserPayslipsByIds",
+     *      tags={"user_payslips"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -614,8 +598,8 @@ class UserPayslipController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user education history by id",
-     *      description="This method is to delete user education history by id",
+     *      summary="This method is to delete user payslip by id",
+     *      description="This method is to delete user payslip by id",
      *
 
      *      @OA\Response(
@@ -652,12 +636,12 @@ class UserPayslipController extends Controller
      *     )
      */
 
-    public function deleteUserEducationHistoriesByIds(Request $request, $ids)
+    public function deleteUserPayslipsByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_education_history_delete')) {
+            if (!$request->user()->hasPermissionTo('employee_payslip_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);

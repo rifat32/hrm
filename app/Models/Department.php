@@ -165,7 +165,7 @@ class Department extends Model
     //     return $childrenData;
     // }
 
-    public function payrun_departments()
+    public function payrun_department()
     {
         return $this->hasOne(PayrunDepartment::class, "department_id" ,'id');
     }

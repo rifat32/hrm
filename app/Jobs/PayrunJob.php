@@ -68,6 +68,15 @@ class PayrunJob implements ShouldQueue
                     "business_id" => $payrun->business_id,
                     "is_active" => 1
                 ])
+                ->where(function($query) use($payrun) {
+                    $query->whereHas("departments.payrun_department",function($query) use($payrun) {
+                        $query->where("payrun_departments.payrun_id", $payrun->id);
+                    })
+                    ->orWhereHas("payrun_user", function($query) use($payrun)  {
+                        $query->where("payrun_users.payrun_id", $payrun->id);
+                    });
+                })
+
                     ->get();
                 $this->process_payrun($payrun,$employees,$payrun->end_date,true);
             });

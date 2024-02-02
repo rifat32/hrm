@@ -1048,7 +1048,7 @@ public function getUser (Request $request) {
      *            required={"email"},
      *
      *             @OA\Property(property="email", type="string", format="string",example="test@g.c"),
-     *
+     *     *  *             @OA\Property(property="user_id", type="string", format="string",example="1"),
      *
      *         ),
      *      ),
@@ -1089,7 +1089,14 @@ public function getUser (Request $request) {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $user = User::where([
                 "email" => $request->email
-               ])->first();
+               ])
+               ->when(
+                !empty($request->user_id),
+                function($query) use($request){
+                    $query->whereNotIn("id",[$request->user_id]);
+                })
+
+               ->first();
                if($user) {
        return response()->json(["data" => true],200);
                }

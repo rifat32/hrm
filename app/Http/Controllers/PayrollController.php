@@ -94,11 +94,12 @@ class PayrollController extends Controller
                      "id" => $request_data["payrun_id"],
                      "business_id" => auth()->user()->business_id
                  ])
+
                  ->first();
 
                  if(!$payrun) {
                      $error = [ "message" => "The given data was invalid.",
-                     "errors" => ["payrun_id"=>["The payrun_id field is required."]]
+                     "errors" => ["payrun_id"=>["The payrun_id field is invalid."]]
                      ];
                          throw new Exception(json_encode($error),500);
                   }
@@ -300,6 +301,14 @@ class PayrollController extends Controller
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                 ;
+            })
+            ->where(function($query) use($payrun) {
+                $query->whereHas("departments.payrun_department",function($query) use($payrun) {
+                    $query->where("payrun_departments.payrun_id", $payrun->id);
+                })
+                ->orWhereHas("payrun_user", function($query) use($payrun)  {
+                    $query->where("payrun_users.payrun_id", $payrun->id);
+                });
             })
 
 

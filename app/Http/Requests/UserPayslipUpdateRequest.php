@@ -3,11 +3,12 @@
 namespace App\Http\Requests;
 
 use App\Models\Department;
-use App\Models\Payrun;
+use App\Models\Payroll;
+use App\Models\Payslip;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PayrollCreateRequest extends FormRequest
+class UserPayslipUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -32,31 +33,38 @@ class PayrollCreateRequest extends FormRequest
             $all_manager_department_ids[] = $manager_department->id;
             $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
         }
+
+
         return [
-            'payrun_id' => [
+
+            'id' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
-                    $exists = Payrun::where('id', $value)
-                        ->where('payruns.business_id', '=', auth()->user()->id)
-                        ->where(function($query) use($all_manager_department_ids) {
-                            $query->whereHas("departments", function($query) use($all_manager_department_ids) {
-                                $query->whereIn("departments.id",$all_manager_department_ids);
-                             })
-                             ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
-                                $query->whereIn("departments.id",$all_manager_department_ids);
-                             });
-                        })
-                        ->exists();
 
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
+
+                  $exists =  Payslip::where(
+                    [
+                        "payslips.id" => $value,
+                        "user_id" => $this->user_id
+                    ])
+                    ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->first();
+
+            if (!$exists) {
+                $fail($attribute . " is invalid.");
+                return;
+            }
+
+
                 },
             ],
-            'users' => 'present|array',
-            'users.*' => [
-                "numeric",
+
+            'user_id' => [
+                'required',
+                'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
 
@@ -69,14 +77,6 @@ class PayrollCreateRequest extends FormRequest
                     ->whereHas("departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
-                     ->where(function($query)  {
-                        $query->whereHas("departments.payrun_department",function($query)  {
-                            $query->where("payrun_departments.payrun_id", $this->payrun_id);
-                        })
-                        ->orWhereHas("payrun_user", function($query)   {
-                            $query->where("payrun_users.payrun_id", $this->payrun_id);
-                        });
-                    })
                      ->first();
 
             if (!$exists) {
@@ -85,10 +85,47 @@ class PayrollCreateRequest extends FormRequest
             }
 
 
+                },
+            ],
+
+
+            "payroll_id" => [
+                'present',
+                'numeric',
+                function ($attribute, $value, $fail)  {
+
+
+                  $exists =  Payroll::where(
+                    [
+                        "payrolls.user_id" => $this->user_id,
+
+                    ])
+                    ->whereHas("departments", function($query)  {
+                        $query->whereIn("departments.id");
+                     })
+                     ->first();
+
+            if (!$exists) {
+                $fail($attribute . " is invalid.");
+                return;
+            }
+
 
                 },
-
             ],
+
+
+            'month' => 'required|integer',
+            'year' => 'required|integer',
+            'payment_amount' => 'required|numeric',
+            'payment_date' => 'required|date',
+            'payslip_file' => 'present|string',
+            'payment_record_file' => 'present|array',
+
+
+
+
+
         ];
     }
 }

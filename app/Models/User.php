@@ -96,7 +96,7 @@ class User extends Authenticatable
 
     }
 
-    public function payrun_users()
+    public function payrun_user()
     {
         return $this->hasOne(PayrunUser::class, "user_id" ,'id');
     }
