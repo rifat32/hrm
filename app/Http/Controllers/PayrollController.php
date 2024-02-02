@@ -33,11 +33,11 @@ class PayrollController extends Controller
      * ),
      *
      * @OA\Parameter(
-     * name="user_id",
+     * name="user_ids",
      * in="query",
-     * description="user_id",
+     * description="user_ids",
      * required=true,
-     * example="1"
+     * example="1,2,3"
      * ),
      *
      *
@@ -156,8 +156,9 @@ class PayrollController extends Controller
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
             ])
-            ->when(!empty($request->user_id), function($query) use($request) {
-                $query->where("id",$request->user_id);
+            ->when(!empty($request->user_ids), function($query) use($request) {
+                $user_ids = explode(',', $request->user_ids);
+                $query->whereIn("users.id",$user_ids);
             })
 
 
