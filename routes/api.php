@@ -48,6 +48,7 @@ use App\Http\Controllers\UserJobHistoryController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserNoteController;
 use App\Http\Controllers\UserPassportHistoryController;
+use App\Http\Controllers\UserPayslipController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\UserSponsorshipHistoryController;
 use App\Http\Controllers\UserVisaHistoryController;
@@ -272,6 +273,20 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user education history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user payslip   management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/user-payslips/single-file-upload', [UserPayslipController::class, "createPayslipFileSingle"]);
+Route::post('/v1.0/user-payslips', [UserPayslipController::class, "createUserPayslip"]);
+Route::put('/v1.0/user-payslips', [UserPayslipController::class, "updateUserPayslip"]);
+Route::get('/v1.0/user-payslips', [UserPayslipController::class, "getUserPayslips"]);
+Route::get('/v1.0/user-payslips/{id}', [UserPayslipController::class, "getUserPayslipById"]);
+Route::delete('/v1.0/user-payslips/{ids}', [UserPayslipController::class, "deleteUserPayslipsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user payslip history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

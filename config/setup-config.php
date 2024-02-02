@@ -237,6 +237,11 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+                "employee_payslip_create",
+                "employee_payslip_update",
+                "employee_payslip_view",
+                "employee_payslip_delete",
+
                 "employee_note_create",
                 "employee_note_update",
                 "employee_note_view",
@@ -443,6 +448,11 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+                "employee_payslip_create",
+                "employee_payslip_update",
+                "employee_payslip_view",
+                "employee_payslip_delete",
+
                 "employee_note_create",
                 "employee_note_update",
                 "employee_note_view",
@@ -635,6 +645,11 @@ return [
                 "employee_education_history_update",
                 "employee_education_history_view",
                 "employee_education_history_delete",
+
+                "employee_payslip_create",
+                "employee_payslip_update",
+                "employee_payslip_view",
+                "employee_payslip_delete",
 
                 "employee_note_create",
                 "employee_note_update",
@@ -862,6 +877,11 @@ return [
         "employee_education_history_update",
         "employee_education_history_view",
         "employee_education_history_delete",
+
+        "employee_payslip_create",
+        "employee_payslip_update",
+        "employee_payslip_view",
+        "employee_payslip_delete",
 
         "employee_note_create",
         "employee_note_update",
@@ -1106,6 +1126,12 @@ return [
         "employee_education_history_update" => "",
         "employee_education_history_view" => "",
         "employee_education_history_delete" => "",
+
+
+        "employee_payslip_create" => "",
+        "employee_payslip_update" => "",
+        "employee_payslip_view" => "",
+        "employee_payslip_delete" => "",
 
         "employee_note_create" => "",
         "employee_note_update" => "",
@@ -1371,6 +1397,14 @@ return [
         "employee_education_history_view"  => "view",
         "employee_education_history_delete"  => "delete",
 
+        "employee_payslip_create" => "create",
+        "employee_payslip_update"  => "update",
+        "employee_payslip_view"  => "view",
+        "employee_payslip_delete"  => "delete",
+
+
+
+
         "employee_address_history_create" => "create",
         "employee_address_history_update"  => "update",
         "employee_address_history_view"  => "view",
@@ -1576,7 +1610,7 @@ return [
 
         "candidate_create" => "create",
         "candidate_update" => "update",
-     
+
         "candidate_view" => "view",
         "candidate_delete" => "delete",
 
@@ -1680,6 +1714,19 @@ return [
 
             ],
         ],
+
+
+        [
+            "header" => "employee_payslip",
+            "permissions" => [
+                "employee_payslip_create",
+                "employee_payslip_update",
+                "employee_payslip_view",
+                "employee_payslip_delete",
+            ],
+        ],
+
+
 
         [
             "header" => "employee_notes",
@@ -2197,6 +2244,8 @@ return [
     "user_image_location" => "user_image",
 
     "user_files_location" => "user_files",
+    "payslip_files_location" => "payslip_files",
+
 
     "user_assets_location" => "user_assets",
 
