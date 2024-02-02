@@ -1155,7 +1155,8 @@ class DashboardManagementController extends Controller
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
-
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('users.created_at', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
         $data["this_week_data_count"] = clone $data_query;
         $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
@@ -1554,6 +1555,9 @@ class DashboardManagementController extends Controller
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
@@ -1647,6 +1651,9 @@ class DashboardManagementController extends Controller
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
+        $data["yesterday_data_count"] = clone $data_query;
+$data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('passport_expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
@@ -1700,6 +1707,9 @@ class DashboardManagementController extends Controller
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]->whereBetween('visa_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('visa_expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
@@ -1752,6 +1762,9 @@ class DashboardManagementController extends Controller
 
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
         $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
