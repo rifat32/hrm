@@ -32,6 +32,16 @@ class PayrollController extends Controller
      * example="1"
      * ),
      *
+     * @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     *
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -134,17 +144,29 @@ class PayrollController extends Controller
             ])
             ->first();
 
+            if(!$payrun) {
+                $error = [ "message" => "The given data was invalid.",
+                "errors" => ["payrun_id"=>["The payrun_id field is required."]]
+                ];
+                    throw new Exception(json_encode($error),422);
+             }
+
 
             $employees = User::where([
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
             ])
+            ->when(!empty($request->user_id), function($query) use($request) {
+                $query->where("id",$request->user_id);
+            })
+
+
                 ->get();
 
 
-           $peocessed_employees =  $this->process_payrun($payrun,$employees,today());
+           $processed_employees =  $this->process_payrun($payrun,$employees,today());
 
-            return response()->json($peocessed_employees);
+            return response()->json($processed_employees);
 
 
         } catch (Exception $e) {
