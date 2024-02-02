@@ -308,7 +308,6 @@ class JobTypeController extends Controller
             $should_update = 0;
             $should_disable = 0;
             if (empty(auth()->user()->business_id)) {
-
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($job_type->business_id != NULL || $job_type->is_default != 1)) {
                         $this->storeError(
