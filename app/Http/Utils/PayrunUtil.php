@@ -13,15 +13,16 @@ use App\Models\Payrun;
 use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 trait PayrunUtil
 {
     // this function do all the task and returns transaction id or -1
-    public function process_payrun($payrun,$end_date,$generate_payroll=false)
+    public function process_payrun($payrun,$employees,$end_date,$generate_payroll=false)
     {
         if (!$payrun->business_id) {
-            return;
+            return false;
         }
         $start_date = $payrun->start_date;
         // $end_date = $payrun->end_date;
@@ -38,7 +39,7 @@ trait PayrunUtil
                 break;
         }
         if (!$start_date || !$end_date) {
-            return; // Skip to the next iteration
+            return false; // Skip to the next iteration
         }
 
         // Convert end_date to Carbon instance
@@ -46,306 +47,316 @@ trait PayrunUtil
 
         // Check if end_date is today
         if (!$end_date->isToday()) {
-            return; // Skip to the next iteration
+            return false; // Skip to the next iteration
+        }
+            $employees->each(function($employee) use($payrun, $generate_payroll,$start_date){
+
+                $employee->payroll = $this->generate_payroll($payrun,$employee, $start_date,$generate_payroll);
+
+                return$employee;
+
+
+            });
+
+            return $employees;
+
+    }
+
+    public function generate_payroll($payrun,$employee, $start_date,$generate_payroll) {
+
+
+        $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
+            $query->where('users.id', $employee->id);
+        })->first();
+
+        if (!$work_shift) {
+           return [
+            "message" => "no work shift found for this employee"
+           ];
         }
 
+        if (!$work_shift->is_active) {
+            return [
+                "message" => "work shift is not active for this employee"
+               ];
+        }
+        $work_shift_details = $work_shift->details()->get()->keyBy('day');
 
 
-        $employees = User::where([
-            "business_id" => $payrun->business_id,
-            "is_active" => 1
-        ])
-            ->get();
+        $all_parent_department_ids = [];
+        $assigned_departments = Department::whereHas("users", function ($query) use ($employee) {
+            $query->where("users.id", $employee->id);
+        })->get();
+        foreach ($assigned_departments as $assigned_department) {
+            $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+        }
+        $salary_per_annum = $employee->salary_per_annum; // in euros
+        $weekly_contractual_hours = $employee->weekly_contractual_hours;
+        $weeks_per_year = 52;
+        $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
+        $overtime_salary = $employee->overtime_rate ? $employee->overtime_rate : $hourly_salary;
 
-        foreach ($employees as $employee) {
-            $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
-                $query->where('users.id', $employee->id);
-            })->first();
-
-            if (!$work_shift) {
-               continue;
-            }
-
-            if (!$work_shift->is_active) {
-                continue;
-            }
-            $work_shift_details = $work_shift->details()->get()->keyBy('day');
+        $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
 
 
-            $all_parent_department_ids = [];
-            $assigned_departments = Department::whereHas("users", function ($query) use ($employee) {
-                $query->where("users.id", $employee->id);
-            })->get();
-            foreach ($assigned_departments as $assigned_department) {
-                $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-            }
-            $salary_per_annum = $employee->salary_per_annum; // in euros
-            $weekly_contractual_hours = $employee->weekly_contractual_hours;
-            $weeks_per_year = 52;
-            $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
-            $overtime_salary = $employee->overtime_rate ? $employee->overtime_rate : $hourly_salary;
+        $attendance_arrears = Attendance::whereDoesntHave("payroll_attendance")
+        ->where('attendances.user_id', $employee->id)
 
-            $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+        ->where(function ($query) use ($start_date) {
+            $query->where(function ($query) use ($start_date) {
+                $query->whereNotIn("attendances.status", ["approved"])
+                    ->where('attendances.in_date', '<=', today()->endOfDay())
+                    ->where('attendances.in_date', '>=', $start_date);
+            })
+                ->orWhere(function ($query) use ($start_date) {
+                    $query->whereDoesntHave("arrear")
+                        ->where('attendances.in_date', '<=', $start_date);
+                });
+        })
+        ->get();
+
+        $leave_arrears = LeaveRecord::whereDoesntHave("payroll_leave_record")
+        ->whereHas('leave',    function ($query) use ($employee) {
+            $query->where("leaves.user_id",  $employee->id);
+        })
+
+        ->where(function ($query) use ($start_date) {
+            $query->where(function ($query) use ($start_date) {
+                $query
+                    ->whereHas('leave',    function ($query) {
+                        $query->whereNotIn("leaves.status", ["approved"]);
+                    })
+                    ->where('leave_records.date', '<=', today()->endOfDay())
+                    ->where('leave_records.date', '>=', $start_date);
+            })
+                ->orWhere(function ($query) use ($start_date) {
+                    $query->whereDoesntHave("arrear")
+                        ->where('leave_records.date', '<=', $start_date);
+                });
+        })
+        ->get();
 
 
-            $attendance_arrears = Attendance::whereDoesntHave("payroll_attendance")
+        $approved_attendances = Attendance::whereDoesntHave("payroll_attendance")
             ->where('attendances.user_id', $employee->id)
-
             ->where(function ($query) use ($start_date) {
                 $query->where(function ($query) use ($start_date) {
-                    $query->whereNotIn("attendances.status", ["approved"])
+                    $query
+                        ->where("attendances.status", "approved")
                         ->where('attendances.in_date', '<=', today()->endOfDay())
                         ->where('attendances.in_date', '>=', $start_date);
                 })
-                    ->orWhere(function ($query) use ($start_date) {
-                        $query->whereDoesntHave("arrear")
-                            ->where('attendances.in_date', '<=', $start_date);
+                    ->orWhere(function ($query) {
+                        $query->whereHas("arrear", function ($query) {
+                            $query->where("attendance_arrears.status", "approved");
+                        });
                     });
             })
             ->get();
 
-            $leave_arrears = LeaveRecord::whereDoesntHave("payroll_leave_record")
+
+
+        $approved_leave_records = LeaveRecord::whereDoesntHave("payroll_leave_record")
             ->whereHas('leave',    function ($query) use ($employee) {
                 $query->where("leaves.user_id",  $employee->id);
             })
-
             ->where(function ($query) use ($start_date) {
                 $query->where(function ($query) use ($start_date) {
                     $query
                         ->whereHas('leave',    function ($query) {
-                            $query->whereNotIn("leaves.status", ["approved"]);
+                            $query
+                                ->where("leaves.status", "approved");
                         })
                         ->where('leave_records.date', '<=', today()->endOfDay())
                         ->where('leave_records.date', '>=', $start_date);
                 })
-                    ->orWhere(function ($query) use ($start_date) {
-                        $query->whereDoesntHave("arrear")
-                            ->where('leave_records.date', '<=', $start_date);
+                    ->orWhere(function ($query) {
+                        $query->whereHas("arrear", function ($query) {
+                            $query->where("leave_record_arrears.status", "approved");
+                        });
                     });
             })
             ->get();
 
 
-            $approved_attendances = Attendance::whereDoesntHave("payroll_attendance")
-                ->where('attendances.user_id', $employee->id)
-                ->where(function ($query) use ($start_date) {
-                    $query->where(function ($query) use ($start_date) {
-                        $query
-                            ->where("attendances.status", "approved")
-                            ->where('attendances.in_date', '<=', today()->endOfDay())
-                            ->where('attendances.in_date', '>=', $start_date);
-                    })
-                        ->orWhere(function ($query) {
-                            $query->whereHas("arrear", function ($query) {
-                                $query->where("attendance_arrears.status", "approved");
-                            });
-                        });
-                })
-                ->get();
 
 
 
-            $approved_leave_records = LeaveRecord::whereDoesntHave("payroll_leave_record")
-                ->whereHas('leave',    function ($query) use ($employee) {
-                    $query->where("leaves.user_id",  $employee->id);
-                })
-                ->where(function ($query) use ($start_date) {
-                    $query->where(function ($query) use ($start_date) {
-                        $query
-                            ->whereHas('leave',    function ($query) {
-                                $query
-                                    ->where("leaves.status", "approved");
-                            })
-                            ->where('leave_records.date', '<=', today()->endOfDay())
-                            ->where('leave_records.date', '>=', $start_date);
-                    })
-                        ->orWhere(function ($query) {
-                            $query->whereHas("arrear", function ($query) {
-                                $query->where("leave_record_arrears.status", "approved");
-                            });
-                        });
-                })
-                ->get();
-
-
-
-
-
-            $holidays = Holiday::where([
-                "business_id" => auth()->user()->business_id
+        $holidays = Holiday::where([
+            "business_id" => auth()->user()->business_id
+        ])
+            ->where('holidays.end_date', '<=', today()->endOfDay())
+            ->where('holidays.end_date', '>=', $start_date)
+            ->where([
+                "is_active" => 1
             ])
-                ->where('holidays.end_date', '<=', today()->endOfDay())
-                ->where('holidays.end_date', '>=', $start_date)
-                ->where([
-                    "is_active" => 1
-                ])
 
-                ->where(function ($query) use ($employee, $all_parent_department_ids) {
-                    $query->whereHas("users", function ($query) use ($employee) {
-                        $query->where([
-                            "users.id" => $employee->id
-                        ]);
-                    })
-                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                            $query->whereIn("departments.id", $all_parent_department_ids);
-                        })
-
-                        ->orWhere(function ($query) {
-                            $query->whereDoesntHave("users")
-                                ->whereDoesntHave("departments");
-                        });
+            ->where(function ($query) use ($employee, $all_parent_department_ids) {
+                $query->whereHas("users", function ($query) use ($employee) {
+                    $query->where([
+                        "users.id" => $employee->id
+                    ]);
                 })
+                    ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                        $query->whereIn("departments.id", $all_parent_department_ids);
+                    })
 
-                ->get();
-
-
-            $total_paid_hours = 0;
-            $total_balance_hours = 0;
-
-
-            $payroll_attendances_data = collect();
-            $payroll_leave_records_data = collect();
-            $payroll_holidays_data = collect();
-
-            $approved_attendances->each(function ($approved_attendance) use (&$total_paid_hours, &$total_balance_hours, $work_shift_details, $approved_leave_records, $holidays, &$payroll_attendances_data) {
-                $payroll_attendances_data->push(["attendances" => $approved_attendance->id]);
-
-
-                $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
-                $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
-                $work_shift_detail = $work_shift_details->get($day_number);
-                $is_weekend = 1;
-                $capacity_hours = 0;
-                if ($work_shift_detail) {
-                    $is_weekend = $work_shift_detail->is_weekend;
-                    $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
-                    $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
-                    $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-                }
-
-                $leave_record = $approved_leave_records->first(function ($leave_record) use ($attendance_in_date) {
-                    $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
-                    return $attendance_in_date == $leave_date;
-                });
-                $holiday = $holidays->first(function ($holiday) use ($attendance_in_date) {
-                    $start_date = Carbon::parse($holiday->start_date);
-                    $end_date = Carbon::parse($holiday->end_date);
-                    $in_date = Carbon::parse($attendance_in_date);
-
-                    // Check if $in_date is within the range of start_date and end_date
-                    return $in_date->between($start_date, $end_date, true);
-                });
-
-                if ($approved_attendance->total_paid_hours > 0) {
-                    $total_attendance_hours = $approved_attendance->total_paid_hours;
-                    if ($leave_record || $holiday || $is_weekend) {
-                        $result_balance_hours = $total_attendance_hours;
-                    } elseif ($approved_attendance->work_hours_delta > 0) {
-                        $result_balance_hours = $approved_attendance->work_hours_delta;
-                    }
-                    $total_paid_hours += $total_attendance_hours;
-                    $total_balance_hours += $result_balance_hours;
-                }
-            });
-
-
-
-
-            $approved_leave_records->each(function ($approved_leave_record) use (&$total_paid_hours, &$payroll_leave_records_data) {
-                if ($approved_leave_record->leave->leave_type->type == "paid") {
-                    $payroll_leave_records_data->push(["leave_record_id" => $approved_leave_record->id]);
-                    $total_paid_hours += $approved_leave_record->leave_hours;
-                }
-            });
-
-
-            $date_range = collect();
-
-            $holidays->each(function ($holiday) use (&$date_range, $payroll_holidays_data) {
-                $start_date = Carbon::parse($holiday->start_date);
-                $end_date = Carbon::parse($holiday->end_date);
-
-                while ($start_date->lte($end_date)) {
-                    $current_date = $start_date->format("Y-m-d");
-                    // Check if the date is not already in the collection before adding
-                    if (!$date_range->contains($current_date)) {
-                        $payroll_holidays_data->push(["holiday_id" => $holiday->id]);
-                        $date_range->push($current_date);
-                    }
-
-                    $start_date->addDay();
-                }
-            });
-
-            $total_paid_hours += $date_range->count() *  $holiday_hours;
-
-
-
-            $payroll_data =  [
-                'user_id' => $employee->id,
-                "payrun_id" => $payrun->id,
-                'regular_hours' => $total_paid_hours - $total_balance_hours,
-                'overtime_hours' => $total_balance_hours,
-                'regular_hours_salary' => ($total_paid_hours - $total_balance_hours) * $hourly_salary,
-                'overtime_hours_salary' => $total_balance_hours * $overtime_salary,
-                'status' => "pending_approval",
-                'is_active' => 1,
-                'business_id' => $employee->business_id,
-            ];
-
-
-
-
-            if($generate_payroll) {
-
-
-                DB::transaction(function () use($payroll_data,$payroll_holidays_data,$payroll_leave_records_data,$payroll_attendances_data,$attendance_arrears,$leave_arrears) {
-                    $payroll = Payroll::create($payroll_data);
-                    $payroll->payroll_holidays()->create($payroll_holidays_data);
-                    $payroll->payroll_leave_records()->create($payroll_leave_records_data);
-                    $payroll->payroll_attendances()->create($payroll_attendances_data);
-
-
-
-                    $attendance_arrears->each(function($attendance_arrear){
-                        AttendanceArrear::create([
-                            "status" => "pending_approval",
-                            "attendance_id" => $attendance_arrear->id
-                        ]);
+                    ->orWhere(function ($query) {
+                        $query->whereDoesntHave("users")
+                            ->whereDoesntHave("departments");
                     });
+            })
 
-                    $leave_arrears->each(function($leave_arrear){
-                        LeaveRecordArrear::create([
-                            "status" => "pending_approval",
-                            "leave_record_id" => $leave_arrear->id
-                        ]);
-                    });
+            ->get();
 
 
+        $total_paid_hours = 0;
+        $total_balance_hours = 0;
 
 
-                });
+        $payroll_attendances_data = collect();
+        $payroll_leave_records_data = collect();
+        $payroll_holidays_data = collect();
 
+        $approved_attendances->each(function ($approved_attendance) use (&$total_paid_hours, &$total_balance_hours, $work_shift_details, $approved_leave_records, $holidays, &$payroll_attendances_data) {
+            $payroll_attendances_data->push(["attendances" => $approved_attendance->id]);
+
+
+            $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
+            $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
+            $work_shift_detail = $work_shift_details->get($day_number);
+            $is_weekend = 1;
+            $capacity_hours = 0;
+            if ($work_shift_detail) {
+                $is_weekend = $work_shift_detail->is_weekend;
+                $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
+                $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
+                $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
             }
 
+            $leave_record = $approved_leave_records->first(function ($leave_record) use ($attendance_in_date) {
+                $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
+                return $attendance_in_date == $leave_date;
+            });
+            $holiday = $holidays->first(function ($holiday) use ($attendance_in_date) {
+                $start_date = Carbon::parse($holiday->start_date);
+                $end_date = Carbon::parse($holiday->end_date);
+                $in_date = Carbon::parse($attendance_in_date);
 
-           return $payroll_data;
+                // Check if $in_date is within the range of start_date and end_date
+                return $in_date->between($start_date, $end_date, true);
+            });
+
+            if ($approved_attendance->total_paid_hours > 0) {
+                $total_attendance_hours = $approved_attendance->total_paid_hours;
+                if ($leave_record || $holiday || $is_weekend) {
+                    $result_balance_hours = $total_attendance_hours;
+                } elseif ($approved_attendance->work_hours_delta > 0) {
+                    $result_balance_hours = $approved_attendance->work_hours_delta;
+                }
+                $total_paid_hours += $total_attendance_hours;
+                $total_balance_hours += $result_balance_hours;
+            }
+        });
+
+
+
+
+        $approved_leave_records->each(function ($approved_leave_record) use (&$total_paid_hours, &$payroll_leave_records_data) {
+            if ($approved_leave_record->leave->leave_type->type == "paid") {
+                $payroll_leave_records_data->push(["leave_record_id" => $approved_leave_record->id]);
+                $total_paid_hours += $approved_leave_record->leave_hours;
+            }
+        });
+
+
+        $date_range = collect();
+
+        $holidays->each(function ($holiday) use (&$date_range, $payroll_holidays_data) {
+            $start_date = Carbon::parse($holiday->start_date);
+            $end_date = Carbon::parse($holiday->end_date);
+
+            while ($start_date->lte($end_date)) {
+                $current_date = $start_date->format("Y-m-d");
+                // Check if the date is not already in the collection before adding
+                if (!$date_range->contains($current_date)) {
+                    $payroll_holidays_data->push(["holiday_id" => $holiday->id]);
+                    $date_range->push($current_date);
+                }
+
+                $start_date->addDay();
+            }
+        });
+
+        $total_paid_hours += $date_range->count() *  $holiday_hours;
+
+
+
+        $payroll_data =  [
+            'user_id' => $employee->id,
+            "payrun_id" => $payrun->id,
+            'regular_hours' => $total_paid_hours - $total_balance_hours,
+            'overtime_hours' => $total_balance_hours,
+            'regular_hours_salary' => ($total_paid_hours - $total_balance_hours) * $hourly_salary,
+            'overtime_hours_salary' => $total_balance_hours * $overtime_salary,
+            'status' => "pending_approval",
+            'is_active' => 1,
+            'business_id' => $employee->business_id,
+        ];
+
+
+
+
+        if($generate_payroll) {
+
+            try{
+             DB::transaction(function () use($payroll_data,$payroll_holidays_data,$payroll_leave_records_data,$payroll_attendances_data,$attendance_arrears,$leave_arrears) {
+                $payroll = Payroll::create($payroll_data);
+                $payroll->payroll_holidays()->create($payroll_holidays_data);
+                $payroll->payroll_leave_records()->create($payroll_leave_records_data);
+                $payroll->payroll_attendances()->create($payroll_attendances_data);
+
+
+
+                $attendance_arrears->each(function($attendance_arrear){
+                    AttendanceArrear::create([
+                        "status" => "pending_approval",
+                        "attendance_id" => $attendance_arrear->id
+                    ]);
+                });
+
+                $leave_arrears->each(function($leave_arrear){
+                    LeaveRecordArrear::create([
+                        "status" => "pending_approval",
+                        "leave_record_id" => $leave_arrear->id
+                    ]);
+                });
 
 
 
 
 
 
+            });
 
+        } catch (Exception $e) {
 
-
-
-
-
-
-
+            $this->storeError($e, 422, $e->getLine(), $e->getFile());
+           return [
+            "message" => "something went wrong creating payroll"
+           ];
+        }
 
         }
 
+
+       return $payroll_data;
+
+
+
     }
+
+
+
+
 }

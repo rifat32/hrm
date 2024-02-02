@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\PayrunUtil;
 use App\Models\Attendance;
 use App\Models\AttendanceArrear;
@@ -14,6 +15,7 @@ use App\Models\Payrun;
 use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,7 +27,7 @@ use Illuminate\Support\Facades\Log;
 
 class PayrunJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, PayrunUtil;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, PayrunUtil,ErrorUtil;
 
     /**
      * Create a new job instance.
@@ -53,14 +55,27 @@ class PayrunJob implements ShouldQueue
 
 
 
+            try {
+                // Your job logic here
 
 
 
             $payruns = Payrun::where('is_active', true)->get();
 
-            $payruns->each(function ($payrun) {
-                $this->process_payrun($payrun,$payrun->end_date,true);
+
+            $payruns->each(function ($payrun)  {
+                $employees = User::where([
+                    "business_id" => $payrun->business_id,
+                    "is_active" => 1
+                ])
+                    ->get();
+                $this->process_payrun($payrun,$employees,$payrun->end_date,true);
             });
+
+        } catch (Exception $e) {
+            // Log the exception to the database
+            $this->storeError($e, 422, $e->getLine(), $e->getFile());
+        }
 
             // foreach ($payruns as $payrun) {
 
