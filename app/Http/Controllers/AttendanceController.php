@@ -13,10 +13,14 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
+use App\Models\AttendanceArrear;
 use App\Models\AttendanceHistory;
 use App\Models\Department;
+use App\Models\EmployeeWorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\LeaveRecord;
+use App\Models\Payroll;
+use App\Models\PayrollAttendance;
 use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\User;
@@ -238,6 +242,32 @@ class AttendanceController extends Controller
                     }
                 }
 
+             $leave_record = LeaveRecord::
+                    whereHas('leave',    function ($query) use ($request_data)  {
+                        $query->whereIn("leaves.user_id",  $request_data["user_id"])
+                        ->where("leaves.status", "approved");
+                    })
+                    ->where('date', '>=', $request_data["in_date"] . ' 00:00:00')
+                    ->where('date', '<=', ($request_data["in_date"] . ' 23:59:59'))
+                    ->first();
+
+
+                    if ($leave_record && !auth()->user()->hasRole("business_owner")) {
+                            $this->storeError(
+                                ("there is a leave on date" . $request_data["in_date"]),
+                                400,
+                                "front end error",
+                                "front end error"
+                            );
+                            $error =  [
+                                "message" => ("there is a leave on date" . $request_data["in_date"]),
+                            ];
+                            throw new Exception(json_encode($error), 400);
+
+                    }
+
+
+
 
 
 
@@ -302,15 +332,43 @@ class AttendanceController extends Controller
 
 
 
+                   $overtime_start_time = NULL;
+                   $overtime_end_time = NULL;
 
+                    if ($work_shift_details->is_weekend || $holiday) {
+                        $overtime_start_time = $request_data["in_time"];
+                        $overtime_end_time = $request_data["out_time"];
+                        $result_balance_hours = $total_paid_hours;
 
+                    } else if ($leave_record) {
+                        $attendance_in_time = Carbon::parse($request_data["in_time"]);
+                        $attendance_out_time = Carbon::parse($request_data["out_time"]);
 
+                        $leave_start_time = Carbon::parse($leave_record->start_time);
+                        $leave_end_time = Carbon::parse($leave_record->start_time);
 
-                    if ($work_hours_delta > 0) {
-                        $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                    } else {
-                        $regular_work_hours = $total_paid_hours;
+                        $balance_start_time = $attendance_in_time->max($leave_start_time);
+                        $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                        // Check if there is any overlap
+                        if ($balance_start_time < $balance_end_time) {
+                            $overtime_start_time = $request_data["in_time"];
+                            $overtime_end_time = $request_data["out_time"];
+
+                            $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
+
+                        }
+                    } else if ($work_hours_delta > 0) {
+                        $result_balance_hours = $work_hours_delta;
                     }
+
+                 $regular_work_hours =  $total_paid_hours - $result_balance_hours;
+
+                    // if ($work_hours_delta > 0) {
+                    //     $regular_work_hours =  $total_paid_hours - $work_hours_delta;
+                    // } else {
+                    //     $regular_work_hours = $total_paid_hours;
+                    // }
 
 
 
@@ -319,6 +377,20 @@ class AttendanceController extends Controller
                     $request_data["work_hours_delta"] = $work_hours_delta;
                     $request_data["total_paid_hours"] = $total_paid_hours;
                     $request_data["regular_work_hours"] = $regular_work_hours;
+
+
+
+                    $request_data["work_shift_start_at"] = $work_shift_start_at;
+                    $request_data["work_shift_end_at"] = $work_shift_end_at;
+                    $request_data["holiday_id"] = $holiday?$holiday->id:NULL;
+                    $request_data["leave_id"] = $leave_record?$holiday->id:NULL;
+                    $request_data["is_weekend"] = $work_shift_details->is_weekend;
+                    $request_data["overtime_start_time"] = $overtime_start_time;
+                    $request_data["overtime_end_time"] = $overtime_end_time;
+
+
+
+
                 }
 
 
@@ -1021,7 +1093,11 @@ class AttendanceController extends Controller
                 $attendance_history_data['attendance_created_at'] = $attendance->created_at;
                 $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
 
+
                 $attendance_history = AttendanceHistory::create($attendance_history_data);
+
+
+
 
                 return response($attendance, 201);
             });
@@ -1029,6 +1105,264 @@ class AttendanceController extends Controller
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
+    }
+
+    public function adjust_payroll_on_attendance_update($attendance) {
+
+
+
+        $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
+
+             $query->where("payroll_attendances.attendance_id",$attendance->id);
+
+        })->first();
+
+        if($attendance->status != "approved") {
+            PayrollAttendance::where([
+                "attendance_id" => $attendance->id
+            ])
+            ->delete();
+            AttendanceArrear:: updateOrCreate(
+                [
+                    "attendance_id" => $attendance->id,
+                ],
+                [
+                    "status" => "pending_approval",
+                    "attendance_id" => $attendance->id
+                ]
+            );
+        }
+
+
+
+        $payroll_holidays = $payroll->payroll_holidays;
+        $payroll_leave_records = $payroll->payroll_leave_records;
+
+
+        $attendance_in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
+        $day_number = Carbon::parse($attendance)->dayOfWeek;
+
+        $work_shift = EmployeeWorkShiftHistory::whereHas('users',function($query) use($attendance) {
+            $query->where('employee_user_work_shift_histories.user_id', $attendance->user_id);
+       })
+       ->where(function($query) use($attendance_in_date) {
+        $query->where(function($query) use($attendance_in_date)  {
+            $query->where("from_date", "<=",  $attendance_in_date)
+            ->where("to_date", ">", $attendance_in_date);
+        })
+        ->orWhere(function($query) use($attendance_in_date) {
+            $query->where("from_date", "<=",  $attendance_in_date)
+            ->whereNull("to_date");
+        });
+       })
+           ->first();
+
+
+           if(!$work_shift) {
+            return [
+                "success" => "false",
+                "status" => "404",
+                "message" => "no work shift found in the history."
+            ];
+           }
+
+        $work_shift_detail = $work_shift->work_shift_details()->where([
+            "day" => $day_number
+        ])->first();
+        $is_weekend = 1;
+        // $capacity_hours = 0;
+        if ($work_shift_detail) {
+            $is_weekend = $work_shift_detail->is_weekend;
+            // $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
+            // $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
+            // $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+        }
+
+        $leave_record = $payroll_leave_records->first(function ($leave_record) use ($attendance_in_date) {
+            $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
+            return $attendance_in_date == $leave_date;
+        });
+
+        $holiday = $payroll_holidays->first(function ($holiday) use ($attendance_in_date) {
+            $holiday_date = Carbon::parse($holiday->date);
+            $attendance_in_date = Carbon::parse($attendance_in_date);
+            return $attendance_in_date->eq($holiday_date);
+        });
+
+        if ($attendance->total_paid_hours > 0) {
+            $total_attendance_hours = $attendance->total_paid_hours;
+            $holiday_id = 0;
+            $leave_record_id = 0;
+            $overtime_start_time = NULL;
+            $overtime_end_time = NULL;
+            $result_balance_hours = 0;
+            if ($is_weekend  || $holiday) {
+                $overtime_start_time = $attendance->in_time;
+                $overtime_end_time = $attendance->out_time;
+                $result_balance_hours = $total_attendance_hours;
+                $holiday_id = $holiday->holiday_id;
+            } else if ($leave_record) {
+                $attendance_in_time = Carbon::parse($attendance->in_time);
+                $attendance_out_time = Carbon::parse($attendance->out_time);
+
+                $leave_start_time = Carbon::parse($leave_record->start_time);
+                $leave_end_time = Carbon::parse($leave_record->start_time);
+
+                $balance_start_time = $attendance_in_time->max($leave_start_time);
+                $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                // Check if there is any overlap
+                if ($balance_start_time < $balance_end_time) {
+                    $overtime_start_time = $attendance->in_time;
+                    $overtime_end_time = $attendance->out_time;
+
+                    $leave_record_id =  $leave_record->id;
+                    $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
+
+                }
+            } else if ($attendance->work_hours_delta > 0) {
+                $result_balance_hours = $attendance->work_hours_delta;
+            }
+
+            PayrollAttendance:: updateOrCreate(
+                [
+                    "attendance_id" => $attendance->id,
+                ],
+                [
+                    "attendances" => $attendance->id, "
+                    is_weekend" => $is_weekend,
+            "holiday_id" =>  $holiday_id,
+            "leave_record_id" => $leave_record_id,
+            "overtime_start_time" => $overtime_start_time,
+             "overtime_end_time" =>$overtime_end_time,
+             "overtime_hours" => $result_balance_hours
+            ]
+            );
+
+
+            AttendanceArrear:: updateOrCreate(
+                [
+                    "attendance_id" => $attendance->id,
+                ],
+                [
+                    "status" => "approved",
+                    "attendance_id" => $attendance->id
+                ]
+            );
+
+
+            $total_regular_attendance_hours = 0;
+            $total_overtime_attendance_hours = 0;
+            $payroll_attendances = $payroll->payroll_attendances;
+            $payroll_attendances->each(function ($approved_attendance) use ($work_shift_detail, $payroll_leave_records, $payroll_holidays, &$total_overtime_attendance_hours, &$total_regular_attendance_hours) {
+
+                $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
+                $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
+
+
+                $is_weekend = 1;
+                // $capacity_hours = 0;
+                if ($work_shift_detail) {
+                    $is_weekend = $work_shift_detail->is_weekend;
+                    // $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
+                    // $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
+                    // $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+                }
+
+                $leave_record = $payroll_leave_records->first(function ($leave_record) use ($attendance_in_date) {
+                    $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
+                    return $attendance_in_date == $leave_date;
+                });
+
+                $holiday = $payroll_holidays->first(function ($holiday) use ($attendance_in_date) {
+                    $holiday_date = Carbon::parse($holiday->date);
+                    $attendance_in_date = Carbon::parse($attendance_in_date);
+                    return $attendance_in_date->eq($holiday_date);
+                });
+
+                if ($approved_attendance->total_paid_hours > 0) {
+                    $total_attendance_hours = $approved_attendance->total_paid_hours;
+                    $holiday_id = 0;
+                    $leave_record_id = 0;
+                    $overtime_start_time = NULL;
+                    $overtime_end_time = NULL;
+                    $result_balance_hours = 0;
+                    if ($is_weekend  || $holiday) {
+                        $overtime_start_time = $approved_attendance->in_time;
+                        $overtime_end_time = $approved_attendance->out_time;
+                        $result_balance_hours = $total_attendance_hours;
+                        $holiday_id = $holiday->holiday_id;
+                    } else if ($leave_record) {
+                        $attendance_in_time = Carbon::parse($approved_attendance->in_time);
+                        $attendance_out_time = Carbon::parse($approved_attendance->out_time);
+
+                        $leave_start_time = Carbon::parse($leave_record->start_time);
+                        $leave_end_time = Carbon::parse($leave_record->start_time);
+
+                        $balance_start_time = $attendance_in_time->max($leave_start_time);
+                        $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                        // Check if there is any overlap
+                        if ($balance_start_time < $balance_end_time) {
+                            $overtime_start_time = $approved_attendance->in_time;
+                            $overtime_end_time = $approved_attendance->out_time;
+
+                            $leave_record_id =  $leave_record->id;
+                            $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
+
+                        }
+                    } else if ($approved_attendance->work_hours_delta > 0) {
+                        $result_balance_hours = $approved_attendance->work_hours_delta;
+                    }
+
+                    $total_overtime_attendance_hours += $result_balance_hours;
+                    $total_regular_attendance_hours += $total_attendance_hours - $result_balance_hours;
+
+                }
+
+            });
+
+
+
+            $payroll->total_regular_attendance_hours = $total_regular_attendance_hours;
+            $payroll->total_overtime_attendance_hours = $total_overtime_attendance_hours;
+
+
+            $payroll->regular_hours =  $payroll->total_holiday_hours +  $payroll->total_leave_hours +   $payroll->total_regular_attendance_hours;
+            $payroll->overtime_hours = $payroll->total_overtime_attendance_hours;
+
+            $payroll->regular_attendance_hours_salary = $payroll->total_regular_attendance_hours * $payroll->hourly_salary;
+            $payroll->overtime_attendance_hours_salary = $payroll->total_overtime_attendance_hours * $payroll->hourly_salary;
+
+            $payroll->regular_hours_salary = ($payroll->total_holiday_hours + $payroll->total_leave_hours +  $payroll->total_regular_attendance_hours) * $payroll->hourly_salary;
+            $payroll->overtime_hours_salary = $payroll->total_overtime_attendance_hours * $payroll->overtime_salary;
+
+
+
+
+            $payroll->save();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+
+
+
+
     }
 
     /**
@@ -1914,10 +2248,8 @@ class AttendanceController extends Controller
                 $employee_ids = $employees->pluck("id");
 
 
-                $leave_records = LeaveRecord::whereHas("leave.leave_type", function ($query)  {
-                    $query->where("setting_leave_types.type", "paid");
-                })
-                    ->whereHas('leave',    function ($query) use ($employee_ids)  {
+                $leave_records = LeaveRecord::
+                    whereHas('leave',    function ($query) use ($employee_ids)  {
                         $query->whereIn("leaves.user_id",  $employee_ids)
                         ->where("leaves.status", "approved");
                     })
@@ -2098,9 +2430,28 @@ class AttendanceController extends Controller
                                 $result_is_present = 1;
                                 $total_attendance_hours = $attendance->total_paid_hours;
 
-                                if ($leave_record || $holiday || $is_weekend) {
+                                if ( $holiday || $is_weekend) {
                                     $result_balance_hours = $total_attendance_hours;
-                                } elseif ($attendance->work_hours_delta > 0) {
+                                }
+                                else if ($leave_record){
+                                    $attendance_in_time = Carbon::parse($attendance->in_time);
+                                    $attendance_out_time = Carbon::parse($attendance->out_time);
+
+                                    $leave_start_time = Carbon::parse($leave_record->start_time);
+                                    $leave_end_time = Carbon::parse($leave_record->start_time);
+
+                                    $balance_start_time = $attendance_in_time->max($leave_start_time);
+                                    $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                                    // Check if there is any overlap
+                                    if ($balance_start_time < $balance_end_time) {
+                                        $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
+                                    }
+                                }
+
+
+
+                                elseif ($attendance->work_hours_delta > 0) {
                                     $result_balance_hours = $attendance->work_hours_delta;
                                 }
 

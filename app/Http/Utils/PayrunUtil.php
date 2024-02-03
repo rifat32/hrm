@@ -280,6 +280,7 @@ trait PayrunUtil
 
 
         $approved_attendances->each(function ($approved_attendance) use ($work_shift_details, $payroll_leave_records_data, $payroll_holidays_data, &$payroll_attendances_data, &$total_overtime_attendance_hours, &$total_regular_attendance_hours) {
+
             $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
             $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
 
@@ -306,8 +307,8 @@ trait PayrunUtil
 
             if ($approved_attendance->total_paid_hours > 0) {
                 $total_attendance_hours = $approved_attendance->total_paid_hours;
-                $holiday_id = 0;
-                $leave_record_id = 0;
+                $holiday_id = NULL;
+                $leave_record_id = NULL;
                 $overtime_start_time = NULL;
                 $overtime_end_time = NULL;
                 $result_balance_hours = 0;
@@ -352,6 +353,11 @@ trait PayrunUtil
 
 
             }
+
+
+
+
+
         });
 
 
@@ -382,6 +388,11 @@ trait PayrunUtil
 
             'regular_hours_salary' => ($total_holiday_hours + $total_leave_hours +  $total_regular_attendance_hours) * $hourly_salary,
             'overtime_hours_salary' => $total_overtime_attendance_hours * $overtime_salary,
+
+
+            "hourly_salary" => $hourly_salary,
+            "overtime_salary" => $overtime_salary,
+            "holiday_hours" => $holiday_hours,
 
 
             'status' => "pending_approval",

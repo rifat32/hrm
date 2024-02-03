@@ -23,13 +23,15 @@ class CreatePayrollAttendancesTable extends Migration
             $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('restrict');
 
 
-            $table->boolean('is_weekend');
-            $table->unsignedBigInteger('holiday_id')->nullable();
-            $table->unsignedBigInteger('leave_record_id')->nullable();
+            // $table->boolean('is_weekend');
+            // $table->unsignedBigInteger('holiday_id')->nullable();
+            // $table->unsignedBigInteger('leave_record_id')->nullable();
 
-            $table->double('overtime_start_time')->nullable();
-            $table->double('overtime_end_time')->nullable();
-            $table->double('overtime_hours')->nullable();
+            // $table->double('overtime_start_time')->nullable();
+            // $table->double('overtime_end_time')->nullable();
+            // $table->double('overtime_hours')->nullable();
+
+           
 
             $table->timestamps();
         });

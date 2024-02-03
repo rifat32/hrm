@@ -45,6 +45,16 @@ class CreateAttendanceHistoriesTable extends Migration
 
             $table->double('capacity_hours');
 
+            $table->boolean('is_weekend');
+            $table->unsignedBigInteger('holiday_id')->nullable();
+            $table->unsignedBigInteger('leave_record_id')->nullable();
+
+            $table->double('overtime_start_time')->nullable();
+            $table->double('overtime_end_time')->nullable();
+            $table->double('overtime_hours')->nullable();
+            $table->double('work_shift_start_at');
+            $table->double('work_shift_end_at');
+
             $table->enum('behavior', ['absent', 'late','regular','early']);
 
 

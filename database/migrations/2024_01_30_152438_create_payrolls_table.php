@@ -39,8 +39,9 @@ class CreatePayrollsTable extends Migration
 
 
 
-
-
+            $table->double('hourly_salary');
+            $table->double('overtime_salary');
+            $table->double('holiday_hours');
 
 
 

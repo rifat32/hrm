@@ -13,13 +13,13 @@ class PayrollAttendance extends Model
         'payroll_id',
         'attendance_id',
 
-        'is_weekend',
-        'holiday_id',
-        'leave_record_id',
+        // 'is_weekend',
+        // 'holiday_id',
+        // 'leave_record_id',
 
-        'overtime_start_time',
-        'overtime_end_time',
-        'overtime_hours',
+        // 'overtime_start_time',
+        // 'overtime_end_time',
+        // 'overtime_hours',
 
 
     ];
