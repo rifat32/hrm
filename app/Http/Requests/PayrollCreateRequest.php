@@ -89,6 +89,10 @@ class PayrollCreateRequest extends FormRequest
                 },
 
             ],
+            "start_date" => "present|date",
+            "end_date" => "present|date",
+
+
         ];
     }
 }

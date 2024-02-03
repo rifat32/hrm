@@ -106,7 +106,7 @@ class PayrollController extends Controller
 
                  $employees = User::whereIn("id",$request_data["users"])
                      ->get();
-                $processed_employees =  $this->process_payrun($payrun,$employees,today(),true);
+                $processed_employees =  $this->process_payrun($payrun,$employees,$request_data["start_date"],$request_data["end_date"],true);
 
                  return response()->json($processed_employees,201);
 
@@ -260,16 +260,35 @@ class PayrollController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
 
-            $payrun_id =  $request->payrun_id;
-            if(!$payrun_id) {
+             ;
+            if(!$request->payrun_id) {
                $error = [ "message" => "The given data was invalid.",
                "errors" => ["payrun_id"=>["The payrun_id field is required."]]
                ];
                    throw new Exception(json_encode($error),422);
             }
 
+            // if(!isset($request->start_date)) {
+            //     $error = [ "message" => "The given data was invalid.",
+            //     "errors" => ["start_date"=>["The start date field is required."]]
+            //     ];
+            //         throw new Exception(json_encode($error),422);
+            //  }
+
+            //  if(!isset($request->end_date)) {
+            //     $error = [ "message" => "The given data was invalid.",
+            //     "errors" => ["start_date"=>["The end date field is required."]]
+            //     ];
+            //         throw new Exception(json_encode($error),422);
+            //  }
+
+
+
+
+
+
             $payrun = Payrun::where([
-                "id" => $payrun_id,
+                "id" => $request->payrun_id,
                 "business_id" => auth()->user()->business_id
             ])
             ->where(function($query) use($all_manager_department_ids) {
@@ -315,7 +334,7 @@ class PayrollController extends Controller
                 ->get();
 
 
-           $processed_employees =  $this->process_payrun($payrun,$employees,today());
+           $processed_employees =  $this->process_payrun($payrun,$employees,$request->start_date,$request->end_date);
 
             return response()->json($processed_employees,200);
 

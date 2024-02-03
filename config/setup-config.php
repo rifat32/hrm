@@ -329,6 +329,13 @@ return [
                 "task_view",
                 "task_delete",
 
+                "comment_create",
+                "comment_update",
+                "comment_view",
+                "comment_delete",
+
+
+
                 "holiday_create",
                 "holiday_update",
                 "holiday_view",
@@ -538,6 +545,12 @@ return [
                 "task_view",
                 "task_delete",
 
+                "comment_create",
+                "comment_update",
+                "comment_view",
+                "comment_delete",
+
+
                 "holiday_create",
                 "holiday_update",
                 "holiday_view",
@@ -730,6 +743,12 @@ return [
                 "task_update",
                 "task_view",
                 "task_delete",
+
+                "comment_create",
+                "comment_update",
+                "comment_view",
+                "comment_delete",
+
 
                 "holiday_create",
                 "holiday_update",
@@ -993,6 +1012,12 @@ return [
         "task_view",
         "task_delete",
 
+        "comment_create",
+        "comment_update",
+        "comment_view",
+        "comment_delete",
+
+
         "holiday_create",
         "holiday_update",
         "holiday_view",
@@ -1235,6 +1260,12 @@ return [
         "task_update" => "Can update task",
         "task_view" => "Can view task",
         "task_delete" => "Can delete task",
+
+        "comment_create" => "",
+        "comment_update" => "",
+        "comment_view" => "",
+        "comment_delete" => "",
+
 
 
 
@@ -1512,8 +1543,10 @@ return [
         "task_view" => "view",
         "task_delete" => "delete",
 
-
-
+        "comment_create" => "create",
+        "comment_update" => "update",
+        "comment_view" => "view",
+        "comment_delete" => "delete",
 
 
         "holiday_create" => "create",
@@ -1967,11 +2000,20 @@ return [
                 "task_view",
                 "task_delete",
 
-
-
-
             ],
         ],
+
+        [
+            "header" => "comment",
+            "permissions" => [
+                "comment_create",
+                "comment_update",
+                "comment_view",
+                "comment_delete"
+            ],
+        ],
+
+
 
 
         [

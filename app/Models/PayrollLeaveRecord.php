@@ -12,6 +12,10 @@ class PayrollLeaveRecord extends Model
     protected $fillable = [
         'payroll_id',
         'leave_record_id',
+        'date',
+        'start_time',
+        'end_time',
+        "leave_hours",
     ];
 
     public function payroll()

@@ -12,10 +12,21 @@ class Payroll extends Model
     protected $fillable = [
         'user_id',
         "payrun_id",
+
+        'total_holiday_hours',
+        'total_leave_hours',
+        'total_regular_attendance_hours',
+        'total_overtime_attendance_hours',
         'regular_hours',
         'overtime_hours',
+        'holiday_hours_salary',
+        'leave_hours_salary',
+        'regular_attendance_hours_salary',
+        'overtime_attendance_hours_salary',
         'regular_hours_salary',
         'overtime_hours_salary',
+
+
         'status',
         'is_active',
         'business_id',

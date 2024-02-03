@@ -78,7 +78,7 @@ class PayrunJob implements ShouldQueue
                 })
 
                     ->get();
-                $this->process_payrun($payrun,$employees,$payrun->end_date,true);
+                $this->process_payrun($payrun,$employees,$payrun->start_date,$payrun->end_date,true);
             });
 
         } catch (Exception $e) {

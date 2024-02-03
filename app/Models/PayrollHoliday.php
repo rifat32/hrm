@@ -12,6 +12,8 @@ class PayrollHoliday extends Model
     protected $fillable = [
         'payroll_id',
         'holiday_id',
+        "date",
+        "hours"
     ];
 
     public function payroll()
