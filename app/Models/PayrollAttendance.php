@@ -12,6 +12,16 @@ class PayrollAttendance extends Model
     protected $fillable = [
         'payroll_id',
         'attendance_id',
+
+        'is_weekend',
+        'holiday_id',
+        'leave_record_id',
+
+        'overtime_start_time',
+        'overtime_end_time',
+        'overtime_hours',
+
+
     ];
 
     public function payroll()
