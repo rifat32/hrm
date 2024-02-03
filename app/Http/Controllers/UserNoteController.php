@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\User;
 use App\Models\UserNote;
 use Exception;
 use Illuminate\Http\Request;
@@ -93,6 +94,14 @@ class UserNoteController extends Controller
                 }
 
                 $request_data = $request->validated();
+
+
+                $commentText = $request_data["description"];
+
+                // Parse comment for mentions
+                preg_match_all('/@(\w+)/', $commentText, $mentions);
+                $mentioned_users = $mentions[1];
+                $mentioned_users_details = User::whereIn('id', $mentioned_users)->get();
 
 
 

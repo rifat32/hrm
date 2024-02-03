@@ -13,6 +13,7 @@ use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessTierController;
 use App\Http\Controllers\BusinessTimesController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmploymentStatusController;
@@ -954,6 +955,22 @@ Route::delete('/v1.0/tasks/{ids}', [TaskController::class, "deleteTasksByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// comment  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/comments', [CommentController::class, "createComment"]);
+Route::put('/v1.0/comments', [CommentController::class, "updateComment"]);
+Route::get('/v1.0/comments', [CommentController::class, "getComments"]);
+Route::get('/v1.0/comments/{id}', [CommentController::class, "getCommentById"]);
+Route::delete('/v1.0/comments/{ids}', [CommentController::class, "deleteCommentsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end comment  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
