@@ -4140,7 +4140,7 @@ class UserManagementController extends Controller
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', ])) {
                 if (strtoupper($request->response_type) == 'PDF') {
-                    $pdf = PDF::loadView('pdf.user', ["user" => $user]);
+                    $pdf = PDF::loadView('pdf.user', ["user" => $user, "request" => $request]);
                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
                 }
             } else {

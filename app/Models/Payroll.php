@@ -14,7 +14,7 @@ class Payroll extends Model
         "payrun_id",
 
         'total_holiday_hours',
-        'total_leave_hours',
+        'total_paid_leave_hours',
         'total_regular_attendance_hours',
         'total_overtime_attendance_hours',
         'regular_hours',

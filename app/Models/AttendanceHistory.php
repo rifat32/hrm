@@ -41,7 +41,7 @@ class AttendanceHistory extends Model
         "work_shift_start_at",
         "work_shift_end_at",
         "holiday_id",
-        "leave_id",
+        "leave_record_id",
         "is_weekend",
         "overtime_start_time",
         "overtime_end_time",

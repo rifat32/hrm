@@ -11,13 +11,16 @@ use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\LeaveUtil;
+use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveApproval;
 use App\Models\LeaveHistory;
 use App\Models\LeaveRecord;
+use App\Models\PayrollAttendance;
 use App\Models\Role;
 use App\Models\SettingLeave;
 use App\Models\User;
@@ -32,7 +35,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LeaveController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil, PayrunUtil;
 
     /**
      *
@@ -331,12 +334,6 @@ foreach ($assigned_departments as $assigned_department) {
                             $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
                             $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                             $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-
-
-
-
-
-
                             $leave_record_data["leave_hours"] =  $capacity_hours;
                             $leave_record_data["capacity_hours"] =  $capacity_hours;
                         $leave_record_data["start_time"] = $work_shift_details->start_at;
@@ -1455,7 +1452,7 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave->records()->delete();
 
 
-            $leave_records = $leave->records()->createMany($leave_record_data_list);
+                $leave_records = $leave->records()->createMany($leave_record_data_list);
 
                 $leave_history_data = $leave->toArray();
                 $leave_history_data['leave_id'] = $leave->id;
@@ -1469,6 +1466,107 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_record_history = $leave_records->toArray();
                 $leave_record_history["leave_id"] = $leave_history->id;
                 $leave_history->records()->createMany($leave_record_data_list);
+
+
+                foreach($leave->records as $leave_record){
+
+
+              $attendance = Attendance::where([
+                        "leave_record_id" => $leave_record->id
+                    ])
+
+               ->first();
+
+               $overtime_start_time = NULL;
+               $overtime_end_time = NULL;
+               $result_balance_hours = 0;
+               $leave_hours = 0;
+
+                if ($attendance->is_weekend || $attendance->holiday_id) {
+                    $overtime_start_time = $attendance->in_time;
+                    $overtime_end_time = $attendance->out_time;
+                    $result_balance_hours = $attendance->total_paid_hours;
+
+                } else if ($attendance->leave_record_id) {
+                    $attendance_in_time = $attendance->in_time;
+                    $attendance_out_time = $attendance->out_time;
+
+                    $leave_start_time = Carbon::parse($leave_record->start_time);
+                    $leave_end_time = Carbon::parse($leave_record->end_time);
+
+                    $balance_start_time = $attendance_in_time->max($leave_start_time);
+                    $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                    // Check if there is any overlap
+                    if ($balance_start_time < $balance_end_time) {
+                        $overtime_start_time = $attendance->in_time;
+                        $overtime_end_time = $attendance->out_time;
+                        $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
+
+
+                        $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
+                        $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
+                        $uncommon_leave_start = $leave_start_time->min($balance_start_time);
+                        $uncommon_leave_end = $leave_end_time->max($balance_end_time);
+
+                    } else {
+                        $uncommon_attendance_start = $attendance_in_time;
+                        $uncommon_attendance_end = $attendance_out_time;
+
+                        $uncommon_leave_start = $leave_start_time;
+                        $uncommon_leave_end = $leave_end_time;
+                    }
+
+                    $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
+                    $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
+
+                    $leave_hours = $$attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
+                } else if ($attendance->work_hours_delta > 0) {
+                    $result_balance_hours = $attendance->work_hours_delta;
+                }  else if ($attendance->work_hours_delta < 0) {
+                    $leave_hours = abs($attendance->work_hours_delta);
+                }
+
+             $regular_work_hours =  $attendance->total_paid_hours - $result_balance_hours;
+
+               // if ($work_hours_delta > 0) {
+               //     $regular_work_hours =  $total_paid_hours - $work_hours_delta;
+               // } else {
+               //     $regular_work_hours = $total_paid_hours;
+               // }
+
+
+
+
+
+
+
+
+
+               $attendance->update([
+                "regular_work_hours" => $regular_work_hours,
+                "overtime_start_time" => $overtime_start_time,
+                "overtime_end_time" => $overtime_end_time,
+                "overtime_hours" => $result_balance_hours,
+                "leave_start_time" => $leave_record->start_time,
+                "leave_end_time" => $leave_record->end_time,
+               ]);
+
+               $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance) ;
+               if(!$adjust_payroll_on_attendance_update) {
+                   $this->storeError([], 422, "leave update", "leave controller");
+                   throw new Exception("some thing went wrong");
+               }
+
+
+
+
+
+                }
+
+
+
+
 
 
                 return response($leave, 201);

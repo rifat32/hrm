@@ -11,6 +11,7 @@ use App\Http\Requests\AttendanceWeeklyCreateRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
 use App\Models\AttendanceArrear;
@@ -34,7 +35,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, PayrunUtil;
 
 
 
@@ -352,7 +353,7 @@ class AttendanceController extends Controller
                         $attendance_out_time = Carbon::parse($request_data["out_time"]);
 
                         $leave_start_time = Carbon::parse($leave_record->start_time);
-                        $leave_end_time = Carbon::parse($leave_record->start_time);
+                        $leave_end_time = Carbon::parse($leave_record->end_time);
 
                         $balance_start_time = $attendance_in_time->max($leave_start_time);
                         $balance_end_time = $attendance_out_time->min($leave_end_time);
@@ -411,7 +412,7 @@ class AttendanceController extends Controller
                     $request_data["work_shift_start_at"] = $work_shift_start_at;
                     $request_data["work_shift_end_at"] = $work_shift_end_at;
                     $request_data["holiday_id"] = $holiday?$holiday->id:NULL;
-                    $request_data["leave_id"] = $leave_record?$holiday->id:NULL;
+                    $request_data["leave_record_id"] = $leave_record?$leave_record->id:NULL;
                     $request_data["is_weekend"] = $work_shift_details->is_weekend;
                     $request_data["overtime_start_time"] = $overtime_start_time;
                     $request_data["overtime_end_time"] = $overtime_end_time;
@@ -758,7 +759,7 @@ class AttendanceController extends Controller
                              $result_balance_hours = $total_paid_hours;
 
                          } else if ($leave_record) {
-                             $leave_hours = $leave_record->leave_hours;
+
                              $attendance_in_time = Carbon::parse($request_data["in_time"]);
                              $attendance_out_time = Carbon::parse($request_data["out_time"]);
 
@@ -841,7 +842,7 @@ class AttendanceController extends Controller
                        "work_shift_start_at" => $work_shift_start_at,
                        "work_shift_end_at" => $work_shift_end_at,
                        "holiday_id" => $holiday?$holiday->id:NULL,
-                       "leave_id" => $leave_record?$holiday->id:NULL,
+                       "leave_record_id" => $leave_record?$leave_record->id:NULL,
                        "is_weekend" => $work_shift_details->is_weekend,
                        "overtime_start_time" => $overtime_start_time,
                        "overtime_end_time" => $overtime_end_time,
@@ -1170,6 +1171,7 @@ class AttendanceController extends Controller
                     $overtime_start_time = NULL;
                     $overtime_end_time = NULL;
                     $result_balance_hours = 0;
+                    $leave_hours = 0;
 
 
                      if ($attendance_prev->is_weekend || $attendance_prev->holiday_id) {
@@ -1189,15 +1191,34 @@ class AttendanceController extends Controller
 
                          // Check if there is any overlap
                          if ($balance_start_time < $balance_end_time) {
-                             $overtime_start_time = $request_data["in_time"];
-                             $overtime_end_time = $request_data["out_time"];
+                            $overtime_start_time = $request_data["in_time"];
+                            $overtime_end_time = $request_data["out_time"];
+                            $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
 
-                             $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
 
-                         }
+                            $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
+                            $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
+                            $uncommon_leave_start = $leave_start_time->min($balance_start_time);
+                            $uncommon_leave_end = $leave_end_time->max($balance_end_time);
+
+                        } else {
+                            $uncommon_attendance_start = $attendance_in_time;
+                            $uncommon_attendance_end = $attendance_out_time;
+
+                            $uncommon_leave_start = $leave_start_time;
+                            $uncommon_leave_end = $leave_end_time;
+                        }
+
+                        $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
+                        $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
+
+                        $leave_hours = $capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
                      } else if ($work_hours_delta > 0) {
                          $result_balance_hours = $work_hours_delta;
                      }
+                     else if ($work_hours_delta < 0) {
+                        $leave_hours = abs($work_hours_delta);
+                    }
 
                   $regular_work_hours =  $total_paid_hours - $result_balance_hours;
 
@@ -1222,6 +1243,7 @@ class AttendanceController extends Controller
 
                     $request_data["overtime_hours"] = $result_balance_hours;
 
+                    $request_data["leave_hours"] = $leave_hours;
 
 
 
@@ -1249,7 +1271,7 @@ class AttendanceController extends Controller
                         "overtime_hours",
                         "overtime_start_time",
                         "overtime_end_time",
-
+                        "leave_hours"
 
 
                         // "is_active",
@@ -1278,7 +1300,6 @@ class AttendanceController extends Controller
                 $attendance_history = AttendanceHistory::create($attendance_history_data);
 
                 $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance) ;
-
                 if(!$adjust_payroll_on_attendance_update) {
                     $this->storeError([], 422, "attendance update", "attendance controller");
                     throw new Exception("some thing went wrong");
@@ -1295,171 +1316,7 @@ class AttendanceController extends Controller
         }
     }
 
-    public function adjust_payroll_on_attendance_update($attendance) {
 
-            DB::transaction(function() use($attendance) {
-                $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
-
-                    $query->where("payroll_attendances.attendance_id",$attendance->id);
-
-               })->first();
-               if($attendance->status != "approved") {
-                PayrollAttendance::where([
-                    "attendance_id" => $attendance->id
-                ])
-                ->delete();
-                AttendanceArrear:: updateOrCreate(
-                    [
-                        "attendance_id" => $attendance->id,
-                    ],
-                    [
-                        "status" => "pending_approval",
-                        "attendance_id" => $attendance->id
-                    ]
-                );
-            }
-            if ($attendance->total_paid_hours > 0) {
-
-
-
-
-                PayrollAttendance:: updateOrCreate(
-                    [
-                        "attendance_id" => $attendance->id,
-                    ],
-                    [
-                        "attendances" => $attendance->id,
-                //          "is_weekend" => $attendance->is_weekend,
-                // "holiday_id" =>  $attendance->holiday_id,
-                // "leave_record_id" => $attendance->leave_record_id,
-                // "overtime_start_time" => $attendance->overtime_start_time,
-                //  "overtime_end_time" =>$attendance->overtime_end_time,
-                //  "overtime_hours" => $result_balance_hours
-                ]
-                );
-
-
-                AttendanceArrear:: updateOrCreate(
-                    [
-                        "attendance_id" => $attendance->id,
-                    ],
-                    [
-                        "status" => "approved",
-                        "attendance_id" => $attendance->id
-                    ]
-                );
-
-
-                $total_regular_attendance_hours = 0;
-                $total_overtime_attendance_hours = 0;
-                $payroll_attendances = $payroll->payroll_attendances;
-                $payroll_attendances->each(function ($approved_attendance) use ($attendance,&$total_overtime_attendance_hours, &$total_regular_attendance_hours) {
-
-
-
-
-
-
-
-
-
-                    if ($approved_attendance->total_paid_hours > 0) {
-                        $total_attendance_hours = $approved_attendance->total_paid_hours;
-                        $holiday_id = 0;
-                        $leave_record_id = 0;
-                        $overtime_start_time = NULL;
-                        $overtime_end_time = NULL;
-                        $result_balance_hours = 0;
-                        if ($attendance->is_weekend  || $attendance->holiday_id) {
-                            $overtime_start_time = $approved_attendance->in_time;
-                            $overtime_end_time = $approved_attendance->out_time;
-                            $result_balance_hours = $total_attendance_hours;
-
-                        } else if ($attendance->leave_record_id) {
-                            $attendance_in_time = Carbon::parse($approved_attendance->in_time);
-                            $attendance_out_time = Carbon::parse($approved_attendance->out_time);
-
-                            $leave_start_time = Carbon::parse($attendance->leave_start_time);
-                            $leave_end_time = Carbon::parse($attendance->leave_end_time);
-
-                            $balance_start_time = $attendance_in_time->max($leave_start_time);
-                            $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                            // Check if there is any overlap
-                            if ($balance_start_time < $balance_end_time) {
-                                $overtime_start_time = $approved_attendance->in_time;
-                                $overtime_end_time = $approved_attendance->out_time;
-                                $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-
-                            }
-                        } else if ($approved_attendance->work_hours_delta > 0) {
-                            $result_balance_hours = $approved_attendance->work_hours_delta;
-                        }
-
-                        $total_overtime_attendance_hours += $result_balance_hours;
-                        $total_regular_attendance_hours += $total_attendance_hours - $result_balance_hours;
-
-
-
-
-
-
-
-
-
-
-                    }
-
-
-
-
-                });
-
-
-
-                $payroll->total_regular_attendance_hours = $total_regular_attendance_hours;
-                $payroll->total_overtime_attendance_hours = $total_overtime_attendance_hours;
-
-
-                $payroll->regular_hours =  $payroll->total_holiday_hours +  $payroll->total_leave_hours +   $payroll->total_regular_attendance_hours;
-                $payroll->overtime_hours = $payroll->total_overtime_attendance_hours;
-
-                $payroll->regular_attendance_hours_salary = $payroll->total_regular_attendance_hours * $payroll->hourly_salary;
-                $payroll->overtime_attendance_hours_salary = $payroll->total_overtime_attendance_hours * $payroll->hourly_salary;
-
-                $payroll->regular_hours_salary = ($payroll->total_holiday_hours + $payroll->total_leave_hours +  $payroll->total_regular_attendance_hours) * $payroll->hourly_salary;
-                $payroll->overtime_hours_salary = $payroll->total_overtime_attendance_hours * $payroll->overtime_salary;
-
-
-
-
-                $payroll->save();
-
-
-
-
-
-
-
-            }
-
-            });
-
-
-
-
-            return true;
-
-
-
-
-
-
-
-
-
-
-    }
 
     /**
      *

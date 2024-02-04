@@ -22,7 +22,7 @@ class CreatePayrollsTable extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->double('total_holiday_hours');
-            $table->double('total_leave_hours');
+            $table->double('total_paid_leave_hours');
             $table->double('total_regular_attendance_hours');
             $table->double('total_overtime_attendance_hours');
             $table->double('regular_hours');
