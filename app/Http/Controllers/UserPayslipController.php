@@ -23,14 +23,14 @@ class UserPayslipController extends Controller
  /**
      *
      * @OA\Post(
-     *      path="/v1.0/users/single-file-upload",
-     *      operationId="createUserFileSingle",
-     *      tags={"user_management"},
+     *      path="/v1.0/user-payslips/single-file-upload",
+     *      operationId="createPayslipFileSingle",
+     *      tags={"user_payslips"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store user file ",
-     *      description="This method is to store user file",
+     *      summary="This method is to store user payslip file ",
+     *      description="This method is to store user payslip file",
      *
      *  @OA\RequestBody(
      *   * @OA\MediaType(

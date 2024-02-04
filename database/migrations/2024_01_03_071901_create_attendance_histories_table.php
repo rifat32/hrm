@@ -55,8 +55,6 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->double('work_shift_start_at');
             $table->double('work_shift_end_at');
 
-            $table->double('work_shift_start_at');
-            $table->double('work_shift_end_at');
 
             $table->time('leave_start_time')->nullable();
             $table->time('leave_end_time')->nullable();
