@@ -54,13 +54,20 @@ class CreateAttendancesTable extends Migration
             $table->unsignedBigInteger('holiday_id')->nullable();
             $table->unsignedBigInteger('leave_record_id')->nullable();
 
-            $table->double('overtime_start_time')->nullable();
-            $table->double('overtime_end_time')->nullable();
-            $table->double('overtime_hours')->nullable();
+            $table->time('overtime_start_time')->nullable();
+            $table->time('overtime_end_time')->nullable();
+            $table->double('overtime_hours');
             $table->double('work_shift_start_at');
             $table->double('work_shift_end_at');
 
+            $table->time('leave_start_time')->nullable();
+            $table->time('leave_end_time')->nullable();
 
+            $table->double('leave_hours');
+
+
+
+            $table->double('punch_in_time_tolerance')->nullable();
 
 
 

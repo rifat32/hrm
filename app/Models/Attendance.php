@@ -34,8 +34,16 @@ class Attendance extends Model
         "is_weekend",
         "overtime_start_time",
         "overtime_end_time",
+        "overtime_hours",
 
 
+
+        "leave_start_time",
+        "leave_end_time",
+
+        "punch_in_time_tolerance",
+
+        "leave_hours",
         "status",
 
         'work_location_id',

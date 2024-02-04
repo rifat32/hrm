@@ -55,12 +55,21 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->double('work_shift_start_at');
             $table->double('work_shift_end_at');
 
+            $table->double('work_shift_start_at');
+            $table->double('work_shift_end_at');
+
+            $table->time('leave_start_time')->nullable();
+            $table->time('leave_end_time')->nullable();
+
+
             $table->enum('behavior', ['absent', 'late','regular','early']);
 
 
             $table->double('work_hours_delta');
             $table->double('regular_work_hours');
             $table->double('total_paid_hours');
+            $table->double('leave_hours');
+
 
             $table->enum('break_type', ['paid', 'unpaid']);
             $table->double('break_hours');

@@ -36,6 +36,8 @@ class AttendanceHistory extends Model
         "total_paid_hours",
         "regular_work_hours",
 
+
+
         "work_shift_start_at",
         "work_shift_end_at",
         "holiday_id",
@@ -44,7 +46,12 @@ class AttendanceHistory extends Model
         "overtime_start_time",
         "overtime_end_time",
 
+        "overtime_hours",
 
+        "leave_hours",
+
+        "leave_start_time",
+        "leave_end_time",
         "status",
 
 
