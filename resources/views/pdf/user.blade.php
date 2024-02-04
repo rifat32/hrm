@@ -6,6 +6,11 @@
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
+
+function format_date($date) {
+    return \Carbon\Carbon::parse($date)->format('d-m-Y');
+}
+
         // Define a function within the Blade file
         function processString($inputString)
         {
@@ -265,13 +270,15 @@ return $formattedBreakTime;
                             {{ $leave_type->name }}
                         </td>
                         <td>{{ $leave_type->type }}</td>
-                        <td>{{ number_format($leave_type->amount, 2) }}/ month</td>
-                        <td>{{ number_format($leave_type->already_taken_hours, 2) }} Hour</td>
-                        <td>{{ number_format($leave_type->amount - $leave_type->already_taken_hours, 2) }} Hour</td>
+                        <td>{{ time_format($leave_type->amount, 2) }}/ month</td>
+                        <td>{{ time_format($leave_type->already_taken_hours, 2) }}</td>
+                        <td>{{ time_format($leave_type->amount - $leave_type->already_taken_hours, 2) }}</td>
                     </tr>
                 @endforeach
             @else
-                <tr>No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
 
         </tbody>
@@ -297,7 +304,7 @@ return $formattedBreakTime;
                 @foreach ($user->attendances as $index => $attendance)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ $attendance->in_date }}</td>
+                        <td>{{ format_date($attendance->in_date) }}</td>
                         <td>{{ $attendance->in_time }}</td>
                         <td>{{ $attendance->out_time }}</td>
                         <td>{{ $attendance->does_break_taken?time_format($attendance->break_hours):0 }}</td>
@@ -308,7 +315,9 @@ return $formattedBreakTime;
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+                     <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
 
         </tbody>
@@ -328,19 +337,45 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->leaves))
+
+                @foreach ($user->leaves as $index => $leave)
+
+
+
                     <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
+                        <td class="index_col">{{ $index + 1 }}  </td>
+                        <td>{{ format_date($leave->start_date) }} - {{ format_date($leave->end_date) }}   </td>
+                        <td>{{ $leave->leave_type?$leave->leave_type->name:"" }}</td>
+                        <td>{{ $leave->leave_duration }}</td>
+
+
+                        <td>
+                            @php
+                                  $leave->total_leave_hours = $leave->records->sum(function ($record) {
+                                $startTime = \Carbon\Carbon::parse($record->start_time);
+                                $endTime = \Carbon\Carbon::parse($record->end_time);
+                                return $startTime->diffInHours($endTime);
+
+                               });
+                            @endphp
+                            {{time_format($leave->total_leave_hours)}}
+
+
+
+                        </td>
+
+                        {{-- <td>{{ }}</td>
                         <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+
+
                     </tr>
+
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+                     <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
@@ -357,19 +392,20 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->documents))
+                @foreach ($user->documents as $index => $document)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        <td>{{ $documents->name }}</td>
+                        <td>  {{ $documents->creator->first_Name . " " . $documents->creator->last_Name . " " . $documents->creator->middle_Name }}</td>
+
+
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+                     <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
@@ -390,22 +426,30 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->assets))
+                @foreach ($user->assets as $index => $asset)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        <td>{{ $asset->name }}</td>
+                        <td>{{ $asset->code }}</td>
+                        <td>{{ $asset->serial_number }}</td>
+                        <td>{{ $asset->is_working }}</td>
+                        <td>{{ $asset->type }}</td>
+                        <td>{{ format_date($asset->date) }}</td>
+                        <td>{{ $asset->note }}</td>
+
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
+
+
             @endif
         </tbody>
     </table>
+
 
     {{-- 7. EDUCATIONAL HISTORY  --}}
     <table>
@@ -423,22 +467,26 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->education_histories))
+                @foreach ($user->education_histories as $index => $education_history)
                     <tr class="table_row">
                         <td style="padding:0px 10px">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        <td>{{ $education_history->degree }}</td>
+                        <td>{{ $education_history->major }}</td>
+                        <td>{{ format_date($education_history->start_date) }}</td>
+                        <td>{{ $education_history->achievements }}</td>
+
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
+
 
     {{-- 8. JOB HISTORY  --}}
     <table>
@@ -449,7 +497,7 @@ return $formattedBreakTime;
                 <th>Job Title</th>
                 <th>Company</th>
                 <th>Start On</th>
-                <th>Start at</th>
+                <th>End At</th>
                 <th>Supervisor</th>
                 {{-- <th>Contact Info</th> JAGA HOILE DIO EDI --}}
                 <th>Country</th>
@@ -457,66 +505,81 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->job_histories))
+                @foreach ($user->job_histories as $index => $job_history)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+
+                        <td>{{ $job_history->job_title }}</td>
+                        <td>{{ $job_history->company_name }}</td>
+                        {{-- <td>{{ \Carbon\Carbon::parse($job_history->employment_start_date)->format('Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($job_history->employment_start_date)->format('F') }}</td> --}}
+                        <td>{{ format_date($job_history->employment_start_date) }}</td>
+                        <td>{{ format_date($job_history->employment_end_date) }}</td>
+                        <td>{{ $job_history->supervisor_name }}</td>
+                        <td>{{ $job_history->work_location }}</td>
+
+
+
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
+
 
     {{-- 9. IMMIGRATION DERAILS  --}}
 
     {{-- COS HISTORY --}}
     <table>
-        <h3>COS History</h3>
+        <h3> Current COS Details</h3>
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>From</th>
-                <th>To</th>
-                <th>Date Assign</th>
+                {{-- <th>From</th>
+                <th>To</th> --}}
+                <th>Date Assigned</th>
                 <th>Expiry Date</th>
-                <th>Cirtificate Number</th>
+                <th>Certificate Number</th>
                 <th>Status</th>
                 <th>Note</th>
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (!empty($user->sponsorship_detail))
+
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{--
-                        <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        {{-- <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
+                        <td>{{ format_date($user->sponsorship_detail->expiry_date) }}</td> --}}
+                        <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
+                        <td>{{ format_date($user->sponsorship_detail->expiry_date) }}</td>
+                        <td>{{ $user->sponsorship_detail->certificate_number }}</td>
+                        <td>{{ $user->sponsorship_detail->current_certificate_status }}</td>
+                        <td>{{ $user->sponsorship_detail->note }}</td>
                     </tr>
-                @endforeach
+
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
     {{-- PASSPORT HISTORY --}}
     <table>
-        <h3>Passport History</h3>
+        <h3>Current Passport Details</h3>
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>From</th>
-                <th>To</th>
+                {{-- <th>From</th>
+                <th>To</th> --}}
                 <th>Issue Date</th>
                 <th>Expiry Date</th>
                 <th>Passport Number</th>
@@ -524,32 +587,35 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (!empty($user->passport_detail))
+
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{--
-                            <td>{{ $user->user_id }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->designation->name }}</td>
-                            <td>{{ processString($user->roles[0]->name) }}</td>
-                            <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        {{-- <td>{{ $user->passport_detail->created_at }}</td>
+                        <td>{{ $user->passport_detail->updated_at }}</td> --}}
+                        <td>{{ format_date($user->passport_detail->passport_issue_date) }}</td>
+                        <td>{{ format_date($user->passport_detail->passport_expiry_date) }}</td>
+                        <td>{{ $user->passport_detail->passport_number }}</td>
+                        <td>{{ $user->passport_detail->place_of_issue }}</td>
                     </tr>
-                @endforeach
+
             @else
-                <tr colspan="7">No Data Found</tr>
+                     <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
     </table>
     {{-- PASSPORT HISTORY --}}
     <table>
-        <h3>Visa History</h3>
+        <h3>Current Visa Details</h3>
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>From</th>
-                <th>To</th>
+                {{-- <th>From</th>
+                <th>To</th> --}}
                 <th>Issue Date</th>
                 <th>Expiry Date</th>
                 <th>BRP Number</th>
@@ -557,23 +623,26 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (!empty($user->visa_detail))
+
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{--
-                            <td>{{ $user->user_id }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->designation->name }}</td>
-                            <td>{{ processString($user->roles[0]->name) }}</td>
-                            <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        {{-- <td>{{ $user->visa_detail->created_at }}</td>
+                        <td>{{ $user->visa_detail->updated_at }}</td> --}}
+                        <td>{{ format_date($user->visa_detail->visa_issue_date) }}</td>
+                        <td>{{ format_date($user->visa_detail->visa_expiry_date) }}</td>
+                        <td>{{ $user->visa_detail->BRP_number }}</td>
+                        <td>{{ $user->visa_detail->place_of_issue }}</td>
                     </tr>
-                @endforeach
+
             @else
-                <tr colspan="7">No Data Found</tr>
+                     <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
 
     {{-- 10. ADDRESS DETAILS  --}}
     <table>
@@ -585,26 +654,26 @@ return $formattedBreakTime;
                 <th>City</th>
                 <th>Country</th>
                 <th>Postcode</th>
-
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (!empty($user->address_line_1))
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        <td>{{ $user->address_line_1 }} </td>
+                        <td>{{ $user->city }}</td>
+                        <td>{{ $user->country }}</td>
+                        <td>{{ $user->postcode }}</td>
                     </tr>
-                @endforeach
+
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
 
     {{-- 11. CONTACT  --}}
     <table>
@@ -612,30 +681,41 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Full Name</th>
+                <th>First Name</th>
+                <th>Last Name</th>
                 <th>Relationship To Employee</th>
                 <th>Address</th>
                 <th>Postcode</th>
-                <th>Mobile Number</th>
+                <th style="text-transform: capitalize">day time tel number</th>
+                <th style="text-transform: capitalize">evening time tel number</th>
+                <th style="text-transform: capitalize">mobile tel number </th>
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->emergency_contact_details))
+                @foreach (($user->emergency_contact_details) as $index => $emergency_contact)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+
+                        <td>{{ isset($emergency_contact["first_name"]) ? $emergency_contact["first_name"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["last_name"]) ? $emergency_contact["last_name"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["relationship_of_above_to_you"]) ? $emergency_contact["relationship_of_above_to_you"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["address_line_1"]) ? $emergency_contact["address_line_1"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["postcode"]) ? $emergency_contact["postcode"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["day_time_tel_number"]) ? $emergency_contact["day_time_tel_number"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["evening_time_tel_number"]) ? $emergency_contact["evening_time_tel_number"] : '' }}</td>
+                        <td>{{ isset($emergency_contact["mobile_tel_number"]) ? $emergency_contact["mobile_tel_number"] : '' }}</td>
+
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
 
     {{-- 12. NOTES  --}}
     <table>
@@ -648,22 +728,22 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->notes))
+                @foreach ($user->notes as $index => $note)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        <td>{{ $note->title }}</td>
+                        <td>{{ $note->description }}</td>
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
 
     {{-- 13. BANK DETAILS  --}}
     <table>
@@ -678,22 +758,22 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
-                    <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
-                    </tr>
-                @endforeach
+            @if ($user->bank)
+                <tr class="table_row">
+                    <td class="index_col">1</td>
+                    <td>{{ $user->bank->name }}</td>
+                    <td>{{ $user->sort_code }}</td>
+                    <td>{{ $user->account_name }}</td>
+                    <td>{{ $user->account_number }}</td>
+                </tr>
             @else
-                <tr colspan="7">No Data Found</tr>
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
 
     {{-- 14. SOCIAL LINKS  --}}
     <table>
@@ -702,26 +782,26 @@ return $formattedBreakTime;
             <tr class="table_head_row">
                 <th class="index_col"></th>
                 <th>Website</th>
-                <th>Url</th>
+                <th>URL</th>
             </tr>
         </thead>
         <tbody>
-            @if (1)
-                @foreach ($leave_types as $index => $user)
+            @if (count($user->social_links))
+                @foreach ($user->social_links as $index => $social_link)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        {{-- <td>{{ $user->user_id }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->designation->name }}</td>
-                        <td>{{ processString($user->roles[0]->name) }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                        <td>{{ $social_link->social_site->name }}</td>
+                        <td>{{ $social_link->profile_link }}</td>
                     </tr>
                 @endforeach
             @else
-                <tr colspan="7">No Data Found</tr>
+                     <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
             @endif
         </tbody>
     </table>
+
 </body>
 
 </html>

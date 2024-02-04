@@ -162,16 +162,38 @@ class User extends Authenticatable
         return $this->hasMany(AttendanceHistory::class, 'user_id', 'id');
     }
 
-    public function sponsorship_details() {
+    public function sponsorship_detail() {
         return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
     }
 
-    public function passport_details() {
+    public function passport_detail() {
         return $this->hasOne(EmployeePassportDetail::class, 'user_id', 'id');
     }
-    public function visa_details() {
+    public function visa_detail() {
         return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
     }
+
+    public function assets() {
+        return $this->hasMany(UserAsset::class, 'user_id', 'id');
+    }
+    public function documents() {
+        return $this->hasMany(UserDocument::class, 'user_id', 'id');
+    }
+    public function education_histories() {
+        return $this->hasMany(UserEducationHistory::class, 'user_id', 'id');
+    }
+    public function job_histories() {
+        return $this->hasMany(UserJobHistory::class, 'user_id', 'id');
+    }
+
+    public function notes() {
+        return $this->hasMany(UserNote::class, 'user_id', 'id');
+    }
+
+    public function social_links() {
+        return $this->hasMany(UserSocialSite::class, 'user_id', 'id');
+    }
+
 
     public function scopeWhereHasRecursiveHolidays($query, $today,$depth = 5)
     {
