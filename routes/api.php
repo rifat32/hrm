@@ -182,6 +182,7 @@ Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserP
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
 Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);
 Route::get('/v2.0/users', [UserManagementController::class, "getUsersV2"]);
+Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
 Route::delete('/v1.0/users/{ids}', [UserManagementController::class, "deleteUsersByIds"]);
 Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "getUserActivity"]);
 

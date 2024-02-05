@@ -96,22 +96,29 @@ class UserNoteController extends Controller
                 $request_data = $request->validated();
 
 
-                $commentText = $request_data["description"];
+                $comment_text = $request_data["description"];
 
                 // Parse comment for mentions
-                preg_match_all('/@(\w+)/', $commentText, $mentions);
+                preg_match_all('/@(\w+)/', $comment_text, $mentions);
                 $mentioned_users = $mentions[1];
-                $mentioned_users_details = User::whereIn('id', $mentioned_users)->get();
-
-
-
-
-
+                $mentioned_users = User::where('business_id', $request->user()->business_id)
+                ->whereIn('user_name', $mentioned_users)
+                ->get();
 
 
                 $request_data["created_by"] = $request->user()->id;
 
                 $user_note =  UserNote::create($request_data);
+
+// Store mentions in user_note_mentions table using createMany
+$mentions_data = $mentioned_users->map(function ($mentioned_user) {
+    return [
+        'mentioned_user_id' => $mentioned_user->id,
+    ];
+});
+
+$user_note->mentions()->createMany($mentions_data);
+
 
 
 
@@ -198,6 +205,14 @@ class UserNoteController extends Controller
 
                 $request_data["updated_by"] = $request->user()->id;
 
+                $comment_text = $request_data["description"];
+
+                // Parse comment for mentions
+                preg_match_all('/@(\w+)/', $comment_text, $mentions);
+                $mentioned_users = $mentions[1];
+                $mentioned_users = User::where('business_id', $request->user()->business_id)
+                ->whereIn('user_name', $mentioned_users)
+                ->get();
 
 
 
@@ -217,6 +232,7 @@ class UserNoteController extends Controller
                         'user_id',
                         'title',
                         'description',
+                        "hidden_note",
                         'updated_by'
                     ])->toArray()
                 )
@@ -229,7 +245,19 @@ class UserNoteController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+                if($user_note->created_by == auth()->user()->created_by) {
+                    $user_note->hidden_note = $request_data["hidden_note"];
+                    $user_note->save();
+                 }
+                $user_note->mentions()->delete();
+// Store mentions in user_note_mentions table using createMany
+$mentions_data = $mentioned_users->map(function ($mentioned_user) {
+    return [
+        'mentioned_user_id' => $mentioned_user->id,
+    ];
+});
 
+$user_note->mentions()->createMany($mentions_data);
                 return response($user_note, 201);
             });
         } catch (Exception $e) {
@@ -315,7 +343,14 @@ class UserNoteController extends Controller
                  $request_data["updated_by"] = $request->user()->id;
 
 
+                 $comment_text = $request_data["description"];
 
+                 // Parse comment for mentions
+                 preg_match_all('/@(\w+)/', $comment_text, $mentions);
+                 $mentioned_users = $mentions[1];
+                 $mentioned_users = User::where('business_id', $request->user()->business_id)
+                 ->whereIn('user_name', $mentioned_users)
+                 ->get();
 
                  $user_note_query_params = [
                      "id" => $request_data["id"],
@@ -330,11 +365,14 @@ class UserNoteController extends Controller
 
                  UserNote::disableTimestamps();
 
+
+
                  // Update the record
                  UserNote::where($user_note_query_params)->update(
                      collect($request_data)->only([
                          'user_id',
                          'title',
+
                          'description',
                          'created_at', // If you need to update created_at manually
                          'updated_at', // If you need to update updated_at manually
@@ -354,6 +392,19 @@ class UserNoteController extends Controller
                      ], 500);
                  }
 
+                 if($user_note->created_by == auth()->user()->created_by) {
+                    $user_note->hidden_note = $request_data["hidden_note"];
+                    $user_note->save();
+                 }
+                 $user_note->mentions()->delete();
+                 // Store mentions in user_note_mentions table using createMany
+                 $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+                     return [
+                         'mentioned_user_id' => $mentioned_user->id,
+                     ];
+                 });
+
+                 $user_note->mentions()->createMany($mentions_data);
                  return response($user_note, 201);
              });
          } catch (Exception $e) {
@@ -482,9 +533,7 @@ class UserNoteController extends Controller
 
 
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
+
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -513,6 +562,15 @@ class UserNoteController extends Controller
                 }, function ($query) {
                     return $query->orderBy("user_notes.id", "DESC");
                 })
+                ->where(function($query) use($all_manager_department_ids) {
+                    $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
+                     })
+                     ->orWhereHas("mentions", function($query) {
+                        $query->where("user_note_mentions.user_id",auth()->user()->id);
+                     });
+                })
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -614,9 +672,14 @@ class UserNoteController extends Controller
             ->where([
                 "id" => $id,
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
+            ->where(function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->orWhereHas("mentions", function($query) {
+                    $query->where("user_note_mentions.user_id",auth()->user()->id);
+                 });
+            })
                 ->first();
             if (!$user_note) {
                 $this->storeError(
@@ -712,10 +775,11 @@ class UserNoteController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $idsArray = explode(',', $ids);
-            $existingIds = UserNote::whereIn('id', $idsArray)
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
+            $existingIds = UserNote::
+            whereIn('id', $idsArray)
+            ->when( !auth()->user()->hasPermissionTo('business_owner'), function($query) {
+                $query->where('user_notes.created_by', '=', auth()->user()->id);
+            })
                 ->select('id')
                 ->get()
                 ->pluck('id')

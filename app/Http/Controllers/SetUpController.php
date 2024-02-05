@@ -63,6 +63,7 @@ class SetUpController extends Controller
 
     public function swaggerRefresh(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        Artisan::call('optimize:clear');
 Artisan::call('l5-swagger:generate');
 return "swagger generated";
     }

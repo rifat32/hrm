@@ -60,6 +60,8 @@ class UserNoteCreateRequest extends BaseFormRequest
             ],
             'title' => 'required|string',
             'description' => 'required|string',
+            'hidden_note' => 'present|string',
+
         ];
     }
 }

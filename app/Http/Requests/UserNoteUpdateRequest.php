@@ -33,6 +33,10 @@ class UserNoteUpdateRequest extends BaseFormRequest
                 function ($attribute, $value, $fail) {
                     $exists = UserNote::where('id', $value)
                         ->where('user_notes.user_id', '=', $this->user_id)
+                        ->when( !auth()->user()->hasPermissionTo('business_owner'), function($query) {
+                            $query->where('user_notes.created_by', '=', auth()->user()->id);
+                        })
+
                         ->exists();
 
                     if (!$exists) {
@@ -73,6 +77,8 @@ class UserNoteUpdateRequest extends BaseFormRequest
             ],
             'title' => 'required|string',
             'description' => 'required|string',
+            'hidden_note' => 'present|string',
+
 
         ];
     }

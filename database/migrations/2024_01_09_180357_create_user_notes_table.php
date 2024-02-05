@@ -23,6 +23,8 @@ class CreateUserNotesTable extends Migration
 
             $table->string('title');
             $table->text('description');
+            $table->text('hidden_note')->nullable();
+            $table->json('history')->nullable();
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

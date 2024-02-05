@@ -28541,6 +28541,118 @@
                         "description": "file_name",
                         "required": true,
                         "example": "employee"
+                    },
+                    {
+                        "name": "employee_details",
+                        "in": "query",
+                        "description": "Employee Details",
+                        "required": true,
+                        "example": "employee_details"
+                    },
+                    {
+                        "name": "leave_allowances",
+                        "in": "query",
+                        "description": "Leave Allowances",
+                        "required": true,
+                        "example": "leave_allowances"
+                    },
+                    {
+                        "name": "attendances",
+                        "in": "query",
+                        "description": "Attendances",
+                        "required": true,
+                        "example": "attendances"
+                    },
+                    {
+                        "name": "leaves",
+                        "in": "query",
+                        "description": "Leaves",
+                        "required": true,
+                        "example": "leaves"
+                    },
+                    {
+                        "name": "documents",
+                        "in": "query",
+                        "description": "Documents",
+                        "required": true,
+                        "example": "documents"
+                    },
+                    {
+                        "name": "assets",
+                        "in": "query",
+                        "description": "Assets",
+                        "required": true,
+                        "example": "assets"
+                    },
+                    {
+                        "name": "educational_history",
+                        "in": "query",
+                        "description": "Educational History",
+                        "required": true,
+                        "example": "educational_history"
+                    },
+                    {
+                        "name": "job_history",
+                        "in": "query",
+                        "description": "Job History",
+                        "required": true,
+                        "example": "job_history"
+                    },
+                    {
+                        "name": "current_cos_details",
+                        "in": "query",
+                        "description": "Current COS Details",
+                        "required": true,
+                        "example": "current_cos_details"
+                    },
+                    {
+                        "name": "current_passport_details",
+                        "in": "query",
+                        "description": "Current Passport Details",
+                        "required": true,
+                        "example": "current_passport_details"
+                    },
+                    {
+                        "name": "current_visa_details",
+                        "in": "query",
+                        "description": "Current Visa Details",
+                        "required": true,
+                        "example": "current_visa_details"
+                    },
+                    {
+                        "name": "address_details",
+                        "in": "query",
+                        "description": "Address Details",
+                        "required": true,
+                        "example": "address_details"
+                    },
+                    {
+                        "name": "contact_details",
+                        "in": "query",
+                        "description": "Contact Details",
+                        "required": true,
+                        "example": "contact_details"
+                    },
+                    {
+                        "name": "notes",
+                        "in": "query",
+                        "description": "Notes",
+                        "required": true,
+                        "example": "notes"
+                    },
+                    {
+                        "name": "bank_details",
+                        "in": "query",
+                        "description": "Bank Details",
+                        "required": true,
+                        "example": "bank_details"
+                    },
+                    {
+                        "name": "social_links",
+                        "in": "query",
+                        "description": "Social Links",
+                        "required": true,
+                        "example": "social_links"
                     }
                 ],
                 "responses": {

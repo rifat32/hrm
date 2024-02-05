@@ -19,11 +19,15 @@ class CreateUsersTable extends Migration
             $table->string('middle_Name')->nullable();
             $table->string('last_Name');
 
+            $table->string('user_name')->nullable();
+
             $table->json('emergency_contact_details')->nullable();
 
             $table->string('color_theme_name')->default("default");
 
             $table->string('user_id')->nullable();
+
+
 
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
 

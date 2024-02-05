@@ -344,7 +344,21 @@ class UserManagementController extends Controller
 
 
 
+    function generate_unique_username($firstName, $middleName, $lastName, $business_id = null)
+    {
+        $baseUsername = $firstName . "." . ($middleName ? $middleName . "." : "") . $lastName;
+        $username = $baseUsername;
+        $counter = 1;
 
+        // Check if the generated username is already in use within the specified business
+        while (User::where('user_name', $username)->where('business_id', $business_id)->exists()) {
+            // If the username exists, append a counter to make it unique
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        return $username;
+    }
 
     /**
      *
@@ -496,7 +510,9 @@ class UserManagementController extends Controller
             $this->loadDefaultAttendanceSetting($user->business_id);
 
 
-
+            $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+            $user->user_name = $username;
+            $user->save();
 
             // $user->permissions  = $user->getAllPermissions()->pluck('name');
             // error_log("cccccc");
@@ -826,7 +842,9 @@ class UserManagementController extends Controller
                 $user->roles = $user->roles->pluck('name');
 
 
-
+                $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+                $user->user_name = $username;
+                $user->save();
                 // $user->permissions  = $user->getAllPermissions()->pluck('name');
                 // error_log("cccccc");
                 // $data["user"] = $user;
@@ -3481,8 +3499,6 @@ class UserManagementController extends Controller
                     });
                 })
 
-
-
                 ->when(!empty($request->start_passport_issue_date), function ($query) use ($request) {
                     return $query->whereHas("passport_details", function ($query) use ($request) {
                         $query->where("employee_passport_details.passport_issue_date", ">=", $request->start_passport_issue_date);
@@ -3545,7 +3561,6 @@ class UserManagementController extends Controller
                     }
 
                 })
-
 
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {
@@ -3708,6 +3723,12 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
 
             $users = User::with(
                 [
@@ -3743,9 +3764,12 @@ class UserManagementController extends Controller
                         });
                     }
                 })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('business_id', auth()->user()->business_id);
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
+                        return  $query->where('business_id', auth()->user()->business_id)
+                            ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });;
                     });
                 })
 
@@ -3818,6 +3842,236 @@ class UserManagementController extends Controller
      * @OA\Get(
      *      path="/v3.0/users",
      *      operationId="getUsersV3",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *    *   * *  @OA\Parameter(
+     * name="business_id",
+     * in="query",
+     * description="business_id",
+     * required=true,
+     * example="1"
+     * ),
+     *   *   * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     *    * *  @OA\Parameter(
+     * name="role",
+     * in="query",
+     * description="role",
+     * required=true,
+     * example="admin,manager"
+     * ),
+     *      summary="This method is to get user",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUsersV3(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+
+
+             $users = User::with(
+                 [
+                     "designation" => function ($query) {
+                         $query->select(
+                             'designations.id',
+                             'designations.name',
+                         );
+                     },
+                     "roles",
+                     "recruitment_processes",
+                     "work_location"
+                 ]
+             )
+
+                 ->whereNotIn('id', [$request->user()->id])
+
+                 ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
+                    if (auth()->user()->hasRole("superadmin")) {
+                        return  $query->where(function ($query) {
+                            return   $query->where('business_id', NULL)
+                                ->orWhere(function ($query) {
+                                    return $query
+                                        ->whereNotNull("business_id")
+                                        ->whereHas("roles", function ($query) {
+                                            return $query->where("roles.name", "business_owner");
+                                        });
+                                });
+                        });
+                    } else {
+                        return  $query->where(function ($query) {
+                            return   $query->where('created_by', auth()->user()->id);
+                        });
+                    }
+                })
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
+                        return  $query->where('business_id', auth()->user()->business_id)
+                            ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });;
+                    });
+                })
+
+
+                 ->when(!empty($request->role), function ($query) use ($request) {
+                     $rolesArray = explode(',', $request->role);
+                     return   $query->whereHas("roles", function ($q) use ($rolesArray) {
+                         return $q->whereIn("name", $rolesArray);
+                     });
+                 })
+
+
+
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     $term = $request->search_key;
+                     return $query->where(function ($subquery) use ($term) {
+                         $subquery->where("first_Name", "like", "%" . $term . "%")
+                             ->orWhere("last_Name", "like", "%" . $term . "%")
+                             ->orWhere("email", "like", "%" . $term . "%")
+                             ->orWhere("phone", "like", "%" . $term . "%");
+                     });
+                 })
+
+                 ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                     return $query->where('is_in_employee', intval($request->is_in_employee));
+                 })
+                 ->when(isset($request->is_active), function ($query) use ($request) {
+                     return $query->where('is_active', intval($request->is_active));
+                 })
+
+
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("users.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("users.id", "DESC");
+                 })
+
+                 ->withCount('all_users as user_count')
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });
+
+             $data["data"] = $users;
+             $data["data_highlights"] = [];
+
+             $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
+                 return $user->is_active == 1;
+             })->count();
+             $data["data_highlights"]["total_users"] = $users->count();
+
+             return response()->json($data, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v4.0/users",
+     *      operationId="getUsersV4",
      *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
@@ -3920,7 +4174,7 @@ class UserManagementController extends Controller
      *     )
      */
 
-    public function getUsersV3(Request $request)
+    public function getUsersV4(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
@@ -3929,46 +4183,14 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
 
-
-
-            $users = User::with(
-                [
-                    "designation" => function ($query) {
-                        $query->select(
-                            'designations.id',
-                            'designations.name',
-                        );
-                    },
-                    "roles",
-                    "sponsorship_details",
-                    "passport_details",
-                    "visa_details",
-                    "recruitment_processes",
-                    "work_location"
-
-
-
-                ]
-
-            )
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->whereNotIn('id', [$request->user()->id])
+            $users = User::whereNotIn('id', [$request->user()->id])
                 ->when(!empty($request->role), function ($query) use ($request) {
                     $rolesArray = explode(',', $request->role);
                     return   $query->whereHas("roles", function ($q) use ($rolesArray) {
                         return $q->whereIn("name", $rolesArray);
                     });
                 })
-
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
@@ -3991,27 +4213,43 @@ class UserManagementController extends Controller
                     }
                     return $query->where('business_id', intval($request->business_id));
                 })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                      return $query->where('business_id', $request->user()->business_id);
+                })
                 ->when(isset($request->is_in_employee), function ($query) use ($request) {
                     return $query->where('is_in_employee', intval($request->is_in_employee));
                 })
                 ->when(isset($request->is_active), function ($query) use ($request) {
                     return $query->where('is_active', intval($request->is_active));
                 })
-
-
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
-
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("users.id", $request->order_by);
                 }, function ($query) {
                     return $query->orderBy("users.id", "DESC");
                 })
-                ->select("users.*")
+
+                ->select(
+                    'user_name',
+                    'first_Name',
+                    'last_Name',
+                    'middle_Name',
+                    'gender',
+                    'phone',
+                    'image',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long"
+                    )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -4049,7 +4287,7 @@ class UserManagementController extends Controller
      *         required=true,
      *  example="json"
      *      ),
-     *      *   *              @OA\Parameter(
+     *     @OA\Parameter(
      *         name="file_name",
      *         in="query",
      *         description="file_name",
@@ -4057,118 +4295,119 @@ class UserManagementController extends Controller
      *  example="employee"
      *      ),
      *
+     *
      *  * @OA\Parameter(
  *     name="employee_details",
  *     in="query",
  *     description="Employee Details",
  *     required=true,
  *     example="employee_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="leave_allowances",
  *     in="query",
  *     description="Leave Allowances",
  *     required=true,
  *     example="leave_allowances"
- * )
+ * ),
  * @OA\Parameter(
  *     name="attendances",
  *     in="query",
  *     description="Attendances",
  *     required=true,
  *     example="attendances"
- * )
+ * ),
  * @OA\Parameter(
  *     name="leaves",
  *     in="query",
  *     description="Leaves",
  *     required=true,
  *     example="leaves"
- * )
+ * ),
  * @OA\Parameter(
  *     name="documents",
  *     in="query",
  *     description="Documents",
  *     required=true,
  *     example="documents"
- * )
+ * ),
  * @OA\Parameter(
  *     name="assets",
  *     in="query",
  *     description="Assets",
  *     required=true,
  *     example="assets"
- * )
+ * ),
  * @OA\Parameter(
  *     name="educational_history",
  *     in="query",
  *     description="Educational History",
  *     required=true,
  *     example="educational_history"
- * )
+ * ),
  * @OA\Parameter(
  *     name="job_history",
  *     in="query",
  *     description="Job History",
  *     required=true,
  *     example="job_history"
- * )
+ * ),
  * @OA\Parameter(
  *     name="current_cos_details",
  *     in="query",
  *     description="Current COS Details",
  *     required=true,
  *     example="current_cos_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="current_passport_details",
  *     in="query",
  *     description="Current Passport Details",
  *     required=true,
  *     example="current_passport_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="current_visa_details",
  *     in="query",
  *     description="Current Visa Details",
  *     required=true,
  *     example="current_visa_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="address_details",
  *     in="query",
  *     description="Address Details",
  *     required=true,
  *     example="address_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="contact_details",
  *     in="query",
  *     description="Contact Details",
  *     required=true,
  *     example="contact_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="notes",
  *     in="query",
  *     description="Notes",
  *     required=true,
  *     example="notes"
- * )
+ * ),
  * @OA\Parameter(
  *     name="bank_details",
  *     in="query",
  *     description="Bank Details",
  *     required=true,
  *     example="bank_details"
- * )
+ * ),
  * @OA\Parameter(
  *     name="social_links",
  *     in="query",
  *     description="Social Links",
  *     required=true,
  *     example="social_links"
- * )
+ * ),
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
