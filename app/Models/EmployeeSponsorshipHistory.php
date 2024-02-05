@@ -13,7 +13,7 @@ class EmployeeSponsorshipHistory extends Model
 
         'date_assigned',
         'expiry_date',
-        'status',
+        // 'status',
         'note',
         "certificate_number",
         "current_certificate_status",

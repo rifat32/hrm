@@ -74,7 +74,7 @@ class UserNoteUpdateByBusinessOwnerRequest extends BaseFormRequest
             ],
             'title' => 'required|string',
             'description' => 'required|string',
-            'hidden_note' => 'present|string',
+            // 'hidden_note' => 'present|string',
 
             'created_at' => 'required|date',
             'updated_at' => 'required|date',

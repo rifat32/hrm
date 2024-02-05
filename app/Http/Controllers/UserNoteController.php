@@ -232,7 +232,7 @@ $user_note->mentions()->createMany($mentions_data);
                         'user_id',
                         'title',
                         'description',
-                        "hidden_note",
+                        // "hidden_note",
                         'updated_by'
                     ])->toArray()
                 )
@@ -245,10 +245,10 @@ $user_note->mentions()->createMany($mentions_data);
                         "message" => "something went wrong."
                     ], 500);
                 }
-                if($user_note->created_by == auth()->user()->created_by) {
-                    $user_note->hidden_note = $request_data["hidden_note"];
-                    $user_note->save();
-                 }
+                // if($user_note->created_by == auth()->user()->created_by) {
+                //     $user_note->hidden_note = $request_data["hidden_note"];
+                //     $user_note->save();
+                //  }
                 $user_note->mentions()->delete();
 // Store mentions in user_note_mentions table using createMany
 $mentions_data = $mentioned_users->map(function ($mentioned_user) {
@@ -392,10 +392,10 @@ $user_note->mentions()->createMany($mentions_data);
                      ], 500);
                  }
 
-                 if($user_note->created_by == auth()->user()->created_by) {
-                    $user_note->hidden_note = $request_data["hidden_note"];
-                    $user_note->save();
-                 }
+                //  if($user_note->created_by == auth()->user()->created_by) {
+                //     $user_note->hidden_note = $request_data["hidden_note"];
+                //     $user_note->save();
+                //  }
                  $user_note->mentions()->delete();
                  // Store mentions in user_note_mentions table using createMany
                  $mentions_data = $mentioned_users->map(function ($mentioned_user) {
@@ -565,10 +565,10 @@ $user_note->mentions()->createMany($mentions_data);
                 ->where(function($query) use($all_manager_department_ids) {
                     $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->orWhereHas("mentions", function($query) {
-                        $query->where("user_note_mentions.user_id",auth()->user()->id);
                      });
+                    //  ->orWhereHas("mentions", function($query) {
+                    //     $query->where("user_note_mentions.user_id",auth()->user()->id);
+                    //  });
                 })
 
                 ->when(!empty($request->per_page), function ($query) use ($request) {
@@ -675,10 +675,10 @@ $user_note->mentions()->createMany($mentions_data);
             ->where(function($query) use($all_manager_department_ids) {
                 $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
-                 })
-                 ->orWhereHas("mentions", function($query) {
-                    $query->where("user_note_mentions.user_id",auth()->user()->id);
                  });
+                //  ->orWhereHas("mentions", function($query) {
+                //     $query->where("user_note_mentions.user_id",auth()->user()->id);
+                //  });
             })
                 ->first();
             if (!$user_note) {

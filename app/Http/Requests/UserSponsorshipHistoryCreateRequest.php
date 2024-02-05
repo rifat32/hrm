@@ -59,7 +59,7 @@ class UserSponsorshipHistoryCreateRequest extends BaseFormRequest
             ],
             "date_assigned" => 'required|date',
             "expiry_date" => 'required|date',
-            "status" => 'required|in:pending,approved,denied,visa_granted',
+            // "status" => 'required|in:pending,approved,denied,visa_granted',
             "note" => 'required|string',
             "certificate_number" => 'required|string',
             "current_certificate_status" => 'required|in:unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal',

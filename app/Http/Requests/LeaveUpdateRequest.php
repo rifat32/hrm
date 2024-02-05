@@ -149,7 +149,7 @@ class LeaveUpdateRequest extends BaseFormRequest
             'end_date' => 'nullable|required_if:leave_duration,multiple_day|after_or_equal:start_date',
 
             'start_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s',
-            'end_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:date',
+            'end_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:start_time',
 
             'attachments' => 'present|array',
         ];

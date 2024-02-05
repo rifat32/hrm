@@ -478,15 +478,24 @@ foreach ($assigned_departments as $assigned_department) {
 
                         if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave) ) {
 
-                        $start_at = $work_shift_details->start_at;
-                        $end_at = $work_shift_details->end_at;
-                        if ($request_data["day_type"] == "first_half") {
-                            $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
-                            $start_at = $middle_time;
-                        } elseif ($request_data["day_type"] == "last_half") {
-                            $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
-                            $end_at = $middle_time;
-                        }
+                            $leave_start_at = Carbon::parse($work_shift_details->start_at);
+                            $leave_end_at = Carbon::parse($work_shift_details->end_at);
+
+                            if ($request_data["day_type"] == "first_half") {
+                                // Create clones of $leave_start_at and $leave_end_at
+                                $temp_start_at = clone $leave_start_at;
+                                $temp_end_at = clone $leave_end_at;
+
+                                // Set $leave_end_at to be the middle time
+                                $leave_end_at = $temp_start_at->addMinutes($temp_start_at->diffInMinutes($temp_end_at) / 2);
+                            } elseif ($request_data["day_type"] == "last_half") {
+                                // Create clones of $leave_start_at and $leave_end_at
+                                $temp_start_at = clone $leave_start_at;
+                                $temp_end_at = clone $leave_end_at;
+
+                                // Set $leave_start_at to be the middle time
+                                $leave_start_at = $temp_start_at->addMinutes($temp_start_at->diffInMinutes($temp_end_at) / 2);
+                            }
 
 
                         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -494,15 +503,18 @@ foreach ($assigned_departments as $assigned_department) {
                         $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
                         $leave_record_data["capacity_hours"] =  $capacity_hours;
 
-                        $leave_start_at = Carbon::createFromFormat('H:i:s', $start_at);
-                        $leave_end_at = Carbon::createFromFormat('H:i:s', $end_at);
+
+
                         $leave_hours = $leave_end_at->diffInHours($leave_start_at);
                         $leave_record_data["leave_hours"] =  $leave_hours;
 
 
 
-                        $leave_record_data["start_time"] = $work_shift_details->start_at;
-                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+
+
+
+                        $leave_record_data["start_time"] = $leave_start_at;
+                        $leave_record_data["end_time"] = $leave_end_at;
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
@@ -650,8 +662,8 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_history_data['actor_id'] = auth()->user()->id;
                 $leave_history_data['action'] = "create";
                 $leave_history_data['is_approved'] = NULL;
-                $leave_history_data['attendance_created_at'] = $leave->created_at;
-                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history_data['leave_created_at'] = $leave->created_at;
+                $leave_history_data['leave_updated_at'] = $leave->updated_at;
 
 
                 // $leave_history = LeaveHistory::create($leave_history_data);
@@ -753,7 +765,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
 
-                $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"]);
+                $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"],$request_data["is_approved"]);
                 if (!$process_leave_approval["success"]) {
 
                     $this->storeError(
@@ -780,8 +792,8 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_history_data['actor_id'] = auth()->user()->id;
                 $leave_history_data['action'] = "approve";
                 $leave_history_data['is_approved'] =  $request_data['is_approved'];
-                $leave_history_data['attendance_created_at'] = $leave->created_at;
-                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history_data['leave_created_at'] = $leave->created_at;
+                $leave_history_data['leave_updated_at'] = $leave->updated_at;
                 $leave_history = LeaveHistory::create($leave_history_data);
 
 
@@ -908,8 +920,8 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_history_data['actor_id'] = auth()->user()->id;
                 $leave_history_data['action'] = "bypass";
                 $leave_history_data['is_approved'] = NULL;
-                $leave_history_data['attendance_created_at'] = $leave->created_at;
-                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history_data['leave_created_at'] = $leave->created_at;
+                $leave_history_data['leave_updated_at'] = $leave->updated_at;
 
 
 
@@ -1261,23 +1273,33 @@ foreach ($assigned_departments as $assigned_department) {
                         if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
 
 
-                        $start_at = $work_shift_details->start_at;
-                        $end_at = $work_shift_details->end_at;
-                        if ($request_data["day_type"] == "first_half") {
-                            $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
-                            $work_shift_details->start_at = $middle_time;
-                        } elseif ($request_data["day_type"] == "last_half") {
-                            $middle_time = date("H:i:s", strtotime("($start_at + $end_at) / 2"));
-                            $work_shift_details->end_at = $middle_time;
-                        }
+                            $leave_start_at = Carbon::parse($work_shift_details->start_at);
+                            $leave_end_at = Carbon::parse($work_shift_details->end_at);
+
+                            if ($request_data["day_type"] == "first_half") {
+                                // Create clones of $leave_start_at and $leave_end_at
+                                $temp_start_at = clone $leave_start_at;
+                                $temp_end_at = clone $leave_end_at;
+
+                                // Set $leave_end_at to be the middle time
+                                $leave_end_at = $temp_start_at->addMinutes($temp_start_at->diffInMinutes($temp_end_at) / 2);
+                            } elseif ($request_data["day_type"] == "last_half") {
+                                // Create clones of $leave_start_at and $leave_end_at
+                                $temp_start_at = clone $leave_start_at;
+                                $temp_end_at = clone $leave_end_at;
+
+                                // Set $leave_start_at to be the middle time
+                                $leave_start_at = $temp_start_at->addMinutes($temp_start_at->diffInMinutes($temp_end_at) / 2);
+                            }
+
 
                         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
                         $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                         $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
                         $leave_record_data["capacity_hours"] =  $capacity_hours;
 
-                        $leave_start_at = Carbon::createFromFormat('H:i:s', $start_at);
-                        $leave_end_at = Carbon::createFromFormat('H:i:s', $end_at);
+
+
                         $leave_hours = $leave_end_at->diffInHours($leave_start_at);
                         $leave_record_data["leave_hours"] =  $leave_hours;
 
@@ -1286,8 +1308,8 @@ foreach ($assigned_departments as $assigned_department) {
 
 
 
-                        $leave_record_data["start_time"] = $work_shift_details->start_at;
-                        $leave_record_data["end_time"] = $work_shift_details->end_at;
+                        $leave_record_data["start_time"] = $leave_start_at;
+                        $leave_record_data["end_time"] = $leave_end_at;
                         $leave_record_data["date"] = $request_data["date"];
                         array_push($leave_record_data_list, $leave_record_data);
                     }
@@ -1459,8 +1481,8 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_history_data['actor_id'] = auth()->user()->id;
                 $leave_history_data['action'] = "update";
                 $leave_history_data['is_approved'] = NULL;
-                $leave_history_data['attendance_created_at'] = $leave->created_at;
-                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history_data['leave_created_at'] = $leave->created_at;
+                $leave_history_data['leave_updated_at'] = $leave->updated_at;
                 $leave_history = LeaveHistory::create($leave_history_data);
 
                 $leave_record_history = $leave_records->toArray();
@@ -1476,6 +1498,10 @@ foreach ($assigned_departments as $assigned_department) {
                     ])
 
                ->first();
+
+               if(!$attendance) {
+                    continue;
+               }
 
                $overtime_start_time = NULL;
                $overtime_end_time = NULL;
@@ -2754,8 +2780,8 @@ return $employee;
                 $leave_history_data['actor_id'] = auth()->user()->id;
                 $leave_history_data['action'] = "delete";
                 $leave_history_data['is_approved'] = NULL;
-                $leave_history_data['attendance_created_at'] = $leave->created_at;
-                $leave_history_data['attendance_updated_at'] = $leave->updated_at;
+                $leave_history_data['leave_created_at'] = $leave->created_at;
+                $leave_history_data['leave_updated_at'] = $leave->updated_at;
                 // $leave_history = LeaveHistory::create($leave_history_data);
 
 

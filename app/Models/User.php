@@ -172,6 +172,18 @@ class User extends Authenticatable
     public function visa_detail() {
         return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
     }
+    public function sponsorship_details() {
+        return $this->hasMany(EmployeeSponsorship::class, 'user_id', 'id');
+    }
+
+    public function passport_details() {
+        return $this->hasMany(EmployeePassportDetail::class, 'user_id', 'id');
+    }
+    public function visa_details() {
+        return $this->hasMany(EmployeeVisaDetail::class, 'user_id', 'id');
+    }
+
+
 
     public function assets() {
         return $this->hasMany(UserAsset::class, 'user_id', 'id');

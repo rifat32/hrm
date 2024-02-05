@@ -19,7 +19,7 @@ trait LeaveUtil
 {
     use ErrorUtil;
 
-    public function processLeaveApproval($leave_id) {
+    public function processLeaveApproval($leave_id,$is_approved=0) {
         $leave = Leave::where([
             "id" => $leave_id,
             "business_id" => auth()->user()->business_id
@@ -80,7 +80,7 @@ trait LeaveUtil
 
 
 
-                $special_user = $setting_leave->special_users()->where(["user_id" => $user->id])->first();
+                $special_user = $setting_leave->special_users()->where(["setting_leave_special_users.user_id" => $user->id])->first();
                 if ($special_user) {
                     if($single_leave_approval->is_approved) {
                         $leave->status = "approved";
@@ -88,7 +88,7 @@ trait LeaveUtil
                         $leave->status = "rejected";
                     }
 
-                    break;
+                    break ;
                 }
 
                 $role_names = $user->getRoleNames()->toArray();
@@ -113,6 +113,58 @@ trait LeaveUtil
                         break 2;
                     }
                 }
+
+
+
+                $department = Department::whereHas('users', function ($query) use ($leave) {
+                    $query->where('users.id', $leave->employee->id);
+                })->first();
+
+                $this->storeError(
+                    "Hey please specify department for the employee first!"
+                    ,
+                    400,
+                    "front end error",
+                    "front end error"
+                   );
+
+                if (!$department) {
+                    return [
+                        "success" => false,
+                        "message" => "Hey please specify department for the employee first!",
+                        "status" => 400
+                    ];
+
+                }
+
+
+                $parentData = [$department];
+                $parent = clone $department;
+                while (!empty($parent->parent)) {
+
+                    $parentData[] = $parent->parent;
+                    $parent = clone $parent->parent;
+
+                }
+                $parentData = array_reverse($parentData);
+
+                foreach($parentData as $single_department) {
+                     $verify_leave_approval =   LeaveApproval::where([
+                            'leave_id' => $leave->id,
+                            'is_approved' => 1,
+                            "created_by" => $single_department->manager_id
+                        ])->first();
+                    if($verify_leave_approval) {
+                        if($single_leave_approval->is_approved) {
+                            $leave->status = "approved";
+                        }else {
+                            $leave->status = "rejected";
+                        }
+                        break 2;
+                    }
+                }
+
+
 
 
             }
@@ -163,16 +215,22 @@ trait LeaveUtil
                         'leave_id' => $leave->id,
                         'is_approved' => 1,
                         "created_by" => $single_department->manager_id
-                    ])->first();
+                    ])->latest()->first();
                 if(!$verify_leave_approval) {
                     $not_approved_manager_found = true;
                     break;
                 }
             }
 
-            if(!$not_approved_manager_found ) {
-                $leave->status = "approved";
+            if(!$not_approved_manager_found || auth()->user()->hasRole("business_owner") ) {
+                if($is_approved) {
+                    $leave->status = "approved";
+                }else {
+                    $leave->status = "rejected";
+                }
+
             }
+
         }
 
         $leave->save();
