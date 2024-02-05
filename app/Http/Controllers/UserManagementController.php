@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UserExport;
 use App\Exports\UsersExport;
 use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\GuestUserRegisterRequest;
@@ -823,6 +824,8 @@ class UserManagementController extends Controller
 
 
                 $user->roles = $user->roles->pluck('name');
+
+
 
                 // $user->permissions  = $user->getAllPermissions()->pluck('name');
                 // error_log("cccccc");
@@ -3575,6 +3578,10 @@ class UserManagementController extends Controller
 
                     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
                 }
+
+
+
+
             } else {
                 return response()->json($users, 200);
             }
@@ -4049,6 +4056,119 @@ class UserManagementController extends Controller
      *         required=true,
      *  example="employee"
      *      ),
+     *
+     *  * @OA\Parameter(
+ *     name="employee_details",
+ *     in="query",
+ *     description="Employee Details",
+ *     required=true,
+ *     example="employee_details"
+ * )
+ * @OA\Parameter(
+ *     name="leave_allowances",
+ *     in="query",
+ *     description="Leave Allowances",
+ *     required=true,
+ *     example="leave_allowances"
+ * )
+ * @OA\Parameter(
+ *     name="attendances",
+ *     in="query",
+ *     description="Attendances",
+ *     required=true,
+ *     example="attendances"
+ * )
+ * @OA\Parameter(
+ *     name="leaves",
+ *     in="query",
+ *     description="Leaves",
+ *     required=true,
+ *     example="leaves"
+ * )
+ * @OA\Parameter(
+ *     name="documents",
+ *     in="query",
+ *     description="Documents",
+ *     required=true,
+ *     example="documents"
+ * )
+ * @OA\Parameter(
+ *     name="assets",
+ *     in="query",
+ *     description="Assets",
+ *     required=true,
+ *     example="assets"
+ * )
+ * @OA\Parameter(
+ *     name="educational_history",
+ *     in="query",
+ *     description="Educational History",
+ *     required=true,
+ *     example="educational_history"
+ * )
+ * @OA\Parameter(
+ *     name="job_history",
+ *     in="query",
+ *     description="Job History",
+ *     required=true,
+ *     example="job_history"
+ * )
+ * @OA\Parameter(
+ *     name="current_cos_details",
+ *     in="query",
+ *     description="Current COS Details",
+ *     required=true,
+ *     example="current_cos_details"
+ * )
+ * @OA\Parameter(
+ *     name="current_passport_details",
+ *     in="query",
+ *     description="Current Passport Details",
+ *     required=true,
+ *     example="current_passport_details"
+ * )
+ * @OA\Parameter(
+ *     name="current_visa_details",
+ *     in="query",
+ *     description="Current Visa Details",
+ *     required=true,
+ *     example="current_visa_details"
+ * )
+ * @OA\Parameter(
+ *     name="address_details",
+ *     in="query",
+ *     description="Address Details",
+ *     required=true,
+ *     example="address_details"
+ * )
+ * @OA\Parameter(
+ *     name="contact_details",
+ *     in="query",
+ *     description="Contact Details",
+ *     required=true,
+ *     example="contact_details"
+ * )
+ * @OA\Parameter(
+ *     name="notes",
+ *     in="query",
+ *     description="Notes",
+ *     required=true,
+ *     example="notes"
+ * )
+ * @OA\Parameter(
+ *     name="bank_details",
+ *     in="query",
+ *     description="Bank Details",
+ *     required=true,
+ *     example="bank_details"
+ * )
+ * @OA\Parameter(
+ *     name="social_links",
+ *     in="query",
+ *     description="Social Links",
+ *     required=true,
+ *     example="social_links"
+ * )
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
@@ -4138,10 +4258,17 @@ class UserManagementController extends Controller
             // });
             $user->work_shift = $user->work_shifts()->first();
 
-            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', ])) {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF','CSV' ])) {
                 if (strtoupper($request->response_type) == 'PDF') {
                     $pdf = PDF::loadView('pdf.user', ["user" => $user, "request" => $request]);
                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+
+                }
+                elseif (strtoupper($request->response_type) === 'CSV') {
+
+                    return Excel::download(new UserExport($user), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+
+
                 }
             } else {
                 return response()->json($user, 200);
