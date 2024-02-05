@@ -25,8 +25,8 @@ class CreatePayrollHolidaysTable extends Migration
 
 
 
-            $table->date("date");
-            $table->integer("hours");
+            // $table->date("date");
+            // $table->integer("hours");
 
             $table->timestamps();
         });

@@ -496,7 +496,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'salary_per_annum' => "required|numeric",
             'weekly_contractual_hours' => 'required|numeric',
             "minimum_working_days_per_week" => 'required|numeric|max:7',
-            "overtime_rate" => 'present|numeric',
+            "overtime_rate" => 'nullable|numeric',
             'emergency_contact_details' => "present|array",
 
 

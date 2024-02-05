@@ -89,8 +89,8 @@ class PayrollCreateRequest extends FormRequest
                 },
 
             ],
-            "start_date" => "present|date",
-            "end_date" => "present|date",
+            "start_date" => "nullable|date",
+            "end_date" => "nullable|date",
 
 
         ];

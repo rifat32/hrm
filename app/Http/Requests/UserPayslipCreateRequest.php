@@ -63,7 +63,7 @@ class UserPayslipCreateRequest extends FormRequest
 
 
             "payroll_id" => [
-                'present',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail)  {
 
@@ -92,7 +92,7 @@ class UserPayslipCreateRequest extends FormRequest
             'year' => 'required|integer',
             'payment_amount' => 'required|numeric',
             'payment_date' => 'required|date',
-            'payslip_file' => 'present|string',
+            'payslip_file' => 'nullable|string',
             'payment_record_file' => 'present|array',
 
 

@@ -57,8 +57,8 @@ class CreateAttendancesTable extends Migration
             $table->time('overtime_start_time')->nullable();
             $table->time('overtime_end_time')->nullable();
             $table->double('overtime_hours');
-            $table->double('work_shift_start_at');
-            $table->double('work_shift_end_at');
+            $table->time('work_shift_start_at');
+            $table->time('work_shift_end_at');
 
             $table->time('leave_start_time')->nullable();
             $table->time('leave_end_time')->nullable();

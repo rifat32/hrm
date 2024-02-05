@@ -81,7 +81,7 @@ class AttendanceCreateRequest extends BaseFormRequest
             'does_break_taken' => "required|boolean",
 
             'project_id' => [
-                'present',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = Project::

@@ -22,10 +22,10 @@ class CreatePayrollLeaveRecordsTable extends Migration
             $table->unsignedBigInteger("leave_record_id");
             $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('restrict');
 
-            $table->date("date");
-            $table->time("start_time");
-            $table->time("end_time");
-            $table->double("leave_hours");
+            // $table->date("date");
+            // $table->time("start_time");
+            // $table->time("end_time");
+            // $table->double("leave_hours");
 
             $table->timestamps();
         });

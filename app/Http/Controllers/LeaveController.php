@@ -797,6 +797,62 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_history = LeaveHistory::create($leave_history_data);
 
 
+                foreach($leave->records as $leave_record){
+                    $this->adjust_payroll_on_leave_update($leave_record);
+
+                    $attendance = Attendance::where([
+                              "leave_record_id" => $leave_record->id
+                          ])
+
+                     ->first();
+
+                     $other_attendance =   Attendance::where([
+                        "user_id" => $leave->user_id
+                    ])
+                    ->where("in_date", "=", $leave_record->date)
+                    ->whereNotIn("leave_record_id",[$leave_record->id])
+                    ->first();
+                    if(!$attendance && !$other_attendance) {
+                        continue;
+                    }
+                    if($attendance) {
+                        if($attendance->leave_record_id) {
+                            $leave_record_date = Carbon::parse($leave_record->date);
+                            $attendance_date = Carbon::parse($attendance->in_date);
+                            if($leave_record_date->isSameDay($attendance_date)) {
+                  
+                            $this->update_attendance_accordingly($attendance,$leave_record);
+
+                            } else {
+                                $attendance->update([
+                                    "leave_start_time" => NULL,
+                                    "leave_end_time" => NULL,
+                                    "leave_record_id" => NULL,
+                                    "leave_hours" => 0
+                                    ]);
+                            }
+                        }
+                    }
+                    if($other_attendance) {
+
+                          $other_attendance = Attendance::find($other_attendance->id);
+
+                          $other_attendance->update([
+                            "leave_start_time" => $leave_record->start_time,
+                            "leave_end_time" => $leave_record->leave_end_time,
+                            "leave_record_id" => $leave_record->id,
+                            "leave_hours" => $leave_record->leave_hours,
+                            ]);
+
+                          $this->update_attendance_accordingly($other_attendance,$leave_record);
+                    }
+                //   call generate payrun
+                if($attendance) {
+                    $this->recalculate_payroll($attendance);
+                } else if ($other_attendance) {
+                    $this->recalculate_payroll($other_attendance);
+                }
+                      }
 
                 return response($leave_approval, 201);
             });
@@ -1578,7 +1634,7 @@ foreach ($assigned_departments as $assigned_department) {
                 "leave_end_time" => $leave_record->end_time,
                ]);
 
-               $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance) ;
+               $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance,$leave_record) ;
                if(!$adjust_payroll_on_attendance_update) {
                    $this->storeError([], 422, "leave update", "leave controller");
                    throw new Exception("some thing went wrong");
