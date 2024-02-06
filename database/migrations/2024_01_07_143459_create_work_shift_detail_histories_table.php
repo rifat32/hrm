@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmployeeWorkShiftDetailHistoriesTable extends Migration
+class CreateWorkShiftDetailHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,15 @@ class CreateEmployeeWorkShiftDetailHistoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_work_shift_detail_histories', function (Blueprint $table) {
+        Schema::create('work_shift_detail_histories', function (Blueprint $table) {
             $table->id();
 
 
 
             $table->unsignedBigInteger('work_shift_id');
-            $table->foreign('work_shift_id')->references('id')->on('employee_work_shift_histories')->onDelete('cascade');
-            
+            $table->foreign('work_shift_id')->references('id')->on('work_shift_histories')->onDelete('cascade');
+
+
             $table->unsignedTinyInteger('day');
             $table->boolean('is_weekend');
             $table->time('start_at')->nullable();
@@ -39,6 +40,6 @@ class CreateEmployeeWorkShiftDetailHistoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_work_shift_detail_histories');
+        Schema::dropIfExists('work_shift_detail_histories');
     }
 }

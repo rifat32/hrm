@@ -14,7 +14,7 @@ use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeVisaDetail;
 use App\Models\EmployeeVisaDetailHistory;
-use App\Models\EmployeeWorkShiftHistory;
+use App\Models\WorkShiftHistory;
 use App\Models\LeaveHistory;
 use App\Models\UserAssetHistory;
 use Exception;
@@ -1263,7 +1263,14 @@ class HistoryDetailsController extends Controller
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              }
 
-             $employee_work_shift_history = EmployeeWorkShiftHistory::when(!empty($request->user_id), function ($query) use ($request) {
+             $employee_work_shift_history = WorkShiftHistory::
+                with([
+                    "users" => function($query) use($request) {
+                        $query->where("user_id",($request->user_id?$request->user_id:auth()->user()->id) );
+                    }
+                ])
+
+                ->when(!empty($request->user_id), function ($query) use ($request) {
 
                 return $query->whereHas('users',function($query) use($request) {
                      $query->where('employee_user_work_shift_histories.user_id', $request->user_id);
@@ -1291,15 +1298,15 @@ class HistoryDetailsController extends Controller
                  })
 
                  ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('employee_work_shift_histories.created_at', ">=", $request->start_date);
+                     return $query->where('work_shift_histories.created_at', ">=", $request->start_date);
                  })
                  ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('employee_work_shift_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                     return $query->where('work_shift_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                  })
                  ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("employee_work_shift_histories.id", $request->order_by);
+                     return $query->orderBy("work_shift_histories.id", $request->order_by);
                  }, function ($query) {
-                     return $query->orderBy("employee_work_shift_histories.id", "DESC");
+                     return $query->orderBy("work_shift_histories.id", "DESC");
                  })
                  ->when(!empty($request->per_page), function ($query) use ($request) {
                      return $query->paginate($request->per_page);

@@ -113,6 +113,12 @@ class ProjectController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $project =  Project::create($request_data);
+
+                if(empty($request_data['departments'])) {
+                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+                }
+
+
                 $project->departments()->sync($request_data['departments'], []);
                 return response($project, 201);
             });
@@ -914,6 +920,11 @@ class ProjectController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+                if(empty($request_data['departments'])) {
+                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+                }
+                $project->departments()->sync($request_data['departments'], []);
 
                 return response($project, 201);
             });

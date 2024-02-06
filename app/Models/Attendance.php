@@ -30,6 +30,7 @@ class Attendance extends Model
 
         "work_shift_start_at",
         "work_shift_end_at",
+        "work_shift_history_id",
         "holiday_id",
         "leave_record_id",
         "is_weekend",
@@ -48,6 +49,7 @@ class Attendance extends Model
 
         'work_location_id',
         'project_id',
+
 
         "is_active",
         "business_id",

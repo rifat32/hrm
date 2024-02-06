@@ -10,7 +10,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessTime;
 use App\Models\Department;
-use App\Models\EmployeeWorkShiftHistory;
+use App\Models\WorkShiftHistory;
 use App\Models\User;
 use App\Models\UserWorkShift;
 use App\Models\WorkShift;
@@ -437,7 +437,7 @@ if(!$fields_changed){
                     $fields_changed
                 ) {
 
-                    EmployeeWorkShiftHistory::where([
+                    WorkShiftHistory::where([
                         "to_date" => NULL
                     ])
                     ->whereHas('users',function($query) use($work_shift_prev)  {
@@ -451,7 +451,7 @@ if(!$fields_changed){
         $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
         $employee_work_shift_history_data["from_date"] = now();
         $employee_work_shift_history_data["to_date"] = NULL;
-         $employee_work_shift_history =  EmployeeWorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
          $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
 
 

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmployeeWorkShiftHistoriesTable extends Migration
+class CreateWorkShiftHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,7 @@ class CreateEmployeeWorkShiftHistoriesTable extends Migration
     {
 
 
-        Schema::create('employee_work_shift_histories', function (Blueprint $table) {
+        Schema::create('work_shift_histories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
@@ -26,7 +26,7 @@ class CreateEmployeeWorkShiftHistoriesTable extends Migration
             $table->unsignedInteger('attendances_count')->default(0);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            
+
             $table->date("from_date");
             $table->date("to_date")->nullable();
 
@@ -67,6 +67,6 @@ class CreateEmployeeWorkShiftHistoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_work_shift_histories');
+        Schema::dropIfExists('work_shift_histories');
     }
 }

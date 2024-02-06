@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeWorkShiftHistory extends Model
+class WorkShiftHistory extends Model
 {
     use HasFactory;
 
@@ -43,7 +43,7 @@ class EmployeeWorkShiftHistory extends Model
 
 
     public function details(){
-        return $this->hasMany(EmployeeWorkShiftDetailHistory::class,'work_shift_id', 'id');
+        return $this->hasMany(WorkShiftDetailHistory::class,'work_shift_id', 'id');
     }
 
     public function departments() {

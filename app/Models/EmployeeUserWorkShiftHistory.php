@@ -10,12 +10,22 @@ class EmployeeUserWorkShiftHistory extends Model
 {
     use HasFactory;
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
+    protected $fillable = [
+        "work_shift_id"
+
+    ];
+
+    public function work_shift_history(){
+        return $this->hasOne(WorkShiftHistory::class,'id', 'work_shift_id');
     }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+
+
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 }

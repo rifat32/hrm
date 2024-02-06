@@ -447,19 +447,29 @@ trait PayrunUtil
     public function adjust_payroll_on_attendance_update($attendance) {
 
         DB::transaction(function() use($attendance) {
+            $attendance_arrear =   AttendanceArrear:: where(["attendance_id" => $attendance->id]) ->first();
             $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
 
                 $query->where("payroll_attendances.attendance_id",$attendance->id);
 
            })->first();
            if(!$payroll) {
+            if(!$attendance_arrear) {
+                $date = Carbon::parse($attendance["in_date"]);
+                $current_date = Carbon::now();
+                if ($date->diffInYears($current_date) >= 2) {
+                    AttendanceArrear::create(["attendance_id" => $attendance->id,  "status" => "pending_approval"]);
+                }
+            }
+
               return true;
            }
 
-            $attendance_arrear =   AttendanceArrear:: where(["attendance_id" => $attendance->id]) ->first();
+
            if($attendance->status != "approved" || $attendance->total_paid_hours < 0) {
             PayrollAttendance::where([
-                "attendance_id" => $attendance->id
+                "attendance_id" => $attendance->id,
+                "payroll_id" => $payroll->id
             ])
             ->delete();
             if($attendance_arrear) {
@@ -473,9 +483,11 @@ trait PayrunUtil
             PayrollAttendance:: updateOrCreate(
                 [
                     "attendance_id" => $attendance->id,
+                    "payroll_id" => $payroll->id
                 ],
                 [
                     "attendances" => $attendance->id,
+                    "payroll_id" => $payroll->id
             ]
             );
             if($attendance_arrear) {
@@ -494,20 +506,33 @@ trait PayrunUtil
 }
 
 
-public function adjust_payroll_on_leave_update($leave_reord) {
+public function adjust_payroll_on_leave_update($leave_record) {
 
-    DB::transaction(function() use($leave_reord) {
-        $payroll = Payroll::whereHas("payroll_leave_records", function($query) use($leave_reord) {
-            $query->where("payroll_leave_records.leave_record_id",$leave_reord->id);
+    DB::transaction(function() use($leave_record) {
+        $leave_record_arrear =   LeaveRecordArrear:: where(["leave_record_id" => $leave_record->id])->first();
+
+
+        $payroll = Payroll::whereHas("payroll_leave_records", function($query) use($leave_record) {
+            $query->where("payroll_leave_records.leave_record_id",$leave_record->id);
        })->first();
        if(!$payroll) {
+        if(!$leave_record_arrear) {
+        $date = Carbon::parse($leave_record["date"]);
+        $current_date = Carbon::now();
+        if ($date->diffInYears($current_date) >= 2) {
+            LeaveRecordArrear::create(["leave_record_id" => $leave_record->id,  "status" => "pending_approval"]);
+        }
+    }
+
+
           return true;
        }
 
-        $leave_record_arrear =   LeaveRecordArrear:: where(["leave_reord_id_id" => $leave_reord->id]) ->first();
-       if($leave_reord->leave->status != "approved" || $leave_reord->leave->leave_type != "paid") {
+
+       if($leave_record->leave->status != "approved" || $leave_record->leave->leave_type != "paid") {
         PayrollLeaveRecord::where([
-            "leave_reord_id" => $leave_reord->id
+            "leave_record_id" => $leave_record->id,
+            "payroll_id" => $payroll->id
         ])
         ->delete();
         if($leave_record_arrear) {
@@ -518,13 +543,15 @@ public function adjust_payroll_on_leave_update($leave_reord) {
     }
 
 
-    if ($leave_reord->leave->leave_type == "paid") {
+    if ($leave_record->leave->leave_type == "paid") {
         PayrollLeaveRecord:: updateOrCreate(
             [
-                "leave_reord_id" => $leave_reord->id,
+                "leave_record_id" => $leave_record->id,
+                "payroll_id" => $payroll->id
             ],
             [
-                "leave_reord_id" => $leave_reord->id,
+                "leave_record_id" => $leave_record->id,
+                "payroll_id" => $payroll->id
         ]
         );
         if($leave_record_arrear) {
@@ -595,7 +622,7 @@ $payroll->overtime_hours_salary = $payroll->total_overtime_attendance_hours * $p
 }
 
 
-public function update_attendance_accordingly($attendance,$leave_record) {
+public function update_attendance_accordingly($attendance,$leave_record = NULL) {
 
     DB::transaction(function() use($attendance, $leave_record) {
 
@@ -605,6 +632,12 @@ public function update_attendance_accordingly($attendance,$leave_record) {
             $result_balance_hours = $attendance->total_paid_hours;
 
         } else if ($attendance->leave_record_id) {
+            if(!$leave_record) {
+                $leave_record = LeaveRecord::where([
+                    "id"=> $attendance->leave_record_id
+                ])
+                ->first();
+            }
 
               $attendance_in_time = $attendance->in_time;
               $attendance_out_time = $attendance->out_time;
@@ -658,9 +691,9 @@ public function update_attendance_accordingly($attendance,$leave_record) {
         "overtime_hours" => $result_balance_hours,
         "leave_start_time" => $leave_start_time,
         "leave_end_time" => $leave_end_time,
-        "leave_record_id" => $leave_record->id,
+        "leave_record_id" => $leave_record?$leave_record->id:NULL,
         "leave_hours" => $leave_hours,
-        "total_paid_hours" => $regular_work_hours + $result_balance_hours,
+        // "total_paid_hours" => $regular_work_hours + $result_balance_hours,
 
        ]);
 

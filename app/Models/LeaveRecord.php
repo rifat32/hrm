@@ -38,14 +38,14 @@ class LeaveRecord extends Model
         return $this->hasOne(PayrollLeaveRecord::class, "leave_record_id" ,'id');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 
 
 
@@ -54,10 +54,10 @@ class LeaveRecord extends Model
 
 
 
-    public function getDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+    // public function getDateAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 
 
 

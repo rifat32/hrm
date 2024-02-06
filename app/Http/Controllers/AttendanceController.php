@@ -17,7 +17,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceArrear;
 use App\Models\AttendanceHistory;
 use App\Models\Department;
-use App\Models\EmployeeWorkShiftHistory;
+use App\Models\WorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\LeaveRecord;
 use App\Models\Payroll;
@@ -399,6 +399,29 @@ class AttendanceController extends Controller
                     //     $regular_work_hours = $total_paid_hours;
                     // }
 
+               $work_shift_history =  WorkShiftHistory::where([
+                        "work_shift_id" => $work_shift->id
+                    ])
+                    ->where("from_date", "<", $$request_data["in_date"])
+                    ->where(function($query) use($request_data){
+                            $query->where("to_date",">=", $request_data["in_date"])
+                            ->orWhereNull("to_date");
+                    })
+                    ->whereHas("users", function($query) use($request_data) {
+                        $query->where("users.id", $request_data["user_id"])
+                        ->where("employee_user_workShift_histories.from_date", "<", $$request_data["in_date"])
+                        ->where(function($query) use($request_data){
+                                $query->where("employee_user_workShift_histories.to_date",">=", $request_data["in_date"])
+                                ->orWhereNull("employee_user_workShift_histories.to_date");
+                        });
+                    })
+
+                    ->first();
+
+                    if(!$work_shift_history) {
+                        throw new Exception("Work shift history not found");
+                    }
+
 
 
                     $request_data["behavior"] = $behavior;
@@ -407,11 +430,14 @@ class AttendanceController extends Controller
                     $request_data["total_paid_hours"] = $total_paid_hours;
                     $request_data["regular_work_hours"] = $regular_work_hours;
 
-
-
-
                     $request_data["work_shift_start_at"] = $work_shift_start_at;
                     $request_data["work_shift_end_at"] = $work_shift_end_at;
+                    $request_data["work_shift_history_id"] = $work_shift_history->id;
+
+
+
+
+
                     $request_data["holiday_id"] = $holiday?$holiday->id:NULL;
                     $request_data["leave_record_id"] = $leave_record?$leave_record->id:NULL;
                     $request_data["is_weekend"] = $work_shift_details->is_weekend;
@@ -747,6 +773,29 @@ class AttendanceController extends Controller
                             }
                         }
 
+                        $work_shift_history =  WorkShiftHistory::where([
+                            "work_shift_id" => $work_shift->id
+                        ])
+                        ->where("from_date", "<", $$request_data["in_date"])
+                        ->where(function($query) use($request_data){
+                                $query->where("to_date",">=", $request_data["in_date"])
+                                ->orWhereNull("to_date");
+                        })
+                        ->whereHas("users", function($query) use($request_data) {
+                            $query->where("users.id", $request_data["user_id"])
+                            ->where("employee_user_workShift_histories.from_date", "<", $$request_data["in_date"])
+                            ->where(function($query) use($request_data){
+                                    $query->where("employee_user_workShift_histories.to_date",">=", $request_data["in_date"])
+                                    ->orWhereNull("employee_user_workShift_histories.to_date");
+                            });
+                        })
+
+                        ->first();
+
+                        if(!$work_shift_history) {
+                            throw new Exception("Work shift history not found");
+                        }
+
 
                         $overtime_start_time = NULL;
                         $overtime_end_time = NULL;
@@ -838,10 +887,12 @@ class AttendanceController extends Controller
                         "regular_work_hours" => $regular_work_hours,
 
 
-
+                      "work_shift_history_id" => $work_shift_history->id,
                        "work_shift_start_at" => $work_shift_start_at,
                        "work_shift_end_at" => $work_shift_end_at,
+
                        "holiday_id" => $holiday?$holiday->id:NULL,
+
                        "leave_record_id" => $leave_record?$leave_record->id:NULL,
                        "is_weekend" => $work_shift_details->is_weekend,
                        "overtime_start_time" => $overtime_start_time,
@@ -990,7 +1041,6 @@ class AttendanceController extends Controller
 
 
 
-
                 $attendance_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
@@ -1008,107 +1058,92 @@ class AttendanceController extends Controller
                         "message" => "no attendance found"
                     ], 404);
                 }
-
-                // $setting_attendance = SettingAttendance::where([
-                //     "business_id" => auth()->user()->business_id
-                // ])
-                //     ->first();
-                // if (!$setting_attendance) {
-                //     $this->storeError(
-                //         "Please define attendance setting first",
-                //         400,
-                //         "front end error",
-                //         "front end error"
-                //     );
-                //     return response()->json(["message" => "Please define attendance setting first"], 400);
-                // }
-
-                // $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                //     $query->where('users.id', $request_data["user_id"]);
-                // })->first();
-                // if (!$work_shift) {
-                //     $this->storeError(
-                //         "Please define workshift first",
-                //         400,
-                //         "front end error",
-                //         "front end error"
-                //     );
-                //     return response()->json(["message" => "Please define workshift first"], 400);
-                // }
-                // if (!$work_shift->is_active) {
-                //     $this->storeError(
-                //         ("Please activate the work shift named '" . $work_shift->name . "'"),
-                //         400,
-                //         "front end error",
-                //         "front end error"
-                //     );
-                //     return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
-                // }
-
-
-                // $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
-                // $work_shift_details =  $work_shift->details()->where([
-                //     "day" => $day_number
-                // ])
-                //     ->first();
-                // if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
-                //     $this->storeError(
-                //         ("No work shift details found  day" . $day_number),
-                //         400,
-                //         "front end error",
-                //         "front end error"
-                //     );
-                //     $error =  [
-                //         "message" => ("No work shift details found  day" . $day_number),
-                //     ];
-                //     throw new Exception(json_encode($error), 400);
-                // }
-                if ($attendance_prev->is_weekend && !auth()->user()->hasRole("business_owner")) {
+                $work_shift =  WorkShiftHistory::
+                    where("id",$attendance_prev->work_shift_history_id)
+                    ->whereHas('users', function ($query) use ($request_data) {
+                    $query->where('users.id', $request_data["user_id"]);
+                })->first();
+                if (!$work_shift) {
                     $this->storeError(
-                        ("there is a weekend on date" . $request_data["in_date"]),
+                        "no work shift history",
+                        400,
+                        "front end error",
+                        "front end error"
+                    );
+                    return response()->json(["message" => "no work shift history found"], 400);
+                }
+                if (!$work_shift->is_active) {
+                    $this->storeError(
+                        ("Please activate the work shift named '" . $work_shift->name . "'"),
+                        400,
+                        "front end error",
+                        "front end error"
+                    );
+                    return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
+                }
+
+                $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
+                $work_shift_details =  $work_shift->details()->where([
+                    "day" => $day_number
+                ])
+                    ->first();
+                if (!$work_shift_details && !auth()->user()->hasRole("business_owner")) {
+                    $this->storeError(
+                        ("No work shift details found  day" . $day_number),
                         400,
                         "front end error",
                         "front end error"
                     );
                     $error =  [
-                        "message" => ("there is a weekend on date" . $request_data["in_date"]),
+                        "message" => ("No work shift details found  day" . $day_number),
                     ];
                     throw new Exception(json_encode($error), 400);
                 }
+                if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
+                    $this->storeError(
+                        ("there is a weekend on date " . $request_data["in_date"]),
+                        400,
+                        "front end error",
+                        "front end error"
+                    );
+                    $error =  [
+                        "message" => ("there is a weekend on date " . $request_data["in_date"]),
+                    ];
+                    throw new Exception(json_encode($error), 400);
+                }
+                $all_parent_department_ids = [];
+                $assigned_departments = Department::whereHas("users", function ($query) use ($request_data) {
+                    $query->where("users.id", $request_data["user_id"]);
+                })->get();
 
-                // $all_parent_department_ids = [];
-                // $assigned_departments = Department::whereHas("users", function ($query) use ($request_data) {
-                //     $query->where("users.id", $request_data["user_id"]);
-                // })->get();
 
-                // foreach ($assigned_departments as $assigned_department) {
-                //     $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-                // }
+                foreach ($assigned_departments as $assigned_department) {
+                    $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+                }
+                $holiday =   Holiday::where([
+                    "business_id" => auth()->user()->business_id
+                ])
+                    ->where('holidays.start_date', "<=", $request_data["in_date"])
+                    ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
+                    ->where(function ($query) use ($request_data, $all_parent_department_ids) {
+                        $query->whereHas("users", function ($query) use ($request_data) {
+                            $query->where([
+                                "users.id" => $request_data["user_id"]
+                            ]);
+                        })
+                            ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departments.id", $all_parent_department_ids);
+                            })
 
-                // $holiday =   Holiday::where([
-                //     "business_id" => auth()->user()->business_id
-                // ])
-                //     ->where('holidays.start_date', "<=", $request_data["in_date"])
-                //     ->where('holidays.end_date', ">=", $request_data["in_date"] . ' 23:59:59')
-                //     ->where(function ($query) use ($request_data, $all_parent_department_ids) {
-                //         $query->whereHas("users", function ($query) use ($request_data) {
-                //             $query->where([
-                //                 "users.id" => $request_data["user_id"]
-                //             ]);
-                //         })
-                //             ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                //                 $query->whereIn("departments.id", $all_parent_department_ids);
-                //             })
+                            ->orWhere(function ($query) {
+                                $query->whereDoesntHave("users")
+                                    ->whereDoesntHave("departments");
+                            });
+                    })
+                    ->first();
 
-                //             ->orWhere(function ($query) {
-                //                 $query->whereDoesntHave("users")
-                //                     ->whereDoesntHave("departments");
-                //             });
-                //     })
-                //     ->first();
-
-                // if ($holiday) {
-                    if ($attendance_prev->is_active && !auth()->user()->hasRole("business_owner")) {
+                if ($holiday) {
+                    if ($holiday->is_active && !auth()->user()->hasRole("business_owner")) {
                         $this->storeError(
                             ("there is a holiday on date" . $request_data["in_date"]),
                             400,
@@ -1120,7 +1155,35 @@ class AttendanceController extends Controller
                         ];
                         throw new Exception(json_encode($error), 400);
                     }
-                // }
+                }
+
+             $leave_record = LeaveRecord::
+                    whereHas('leave',    function ($query) use ($request_data)  {
+                        $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
+                        ->where("leaves.status", "approved");
+                    })
+                    ->where('date', '>=', $request_data["in_date"] . ' 00:00:00')
+                    ->where('date', '<=', ($request_data["in_date"] . ' 23:59:59'))
+                    ->first();
+
+
+                    if ($leave_record && !auth()->user()->hasRole("business_owner")) {
+                            $this->storeError(
+                                ("there is a leave on date" . $request_data["in_date"]),
+                                400,
+                                "front end error",
+                                "front end error"
+                            );
+                            $error =  [
+                                "message" => ("there is a leave on date" . $request_data["in_date"]),
+                            ];
+                            throw new Exception(json_encode($error), 400);
+                    }
+
+
+
+
+
 
                 $request_data["behavior"] = "absent";
                 $request_data["capacity_hours"] = 0;
@@ -1144,7 +1207,7 @@ class AttendanceController extends Controller
 
                     $work_hours_delta = $total_present_hours - $capacity_hours;
 
-                    $total_paid_hours = $total_present_hours;
+                    $request_data["total_paid_hours"] = $total_present_hours;
 
                     $behavior = "absent";
 
@@ -1164,7 +1227,7 @@ class AttendanceController extends Controller
 
                     if ($request_data["does_break_taken"]) {
                         if ($attendance_prev->break_type == 'unpaid') {
-                            $total_paid_hours -= $attendance_prev->break_hours;
+                            $request_data["total_paid_hours"] -= $attendance_prev->break_hours;
                         }
                     }
 
@@ -1173,87 +1236,14 @@ class AttendanceController extends Controller
                     $request_data["capacity_hours"] = $capacity_hours;
                     $request_data["work_hours_delta"] = $work_hours_delta;
 
-                //     $overtime_start_time = NULL;
-                //     $overtime_end_time = NULL;
-                //     $result_balance_hours = 0;
-                //     $leave_hours = 0;
-
-
-                //      if ($attendance_prev->is_weekend || $attendance_prev->holiday_id) {
-                //          $overtime_start_time = $request_data["in_time"];
-                //          $overtime_end_time = $request_data["out_time"];
-                //          $result_balance_hours = $total_paid_hours;
-
-                //      } else if ($attendance_prev->leave_record_id) {
-                //          $attendance_in_time = Carbon::parse($request_data["in_time"]);
-                //          $attendance_out_time = Carbon::parse($request_data["out_time"]);
-
-                //          $leave_start_time = Carbon::parse($attendance_prev->leave_start_time);
-                //          $leave_end_time = Carbon::parse($attendance_prev->leave_end_time);
-
-                //          $balance_start_time = $attendance_in_time->max($leave_start_time);
-                //          $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                //          // Check if there is any overlap
-                //          if ($balance_start_time < $balance_end_time) {
-                //             $overtime_start_time = $request_data["in_time"];
-                //             $overtime_end_time = $request_data["out_time"];
-                //             $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-
-
-                //             $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
-                //             $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
-                //             $uncommon_leave_start = $leave_start_time->min($balance_start_time);
-                //             $uncommon_leave_end = $leave_end_time->max($balance_end_time);
-
-                //         } else {
-                //             $uncommon_attendance_start = $attendance_in_time;
-                //             $uncommon_attendance_end = $attendance_out_time;
-
-                //             $uncommon_leave_start = $leave_start_time;
-                //             $uncommon_leave_end = $leave_end_time;
-                //         }
-
-                //         $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
-                //         $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
-
-                //         $leave_hours = $capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
-                //      } else if ($work_hours_delta > 0) {
-                //          $result_balance_hours = $work_hours_delta;
-                //      }
-                //      else if ($work_hours_delta < 0) {
-                //         $leave_hours = abs($work_hours_delta);
-                //     }
-
-                //   $regular_work_hours =  $total_paid_hours - $result_balance_hours;
-
-                    // if ($work_hours_delta > 0) {
-                    //     $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-                    // } else {
-                    //     $regular_work_hours = $total_paid_hours;
-                    // }
-
-
-
-
-
-                    // $request_data["total_paid_hours"] = $total_paid_hours;
-                    // $request_data["regular_work_hours"] = $regular_work_hours;
-
-
-
-
-                    // $request_data["overtime_start_time"] = $overtime_start_time;
-                    // $request_data["overtime_end_time"] = $overtime_end_time;
-
-                    // $request_data["overtime_hours"] = $result_balance_hours;
-
-                    // $request_data["leave_hours"] = $leave_hours;
-
-
-
 
                 }
+
+                $request_data["is_weekend"] = $work_shift_details->is_weekend;
+                $request_data["holiday_id"] = $holiday?$holiday->id:NULL;
+                $request_data["leave_record_id"] = $leave_record?$leave_record->id:NULL;
+
+
 
                 $attendance  =  tap(Attendance::where($attendance_query_params))->update(
                     collect($request_data)->only([
@@ -1270,8 +1260,11 @@ class AttendanceController extends Controller
                         "work_hours_delta",
                         "work_location_id",
                         "project_id",
+                        "is_weekend",
+                        "holiday_id",
+                        "leave_record_id",
+                        "total_paid_hours",
 
-                        // "total_paid_hours",
                         // "regular_work_hours",
 
                         // "overtime_hours",
@@ -1294,6 +1287,12 @@ class AttendanceController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+                $update_attendance_accordingly = $this->update_attendance_accordingly($attendance,$leave_record) ;
+                if(!$update_attendance_accordingly) {
+                    $this->storeError([], 422, "attendance update", "attendance controller");
+                    throw new Exception("some thing went wrong");
+                }
+
 
 
                 $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance) ;
@@ -1303,9 +1302,10 @@ class AttendanceController extends Controller
                 }
 
 
-$attendance = Attendance::find($attendance->id);
 
-$attendance_history_data = $attendance->toArray();
+                 $attendance = Attendance::find($attendance->id);
+
+                $attendance_history_data = $attendance->toArray();
 
                 $attendance_history_data = $attendance->toArray();
                 $attendance_history_data['attendance_id'] = $attendance->id;
@@ -1399,6 +1399,7 @@ $attendance_history_data = $attendance->toArray();
                         "message" => "You can not perform this action"
                     ], 401);
                 }
+
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
@@ -2422,42 +2423,6 @@ $attendance_history_data = $attendance->toArray();
                             $total_paid_hours += $holiday_hours;
                         }
                         if ($attendance ) {
-
-                            // if($attendance->total_paid_hours > 0) {
-                            //     $result_is_present = 1;
-                            //     $total_attendance_hours = $attendance->total_paid_hours;
-
-                            //     if ( $attendance->holiday_id || $attendance->is_weekend) {
-                            //         $result_balance_hours = $total_attendance_hours;
-                            //     }
-                            //     else if ($attendance->leave_record_id){
-                            //         $attendance_in_time = Carbon::parse($attendance->in_time);
-                            //         $attendance_out_time = Carbon::parse($attendance->out_time);
-
-                            //         $leave_start_time = Carbon::parse($leave_record->start_time);
-                            //         $leave_end_time = Carbon::parse($leave_record->start_time);
-
-                            //         $balance_start_time = $attendance_in_time->max($leave_start_time);
-                            //         $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                            //         // Check if there is any overlap
-                            //         if ($balance_start_time < $balance_end_time) {
-                            //             $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-                            //         }
-                            //     }
-
-
-
-                            //     elseif ($attendance->work_hours_delta > 0) {
-                            //         $result_balance_hours = $attendance->work_hours_delta;
-                            //     }
-
-
-                            //     $total_paid_hours += $total_attendance_hours;
-                            //     $total_balance_hours += $result_balance_hours;
-                            // }
-
-
                             $total_capacity_hours += $attendance->capacity_hours;
                             if($attendance->total_paid_hours > 0) {
                                 $result_is_present = 1;
@@ -2467,17 +2432,7 @@ $attendance_history_data = $attendance->toArray();
                                $total_balance_hours += $attendance->overtime_hours;
                                $result_paid_hours += $attendance->total_paid_hours;
 
-
-
-
-
-
-
                             }
-
-
-
-
                         }
 
                         if ($leave_record || $attendance || $holiday) {
