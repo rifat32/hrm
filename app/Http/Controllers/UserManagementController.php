@@ -488,6 +488,10 @@ class UserManagementController extends Controller
 
 
             $user =  User::create($request_data);
+            $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+            $user->user_name = $username;
+            $user->save();
+
 
             $user->assignRole($request_data['role']);
 
@@ -510,9 +514,7 @@ class UserManagementController extends Controller
             $this->loadDefaultAttendanceSetting($user->business_id);
 
 
-            $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
-            $user->user_name = $username;
-            $user->save();
+
 
             // $user->permissions  = $user->getAllPermissions()->pluck('name');
             // error_log("cccccc");
@@ -728,6 +730,9 @@ class UserManagementController extends Controller
 
 
                 $user =  User::create($request_data);
+                $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+                $user->user_name = $username;
+                $user->save();
                 $user->departments()->sync($request_data['departments'], []);
                 $user->assignRole($request_data['role']);
 
@@ -842,9 +847,7 @@ class UserManagementController extends Controller
                 $user->roles = $user->roles->pluck('name');
 
 
-                $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
-                $user->user_name = $username;
-                $user->save();
+
                 // $user->permissions  = $user->getAllPermissions()->pluck('name');
                 // error_log("cccccc");
                 // $data["user"] = $user;
