@@ -820,7 +820,7 @@ foreach ($assigned_departments as $assigned_department) {
                             $leave_record_date = Carbon::parse($leave_record->date);
                             $attendance_date = Carbon::parse($attendance->in_date);
                             if($leave_record_date->isSameDay($attendance_date)) {
-                  
+
                             $this->update_attendance_accordingly($attendance,$leave_record);
 
                             } else {
@@ -849,7 +849,9 @@ foreach ($assigned_departments as $assigned_department) {
                 //   call generate payrun
                 if($attendance) {
                     $this->recalculate_payroll($attendance);
-                } else if ($other_attendance) {
+                }
+                
+                if ($other_attendance) {
                     $this->recalculate_payroll($other_attendance);
                 }
                       }

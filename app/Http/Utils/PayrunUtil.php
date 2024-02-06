@@ -273,8 +273,8 @@ trait PayrunUtil
                     if (Carbon::parse($current_date)->between(today()->endOfDay(), $holiday_start_date)) {
                         $payroll_holidays_data->push([
                             "holiday_id" => $holiday->id,
-                            // "date" => $current_date,
-                            // "hours" => $holiday_hours,
+                            "date" => $current_date,
+                            "hours" => $holiday_hours,
                         ]);
                         // $total_holiday_hours +=  $holiday_hours;
                     }
@@ -285,7 +285,7 @@ trait PayrunUtil
 
 
 
-        $approved_attendances->each(function ($approved_attendance) use ( &$payroll_attendances_data,  ) {
+        $approved_attendances->each(function ($approved_attendance) use ( &$payroll_attendances_data  ) {
 
             // $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
             // $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;

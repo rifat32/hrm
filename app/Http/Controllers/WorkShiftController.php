@@ -452,7 +452,13 @@ if(!$fields_changed){
         $employee_work_shift_history_data["from_date"] = now();
         $employee_work_shift_history_data["to_date"] = NULL;
          $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
+        //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
+        
+        $user_ids_with_pivot_data = $work_shift->users()->pluck('id', 'id')->map(function ($id) {
+            return [$id => ['from_date' => now(), 'to_date' => NULL]];
+        })->flatten(); // Flatten the multi-dimensional array
+
+        $employee_work_shift_history->users()->sync($user_ids_with_pivot_data);
 
 
 

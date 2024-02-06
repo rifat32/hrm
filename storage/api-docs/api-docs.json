@@ -31663,11 +31663,6 @@
                                         "format": "date",
                                         "example": "Your Expiry Date"
                                     },
-                                    "status": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "Your Status"
-                                    },
                                     "note": {
                                         "type": "string",
                                         "format": "string",
@@ -31792,11 +31787,6 @@
                                         "type": "string",
                                         "format": "date",
                                         "example": "Your Expiry Date"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "Your Status"
                                     },
                                     "note": {
                                         "type": "string",

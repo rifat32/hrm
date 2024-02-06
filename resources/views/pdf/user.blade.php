@@ -206,9 +206,10 @@ return $formattedBreakTime;
         <h3>Employee Details</h3>
         <thead>
             <tr class="table_head_row">
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Last Name</th>
+                <th>Name</th>
+                {{-- <th>First Name</th> --}}
+                {{-- <th>Middle Name</th>
+                <th>Last Name</th> --}}
                 <th>Employe ID</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -217,7 +218,11 @@ return $formattedBreakTime;
         </thead>
         <tbody>
             <tr class="table_row">
+
                 <td>
+                    {{ $user->first_Name . " " .  $user->middle_Name . " " . $user->last_Name}}
+                </td>
+                {{-- <td>
                     {{ $user->first_Name }}
                 </td>
                 <td>
@@ -225,7 +230,7 @@ return $formattedBreakTime;
                 </td>
                 <td>
                     {{ $user->last_Name }}
-                </td>
+                </td> --}}
                 <td>
                     {{ $user->user_id }}
                 </td>
@@ -333,43 +338,7 @@ return $formattedBreakTime;
     </table>
 
 @endif
-    <table>
-        <h3>Attendances</h3>
-        <thead>
-            <tr class="table_head_row">
-                <th class="index_col"></th>
-                <th>Date</th>
 
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Break (hour)</th>
-                <th>Schedule (hour)</th>
-                <th>Overtime (hour)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (count($user->attendances))
-                @foreach ($user->attendances as $index => $attendance)
-                    <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ format_date($attendance->in_date) }}</td>
-                        <td>{{ $attendance->in_time }}</td>
-                        <td>{{ $attendance->out_time }}</td>
-                        <td>{{ $attendance->does_break_taken?time_format($attendance->break_hours):0 }}</td>
-                        <td>{{ time_format($attendance->capacity_hours) }}</td>
-                        <td>{{ time_format($attendance->overtime_hours) }}</td>
-
-
-                    </tr>
-                @endforeach
-            @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
-            @endif
-
-        </tbody>
-    </table>
 
     {{-- 4. LEAVE  --}}
     @if (!empty($request->leaves))
@@ -516,7 +485,7 @@ return $formattedBreakTime;
                 <th class="index_col"></th>
                 <th>Degree</th>
                 <th>Major</th>
-                </th>
+
                 {{-- <th>Institution</th> ETA TO ONEK BOTO HOBE KEMNE SHOW KORAIBA CSS DIA DEIKHO PARO KINA --}}
                 <th>Start Date</th>
                 <th>Achivments</th>
@@ -617,7 +586,7 @@ return $formattedBreakTime;
             @if (!empty($user->sponsorship_detail))
 
                     <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
+                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
                         {{-- <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
                         <td>{{ format_date($user->sponsorship_detail->expiry_date) }}</td> --}}
                         <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
@@ -656,7 +625,7 @@ return $formattedBreakTime;
             @if (!empty($user->passport_detail))
 
                     <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
+                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
                         {{-- <td>{{ $user->passport_detail->created_at }}</td>
                         <td>{{ $user->passport_detail->updated_at }}</td> --}}
                         <td>{{ format_date($user->passport_detail->passport_issue_date) }}</td>
@@ -675,7 +644,7 @@ return $formattedBreakTime;
 @endif
 
 
-    </table>
+
     {{-- PASSPORT HISTORY --}}
     @if (!empty($request->current_visa_details))
     <table>
@@ -695,7 +664,7 @@ return $formattedBreakTime;
             @if (!empty($user->visa_detail))
 
                     <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
+                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
                         {{-- <td>{{ $user->visa_detail->created_at }}</td>
                         <td>{{ $user->visa_detail->updated_at }}</td> --}}
                         <td>{{ format_date($user->visa_detail->visa_issue_date) }}</td>
@@ -731,7 +700,7 @@ return $formattedBreakTime;
         <tbody>
             @if (!empty($user->address_line_1))
                     <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
+                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
                         <td>{{ $user->address_line_1 }} </td>
                         <td>{{ $user->city }}</td>
                         <td>{{ $user->country }}</td>

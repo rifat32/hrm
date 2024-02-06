@@ -3,9 +3,10 @@
 namespace App\Exports;
 
 use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\FromCollection;
 
-class UserExport implements FromCollection
+use Maatwebsite\Excel\Concerns\FromView;
+
+class UserExport implements FromView
 {
     protected $user;
 
