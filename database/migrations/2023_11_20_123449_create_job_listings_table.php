@@ -36,8 +36,8 @@ class CreateJobListingsTable extends Migration
 
 
 
-            $table->unsignedBigInteger("department_id");
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
+            $table->unsignedBigInteger("department_id")->nullable();
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
             $table->boolean("is_active")->default(true);
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

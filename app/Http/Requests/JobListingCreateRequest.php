@@ -123,7 +123,7 @@ class JobListingCreateRequest extends BaseFormRequest
 
 
             'department_id' => [
-                'required',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
