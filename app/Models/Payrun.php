@@ -15,6 +15,7 @@ class Payrun extends Model
         "start_date",
         "end_date",
         "generating_type",
+        "consider_type",
         "consider_overtime",
         "notes",
 

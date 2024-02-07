@@ -42,7 +42,7 @@ class PayrunUpdateRequest extends BaseFormRequest
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
                     $exists = Payrun::where('id', $value)
-                        ->where('payruns.business_id', '=', auth()->user()->id)
+                        ->where('payruns.business_id', '=', auth()->user()->business_id)
                         ->whereHas("departments", function($query) use($all_manager_department_ids) {
                             $query->whereIn("departments.id",$all_manager_department_ids);
                          })

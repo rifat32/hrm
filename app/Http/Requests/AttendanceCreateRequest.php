@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\Project;
 use App\Models\User;
@@ -77,11 +78,28 @@ class AttendanceCreateRequest extends BaseFormRequest
 
 
 
-            'in_date' => 'required|date',
+
+            'in_date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $exists = Attendance::
+                        where('attendances.user_id', $this->user_id)
+                        ->where('attendances.in_date', $value)
+                        ->where('attendances.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail($attribute . " is invalid. attendance already exists in this date");
+                    }
+                },
+            ],
+
+
             'does_break_taken' => "required|boolean",
 
             'project_id' => [
-                'nullable',
+                'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = Project::

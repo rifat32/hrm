@@ -16,7 +16,7 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
 
-        \App\Http\Middleware\DateFormatterMiddleware::class,
+
         \App\Http\Middleware\TrustProxies::class,
         \Fruitcake\Cors\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -42,6 +42,8 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \App\Http\Middleware\FormatDatesInResponse::class,
+            \App\Http\Middleware\FormatDatesInRequest::class,
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
     //  'throttle:9999999,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,

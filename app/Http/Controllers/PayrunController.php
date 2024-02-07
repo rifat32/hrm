@@ -108,7 +108,10 @@ class PayrunController extends Controller
                 ->pluck("id");
 
 
+
+
                 $payrun->departments()->sync($request_data['departments'], []);
+                // $payrun->departments()->sync($request_data['departments'], []);
                 // $payrun->users()->sync($request_data['users'], []);
 
                 return response($payrun, 201);
@@ -206,6 +209,10 @@ class PayrunController extends Controller
                         "start_date",
                         "end_date",
                         "generating_type",
+                        "consider_type",
+                        "consider_overtime",
+                        "notes",
+
                         "consider_overtime",
                         "notes",
                     ])->toArray()

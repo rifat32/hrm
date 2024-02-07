@@ -119,13 +119,14 @@ class AttendanceController extends Controller
 
                 $request_data = $request->validated();
 
+
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
                 $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
 
-
+               
 
 
                 $setting_attendance = SettingAttendance::where([
@@ -399,24 +400,27 @@ class AttendanceController extends Controller
                     //     $regular_work_hours = $total_paid_hours;
                     // }
 
+
                $work_shift_history =  WorkShiftHistory::where([
                         "work_shift_id" => $work_shift->id
                     ])
-                    ->where("from_date", "<", $$request_data["in_date"])
+                    ->where("from_date", "<", $request_data["in_date"])
                     ->where(function($query) use($request_data){
                             $query->where("to_date",">=", $request_data["in_date"])
                             ->orWhereNull("to_date");
                     })
                     ->whereHas("users", function($query) use($request_data) {
                         $query->where("users.id", $request_data["user_id"])
-                        ->where("employee_user_workShift_histories.from_date", "<", $$request_data["in_date"])
+                        ->where("employee_user_work_shift_histories.from_date", "<", $request_data["in_date"])
                         ->where(function($query) use($request_data){
-                                $query->where("employee_user_workShift_histories.to_date",">=", $request_data["in_date"])
-                                ->orWhereNull("employee_user_workShift_histories.to_date");
+                                $query->where("employee_user_work_shift_histories.to_date",">=", $request_data["in_date"])
+                                ->orWhereNull("employee_user_work_shift_histories.to_date");
                         });
                     })
 
                     ->first();
+
+
 
                     if(!$work_shift_history) {
                         throw new Exception("Work shift history not found");
@@ -454,6 +458,10 @@ class AttendanceController extends Controller
 
 
                 }
+
+
+
+
 
 
                 $attendance =  Attendance::create($request_data);
@@ -703,20 +711,20 @@ class AttendanceController extends Controller
                         $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
                         ->where("leaves.status", "approved");
                     })
-                    ->where('date', '>=', $request_data["in_date"] . ' 00:00:00')
-                    ->where('date', '<=', ($request_data["in_date"] . ' 23:59:59'))
+                    ->where('date', '>=', $item["in_date"] . ' 00:00:00')
+                    ->where('date', '<=', ($item["in_date"] . ' 23:59:59'))
                     ->first();
 
 
                     if ($leave_record && !auth()->user()->hasRole("business_owner")) {
                             $this->storeError(
-                                ("there is a leave on date" . $request_data["in_date"]),
+                                ("there is a leave on date" . $item["in_date"]),
                                 400,
                                 "front end error",
                                 "front end error"
                             );
                             $error =  [
-                                "message" => ("there is a leave on date" . $request_data["in_date"]),
+                                "message" => ("there is a leave on date" . $item["in_date"]),
                             ];
                             throw new Exception(json_encode($error), 400);
 
@@ -1264,6 +1272,7 @@ class AttendanceController extends Controller
                         "holiday_id",
                         "leave_record_id",
                         "total_paid_hours",
+
 
                         // "regular_work_hours",
 

@@ -110,7 +110,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
 
 
             'attendance_details.*.project_id' => [
-                'nullable',
+                'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = Project::

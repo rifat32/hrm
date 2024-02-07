@@ -26,7 +26,7 @@ use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\VerifyMail;
 use App\Models\ActivityLog;
-
+use App\Models\Attendance;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
@@ -4829,7 +4829,161 @@ class UserManagementController extends Controller
     }
 
 
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/get-attendances/{id}",
+     *      operationId="getAttendancesByUserId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
 
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getAttendancesByUserId($id, Request $request)
+     {
+         $logPath = storage_path('logs');
+
+         foreach (File::glob($logPath . '/*.log') as $file) {
+             File::delete($file);
+         }
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+
+             $user = User::with("roles")
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+                 })
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                     return $query->where(function ($query) {
+                         return  $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id);
+                     });
+                 })
+                 ->first();
+
+             if (!$user) {
+                 $this->storeError(
+                     "no data found"
+                     ,
+                     404,
+                     "front end error",
+                     "front end error"
+                    );
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+             $all_parent_department_ids = [];
+             $assigned_departments = Department::whereHas("users", function ($query) use ($id) {
+                 $query->where("users.id", $id);
+             })->get();
+
+
+             foreach ($assigned_departments as $assigned_department) {
+                 $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+             }
+
+
+             $today = Carbon::now()->startOfYear()->format('Y-m-d');
+             $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+
+
+
+             $already_taken_attendances =  Attendance::where([
+                 "user_id" => $user->id
+             ])
+            ->where('attendances.in_date', '>=', $today)
+            ->where('attendances.in_date', '<=', $end_date_of_year . ' 23:59:59')
+                 ->get();
+
+
+             $already_taken_attendance_dates = $already_taken_attendances->flatMap(function ($attendance) {
+                     return Carbon::parse($attendance->in_date)->format('d-m-Y');
+             })->toArray();
+
+
+
+
+             // Merge the collections and remove duplicates
+             $result_collection = $already_taken_attendance_dates->unique();
+
+
+             // $result_collection now contains all unique dates from holidays and weekends
+             $result_array = $result_collection->values()->all();
+
+
+
+             return response()->json($result_array, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

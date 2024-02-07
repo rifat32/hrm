@@ -20,7 +20,7 @@ class Module extends Model
 
 
     public function business_tier(){
-        return $this->belongsTo(businessTier::class,'business_tier_id', 'id');
+        return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
     }
     public function getCreatedAtAttribute($value)
     {

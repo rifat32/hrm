@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Department;
+use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
@@ -68,6 +69,20 @@ class AttendanceUpdateRequest extends BaseFormRequest
             'out_time' => 'nullable|date_format:H:i:s|after_or_equal:in_time',
             'in_date' => 'required|date',
             'does_break_taken' => "required|boolean",
+            'attendance_details.*.project_id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = Project::
+                        where('id', $value)
+                        ->where('projects.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail($attribute . " is invalid.");
+                    }
+                },
+            ],
             'work_location_id' => [
                 "required",
                 'numeric',
