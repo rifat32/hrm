@@ -416,8 +416,8 @@ return $formattedBreakTime;
                 @foreach ($user->documents as $index => $document)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ $documents->name }}</td>
-                        <td>  {{ $documents->creator->first_Name . " " . $documents->creator->last_Name . " " . $documents->creator->middle_Name }}</td>
+                        <td>{{ $document->name }}</td>
+                        <td>  {{ $document->creator->first_Name . " " . $document->creator->last_Name . " " . $document->creator->middle_Name }}</td>
 
 
                     </tr>

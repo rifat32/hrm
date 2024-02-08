@@ -86,6 +86,9 @@ class JobPlatform extends Model
     }
 
 
+    public function job_listings() {
+        return $this->belongsToMany(JobListing::class, 'job_listing_job_platforms', 'job_platform_id', 'job_listing_id');
+    }
 
     public function getCreatedAtAttribute($value)
     {

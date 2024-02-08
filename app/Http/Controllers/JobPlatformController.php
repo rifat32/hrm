@@ -480,6 +480,14 @@ class JobPlatformController extends Controller
      *         required=true,
      *  example="6"
      *      ),
+     *   *    *      * *  @OA\Parameter(
+     * name="job_listing_id",
+     * in="query",
+     * description="job_listing_id",
+     * required=true,
+     * example="1"
+     * ),
+
 
      *      * *  @OA\Parameter(
      * name="start_date",
@@ -668,6 +676,11 @@ class JobPlatformController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+                ->when(!empty($request->job_listing_id), function ($query) use ($request) {
+                    return $query->whereHas('job_listings',function($query) use($request) {
+                        $query->where('job_listings.id',$request->job_listing_id);
+                    });
+                })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('job_platforms.created_at', ">=", $request->start_date);
                 })

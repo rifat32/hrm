@@ -824,7 +824,7 @@ class UserManagementController extends Controller
                         throw new Exception("Now work shift history found");
                     }
 
-                        $work_shift_history->users()->attach($user->id, ['from_date' => now(), 'to_date' => NULL]);
+                        $work_shift_history->users()->attach($user->id, ['from_date' => $work_shift_history->from_date, 'to_date' => NULL]);
 
 
                 } else {

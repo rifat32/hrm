@@ -64,7 +64,7 @@ trait PayrunUtil
         if (!$start_date || !$end_date) {
             return false; // Skip to the next iteration
         }
-        
+
         // Convert end_date to Carbon instance
         $end_date = Carbon::parse($end_date);
 
@@ -413,9 +413,9 @@ trait PayrunUtil
             try {
                 DB::transaction(function () use ($payroll_data, $payroll_holidays_data, $payroll_leave_records_data, $payroll_attendances_data, $attendance_arrears, $leave_arrears) {
                     $payroll = Payroll::create($payroll_data);
-                    $payroll->payroll_holidays()->create($payroll_holidays_data);
-                    $payroll->payroll_leave_records()->create($payroll_leave_records_data);
-                    $payroll->payroll_attendances()->create($payroll_attendances_data);
+                    $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
+                    $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
+                    $payroll->payroll_attendances()->createMany($payroll_attendances_data->toArray());
 
                     $attendance_arrears->each(function ($attendance_arrear) {
                         AttendanceArrear::create([
@@ -440,8 +440,9 @@ trait PayrunUtil
             } catch (Exception $e) {
 
                 $this->storeError($e, 422, $e->getLine(), $e->getFile());
+                return false;
                 return [
-                    "message" => "something went wrong creating payroll"
+                    "message" => "something went wrong creating payroll",
                 ];
             }
         }
@@ -631,7 +632,12 @@ $payroll->overtime_hours_salary = $payroll->total_overtime_attendance_hours * $p
 public function update_attendance_accordingly($attendance,$leave_record = NULL) {
 
     DB::transaction(function() use($attendance, $leave_record) {
-
+        $result_balance_hours = 0;
+        $overtime_start_time = NULL;
+        $overtime_end_time = NULL;
+        $leave_start_time = NULL;
+        $leave_end_time = NULL;
+        $leave_hours = 0;
         if ($attendance->is_weekend || $attendance->holiday_id) {
             $overtime_start_time = $attendance->in_time;
             $overtime_end_time = $attendance->out_time;
