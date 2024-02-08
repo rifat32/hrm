@@ -808,17 +808,17 @@ class UserManagementController extends Controller
                     $work_shift->users()->attach($user->id);
 
 
-
-
-                    $employee_work_shift_history_data = $work_shift->toArray();
-
                     $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
 
-                    $employee_work_shift_history_data["from_date"] = now();
-                    $employee_work_shift_history_data["to_date"] = NULL;
+                    $work_shift_history =  WorkShiftHistory::where([
+                        "to_date" => NULL,
+                        "work_shift_id" => $work_shift->id
+                    ])
+                    ->first();
 
-                    $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                    $employee_work_shift_history->users()->attach($user->id);
+                        $work_shift_history->users()->attach($user->id, ['from_date' => now(), 'to_date' => NULL]);
+
+
                 } else {
                     $default_work_shift = WorkShift::where([
                         "business_id" => auth()->user()->business_id,

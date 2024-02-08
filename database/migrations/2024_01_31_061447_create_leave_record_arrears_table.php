@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLeaveArrearsTable extends Migration
+class CreateLeaveRecordArrearsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateLeaveArrearsTable extends Migration
      */
     public function up()
     {
-        Schema::create('leave_arrears', function (Blueprint $table) {
+        Schema::create('leave_record_arrears', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("leave_record_id");
             $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('cascade');

@@ -967,6 +967,14 @@ class ProjectController extends Controller
      * required=true,
      * example="2019-06-29"
      * ),
+     *  @OA\Parameter(
+     * name="in_date",
+     * in="query",
+     * description="in_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * in_date
      * *  @OA\Parameter(
      * name="search_key",
      * in="query",
@@ -1081,11 +1089,19 @@ class ProjectController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", $request->start_date);
+                    return $query->where('start_date', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('end_date', "<=", ($request->end_date . ' 23:59:59'));
                 })
+                ->when(!empty($request->in_date), function ($query) use ($request) {
+                    return $query->where('start_date', "<=", ($request->in_date . ' 00:00:00'))
+                    ->where('end_date', "<=", ($request->in_date . ' 23:59:59'));
+                })
+
+
+
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("projects.id", $request->order_by);
                 }, function ($query) {

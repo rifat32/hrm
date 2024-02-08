@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 trait PayrunUtil
 {
     // this function do all the task and returns transaction id or -1
-    public function process_payrun($payrun, $employees, $start_date, $end_date = NULL, $generate_payroll = false)
+    public function process_payrun($payrun, $employees, $start_date, $end_date = NULL,$is_manual=false,$generate_payroll = false)
     {
 
         if (!$payrun->business_id) {
@@ -59,17 +59,23 @@ trait PayrunUtil
                     break;
             }
         }
+
+
         if (!$start_date || !$end_date) {
             return false; // Skip to the next iteration
         }
-
+        
         // Convert end_date to Carbon instance
         $end_date = Carbon::parse($end_date);
 
         // Check if end_date is today
-        if (!$end_date->isToday()) {
+        if (!$end_date->isToday() && $is_manual==false) {
             return false; // Skip to the next iteration
         }
+
+
+
+
         $employees->each(function ($employee) use ($payrun, $generate_payroll, $start_date) {
 
             $employee->payroll = $this->generate_payroll($payrun, $employee, $start_date, $generate_payroll);

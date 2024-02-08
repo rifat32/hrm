@@ -106,7 +106,7 @@ class PayrollController extends Controller
 
                  $employees = User::whereIn("id",$request_data["users"])
                      ->get();
-                $processed_employees =  $this->process_payrun($payrun,$employees,$request_data["start_date"],$request_data["end_date"],true);
+                $processed_employees =  $this->process_payrun($payrun,$employees,$request_data["start_date"],$request_data["end_date"],true,true);
 
                  return response()->json($processed_employees,201);
 
@@ -258,9 +258,7 @@ class PayrollController extends Controller
             foreach ($manager_departments as $manager_department) {
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
-
-             ;
+            };
             if(!$request->payrun_id) {
                $error = [ "message" => "The given data was invalid.",
                "errors" => ["payrun_id"=>["The payrun_id field is required."]]
@@ -309,6 +307,7 @@ class PayrollController extends Controller
              }
 
 
+
             $employees = User::where([
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
@@ -334,7 +333,8 @@ class PayrollController extends Controller
                 ->get();
 
 
-           $processed_employees =  $this->process_payrun($payrun,$employees,$request->start_date,$request->end_date);
+           $processed_employees =  $this->process_payrun($payrun,$employees,$request->start_date,$request->end_date,true,false);
+
 
             return response()->json($processed_employees,200);
 

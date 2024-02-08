@@ -89,7 +89,7 @@ class AttendanceCreateRequest extends BaseFormRequest
                         ->where('attendances.business_id', '=', auth()->user()->business_id)
                         ->exists();
 
-                    if (!$exists) {
+                    if ($exists) {
                         $fail($attribute . " is invalid. attendance already exists in this date");
                     }
                 },

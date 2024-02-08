@@ -27,7 +27,7 @@ class FormatDatesInResponse
     {
         $data = json_decode($json, true);
 
-        if (json_last_error() === JSON_ERROR_NONE) {
+        if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
             array_walk_recursive($data, function (&$value, $key) {
                 if (is_string($value) && strtotime($value) !== false && !preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
                     $value = date('d-m-Y', strtotime($value));

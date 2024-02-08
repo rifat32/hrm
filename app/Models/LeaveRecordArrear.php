@@ -14,7 +14,7 @@ class LeaveRecordArrear extends Model
         "status",
     ];
 
-    public function leave()
+    public function leave_record()
     {
         return $this->belongsTo(LeaveRecord::class, "leave_record_id" ,'id');
     }
