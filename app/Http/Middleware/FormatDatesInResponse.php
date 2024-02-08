@@ -29,8 +29,9 @@ class FormatDatesInResponse
 
         if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
             array_walk_recursive($data, function (&$value, $key) {
-                if (is_string($value) && strtotime($value) !== false && !preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
-                    $value = date('d-m-Y', strtotime($value));
+                // Check if the value resembles a date but not in the format G-0001
+                if (is_string($value) && Carbon::hasFormat($value, 'Y-m-d')) {
+                    $value = Carbon::createFromFormat('Y-m-d', $value)->format('d-m-Y');
                 }
             });
 

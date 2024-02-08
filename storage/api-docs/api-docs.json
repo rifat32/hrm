@@ -11101,6 +11101,122 @@
                 ]
             }
         },
+        "/v1.0/histories/employee-work-shift": {
+            "get": {
+                "tags": [
+                    "histories"
+                ],
+                "summary": "This method is to get employee work shift history",
+                "description": "This method is to get work shift history",
+                "operationId": "getEmployeeWorkShiftHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "user_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "leave_id",
+                        "in": "query",
+                        "description": "leave_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/histories/user-project": {
             "get": {
                 "tags": [
@@ -17878,6 +17994,13 @@
                         "name": "end_date",
                         "in": "query",
                         "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "in_date",
+                        "in": "query",
+                        "description": "in_date",
                         "required": true,
                         "example": "2019-06-29"
                     },
@@ -30807,6 +30930,11 @@
                                         "format": "double",
                                         "example": 1000
                                     },
+                                    "payment_notes": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 1000
+                                    },
                                     "payment_date": {
                                         "type": "string",
                                         "format": "date",
@@ -30824,6 +30952,30 @@
                                             "/abcd.jpg",
                                             "/efgh.jpg"
                                         ]
+                                    },
+                                    "gross_pay": {
+                                        "description": "Gross pay amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 1000.5
+                                    },
+                                    "tax": {
+                                        "description": "Tax amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 200.75
+                                    },
+                                    "employee_ni_deduction": {
+                                        "description": "Employee NI deduction amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 50.25
+                                    },
+                                    "employer_ni": {
+                                        "description": "Employer NI amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 75.2999999999999971578290569595992565155029296875
                                     }
                                 },
                                 "type": "object"
@@ -30920,6 +31072,11 @@
                                         "format": "int",
                                         "example": 2024
                                     },
+                                    "payment_notes": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 1000
+                                    },
                                     "payment_amount": {
                                         "type": "number",
                                         "format": "double",
@@ -30942,6 +31099,30 @@
                                             "/abcd.jpg",
                                             "/efgh.jpg"
                                         ]
+                                    },
+                                    "gross_pay": {
+                                        "description": "Gross pay amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 1000.5
+                                    },
+                                    "tax": {
+                                        "description": "Tax amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 200.75
+                                    },
+                                    "employee_ni_deduction": {
+                                        "description": "Employee NI deduction amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 50.25
+                                    },
+                                    "employer_ni": {
+                                        "description": "Employer NI amount",
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 75.2999999999999971578290569595992565155029296875
                                     }
                                 },
                                 "type": "object"

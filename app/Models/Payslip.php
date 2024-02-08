@@ -10,7 +10,14 @@ class Payslip extends Model
     use HasFactory;
 
     protected $fillable = [
-       'user_id', 'month', 'year', 'payment_amount', 'payment_date', 'payslip_file', 'payment_record_file', "payroll_id", "created_by"
+       'user_id', 'month', 'year', 'payment_amount', "payment_notes",'payment_date', 'payslip_file', 'payment_record_file', "payroll_id",
+       'gross_pay',
+       'tax',
+       'employee_ni_deduction',
+       'employer_ni',
+
+
+       "created_by"
     ];
 
 

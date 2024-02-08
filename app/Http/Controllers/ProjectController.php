@@ -974,7 +974,7 @@ class ProjectController extends Controller
      * required=true,
      * example="2019-06-29"
      * ),
-     * in_date
+     *
      * *  @OA\Parameter(
      * name="search_key",
      * in="query",
@@ -1072,11 +1072,11 @@ class ProjectController extends Controller
             )  ->whereHas("departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
-             ->when(!empty($request->user_id), function ($query) use ($request) {
-                return $query->whereHas('users', function($query) use($request) {
-                        $query->where("users.id",$request->user_id);
-                });
-            })
+            //  ->when(!empty($request->user_id), function ($query) use ($request) {
+            //     return $query->whereHas('users', function($query) use($request) {
+            //             $query->where("users.id",$request->user_id);
+            //     });
+            // })
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {

@@ -17,6 +17,11 @@ trait ErrorUtil
             return response()->json(json_decode($e->getMessage()), 422);
         }
 
+        if ($e->getCode() == 400) {
+            $statusCode = 400;
+            return response()->json(json_decode($e->getMessage()), 400);
+        }
+
 
         if (env("APP_DEBUG") === false) {
             $data["message"] = "something went wrong";

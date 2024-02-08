@@ -21,7 +21,7 @@ class CreatePayslipsTable extends Migration
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade');
-                
+
                 $table->unsignedBigInteger("payroll_id")->nullable();
                 $table->foreign('payroll_id')
                     ->references('id')
@@ -32,11 +32,21 @@ class CreatePayslipsTable extends Migration
             $table->integer('month');
             $table->integer('year');
             $table->double('payment_amount');
+
+            $table->text('payment_notes')->nullable();
+
+
+
             $table->date('payment_date');
 
 
             $table->string('payslip_file')->nullable();
             $table->json('payment_record_file')->nullable();
+
+            $table->double('gross_pay')->default(0);
+            $table->double('tax')->default(0);
+            $table->double('employee_ni_deduction')->default(0);
+            $table->double('employer_ni')->default(0);
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

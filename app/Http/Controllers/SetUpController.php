@@ -25,6 +25,7 @@ use App\Models\SettingPayrun;
 use App\Models\SocialSite;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
+use App\Models\WorkShiftHistory;
 
 class SetUpController extends Controller
 {
@@ -635,7 +636,18 @@ return "swagger generated";
         ];
 
         $default_work_shift_1 = WorkShift::create($default_work_shift_data_1);
+        
+
+
+
         $default_work_shift_1->details()->createMany($default_work_shift_data_1['details']);
+
+        $employee_work_shift_history_data = $default_work_shift_1->toArray();
+        $employee_work_shift_history_data["work_shift_id"] = $default_work_shift_1->id;
+        $employee_work_shift_history_data["from_date"] = now();
+        $employee_work_shift_history_data["to_date"] = NULL;
+         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history->details()->createMany($default_work_shift_data_1['details']);
 
         $default_work_shift_data_2 = [
             'name' => 'main work shift',

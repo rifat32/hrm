@@ -803,7 +803,12 @@ class UserManagementController extends Controller
                             "front end error",
                             "front end error"
                            );
-                        return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
+                           $error =  [
+                            "message" => ("Please activate the work shift named '" . $work_shift->name . "'"),
+
+                     ];
+                        throw new Exception(json_encode($error),400);
+                        // return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
                     }
                     $work_shift->users()->attach($user->id);
 
@@ -815,6 +820,9 @@ class UserManagementController extends Controller
                         "work_shift_id" => $work_shift->id
                     ])
                     ->first();
+                    if (!$work_shift_history) {
+                        throw new Exception("Now work shift history found");
+                    }
 
                         $work_shift_history->users()->attach($user->id, ['from_date' => now(), 'to_date' => NULL]);
 
@@ -837,7 +845,12 @@ class UserManagementController extends Controller
                             "front end error",
                             "front end error"
                            );
-                        return response()->json(["message" => ("Please activate the work shift named '" . $default_work_shift->name . "'")], 400);
+                           $error =  [
+                            "message" =>        ("Please activate the work shift named '" . $default_work_shift->name . "'"),
+
+                     ];
+                        throw new Exception(json_encode($error),400);
+                        // return response()->json(["message" => ("Please activate the work shift named '" . $default_work_shift->name . "'")], 400);
                     }
 
                     $default_work_shift->users()->attach($user->id);
@@ -5773,7 +5786,7 @@ class UserManagementController extends Controller
             ])->exists()
         );
 
-
+error_log($user_id);
         return response()->json(["user_id" => $user_id], 200);
     }
 

@@ -18,6 +18,7 @@ use App\Models\SettingPayrun;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
+use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
 
@@ -795,6 +796,12 @@ trait BusinessUtil
 
         $default_work_shift = WorkShift::create($default_work_shift_data);
         $default_work_shift->details()->createMany($default_work_shift_data['details']);
+        $employee_work_shift_history_data = $default_work_shift->toArray();
+        $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
+        $employee_work_shift_history_data["from_date"] = now();
+        $employee_work_shift_history_data["to_date"] = NULL;
+         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
     }
 
 

@@ -130,11 +130,41 @@ class UserPayslipController extends Controller
  *     @OA\Property(property="payroll_id", type="integer", format="int", example=null),
  *     @OA\Property(property="month", type="integer", format="int", example=1),
  *     @OA\Property(property="year", type="integer", format="int", example=2024),
+ *
+ *   @OA\Property(property="payment_notes", type="number", format="double", example=1000.00),
  *     @OA\Property(property="payment_amount", type="number", format="double", example=1000.00),
  *     @OA\Property(property="payment_date", type="string", format="date", example="2024-02-02"),
  *     @OA\Property(property="payslip_file", type="string", format="string", example="path/to/payslip.pdf"),
- *  *   @OA\Property(property="payment_record_file", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *  *   @OA\Property(property="payment_record_file", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"}),
  *
+ **     @OA\Property(
+ *         property="gross_pay",
+ *         type="number",
+ *         format="double",
+ *         example=1000.50,
+ *         description="Gross pay amount"
+ *     ),
+ *     @OA\Property(
+ *         property="tax",
+ *         type="number",
+ *         format="double",
+ *         example=200.75,
+ *         description="Tax amount"
+ *     ),
+ *     @OA\Property(
+ *         property="employee_ni_deduction",
+ *         type="number",
+ *         format="double",
+ *         example=50.25,
+ *         description="Employee NI deduction amount"
+ *     ),
+ *     @OA\Property(
+ *         property="employer_ni",
+ *         type="number",
+ *         format="double",
+ *         example=75.30,
+ *         description="Employer NI amount"
+ *     )
  *
  *
      *
@@ -218,9 +248,39 @@ class UserPayslipController extends Controller
  *     @OA\Property(property="month", type="integer", format="int", example=1),
  *     @OA\Property(property="year", type="integer", format="int", example=2024),
  *     @OA\Property(property="payment_amount", type="number", format="double", example=1000.00),
+ * *     @OA\Property(property="payment_notes", type="number", format="double", example=1000.00),
+ *
  *     @OA\Property(property="payment_date", type="string", format="date", example="2024-02-02"),
  *     @OA\Property(property="payslip_file", type="string", format="string", example="path/to/payslip.pdf"),
- *  *   @OA\Property(property="payment_record_file", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+ *  *   @OA\Property(property="payment_record_file", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"}),
+ * *     @OA\Property(
+ *         property="gross_pay",
+ *         type="number",
+ *         format="double",
+ *         example=1000.50,
+ *         description="Gross pay amount"
+ *     ),
+ *     @OA\Property(
+ *         property="tax",
+ *         type="number",
+ *         format="double",
+ *         example=200.75,
+ *         description="Tax amount"
+ *     ),
+ *     @OA\Property(
+ *         property="employee_ni_deduction",
+ *         type="number",
+ *         format="double",
+ *         example=50.25,
+ *         description="Employee NI deduction amount"
+ *     ),
+ *     @OA\Property(
+ *         property="employer_ni",
+ *         type="number",
+ *         format="double",
+ *         example=75.30,
+ *         description="Employer NI amount"
+ *     ),
 *
  *
 
@@ -294,11 +354,18 @@ class UserPayslipController extends Controller
                         'user_id',
                          'month',
                           'year',
+                          "payment_notes",
                            'payment_amount',
                             'payment_date',
                              'payslip_file',
                               'payment_record_file',
                                "payroll_id",
+
+
+    'gross_pay',
+    'tax',
+    'employee_ni_deduction',
+    'employer_ni'
                                 // "created_by"
 
                     ])->toArray()
@@ -442,7 +509,7 @@ class UserPayslipController extends Controller
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("payslips.name", "like", "%" . $term . "%");
+                        $query->where("payslips.payment_notes", "like", "%" . $term . "%");
                         //     ->orWhere("user_education_histories.description", "like", "%" . $term . "%");
                     });
                 })

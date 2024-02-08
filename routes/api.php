@@ -810,6 +810,7 @@ Route::get('/v1.0/histories/user-attendance-details', [HistoryDetailsController:
 Route::get('/v1.0/histories/user-leave-details', [HistoryDetailsController::class, "getUserLeaveDetailsHistory"]);
 
 Route::get('/v1.0/histories/user-work-shift', [HistoryDetailsController::class, "getUserWorkShiftHistory"]);
+Route::get('/v1.0/histories/employee-work-shift', [HistoryDetailsController::class, "getEmployeeWorkShiftHistory"]);
 Route::get('/v1.0/histories/user-project', [HistoryDetailsController::class, "getUserProjectHistory"]);
 
 

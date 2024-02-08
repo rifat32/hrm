@@ -34,7 +34,16 @@ class FormatDatesInRequest
     {
         return is_string($value) && preg_match('/^\d{2}-\d{2}-\d{4}$/', $value);
     }
-
+    // private function isDateFormat($value)
+    // {
+    //     // Check if it's a string and matches the date format pattern
+    //     if (is_string($value) && preg_match('/^\d{2}-\d{2}-\d{4}$/', $value)) {
+    //         // Check if it's a valid date
+    //         $date = DateTime::createFromFormat('d-m-Y', $value);
+    //         return $date && $date->format('d-m-Y') === $value;
+    //     }
+    //     return false;
+    // }
     private function formatDates($array)
     {
         foreach ($array as $key => $value) {

@@ -91,11 +91,15 @@ class UserPayslipCreateRequest extends FormRequest
             'month' => 'required|integer',
             'year' => 'required|integer',
             'payment_amount' => 'required|numeric',
+            'payment_notes' => 'nullable|string',
             'payment_date' => 'required|date',
             'payslip_file' => 'nullable|string',
             'payment_record_file' => 'present|array',
 
-
+            'gross_pay' => 'required|numeric|min:0',
+            'tax' => 'required|numeric|min:0',
+            'employee_ni_deduction' => 'required|numeric|min:0',
+            'employer_ni' => 'required|numeric|min:0',
 
 
 
