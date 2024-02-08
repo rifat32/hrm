@@ -377,13 +377,13 @@ class WorkShiftController extends Controller
                     ], 500);
                 }
 
-                $work_shift->departments()->delete();
-                $work_shift->departments()->sync($request_data['departments'], []);
+                // $work_shift->departments()->delete();
+                // $work_shift->departments()->sync($request_data['departments'], []);
 
                 // $work_shift->users()->delete();
                 // $work_shift->users()->sync($request_data['users'], []);
 
-
+                $work_shift_prev_details  =  ($work_shift_prev->details)->toArray();
 
                 $work_shift->details()->delete();
                 $work_shift->details()->createMany($request_data['details']);
@@ -422,17 +422,20 @@ if(!$fields_changed){
         $fields_changed = false; // Initialize to false
         foreach ($fields_to_check as $field) {
 
-            foreach($work_shift_prev->details as $prev_detail){
+            foreach($work_shift_prev_details as $key=>$prev_detail){
+                   $value1 = $prev_detail[$field];
+                    $value2 = $work_shift->details[$key]->$field;
 
-                foreach($work_shift->details as $current_detail){
-                    $value1 = $work_shift_prev->details->$field;
-                    $value2 = $work_shift->$field;
+
+
 
                     if ($value1 != $value2) {
                         $fields_changed = true;
-                        break 3;
+                        break 2;
                     }
-                }
+
+
+
 
             }
 
@@ -444,16 +447,16 @@ if(!$fields_changed){
 
 
 
-
                 if (
                     $fields_changed
                 ) {
+
 
                     WorkShiftHistory::where([
                         "to_date" => NULL
                     ])
                     ->whereHas('users',function($query) use($work_shift_prev)  {
-                        $query->whereIn("users.id",$work_shift_prev->users()->pluck("id"));
+                        $query->whereIn("users.id",$work_shift_prev->users()->pluck("users.id"));
                     })
                     ->update([
                         "to_date" => now()
@@ -467,7 +470,7 @@ if(!$fields_changed){
          $employee_work_shift_history->details()->createMany($request_data['details']);
         //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
 
-        $user_ids_with_pivot_data = $work_shift->users()->pluck('id', 'id')->map(function ($id) {
+        $user_ids_with_pivot_data = $work_shift->users()->pluck('user_work_shifts.id', 'users.id')->map(function ($id) {
             return [$id => ['from_date' => now()->toDateString(), 'to_date' => NULL]];
         })->flatten(); // Flatten the multi-dimensional array
 

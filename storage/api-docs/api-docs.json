@@ -16029,6 +16029,16 @@
                                             2,
                                             3
                                         ]
+                                    },
+                                    "start_date": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "10-02-2024"
+                                    },
+                                    "end_date": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "25-02-2024"
                                     }
                                 },
                                 "type": "object"

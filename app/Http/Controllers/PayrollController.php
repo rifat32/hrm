@@ -38,6 +38,9 @@ class PayrollController extends Controller
      *
      *  @OA\Property(property="payrun_id", type="number", format="number", example="1"),
      *  @OA\Property(property="users", type="string", format="array", example={1,2,3}),
+     *    @OA\Property(property="start_date", type="number", format="number", example="10-02-2024"),
+     *   @OA\Property(property="end_date", type="number", format="number", example="25-02-2024"),
+     *
      *
      *
      *         ),

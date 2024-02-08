@@ -277,7 +277,6 @@ Route::put('/v1.0/user-payslips', [UserPayslipController::class, "updateUserPays
 Route::get('/v1.0/user-payslips', [UserPayslipController::class, "getUserPayslips"]);
 Route::get('/v1.0/user-payslips/{id}', [UserPayslipController::class, "getUserPayslipById"]);
 Route::delete('/v1.0/user-payslips/{ids}', [UserPayslipController::class, "deleteUserPayslipsByIds"]);
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user payslip history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

@@ -204,7 +204,7 @@ class UserPayslipController extends Controller
      *     )
      */
 
-    public function createPayslip(UserPayslipCreateRequest $request)
+    public function createUserPayslip(UserPayslipCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
