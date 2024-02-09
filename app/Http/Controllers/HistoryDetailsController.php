@@ -1257,6 +1257,7 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
+
              $all_manager_department_ids = [];
              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
              foreach ($manager_departments as $manager_department) {
@@ -1266,27 +1267,25 @@ class HistoryDetailsController extends Controller
 
              $employee_work_shift_history = WorkShiftHistory::
                 with([
-                    "users" => function($query) use($request) {
-                        $query->where("user_id",($request->user_id?$request->user_id:auth()->user()->id) );
-                    }
+                  "details"
                 ])
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
 
-                return $query->whereHas('users',function($query) use($request) {
+                 $query->whereHas('users',function($query) use($request) {
                      $query->where('employee_user_work_shift_histories.user_id', $request->user_id);
                 });
 
 
             })
             ->when(empty($request->user_id), function ($query) use ($request) {
-                return $query->whereHas('users',function($query) use($request) {
+                 $query->whereHas('users',function($query) use($request) {
                     $query->where('employee_user_work_shift_histories.user_id', auth()->user()->id);
                });
             })
-            ->whereHas("users.departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+            // ->whereHas("users.departments", function($query) use($all_manager_department_ids) {
+            //     $query->whereIn("departments.id",$all_manager_department_ids);
+            //  })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;
@@ -1313,8 +1312,7 @@ class HistoryDetailsController extends Controller
                      return $query->paginate($request->per_page);
                  }, function ($query) {
                      return $query->get();
-                 });;
-
+                 });
 
 
              return response()->json($employee_work_shift_history, 200);

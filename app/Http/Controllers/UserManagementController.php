@@ -1507,27 +1507,21 @@ class UserManagementController extends Controller
                 if (!empty($request_data["work_shift_id"])) {
 
 
+                    $current_workshift = $user->work_shifts->last();
+
+                    $current_workshift_id = NULL;
+                    if($current_workshift) {
+                        $current_workshift_id = $current_workshift->id;
+                    }
 
 
-                    $current_workshift =  WorkShift::where([
-                        "id" => $request_data["work_shift_id"]
-                    ])
-                        ->whereHas('users', function ($query) use ($user) {
-
-                            $query->where([
-                                "users.id" => $user->id
-                            ]);
-                        })
-                        ->first();
 
 
-                    if (!$current_workshift) {
-
+                    if ($work_shift->id != $current_workshift_id) {
                         UserWorkShift::where([
                             "user_id" => $user->id
                         ])
                             ->delete();
-
 
                         $work_shift->users()->attach($user->id);
 
@@ -1537,8 +1531,8 @@ class UserManagementController extends Controller
                             "to_date" => NULL,
                             "user_id" => $user->id
                         ])
-                        ->whereHas("work_shift_history",function($query) use($current_workshift) {
-                            $query->where("work_shift_histories.work_shift_id", $current_workshift->id);
+                        ->whereHas("work_shift_history",function($query) use($current_workshift_id) {
+                            $query->where("work_shift_histories.work_shift_id", $current_workshift_id);
                         })
                         // ->where("work_shift_id",$current_workshift->id)
                             ->update([
@@ -1554,6 +1548,11 @@ class UserManagementController extends Controller
 
                         $work_shift_history->users()->attach($user->id, ['from_date' => now(), 'to_date' => NULL]);
                     }
+
+
+
+
+
                 }
 
 

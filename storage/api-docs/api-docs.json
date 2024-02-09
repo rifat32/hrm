@@ -12482,6 +12482,13 @@
                         "example": "6"
                     },
                     {
+                        "name": "job_listing_id",
+                        "in": "query",
+                        "description": "job_listing_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "start_date",
                         "in": "query",
                         "description": "start_date",

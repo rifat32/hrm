@@ -180,7 +180,7 @@ class WorkShiftController extends Controller
 
                 $employee_work_shift_history_data = $work_shift->toArray();
                 $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-                $employee_work_shift_history_data["from_date"] = now();
+                $employee_work_shift_history_data["from_date"] = $request_data["start_date"]?$request_data["start_date"]:now();
                 $employee_work_shift_history_data["to_date"] = NULL;
 
                  $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
@@ -470,11 +470,13 @@ if(!$fields_changed){
          $employee_work_shift_history->details()->createMany($request_data['details']);
         //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
 
-        $user_ids_with_pivot_data = $work_shift->users()->pluck('user_work_shifts.id', 'users.id')->map(function ($id) {
-            return [$id => ['from_date' => now()->toDateString(), 'to_date' => NULL]];
-        })->flatten(); // Flatten the multi-dimensional array
+        $user_ids = $work_shift->users()->pluck('users.id')->toArray();
 
-        $employee_work_shift_history->users()->sync($user_ids_with_pivot_data);
+        // Define the additional pivot data for each user
+        $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
+            return [$user_id => ['from_date' => now(), 'to_date' => null]];
+        });
+        $employee_work_shift_history->users()->sync($pivot_data);
 
 
 
