@@ -10,6 +10,8 @@ class Payroll extends Model
 {
     use HasFactory;
     protected $fillable = [
+"payroll_name",
+
         'user_id',
         "payrun_id",
 

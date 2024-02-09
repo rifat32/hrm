@@ -15,6 +15,9 @@ class CreatePayrollsTable extends Migration
     {
         Schema::create('payrolls', function (Blueprint $table) {
             $table->id();
+            $table->string('payroll_name');
+
+
             $table->unsignedBigInteger("payrun_id")->nullable();
             $table->foreign('payrun_id')->references('id')->on('payruns')->onDelete('set null');
 

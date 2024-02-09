@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ActivityLog;
+use App\Models\Bank;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\ErrorLog;
@@ -195,6 +196,37 @@ return "swagger generated";
                 "created_by" => $admin->id
             ]);
         }
+
+        $banks = [
+            ['id' => 1, 'name' => 'Barclays'],
+            ['id' => 2, 'name' => 'HSBC'],
+            ['id' => 3, 'name' => 'Lloyds Banking Group'],
+            ['id' => 4, 'name' => 'Nationwide'],
+            ['id' => 5, 'name' => 'NatWest Group'],
+            ['id' => 6, 'name' => 'Santander UK'],
+            ['id' => 7, 'name' => 'Standard Chartered'],
+        ];
+
+        foreach ($banks as $data) {
+            Bank::create([
+                'name' => $data['name'],
+                'is_active' => 1,
+                'is_default' => 1,
+                'business_id' => NULL,
+                'created_by' => $admin->id
+            ]);
+        }
+
+
+
+
+
+
+
+
+
+
+
         $default_designations = [
             [
                 'name' => "CEO",
@@ -635,8 +667,9 @@ return "swagger generated";
             ],
         ];
 
+
         $default_work_shift_1 = WorkShift::create($default_work_shift_data_1);
-        
+
 
 
 

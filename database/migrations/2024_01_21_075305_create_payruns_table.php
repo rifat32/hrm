@@ -14,7 +14,7 @@ class CreatePayrunsTable extends Migration
     public function up()
     {
         Schema::create('payruns', function (Blueprint $table) {
-            $table->id(); 
+            $table->id();
             $table->enum('period_type', ['weekly', 'monthly', 'customized'])->default('weekly');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
@@ -44,6 +44,6 @@ class CreatePayrunsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payrolls');
+        Schema::dropIfExists('payruns');
     }
 }

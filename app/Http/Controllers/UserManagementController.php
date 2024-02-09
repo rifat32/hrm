@@ -757,8 +757,8 @@ class UserManagementController extends Controller
                         EmployeeSponsorshipHistory::where('to_date', '<=', $ten_years_ago)->delete();
                     }
                 }
-                if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
 
+                if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
                     if (!empty($request_data["passport_details"])) {
                         $request_data["passport_details"]["user_id"] = $user->id;
                         $request_data["passport_details"]["business_id"] = $user->business_id;
@@ -824,7 +824,7 @@ class UserManagementController extends Controller
                         throw new Exception("Now work shift history found");
                     }
 
-                        $work_shift_history->users()->attach($user->id, ['from_date' => $work_shift_history->from_date, 'to_date' => NULL]);
+                        $work_shift_history->users()->attach($user->id, ['from_date' => $user->joining_date, 'to_date' => NULL]);
 
 
                 } else {

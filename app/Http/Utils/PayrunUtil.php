@@ -85,6 +85,28 @@ trait PayrunUtil
 
         return $employees;
     }
+ public  function generate_payroll_name($payrun)
+{
+    // Define variables for the payroll name
+    $period_type = $payrun->period_type;
+    $end_date = $payrun->end_date;
+
+    // Generate the payroll name based on the period type
+    if ($period_type == 'weekly') {
+        $payroll_name = date('d-m-Y', strtotime($end_date)) . '_weekly_payroll';
+    } elseif ($period_type == 'monthly') {
+        $payroll_name = date('m-Y', strtotime($end_date)) . '_monthly_payroll';
+    } elseif ($period_type == 'customized') {
+        // Assuming you have a start_date field in $payrun object
+        $start_date = $payrun->start_date;
+        $payroll_name = date('d-m-Y', strtotime($start_date)) . '_to_' . date('d-m-Y', strtotime($end_date)) . '_customized_payroll';
+    } else {
+        // Default case, if period_type is not recognized
+        $payroll_name = 'unknown_payroll';
+    }
+
+    return $payroll_name;
+}
 
     public function generate_payroll($payrun, $employee, $start_date, $generate_payroll)
     {
@@ -237,10 +259,6 @@ trait PayrunUtil
 
 
 
-        // $total_holiday_hours = 0;
-        // $total_paid_leave_hours = 0;
-        // $total_regular_attendance_hours = 0;
-        // $total_overtime_attendance_hours = 0;
 
         $payroll_attendances_data = collect();
         $payroll_leave_records_data = collect();
@@ -254,10 +272,7 @@ trait PayrunUtil
                 // $total_paid_leave_hours += $approved_leave_record->leave_hours;
                 $payroll_leave_records_data->push([
                     "leave_record_id" => $approved_leave_record->id,
-                    // "date" => $approved_leave_record->date,
-                    // "start_time" => $approved_leave_record->start_time,
-                    // "end_time" => $approved_leave_record->end_time,
-                    // "leave_hours" => $approved_leave_record->leave_hours,
+
                 ]);
 
             }
@@ -292,76 +307,13 @@ trait PayrunUtil
 
 
         $approved_attendances->each(function ($approved_attendance) use ( &$payroll_attendances_data  ) {
-
-            // $attendance_in_date = Carbon::parse($approved_attendance->in_date)->format("Y-m-d");
-            // $day_number = Carbon::parse($attendance_in_date)->dayOfWeek;
-
-            // $work_shift_detail = $work_shift_details->get($day_number);
-            // $is_weekend = 1;
-            // // $capacity_hours = 0;
-            // if ($work_shift_detail) {
-            //     $is_weekend = $work_shift_detail->is_weekend;
-            //     // $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
-            //     // $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
-            //     // $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-            // }
-
-            // $leave_record = $payroll_leave_records_data->first(function ($leave_record) use ($attendance_in_date) {
-            //     $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
-            //     return $attendance_in_date == $leave_date;
-            // });
-
-            // $holiday = $payroll_holidays_data->first(function ($holiday) use ($attendance_in_date) {
-            //     $holiday_date = Carbon::parse($holiday->date);
-            //     $attendance_in_date = Carbon::parse($attendance_in_date);
-            //     return $attendance_in_date->eq($holiday_date);
-            // });
-
             if ($approved_attendance->total_paid_hours > 0) {
-                // $total_attendance_hours = $approved_attendance->total_paid_hours;
-                // $holiday_id = NULL;
-                // $leave_record_id = NULL;
-                // $overtime_start_time = NULL;
-                // $overtime_end_time = NULL;
-                // $result_balance_hours = 0;
-                // if ($approved_attendance->is_weekend  || $approved_attendance->holiday_id) {
-                //     $overtime_start_time = $approved_attendance->in_time;
-                //     $overtime_end_time = $approved_attendance->out_time;
-                //     $result_balance_hours = $total_attendance_hours;
 
-                // } else if ($approved_attendance->leave_record_id) {
-                //     $attendance_in_time = Carbon::parse($approved_attendance->in_time);
-                //     $attendance_out_time = Carbon::parse($approved_attendance->out_time);
-
-                //     $leave_start_time = Carbon::parse($approved_attendance->leave_start_time);
-                //     $leave_end_time = Carbon::parse($approved_attendance->leave_end_time);
-
-                //     $balance_start_time = $attendance_in_time->max($leave_start_time);
-                //     $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                //     // Check if there is any overlap
-                //     if ($balance_start_time < $balance_end_time) {
-                //         $overtime_start_time = $approved_attendance->in_time;
-                //         $overtime_end_time = $approved_attendance->out_time;
-
-                //         $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-
-                //     }
-                // } else if ($approved_attendance->work_hours_delta > 0) {
-                //     $result_balance_hours = $approved_attendance->work_hours_delta;
-                // }
-
-                // $total_overtime_attendance_hours += $approved_attendance->result_balance_hours;
-                // $total_regular_attendance_hours += $approved_attendance->regular_work_hours;
                 $payroll_attendances_data->push([
                     "attendances" => $approved_attendance->id
             ]);
 
             }
-
-
-
-
 
         });
 
@@ -377,39 +329,18 @@ trait PayrunUtil
             'user_id' => $employee->id,
             "payrun_id" => $payrun->id,
 
-            // "total_holiday_hours" => $total_holiday_hours,
-            // "total_paid_leave_hours" => $total_paid_leave_hours,
-            // "total_regular_attendance_hours" => $total_regular_attendance_hours,
-            // "total_overtime_attendance_hours" => $total_overtime_attendance_hours,
-
-            // 'regular_hours' => $total_holiday_hours + $total_paid_leave_hours +  $total_regular_attendance_hours,
-            // 'overtime_hours' => $total_overtime_attendance_hours,
-
-
-            // "holiday_hours_salary" => $total_holiday_hours * $hourly_salary,
-            // "leave_hours_salary" => $total_paid_leave_hours * $hourly_salary,
-            // "regular_attendance_hours_salary" => $total_regular_attendance_hours * $hourly_salary,
-            // "overtime_attendance_hours_salary" => $total_overtime_attendance_hours * $hourly_salary,
-
-            // 'regular_hours_salary' => ($total_holiday_hours + $total_paid_leave_hours +  $total_regular_attendance_hours) * $hourly_salary,
-            // 'overtime_hours_salary' => $total_overtime_attendance_hours * $overtime_salary,
-
-
             "hourly_salary" => $hourly_salary,
             "overtime_salary" => $overtime_salary,
             "holiday_hours" => $holiday_hours,
-
 
             'status' => "pending_approval",
             'is_active' => 1,
             'business_id' => $employee->business_id,
         ];
-
-
+        $payroll_data['payroll_name'] = $this->generate_payroll_name($payrun);
 
 
         if ($generate_payroll) {
-
             try {
                 DB::transaction(function () use ($payroll_data, $payroll_holidays_data, $payroll_leave_records_data, $payroll_attendances_data, $attendance_arrears, $leave_arrears) {
                     $payroll = Payroll::create($payroll_data);
@@ -430,11 +361,6 @@ trait PayrunUtil
                             "leave_record_id" => $leave_arrear->id
                         ]);
                     });
-
-
-
-
-
 
                 });
             } catch (Exception $e) {
