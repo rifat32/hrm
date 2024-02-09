@@ -131,6 +131,7 @@ class UserPayslipController extends Controller
  *     @OA\Property(property="payroll_id", type="integer", format="int", example=null),
  *     @OA\Property(property="month", type="integer", format="int", example=1),
  *     @OA\Property(property="year", type="integer", format="int", example=2024),
+ *  *     @OA\Property(property="payment_method", type="string", format="string", example="payment_method"),
  *
  *   @OA\Property(property="payment_notes", type="number", format="double", example=1000.00),
  *     @OA\Property(property="payment_amount", type="number", format="double", example=1000.00),
@@ -271,6 +272,7 @@ class UserPayslipController extends Controller
  *     @OA\Property(property="year", type="integer", format="int", example=2024),
  *     @OA\Property(property="payment_amount", type="number", format="double", example=1000.00),
  * *     @OA\Property(property="payment_notes", type="number", format="double", example=1000.00),
+ *  *  *     @OA\Property(property="payment_method", type="string", format="string", example="payment_method"),
  *
  *     @OA\Property(property="payment_date", type="string", format="date", example="2024-02-02"),
  *     @OA\Property(property="payslip_file", type="string", format="string", example="path/to/payslip.pdf"),
@@ -357,7 +359,24 @@ class UserPayslipController extends Controller
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
 
+  // Fetch user's bank details
+  $user = User::find($request_data["user_id"]); // Assuming user_id is passed in the request
 
+  if ($user) {
+      $request_data["bank_id"] = $user->bank_id;
+      $request_data["sort_code"] = $user->sort_code;
+      $request_data["account_number"] = $user->account_number;
+      $request_data["account_name"] = $user->account_name;
+  } else {
+     throw new Exception ("User not found");
+  }
+
+  // Check if payment_method is bank_transfer and payment_notes is empty
+  if ($request_data["payment_method"] === 'bank_transfer' && empty($request_data["payment_notes"])) {
+      // Build the payment notes with the user's bank details
+      $payment_notes = "Payment made to bank account number: " . $user->account_number . " Sort Code: " . $user->sort_code . " Account Name: " . $user->account_name;
+      $request_data["payment_notes"] = $payment_notes;
+  }
 
 
                 $user_payslip_query_params = [
@@ -376,6 +395,7 @@ class UserPayslipController extends Controller
                         'user_id',
                          'month',
                           'year',
+                          "payment_method",
                           "payment_notes",
                            'payment_amount',
                             'payment_date',

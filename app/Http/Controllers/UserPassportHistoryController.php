@@ -8,7 +8,9 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,18 +39,18 @@ class UserPassportHistoryController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-* @OA\Property(property="passport_number", type="string", format="string", example="Your Passport Number"),
- * @OA\Property(property="passport_issue_date", type="string", format="date", example="Your Passport Issue Date"),
- * @OA\Property(property="passport_expiry_date", type="string", format="date", example="Your Passport Expiry Date"),
- * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Passport Issue"),
- * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
- * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
- * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
- *
+     * @OA\Property(property="passport_number", type="string", format="string", example="Your Passport Number"),
+     * @OA\Property(property="passport_issue_date", type="string", format="date", example="Your Passport Issue Date"),
+     * @OA\Property(property="passport_expiry_date", type="string", format="date", example="Your Passport Expiry Date"),
+     * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Passport Issue"),
+     * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+     * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+     * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
+     *
 
- *
- *
- *
+     *
+     *
+     *
      *
      *         ),
      *      ),
@@ -89,7 +91,7 @@ class UserPassportHistoryController extends Controller
     public function createUserPassportHistory(UserPassportHistoryCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('employee_passport_history_create')) {
                     return response()->json([
@@ -102,12 +104,51 @@ class UserPassportHistoryController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
 
+                $current_passport_detail =  EmployeePassportDetail::where(
+                    [
+                        "user_id" => $request["user_id"],
+                    ]
+                )->latest()->first();
 
+                if ($current_passport_detail) {
+                    // Parse the new expiry date using Carbon
+                    $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
+                    $current_expiry_date = Carbon::parse($current_passport_detail->passport_expiry_date);
+
+                    if ($new_expiry_date->gt($current_expiry_date)) {
+                        // Update the passport expiry date
+                        $request_data["is_manual"] = 0;
+                        $user_passport_history  =  $current_expiry_date->update(
+                            collect($request_data)->only([
+                                'passport_number',
+                                "passport_issue_date",
+                                "passport_expiry_date",
+                                "place_of_issue",
+                                "created_by"
+
+                            ])->toArray()
+                        );
+
+                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                    }
+                } else {
+                    $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
+                    $today = Carbon::now();
+
+                    if ($new_expiry_date->gt($today)) {
+                        // Handle the case where the new expiry date is later than today's date
+                        $request_data["is_manual"] = 0;
+                        $user_passport_history = EmployeePassportDetail::create($request_data);
+                    }
+                }
                 $user_passport_history =  EmployeePassportDetailHistory::create($request_data);
 
 
 
                 return response($user_passport_history, 201);
+
+
+
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -130,17 +171,17 @@ class UserPassportHistoryController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-* @OA\Property(property="passport_number", type="string", format="string", example="Your Passport Number"),
- * @OA\Property(property="passport_issue_date", type="string", format="date", example="Your Passport Issue Date"),
- * @OA\Property(property="passport_expiry_date", type="string", format="date", example="Your Passport Expiry Date"),
- * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Passport Issue"),
- * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
- * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
- * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
- *
-*
- *
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     * @OA\Property(property="passport_number", type="string", format="string", example="Your Passport Number"),
+     * @OA\Property(property="passport_issue_date", type="string", format="date", example="Your Passport Issue Date"),
+     * @OA\Property(property="passport_expiry_date", type="string", format="date", example="Your Passport Expiry Date"),
+     * @OA\Property(property="place_of_issue", type="string", format="string", example="Place of Passport Issue"),
+     * @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+     * @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+     * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
+     *
+     *
+     *
 
      *
      *         ),
@@ -183,7 +224,7 @@ class UserPassportHistoryController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('employee_passport_history_update')) {
                     return response()->json([
@@ -192,13 +233,51 @@ class UserPassportHistoryController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
+                $request_data["is_manual"] = 1;
 
 
+                $current_passport_detail =  EmployeePassportDetail::where(
+                    [
+                        "user_id" => $request["user_id"],
+                    ]
+                )->latest()->first();
+
+                if ($current_passport_detail) {
+                    // Parse the new expiry date using Carbon
+                    $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
+                    $current_expiry_date = Carbon::parse($current_passport_detail->passport_expiry_date);
+
+                    if ($new_expiry_date->gt($current_expiry_date)) {
+                        // Update the passport expiry date
+                        $request_data["is_manual"] = 0;
+                        $user_passport_history  =  $current_expiry_date->update(
+                            collect($request_data)->only([
+                                'passport_number',
+                                "passport_issue_date",
+                                "passport_expiry_date",
+                                "place_of_issue",
+                                "created_by"
+
+                            ])->toArray()
+                        );
+
+                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                    }
+                } else {
+                    $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
+                    $today = Carbon::now();
+
+                    if ($new_expiry_date->gt($today)) {
+                        // Handle the case where the new expiry date is later than today's date
+                        $request_data["is_manual"] = 0;
+                        $user_passport_history = EmployeePassportDetail::create($request_data);
+                    }
+                }
 
 
                 $user_passport_history_query_params = [
                     "id" => $request_data["id"],
-                    "is_manual" => 1
+                    // "is_manual" => 1
                 ];
                 // $user_passport_history_prev = UserPassportHistory::where($user_passport_history_query_params)
                 //     ->first();
@@ -333,7 +412,7 @@ class UserPassportHistoryController extends Controller
     public function getUserPassportHistories(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('employee_passport_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -348,16 +427,20 @@ class UserPassportHistoryController extends Controller
             }
             $user_passport_histories = EmployeePassportDetailHistory::with([
                 "creator" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
                 },
 
             ])
-            // ->where(["is_manual" => 1])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
-            ->when(!empty($request->search_key), function ($query) use ($request) {
+                // ->where(["is_manual" => 1])
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("employee_passport_detail_histories.name", "like", "%" . $term . "%");
@@ -381,9 +464,9 @@ class UserPassportHistoryController extends Controller
                     return $query->where('employee_passport_detail_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("employee_passport_detail_histories.id", $request->order_by);
+                    return $query->orderBy("employee_passport_detail_histories.passport_expiry_date", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("employee_passport_detail_histories.id", "DESC");
+                    return $query->orderBy("employee_passport_detail_histories.passport_expiry_date", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -457,7 +540,7 @@ class UserPassportHistoryController extends Controller
     public function getUserPassportHistoryById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('employee_passport_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -475,18 +558,17 @@ class UserPassportHistoryController extends Controller
                 "is_manual" => 1
             ])
 
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
                 ->first();
             if (!$user_passport_history) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -559,7 +641,7 @@ class UserPassportHistoryController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('employee_passport_history_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -574,10 +656,10 @@ class UserPassportHistoryController extends Controller
             }
             $idsArray = explode(',', $ids);
             $existingIds = EmployeePassportDetailHistory::whereIn('id', $idsArray)
-            // ->where(["is_manual" => 1])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-              $query->whereIn("departments.id",$all_manager_department_ids);
-           })
+                // ->where(["is_manual" => 1])
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -586,12 +668,11 @@ class UserPassportHistoryController extends Controller
 
             if (!empty($nonExistingIds)) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -599,11 +680,10 @@ class UserPassportHistoryController extends Controller
             EmployeePassportDetailHistory::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
         }
     }
-
 }

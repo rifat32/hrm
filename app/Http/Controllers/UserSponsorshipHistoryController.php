@@ -9,7 +9,9 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\EmloyeeSponsorshipHistory;
+use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -104,6 +106,53 @@ class UserSponsorshipHistoryController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
 
+
+
+
+                $current_sponsorship_detail =  EmployeeSponsorship::where(
+                    [
+                        "user_id" => $request["user_id"],
+                    ]
+                )->latest()->first();
+
+                if ($current_sponsorship_detail) {
+                    // Parse the new expiry date using Carbon
+                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $current_expiry_date = Carbon::parse($current_sponsorship_detail->expiry_date);
+
+                    if ($new_expiry_date->gt($current_expiry_date)) {
+                        // Update the passport expiry date
+                        $request_data["is_manual"] = 0;
+                        $user_sponsorship  =  $current_expiry_date->update(
+                            collect($request_data)->only([
+        'date_assigned',
+        'expiry_date',
+        'status',
+        'note',
+        "certificate_number",
+        "current_certificate_status",
+        "is_sponsorship_withdrawn",
+        "created_by"
+
+                            ])->toArray()
+                        );
+
+                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                    }
+                } else {
+                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $today = Carbon::now();
+
+                    if ($new_expiry_date->gt($today)) {
+                        // Handle the case where the new expiry date is later than today's date
+                        $request_data["is_manual"] = 0;
+                        $user_sponsorship = EmployeeSponsorship::create($request_data);
+                    }
+                }
+
+
+
+
                 $user_sponsorship_history =  EmployeeSponsorshipHistory::create($request_data);
 
 
@@ -196,13 +245,60 @@ class UserSponsorshipHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["is_manual"] = 1;
+
+
+
+
+                $current_sponsorship_detail =  EmployeeSponsorship::where(
+                    [
+                        "user_id" => $request["user_id"],
+                    ]
+                )->latest()->first();
+
+                if ($current_sponsorship_detail) {
+                    // Parse the new expiry date using Carbon
+                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $current_expiry_date = Carbon::parse($current_sponsorship_detail->expiry_date);
+
+                    if ($new_expiry_date->gt($current_expiry_date)) {
+                        // Update the passport expiry date
+                        $request_data["is_manual"] = 0;
+                        $user_sponsorship  =  $current_expiry_date->update(
+                            collect($request_data)->only([
+        'date_assigned',
+        'expiry_date',
+        'status',
+        'note',
+        "certificate_number",
+        "current_certificate_status",
+        "is_sponsorship_withdrawn",
+        "created_by"
+
+                            ])->toArray()
+                        );
+
+                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                    }
+                } else {
+                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $today = Carbon::now();
+
+                    if ($new_expiry_date->gt($today)) {
+                        // Handle the case where the new expiry date is later than today's date
+                        $request_data["is_manual"] = 0;
+                        $user_sponsorship = EmployeeSponsorship::create($request_data);
+                    }
+                }
+
 
 
 
 
                 $user_sponsorship_history_query_params = [
                     "id" => $request_data["id"],
-                    "is_manual" => 1
+                    // "is_manual" => 1
                 ];
                 // $user_sponsorship_history_prev = UserSponsorshipHistory::where($user_sponsorship_history_query_params)
                 //     ->first();
@@ -389,11 +485,13 @@ class UserSponsorshipHistoryController extends Controller
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('employee_sponsorship_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("employee_sponsorship_histories.id", $request->order_by);
+                    return $query->orderBy("employee_sponsorship_histories.expiry_date", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("employee_sponsorship_histories.id", "DESC");
+                    return $query->orderBy("employee_sponsorship_histories.expiry_date", "DESC");
                 })
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
