@@ -100,12 +100,19 @@ class UserPayslipCreateRequest extends FormRequest
             'tax' => 'required|numeric|min:0',
             'employee_ni_deduction' => 'required|numeric|min:0',
             'employer_ni' => 'required|numeric|min:0',
-
+            'payment_method' => ['required', 'string', 'in:bank_transfer,cash,cheque,other'],
 
 
         ];
 
 
 
+    }
+    public function messages()
+    {
+        return [
+            'payment_method.required' => 'The payment method field is required.',
+            'payment_method.in' => 'Invalid payment method selected. Valid options are: bank_transfer, cash, cheque, or other.',
+        ];
     }
 }

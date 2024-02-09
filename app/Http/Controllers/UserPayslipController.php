@@ -10,6 +10,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Payslip;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -217,6 +218,27 @@ class UserPayslipController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["created_by"] = $request->user()->id;
+
+                // Fetch user's bank details
+                $user = User::find($request_data["user_id"]); // Assuming user_id is passed in the request
+
+                if ($user) {
+                    $request_data["bank_id"] = $user->bank_id;
+                    $request_data["sort_code"] = $user->sort_code;
+                    $request_data["account_number"] = $user->account_number;
+                    $request_data["account_name"] = $user->account_name;
+                } else {
+                   throw new Exception ("User not found");
+                }
+
+                // Check if payment_method is bank_transfer and payment_notes is empty
+                if ($request_data["payment_method"] === 'bank_transfer' && empty($request_data["payment_notes"])) {
+                    // Build the payment notes with the user's bank details
+                    $payment_notes = "Payment made to bank account number: " . $user->account_number . " Sort Code: " . $user->sort_code . " Account Name: " . $user->account_name;
+                    $request_data["payment_notes"] = $payment_notes;
+                }
+
+
                 $user_payslip =  Payslip::create($request_data);
 
                 return response($user_payslip, 201);
