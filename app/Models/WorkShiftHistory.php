@@ -55,6 +55,9 @@ class WorkShiftHistory extends Model
         return $this->belongsToMany(User::class, 'employee_user_work_shift_histories', 'work_shift_id', 'user_id');
     }
 
+    public function user_work_shift(){
+        return $this->hasMany(EmployeeUserWorkShiftHistory::class,'work_shift_id', 'id');
+    }
 
     public function getCreatedAtAttribute($value)
     {

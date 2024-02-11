@@ -8,7 +8,9 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\EmployeeVisaDetail;
 use App\Models\EmployeeVisaDetailHistory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -99,6 +101,47 @@ class UserVisaHistoryController extends Controller
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
+
+
+                $current_visa_detail =  EmployeeVisaDetail::where(
+                    [
+                        "user_id" => $request["user_id"],
+                    ]
+                )->latest()->first();
+
+                if ($current_visa_detail) {
+                    // Parse the new expiry date using Carbon
+                    $new_expiry_date = Carbon::parse($request_data["visa_expiry_date"]);
+                    $current_expiry_date = Carbon::parse($current_visa_detail->visa_expiry_date);
+
+                    if ($new_expiry_date->gt($current_expiry_date)) {
+                        // Update the passport expiry date
+                        $request_data["is_manual"] = 0;
+                        $user_visa  =  $current_expiry_date->update(
+                            collect($request_data)->only([
+                                'BRP_number',
+                                "visa_issue_date",
+                                "visa_expiry_date",
+                                "place_of_issue",
+                                "visa_docs",
+                                 "created_by"
+
+                            ])->toArray()
+                        );
+
+                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                    }
+                } else {
+                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $today = Carbon::now();
+
+                    if ($new_expiry_date->gt($today)) {
+                        // Handle the case where the new expiry date is later than today's date
+                        $request_data["is_manual"] = 0;
+                        $user_visa = EmployeeVisaDetail::create($request_data);
+                    }
+                }
+
 
                 $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
 
@@ -191,6 +234,50 @@ class UserVisaHistoryController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["is_manual"] = 1;
+
+                $current_visa_detail =  EmployeeVisaDetail::where(
+                    [
+                        "user_id" => $request["user_id"],
+                    ]
+                )->latest()->first();
+
+                if ($current_visa_detail) {
+                    // Parse the new expiry date using Carbon
+                    $new_expiry_date = Carbon::parse($request_data["visa_expiry_date"]);
+                    $current_expiry_date = Carbon::parse($current_visa_detail->visa_expiry_date);
+
+                    if ($new_expiry_date->gt($current_expiry_date)) {
+                        // Update the passport expiry date
+                        $request_data["is_manual"] = 0;
+                        $user_visa  =  $current_expiry_date->update(
+                            collect($request_data)->only([
+                                'BRP_number',
+                                "visa_issue_date",
+                                "visa_expiry_date",
+                                "place_of_issue",
+                                "visa_docs",
+                                 "created_by"
+
+                            ])->toArray()
+                        );
+
+                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                    }
+                } else {
+                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $today = Carbon::now();
+
+                    if ($new_expiry_date->gt($today)) {
+                        // Handle the case where the new expiry date is later than today's date
+                        $request_data["is_manual"] = 0;
+                        $user_visa = EmployeeVisaDetail::create($request_data);
+                    }
+                }
+
+
+                $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
 
 
 
@@ -214,7 +301,6 @@ class UserVisaHistoryController extends Controller
         "visa_expiry_date",
         "place_of_issue",
         "visa_docs",
-
 
 
         "is_manual",
@@ -386,9 +472,9 @@ class UserVisaHistoryController extends Controller
                     return $query->where('employee_visa_detail_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("employee_visa_detail_histories.id", $request->order_by);
+                    return $query->orderBy("employee_visa_detail_histories.visa_expiry_date", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("employee_visa_detail_histories.id", "DESC");
+                    return $query->orderBy("employee_visa_detail_histories.visa_expiry_date", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);

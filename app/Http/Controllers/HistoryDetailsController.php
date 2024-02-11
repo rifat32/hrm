@@ -1267,7 +1267,20 @@ class HistoryDetailsController extends Controller
 
              $employee_work_shift_history = WorkShiftHistory::
                 with([
-                  "details"
+                  "details",
+                  "user_work_shift" => function($query) use($request) {
+                    $query->when(empty($request->user_id), function ($query) use ($request) {
+                           $query->where('employee_user_work_shift_histories.user_id', auth()->user()->id);
+                   })
+                   ->when(!empty($request->user_id), function ($query) use ($request) {
+                        $query->where('employee_user_work_shift_histories.user_id', $request->user_id);
+               }) ;
+
+
+
+
+
+                  }
                 ])
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
