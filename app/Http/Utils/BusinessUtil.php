@@ -21,6 +21,8 @@ use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
 
 trait BusinessUtil
 {
@@ -613,12 +615,13 @@ trait BusinessUtil
             $default_setting_attendance_query["created_by"] = auth()->user()->id;
         }
 
-        $defaultSettingAttendances = SettingPayrun::where($default_setting_attendance_query)->get();
+        $defaultSettingAttendances = SettingAttendance::where($default_setting_attendance_query)->get();
 
         // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
         if ($defaultSettingAttendances->isEmpty() && !auth()->user()->hasRole("superadmin")) {
             unset($default_setting_attendance_query['created_by']);
-            $defaultSettingAttendances = SettingPayrun::where($default_setting_attendance_query)->get();
+            $default_setting_attendance_query["is_default"] = 1;
+            $defaultSettingAttendances = SettingAttendance::where($default_setting_attendance_query)->get();
         }
 
 
@@ -628,6 +631,7 @@ trait BusinessUtil
 
 
         foreach ($defaultSettingAttendances as $defaultSettingAttendance) {
+            Log::info(json_encode($defaultSettingAttendance));
             $insertableData = [
                 'punch_in_time_tolerance' => $defaultSettingAttendance->punch_in_time_tolerance,
                 'work_availability_definition' => $defaultSettingAttendance->work_availability_definition,
@@ -636,10 +640,20 @@ trait BusinessUtil
                 'alert_area' => $defaultSettingAttendance->alert_area,
                 'auto_approval' => $defaultSettingAttendance->auto_approval,
 
+                'service_name' => $defaultSettingAttendance->auto_approval,
+                'api_key'=> $defaultSettingAttendance->auto_approval,
+
                 "created_by" => auth()->user()->id,
                 "is_active" => 1,
                 "is_default" => 0,
                 "business_id" => $business_id,
+
+
+
+
+
+
+
             ];
 
             $setting_attendance  = SettingAttendance::create($insertableData);

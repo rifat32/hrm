@@ -126,7 +126,7 @@ class AttendanceController extends Controller
 
                 $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
 
-               
+
 
 
                 $setting_attendance = SettingAttendance::where([
@@ -1692,9 +1692,7 @@ class AttendanceController extends Controller
                 "work_location",
                 "project"
             ])
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
+
 
                 ->where(
                     [
@@ -1711,6 +1709,15 @@ class AttendanceController extends Controller
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('attendances.user_id', $request->user_id);
                 })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->whereHas("employee", function ($query){
+                        $query->whereNotIn("users.id",[auth()->user()->id]);
+                    });
+                })
+
+
+
+
                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
                     return $query->where('attendances.user_id', $request->work_location_id);
                 })
@@ -1730,6 +1737,11 @@ class AttendanceController extends Controller
                         $query->where("departments.id", $request->department_id);
                     });
                 })
+                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+
+
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('attendances.in_date', ">=", $request->start_date);
@@ -1912,8 +1924,20 @@ class AttendanceController extends Controller
                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
+
+
+
+
+
+
+
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('attendances.user_id', $request->user_id);
+                })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->whereHas("employee", function ($query){
+                        $query->whereNotIn("users.id",[auth()->user()->id]);
+                    });
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -2154,12 +2178,12 @@ class AttendanceController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-
             if (!$request->user()->hasPermissionTo('attendance_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {
@@ -2199,6 +2223,7 @@ class AttendanceController extends Controller
                         "users.business_id" => $business_id
                     ]
                 )
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -2214,6 +2239,11 @@ class AttendanceController extends Controller
                         $q->where('user_id', $request->user_id);
                     });
                 })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                     $query->whereNotIn("users.id",[auth()->user()->id]);
+
+                })
+
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("users.id", $request->order_by);
@@ -2563,6 +2593,7 @@ class AttendanceController extends Controller
                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
+
                 ->first();
             if (!$attendance) {
                 $this->storeError(
@@ -2663,6 +2694,10 @@ class AttendanceController extends Controller
                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
+                ->whereHas("employee", function ($query){
+                    $query->whereNotIn("users.id",[auth()->user()->id]);
+                })
+
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

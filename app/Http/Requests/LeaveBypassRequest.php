@@ -43,6 +43,11 @@ class LeaveBypassRequest extends BaseFormRequest
                         ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                             $query->whereIn("departments.id",$all_manager_department_ids);
                          })
+
+                         ->whereHas("employee", function ($query){
+                                $query->whereNotIn("users.id",[auth()->user()->id]);
+                            })
+
                         ->exists();
 
                     if (!$exists) {

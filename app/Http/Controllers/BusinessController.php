@@ -744,7 +744,7 @@ if(!$user->hasRole('business_owner')) {
 
 
 
-        
+
     // }
 
         return response([

@@ -850,7 +850,7 @@ foreach ($assigned_departments as $assigned_department) {
                 if($attendance) {
                     $this->recalculate_payroll($attendance);
                 }
-                
+
                 if ($other_attendance) {
                     $this->recalculate_payroll($other_attendance);
                 }
@@ -1824,6 +1824,11 @@ foreach ($assigned_departments as $assigned_department) {
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('leaves.user_id', $request->user_id);
                 })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->whereHas("employee", function ($query){
+                        $query->whereNotIn("users.id",[auth()->user()->id]);
+                    });
+                })
                 ->when(!empty($request->leave_type_id), function ($query) use ($request) {
                     return $query->where('leaves.leave_type_id', $request->leave_type_id);
                 })
@@ -2036,6 +2041,11 @@ foreach ($assigned_departments as $assigned_department) {
                 })
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('leaves.user_id', $request->user_id);
+                })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->whereHas("employee", function ($query){
+                        $query->whereNotIn("users.id",[auth()->user()->id]);
+                    });
                 })
 
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
@@ -2265,6 +2275,9 @@ foreach ($assigned_departments as $assigned_department) {
                     return $query->whereHas("leaves", function($q)use ($request)  {
                         $q->where('user_id', $request->user_id);
                     });
+                })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                        $query->whereNotIn("users.id",[auth()->user()->id]);
                 })
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
@@ -2525,6 +2538,11 @@ return $employee;
                  ->when(!empty($request->user_id), function ($query) use ($request) {
                      return $query->where('leaves.user_id', $request->user_id);
                  })
+                 ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->whereHas("employee", function ($query){
+                        $query->whereNotIn("users.id",[auth()->user()->id]);
+                    });
+                })
 
                  //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                  //        return $query->where('product_category_id', $request->product_category_id);
@@ -2808,6 +2826,11 @@ return $employee;
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
+
+             ->whereHas("employee", function ($query){
+                    $query->whereNotIn("users.id",[auth()->user()->id]);
+                })
+
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

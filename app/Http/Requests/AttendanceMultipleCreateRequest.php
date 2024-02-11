@@ -53,6 +53,8 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                     ->whereHas("departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
+                     ->whereNotIn("users.id",[auth()->user()->id])
+
                      ->first();
 
             if (!$exists) {

@@ -463,67 +463,71 @@ class UserManagementController extends Controller
 
             $request_data = $request->validated();
 
-
-            if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
-                $this->storeError(
-                    "You can not create superadmin.",
-                    403,
-                    "front end error",
-                    "front end error"
-                   );
-                $error =  [
-                    "message" => "You can not create superadmin.",
-                ];
-                throw new Exception(json_encode($error), 403);
-            }
-
-
-            $request_data['password'] = Hash::make($request['password']);
-            $request_data['is_active'] = true;
-            $request_data['remember_token'] = Str::random(10);
+      return      DB::transaction(function() use($request_data) {
+        if (!auth()->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+            $this->storeError(
+                "You can not create superadmin.",
+                403,
+                "front end error",
+                "front end error"
+               );
+            $error =  [
+                "message" => "You can not create superadmin.",
+            ];
+            throw new Exception(json_encode($error), 403);
+        }
 
 
-            if (!empty($business_id)) {
-                $request_data['business_id'] = $business_id;
-            }
+        $request_data['password'] = Hash::make($request_data['password']);
+        $request_data['is_active'] = true;
+        $request_data['remember_token'] = Str::random(10);
 
 
-            $user =  User::create($request_data);
-            $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
-            $user->user_name = $username;
-            $user->save();
+        if (!empty($business_id)) {
+            $request_data['business_id'] = $business_id;
+        }
 
 
-            $user->assignRole($request_data['role']);
-
-            // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
-
-            // $default_work_shift = WorkShift::where([
-            //       "business_id" => auth()->user()->id,
-            //       "is_business_default" => 1
-            // ])
-            // ->first();
-            // if(!$default_work_shift) {
-            //     throw new Error("There is no default workshift for this business");
-            //  }
-            //   $default_work_shift->users()->attach($user->id);
-
-            $user->roles = $user->roles->pluck('name');
+        $user =  User::create($request_data);
+        $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+        $user->user_name = $username;
+        $user->save();
 
 
-            $this->loadDefaultSettingLeave($user->business_id);
-            $this->loadDefaultAttendanceSetting($user->business_id);
+        $user->assignRole($request_data['role']);
+
+        // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
+
+        // $default_work_shift = WorkShift::where([
+        //       "business_id" => auth()->user()->id,
+        //       "is_business_default" => 1
+        // ])
+        // ->first();
+        // if(!$default_work_shift) {
+        //     throw new Error("There is no default workshift for this business");
+        //  }
+        //   $default_work_shift->users()->attach($user->id);
+
+        $user->roles = $user->roles->pluck('name');
+
+
+        $this->loadDefaultSettingLeave($user->business_id);
+        $this->loadDefaultAttendanceSetting($user->business_id);
 
 
 
 
-            // $user->permissions  = $user->getAllPermissions()->pluck('name');
-            // error_log("cccccc");
-            // $data["user"] = $user;
-            // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
-            // $data["roles"] = $user->roles->pluck('name');
-            // $data["token"] = $token;
-            return response($user, 201);
+        // $user->permissions  = $user->getAllPermissions()->pluck('name');
+        // error_log("cccccc");
+        // $data["user"] = $user;
+        // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
+        // $data["roles"] = $user->roles->pluck('name');
+        // $data["token"] = $token;
+        return response($user, 201);
+            });
+
+
+
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
