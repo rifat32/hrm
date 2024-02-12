@@ -206,37 +206,41 @@ return $formattedBreakTime;
         <h3>Employee Details</h3>
         <thead>
             <tr class="table_head_row">
+                @if (!empty($request->employee_details_name))
                 <th>Name</th>
-                {{-- <th>First Name</th> --}}
-                {{-- <th>Middle Name</th>
-                <th>Last Name</th> --}}
+                @endif
+                @if (!empty($request->employee_details_user_id))
                 <th>Employe ID</th>
+                @endif
+                @if (!empty($request->employee_details_email))
                 <th>Email</th>
+                @endif
+                @if (!empty($request->employee_details_phone))
                 <th>Phone</th>
+                @endif
+                @if (!empty($request->employee_details_gender))
                 <th>Gender</th>
+                @endif
             </tr>
         </thead>
         <tbody>
             <tr class="table_row">
 
-                <td>
-                    {{ $user->first_Name . " " .  $user->middle_Name . " " . $user->last_Name}}
-                </td>
-                {{-- <td>
-                    {{ $user->first_Name }}
-                </td>
-                <td>
-                    {{ $user->last_Name }}
-                </td>
-                <td>
-                    {{ $user->last_Name }}
-                </td> --}}
-                <td>
-                    {{ $user->user_id }}
-                </td>
-                <td>{{ $user->email }}</td>
-                <td>{{ $user->phone }}</td>
-                <td>{{ $user->gender }}</td>
+                @if (!empty($request->employee_details_name))
+                    <td>{{ $user->first_Name . " " .  $user->middle_Name . " " . $user->last_Name }}</td>
+                @endif
+                @if (!empty($request->employee_details_user_id))
+                    <td>{{ $user->user_id }}</td>
+                @endif
+                @if (!empty($request->employee_details_email))
+                    <td>{{ $user->email }}</td>
+                @endif
+                @if (!empty($request->employee_details_phone))
+                    <td>{{ $user->phone }}</td>
+                @endif
+                @if (!empty($request->employee_details_gender))
+                    <td>{{ $user->gender }}</td>
+                @endif
             </tr>
         </tbody>
     </table>
@@ -252,15 +256,25 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Allowance Name</th>
-                <th>Type</th>
-                <th>Allowance</th>
-                <th>Earned</th>
-                <th>Availability</th>
+                @if (!empty($request->leave_allowance_name))
+                    <th>Allowance Name</th>
+                @endif
+                @if (!empty($request->leave_allowance_type))
+                    <th>Type</th>
+                @endif
+                @if (!empty($request->leave_allowance_allowance))
+                    <th>Allowance</th>
+                @endif
+                @if (!empty($request->leave_allowance_earned))
+                    <th>Earned</th>
+                @endif
+                @if (!empty($request->leave_allowance_availability))
+                    <th>Availability</th>
+                @endif
             </tr>
         </thead>
         <tbody>
-            @if (1)
+            @if (count($leave_types))
                 @foreach ($leave_types as $key => $leave_type)
                     @php
                         $total_recorded_hours = \App\Models\LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
@@ -277,13 +291,21 @@ return $formattedBreakTime;
                     @endphp
                     <tr class="table_row">
                         <td class="index_col">{{ $key + 1 }}</td>
-                        <td style="text-align: left">
-                            {{ $leave_type->name }}
-                        </td>
-                        <td>{{ $leave_type->type }}</td>
-                        <td>{{ time_format($leave_type->amount, 2) }}/ month</td>
-                        <td>{{ time_format($leave_type->already_taken_hours, 2) }}</td>
-                        <td>{{ time_format($leave_type->amount - $leave_type->already_taken_hours, 2) }}</td>
+                        @if (!empty($request->leave_allowance_name))
+                            <td style="text-align: left">{{ $leave_type->name }}</td>
+                        @endif
+                        @if (!empty($request->leave_allowance_type))
+                            <td>{{ $leave_type->type }}</td>
+                        @endif
+                        @if (!empty($request->leave_allowance_allowance))
+                            <td>{{ time_format($leave_type->amount, 2) }}/ month</td>
+                        @endif
+                        @if (!empty($request->leave_allowance_earned))
+                            <td>{{ time_format($leave_type->already_taken_hours, 2) }}</td>
+                        @endif
+                        @if (!empty($request->leave_allowance_availability))
+                            <td>{{ time_format($leave_type->amount - $leave_type->already_taken_hours, 2) }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @else
@@ -304,13 +326,24 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Date</th>
-
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Break (hour)</th>
-                <th>Schedule (hour)</th>
-                <th>Overtime (hour)</th>
+                @if (!empty($request->attendance_date))
+                    <th>Date</th>
+                @endif
+                @if (!empty($request->attendance_start_time))
+                    <th>Start Time</th>
+                @endif
+                @if (!empty($request->attendance_end_time))
+                    <th>End Time</th>
+                @endif
+                @if (!empty($request->attendance_break))
+                    <th>Break (hour)</th>
+                @endif
+                @if (!empty($request->attendance_schedule))
+                    <th>Schedule (hour)</th>
+                @endif
+                @if (!empty($request->attendance_overtime))
+                    <th>Overtime (hour)</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -318,26 +351,35 @@ return $formattedBreakTime;
                 @foreach ($user->attendances as $index => $attendance)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ format_date($attendance->in_date) }}</td>
-                        <td>{{ $attendance->in_time }}</td>
-                        <td>{{ $attendance->out_time }}</td>
-                        <td>{{ $attendance->does_break_taken?time_format($attendance->break_hours):0 }}</td>
-                        <td>{{ time_format($attendance->capacity_hours) }}</td>
-                        <td>{{ time_format($attendance->overtime_hours) }}</td>
-
-
+                        @if (!empty($request->attendance_date))
+                            <td>{{ format_date($attendance->in_date) }}</td>
+                        @endif
+                        @if (!empty($request->attendance_start_time))
+                            <td>{{ $attendance->in_time }}</td>
+                        @endif
+                        @if (!empty($request->attendance_end_time))
+                            <td>{{ $attendance->out_time }}</td>
+                        @endif
+                        @if (!empty($request->attendance_break))
+                            <td>{{ $attendance->does_break_taken ? time_format($attendance->break_hours) : 0 }}</td>
+                        @endif
+                        @if (!empty($request->attendance_schedule))
+                            <td>{{ time_format($attendance->capacity_hours) }}</td>
+                        @endif
+                        @if (!empty($request->attendance_overtime))
+                            <td>{{ time_format($attendance->overtime_hours) }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
-
         </tbody>
     </table>
-
 @endif
+
 
 
     {{-- 4. LEAVE  --}}

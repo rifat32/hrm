@@ -30952,6 +30952,11 @@
                                         "format": "double",
                                         "example": 1000
                                     },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "payment_method"
+                                    },
                                     "payment_date": {
                                         "type": "string",
                                         "format": "date",
@@ -31088,6 +31093,11 @@
                                         "type": "integer",
                                         "format": "int",
                                         "example": 2024
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "payment_method"
                                     },
                                     "payment_notes": {
                                         "type": "number",
