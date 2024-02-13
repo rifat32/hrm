@@ -463,71 +463,68 @@ class UserManagementController extends Controller
 
             $request_data = $request->validated();
 
-      return      DB::transaction(function() use($request_data) {
-        if (!auth()->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
-            $this->storeError(
-                "You can not create superadmin.",
-                403,
-                "front end error",
-                "front end error"
-               );
-            $error =  [
-                "message" => "You can not create superadmin.",
-            ];
-            throw new Exception(json_encode($error), 403);
-        }
+            return      DB::transaction(function () use ($request_data) {
+                if (!auth()->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+                    $this->storeError(
+                        "You can not create superadmin.",
+                        403,
+                        "front end error",
+                        "front end error"
+                    );
+                    $error =  [
+                        "message" => "You can not create superadmin.",
+                    ];
+                    throw new Exception(json_encode($error), 403);
+                }
 
 
-        $request_data['password'] = Hash::make($request_data['password']);
-        $request_data['is_active'] = true;
-        $request_data['remember_token'] = Str::random(10);
+                $request_data['password'] = Hash::make($request_data['password']);
+                $request_data['is_active'] = true;
+                $request_data['remember_token'] = Str::random(10);
 
 
-        if (!empty($business_id)) {
-            $request_data['business_id'] = $business_id;
-        }
+                if (!empty($business_id)) {
+                    $request_data['business_id'] = $business_id;
+                }
 
 
-        $user =  User::create($request_data);
-        $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
-        $user->user_name = $username;
-        $user->save();
+                $user =  User::create($request_data);
+                $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+                $user->user_name = $username;
+                $user->save();
 
 
-        $user->assignRole($request_data['role']);
+                $user->assignRole($request_data['role']);
 
-        // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
-        // $default_work_shift = WorkShift::where([
-        //       "business_id" => auth()->user()->id,
-        //       "is_business_default" => 1
-        // ])
-        // ->first();
-        // if(!$default_work_shift) {
-        //     throw new Error("There is no default workshift for this business");
-        //  }
-        //   $default_work_shift->users()->attach($user->id);
+                // $default_work_shift = WorkShift::where([
+                //       "business_id" => auth()->user()->id,
+                //       "is_business_default" => 1
+                // ])
+                // ->first();
+                // if(!$default_work_shift) {
+                //     throw new Error("There is no default workshift for this business");
+                //  }
+                //   $default_work_shift->users()->attach($user->id);
 
-        $user->roles = $user->roles->pluck('name');
-
-
-        $this->loadDefaultSettingLeave($user->business_id);
-        $this->loadDefaultAttendanceSetting($user->business_id);
+                $user->roles = $user->roles->pluck('name');
 
 
+                $this->loadDefaultSettingLeave($user->business_id);
+                $this->loadDefaultAttendanceSetting($user->business_id);
 
 
-        // $user->permissions  = $user->getAllPermissions()->pluck('name');
-        // error_log("cccccc");
-        // $data["user"] = $user;
-        // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
-        // $data["roles"] = $user->roles->pluck('name');
-        // $data["token"] = $token;
-        return response($user, 201);
+
+
+                // $user->permissions  = $user->getAllPermissions()->pluck('name');
+                // error_log("cccccc");
+                // $data["user"] = $user;
+                // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
+                // $data["roles"] = $user->roles->pluck('name');
+                // $data["token"] = $token;
+                return response($user, 201);
             });
-
-
-
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -713,7 +710,7 @@ class UserManagementController extends Controller
                         403,
                         "front end error",
                         "front end error"
-                       );
+                    );
                     $error =  [
                         "message" => "You can not create superadmin.",
                     ];
@@ -801,17 +798,16 @@ class UserManagementController extends Controller
                     }
                     if (!$work_shift->is_active) {
                         $this->storeError(
-                            ("Please activate the work shift named '" . $work_shift->name . "'")
-                            ,
+                            ("Please activate the work shift named '" . $work_shift->name . "'"),
                             400,
                             "front end error",
                             "front end error"
-                           );
-                           $error =  [
+                        );
+                        $error =  [
                             "message" => ("Please activate the work shift named '" . $work_shift->name . "'"),
 
-                     ];
-                        throw new Exception(json_encode($error),400);
+                        ];
+                        throw new Exception(json_encode($error), 400);
                         // return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
                     }
                     $work_shift->users()->attach($user->id);
@@ -823,14 +819,12 @@ class UserManagementController extends Controller
                         "to_date" => NULL,
                         "work_shift_id" => $work_shift->id
                     ])
-                    ->first();
+                        ->first();
                     if (!$work_shift_history) {
                         throw new Exception("Now work shift history found");
                     }
 
-                        $work_shift_history->users()->attach($user->id, ['from_date' => $user->joining_date, 'to_date' => NULL]);
-
-
+                    $work_shift_history->users()->attach($user->id, ['from_date' => $user->joining_date, 'to_date' => NULL]);
                 } else {
                     $default_work_shift = WorkShift::where([
                         "business_id" => auth()->user()->business_id,
@@ -843,17 +837,16 @@ class UserManagementController extends Controller
 
                     if (!$default_work_shift->is_active) {
                         $this->storeError(
-                            ("Please activate the work shift named '" . $default_work_shift->name . "'")
-                            ,
+                            ("Please activate the work shift named '" . $default_work_shift->name . "'"),
                             400,
                             "front end error",
                             "front end error"
-                           );
-                           $error =  [
-                            "message" =>        ("Please activate the work shift named '" . $default_work_shift->name . "'"),
+                        );
+                        $error =  [
+                            "message" => ("Please activate the work shift named '" . $default_work_shift->name . "'"),
 
-                     ];
-                        throw new Exception(json_encode($error),400);
+                        ];
+                        throw new Exception(json_encode($error), 400);
                         // return response()->json(["message" => ("Please activate the work shift named '" . $default_work_shift->name . "'")], 400);
                     }
 
@@ -1047,12 +1040,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1149,12 +1141,11 @@ class UserManagementController extends Controller
 
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1341,24 +1332,22 @@ class UserManagementController extends Controller
                         ->first();
                     if (!$work_shift) {
                         $this->storeError(
-                            "no work shift found"
-                            ,
+                            "no work shift found",
                             403,
                             "front end error",
                             "front end error"
-                           );
+                        );
                         return response()->json([
                             "message" => "no work shift found"
                         ], 403);
                     }
                     if (!$work_shift->is_active) {
                         $this->storeError(
-                            ("Please activate the work shift named '" . $work_shift->name . "'")
-                            ,
+                            ("Please activate the work shift named '" . $work_shift->name . "'"),
                             400,
                             "front end error",
                             "front end error"
-                           );
+                        );
                         return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
                     }
                 }
@@ -1420,12 +1409,11 @@ class UserManagementController extends Controller
                     ->first();
                 if (!$user) {
                     $this->storeError(
-                        "no data found"
-                        ,
+                        "no data found",
                         404,
                         "front end error",
                         "front end error"
-                       );
+                    );
                     return response()->json([
                         "message" => "no user found"
                     ], 404);
@@ -1514,7 +1502,7 @@ class UserManagementController extends Controller
                     $current_workshift = $user->work_shifts->last();
 
                     $current_workshift_id = NULL;
-                    if($current_workshift) {
+                    if ($current_workshift) {
                         $current_workshift_id = $current_workshift->id;
                     }
 
@@ -1531,32 +1519,27 @@ class UserManagementController extends Controller
 
 
 
-                     EmployeeUserWorkShiftHistory::where([
+                        EmployeeUserWorkShiftHistory::where([
                             "to_date" => NULL,
                             "user_id" => $user->id
                         ])
-                        ->whereHas("work_shift_history",function($query) use($current_workshift_id) {
-                            $query->where("work_shift_histories.work_shift_id", $current_workshift_id);
-                        })
-                        // ->where("work_shift_id",$current_workshift->id)
+                            ->whereHas("work_shift_history", function ($query) use ($current_workshift_id) {
+                                $query->where("work_shift_histories.work_shift_id", $current_workshift_id);
+                            })
+                            // ->where("work_shift_id",$current_workshift->id)
                             ->update([
                                 "to_date" => now()
                             ]);
 
 
-                 $work_shift_history =  WorkShiftHistory::where([
-                        "to_date" => NULL,
-                        "work_shift_id" => $work_shift->id
-                    ])
-                    ->first();
+                        $work_shift_history =  WorkShiftHistory::where([
+                            "to_date" => NULL,
+                            "work_shift_id" => $work_shift->id
+                        ])
+                            ->first();
 
                         $work_shift_history->users()->attach($user->id, ['from_date' => now(), 'to_date' => NULL]);
                     }
-
-
-
-
-
                 }
 
 
@@ -2007,12 +1990,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2190,12 +2172,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2316,12 +2297,11 @@ class UserManagementController extends Controller
 
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2439,12 +2419,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2747,12 +2726,11 @@ class UserManagementController extends Controller
             $user =  $userQuery->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2897,12 +2875,11 @@ class UserManagementController extends Controller
 
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -3574,12 +3551,11 @@ class UserManagementController extends Controller
                     });
                 })
                 ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
-                    if(intval($request->doesnt_have_payrun)) {
+                    if (intval($request->doesnt_have_payrun)) {
                         return $query->whereDoesntHave("payrun_users");
                     } else {
                         return $query;
                     }
-
                 })
 
 
@@ -3613,10 +3589,6 @@ class UserManagementController extends Controller
 
                     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
                 }
-
-
-
-
             } else {
                 return response()->json($users, 200);
             }
@@ -3962,41 +3934,41 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function getUsersV3(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getUsersV3(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
 
 
-             $users = User::with(
-                 [
-                     "designation" => function ($query) {
-                         $query->select(
-                             'designations.id',
-                             'designations.name',
-                         );
-                     },
-                     "roles",
-                     "recruitment_processes",
-                     "work_location"
-                 ]
-             )
+            $users = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                    "recruitment_processes",
+                    "work_location"
+                ]
+            )
 
-                 ->whereNotIn('id', [$request->user()->id])
+                ->whereNotIn('id', [$request->user()->id])
 
-                 ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if (auth()->user()->hasRole("superadmin")) {
                         return  $query->where(function ($query) {
                             return   $query->where('business_id', NULL)
@@ -4024,67 +3996,67 @@ class UserManagementController extends Controller
                 })
 
 
-                 ->when(!empty($request->role), function ($query) use ($request) {
-                     $rolesArray = explode(',', $request->role);
-                     return   $query->whereHas("roles", function ($q) use ($rolesArray) {
-                         return $q->whereIn("name", $rolesArray);
-                     });
-                 })
+                ->when(!empty($request->role), function ($query) use ($request) {
+                    $rolesArray = explode(',', $request->role);
+                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
+                        return $q->whereIn("name", $rolesArray);
+                    });
+                })
 
 
 
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     $term = $request->search_key;
-                     return $query->where(function ($subquery) use ($term) {
-                         $subquery->where("first_Name", "like", "%" . $term . "%")
-                             ->orWhere("last_Name", "like", "%" . $term . "%")
-                             ->orWhere("email", "like", "%" . $term . "%")
-                             ->orWhere("phone", "like", "%" . $term . "%");
-                     });
-                 })
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    $term = $request->search_key;
+                    return $query->where(function ($subquery) use ($term) {
+                        $subquery->where("first_Name", "like", "%" . $term . "%")
+                            ->orWhere("last_Name", "like", "%" . $term . "%")
+                            ->orWhere("email", "like", "%" . $term . "%")
+                            ->orWhere("phone", "like", "%" . $term . "%");
+                    });
+                })
 
-                 ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                     return $query->where('is_in_employee', intval($request->is_in_employee));
-                 })
-                 ->when(isset($request->is_active), function ($query) use ($request) {
-                     return $query->where('is_active', intval($request->is_active));
-                 })
+                ->when(isset($request->is_in_employee), function ($query) use ($request) {
+                    return $query->where('is_in_employee', intval($request->is_in_employee));
+                })
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    return $query->where('is_active', intval($request->is_active));
+                })
 
 
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                 })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
 
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("users.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("users.id", "DESC");
-                 })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("users.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("users.id", "DESC");
+                })
 
-                 ->withCount('all_users as user_count')
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });
+                ->withCount('all_users as user_count')
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
 
-             $data["data"] = $users;
-             $data["data_highlights"] = [];
+            $data["data"] = $users;
+            $data["data_highlights"] = [];
 
-             $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
-                 return $user->is_active == 1;
-             })->count();
-             $data["data_highlights"]["total_users"] = $users->count();
+            $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
+                return $user->is_active == 1;
+            })->count();
+            $data["data_highlights"]["total_users"] = $users->count();
 
-             return response()->json($data, 200);
-         } catch (Exception $e) {
+            return response()->json($data, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -4234,7 +4206,7 @@ class UserManagementController extends Controller
                     return $query->where('business_id', intval($request->business_id));
                 })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                      return $query->where('business_id', $request->user()->business_id);
+                    return $query->where('business_id', $request->user()->business_id);
                 })
                 ->when(isset($request->is_in_employee), function ($query) use ($request) {
                     return $query->where('is_in_employee', intval($request->is_in_employee));
@@ -4269,7 +4241,7 @@ class UserManagementController extends Controller
                     'postcode',
                     "lat",
                     "long"
-                    )
+                )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -4317,624 +4289,624 @@ class UserManagementController extends Controller
      *
      *
      *  * @OA\Parameter(
- *     name="employee_details",
- *     in="query",
- *     description="Employee Details",
- *     required=true,
- *     example="employee_details"
- * ),
- * @OA\Parameter(
- *     name="leave_allowances",
- *     in="query",
- *     description="Leave Allowances",
- *     required=true,
- *     example="leave_allowances"
- * ),
- * @OA\Parameter(
- *     name="attendances",
- *     in="query",
- *     description="Attendances",
- *     required=true,
- *     example="attendances"
- * ),
- * @OA\Parameter(
- *     name="leaves",
- *     in="query",
- *     description="Leaves",
- *     required=true,
- *     example="leaves"
- * ),
- * @OA\Parameter(
- *     name="documents",
- *     in="query",
- *     description="Documents",
- *     required=true,
- *     example="documents"
- * ),
- * @OA\Parameter(
- *     name="assets",
- *     in="query",
- *     description="Assets",
- *     required=true,
- *     example="assets"
- * ),
- * @OA\Parameter(
- *     name="educational_history",
- *     in="query",
- *     description="Educational History",
- *     required=true,
- *     example="educational_history"
- * ),
- * @OA\Parameter(
- *     name="job_history",
- *     in="query",
- *     description="Job History",
- *     required=true,
- *     example="job_history"
- * ),
- * @OA\Parameter(
- *     name="current_cos_details",
- *     in="query",
- *     description="Current COS Details",
- *     required=true,
- *     example="current_cos_details"
- * ),
- * @OA\Parameter(
- *     name="current_passport_details",
- *     in="query",
- *     description="Current Passport Details",
- *     required=true,
- *     example="current_passport_details"
- * ),
- * @OA\Parameter(
- *     name="current_visa_details",
- *     in="query",
- *     description="Current Visa Details",
- *     required=true,
- *     example="current_visa_details"
- * ),
- * @OA\Parameter(
- *     name="address_details",
- *     in="query",
- *     description="Address Details",
- *     required=true,
- *     example="address_details"
- * ),
- * @OA\Parameter(
- *     name="contact_details",
- *     in="query",
- *     description="Contact Details",
- *     required=true,
- *     example="contact_details"
- * ),
- * @OA\Parameter(
- *     name="notes",
- *     in="query",
- *     description="Notes",
- *     required=true,
- *     example="notes"
- * ),
- * @OA\Parameter(
- *     name="bank_details",
- *     in="query",
- *     description="Bank Details",
- *     required=true,
- *     example="bank_details"
- * ),
- * @OA\Parameter(
- *     name="social_links",
- *     in="query",
- *     description="Social Links",
- *     required=true,
- *     example="social_links"
- * ),
- *  * @OA\Parameter(
- *     name="employee_details_name",
- *     in="query",
- *     description="Employee Name",
- *     required=true,
- *     example="John Doe"
- * ),
- * @OA\Parameter(
- *     name="employee_details_user_id",
- *     in="query",
- *     description="Employee User ID",
- *     required=true,
- *     example="123456"
- * ),
- * @OA\Parameter(
- *     name="employee_details_email",
- *     in="query",
- *     description="Employee Email",
- *     required=true,
- *     example="john.doe@example.com"
- * ),
- * @OA\Parameter(
- *     name="employee_details_phone",
- *     in="query",
- *     description="Employee Phone",
- *     required=true,
- *     example="123-456-7890"
- * ),
- * @OA\Parameter(
- *     name="employee_details_gender",
- *     in="query",
- *     description="Employee Gender",
- *     required=true,
- *     example="male"
- * ),
- * @OA\Parameter(
- *     name="leave_allowance_name",
- *     in="query",
- *     description="Leave Allowance Name",
- *     required=true,
- *     example="Annual Leave"
- * ),
- * @OA\Parameter(
- *     name="leave_allowance_type",
- *     in="query",
- *     description="Leave Allowance Type",
- *     required=true,
- *     example="Paid"
- * ),
- * @OA\Parameter(
- *     name="leave_allowance_allowance",
- *     in="query",
- *     description="Leave Allowance Amount",
- *     required=true,
- *     example="20"
- * ),
- * @OA\Parameter(
- *     name="leave_allowance_earned",
- *     in="query",
- *     description="Leave Allowance Earned",
- *     required=true,
- *     example="10"
- * ),
- * @OA\Parameter(
- *     name="leave_allowance_availability",
- *     in="query",
- *     description="Leave Allowance Availability",
- *     required=true,
- *     example="Yes"
- * ),
- * @OA\Parameter(
- *     name="attendance_date",
- *     in="query",
- *     description="Attendance Date",
- *     required=true,
- *     example="2024-02-13"
- * ),
- * @OA\Parameter(
- *     name="attendance_start_time",
- *     in="query",
- *     description="Attendance Start Time",
- *     required=true,
- *     example="08:00:00"
- * ),
- * @OA\Parameter(
- *     name="attendance_end_time",
- *     in="query",
- *     description="Attendance End Time",
- *     required=true,
- *     example="17:00:00"
- * ),
- * @OA\Parameter(
- *     name="attendance_break",
- *     in="query",
- *     description="Attendance Break Time",
- *     required=true,
- *     example="01:00:00"
- * ),
- * @OA\Parameter(
- *     name="attendance_schedule",
- *     in="query",
- *     description="Attendance Schedule",
- *     required=true,
- *     example="Regular"
- * ),
- * @OA\Parameter(
- *     name="attendance_overtime",
- *     in="query",
- *     description="Attendance Overtime",
- *     required=true,
- *     example="02:00:00"
- * ),
- * @OA\Parameter(
- *     name="leave_date_time",
- *     in="query",
- *     description="Leave Date and Time",
- *     required=true,
- *     example="2024-02-14 08:00:00"
- * ),
- * @OA\Parameter(
- *     name="leave_type",
- *     in="query",
- *     description="Leave Type",
- *     required=true,
- *     example="Sick Leave"
- * ),
- * @OA\Parameter(
- *     name="leave_duration",
- *     in="query",
- *     description="Leave Duration",
- *     required=true,
- *     example="8"
- * ),
- * @OA\Parameter(
- *     name="total_leave_hours",
- *     in="query",
- *     description="Total Leave Hours",
- *     required=true,
- *     example="8"
- * ),
- * @OA\Parameter(
- *     name="document_title",
- *     in="query",
- *     description="Document Title",
- *     required=true,
- *     example="Annual Report"
- * ),
- * @OA\Parameter(
- *     name="document_added_by",
- *     in="query",
- *     description="Document Added By",
- *     required=true,
- *     example="Jane Smith"
- * ),
- * @OA\Parameter(
- *     name="asset_name",
- *     in="query",
- *     description="Asset Name",
- *     required=true,
- *     example="Laptop"
- * ),
- * @OA\Parameter(
- *     name="asset_code",
- *     in="query",
- *     description="Asset Code",
- *     required=true,
- *     example="LT12345"
- * ),
- * @OA\Parameter(
- *     name="asset_serial_number",
- *     in="query",
- *     description="Asset Serial Number",
- *     required=true,
- *     example="SN6789"
- * ),
- * @OA\Parameter(
- *     name="asset_is_working",
- *     in="query",
- *     description="Is Asset Working",
- *     required=true,
- *     example="true"
- * ),
- * @OA\Parameter(
- *     name="asset_type",
- *     in="query",
- *     description="Asset Type",
- *     required=true,
- *     example="Electronic"
- * ),
- * @OA\Parameter(
- *     name="asset_date",
- *     in="query",
- *     description="Asset Date",
- *     required=true,
- *     example="2024-02-13"
- * ),
- * @OA\Parameter(
- *     name="asset_note",
- *     in="query",
- *     description="Asset Note",
- *     required=true,
- *     example="This is a laptop for development purposes."
- * ),
- * @OA\Parameter(
- *     name="educational_history_degree",
- *     in="query",
- *     description="Educational History Degree",
- *     required=true,
- *     example="Bachelor of Science"
- * ),
- * @OA\Parameter(
- *     name="educational_history_major",
- *     in="query",
- *     description="Educational History Major",
- *     required=true,
- *     example="Computer Science"
- * ),
- * @OA\Parameter(
- *     name="educational_history_start_date",
- *     in="query",
- *     description="Educational History Start Date",
- *     required=true,
- *     example="2018-09-01"
- * ),
- * @OA\Parameter(
- *     name="educational_history_achievements",
- *     in="query",
- *     description="Educational History Achievements",
- *     required=true,
- *     example="Graduated with honors"
- * ),
- * @OA\Parameter(
- *     name="job_history_job_title",
- *     in="query",
- *     description="Job History Job Title",
- *     required=true,
- *     example="Software Engineer"
- * ),
- * @OA\Parameter(
- *     name="job_history_company",
- *     in="query",
- *     description="Job History Company",
- *     required=true,
- *     example="Tech Solutions Inc."
- * ),
- * @OA\Parameter(
- *     name="job_history_start_on",
- *     in="query",
- *     description="Job History Start Date",
- *     required=true,
- *     example="2020-03-15"
- * ),
- * @OA\Parameter(
- *     name="job_history_end_at",
- *     in="query",
- *     description="Job History End Date",
- *     required=true,
- *     example="2022-05-30"
- * ),
- * @OA\Parameter(
- *     name="job_history_supervisor",
- *     in="query",
- *     description="Job History Supervisor",
- *     required=true,
- *     example="John Smith"
- * ),
- * @OA\Parameter(
- *     name="job_history_country",
- *     in="query",
- *     description="Job History Country",
- *     required=true,
- *     example="United States"
- * ),
- * @OA\Parameter(
- *     name="current_cos_details_date_assigned",
- *     in="query",
- *     description="Date COS Assigned",
- *     required=true,
- *     example="2023-05-15"
- * ),
- * @OA\Parameter(
- *     name="current_cos_details_expiry_date",
- *     in="query",
- *     description="COS Expiry Date",
- *     required=true,
- *     example="2025-05-14"
- * ),
- * @OA\Parameter(
- *     name="current_cos_details_certificate_number",
- *     in="query",
- *     description="COS Certificate Number",
- *     required=true,
- *     example="COS12345"
- * ),
- * @OA\Parameter(
- *     name="current_cos_details_current_certificate_status",
- *     in="query",
- *     description="Current COS Certificate Status",
- *     required=true,
- *     example="Active"
- * ),
- * @OA\Parameter(
- *     name="current_cos_details_note",
- *     in="query",
- *     description="COS Note",
- *     required=true,
- *     example="Employee is eligible for work under the current COS."
- * ),
- * @OA\Parameter(
- *     name="current_passport_details_issue_date",
- *     in="query",
- *     description="Passport Issue Date",
- *     required=true,
- *     example="2022-01-01"
- * ),
- * @OA\Parameter(
- *     name="current_passport_details_expiry_date",
- *     in="query",
- *     description="Passport Expiry Date",
- *     required=true,
- *     example="2032-01-01"
- * ),
- * @OA\Parameter(
- *     name="current_passport_details_passport_number",
- *     in="query",
- *     description="Passport Number",
- *     required=true,
- *     example="P123456"
- * ),
- * @OA\Parameter(
- *     name="current_passport_details_place_of_issue",
- *     in="query",
- *     description="Passport Place of Issue",
- *     required=true,
- *     example="United Kingdom"
- * ),
- * @OA\Parameter(
- *     name="current_visa_details_issue_date",
- *     in="query",
- *     description="Visa Issue Date",
- *     required=true,
- *     example="2023-01-01"
- * ),
- * @OA\Parameter(
- *     name="current_visa_details_expiry_date",
- *     in="query",
- *     description="Visa Expiry Date",
- *     required=true,
- *     example="2025-01-01"
- * ),
- * @OA\Parameter(
- *     name="current_visa_details_brp_number",
- *     in="query",
- *     description="BRP Number",
- *     required=true,
- *     example="BRP1234567890"
- * ),
- * @OA\Parameter(
- *     name="current_visa_details_place_of_issue",
- *     in="query",
- *     description="Visa Place of Issue",
- *     required=true,
- *     example="United Kingdom"
- * ),
- * @OA\Parameter(
- *     name="address_details_address",
- *     in="query",
- *     description="Address",
- *     required=true,
- *     example="123 Main Street"
- * ),
- * @OA\Parameter(
- *     name="address_details_city",
- *     in="query",
- *     description="City",
- *     required=true,
- *     example="London"
- * ),
- * @OA\Parameter(
- *     name="address_details_country",
- *     in="query",
- *     description="Country",
- *     required=true,
- *     example="United Kingdom"
- * ),
- * @OA\Parameter(
- *     name="address_details_postcode",
- *     in="query",
- *     description="Postcode",
- *     required=true,
- *     example="AB12 3CD"
- * ),
- * @OA\Parameter(
- *     name="contact_details_first_name",
- *     in="query",
- *     description="First Name",
- *     required=true,
- *     example="John"
- * ),
- * @OA\Parameter(
- *     name="contact_details_last_name",
- *     in="query",
- *     description="Last Name",
- *     required=true,
- *     example="Doe"
- * ),
- * @OA\Parameter(
- *     name="contact_details_relationship",
- *     in="query",
- *     description="Relationship",
- *     required=true,
- *     example="Spouse"
- * ),
- * @OA\Parameter(
- *     name="contact_details_address",
- *     in="query",
- *     description="Address",
- *     required=true,
- *     example="456 Elm Street"
- * ),
- * @OA\Parameter(
- *     name="contact_details_postcode",
- *     in="query",
- *     description="Postcode",
- *     required=true,
- *     example="XY12 3Z"
- * ),
- * @OA\Parameter(
- *     name="contact_details_day_time_tel_number",
- *     in="query",
- *     description="Daytime Telephone Number",
- *     required=true,
- *     example="123-456-7890"
- * ),
- * @OA\Parameter(
- *     name="contact_details_evening_time_tel_number",
- *     in="query",
- *     description="Evening Telephone Number",
- *     required=true,
- *     example="789-456-1230"
- * ),
- * @OA\Parameter(
- *     name="contact_details_mobile_tel_number",
- *     in="query",
- *     description="Mobile Telephone Number",
- *     required=true,
- *     example="987-654-3210"
- * ),
- * @OA\Parameter(
- *     name="notes_title",
- *     in="query",
- *     description="Notes Title",
- *     required=true,
- *     example="Meeting Notes"
- * ),
- * @OA\Parameter(
- *     name="notes_description",
- *     in="query",
- *     description="Notes Description",
- *     required=true,
- *     example="Discussed project progress."
- * ),
- * @OA\Parameter(
- *     name="bank_details_name",
- *     in="query",
- *     description="Bank Name",
- *     required=true,
- *     example="ABC Bank"
- * ),
- * @OA\Parameter(
- *     name="bank_details_sort_code",
- *     in="query",
- *     description="Bank Sort Code",
- *     required=true,
- *     example="12-34-56"
- * ),
- * @OA\Parameter(
- *     name="bank_details_account_name",
- *     in="query",
- *     description="Account Name",
- *     required=true,
- *     example="John Doe"
- * ),
- * @OA\Parameter(
- *     name="bank_details_account_number",
- *     in="query",
- *     description="Account Number",
- *     required=true,
- *     example="12345678"
- * ),
- * @OA\Parameter(
- *     name="social_links_website",
- *     in="query",
- *     description="Website",
- *     required=true,
- *     example="example.com"
- * ),
- * @OA\Parameter(
- *     name="social_links_url",
- *     in="query",
- *     description="Social Media URL",
- *     required=true,
- *     example="https://twitter.com/example"
- * ),
+     *     name="employee_details",
+     *     in="query",
+     *     description="Employee Details",
+     *     required=true,
+     *     example="employee_details"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_allowances",
+     *     in="query",
+     *     description="Leave Allowances",
+     *     required=true,
+     *     example="leave_allowances"
+     * ),
+     * @OA\Parameter(
+     *     name="attendances",
+     *     in="query",
+     *     description="Attendances",
+     *     required=true,
+     *     example="attendances"
+     * ),
+     * @OA\Parameter(
+     *     name="leaves",
+     *     in="query",
+     *     description="Leaves",
+     *     required=true,
+     *     example="leaves"
+     * ),
+     * @OA\Parameter(
+     *     name="documents",
+     *     in="query",
+     *     description="Documents",
+     *     required=true,
+     *     example="documents"
+     * ),
+     * @OA\Parameter(
+     *     name="assets",
+     *     in="query",
+     *     description="Assets",
+     *     required=true,
+     *     example="assets"
+     * ),
+     * @OA\Parameter(
+     *     name="educational_history",
+     *     in="query",
+     *     description="Educational History",
+     *     required=true,
+     *     example="educational_history"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history",
+     *     in="query",
+     *     description="Job History",
+     *     required=true,
+     *     example="job_history"
+     * ),
+     * @OA\Parameter(
+     *     name="current_cos_details",
+     *     in="query",
+     *     description="Current COS Details",
+     *     required=true,
+     *     example="current_cos_details"
+     * ),
+     * @OA\Parameter(
+     *     name="current_passport_details",
+     *     in="query",
+     *     description="Current Passport Details",
+     *     required=true,
+     *     example="current_passport_details"
+     * ),
+     * @OA\Parameter(
+     *     name="current_visa_details",
+     *     in="query",
+     *     description="Current Visa Details",
+     *     required=true,
+     *     example="current_visa_details"
+     * ),
+     * @OA\Parameter(
+     *     name="address_details",
+     *     in="query",
+     *     description="Address Details",
+     *     required=true,
+     *     example="address_details"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details",
+     *     in="query",
+     *     description="Contact Details",
+     *     required=true,
+     *     example="contact_details"
+     * ),
+     * @OA\Parameter(
+     *     name="notes",
+     *     in="query",
+     *     description="Notes",
+     *     required=true,
+     *     example="notes"
+     * ),
+     * @OA\Parameter(
+     *     name="bank_details",
+     *     in="query",
+     *     description="Bank Details",
+     *     required=true,
+     *     example="bank_details"
+     * ),
+     * @OA\Parameter(
+     *     name="social_links",
+     *     in="query",
+     *     description="Social Links",
+     *     required=true,
+     *     example="social_links"
+     * ),
+     *  * @OA\Parameter(
+     *     name="employee_details_name",
+     *     in="query",
+     *     description="Employee Name",
+     *     required=true,
+     *     example="John Doe"
+     * ),
+     * @OA\Parameter(
+     *     name="employee_details_user_id",
+     *     in="query",
+     *     description="Employee User ID",
+     *     required=true,
+     *     example="123456"
+     * ),
+     * @OA\Parameter(
+     *     name="employee_details_email",
+     *     in="query",
+     *     description="Employee Email",
+     *     required=true,
+     *     example="john.doe@example.com"
+     * ),
+     * @OA\Parameter(
+     *     name="employee_details_phone",
+     *     in="query",
+     *     description="Employee Phone",
+     *     required=true,
+     *     example="123-456-7890"
+     * ),
+     * @OA\Parameter(
+     *     name="employee_details_gender",
+     *     in="query",
+     *     description="Employee Gender",
+     *     required=true,
+     *     example="male"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_allowance_name",
+     *     in="query",
+     *     description="Leave Allowance Name",
+     *     required=true,
+     *     example="Annual Leave"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_allowance_type",
+     *     in="query",
+     *     description="Leave Allowance Type",
+     *     required=true,
+     *     example="Paid"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_allowance_allowance",
+     *     in="query",
+     *     description="Leave Allowance Amount",
+     *     required=true,
+     *     example="20"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_allowance_earned",
+     *     in="query",
+     *     description="Leave Allowance Earned",
+     *     required=true,
+     *     example="10"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_allowance_availability",
+     *     in="query",
+     *     description="Leave Allowance Availability",
+     *     required=true,
+     *     example="Yes"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_date",
+     *     in="query",
+     *     description="Attendance Date",
+     *     required=true,
+     *     example="2024-02-13"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_start_time",
+     *     in="query",
+     *     description="Attendance Start Time",
+     *     required=true,
+     *     example="08:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_end_time",
+     *     in="query",
+     *     description="Attendance End Time",
+     *     required=true,
+     *     example="17:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_break",
+     *     in="query",
+     *     description="Attendance Break Time",
+     *     required=true,
+     *     example="01:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_schedule",
+     *     in="query",
+     *     description="Attendance Schedule",
+     *     required=true,
+     *     example="Regular"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_overtime",
+     *     in="query",
+     *     description="Attendance Overtime",
+     *     required=true,
+     *     example="02:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_date_time",
+     *     in="query",
+     *     description="Leave Date and Time",
+     *     required=true,
+     *     example="2024-02-14 08:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_type",
+     *     in="query",
+     *     description="Leave Type",
+     *     required=true,
+     *     example="Sick Leave"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_duration",
+     *     in="query",
+     *     description="Leave Duration",
+     *     required=true,
+     *     example="8"
+     * ),
+     * @OA\Parameter(
+     *     name="total_leave_hours",
+     *     in="query",
+     *     description="Total Leave Hours",
+     *     required=true,
+     *     example="8"
+     * ),
+     * @OA\Parameter(
+     *     name="document_title",
+     *     in="query",
+     *     description="Document Title",
+     *     required=true,
+     *     example="Annual Report"
+     * ),
+     * @OA\Parameter(
+     *     name="document_added_by",
+     *     in="query",
+     *     description="Document Added By",
+     *     required=true,
+     *     example="Jane Smith"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_name",
+     *     in="query",
+     *     description="Asset Name",
+     *     required=true,
+     *     example="Laptop"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_code",
+     *     in="query",
+     *     description="Asset Code",
+     *     required=true,
+     *     example="LT12345"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_serial_number",
+     *     in="query",
+     *     description="Asset Serial Number",
+     *     required=true,
+     *     example="SN6789"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_is_working",
+     *     in="query",
+     *     description="Is Asset Working",
+     *     required=true,
+     *     example="true"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_type",
+     *     in="query",
+     *     description="Asset Type",
+     *     required=true,
+     *     example="Electronic"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_date",
+     *     in="query",
+     *     description="Asset Date",
+     *     required=true,
+     *     example="2024-02-13"
+     * ),
+     * @OA\Parameter(
+     *     name="asset_note",
+     *     in="query",
+     *     description="Asset Note",
+     *     required=true,
+     *     example="This is a laptop for development purposes."
+     * ),
+     * @OA\Parameter(
+     *     name="educational_history_degree",
+     *     in="query",
+     *     description="Educational History Degree",
+     *     required=true,
+     *     example="Bachelor of Science"
+     * ),
+     * @OA\Parameter(
+     *     name="educational_history_major",
+     *     in="query",
+     *     description="Educational History Major",
+     *     required=true,
+     *     example="Computer Science"
+     * ),
+     * @OA\Parameter(
+     *     name="educational_history_start_date",
+     *     in="query",
+     *     description="Educational History Start Date",
+     *     required=true,
+     *     example="2018-09-01"
+     * ),
+     * @OA\Parameter(
+     *     name="educational_history_achievements",
+     *     in="query",
+     *     description="Educational History Achievements",
+     *     required=true,
+     *     example="Graduated with honors"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_job_title",
+     *     in="query",
+     *     description="Job History Job Title",
+     *     required=true,
+     *     example="Software Engineer"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_company",
+     *     in="query",
+     *     description="Job History Company",
+     *     required=true,
+     *     example="Tech Solutions Inc."
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_start_on",
+     *     in="query",
+     *     description="Job History Start Date",
+     *     required=true,
+     *     example="2020-03-15"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_end_at",
+     *     in="query",
+     *     description="Job History End Date",
+     *     required=true,
+     *     example="2022-05-30"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_supervisor",
+     *     in="query",
+     *     description="Job History Supervisor",
+     *     required=true,
+     *     example="John Smith"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_country",
+     *     in="query",
+     *     description="Job History Country",
+     *     required=true,
+     *     example="United States"
+     * ),
+     * @OA\Parameter(
+     *     name="current_cos_details_date_assigned",
+     *     in="query",
+     *     description="Date COS Assigned",
+     *     required=true,
+     *     example="2023-05-15"
+     * ),
+     * @OA\Parameter(
+     *     name="current_cos_details_expiry_date",
+     *     in="query",
+     *     description="COS Expiry Date",
+     *     required=true,
+     *     example="2025-05-14"
+     * ),
+     * @OA\Parameter(
+     *     name="current_cos_details_certificate_number",
+     *     in="query",
+     *     description="COS Certificate Number",
+     *     required=true,
+     *     example="COS12345"
+     * ),
+     * @OA\Parameter(
+     *     name="current_cos_details_current_certificate_status",
+     *     in="query",
+     *     description="Current COS Certificate Status",
+     *     required=true,
+     *     example="Active"
+     * ),
+     * @OA\Parameter(
+     *     name="current_cos_details_note",
+     *     in="query",
+     *     description="COS Note",
+     *     required=true,
+     *     example="Employee is eligible for work under the current COS."
+     * ),
+     * @OA\Parameter(
+     *     name="current_passport_details_issue_date",
+     *     in="query",
+     *     description="Passport Issue Date",
+     *     required=true,
+     *     example="2022-01-01"
+     * ),
+     * @OA\Parameter(
+     *     name="current_passport_details_expiry_date",
+     *     in="query",
+     *     description="Passport Expiry Date",
+     *     required=true,
+     *     example="2032-01-01"
+     * ),
+     * @OA\Parameter(
+     *     name="current_passport_details_passport_number",
+     *     in="query",
+     *     description="Passport Number",
+     *     required=true,
+     *     example="P123456"
+     * ),
+     * @OA\Parameter(
+     *     name="current_passport_details_place_of_issue",
+     *     in="query",
+     *     description="Passport Place of Issue",
+     *     required=true,
+     *     example="United Kingdom"
+     * ),
+     * @OA\Parameter(
+     *     name="current_visa_details_issue_date",
+     *     in="query",
+     *     description="Visa Issue Date",
+     *     required=true,
+     *     example="2023-01-01"
+     * ),
+     * @OA\Parameter(
+     *     name="current_visa_details_expiry_date",
+     *     in="query",
+     *     description="Visa Expiry Date",
+     *     required=true,
+     *     example="2025-01-01"
+     * ),
+     * @OA\Parameter(
+     *     name="current_visa_details_brp_number",
+     *     in="query",
+     *     description="BRP Number",
+     *     required=true,
+     *     example="BRP1234567890"
+     * ),
+     * @OA\Parameter(
+     *     name="current_visa_details_place_of_issue",
+     *     in="query",
+     *     description="Visa Place of Issue",
+     *     required=true,
+     *     example="United Kingdom"
+     * ),
+     * @OA\Parameter(
+     *     name="address_details_address",
+     *     in="query",
+     *     description="Address",
+     *     required=true,
+     *     example="123 Main Street"
+     * ),
+     * @OA\Parameter(
+     *     name="address_details_city",
+     *     in="query",
+     *     description="City",
+     *     required=true,
+     *     example="London"
+     * ),
+     * @OA\Parameter(
+     *     name="address_details_country",
+     *     in="query",
+     *     description="Country",
+     *     required=true,
+     *     example="United Kingdom"
+     * ),
+     * @OA\Parameter(
+     *     name="address_details_postcode",
+     *     in="query",
+     *     description="Postcode",
+     *     required=true,
+     *     example="AB12 3CD"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_first_name",
+     *     in="query",
+     *     description="First Name",
+     *     required=true,
+     *     example="John"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_last_name",
+     *     in="query",
+     *     description="Last Name",
+     *     required=true,
+     *     example="Doe"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_relationship",
+     *     in="query",
+     *     description="Relationship",
+     *     required=true,
+     *     example="Spouse"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_address",
+     *     in="query",
+     *     description="Address",
+     *     required=true,
+     *     example="456 Elm Street"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_postcode",
+     *     in="query",
+     *     description="Postcode",
+     *     required=true,
+     *     example="XY12 3Z"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_day_time_tel_number",
+     *     in="query",
+     *     description="Daytime Telephone Number",
+     *     required=true,
+     *     example="123-456-7890"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_evening_time_tel_number",
+     *     in="query",
+     *     description="Evening Telephone Number",
+     *     required=true,
+     *     example="789-456-1230"
+     * ),
+     * @OA\Parameter(
+     *     name="contact_details_mobile_tel_number",
+     *     in="query",
+     *     description="Mobile Telephone Number",
+     *     required=true,
+     *     example="987-654-3210"
+     * ),
+     * @OA\Parameter(
+     *     name="notes_title",
+     *     in="query",
+     *     description="Notes Title",
+     *     required=true,
+     *     example="Meeting Notes"
+     * ),
+     * @OA\Parameter(
+     *     name="notes_description",
+     *     in="query",
+     *     description="Notes Description",
+     *     required=true,
+     *     example="Discussed project progress."
+     * ),
+     * @OA\Parameter(
+     *     name="bank_details_name",
+     *     in="query",
+     *     description="Bank Name",
+     *     required=true,
+     *     example="ABC Bank"
+     * ),
+     * @OA\Parameter(
+     *     name="bank_details_sort_code",
+     *     in="query",
+     *     description="Bank Sort Code",
+     *     required=true,
+     *     example="12-34-56"
+     * ),
+     * @OA\Parameter(
+     *     name="bank_details_account_name",
+     *     in="query",
+     *     description="Account Name",
+     *     required=true,
+     *     example="John Doe"
+     * ),
+     * @OA\Parameter(
+     *     name="bank_details_account_number",
+     *     in="query",
+     *     description="Account Number",
+     *     required=true,
+     *     example="12345678"
+     * ),
+     * @OA\Parameter(
+     *     name="social_links_website",
+     *     in="query",
+     *     description="Website",
+     *     required=true,
+     *     example="example.com"
+     * ),
+     * @OA\Parameter(
+     *     name="social_links_url",
+     *     in="query",
+     *     description="Social Media URL",
+     *     required=true,
+     *     example="https://twitter.com/example"
+     * ),
 
- *
- *
+     *
+     *
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
@@ -5009,12 +4981,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -5024,17 +4995,13 @@ class UserManagementController extends Controller
             // });
             $user->work_shift = $user->work_shifts()->first();
 
-            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF','CSV' ])) {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 if (strtoupper($request->response_type) == 'PDF') {
                     $pdf = PDF::loadView('pdf.user', ["user" => $user, "request" => $request]);
                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-
-                }
-                elseif (strtoupper($request->response_type) === 'CSV') {
+                } elseif (strtoupper($request->response_type) === 'CSV') {
 
                     return Excel::download(new UserExport($user), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-
-
                 }
             } else {
                 return response()->json($user, 200);
@@ -5146,12 +5113,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -5169,8 +5135,6 @@ class UserManagementController extends Controller
 
 
             return response()->json($user, 200);
-
-
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -5263,12 +5227,11 @@ class UserManagementController extends Controller
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -5352,7 +5315,7 @@ class UserManagementController extends Controller
     }
 
 
-  /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get-attendances/{id}",
@@ -5407,106 +5370,105 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function getAttendancesByUserId($id, Request $request)
-     {
-         $logPath = storage_path('logs');
+    public function getAttendancesByUserId($id, Request $request)
+    {
+        $logPath = storage_path('logs');
 
-         foreach (File::glob($logPath . '/*.log') as $file) {
-             File::delete($file);
-         }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        foreach (File::glob($logPath . '/*.log') as $file) {
+            File::delete($file);
+        }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
 
-             $user = User::with("roles")
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                     $query->whereIn("departments.id", $all_manager_department_ids);
-                 })
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id);
-                     });
-                 })
-                 ->first();
+            $user = User::with("roles")
+                ->where([
+                    "id" => $id
+                ])
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
 
-             if (!$user) {
-                 $this->storeError(
-                     "no data found"
-                     ,
-                     404,
-                     "front end error",
-                     "front end error"
-                    );
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-
-
-             $all_parent_department_ids = [];
-             $assigned_departments = Department::whereHas("users", function ($query) use ($id) {
-                 $query->where("users.id", $id);
-             })->get();
+            if (!$user) {
+                $this->storeError(
+                    "no data found",
+                    404,
+                    "front end error",
+                    "front end error"
+                );
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
-             foreach ($assigned_departments as $assigned_department) {
-                 $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-             }
+            $all_parent_department_ids = [];
+            $assigned_departments = Department::whereHas("users", function ($query) use ($id) {
+                $query->where("users.id", $id);
+            })->get();
 
 
-             $today = Carbon::now()->startOfYear()->format('Y-m-d');
-             $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
+            foreach ($assigned_departments as $assigned_department) {
+                $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+            }
 
+
+            $today = Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
 
 
 
 
-             $already_taken_attendances =  Attendance::where([
-                 "user_id" => $user->id
-             ])
-            ->where('attendances.in_date', '>=', $today)
-            ->where('attendances.in_date', '<=', $end_date_of_year . ' 23:59:59')
-                 ->get();
+
+            $already_taken_attendances =  Attendance::where([
+                "user_id" => $user->id
+            ])
+                ->where('attendances.in_date', '>=', $today)
+                ->where('attendances.in_date', '<=', $end_date_of_year . ' 23:59:59')
+                ->get();
 
 
-             $already_taken_attendance_dates = $already_taken_attendances->flatMap(function ($attendance) {
-                     return Carbon::parse($attendance->in_date)->format('d-m-Y');
-             })->toArray();
-
-
-
-
-             // Merge the collections and remove duplicates
-             $result_collection = $already_taken_attendance_dates->unique();
-
-
-             // $result_collection now contains all unique dates from holidays and weekends
-             $result_array = $result_collection->values()->all();
+            $already_taken_attendance_dates = $already_taken_attendances->flatMap(function ($attendance) {
+                return Carbon::parse($attendance->in_date)->format('d-m-Y');
+            })->toArray();
 
 
 
-             return response()->json($result_array, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            // Merge the collections and remove duplicates
+            $result_collection = $already_taken_attendance_dates->unique();
+
+
+            // $result_collection now contains all unique dates from holidays and weekends
+            $result_array = $result_collection->values()->all();
+
+
+
+            return response()->json($result_array, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -5603,12 +5565,11 @@ class UserManagementController extends Controller
 
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -5626,13 +5587,13 @@ class UserManagementController extends Controller
             }
 
 
-            $today = Carbon::now()->startOfYear()->format('Y-m-d');
+            $start_of_year = Carbon::now()->startOfYear()->format('Y-m-d');
             $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
 
             $holidays = Holiday::where([
                 "business_id" => $user->business_id
             ])
-                ->where('holidays.start_date', ">=", $today)
+                ->where('holidays.start_date', ">=", $start_of_year)
                 ->where('holidays.end_date', "<=", $end_date_of_year . ' 23:59:59')
                 ->where([
                     "is_active" => 1
@@ -5681,45 +5642,130 @@ class UserManagementController extends Controller
 
 
 
-            $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
-                $query->where('users.id', $user->id);
-            })
-                ->first();
-                if (!$work_shift) {
-                    $this->storeError(
-                        "Please define workshift first"
-                        ,
-                        400,
-                        "front end error",
-                        "front end error"
-                       );
-                    return response()->json(["message" => "Please define workshift first"], 400);
-                }
-            $weekends = $work_shift->details()->where([
-                "is_weekend" => 1
-            ])
+            // $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
+            //     $query->where('users.id', $user->id);
+            // })
+            //     ->first();
+            //     if (!$work_shift) {
+            //         $this->storeError(
+            //             "Please define workshift first"
+            //             ,
+            //             400,
+            //             "front end error",
+            //             "front end error"
+            //            );
+            //         return response()->json(["message" => "Please define workshift first"], 400);
+            //     }
+            // $weekends = $work_shift->details()->where([
+            //     "is_weekend" => 1
+            // ])
+            //     ->get();
+
+            // $weekend_dates = $weekends->flatMap(function ($weekend) use ($start_of_year, $end_date_of_year) {
+            //     $day_of_week = $weekend->day;
+
+            //     // Find the next occurrence of the specified day of the week
+            //     $next_day = Carbon::parse($start_of_year)->copy()->next($day_of_week);
+
+            //     $matching_days = [];
+
+            //     // Loop through the days between today and the end date
+            //     while ($next_day <= $end_date_of_year) {
+            //         $matching_days[] = $next_day->format('d-m-Y');
+            //         $next_day->addWeek(); // Move to the next week
+            //     }
+
+            //     return $matching_days;
+            // });
+
+
+            $work_shift_histories = WorkShiftHistory::where("from_date", "<", $end_date_of_year)
+                ->where(function ($query) use ($start_of_year) {
+                    $query->where("to_date", ">=", $start_of_year)
+                        ->orWhereNull("to_date");
+                })
+                ->whereHas("users", function ($query) use ($start_of_year, $user, $end_date_of_year) {
+                    $query->where("users.id", $user->id)
+                        ->where("employee_user_work_shift_histories.from_date", "<", $end_date_of_year)
+                        ->where(function ($query) use ($start_of_year) {
+                            $query->where("employee_user_work_shift_histories.to_date", ">=", $start_of_year)
+                                ->orWhereNull("employee_user_work_shift_histories.to_date");
+                        });
+                })
+
                 ->get();
 
+            if ($work_shift_histories->isEmpty()) {
+                $this->storeError(
+                    "Please define workshift first",
+                    400,
+                    "front end error",
+                    "front end error"
+                );
+                return response()->json(["message" => "Please define workshift first"], 400);
+            }
+
+            $weekend_dates = collect(); // Initialize an empty collection to store weekend dates
+
+            $user_id = $user->id;
+            $work_shift_histories->each(function ($work_shift) use ($start_of_year, $end_date_of_year, &$weekend_dates, $user_id) {
+                $weekends = $work_shift->details()->where("is_weekend", 1)->get();
+
+                $weekends->each(function ($weekend) use ($start_of_year, $end_date_of_year, &$weekend_dates, $work_shift, $user_id) {
+                    $day_of_week = $weekend->day;
+
+                    // Determine the end date for the loop
+                    // Determine the end date for the loop
+                    // $end_date = $work_shift->to_date ? ($work_shift->to_date->lt($end_date_of_year) ? $work_shift->to_date : $end_date_of_year) : $end_date_of_year;
+
+                    // // Determine the start date for the loop
+                    // $start_date = $work_shift->from_date->gt($start_of_year) ? $work_shift->from_date : $start_of_year;
+
+                    // Determine the end date for the loop
+                    $userShift = $work_shift->users->first(function ($user) use ($user_id) {
+                        return $user->id == $user_id;
+                    });
+                    $user_to_date = $userShift->pivot->to_date ?? null;
+
+                    if ($user_to_date) {
+                        $end_date = $user_to_date;
+                    } elseif ($work_shift->to_date) {
+                        $end_date = $work_shift->to_date;
+                    } else {
+                        $end_date = $end_date_of_year;
+                    }
+
+                    $user_from_date = $userShift->pivot->from_date;
+                    $start_date = $user_from_date->gt($start_of_year) ? $user_from_date : $start_of_year;
 
 
+                    // Find the next occurrence of the specified day of the week
+                    $next_day = Carbon::parse($start_date)->copy()->next($day_of_week);
 
 
-            $weekend_dates = $weekends->flatMap(function ($weekend) use ($today, $end_date_of_year) {
-                $day_of_week = $weekend->day;
-
-                // Find the next occurrence of the specified day of the week
-                $next_day = Carbon::parse($today)->copy()->next($day_of_week);
-
-                $matching_days = [];
-
-                // Loop through the days between today and the end date
-                while ($next_day <= $end_date_of_year) {
-                    $matching_days[] = $next_day->format('d-m-Y');
-                    $next_day->addWeek(); // Move to the next week
-                }
-
-                return $matching_days;
+                    // Loop through the days until either the to_date or the end of the year
+                    while ($next_day <= $end_date) {
+                        $weekend_dates->push($next_day->format('d-m-Y'));
+                        $next_day->addWeek(); // Move to the next week
+                    }
+                });
             });
+
+            // $weekend_dates now contains all the weekend dates
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5728,8 +5774,8 @@ class UserManagementController extends Controller
             $already_taken_leaves =  Leave::where([
                 "user_id" => $user->id
             ])
-                ->whereHas('records', function ($query) use ($today, $end_date_of_year) {
-                    $query->where('leave_records.date', '>=', $today)
+                ->whereHas('records', function ($query) use ($start_of_year, $end_date_of_year) {
+                    $query->where('leave_records.date', '>=', $start_of_year)
                         ->where('leave_records.date', '<=', $end_date_of_year . ' 23:59:59');
                 })
                 ->get();
@@ -5869,12 +5915,11 @@ class UserManagementController extends Controller
 
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -5899,32 +5944,32 @@ class UserManagementController extends Controller
 
 
 
-            $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
-                $query->where('users.id', $user->id);
-            })
-                ->first();
+            // $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
+            //     $query->where('users.id', $user->id);
+            // })
+            //     ->first();
 
-            if (!$work_shift) {
-                $this->storeError(
-                    "Please define workshift first"
-                    ,
-                    400,
-                    "front end error",
-                    "front end error"
-                   );
-                return response()->json(["message" => "Please define workshift first"], 400);
-            }
-            if (!$work_shift->is_active) {
-                $this->storeError(
-                    ("Please activate the work shift named '" . $work_shift->name . "'")
-                    ,
-                    400,
-                    "front end error",
-                    "front end error"
-                   );
+            // if (!$work_shift) {
+            //     $this->storeError(
+            //         "Please define workshift first"
+            //         ,
+            //         400,
+            //         "front end error",
+            //         "front end error"
+            //        );
+            //     return response()->json(["message" => "Please define workshift first"], 400);
+            // }
+            // if (!$work_shift->is_active) {
+            //     $this->storeError(
+            //         ("Please activate the work shift named '" . $work_shift->name . "'")
+            //         ,
+            //         400,
+            //         "front end error",
+            //         "front end error"
+            //        );
 
-                return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
-            }
+            //     return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
+            // }
 
 
             $holidays = Holiday::where([
@@ -5982,32 +6027,100 @@ class UserManagementController extends Controller
 
 
 
-            $weekends = $work_shift->details()->where([
-                "is_weekend" => 1
-            ])
+            // $weekends = $work_shift->details()->where([
+            //     "is_weekend" => 1
+            // ])
+            //     ->get();
+
+
+
+
+
+            // $weekend_dates = $weekends->flatMap(function ($weekend) use ($start_date, $end_date) {
+            //     $day_of_week = $weekend->day;
+
+            //     // Find the next occurrence of the specified day of the week
+            //     $next_day = Carbon::parse($start_date)->copy()->next($day_of_week);
+
+            //     $matching_days = [];
+
+            //     // Loop through the days between today and the end date
+            //     while ($next_day <= $end_date) {
+            //         $matching_days[] = $next_day->format('Y-m-d');
+            //         $next_day->addWeek(); // Move to the next week
+            //     }
+
+            //     return $matching_days;
+            // });
+            $work_shift_histories = WorkShiftHistory::where("from_date", "<", $end_date)
+                ->where(function ($query) use ($start_date) {
+                    $query->where("to_date", ">=", $start_date)
+                        ->orWhereNull("to_date");
+                })
+                ->whereHas("users", function ($query) use ($start_date, $user, $end_date) {
+                    $query->where("users.id", $user->id)
+                        ->where("employee_user_work_shift_histories.from_date", "<", $end_date)
+                        ->where(function ($query) use ($start_date) {
+                            $query->where("employee_user_work_shift_histories.to_date", ">=", $start_date)
+                                ->orWhereNull("employee_user_work_shift_histories.to_date");
+                        });
+                })
                 ->get();
 
 
 
 
+            if ($work_shift_histories->isEmpty()) {
+                $this->storeError(
+                    "Please define workshift first",
+                    400,
+                    "front end error",
+                    "front end error"
+                );
+                return response()->json(["message" => "Please define workshift first"], 400);
+            }
 
-            $weekend_dates = $weekends->flatMap(function ($weekend) use ($start_date, $end_date) {
-                $day_of_week = $weekend->day;
+            $weekend_dates = collect(); // Initialize an empty collection to store weekend dates
+            $user_id = $user->id;
 
-                // Find the next occurrence of the specified day of the week
-                $next_day = Carbon::parse($start_date)->copy()->next($day_of_week);
+            $work_shift_histories->each(function ($work_shift) use ($start_date, $end_date, &$weekend_dates, $user_id) {
+                $weekends = $work_shift->details()->where("is_weekend", 1)->get();
 
-                $matching_days = [];
+                $weekends->each(function ($weekend) use ($start_date, $end_date, &$weekend_dates, $work_shift, $user_id) {
+                    $day_of_week = $weekend->day;
 
-                // Loop through the days between today and the end date
-                while ($next_day <= $end_date) {
-                    $matching_days[] = $next_day->format('Y-m-d');
-                    $next_day->addWeek(); // Move to the next week
-                }
+                    // Determine the end date for the loop
+                    // Determine the end date for the loop
 
-                return $matching_days;
+
+                    $userShift = $work_shift->users->first(function ($user) use ($user_id) {
+                        return $user->id == $user_id;
+                    });
+                    $user_to_date = $userShift->pivot->to_date ?? null;
+
+                    if ($user_to_date) {
+                        $end_date_loop = $user_to_date;
+                    } elseif ($work_shift->to_date) {
+                        $end_date_loop = $work_shift->to_date;
+                    } else {
+                        $end_date_loop = $end_date;
+                    }
+
+                    $user_from_date = $userShift->pivot->from_date;
+                    $start_date_loop = $user_from_date->gt($start_date) ? $user_from_date : $start_date;
+
+
+                    // Find the next occurrence of the specified day of the week
+                    $next_day = Carbon::parse($start_date_loop)->copy()->next($day_of_week);
+
+
+                    // Loop through the days until either the to_date or the end of the year
+                    while ($next_day <= $end_date_loop) {
+                        $weekend_dates->push($next_day->format('d-m-Y'));
+                        $next_day->addWeek(); // Move to the next week
+                    }
+                });
             });
-
 
 
 
@@ -6063,19 +6176,39 @@ class UserManagementController extends Controller
             $total_capacity_hours = 0;
 
             // Fetch all work shift details outside the loop
-            $work_shift_details = $work_shift->details()->where([
-                "is_weekend" => 0
-            ])
-                ->get()
-                ->keyBy('day');
+            // $work_shift_details = $work_shift->details()->where([
+            //     "is_weekend" => 0
+            // ])
+            //     ->get()
+            //     ->keyBy('day');
 
-            $all_scheduled_dates->each(function ($date) use ($work_shift_details, &$schedule_data, &$total_capacity_hours) {
+            $all_scheduled_dates->each(function ($date) use (&$schedule_data, &$total_capacity_hours, $user) {
                 $day_number = Carbon::parse($date)->dayOfWeek;
-                $work_shift_detail = $work_shift_details->get($day_number);
 
-                if ($work_shift_detail) {
-                    $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->start_at);
-                    $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_detail->end_at);
+                $work_shift_history =  WorkShiftHistory::where("from_date", "<", $date)
+                    ->where(function ($query) use ($date) {
+                        $query->where("to_date", ">=", $date)
+                            ->orWhereNull("to_date");
+                    })
+                    ->whereHas("users", function ($query) use ($date, $user) {
+                        $query->where("users.id", $user->id)
+                            ->where("employee_user_work_shift_histories.from_date", "<", $date)
+                            ->where(function ($query) use ($date) {
+                                $query->where("employee_user_work_shift_histories.to_date", ">=", $date)
+                                    ->orWhereNull("employee_user_work_shift_histories.to_date");
+                            });
+                    })
+                    ->first();
+
+
+                $work_shift_details =  $work_shift_history->details()->where([
+                    "day" => $day_number
+                ])
+                    ->first();
+
+                if ($work_shift_details) {
+                    $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                    $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                     $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
 
                     $schedule_data[] = [
@@ -6180,12 +6313,11 @@ class UserManagementController extends Controller
 
             if (!empty($nonExistingIds)) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -6296,7 +6428,7 @@ class UserManagementController extends Controller
             ])->exists()
         );
 
-error_log($user_id);
+        error_log($user_id);
         return response()->json(["user_id" => $user_id], 200);
     }
 
@@ -6475,16 +6607,15 @@ error_log($user_id);
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if(!$this->isModuleEnabled("user_activity")) {
+            if (!$this->isModuleEnabled("user_activity")) {
                 $this->storeError(
-                    'Module is not enabled'
-                    ,
+                    'Module is not enabled',
                     403,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json(['messege' => 'Module is not enabled'], 403);
-             }
+            }
 
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
@@ -6513,12 +6644,11 @@ error_log($user_id);
                 ->first();
             if (!$user) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "User not found"
                 ], 404);

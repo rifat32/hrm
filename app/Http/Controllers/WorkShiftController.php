@@ -463,9 +463,13 @@ if(!$fields_changed){
                         "to_date" => now()
                     ]);
 
+                    $last_inactive_date = WorkShiftHistory::
+                        where("work_shift_id",$work_shift->id)
+                        ->latest()->first();
+
         $employee_work_shift_history_data = $work_shift->toArray();
         $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-        $employee_work_shift_history_data["from_date"] = now();
+        $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
         $employee_work_shift_history_data["to_date"] = NULL;
          $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
          $employee_work_shift_history->details()->createMany($request_data['details']);
@@ -666,12 +670,18 @@ if(!$check_work_shift_details["ok"]) {
                 // });
                 // $employee_work_shift_history->users()->sync($pivot_data);
              } else {
+
+                $last_inactive_date = WorkShiftHistory::
+                where("work_shift_id",$work_shift->id)
+                ->latest()->first();
+
+
                 $employee_work_shift_history_data = $work_shift->toArray();
 
                 $employee_work_shift_history_data["is_active"] = $is_active;
 
                 $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-                $employee_work_shift_history_data["from_date"] = now();
+                $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
                 $employee_work_shift_history_data["to_date"] = NULL;
                 $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
                 $employee_work_shift_history->details()->createMany($request_data['details']);

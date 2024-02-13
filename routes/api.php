@@ -208,6 +208,8 @@ Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::cl
 Route::get('/v1.0/users/get-schedule-information/{id}', [UserManagementController::class, "getScheduleInformationByUserId"]);
 
 
+
+
 // ********************************************
 // user management section --role
 // ********************************************
