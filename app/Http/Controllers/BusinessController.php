@@ -20,6 +20,7 @@ use App\Models\Business;
 use App\Models\BusinessTime;
 use App\Models\User;
 use App\Models\WorkShift;
+use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -1038,6 +1039,18 @@ if(!$user->hasRole('business_owner')) {
         WorkShift::whereIn("id",$conflicted_work_shift_ids)->update([
             "is_active" => 0
         ]);
+
+        WorkShiftHistory::where([
+            "to_date" => NULL
+        ])
+        ->whereIn("work_shift_id",$conflicted_work_shift_ids)
+        ->update([
+            "to_date" => now()
+        ]);
+
+
+
+
     }
 
 

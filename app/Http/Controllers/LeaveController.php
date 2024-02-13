@@ -225,6 +225,10 @@ class LeaveController extends Controller
                 $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
                     $query->where('users.id', $request_data["user_id"]);
                 })->first();
+
+
+
+
                 if (!$work_shift) {
                     $this->storeError(
                         "Please define workshift first"
@@ -1604,7 +1608,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
                     $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
 
-                    $leave_hours = $$attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
+                    $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
                 } else if ($attendance->work_hours_delta > 0) {
                     $result_balance_hours = $attendance->work_hours_delta;
                 }  else if ($attendance->work_hours_delta < 0) {
@@ -1745,6 +1749,34 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="ASC"
      * ),
+     * * @OA\Parameter(
+ *     name="leave_date_time",
+ *     in="query",
+ *     description="Leave Date and Time",
+ *     required=true,
+ *     example="2024-02-14 08:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_type",
+ *     in="query",
+ *     description="Leave Type",
+ *     required=true,
+ *     example="Sick Leave"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_duration",
+ *     in="query",
+ *     description="Leave Duration",
+ *     required=true,
+ *     example="8"
+ * ),
+ * @OA\Parameter(
+ *     name="total_leave_hours",
+ *     in="query",
+ *     description="Total Leave Hours",
+ *     required=true,
+ *     example="8"
+ * ),
 
      *      summary="This method is to get leaves  ",
      *      description="This method is to get leaves ",

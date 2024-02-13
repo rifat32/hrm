@@ -147,30 +147,46 @@ class AttendanceController extends Controller
                         $request_data["status"] = "approved";
                     }
                 }
-                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["user_id"]);
-                })->first();
-                if (!$work_shift) {
-                    $this->storeError(
-                        "Please define workshift first",
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
-                    return response()->json(["message" => "Please define workshift first"], 400);
-                }
-                if (!$work_shift->is_active) {
-                    $this->storeError(
-                        ("Please activate the work shift named '" . $work_shift->name . "'"),
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
-                    return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
-                }
+                // $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                //     $query->where('users.id', $request_data["user_id"]);
+                // })->first();
+                // if (!$work_shift) {
+                //     $this->storeError(
+                //         "Please define workshift first",
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //     );
+                //     return response()->json(["message" => "Please define workshift first"], 400);
+                // }
+                $work_shift_history =  WorkShiftHistory::
+                 where("from_date", "<", $request_data["in_date"])
+                ->where(function($query) use($request_data){
+                        $query->where("to_date",">=", $request_data["in_date"])
+                        ->orWhereNull("to_date");
+                })
+                ->whereHas("users", function($query) use($request_data) {
+                    $query->where("users.id", $request_data["user_id"])
+                    ->where("employee_user_work_shift_histories.from_date", "<", $request_data["in_date"])
+                    ->where(function($query) use($request_data){
+                            $query->where("employee_user_work_shift_histories.to_date",">=", $request_data["in_date"])
+                            ->orWhereNull("employee_user_work_shift_histories.to_date");
+                    });
+                })
+                ->first();
+
+                // if (!$work_shift->is_active) {
+                //     $this->storeError(
+                //         ("Please activate the work shift named '" . $work_shift->name . "'"),
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //     );
+                //     return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
+                // }
 
                 $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
-                $work_shift_details =  $work_shift->details()->where([
+                $work_shift_details =  $work_shift_history->details()->where([
                     "day" => $day_number
                 ])
                     ->first();
@@ -278,8 +294,8 @@ class AttendanceController extends Controller
                 $request_data["work_hours_delta"] = 0;
                 $request_data["total_paid_hours"] = 0;
                 $request_data["regular_work_hours"] = 0;
-                $request_data["break_type"] = $work_shift->break_type;
-                $request_data["break_hours"] = $work_shift->break_hours;
+                $request_data["break_type"] = $work_shift_history->break_type;
+                $request_data["break_hours"] = $work_shift_history->break_hours;
 
                 if (!empty($request_data["in_time"]) && !empty($request_data["out_time"])) {
 
@@ -325,8 +341,8 @@ class AttendanceController extends Controller
 
 
                     if ($request_data["does_break_taken"]) {
-                        if ($work_shift->break_type == 'unpaid') {
-                            $total_paid_hours -= $work_shift->break_hours;
+                        if ($work_shift_history->break_type == 'unpaid') {
+                            $total_paid_hours -= $work_shift_history->break_hours;
                         }
                     }
 
@@ -401,30 +417,30 @@ class AttendanceController extends Controller
                     // }
 
 
-               $work_shift_history =  WorkShiftHistory::where([
-                        "work_shift_id" => $work_shift->id
-                    ])
-                    ->where("from_date", "<", $request_data["in_date"])
-                    ->where(function($query) use($request_data){
-                            $query->where("to_date",">=", $request_data["in_date"])
-                            ->orWhereNull("to_date");
-                    })
-                    ->whereHas("users", function($query) use($request_data) {
-                        $query->where("users.id", $request_data["user_id"])
-                        ->where("employee_user_work_shift_histories.from_date", "<", $request_data["in_date"])
-                        ->where(function($query) use($request_data){
-                                $query->where("employee_user_work_shift_histories.to_date",">=", $request_data["in_date"])
-                                ->orWhereNull("employee_user_work_shift_histories.to_date");
-                        });
-                    })
+            //    $work_shift_history =  WorkShiftHistory::where([
+            //             "work_shift_id" => $work_shift->id
+            //         ])
+            //         ->where("from_date", "<", $request_data["in_date"])
+            //         ->where(function($query) use($request_data){
+            //                 $query->where("to_date",">=", $request_data["in_date"])
+            //                 ->orWhereNull("to_date");
+            //         })
+            //         ->whereHas("users", function($query) use($request_data) {
+            //             $query->where("users.id", $request_data["user_id"])
+            //             ->where("employee_user_work_shift_histories.from_date", "<", $request_data["in_date"])
+            //             ->where(function($query) use($request_data){
+            //                     $query->where("employee_user_work_shift_histories.to_date",">=", $request_data["in_date"])
+            //                     ->orWhereNull("employee_user_work_shift_histories.to_date");
+            //             });
+            //         })
 
-                    ->first();
+            //         ->first();
 
 
 
-                    if(!$work_shift_history) {
-                        throw new Exception("Work shift history not found");
-                    }
+            //         if(!$work_shift_history) {
+            //             throw new Exception("Work shift history not found");
+            //         }
 
 
 
@@ -436,9 +452,9 @@ class AttendanceController extends Controller
 
                     $request_data["work_shift_start_at"] = $work_shift_start_at;
                     $request_data["work_shift_end_at"] = $work_shift_end_at;
+
+                    // $request_data["work_shift_history_id"] = $work_shift_history->id;
                     $request_data["work_shift_history_id"] = $work_shift_history->id;
-
-
 
 
 
@@ -492,6 +508,8 @@ class AttendanceController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
     /**
      *
      * @OA\Post(
@@ -596,36 +614,71 @@ class AttendanceController extends Controller
                     );
                     return response()->json(["message" => "Please define attendance setting first"], 400);
                 }
-                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["user_id"]);
-                })->first();
+                // $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                //     $query->where('users.id', $request_data["user_id"]);
+                // })->first();
 
-                if (!$work_shift) {
-                    $this->storeError(
-                        "Please define workshift first",
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
-                    return response()->json(["message" => "Please define workshift first"], 400);
-                }
+                // if (!$work_shift) {
+                //     $this->storeError(
+                //         "Please define workshift first",
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //     );
+                //     return response()->json(["message" => "Please define workshift first"], 400);
+                // }
 
-                if (!$work_shift->is_active) {
-                    $this->storeError(
-                        ("Please activate the work shift named '" . $work_shift->name . "'"),
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
-                    return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
-                }
+                // if (!$work_shift->is_active) {
+                //     $this->storeError(
+                //         ("Please activate the work shift named '" . $work_shift->name . "'"),
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //     );
+                //     return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
+                // }
 
 
 
-                $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $work_shift, $setting_attendance) {
+                $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance) {
+                    // $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                    //     $query->where('users.id', $request_data["user_id"]);
+                    // })->first();
+
+                    $work_shift_history =    WorkShiftHistory::
+                        where("from_date", "<", $request_data["in_date"])
+                       ->where(function($query) use($request_data){
+                               $query->where("to_date",">=", $request_data["in_date"])
+                               ->orWhereNull("to_date");
+                       })
+                       ->whereHas("users", function($query) use($request_data) {
+                           $query->where("users.id", $request_data["user_id"])
+                           ->where("employee_user_work_shift_histories.from_date", "<", $request_data["in_date"])
+                           ->where(function($query) use($request_data){
+                                   $query->where("employee_user_work_shift_histories.to_date",">=", $request_data["in_date"])
+                                   ->orWhereNull("employee_user_work_shift_histories.to_date");
+                           });
+                       })->first();
+
+
+
+                    if (!$work_shift_history) {
+                        $this->storeError(
+                            "Please define workshift first",
+                            400,
+                            "front end error",
+                            "front end error"
+                        );
+                        return response()->json(["message" => "Please define workshift first"], 400);
+                    }
+
+
+
+
 
                     $day_number = Carbon::parse($item["in_date"])->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $day_number
                     ])
                         ->first();
@@ -776,33 +829,33 @@ class AttendanceController extends Controller
                         }
 
                         if ($item["does_break_taken"]) {
-                            if ($work_shift->break_type == 'unpaid') {
-                                $total_paid_hours -= $work_shift->break_hours;
+                            if ($work_shift_history->break_type == 'unpaid') {
+                                $total_paid_hours -= $work_shift_history->break_hours;
                             }
                         }
 
-                        $work_shift_history =  WorkShiftHistory::where([
-                            "work_shift_id" => $work_shift->id
-                        ])
-                        ->where("from_date", "<", $$request_data["in_date"])
-                        ->where(function($query) use($request_data){
-                                $query->where("to_date",">=", $request_data["in_date"])
-                                ->orWhereNull("to_date");
-                        })
-                        ->whereHas("users", function($query) use($request_data) {
-                            $query->where("users.id", $request_data["user_id"])
-                            ->where("employee_user_workShift_histories.from_date", "<", $$request_data["in_date"])
-                            ->where(function($query) use($request_data){
-                                    $query->where("employee_user_workShift_histories.to_date",">=", $request_data["in_date"])
-                                    ->orWhereNull("employee_user_workShift_histories.to_date");
-                            });
-                        })
+                        // $work_shift_history =  WorkShiftHistory::where([
+                        //     "work_shift_id" => $work_shift->id
+                        // ])
+                        // ->where("from_date", "<", $request_data["in_date"])
+                        // ->where(function($query) use($request_data){
+                        //         $query->where("to_date",">=", $request_data["in_date"])
+                        //         ->orWhereNull("to_date");
+                        // })
+                        // ->whereHas("users", function($query) use($request_data) {
+                        //     $query->where("users.id", $request_data["user_id"])
+                        //     ->where("employee_user_workShift_histories.from_date", "<", $request_data["in_date"])
+                        //     ->where(function($query) use($request_data){
+                        //             $query->where("employee_user_workShift_histories.to_date",">=", $request_data["in_date"])
+                        //             ->orWhereNull("employee_user_workShift_histories.to_date");
+                        //     });
+                        // })
 
-                        ->first();
+                        // ->first();
 
-                        if(!$work_shift_history) {
-                            throw new Exception("Work shift history not found");
-                        }
+                        // if(!$work_shift_history) {
+                        //     throw new Exception("Work shift history not found");
+                        // }
 
 
                         $overtime_start_time = NULL;
@@ -889,13 +942,16 @@ class AttendanceController extends Controller
                         "does_break_taken" => $item["does_break_taken"],
                         "capacity_hours" => $capacity_hours,
                         "work_hours_delta" => $work_hours_delta,
-                        "break_type" => $work_shift->break_type,
-                        "break_hours" => $work_shift->break_hours,
+                        "break_type" => $work_shift_history->break_type,
+                        "break_hours" => $work_shift_history->break_hours,
                         "total_paid_hours" => $total_paid_hours,
                         "regular_work_hours" => $regular_work_hours,
 
 
-                      "work_shift_history_id" => $work_shift_history->id,
+                    //   "work_shift_history_id" => $work_shift_history->id,
+                         "work_shift_history_id" => $work_shift_history->id,
+
+
                        "work_shift_start_at" => $work_shift_start_at,
                        "work_shift_end_at" => $work_shift_end_at,
 
@@ -1066,12 +1122,23 @@ class AttendanceController extends Controller
                         "message" => "no attendance found"
                     ], 404);
                 }
-                $work_shift =  WorkShiftHistory::
-                    where("id",$attendance_prev->work_shift_history_id)
-                    ->whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["user_id"]);
-                })->first();
-                if (!$work_shift) {
+                $work_shift_history =  WorkShiftHistory::
+                    where("from_date", "<", $request_data["in_date"])
+                   ->where(function($query) use($request_data){
+                           $query->where("to_date",">=", $request_data["in_date"])
+                           ->orWhereNull("to_date");
+                   })
+                   ->whereHas("users", function($query) use($request_data) {
+                       $query->where("users.id", $request_data["user_id"])
+                       ->where("employee_user_work_shift_histories.from_date", "<", $request_data["in_date"])
+                       ->where(function($query) use($request_data){
+                               $query->where("employee_user_work_shift_histories.to_date",">=", $request_data["in_date"])
+                               ->orWhereNull("employee_user_work_shift_histories.to_date");
+                       });
+                   })
+
+                   ->first();
+                if (!$work_shift_history) {
                     $this->storeError(
                         "no work shift history",
                         400,
@@ -1080,18 +1147,19 @@ class AttendanceController extends Controller
                     );
                     return response()->json(["message" => "no work shift history found"], 400);
                 }
-                if (!$work_shift->is_active) {
-                    $this->storeError(
-                        ("Please activate the work shift named '" . $work_shift->name . "'"),
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
-                    return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
-                }
+
+                // if (!$work_shift_history->is_active) {
+                //     $this->storeError(
+                //         ("Please activate the work shift named '" . $work_shift_history->name . "'"),
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //     );
+                //     return response()->json(["message" => ("Please activate the work shift named '" . $work_shift_history->name . "'")], 400);
+                // }
 
                 $day_number = Carbon::parse($request_data["in_date"])->dayOfWeek;
-                $work_shift_details =  $work_shift->details()->where([
+                $work_shift_details =  $work_shift_history->details()->where([
                     "day" => $day_number
                 ])
                     ->first();
@@ -1251,6 +1319,8 @@ class AttendanceController extends Controller
                 $request_data["holiday_id"] = $holiday?$holiday->id:NULL;
                 $request_data["leave_record_id"] = $leave_record?$leave_record->id:NULL;
 
+                $request_data["work_shift_history_id"] = $work_shift_history->id;
+
 
 
                 $attendance  =  tap(Attendance::where($attendance_query_params))->update(
@@ -1272,6 +1342,7 @@ class AttendanceController extends Controller
                         "holiday_id",
                         "leave_record_id",
                         "total_paid_hours",
+                        "work_shift_history_id",
 
 
                         // "regular_work_hours",
@@ -1620,6 +1691,49 @@ class AttendanceController extends Controller
      * required=true,
      * example="ASC"
      * ),
+     *
+     ** @OA\Parameter(
+ *     name="attendance_date",
+ *     in="query",
+ *     description="Attendance Date",
+ *     required=true,
+ *     example="2024-02-13"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_start_time",
+ *     in="query",
+ *     description="Attendance Start Time",
+ *     required=true,
+ *     example="08:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_end_time",
+ *     in="query",
+ *     description="Attendance End Time",
+ *     required=true,
+ *     example="17:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_break",
+ *     in="query",
+ *     description="Attendance Break Time",
+ *     required=true,
+ *     example="01:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_schedule",
+ *     in="query",
+ *     description="Attendance Schedule",
+ *     required=true,
+ *     example="Regular"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_overtime",
+ *     in="query",
+ *     description="Attendance Overtime",
+ *     required=true,
+ *     example="02:00:00"
+ * ),
 
      *      summary="This method is to get attendances  ",
      *      description="This method is to get attendances ",
@@ -2309,20 +2423,20 @@ class AttendanceController extends Controller
                     foreach ($assigned_departments as $assigned_department) {
                         $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                     }
-                    $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
-                        $query->where('users.id', $employee->id);
-                    })->first();
+                    // $work_shift =  WorkShift::whereHas('users', function ($query) use ($employee) {
+                    //     $query->where('users.id', $employee->id);
+                    // })->first();
 
-                    if (!$work_shift) {
-                        return false;
-                    }
+                    // if (!$work_shift) {
+                    //     return false;
+                    // }
 
-                    if (!$work_shift->is_active) {
-                        return false;
-                    }
+                    // if (!$work_shift->is_active) {
+                    //     return false;
+                    // }
 
 
-                    $work_shift_details = $work_shift->details()->get()->keyBy('day');
+                    // $work_shift_details = $work_shift->details()->get()->keyBy('day');
 
 
 
@@ -2341,7 +2455,7 @@ class AttendanceController extends Controller
                     $total_balance_hours = 0;
 
 
-                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours,&$total_paid_holiday_hours, $employee, $work_shift, $all_parent_department_ids,$work_shift_details) {
+                    $employee->datewise_attendanes = collect($dateArray)->map(function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours,&$total_paid_leave_hours,&$total_paid_holiday_hours, $employee, $all_parent_department_ids) {
 
                         $day_number = Carbon::parse($date)->dayOfWeek;
 

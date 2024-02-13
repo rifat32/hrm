@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Employee List</title>
+    <title>Attendance List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
@@ -18,6 +18,23 @@
 
             return $capitalizedString;
         }
+
+        function time_format($breakHours) {
+        if(!$breakHours){
+            $breakHours = 0;
+        }
+
+// Convert break hours to seconds
+$breakSeconds = round($breakHours * 3600);
+
+// Format seconds to "00:00:00" time format
+$formattedBreakTime = gmdate("H:i:s", $breakSeconds);
+return $formattedBreakTime;
+    }
+    function format_date($date) {
+    return \Carbon\Carbon::parse($date)->format('d-m-Y');
+}
+
     @endphp
 
     @php
@@ -29,18 +46,24 @@
         /* Add any additional styling for your PDF */
         body {
             font-family: Arial, sans-serif;
+            margin:0;
+            padding:0;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             font-size:10px;
-            box-shadow:5px 5px 10px #000000;
+
 
         }
         .table_head_row{
-            background-color:#f9f9fb;
+            color:#fff;
+            background-color:#dc2d2a;
             font-weight:600;
+        }
+        .table_head_row td{
+            color:#fff;
         }
         .table_head_row th, tbody tr td {
             text-align: left;
@@ -51,7 +74,7 @@
         }
         .table_row td{
             padding:10px 0px;
-            border-bottom:0.5px solid #666;
+            border-bottom:0.2px solid #ddd;
         }
 
         .employee_index{
@@ -67,69 +90,107 @@
         .role{
 
         }
+    .logo{
+        width:75px;
+        height:75px;
+    }
+    .file_title{
+        font-size:1.3rem;
+        font-weight:bold;
+        text-align:right;
+    }
+    .business_name{
+        font-size:1.2rem;
+        font-weight:bold;
+        display:block;
+    }
+    .business_address{
 
+    }
     </style>
 
 </head>
 <body>
 
-
-    <table>
+    <table style="margin-top:-30px">
        <tbody>
           <tr>
-            <th rowspan="2">
-
-                @if (empty($business->logo))
-                {{$business->name}}
-                @else
-                <img src="{{public_path($business->logo)}}" >
-                @endif
-
-
-
-            </th>
-            <th></th>
-          </tr>
-          <tr>
-            <th>Employee List </th>
-          </tr>
-          <tr>
-            <td>Business Name</td>
+            @if ($business->logo)
+            <td rowspan="2">
+                <img class="logo" src="{{public_path($business->logo)}}" >
+            </td>
+            @endif
             <td></td>
+          </tr>
+          <tr>
+            <td class="file_title">Leave Request List </td>
+          </tr>
+          <tr>
+            <td>
+                <span class="business_name">{{$business->name}}</span>
+                <address class="business_address">{{$business->address_line_1}}</address>
+            </td>
+
           </tr>
         </tbody>
     </table>
 
 
-
-
-    <h4>Employee List {{public_path(env("APP_URL").auth()->user()->business->logo)}}</h4>
     <table>
+        <h3>Leaves</h3>
         <thead>
             <tr class="table_head_row">
-                <th></th>
-                {{-- <th>Employee</th> --}}
-                {{-- <th>Employee ID</th>
-                <th>Email</th>
-                <th>Designation</th>
-                <th>Role</th>
-                <th>Status</th> --}}
+                <th class="index_col"></th>
+                @if (!empty($request->leave_date_time))
+                    <th>Date & Time</th>
+                @endif
+                @if (!empty($request->leave_type))
+                    <th>Type</th>
+                @endif
+                @if (!empty($request->leave_duration))
+                    <th>Duration</th>
+                @endif
+                @if (!empty($request->total_leave_hours))
+                    <th>Total Leave (hours)</th>
+                @endif
+                {{-- <th>Attachment</th> --}}
             </tr>
         </thead>
         <tbody>
-            @foreach($leaves as $index=>$user)
-                <tr class="table_row">
-                    {{-- <td class="employee_index" style="padding:0px 10px">{{ $index+1 }}</td>
-                    <td class="employee">
-                        {{ ($user->first_Name ." ". $user->last_Name ." ". $user->last_Name )}}
-                    </td>
-                    <td class="employee_id">{{ $user->user_id }}</td>
-                    <td class="email">{{ $user->email }}</td>
-                    <td class="designation">{{ ($user->designation->name) }}</td>
-                    <td class="role">{{ processString($user->roles[0]->name) }}</td>
-                    <td class="status">{{ $user->is_active ? "Active":"De-active" }}</td> --}}
+            @if (count($user->leaves))
+                @foreach ($user->leaves as $index => $leave)
+                    <tr class="table_row">
+                        <td class="index_col">{{ $index + 1 }}</td>
+                        @if (!empty($request->leave_date_time))
+                            <td>{{ format_date($leave->start_date) }} - {{ format_date($leave->end_date) }}</td>
+                        @endif
+                        @if (!empty($request->leave_type))
+                            <td>{{ $leave->leave_type ? $leave->leave_type->name : "" }}</td>
+                        @endif
+                        @if (!empty($request->leave_duration))
+                            <td>{{ $leave->leave_duration }}</td>
+                        @endif
+                        @if (!empty($request->total_leave_hours))
+                            <td>
+                                @php
+                                    $leave->total_leave_hours = $leave->records->sum(function ($record) {
+                                        $startTime = \Carbon\Carbon::parse($record->start_time);
+                                        $endTime = \Carbon\Carbon::parse($record->end_time);
+                                        return $startTime->diffInHours($endTime);
+                                    });
+                                @endphp
+                                {{ time_format($leave->total_leave_hours) }}
+                            </td>
+                        @endif
+                        {{-- <td>{{ }}</td>
+                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
+                    </tr>
+                @endforeach
+            @else
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
                 </tr>
-            @endforeach
+            @endif
         </tbody>
     </table>
 

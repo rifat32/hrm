@@ -609,7 +609,7 @@ public function update_attendance_accordingly($attendance,$leave_record = NULL) 
               $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
               $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
 
-              $leave_hours = $$attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
+              $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
 
 
         } else if ($attendance->work_hours_delta > 0) {

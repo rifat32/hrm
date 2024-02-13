@@ -389,57 +389,60 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Date & Time</th>
-                <th>Type</th>
-                <th>Duration</th>
-                <th>Total Leave (hours)</th>
+                @if (!empty($request->leave_date_time))
+                    <th>Date & Time</th>
+                @endif
+                @if (!empty($request->leave_type))
+                    <th>Type</th>
+                @endif
+                @if (!empty($request->leave_duration))
+                    <th>Duration</th>
+                @endif
+                @if (!empty($request->total_leave_hours))
+                    <th>Total Leave (hours)</th>
+                @endif
                 {{-- <th>Attachment</th> --}}
             </tr>
         </thead>
         <tbody>
             @if (count($user->leaves))
-
                 @foreach ($user->leaves as $index => $leave)
-
-
-
                     <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}  </td>
-                        <td>{{ format_date($leave->start_date) }} - {{ format_date($leave->end_date) }}   </td>
-                        <td>{{ $leave->leave_type?$leave->leave_type->name:"" }}</td>
-                        <td>{{ $leave->leave_duration }}</td>
-
-
-                        <td>
-                            @php
-                                  $leave->total_leave_hours = $leave->records->sum(function ($record) {
-                                $startTime = \Carbon\Carbon::parse($record->start_time);
-                                $endTime = \Carbon\Carbon::parse($record->end_time);
-                                return $startTime->diffInHours($endTime);
-
-                               });
-                            @endphp
-                            {{time_format($leave->total_leave_hours)}}
-
-
-
-                        </td>
-
+                        <td class="index_col">{{ $index + 1 }}</td>
+                        @if (!empty($request->leave_date_time))
+                            <td>{{ format_date($leave->start_date) }} - {{ format_date($leave->end_date) }}</td>
+                        @endif
+                        @if (!empty($request->leave_type))
+                            <td>{{ $leave->leave_type ? $leave->leave_type->name : "" }}</td>
+                        @endif
+                        @if (!empty($request->leave_duration))
+                            <td>{{ $leave->leave_duration }}</td>
+                        @endif
+                        @if (!empty($request->total_leave_hours))
+                            <td>
+                                @php
+                                    $leave->total_leave_hours = $leave->records->sum(function ($record) {
+                                        $startTime = \Carbon\Carbon::parse($record->start_time);
+                                        $endTime = \Carbon\Carbon::parse($record->end_time);
+                                        return $startTime->diffInHours($endTime);
+                                    });
+                                @endphp
+                                {{ time_format($leave->total_leave_hours) }}
+                            </td>
+                        @endif
                         {{-- <td>{{ }}</td>
                         <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
-
-
                     </tr>
-
                 @endforeach
             @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
     {{-- 5. DOCUMENTS  --}}
     @if (!empty($request->documents))
@@ -448,9 +451,13 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Title</th>
+                @if (!empty($request->document_title))
+                    <th>Title</th>
+                @endif
                 {{-- <th>Attachment</th> --}}
-                <th>Added by</th>
+                @if (!empty($request->document_added_by))
+                    <th>Added by</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -458,20 +465,23 @@ return $formattedBreakTime;
                 @foreach ($user->documents as $index => $document)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ $document->name }}</td>
-                        <td>  {{ $document->creator->first_Name . " " . $document->creator->last_Name . " " . $document->creator->middle_Name }}</td>
-
-
+                        @if (!empty($request->document_title))
+                            <td>{{ $document->name }}</td>
+                        @endif
+                        @if (!empty($request->document_added_by))
+                            <td>{{ $document->creator->first_Name . " " . $document->creator->last_Name . " " . $document->creator->middle_Name }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
 
     {{-- 6. ASSETS  --}}
@@ -481,13 +491,27 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Asset Name</th>
-                <th>Asset Code</th>
-                <th>Serial No</th>
-                <th>Is Working</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Note</th>
+                @if (!empty($request->asset_name))
+                    <th>Asset Name</th>
+                @endif
+                @if (!empty($request->asset_code))
+                    <th>Asset Code</th>
+                @endif
+                @if (!empty($request->asset_serial_number))
+                    <th>Serial No</th>
+                @endif
+                @if (!empty($request->asset_is_working))
+                    <th>Is Working</th>
+                @endif
+                @if (!empty($request->asset_type))
+                    <th>Type</th>
+                @endif
+                @if (!empty($request->asset_date))
+                    <th>Date</th>
+                @endif
+                @if (!empty($request->asset_note))
+                    <th>Note</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -495,26 +519,38 @@ return $formattedBreakTime;
                 @foreach ($user->assets as $index => $asset)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ $asset->name }}</td>
-                        <td>{{ $asset->code }}</td>
-                        <td>{{ $asset->serial_number }}</td>
-                        <td>{{ $asset->is_working }}</td>
-                        <td>{{ $asset->type }}</td>
-                        <td>{{ format_date($asset->date) }}</td>
-                        <td>{{ $asset->note }}</td>
-
+                        @if (!empty($request->asset_name))
+                            <td>{{ $asset->name }}</td>
+                        @endif
+                        @if (!empty($request->asset_code))
+                            <td>{{ $asset->code }}</td>
+                        @endif
+                        @if (!empty($request->asset_serial_number))
+                            <td>{{ $asset->serial_number }}</td>
+                        @endif
+                        @if (!empty($request->asset_is_working))
+                            <td>{{ $asset->is_working }}</td>
+                        @endif
+                        @if (!empty($request->asset_type))
+                            <td>{{ $asset->type }}</td>
+                        @endif
+                        @if (!empty($request->asset_date))
+                            <td>{{ format_date($asset->date) }}</td>
+                        @endif
+                        @if (!empty($request->asset_note))
+                            <td>{{ $asset->note }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @else
-            <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
-
-
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
 
 
@@ -525,13 +561,22 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Degree</th>
-                <th>Major</th>
-
-                {{-- <th>Institution</th> ETA TO ONEK BOTO HOBE KEMNE SHOW KORAIBA CSS DIA DEIKHO PARO KINA --}}
-                <th>Start Date</th>
-                <th>Achivments</th>
-                {{-- <th>Description</th> ETA TO ONEK BOTO HOBE KEMNE SHOW KORAIBA CSS DIA DEIKHO PARO KINA --}}
+                @if (!empty($request->educational_history_degree))
+                    <th>Degree</th>
+                @endif
+                @if (!empty($request->educational_history_major))
+                    <th>Major</th>
+                @endif
+                {{-- Uncomment if you want to include institution --}}
+                {{-- <th>Institution</th> --}}
+                @if (!empty($request->educational_history_start_date))
+                    <th>Start Date</th>
+                @endif
+                @if (!empty($request->educational_history_achievements))
+                    <th>Achievements</th>
+                @endif
+                {{-- Uncomment if you want to include description --}}
+                {{-- <th>Description</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -539,11 +584,22 @@ return $formattedBreakTime;
                 @foreach ($user->education_histories as $index => $education_history)
                     <tr class="table_row">
                         <td style="padding:0px 10px">{{ $index + 1 }}</td>
-                        <td>{{ $education_history->degree }}</td>
-                        <td>{{ $education_history->major }}</td>
-                        <td>{{ format_date($education_history->start_date) }}</td>
-                        <td>{{ $education_history->achievements }}</td>
-
+                        @if (!empty($request->educational_history_degree))
+                            <td>{{ $education_history->degree }}</td>
+                        @endif
+                        @if (!empty($request->educational_history_major))
+                            <td>{{ $education_history->major }}</td>
+                        @endif
+                        {{-- Uncomment if you want to include institution --}}
+                        {{-- <td>{{ $education_history->institution }}</td> --}}
+                        @if (!empty($request->educational_history_start_date))
+                            <td>{{ format_date($education_history->start_date) }}</td>
+                        @endif
+                        @if (!empty($request->educational_history_achievements))
+                            <td>{{ $education_history->achievements }}</td>
+                        @endif
+                        {{-- Uncomment if you want to include description --}}
+                        {{-- <td>{{ $education_history->description }}</td> --}}
                     </tr>
                 @endforeach
             @else
@@ -553,8 +609,8 @@ return $formattedBreakTime;
             @endif
         </tbody>
     </table>
-
 @endif
+
 
 
 
@@ -565,13 +621,25 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Job Title</th>
-                <th>Company</th>
-                <th>Start On</th>
-                <th>End At</th>
-                <th>Supervisor</th>
+                @if (!empty($request->job_history_job_title))
+                    <th>Job Title</th>
+                @endif
+                @if (!empty($request->job_history_company))
+                    <th>Company</th>
+                @endif
+                @if (!empty($request->job_history_start_on))
+                    <th>Start On</th>
+                @endif
+                @if (!empty($request->job_history_end_at))
+                    <th>End At</th>
+                @endif
+                @if (!empty($request->job_history_supervisor))
+                    <th>Supervisor</th>
+                @endif
                 {{-- <th>Contact Info</th> JAGA HOILE DIO EDI --}}
-                <th>Country</th>
+                @if (!empty($request->job_history_country))
+                    <th>Country</th>
+                @endif
                 {{-- <th>Achivments</th> JAGA HOILE DIO EDI --}}
             </tr>
         </thead>
@@ -581,16 +649,26 @@ return $formattedBreakTime;
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
 
-                        <td>{{ $job_history->job_title }}</td>
-                        <td>{{ $job_history->company_name }}</td>
+                        @if (!empty($request->job_history_job_title))
+                            <td>{{ $job_history->job_title }}</td>
+                        @endif
+                        @if (!empty($request->job_history_company))
+                            <td>{{ $job_history->company_name }}</td>
+                        @endif
                         {{-- <td>{{ \Carbon\Carbon::parse($job_history->employment_start_date)->format('Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($job_history->employment_start_date)->format('F') }}</td> --}}
-                        <td>{{ format_date($job_history->employment_start_date) }}</td>
-                        <td>{{ format_date($job_history->employment_end_date) }}</td>
-                        <td>{{ $job_history->supervisor_name }}</td>
-                        <td>{{ $job_history->work_location }}</td>
-
-
+                        @if (!empty($request->job_history_start_on))
+                            <td>{{ format_date($job_history->employment_start_date) }}</td>
+                        @endif
+                        @if (!empty($request->job_history_end_at))
+                            <td>{{ format_date($job_history->employment_end_date) }}</td>
+                        @endif
+                        @if (!empty($request->job_history_supervisor))
+                            <td>{{ $job_history->supervisor_name }}</td>
+                        @endif
+                        @if (!empty($request->job_history_country))
+                            <td>{{ $job_history->work_location }}</td>
+                        @endif
 
                     </tr>
                 @endforeach
@@ -603,6 +681,7 @@ return $formattedBreakTime;
     </table>
 
 @endif
+
 
 
 
@@ -615,37 +694,52 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                {{-- <th>From</th>
-                <th>To</th> --}}
-                <th>Date Assigned</th>
-                <th>Expiry Date</th>
-                <th>Certificate Number</th>
-                <th>Status</th>
-                <th>Note</th>
+                @if (!empty($request->current_cos_details_date_assigned))
+                    <th>Date Assigned</th>
+                @endif
+                @if (!empty($request->current_cos_details_expiry_date))
+                    <th>Expiry Date</th>
+                @endif
+                @if (!empty($request->current_cos_details_certificate_number))
+                    <th>Certificate Number</th>
+                @endif
+                @if (!empty($request->current_cos_details_current_certificate_status))
+                    <th>Status</th>
+                @endif
+                @if (!empty($request->current_cos_details_note))
+                    <th>Note</th>
+                @endif
             </tr>
         </thead>
         <tbody>
             @if (!empty($user->sponsorship_detail))
-
-                    <tr class="table_row">
-                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
-                        {{-- <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
-                        <td>{{ format_date($user->sponsorship_detail->expiry_date) }}</td> --}}
+                <tr class="table_row">
+                    <td class="index_col"></td>
+                    @if (!empty($request->current_cos_details_date_assigned))
                         <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
+                    @endif
+                    @if (!empty($request->current_cos_details_expiry_date))
                         <td>{{ format_date($user->sponsorship_detail->expiry_date) }}</td>
+                    @endif
+                    @if (!empty($request->current_cos_details_certificate_number))
                         <td>{{ $user->sponsorship_detail->certificate_number }}</td>
+                    @endif
+                    @if (!empty($request->current_cos_details_current_certificate_status))
                         <td>{{ $user->sponsorship_detail->current_certificate_status }}</td>
+                    @endif
+                    @if (!empty($request->current_cos_details_note))
                         <td>{{ $user->sponsorship_detail->note }}</td>
-                    </tr>
-
+                    @endif
+                </tr>
             @else
-            <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
 
     {{-- PASSPORT HISTORY --}}
@@ -655,31 +749,41 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                {{-- <th>From</th>
-                <th>To</th> --}}
-                <th>Issue Date</th>
-                <th>Expiry Date</th>
-                <th>Passport Number</th>
-                <th>Place Of Issue</th>
+                @if (!empty($request->current_passport_details_issue_date))
+                    <th>Issue Date</th>
+                @endif
+                @if (!empty($request->current_passport_details_expiry_date))
+                    <th>Expiry Date</th>
+                @endif
+                @if (!empty($request->current_passport_details_passport_number))
+                    <th>Passport Number</th>
+                @endif
+                @if (!empty($request->current_passport_details_place_of_issue))
+                    <th>Place Of Issue</th>
+                @endif
             </tr>
         </thead>
         <tbody>
             @if (!empty($user->passport_detail))
-
-                    <tr class="table_row">
-                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
-                        {{-- <td>{{ $user->passport_detail->created_at }}</td>
-                        <td>{{ $user->passport_detail->updated_at }}</td> --}}
+                <tr class="table_row">
+                    <td class="index_col"></td>
+                    @if (!empty($request->current_passport_details_issue_date))
                         <td>{{ format_date($user->passport_detail->passport_issue_date) }}</td>
+                    @endif
+                    @if (!empty($request->current_passport_details_expiry_date))
                         <td>{{ format_date($user->passport_detail->passport_expiry_date) }}</td>
+                    @endif
+                    @if (!empty($request->current_passport_details_passport_number))
                         <td>{{ $user->passport_detail->passport_number }}</td>
+                    @endif
+                    @if (!empty($request->current_passport_details_place_of_issue))
                         <td>{{ $user->passport_detail->place_of_issue }}</td>
-                    </tr>
-
+                    @endif
+                </tr>
             @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
@@ -687,42 +791,54 @@ return $formattedBreakTime;
 
 
 
-    {{-- PASSPORT HISTORY --}}
+
+    {{-- VISA HISTORY --}}
     @if (!empty($request->current_visa_details))
     <table>
         <h3>Current Visa Details</h3>
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                {{-- <th>From</th>
-                <th>To</th> --}}
-                <th>Issue Date</th>
-                <th>Expiry Date</th>
-                <th>BRP Number</th>
-                <th>Place Of Issue</th>
+                @if (!empty($request->current_visa_details_issue_date))
+                    <th>Issue Date</th>
+                @endif
+                @if (!empty($request->current_visa_details_expiry_date))
+                    <th>Expiry Date</th>
+                @endif
+                @if (!empty($request->current_visa_details_brp_number))
+                    <th>BRP Number</th>
+                @endif
+                @if (!empty($request->current_visa_details_place_of_issue))
+                    <th>Place Of Issue</th>
+                @endif
             </tr>
         </thead>
         <tbody>
             @if (!empty($user->visa_detail))
-
-                    <tr class="table_row">
-                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
-                        {{-- <td>{{ $user->visa_detail->created_at }}</td>
-                        <td>{{ $user->visa_detail->updated_at }}</td> --}}
+                <tr class="table_row">
+                    <td class="index_col"></td>
+                    @if (!empty($request->current_visa_details_issue_date))
                         <td>{{ format_date($user->visa_detail->visa_issue_date) }}</td>
+                    @endif
+                    @if (!empty($request->current_visa_details_expiry_date))
                         <td>{{ format_date($user->visa_detail->visa_expiry_date) }}</td>
+                    @endif
+                    @if (!empty($request->current_visa_details_brp_number))
                         <td>{{ $user->visa_detail->BRP_number }}</td>
+                    @endif
+                    @if (!empty($request->current_visa_details_place_of_issue))
                         <td>{{ $user->visa_detail->place_of_issue }}</td>
-                    </tr>
-
+                    @endif
+                </tr>
             @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
 
 
@@ -733,30 +849,46 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Address</th>
-                <th>City</th>
-                <th>Country</th>
-                <th>Postcode</th>
+                @if (!empty($request->address_details_address))
+                    <th>Address</th>
+                @endif
+                @if (!empty($request->address_details_city))
+                    <th>City</th>
+                @endif
+                @if (!empty($request->address_details_country))
+                    <th>Country</th>
+                @endif
+                @if (!empty($request->address_details_postcode))
+                    <th>Postcode</th>
+                @endif
             </tr>
         </thead>
         <tbody>
             @if (!empty($user->address_line_1))
-                    <tr class="table_row">
-                        {{-- <td class="index_col">{{ $index + 1 }}</td> --}}
-                        <td>{{ $user->address_line_1 }} </td>
+                <tr class="table_row">
+                    <td class="index_col"></td>
+                    @if (!empty($request->address_details_address))
+                        <td>{{ $user->address_line_1 }}</td>
+                    @endif
+                    @if (!empty($request->address_details_city))
                         <td>{{ $user->city }}</td>
+                    @endif
+                    @if (!empty($request->address_details_country))
                         <td>{{ $user->country }}</td>
+                    @endif
+                    @if (!empty($request->address_details_postcode))
                         <td>{{ $user->postcode }}</td>
-                    </tr>
-
+                    @endif
+                </tr>
             @else
-            <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
 
 
@@ -767,14 +899,30 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Relationship To Employee</th>
-                <th>Address</th>
-                <th>Postcode</th>
-                <th style="text-transform: capitalize">day time tel number</th>
-                <th style="text-transform: capitalize">evening time tel number</th>
-                <th style="text-transform: capitalize">mobile tel number </th>
+                @if (!empty($request->contact_details_first_name))
+                    <th>First Name</th>
+                @endif
+                @if (!empty($request->contact_details_last_name))
+                    <th>Last Name</th>
+                @endif
+                @if (!empty($request->contact_details_relationship))
+                    <th>Relationship To Employee</th>
+                @endif
+                @if (!empty($request->contact_details_address))
+                    <th>Address</th>
+                @endif
+                @if (!empty($request->contact_details_postcode))
+                    <th>Postcode</th>
+                @endif
+                @if (!empty($request->contact_details_day_time_tel_number))
+                    <th style="text-transform: capitalize">Day Time Tel Number</th>
+                @endif
+                @if (!empty($request->contact_details_evening_time_tel_number))
+                    <th style="text-transform: capitalize">Evening Time Tel Number</th>
+                @endif
+                @if (!empty($request->contact_details_mobile_tel_number))
+                    <th style="text-transform: capitalize">Mobile Tel Number</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -783,26 +931,42 @@ return $formattedBreakTime;
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
 
-                        <td>{{ isset($emergency_contact["first_name"]) ? $emergency_contact["first_name"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["last_name"]) ? $emergency_contact["last_name"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["relationship_of_above_to_you"]) ? $emergency_contact["relationship_of_above_to_you"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["address_line_1"]) ? $emergency_contact["address_line_1"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["postcode"]) ? $emergency_contact["postcode"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["day_time_tel_number"]) ? $emergency_contact["day_time_tel_number"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["evening_time_tel_number"]) ? $emergency_contact["evening_time_tel_number"] : '' }}</td>
-                        <td>{{ isset($emergency_contact["mobile_tel_number"]) ? $emergency_contact["mobile_tel_number"] : '' }}</td>
+                        @if (!empty($request->contact_details_first_name))
+                            <td>{{ isset($emergency_contact["first_name"]) ? $emergency_contact["first_name"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_last_name))
+                            <td>{{ isset($emergency_contact["last_name"]) ? $emergency_contact["last_name"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_relationship))
+                            <td>{{ isset($emergency_contact["relationship_of_above_to_you"]) ? $emergency_contact["relationship_of_above_to_you"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_address))
+                            <td>{{ isset($emergency_contact["address_line_1"]) ? $emergency_contact["address_line_1"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_postcode))
+                            <td>{{ isset($emergency_contact["postcode"]) ? $emergency_contact["postcode"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_day_time_tel_number))
+                            <td>{{ isset($emergency_contact["day_time_tel_number"]) ? $emergency_contact["day_time_tel_number"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_evening_time_tel_number))
+                            <td>{{ isset($emergency_contact["evening_time_tel_number"]) ? $emergency_contact["evening_time_tel_number"] : '' }}</td>
+                        @endif
+                        @if (!empty($request->contact_details_mobile_tel_number))
+                            <td>{{ isset($emergency_contact["mobile_tel_number"]) ? $emergency_contact["mobile_tel_number"] : '' }}</td>
+                        @endif
 
                     </tr>
                 @endforeach
             @else
-            <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
-
 @endif
+
 
 
     {{-- 12. NOTES  --}}
@@ -812,8 +976,12 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Title</th>
-                <th>Description</th>
+                @if (!empty($request->notes_title))
+                    <th>Title</th>
+                @endif
+                @if (!empty($request->notes_description))
+                    <th>Description</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -821,14 +989,18 @@ return $formattedBreakTime;
                 @foreach ($user->notes as $index => $note)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ $note->title }}</td>
-                        <td>{{ $note->description }}</td>
+                        @if (!empty($request->notes_title))
+                            <td>{{ $note->title }}</td>
+                        @endif
+                        @if (!empty($request->notes_description))
+                            <td>{{ $note->description }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @else
-            <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
@@ -843,25 +1015,41 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Bank Name</th>
-                <th>Sort Code</th>
-                <th>Account Name</th>
-                <th>Account Number</th>
+                @if (!empty($request->bank_details_name))
+                    <th>Bank Name</th>
+                @endif
+                @if (!empty($request->bank_details_sort_code))
+                    <th>Sort Code</th>
+                @endif
+                @if (!empty($request->bank_details_account_name))
+                    <th>Account Name</th>
+                @endif
+                @if (!empty($request->bank_details_account_number))
+                    <th>Account Number</th>
+                @endif
             </tr>
         </thead>
         <tbody>
             @if ($user->bank)
                 <tr class="table_row">
                     <td class="index_col">1</td>
-                    <td>{{ $user->bank->name }}</td>
-                    <td>{{ $user->sort_code }}</td>
-                    <td>{{ $user->account_name }}</td>
-                    <td>{{ $user->account_number }}</td>
+                    @if (!empty($request->bank_details_name))
+                        <td>{{ $user->bank->name }}</td>
+                    @endif
+                    @if (!empty($request->bank_details_sort_code))
+                        <td>{{ $user->sort_code }}</td>
+                    @endif
+                    @if (!empty($request->bank_details_account_name))
+                        <td>{{ $user->account_name }}</td>
+                    @endif
+                    @if (!empty($request->bank_details_account_number))
+                        <td>{{ $user->account_number }}</td>
+                    @endif
                 </tr>
             @else
-            <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
@@ -876,8 +1064,12 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                <th>Website</th>
-                <th>URL</th>
+                @if (!empty($request->social_links_website))
+                    <th>Website</th>
+                @endif
+                @if (!empty($request->social_links_url))
+                    <th>URL</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -885,18 +1077,23 @@ return $formattedBreakTime;
                 @foreach ($user->social_links as $index => $social_link)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        <td>{{ $social_link->social_site->name }}</td>
-                        <td>{{ $social_link->profile_link }}</td>
+                        @if (!empty($request->social_links_website))
+                            <td>{{ $social_link->social_site->name }}</td>
+                        @endif
+                        @if (!empty($request->social_links_url))
+                            <td>{{ $social_link->profile_link }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @else
-                     <tr>
-                <td colspan="8" style="text-align: center;">No Data Found</td>
-            </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">No Data Found</td>
+                </tr>
             @endif
         </tbody>
     </table>
 @endif
+
 
 
 </body>

@@ -4428,6 +4428,513 @@ class UserManagementController extends Controller
  *     required=true,
  *     example="social_links"
  * ),
+ *  * @OA\Parameter(
+ *     name="employee_details_name",
+ *     in="query",
+ *     description="Employee Name",
+ *     required=true,
+ *     example="John Doe"
+ * ),
+ * @OA\Parameter(
+ *     name="employee_details_user_id",
+ *     in="query",
+ *     description="Employee User ID",
+ *     required=true,
+ *     example="123456"
+ * ),
+ * @OA\Parameter(
+ *     name="employee_details_email",
+ *     in="query",
+ *     description="Employee Email",
+ *     required=true,
+ *     example="john.doe@example.com"
+ * ),
+ * @OA\Parameter(
+ *     name="employee_details_phone",
+ *     in="query",
+ *     description="Employee Phone",
+ *     required=true,
+ *     example="123-456-7890"
+ * ),
+ * @OA\Parameter(
+ *     name="employee_details_gender",
+ *     in="query",
+ *     description="Employee Gender",
+ *     required=true,
+ *     example="male"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_allowance_name",
+ *     in="query",
+ *     description="Leave Allowance Name",
+ *     required=true,
+ *     example="Annual Leave"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_allowance_type",
+ *     in="query",
+ *     description="Leave Allowance Type",
+ *     required=true,
+ *     example="Paid"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_allowance_allowance",
+ *     in="query",
+ *     description="Leave Allowance Amount",
+ *     required=true,
+ *     example="20"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_allowance_earned",
+ *     in="query",
+ *     description="Leave Allowance Earned",
+ *     required=true,
+ *     example="10"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_allowance_availability",
+ *     in="query",
+ *     description="Leave Allowance Availability",
+ *     required=true,
+ *     example="Yes"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_date",
+ *     in="query",
+ *     description="Attendance Date",
+ *     required=true,
+ *     example="2024-02-13"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_start_time",
+ *     in="query",
+ *     description="Attendance Start Time",
+ *     required=true,
+ *     example="08:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_end_time",
+ *     in="query",
+ *     description="Attendance End Time",
+ *     required=true,
+ *     example="17:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_break",
+ *     in="query",
+ *     description="Attendance Break Time",
+ *     required=true,
+ *     example="01:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_schedule",
+ *     in="query",
+ *     description="Attendance Schedule",
+ *     required=true,
+ *     example="Regular"
+ * ),
+ * @OA\Parameter(
+ *     name="attendance_overtime",
+ *     in="query",
+ *     description="Attendance Overtime",
+ *     required=true,
+ *     example="02:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_date_time",
+ *     in="query",
+ *     description="Leave Date and Time",
+ *     required=true,
+ *     example="2024-02-14 08:00:00"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_type",
+ *     in="query",
+ *     description="Leave Type",
+ *     required=true,
+ *     example="Sick Leave"
+ * ),
+ * @OA\Parameter(
+ *     name="leave_duration",
+ *     in="query",
+ *     description="Leave Duration",
+ *     required=true,
+ *     example="8"
+ * ),
+ * @OA\Parameter(
+ *     name="total_leave_hours",
+ *     in="query",
+ *     description="Total Leave Hours",
+ *     required=true,
+ *     example="8"
+ * ),
+ * @OA\Parameter(
+ *     name="document_title",
+ *     in="query",
+ *     description="Document Title",
+ *     required=true,
+ *     example="Annual Report"
+ * ),
+ * @OA\Parameter(
+ *     name="document_added_by",
+ *     in="query",
+ *     description="Document Added By",
+ *     required=true,
+ *     example="Jane Smith"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_name",
+ *     in="query",
+ *     description="Asset Name",
+ *     required=true,
+ *     example="Laptop"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_code",
+ *     in="query",
+ *     description="Asset Code",
+ *     required=true,
+ *     example="LT12345"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_serial_number",
+ *     in="query",
+ *     description="Asset Serial Number",
+ *     required=true,
+ *     example="SN6789"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_is_working",
+ *     in="query",
+ *     description="Is Asset Working",
+ *     required=true,
+ *     example="true"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_type",
+ *     in="query",
+ *     description="Asset Type",
+ *     required=true,
+ *     example="Electronic"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_date",
+ *     in="query",
+ *     description="Asset Date",
+ *     required=true,
+ *     example="2024-02-13"
+ * ),
+ * @OA\Parameter(
+ *     name="asset_note",
+ *     in="query",
+ *     description="Asset Note",
+ *     required=true,
+ *     example="This is a laptop for development purposes."
+ * ),
+ * @OA\Parameter(
+ *     name="educational_history_degree",
+ *     in="query",
+ *     description="Educational History Degree",
+ *     required=true,
+ *     example="Bachelor of Science"
+ * ),
+ * @OA\Parameter(
+ *     name="educational_history_major",
+ *     in="query",
+ *     description="Educational History Major",
+ *     required=true,
+ *     example="Computer Science"
+ * ),
+ * @OA\Parameter(
+ *     name="educational_history_start_date",
+ *     in="query",
+ *     description="Educational History Start Date",
+ *     required=true,
+ *     example="2018-09-01"
+ * ),
+ * @OA\Parameter(
+ *     name="educational_history_achievements",
+ *     in="query",
+ *     description="Educational History Achievements",
+ *     required=true,
+ *     example="Graduated with honors"
+ * ),
+ * @OA\Parameter(
+ *     name="job_history_job_title",
+ *     in="query",
+ *     description="Job History Job Title",
+ *     required=true,
+ *     example="Software Engineer"
+ * ),
+ * @OA\Parameter(
+ *     name="job_history_company",
+ *     in="query",
+ *     description="Job History Company",
+ *     required=true,
+ *     example="Tech Solutions Inc."
+ * ),
+ * @OA\Parameter(
+ *     name="job_history_start_on",
+ *     in="query",
+ *     description="Job History Start Date",
+ *     required=true,
+ *     example="2020-03-15"
+ * ),
+ * @OA\Parameter(
+ *     name="job_history_end_at",
+ *     in="query",
+ *     description="Job History End Date",
+ *     required=true,
+ *     example="2022-05-30"
+ * ),
+ * @OA\Parameter(
+ *     name="job_history_supervisor",
+ *     in="query",
+ *     description="Job History Supervisor",
+ *     required=true,
+ *     example="John Smith"
+ * ),
+ * @OA\Parameter(
+ *     name="job_history_country",
+ *     in="query",
+ *     description="Job History Country",
+ *     required=true,
+ *     example="United States"
+ * ),
+ * @OA\Parameter(
+ *     name="current_cos_details_date_assigned",
+ *     in="query",
+ *     description="Date COS Assigned",
+ *     required=true,
+ *     example="2023-05-15"
+ * ),
+ * @OA\Parameter(
+ *     name="current_cos_details_expiry_date",
+ *     in="query",
+ *     description="COS Expiry Date",
+ *     required=true,
+ *     example="2025-05-14"
+ * ),
+ * @OA\Parameter(
+ *     name="current_cos_details_certificate_number",
+ *     in="query",
+ *     description="COS Certificate Number",
+ *     required=true,
+ *     example="COS12345"
+ * ),
+ * @OA\Parameter(
+ *     name="current_cos_details_current_certificate_status",
+ *     in="query",
+ *     description="Current COS Certificate Status",
+ *     required=true,
+ *     example="Active"
+ * ),
+ * @OA\Parameter(
+ *     name="current_cos_details_note",
+ *     in="query",
+ *     description="COS Note",
+ *     required=true,
+ *     example="Employee is eligible for work under the current COS."
+ * ),
+ * @OA\Parameter(
+ *     name="current_passport_details_issue_date",
+ *     in="query",
+ *     description="Passport Issue Date",
+ *     required=true,
+ *     example="2022-01-01"
+ * ),
+ * @OA\Parameter(
+ *     name="current_passport_details_expiry_date",
+ *     in="query",
+ *     description="Passport Expiry Date",
+ *     required=true,
+ *     example="2032-01-01"
+ * ),
+ * @OA\Parameter(
+ *     name="current_passport_details_passport_number",
+ *     in="query",
+ *     description="Passport Number",
+ *     required=true,
+ *     example="P123456"
+ * ),
+ * @OA\Parameter(
+ *     name="current_passport_details_place_of_issue",
+ *     in="query",
+ *     description="Passport Place of Issue",
+ *     required=true,
+ *     example="United Kingdom"
+ * ),
+ * @OA\Parameter(
+ *     name="current_visa_details_issue_date",
+ *     in="query",
+ *     description="Visa Issue Date",
+ *     required=true,
+ *     example="2023-01-01"
+ * ),
+ * @OA\Parameter(
+ *     name="current_visa_details_expiry_date",
+ *     in="query",
+ *     description="Visa Expiry Date",
+ *     required=true,
+ *     example="2025-01-01"
+ * ),
+ * @OA\Parameter(
+ *     name="current_visa_details_brp_number",
+ *     in="query",
+ *     description="BRP Number",
+ *     required=true,
+ *     example="BRP1234567890"
+ * ),
+ * @OA\Parameter(
+ *     name="current_visa_details_place_of_issue",
+ *     in="query",
+ *     description="Visa Place of Issue",
+ *     required=true,
+ *     example="United Kingdom"
+ * ),
+ * @OA\Parameter(
+ *     name="address_details_address",
+ *     in="query",
+ *     description="Address",
+ *     required=true,
+ *     example="123 Main Street"
+ * ),
+ * @OA\Parameter(
+ *     name="address_details_city",
+ *     in="query",
+ *     description="City",
+ *     required=true,
+ *     example="London"
+ * ),
+ * @OA\Parameter(
+ *     name="address_details_country",
+ *     in="query",
+ *     description="Country",
+ *     required=true,
+ *     example="United Kingdom"
+ * ),
+ * @OA\Parameter(
+ *     name="address_details_postcode",
+ *     in="query",
+ *     description="Postcode",
+ *     required=true,
+ *     example="AB12 3CD"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_first_name",
+ *     in="query",
+ *     description="First Name",
+ *     required=true,
+ *     example="John"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_last_name",
+ *     in="query",
+ *     description="Last Name",
+ *     required=true,
+ *     example="Doe"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_relationship",
+ *     in="query",
+ *     description="Relationship",
+ *     required=true,
+ *     example="Spouse"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_address",
+ *     in="query",
+ *     description="Address",
+ *     required=true,
+ *     example="456 Elm Street"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_postcode",
+ *     in="query",
+ *     description="Postcode",
+ *     required=true,
+ *     example="XY12 3Z"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_day_time_tel_number",
+ *     in="query",
+ *     description="Daytime Telephone Number",
+ *     required=true,
+ *     example="123-456-7890"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_evening_time_tel_number",
+ *     in="query",
+ *     description="Evening Telephone Number",
+ *     required=true,
+ *     example="789-456-1230"
+ * ),
+ * @OA\Parameter(
+ *     name="contact_details_mobile_tel_number",
+ *     in="query",
+ *     description="Mobile Telephone Number",
+ *     required=true,
+ *     example="987-654-3210"
+ * ),
+ * @OA\Parameter(
+ *     name="notes_title",
+ *     in="query",
+ *     description="Notes Title",
+ *     required=true,
+ *     example="Meeting Notes"
+ * ),
+ * @OA\Parameter(
+ *     name="notes_description",
+ *     in="query",
+ *     description="Notes Description",
+ *     required=true,
+ *     example="Discussed project progress."
+ * ),
+ * @OA\Parameter(
+ *     name="bank_details_name",
+ *     in="query",
+ *     description="Bank Name",
+ *     required=true,
+ *     example="ABC Bank"
+ * ),
+ * @OA\Parameter(
+ *     name="bank_details_sort_code",
+ *     in="query",
+ *     description="Bank Sort Code",
+ *     required=true,
+ *     example="12-34-56"
+ * ),
+ * @OA\Parameter(
+ *     name="bank_details_account_name",
+ *     in="query",
+ *     description="Account Name",
+ *     required=true,
+ *     example="John Doe"
+ * ),
+ * @OA\Parameter(
+ *     name="bank_details_account_number",
+ *     in="query",
+ *     description="Account Number",
+ *     required=true,
+ *     example="12345678"
+ * ),
+ * @OA\Parameter(
+ *     name="social_links_website",
+ *     in="query",
+ *     description="Website",
+ *     required=true,
+ *     example="example.com"
+ * ),
+ * @OA\Parameter(
+ *     name="social_links_url",
+ *     in="query",
+ *     description="Social Media URL",
+ *     required=true,
+ *     example="https://twitter.com/example"
+ * ),
+
+ *
+ *
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
