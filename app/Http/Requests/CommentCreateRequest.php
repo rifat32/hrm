@@ -13,7 +13,7 @@ class CommentCreateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,10 +21,35 @@ class CommentCreateRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
-    {
-        return [
-            //
-        ];
-    }
+
+
+            public function rules()
+            {
+                return [
+                    'description' => 'required|string',
+                    'attachments' => 'nullable|array',
+                    'status' => 'string|in:open,closed',
+                    'priority' => 'string|in:low,medium,high',
+                    'visibility' => 'string|in:public,private',
+                    'tags' => 'nullable|string',
+                    'resolution' => 'nullable|string',
+                    'feedback' => 'nullable|array',
+                    'hidden_note' => 'nullable|string',
+                    'related_task_id' => 'nullable|exists:tasks,id',
+                    'task_id' => 'required|exists:tasks,id',
+                ];
+            }
+
+            public function messages()
+            {
+                return [
+                    'description.required' => 'The description field is required.',
+                    'status.in' => 'Invalid status provided. Valid values are: open, closed.',
+                    'priority.in' => 'Invalid priority provided. Valid values are: low, medium, high.',
+                    'visibility.in' => 'Invalid visibility provided. Valid values are: public, private.',
+                ];
+            }
+
+
+
 }

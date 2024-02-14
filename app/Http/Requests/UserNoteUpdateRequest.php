@@ -27,6 +27,7 @@ class UserNoteUpdateRequest extends BaseFormRequest
     public function rules()
     {
         return [
+
             'id' => [
                 'required',
                 'numeric',
@@ -44,6 +45,9 @@ class UserNoteUpdateRequest extends BaseFormRequest
                     }
                 },
             ],
+
+
+
             'user_id' => [
                 'required',
                 'numeric',

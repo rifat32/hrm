@@ -15,23 +15,33 @@ class CreateCommentsTable extends Migration
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->text('comment_text');
-            $table->text('attachments')->nullable();
-            $table->string('status')->default('open');
-            $table->string('priority')->default('medium');
-            $table->string('visibility')->default('public');
-            $table->text('mentions')->nullable();
+
+            $table->text('description');
+            $table->json('attachments')->nullable();
+            
+            $table->enum('status', ['open', 'closed'])->default('open');
+            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->enum('visibility', ['public', 'private'])->default('public');
+
             $table->text('tags')->nullable();
             $table->text('resolution')->nullable();
             $table->json('feedback')->nullable();
-            $table->text('internal_notes')->nullable();
-            $table->text('history')->nullable();
+
+
+            $table->text('hidden_note')->nullable();
+              $table->json('history')->nullable();
 
             $table->unsignedBigInteger('related_task_id')->nullable();
             $table->foreign('related_task_id')->references('id')->on('tasks');
             $table->unsignedBigInteger('task_id');
             $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
-            $table->unsignedBigInteger('user_id');
+
+            $table->unsignedBigInteger("created_by")->nullable();
+            $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
+
             // $table->foreign('user_id')->references('id')->on('users');
 
             $table->timestamps();

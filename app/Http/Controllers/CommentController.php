@@ -9,6 +9,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Comment;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,18 +33,22 @@ class CommentController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 
- *     @OA\Property(property="name", type="string", format="string", example="Comment X"),
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
- *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="progress"),
- *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
- *     @OA\Property(property="parent_comment_id", type="integer", format="integer", example="2"),
- *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3})
 
+ *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
+ *     @OA\Property(property="attachments", type="array", @OA\Items(type="string")),
+ *     @OA\Property(property="status", type="string", format="string", example="open", enum={"open", "closed"}),
+ *     @OA\Property(property="priority", type="string", format="string", example="low", enum={"low", "medium", "high"}),
+ *     @OA\Property(property="visibility", type="string", format="string", example="public", enum={"public", "private"}),
+ *     @OA\Property(property="tags", type="string", format="string", example="tag1,tag2,tag3"),
+ *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
+ *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
+ *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
+ *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
+ *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
  *
- *
+
+     *
+     *
      *
      *         ),
      *      ),
@@ -84,16 +89,16 @@ class CommentController extends Controller
     public function createComment(CommentCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$this->isModuleEnabled("project_and_comment_management")) {
                 $this->storeError(
                     'Module is not enabled',
                     403,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            }
 
             return DB::transaction(function () use ($request) {
 
@@ -109,9 +114,31 @@ class CommentController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["assigned_by"] = $request->user()->id;
+
+                $comment_text = $request_data["description"];
+
+                // Parse comment for mentions
+                preg_match_all('/@(\w+)/', $comment_text, $mentions);
+                $mentioned_users = $mentions[1];
+                $mentioned_users = User::where('business_id', $request->user()->business_id)
+                    ->whereIn('user_name', $mentioned_users)
+                    ->get();
+
+
+
                 $comment =  Comment::create($request_data);
-                $comment->assignees()->sync($request_data['assignees'],[]);
+
+
+
+                // Store mentions in user_note_mentions table using createMany
+                $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+                    return [
+                        'user_id' => $mentioned_user->id,
+                    ];
+                });
+
+                $comment->mentions()->createMany($mentions_data);
+
                 return response($comment, 201);
             });
         } catch (Exception $e) {
@@ -136,16 +163,19 @@ class CommentController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
- *     @OA\Property(property="name", type="string", format="string", example="Comment X"),
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
- *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="progress"),
- *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
- *     @OA\Property(property="parent_comment_id", type="integer", format="integer", example="2")
- *
- *
+*     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
+ *     @OA\Property(property="attachments", type="array", @OA\Items(type="string")),
+ *     @OA\Property(property="status", type="string", format="string", example="open", enum={"open", "closed"}),
+ *     @OA\Property(property="priority", type="string", format="string", example="low", enum={"low", "medium", "high"}),
+ *     @OA\Property(property="visibility", type="string", format="string", example="public", enum={"public", "private"}),
+ *     @OA\Property(property="tags", type="string", format="string", example="tag1,tag2,tag3"),
+ *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
+ *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
+ *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
+ *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
+ *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
+     *
+     *
 
      *
      *         ),
@@ -188,16 +218,16 @@ class CommentController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$this->isModuleEnabled("project_and_comment_management")) {
                 $this->storeError(
                     'Module is not enabled',
                     403,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            }
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('comment_update')) {
                     return response()->json([
@@ -224,19 +254,17 @@ class CommentController extends Controller
 
                 $comment  =  tap(Comment::where($comment_query_params))->update(
                     collect($request_data)->only([
-                        'name',
                         'description',
-                        'start_date',
-                        'due_date',
-                        'end_date',
+                        'attachments',
                         'status',
-                        'project_id',
-                        'parent_comment_id',
-                        'assigned_by',
-
-                        // "is_active",
-                        // "business_id",
-                        // "created_by"
+                        'priority',
+                        'visibility',
+                        'tags',
+                        'resolution',
+                        'feedback',
+                        // 'hidden_note',
+                        'related_task_id',
+                        'task_id',
 
                     ])->toArray()
                 )
@@ -248,7 +276,11 @@ class CommentController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $comment->assignees()->sync($request_data['assignees'],[]);
+                if ($comment->created_by == auth()->user()->created_by) {
+                    $comment->hidden_note = $request_data["hidden_note"];
+                    $comment->save();
+                }
+
                 return response($comment, 201);
             });
         } catch (Exception $e) {
@@ -275,11 +307,10 @@ class CommentController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *
      *    @OA\Parameter(
-     *         name="project_id",
+     *         name="task_id",
      *         in="query",
-     *         description="project_id",
+     *         description="task_id",
      *         required=true,
      *  example="1"
      *      ),
@@ -361,29 +392,29 @@ class CommentController extends Controller
     public function getComments(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$this->isModuleEnabled("project_and_comment_management")) {
                 $this->storeError(
                     'Module is not enabled',
                     403,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            }
             if (!$request->user()->hasPermissionTo('comment_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $comments = Comment::with("assigned_by","assignees")
+            $comments = Comment::with("assigned_by", "assignees")
 
-            ->where(
-                [
-                    "business_id" => $business_id
-                ]
-            )
+                ->where(
+                    [
+                        "business_id" => $business_id
+                    ]
+                )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -396,11 +427,11 @@ class CommentController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                ->when(!empty($request->project_id), function ($query) use ($request) {
-                    return $query->where('project_id' , $request->project_id);
+                ->when(!empty($request->task_id), function ($query) use ($request) {
+                    return $query->where('task_id', $request->task_id);
                 })
                 ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where('status' , $request->status);
+                    return $query->where('status', $request->status);
                 })
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {
@@ -414,9 +445,10 @@ class CommentController extends Controller
                 }, function ($query) {
                     return $query->orderBy("comments.id", "DESC");
                 })
-                ->select('comments.*',
+                ->select(
+                    'comments.*',
 
-                 )
+                )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -490,38 +522,38 @@ class CommentController extends Controller
     public function getCommentById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$this->isModuleEnabled("project_and_comment_management")) {
                 $this->storeError(
                     'Module is not enabled',
                     403,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            }
             if (!$request->user()->hasPermissionTo('comment_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $comment =  Comment::with("assigned_by","assignees")
-            ->where([
-                "id" => $id,
-                "business_id" => $business_id
-            ])
-            ->select('comments.*'
-             )
+            $comment =  Comment::with("assigned_by", "assignees")
+                ->where([
+                    "id" => $id,
+                    "business_id" => $business_id
+                ])
+                ->select(
+                    'comments.*'
+                )
                 ->first();
             if (!$comment) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "no comment listing found"
                 ], 404);
@@ -594,16 +626,16 @@ class CommentController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$this->isModuleEnabled("project_and_comment_management")) {
                 $this->storeError(
                     'Module is not enabled',
                     403,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            }
             if (!$request->user()->hasPermissionTo('comment_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -614,6 +646,7 @@ class CommentController extends Controller
             $existingIds = Comment::where([
                 "business_id" => $business_id
             ])
+            ->where("created_by",auth()->user()->id)
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
@@ -624,12 +657,11 @@ class CommentController extends Controller
 
             if (!empty($nonExistingIds)) {
                 $this->storeError(
-                    "no data found"
-                    ,
+                    "no data found",
                     404,
                     "front end error",
                     "front end error"
-                   );
+                );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -638,7 +670,7 @@ class CommentController extends Controller
             Comment::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

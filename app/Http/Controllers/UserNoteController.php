@@ -113,7 +113,7 @@ class UserNoteController extends Controller
 // Store mentions in user_note_mentions table using createMany
 $mentions_data = $mentioned_users->map(function ($mentioned_user) {
     return [
-        'mentioned_user_id' => $mentioned_user->id,
+        'user_id' => $mentioned_user->id,
     ];
 });
 
@@ -253,7 +253,7 @@ $user_note->mentions()->createMany($mentions_data);
 // Store mentions in user_note_mentions table using createMany
 $mentions_data = $mentioned_users->map(function ($mentioned_user) {
     return [
-        'mentioned_user_id' => $mentioned_user->id,
+        'user_id' => $mentioned_user->id,
     ];
 });
 
@@ -400,7 +400,7 @@ $user_note->mentions()->createMany($mentions_data);
                  // Store mentions in user_note_mentions table using createMany
                  $mentions_data = $mentioned_users->map(function ($mentioned_user) {
                      return [
-                         'mentioned_user_id' => $mentioned_user->id,
+                         'user_id' => $mentioned_user->id,
                      ];
                  });
 
