@@ -57,6 +57,8 @@ class Department extends Model
         return $parentIds;
     }
 
+
+
     protected function getParentIdsRecursive($department, &$parentIds)
     {
         if ($department->parent) {
@@ -68,6 +70,24 @@ class Department extends Model
         }
     }
 
+
+    public function getAllParentManagerIds()
+    {
+        $parentManagerIds = [];
+        $this->getParentManagerIdsRecursive($this, $parentManagerIds);
+
+        return $parentManagerIds;
+    }
+    protected function getParentManagerIdsRecursive($department, &$parentManagerIds)
+    {
+        if ($department->parent) {
+            // Include the parent ID
+            $parentManagerIds[] = $department->parent->manager_id;
+
+            // Recursively get the parent IDs of the current parent
+            $this->getParentManagerIdsRecursive($department->parent, $parentManagerIds);
+        }
+    }
 
 
 

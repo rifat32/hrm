@@ -17,6 +17,10 @@ class CreateNotificationsTable extends Migration
             $table->id();
 
             $table->unsignedBigInteger("entity_id");
+            $table->json("entity_ids")->nullable();
+
+
+
             $table->unsignedBigInteger("entity_name");
 
             $table->text("notification_title");

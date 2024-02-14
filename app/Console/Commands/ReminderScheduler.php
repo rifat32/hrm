@@ -54,11 +54,6 @@ class ReminderScheduler extends Command
         ])
             ->first();
 
-        $dapartments = Department::whereHas("users", function ($query) use ($user) {
-            $query->where("users.id", $user->id);
-        })
-            ->get();
-        $manager_ids = $dapartments->pluck("manager_id");
 
 
 
@@ -84,12 +79,21 @@ class ReminderScheduler extends Command
 
 
 
-        Log::info("33");
 
         Log::info(($notification_description));
         Log::info(($notification_link));
 
-        foreach ($manager_ids as $manager_id) {
+        $dapartments = Department::whereHas("users", function ($query) use ($user) {
+            $query->where("users.id", $user->id);
+        })
+            ->get();
+        $all_parent_department_manager_ids = [];
+        foreach ($dapartments as $dapartment) {
+            $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $dapartment->getAllParentManagerIds());
+        }
+        $unique_all_parent_department_manager_ids = array_unique($all_parent_department_manager_ids);
+
+        foreach ($unique_all_parent_department_manager_ids as $manager_id) {
             Notification::create([
                 "entity_id" => $data->id,
                 "entity_name" => $reminder->entity_name,
@@ -104,19 +108,7 @@ class ReminderScheduler extends Command
                 "status" => "unread",
             ]);
         }
-        Notification::create([
-            "entity_id" => $data->id,
-            "entity_name" => $reminder->entity_name,
-            'notification_title' => $reminder->title,
-            'notification_description' => $notification_description,
-            'notification_link' => $notification_link,
-            "sender_id" => 1,
-            "receiver_id" => $business->owner_id,
-            "business_id" => $business->id,
-            "is_system_generated" => 1,
-
-            "status" => "unread",
-        ]);
+ 
     }
     public function handle()
     {

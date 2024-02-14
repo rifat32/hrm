@@ -16,6 +16,7 @@ class Notification extends Model
         "business_id",
         "entity_name",
         "entity_id",
+        "entity_ids",
 
 
         'notification_title',
@@ -27,9 +28,14 @@ class Notification extends Model
 
     ];
 
+    protected $casts = [
+        'entity_ids' => 'array',
+
+    ];
 
 
-    
+
+
 
     public function template(){
         return $this->belongsTo(NotificationTemplate::class,'notification_template_id', 'id');
