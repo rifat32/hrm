@@ -1001,6 +1001,7 @@ class ComposerStaticInit21d3eeeef4e11a73df45b8701b58e483
         'App\\Models\\SettingLeaveSpecialUser' => __DIR__ . '/../..' . '/app/Models/SettingLeaveSpecialUser.php',
         'App\\Models\\SettingLeaveType' => __DIR__ . '/../..' . '/app/Models/SettingLeaveType.php',
         'App\\Models\\SettingPaidLeaveEmploymentStatus' => __DIR__ . '/../..' . '/app/Models/SettingPaidLeaveEmploymentStatus.php',
+        'App\\Models\\SettingPaymentDate' => __DIR__ . '/../..' . '/app/Models/SettingPaymentDate.php',
         'App\\Models\\SettingPayrun' => __DIR__ . '/../..' . '/app/Models/SettingPayrun.php',
         'App\\Models\\SettingPayrunRestrictedDepartment' => __DIR__ . '/../..' . '/app/Models/SettingPayrunRestrictedDepartment.php',
         'App\\Models\\SettingPayrunRestrictedUser' => __DIR__ . '/../..' . '/app/Models/SettingPayrunRestrictedUser.php',

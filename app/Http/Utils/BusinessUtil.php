@@ -14,6 +14,7 @@ use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
+use App\Models\SettingPaymentDate;
 use App\Models\SettingPayrun;
 use App\Models\User;
 use App\Models\WorkLocation;
@@ -719,6 +720,49 @@ trait BusinessUtil
         }
     }
 
+    public function loadDefaultPaymentDateSetting($business_id = null)
+{
+    // Load default payment date settings
+
+    $default_setting_payment_date_query = [
+        'business_id' => null,
+        'is_active' => 1,
+        'is_default' => auth()->user()->hasRole('superadmin') ? 1 : 0,
+    ];
+
+    if (!auth()->user()->hasRole('superadmin')) {
+        $default_setting_payment_date_query['created_by'] = auth()->user()->id;
+    }
+
+    $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
+
+    // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
+    if ($defaultSettingPaymentDates->isEmpty() && !auth()->user()->hasRole('superadmin')) {
+        unset($default_setting_payment_date_query['created_by']);
+        $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
+    }
+
+    foreach ($defaultSettingPaymentDates as $defaultSettingPaymentDate) {
+        $insertableData = [
+            'payment_type' => $defaultSettingPaymentDate->payment_type,
+            'day_of_week' => $defaultSettingPaymentDate->day_of_week,
+            'day_of_month' => $defaultSettingPaymentDate->day_of_month,
+            'custom_frequency_interval' => $defaultSettingPaymentDate->custom_frequency_interval,
+            'custom_frequency_unit' => $defaultSettingPaymentDate->custom_frequency_unit,
+            'notification_delivery_status' => $defaultSettingPaymentDate->notification_delivery_status,
+            'is_active' => 1,
+            'is_default' => 0,
+            'business_id' => $business_id,
+            'created_by' => auth()->user()->id,
+            'role_specific_settings' => $defaultSettingPaymentDate->role_specific_settings,
+        ];
+
+        $settingPaymentDate = SettingPaymentDate::create($insertableData);
+
+        // Additional logic can be added here if needed
+    }
+}
+
     // end load setting attendance
 
     public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1, $business)
@@ -791,6 +835,10 @@ trait BusinessUtil
         $this->loadDefaultAttendanceSetting($business_id);
 
         $this->loadDefaultPayrunSetting($business_id);
+
+        $this->loadDefaultPaymentDateSetting($business_id);
+
+
 
 
         $default_work_shift_data = [

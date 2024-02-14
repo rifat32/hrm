@@ -513,7 +513,9 @@ class UserManagementController extends Controller
 
                 $this->loadDefaultSettingLeave($user->business_id);
                 $this->loadDefaultAttendanceSetting($user->business_id);
-
+                $this->loadDefaultPayrunSetting($user->business_id);
+                $this->loadDefaultPaymentDateSetting($user->business_id);
+            
 
 
 

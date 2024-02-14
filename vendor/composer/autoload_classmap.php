@@ -310,6 +310,7 @@ return array(
     'App\\Models\\SettingLeaveSpecialUser' => $baseDir . '/app/Models/SettingLeaveSpecialUser.php',
     'App\\Models\\SettingLeaveType' => $baseDir . '/app/Models/SettingLeaveType.php',
     'App\\Models\\SettingPaidLeaveEmploymentStatus' => $baseDir . '/app/Models/SettingPaidLeaveEmploymentStatus.php',
+    'App\\Models\\SettingPaymentDate' => $baseDir . '/app/Models/SettingPaymentDate.php',
     'App\\Models\\SettingPayrun' => $baseDir . '/app/Models/SettingPayrun.php',
     'App\\Models\\SettingPayrunRestrictedDepartment' => $baseDir . '/app/Models/SettingPayrunRestrictedDepartment.php',
     'App\\Models\\SettingPayrunRestrictedUser' => $baseDir . '/app/Models/SettingPayrunRestrictedUser.php',

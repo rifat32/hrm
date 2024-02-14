@@ -22,6 +22,7 @@ use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
+use App\Models\SettingPaymentDate;
 use App\Models\SettingPayrun;
 use App\Models\SocialSite;
 use App\Models\WorkLocation;
@@ -603,11 +604,23 @@ return "swagger generated";
             'payrun_period' => "weekly",
             'consider_type' => "daily_log",
             'consider_overtime' => 1,
-
             "business_id" => NULL,
             "is_active" => 1,
             "is_default" => 1,
             "created_by" => $admin->id,
+        ]);
+
+        SettingPaymentDate::create([
+            'payment_type' => 'weekly',
+            'day_of_week' => 2,
+            'day_of_month' => null,
+            'custom_frequency_interval' => null,
+            'custom_frequency_unit' => null,
+            'is_active' => 1,
+            'is_default' => 1,
+            'business_id' => null,
+            'created_by' => $admin->id,
+            'role_specific_settings' => null,
         ]);
 
 
