@@ -13,6 +13,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\LeaveUtil;
 use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Jobs\SendNotificationJob;
 use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\Holiday;
@@ -679,7 +680,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
 
-
+                SendNotificationJob::dispatch($leave, $leave->employee, "Leave Request Taken", "create", "leave");
 
                 return response($leave, 200);
             });
@@ -860,6 +861,16 @@ foreach ($assigned_departments as $assigned_department) {
                 }
                       }
 
+
+
+                      if($request_data["is_approved"]) {
+                        SendNotificationJob::dispatch($leave, $leave->employee, "Leave Request Approved", "approve", "leave");
+                      } else {
+                        SendNotificationJob::dispatch($leave, $leave->employee, "Leave Request Rejected", "reject", "leave");
+                      }
+
+
+
                 return response($leave_approval, 201);
             });
         } catch (Exception $e) {
@@ -986,7 +997,7 @@ foreach ($assigned_departments as $assigned_department) {
                 $leave_history_data['leave_updated_at'] = $leave->updated_at;
 
 
-
+                SendNotificationJob::dispatch($leave, $leave->employee, "Leave Request Approved", "approve", "leave");
 
                 return response($leave, 200);
             });
@@ -1655,7 +1666,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
 
-
+                SendNotificationJob::dispatch($leave, $leave->employee, "Leave Request Updated", "update", "leave");
 
                 return response($leave, 201);
             });
@@ -2912,6 +2923,7 @@ return $employee;
 
             Leave::destroy($existingIds);
 
+            SendNotificationJob::dispatch($leaves, $leaves->first()->employee, "Leave Request Deleted", "delete", "leave");
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
