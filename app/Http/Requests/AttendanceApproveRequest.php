@@ -44,7 +44,7 @@ class AttendanceApproveRequest extends BaseFormRequest
                             $query->whereIn("departments.id",$all_manager_department_ids);
                          })
 
-                        ->whereNotIn("users.id",[auth()->user()->id])
+                        ->whereNotIn("user_id",[auth()->user()->id])
 
                         ->exists();
 

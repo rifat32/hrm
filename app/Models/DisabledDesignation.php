@@ -15,12 +15,5 @@ class DisabledDesignation extends Model
         'created_by',
         // Add other fillable columns if needed
     ];
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+  
 }

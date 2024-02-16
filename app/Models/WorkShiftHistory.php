@@ -52,44 +52,13 @@ class WorkShiftHistory extends Model
 
 
     public function users() {
-        return $this->belongsToMany(User::class, 'employee_user_work_shift_histories', 'work_shift_id', 'user_id');
+        return $this->belongsToMany(User::class, 'employee_user_work_shift_histories', 'work_shift_id', 'user_id')->withPivot('from_date', 'to_date');
     }
 
     public function user_work_shift(){
         return $this->hasMany(EmployeeUserWorkShiftHistory::class,'work_shift_id', 'id');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-
-        return (new Carbon($value))->format('d-m-Y');
-    }
-
-    public function getStartDateAttribute($value)
-    {
-
-        return (new Carbon($value))->format('d-m-Y');
-    }
-
-    public function getEndDateAttribute($value)
-    {
-
-        return (new Carbon($value))->format('d-m-Y');
-    }
-
-    public function getFromDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getToDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
 
 
 

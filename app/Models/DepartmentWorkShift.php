@@ -12,12 +12,5 @@ class DepartmentWorkShift extends Model
     protected $fillable = [
         'work_shift_id', 'department_id'
     ];
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+   
 }

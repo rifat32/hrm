@@ -27,33 +27,7 @@ class Announcement extends Model
         return $this->belongsToMany(Department::class, 'department_announcements', 'announcement_id', 'department_id');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+   
 
 
-
-
-
-
-
-
-
-    public function getStartDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getEndDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-
-
-
-    
 }

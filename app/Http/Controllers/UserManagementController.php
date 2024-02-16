@@ -515,7 +515,7 @@ class UserManagementController extends Controller
                 $this->loadDefaultAttendanceSetting($user->business_id);
                 $this->loadDefaultPayrunSetting($user->business_id);
                 $this->loadDefaultPaymentDateSetting($user->business_id);
-            
+
 
 
 
@@ -853,6 +853,18 @@ class UserManagementController extends Controller
                     }
 
                     $default_work_shift->users()->attach($user->id);
+                    $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
+
+                    $work_shift_history =  WorkShiftHistory::where([
+                        "to_date" => NULL,
+                        "work_shift_id" => $default_work_shift->id
+                    ])
+                        ->first();
+                    if (!$work_shift_history) {
+                        throw new Exception("Now work shift history found");
+                    }
+
+                    $work_shift_history->users()->attach($user->id, ['from_date' => $user->joining_date, 'to_date' => NULL]);
                 }
                 // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
@@ -5724,10 +5736,10 @@ class UserManagementController extends Controller
                     // $start_date = $work_shift->from_date->gt($start_of_year) ? $work_shift->from_date : $start_of_year;
 
                     // Determine the end date for the loop
-                    $userShift = $work_shift->users->first(function ($user) use ($user_id) {
+                    $user = $work_shift->users->first(function ($user) use ($user_id) {
                         return $user->id == $user_id;
                     });
-                    $user_to_date = $userShift->pivot->to_date ?? null;
+                    $user_to_date = $user->pivot->to_date ?? null;
 
                     if ($user_to_date) {
                         $end_date = $user_to_date;
@@ -5737,8 +5749,9 @@ class UserManagementController extends Controller
                         $end_date = $end_date_of_year;
                     }
 
-                    $user_from_date = $userShift->pivot->from_date;
-                    $start_date = $user_from_date->gt($start_of_year) ? $user_from_date : $start_of_year;
+                    $user_from_date = $user->pivot->from_date;
+                    Log::alert(json_encode($user->pivot));
+                    $start_date = Carbon::parse($user_from_date)->gt($start_of_year) ? $user_from_date : $start_of_year;
 
 
                     // Find the next occurrence of the specified day of the week

@@ -996,6 +996,48 @@
                         "description": "order_by",
                         "required": true,
                         "example": "ASC"
+                    },
+                    {
+                        "name": "attendance_date",
+                        "in": "query",
+                        "description": "Attendance Date",
+                        "required": true,
+                        "example": "2024-02-13"
+                    },
+                    {
+                        "name": "attendance_start_time",
+                        "in": "query",
+                        "description": "Attendance Start Time",
+                        "required": true,
+                        "example": "08:00:00"
+                    },
+                    {
+                        "name": "attendance_end_time",
+                        "in": "query",
+                        "description": "Attendance End Time",
+                        "required": true,
+                        "example": "17:00:00"
+                    },
+                    {
+                        "name": "attendance_break",
+                        "in": "query",
+                        "description": "Attendance Break Time",
+                        "required": true,
+                        "example": "01:00:00"
+                    },
+                    {
+                        "name": "attendance_schedule",
+                        "in": "query",
+                        "description": "Attendance Schedule",
+                        "required": true,
+                        "example": "Regular"
+                    },
+                    {
+                        "name": "attendance_overtime",
+                        "in": "query",
+                        "description": "Attendance Overtime",
+                        "required": true,
+                        "example": "02:00:00"
                     }
                 ],
                 "responses": {
@@ -1805,6 +1847,109 @@
                         "example": "1,2,3"
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/attendances/bypass/multiple": {
+            "post": {
+                "tags": [
+                    "attendances"
+                ],
+                "summary": "This method is to store attendance",
+                "description": "This method is to store attendance",
+                "operationId": "createMultipleBypassAttendance",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user_ids": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "attendance_details": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "note": "note",
+                                                "in_geolocation": "in_geolocation",
+                                                "out_geolocation": "out_geolocation",
+                                                "in_time": "08:44:00",
+                                                "out_time": "12:44:00",
+                                                "in_date": "2023-11-18",
+                                                "does_break_taken": 1,
+                                                "work_location_id": 1,
+                                                "project_id": 1
+                                            }
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -6351,9 +6496,9 @@
                         "example": "6"
                     },
                     {
-                        "name": "project_id",
+                        "name": "task_id",
                         "in": "query",
-                        "description": "project_id",
+                        "description": "task_id",
                         "required": true,
                         "example": "1"
                     },
@@ -6467,45 +6612,75 @@
                                         "format": "number",
                                         "example": "1"
                                     },
-                                    "name": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "Comment X"
-                                    },
                                     "description": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "A brief overview of Comment X's objectives and scope."
                                     },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2023-01-01"
-                                    },
-                                    "due_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2023-06-30"
-                                    },
-                                    "end_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2023-12-31"
+                                    "attachments": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
                                     },
                                     "status": {
                                         "type": "string",
                                         "format": "string",
-                                        "example": "progress"
+                                        "enum": [
+                                            "open",
+                                            "closed"
+                                        ],
+                                        "example": "open"
                                     },
-                                    "project_id": {
-                                        "type": "integer",
-                                        "format": "integer",
-                                        "example": "1"
+                                    "priority": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "enum": [
+                                            "low",
+                                            "medium",
+                                            "high"
+                                        ],
+                                        "example": "low"
                                     },
-                                    "parent_comment_id": {
+                                    "visibility": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "enum": [
+                                            "public",
+                                            "private"
+                                        ],
+                                        "example": "public"
+                                    },
+                                    "tags": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tag1,tag2,tag3"
+                                    },
+                                    "resolution": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Resolution details"
+                                    },
+                                    "feedback": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "hidden_note": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Hidden note details"
+                                    },
+                                    "related_task_id": {
                                         "type": "integer",
-                                        "format": "integer",
-                                        "example": "2"
+                                        "format": "int64",
+                                        "example": 123
+                                    },
+                                    "task_id": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 456
                                     }
                                 },
                                 "type": "object"
@@ -6582,54 +6757,75 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "Comment X"
-                                    },
                                     "description": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "A brief overview of Comment X's objectives and scope."
                                     },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2023-01-01"
-                                    },
-                                    "due_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2023-06-30"
-                                    },
-                                    "end_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2023-12-31"
+                                    "attachments": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
                                     },
                                     "status": {
                                         "type": "string",
                                         "format": "string",
-                                        "example": "progress"
+                                        "enum": [
+                                            "open",
+                                            "closed"
+                                        ],
+                                        "example": "open"
                                     },
-                                    "project_id": {
-                                        "type": "integer",
-                                        "format": "integer",
-                                        "example": "1"
-                                    },
-                                    "parent_comment_id": {
-                                        "type": "integer",
-                                        "format": "integer",
-                                        "example": "2"
-                                    },
-                                    "assignees": {
+                                    "priority": {
                                         "type": "string",
-                                        "format": "array",
-                                        "example": [
-                                            1,
-                                            2,
-                                            3
-                                        ]
+                                        "format": "string",
+                                        "enum": [
+                                            "low",
+                                            "medium",
+                                            "high"
+                                        ],
+                                        "example": "low"
+                                    },
+                                    "visibility": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "enum": [
+                                            "public",
+                                            "private"
+                                        ],
+                                        "example": "public"
+                                    },
+                                    "tags": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tag1,tag2,tag3"
+                                    },
+                                    "resolution": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Resolution details"
+                                    },
+                                    "feedback": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "hidden_note": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Hidden note details"
+                                    },
+                                    "related_task_id": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 123
+                                    },
+                                    "task_id": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 456
                                     }
                                 },
                                 "type": "object"
@@ -13658,6 +13854,34 @@
                         "description": "order_by",
                         "required": true,
                         "example": "ASC"
+                    },
+                    {
+                        "name": "leave_date_time",
+                        "in": "query",
+                        "description": "Leave Date and Time",
+                        "required": true,
+                        "example": "2024-02-14 08:00:00"
+                    },
+                    {
+                        "name": "leave_type",
+                        "in": "query",
+                        "description": "Leave Type",
+                        "required": true,
+                        "example": "Sick Leave"
+                    },
+                    {
+                        "name": "leave_duration",
+                        "in": "query",
+                        "description": "Leave Duration",
+                        "required": true,
+                        "example": "8"
+                    },
+                    {
+                        "name": "total_leave_hours",
+                        "in": "query",
+                        "description": "Total Leave Hours",
+                        "required": true,
+                        "example": "8"
                     }
                 ],
                 "responses": {
@@ -21539,6 +21763,203 @@
                         "example": "1,2,3"
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/setting-payment-dates": {
+            "get": {
+                "tags": [
+                    "settings.setting_payment_date"
+                ],
+                "summary": "This method is to get setting payment date  ",
+                "description": "This method is to get setting payment date ",
+                "operationId": "getSettingPaymentDate",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "settings.setting_payment_date"
+                ],
+                "summary": "This method is to store setting payment date",
+                "description": "This method is to store setting payment date",
+                "operationId": "createSettingPaymentDate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "payment_type": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "day_of_week": {
+                                        "type": "integer",
+                                        "format": "string"
+                                    },
+                                    "day_of_month": {
+                                        "type": "integer",
+                                        "format": "string"
+                                    },
+                                    "custom_frequency_interval": {
+                                        "type": "integer",
+                                        "format": "string"
+                                    },
+                                    "custom_frequency_unit": {
+                                        "type": "string",
+                                        "format": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful operation",

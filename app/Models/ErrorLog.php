@@ -30,12 +30,5 @@ class ErrorLog extends Model
         return $this->hasOne(User::class,'id', 'user_id');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+   
 }

@@ -35,36 +35,5 @@ class EmployeePassportDetailHistory extends Model
         return $this->hasOne(User::class,'id', 'user_id');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-
-
-
-
-
-
-    public function getPassportIssueDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getPassportExpiryDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-
-
-    public function getFromDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getToDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+  
 }

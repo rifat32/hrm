@@ -17,6 +17,11 @@ class EmployeeUserWorkShiftHistory extends Model
         "to_date"
 
     ];
+    protected $dates = [
+        'from_date',
+        'to_date',
+        // Add other date attributes here if needed
+    ];
 
     public function work_shift_history(){
         return $this->hasOne(WorkShiftHistory::class,'id', 'work_shift_id');
@@ -25,12 +30,5 @@ class EmployeeUserWorkShiftHistory extends Model
         return $this->hasOne(User::class,  'id', 'user_id');
     }
 
-    // public function getCreatedAtAttribute($value)
-    // {
-    //     return (new Carbon($value))->format('d-m-Y');
-    // }
-    // public function getUpdatedAtAttribute($value)
-    // {
-    //     return (new Carbon($value))->format('d-m-Y');
-    // }
+
 }
