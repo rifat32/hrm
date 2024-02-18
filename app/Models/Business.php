@@ -12,6 +12,7 @@ class Business extends Model
     use HasFactory,  SoftDeletes;
     protected $fillable = [
         "name",
+        "start_date",
         "about",
         "web_page",
         "phone",
@@ -60,7 +61,7 @@ class Business extends Model
     }
 
 
-   
+
 
 
 

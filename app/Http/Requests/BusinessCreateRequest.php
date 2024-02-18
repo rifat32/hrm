@@ -33,7 +33,7 @@ class BusinessCreateRequest extends BaseFormRequest
 
             'business.owner_id' => 'required|numeric',
 
-
+            'business.start_date' => 'required|date',
 
             'business.name' => 'required|string|max:255',
             'business.about' => 'nullable|string',

@@ -180,7 +180,8 @@ class WorkShiftController extends Controller
 
                 $employee_work_shift_history_data = $work_shift->toArray();
                 $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-                $employee_work_shift_history_data["from_date"] = $request_data["start_date"]?$request_data["start_date"]:now();
+                // $employee_work_shift_history_data["from_date"] = $request_data["start_date"]?$request_data["start_date"]:now();
+                $employee_work_shift_history_data["from_date"] = auth()->user()->business->start_date;
                 $employee_work_shift_history_data["to_date"] = NULL;
 
                  $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
@@ -602,8 +603,9 @@ if(!$fields_changed){
                     "message" => "no department found"
                 ], 404);
             }
+            $is_active = !$work_shift->is_active;
 
-if(!$work_shift->is_active) {
+if(!$is_active) {
 // Assuming you have a 'Details' model for your 'details' table
 // Transform the retrieved data into the required structure using the collection
 $details = $work_shift->details->map(function ($detail) {
@@ -633,7 +635,7 @@ if(!$check_work_shift_details["ok"]) {
 
 
 
-           $is_active = !$work_shift->is_active;
+
              $work_shift->update([
                  'is_active' => $is_active
              ]);
@@ -643,16 +645,25 @@ if(!$check_work_shift_details["ok"]) {
 
              if($is_active) {
 
-                WorkShiftHistory::where([
-                    "to_date" => NULL
-                ])
-                ->where("work_shift_id",$work_shift->id)
-                // ->whereHas('users',function($query) use($work_shift)  {
-                //     $query->whereIn("users.id",$work_shift->users()->pluck("users.id"));
-                // })
-                ->update([
-                    "to_date" => now()
-                ]);
+                $last_inactive_date = WorkShiftHistory::
+                    where("work_shift_id",$work_shift->id)
+                    ->latest()->first();
+
+
+                    $employee_work_shift_history_data = $work_shift->toArray();
+
+                    $employee_work_shift_history_data["is_active"] = $is_active;
+
+                    $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+                    $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
+                    $employee_work_shift_history_data["to_date"] = NULL;
+                    $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+                    $employee_work_shift_history->details()->createMany($request_data['details']);
+                    $user_ids = $work_shift->users()->pluck('users.id')->toArray();
+                    $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
+                    return [$user_id => ['from_date' => now(), 'to_date' => null]];
+                    });
+                    $employee_work_shift_history->users()->sync($pivot_data);
 
                 // $employee_work_shift_history_data = $work_shift->toArray();
                 // $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
@@ -671,25 +682,18 @@ if(!$check_work_shift_details["ok"]) {
                 // $employee_work_shift_history->users()->sync($pivot_data);
              } else {
 
-                $last_inactive_date = WorkShiftHistory::
-                where("work_shift_id",$work_shift->id)
-                ->latest()->first();
+                WorkShiftHistory::where([
+                    "to_date" => NULL
+                ])
+                ->where("work_shift_id",$work_shift->id)
+                // ->whereHas('users',function($query) use($work_shift)  {
+                //     $query->whereIn("users.id",$work_shift->users()->pluck("users.id"));
+                // })
+                ->update([
+                    "to_date" => now()
+                ]);
 
 
-                $employee_work_shift_history_data = $work_shift->toArray();
-
-                $employee_work_shift_history_data["is_active"] = $is_active;
-
-                $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-                $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
-                $employee_work_shift_history_data["to_date"] = NULL;
-                $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                $employee_work_shift_history->details()->createMany($request_data['details']);
-                $user_ids = $work_shift->users()->pluck('users.id')->toArray();
-                $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
-                return [$user_id => ['from_date' => now(), 'to_date' => null]];
-                });
-                $employee_work_shift_history->users()->sync($pivot_data);
              }
 
 

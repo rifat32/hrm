@@ -246,6 +246,7 @@ class BusinessController extends Controller
      *
      *  @OA\Property(property="business", type="string", format="array",example={
      *  "owner_id":"1",
+     * * "start_date":"start_date",
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
@@ -313,19 +314,16 @@ class BusinessController extends Controller
      *     )
      */
     public function createBusiness(BusinessCreateRequest $request) {
-// this is business create by super admin
+
         try{
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
      return  DB::transaction(function ()use (&$request) {
-
         if(!$request->user()->hasPermissionTo('business_create')){
             return response()->json([
                "message" => "You can not perform this action"
             ],401);
        }
         $request_data = $request->validated();
-
-
 
 $user = User::where([
     "id" =>  $request_data['business']['owner_id']
@@ -557,6 +555,7 @@ if(!$user->hasRole('business_owner')) {
      *
      *  @OA\Property(property="business", type="string", format="array",example={
      * "name":"ABCD businesses",
+     * "start_date":"start_date",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
      *  "phone":"01771034383",

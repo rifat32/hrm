@@ -9,6 +9,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
 use App\Models\BusinessTime;
 use App\Models\WorkShift;
+use App\Models\WorkShiftHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -122,6 +123,14 @@ class BusinessTimesController extends Controller
                     WorkShift::whereIn("id",$conflicted_work_shift_ids)->update([
                         "is_active" => 0
                     ]);
+                    WorkShiftHistory::where([
+                        "to_date" => NULL
+                    ])
+                    ->whereIn("work_shift_id",$conflicted_work_shift_ids)
+
+                    ->update([
+                        "to_date" => now()
+                    ]);
                 }
 
 
@@ -162,6 +171,14 @@ class BusinessTimesController extends Controller
 
             $default_work_shift = WorkShift::create($default_work_shift_data);
             $default_work_shift->details()->createMany($default_work_shift_data['details']);
+
+            $employee_work_shift_history_data = $default_work_shift->toArray();
+            $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
+            $employee_work_shift_history_data["from_date"] = $business->start_date;
+            $employee_work_shift_history_data["to_date"] = NULL;
+             $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+             $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
+
 
 
                 return response(["message" => "data inserted"], 201);
