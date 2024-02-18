@@ -26,6 +26,7 @@ use App\Models\Role;
 use App\Models\SettingLeave;
 use App\Models\User;
 use App\Models\WorkShift;
+use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -204,6 +205,7 @@ class LeaveController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
+
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('leave_create')) {
                     return response()->json([
@@ -223,14 +225,52 @@ class LeaveController extends Controller
 
 
 
-                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["user_id"]);
-                })->first();
+                // $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                //     $query->where('users.id', $request_data["user_id"]);
+                // })->first();
+
+                // if (!$work_shift) {
+                //     $this->storeError(
+                //         "Please define workshift first"
+                //         ,
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //        );
+                //     return response()->json(["message" => "Please define workshift first"], 400);
+                // }
+                // if (!$work_shift->is_active) {
+                //     $this->storeError(
+                //         ("Please activate the work shift named '". $work_shift->name . "'")
+                //         ,
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //        );
+                //     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+                // }
+                if($request_data["leave_duration"] == "multiple_day") {
+                    $work_shift_start_date = $request_data["start_date"];
+                  } else {
+                     $work_shift_start_date = $request_data["date"];
+                  }
+                $work_shift_history =  WorkShiftHistory::
+                    where("from_date", "<", $work_shift_start_date)
+                   ->where(function($query) use($work_shift_start_date){
+                           $query->where("to_date",">=", $work_shift_start_date)
+                           ->orWhereNull("to_date");
+                   })
+                   ->whereHas("users", function($query) use($work_shift_start_date,$request_data) {
+                       $query->where("users.id", $request_data["user_id"])
+                       ->where("employee_user_work_shift_histories.from_date", "<", $work_shift_start_date)
+                       ->where(function($query) use($work_shift_start_date){
+                               $query->where("employee_user_work_shift_histories.to_date",">=", $work_shift_start_date)
+                               ->orWhereNull("employee_user_work_shift_histories.to_date");
+                       });
+                   })->first();
 
 
-
-
-                if (!$work_shift) {
+                   if (!$work_shift_history) {
                     $this->storeError(
                         "Please define workshift first"
                         ,
@@ -240,34 +280,7 @@ class LeaveController extends Controller
                        );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
-                if (!$work_shift->is_active) {
-                    $this->storeError(
-                        ("Please activate the work shift named '". $work_shift->name . "'")
-                        ,
-                        400,
-                        "front end error",
-                        "front end error"
-                       );
-                    return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
-                }
-                // if (!$wors_shift) {
-                //     $department = Department::whereHas('users', function ($query) use ($request_data) {
-                //         $query->where('id', $request_data["user_id"]);
-                //     })->first();
 
-                //     if (!$department) {
-                //         return response()->json(["message" => "Hey please specify department for the employee first!"], 400);
-                //     }
-
-                //     $all_department_ids = $department->all_parent_ids;
-
-                //     $work_shift = WorkShift::whereHas('departments', function ($query) use ($all_department_ids) {
-                //         $query->whereIn('id', $all_department_ids);
-                //     })->orderByRaw('FIELD(department_id, ' . implode(',', $all_department_ids) . ')')->first();
-                //     if (!$work_shift) {
-                //         return response()->json(["message" => "Please define workshift first"], 400);
-                //     }
-                // }
                 $leave_record_data_list = [];
                 $all_parent_department_ids = [];
 $assigned_departments = Department::whereHas("users", function($query) use ($request_data) {
@@ -287,7 +300,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $request_data["end_date"] = $request_data["date"];
 
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $dayNumber
                     ])
                         ->first();
@@ -364,7 +377,7 @@ foreach ($assigned_departments as $assigned_department) {
                     foreach ($leave_dates as $leave_date) {
                         $dateString = $leave_date;
                         $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                        $work_shift_details =  $work_shift->details()->where([
+                        $work_shift_details =  $work_shift_history->details()->where([
                             "day" => $dayNumber
                         ])
                             ->first();
@@ -434,7 +447,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $request_data["start_date"] = $request_data["date"];
                     $request_data["end_date"] = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $dayNumber
                     ])
                         ->first();
@@ -530,7 +543,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $request_data["end_date"] = $request_data["date"];
 
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $dayNumber
                     ])
                         ->first();
@@ -544,7 +557,9 @@ foreach ($assigned_departments as $assigned_department) {
                            );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
-                    if (!$request_data["start_time"] < $work_shift_details->start_at) {
+                    $start_time = Carbon::parse($request_data["start_time"]);
+                    $work_shift_start = Carbon::parse($work_shift_details->start_at);
+                    if ($start_time->lessThan($work_shift_start)) {
                         $this->storeError(
                             ("The employee does not start working at " . $request_data["start_time"])
                             ,
@@ -552,9 +567,11 @@ foreach ($assigned_departments as $assigned_department) {
                             "front end error",
                             "front end error"
                            );
-                        return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"])], 400);
+                        return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"] . ". He starts at " . $work_shift_details->start_at)], 400);
                     }
-                    if (!$request_data["end_time"] > $work_shift_details->end_at) {
+                    $end_time = Carbon::parse($request_data["end_time"]);
+                    $work_shift_end = Carbon::parse($work_shift_details->end_at);
+                    if ($end_time->greaterThan($work_shift_end)) {
                         $this->storeError(
                             ("The employee does not close working at " . $request_data["end_time"])
                             ,
@@ -1087,17 +1104,28 @@ foreach ($assigned_departments as $assigned_department) {
                 $request_data = $request->validated();
 
 
+                if($request_data["leave_duration"] == "multiple_day") {
+                  $work_shift_start_date = $request_data["start_date"];
+                } else {
+                   $work_shift_start_date = $request_data["date"];
+                }
 
+                $work_shift_history =  WorkShiftHistory::
+                    where("from_date", "<", $work_shift_start_date)
+                   ->where(function($query) use($work_shift_start_date){
+                           $query->where("to_date",">=", $work_shift_start_date)
+                           ->orWhereNull("to_date");
+                   })
+                   ->whereHas("users", function($query) use($work_shift_start_date,$request_data) {
+                       $query->where("users.id", $request_data["user_id"])
+                       ->where("employee_user_work_shift_histories.from_date", "<", $work_shift_start_date)
+                       ->where(function($query) use($work_shift_start_date){
+                               $query->where("employee_user_work_shift_histories.to_date",">=", $work_shift_start_date)
+                               ->orWhereNull("employee_user_work_shift_histories.to_date");
+                       });
+                   })->first();
 
-
-
-
-
-                $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
-                    $query->where('users.id', $request_data["user_id"]);
-                })->first();
-
-                if (!$work_shift) {
+                   if (!$work_shift_history) {
                     $this->storeError(
                         "Please define workshift first"
                         ,
@@ -1107,16 +1135,32 @@ foreach ($assigned_departments as $assigned_department) {
                        );
                     return response()->json(["message" => "Please define workshift first"], 400);
                 }
-                if (!$work_shift->is_active) {
-                    $this->storeError(
-                        ("Please activate the work shift named '". $work_shift->name . "'")
-                        ,
-                        400,
-                        "front end error",
-                        "front end error"
-                       );
-                    return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
-                }
+
+
+                // $work_shift =   WorkShift::whereHas('users', function ($query) use ($request_data) {
+                //     $query->where('users.id', $request_data["user_id"]);
+                // })->first();
+
+                // if (!$work_shift) {
+                //     $this->storeError(
+                //         "Please define workshift first"
+                //         ,
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //        );
+                //     return response()->json(["message" => "Please define workshift first"], 400);
+                // }
+                // if (!$work_shift->is_active) {
+                //     $this->storeError(
+                //         ("Please activate the work shift named '". $work_shift->name . "'")
+                //         ,
+                //         400,
+                //         "front end error",
+                //         "front end error"
+                //        );
+                //     return response()->json(["message" => ("Please activate the work shift named '". $work_shift->name . "'")], 400);
+                // }
                 // if (!$wors_shift) {
                 //     $department = Department::whereHas('users', function ($query) use ($request_data) {
                 //         $query->where('id', $request_data["user_id"]);
@@ -1152,7 +1196,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $request_data["start_date"] = $request_data["date"];
                     $request_data["end_date"] = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $dayNumber
                     ])
                         ->first();
@@ -1226,7 +1270,7 @@ foreach ($assigned_departments as $assigned_department) {
                     foreach ($leave_dates as $leave_date) {
                         $dateString = $leave_date;
                         $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                        $work_shift_details =  $work_shift->details()->where([
+                        $work_shift_details =  $work_shift_history->details()->where([
                             "day" => $dayNumber
                         ])
                             ->first();
@@ -1296,7 +1340,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $request_data["end_date"] = $request_data["date"];
 
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $dayNumber
                     ])
                         ->first();
@@ -1392,7 +1436,7 @@ foreach ($assigned_departments as $assigned_department) {
                     $request_data["start_date"] = $request_data["date"];
                     $request_data["end_date"] = $request_data["date"];
                     $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift->details()->where([
+                    $work_shift_details =  $work_shift_history->details()->where([
                         "day" => $dayNumber
                     ])
                         ->first();
@@ -1406,7 +1450,9 @@ foreach ($assigned_departments as $assigned_department) {
                            );
                         return response()->json(["message" => "No work shift details found"], 400);
                     }
-                    if (!$request_data["start_time"] < $work_shift_details->start_at) {
+                    $start_time = Carbon::parse($request_data["start_time"]);
+                    $work_shift_start = Carbon::parse($work_shift_details->start_at);
+                    if ($start_time->lessThan($work_shift_start)) {
                         $this->storeError(
                             ("The employee does not start working at " . $request_data["start_time"])
                             ,
@@ -1414,9 +1460,11 @@ foreach ($assigned_departments as $assigned_department) {
                             "front end error",
                             "front end error"
                            );
-                        return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"])], 400);
+                        return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"] . ". He starts at " . $work_shift_details->start_at)], 400);
                     }
-                    if (!$request_data["end_time"] > $work_shift_details->end_at) {
+                    $end_time = Carbon::parse($request_data["end_time"]);
+                    $work_shift_end = Carbon::parse($work_shift_details->end_at);
+                    if ($end_time->greaterThan($work_shift_end)) {
                         $this->storeError(
                             ("The employee does not close working at " . $request_data["end_time"])
                             ,
@@ -1426,6 +1474,7 @@ foreach ($assigned_departments as $assigned_department) {
                            );
                         return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
                     }
+
 
                     $holiday =   Holiday::where([
                         "business_id" => $request->user()->business_id

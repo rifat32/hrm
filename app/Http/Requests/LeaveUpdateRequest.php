@@ -132,9 +132,9 @@ class LeaveUpdateRequest extends BaseFormRequest
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
 
-                    ->whereHas("employee", function ($query){
-                            $query->whereNotIn("users.id",[auth()->user()->id]);
-                        })
+
+                ->whereNotIn("users.id",[auth()->user()->id])
+
 
                      ->first();
 

@@ -112,22 +112,26 @@ trait PayrunUtil
     {
 
 
-        $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
-            $query->where('users.id', $employee->id);
-        })->first();
+        // $work_shift =   WorkShift::whereHas('users', function ($query) use ($employee) {
 
-        if (!$work_shift) {
-            return [
-                "message" => "no work shift found for this employee"
-            ];
-        }
 
-        if (!$work_shift->is_active) {
-            return [
-                "message" => "work shift is not active for this employee"
-            ];
-        }
-        $work_shift_details = $work_shift->details()->get()->keyBy('day');
+        //     $query->where('users.id', $employee->id);
+
+
+        // })->first();
+
+        // if (!$work_shift) {
+        //     return [
+        //         "message" => "no work shift found for this employee"
+        //     ];
+        // }
+
+        // if (!$work_shift->is_active) {
+        //     return [
+        //         "message" => "work shift is not active for this employee"
+        //     ];
+        // }
+        // $work_shift_details = $work_shift->details()->get()->keyBy('day');
 
 
         $all_parent_department_ids = [];

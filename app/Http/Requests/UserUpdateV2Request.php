@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateV2Request extends BaseFormRequest
@@ -492,7 +493,20 @@ class UserUpdateV2Request extends BaseFormRequest
                 },
             ],
 
-            'joining_date' => "required|date",
+            'joining_date' => [
+                "required",
+                'date',
+                function ($attribute, $value, $fail) {
+
+                   $joining_date = Carbon::parse($value);
+                   $start_date = Carbon::parse(auth()->user()->business->start_date);
+
+                   if ($joining_date->lessThan($start_date)) {
+                       $fail("The $attribute must not be before the start date of the business.");
+                   }
+
+                },
+            ],
             'salary_per_annum' => "required|numeric",
             'weekly_contractual_hours' => 'required|numeric',
             "minimum_working_days_per_week" => 'required|numeric|max:7',

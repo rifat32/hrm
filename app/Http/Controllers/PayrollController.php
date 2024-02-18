@@ -476,12 +476,12 @@ class PayrollController extends Controller
                  $all_manager_department_ids[] = $manager_department->id;
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
              };
-             if(!$request->payrun_id) {
-                $error = [ "message" => "The given data was invalid.",
-                "errors" => ["payrun_id"=>["The payrun_id field is required."]]
-                ];
-                    throw new Exception(json_encode($error),422);
-             }
+            //  if(!$request->payrun_id) {
+            //     $error = [ "message" => "The given data was invalid.",
+            //     "errors" => ["payrun_id"=>["The payrun_id field is required."]]
+            //     ];
+            //         throw new Exception(json_encode($error),422);
+            //  }
 
 
 
@@ -489,41 +489,50 @@ class PayrollController extends Controller
 
 
 
+                 if(!empty($request->payrun_id)) {
+                    $payrun = Payrun::where([
 
-             $payrun = Payrun::where([
-                 "id" => $request->payrun_id,
-                 "business_id" => auth()->user()->business_id
-             ])
-
-             ->where(function($query) use($all_manager_department_ids) {
-                 $query->whereHas("departments", function($query) use($all_manager_department_ids) {
-                     $query->whereIn("departments.id",$all_manager_department_ids);
-                  })
-                  ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
-                     $query->whereIn("departments.id",$all_manager_department_ids);
-                  });
-             })
-             ->first();
-
-             if(!$payrun) {
-                 $error = [ "message" => "The given data was invalid.",
-                 "errors" => ["payrun_id"=>["The payrun_id field is invalid."]]
-                 ];
-                     throw new Exception(json_encode($error),422);
-              }
+                        "business_id" => auth()->user()->business_id
+                    ])
 
 
+                    ->where(function($query) use($all_manager_department_ids) {
+                        $query->whereHas("departments", function($query) use($all_manager_department_ids) {
+                            $query->whereIn("departments.id",$all_manager_department_ids);
+                         })
+                         ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
+                            $query->whereIn("departments.id",$all_manager_department_ids);
+                         });
+                    })
+                    ->first();
 
-            $payrolls = Payroll::where([
-                "payrun_id" => $request->payrun_id
-            ])
+                    if(!$payrun) {
+                        $error = [ "message" => "The given data was invalid.",
+                        "errors" => ["payrun_id"=>["The payrun_id field is invalid."]]
+                        ];
+                            throw new Exception(json_encode($error),422);
+                     }
+
+                }
+
+
+
+            $payrolls = Payroll::
+            with("user","payrun")
+            ->when(!empty($request->payrun_id), function($query) use($request) {
+                $query->where([
+                    "payrun_id" => $request->payrun_id
+                ]);
+            })
+
             ->when(!empty($request->user_ids), function($query) use($request) {
-                $query->orWhereHas("user", function($query) use($request) {
-                    $query->whereIn("users..id",$request->request);
+                $user_ids = explode(',', $request->user_ids);
+                $query->orWhereHas("user", function($query) use($user_ids) {
+                    $query->whereIn("users..id",$user_ids);
                  });
             })
             ->where(function($query) use($all_manager_department_ids) {
-                 $query->orWhereHas("user.departments", function($query) use($all_manager_department_ids) {
+                 $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
             })

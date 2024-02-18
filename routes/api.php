@@ -855,7 +855,7 @@ Route::delete('/v1.0/payruns/{ids}', [PayrunController::class, "deletePayrunsByI
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Route::post('/v1.0/payrolls', [PayrollController::class, "createPayroll"]);
 Route::get('/v1.0/payrolls', [PayrollController::class, "getPayrolls"]);
-Route::get('/v1.0/payroll-list', [PayrollController::class, "getPayrolls"]);
+Route::get('/v1.0/payroll-list', [PayrollController::class, "getPayrollList"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // payruns  management section

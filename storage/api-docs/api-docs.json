@@ -4277,6 +4277,7 @@
                                         "format": "array",
                                         "example": {
                                             "owner_id": "1",
+                                            "start_date": "start_date",
                                             "name": "ABCD businesses",
                                             "about": "Best businesses in Dhaka",
                                             "web_page": "https://www.facebook.com/",
@@ -4579,6 +4580,7 @@
                                         "format": "array",
                                         "example": {
                                             "name": "ABCD businesses",
+                                            "start_date": "start_date",
                                             "about": "Best businesses in Dhaka",
                                             "web_page": "https://www.facebook.com/",
                                             "phone": "01771034383",
@@ -16277,6 +16279,129 @@
                         }
                     }
                 },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payroll-list": {
+            "get": {
+                "tags": [
+                    "administrator.payrolls"
+                ],
+                "summary": "This method is to get payrolls  ",
+                "description": "This method is to get payrolls ",
+                "operationId": "getPayrollList",
+                "parameters": [
+                    {
+                        "name": "payrun_id",
+                        "in": "query",
+                        "description": "payrun_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "user_ids",
+                        "in": "query",
+                        "description": "user_ids",
+                        "required": true,
+                        "example": "1,2,3"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",

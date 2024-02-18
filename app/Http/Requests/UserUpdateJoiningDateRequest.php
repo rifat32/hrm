@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Department;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateJoiningDateRequest extends BaseFormRequest
@@ -64,7 +65,22 @@ class UserUpdateJoiningDateRequest extends BaseFormRequest
 
 
 
-        'joining_date' => "required|date",
+            'joining_date' => [
+                "required",
+                'date',
+                function ($attribute, $value, $fail) {
+
+                   $joining_date = Carbon::parse($value);
+                   $start_date = Carbon::parse(auth()->user()->business->start_date);
+
+                   if ($joining_date->lessThan($start_date)) {
+                       $fail("The $attribute must not be before the start date of the business.");
+                   }
+
+                },
+            ],
+
+            
         ];
     }
 }
