@@ -263,7 +263,7 @@ class AuthController extends Controller
                 return response(['message' => 'Invalid Credentials'], 401);
             }
 
-            $user = auth()->user();
+
 
             if(!$user->is_active) {
 
@@ -311,6 +311,15 @@ $user_created_date = strtotime($user->created_at);
 $datediff = $now - $user_created_date;
 
             if(!$user->email_verified_at && (($datediff / (60 * 60 * 24))>1)){
+
+                $email_token = Str::random(30);
+                $user->email_verify_token = $email_token;
+                $user->email_verify_token_expires = Carbon::now()->subDays(-1);
+                if(env("SEND_EMAIL") == true) {
+                    Mail::to($user->email)->send(new VerifyMail($user));
+                }
+                $user->save();
+
                 $this->storeError(
                     'please activate your email first'
                     ,

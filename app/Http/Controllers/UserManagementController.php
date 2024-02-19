@@ -491,6 +491,7 @@ class UserManagementController extends Controller
                 $user =  User::create($request_data);
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
+                $user->email_verified_at = now();
                 $user->save();
 
 
