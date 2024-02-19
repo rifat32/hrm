@@ -27,7 +27,9 @@ class Announcement extends Model
         return $this->belongsToMany(Department::class, 'department_announcements', 'announcement_id', 'department_id');
     }
 
-   
+    public function users() {
+        return $this->belongsToMany(User::class, 'user_announcements', 'announcement_id', 'user_id')->withPivot('status');
+    }
 
 
 }

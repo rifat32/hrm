@@ -311,7 +311,6 @@ $user_created_date = strtotime($user->created_at);
 $datediff = $now - $user_created_date;
 
             if(!$user->email_verified_at && (($datediff / (60 * 60 * 24))>1)){
-
                 $email_token = Str::random(30);
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);

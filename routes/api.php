@@ -576,6 +576,9 @@ Route::get('/v1.0/announcements', [AnnouncementController::class, "getAnnounceme
 Route::get('/v1.0/announcements/{id}', [AnnouncementController::class, "getAnnouncementById"]);
 Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "deleteAnnouncementsByIds"]);
 
+Route::get('/v1.0/clients/announcements', [AnnouncementController::class, "getAnnouncementsClient"]);
+Route::put('/v1.0/clients/announcements/change-status', [AnnouncementController::class, "updateAnnouncementStatus"]);
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end announcements management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
