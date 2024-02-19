@@ -144,10 +144,21 @@ trait PayrunUtil
         $salary_per_annum = $employee->salary_per_annum; // in euros
         $weekly_contractual_hours = $employee->weekly_contractual_hours;
         $weeks_per_year = 52;
-        $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
+        if(!$weekly_contractual_hours) {
+            $hourly_salary = 0;
+        }else {
+            $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
+        }
+
         $overtime_salary = $employee->overtime_rate ? $employee->overtime_rate : $hourly_salary;
 
-        $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+        if(!$weekly_contractual_hours || !$employee->minimum_working_days_per_week) {
+            $holiday_hours = 0;
+        }else {
+            $holiday_hours = $weekly_contractual_hours / $employee->minimum_working_days_per_week;
+        }
+
+
 
 
         $attendance_arrears = Attendance::whereDoesntHave("payroll_attendance")

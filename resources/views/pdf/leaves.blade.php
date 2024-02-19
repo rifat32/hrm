@@ -157,8 +157,8 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->leaves))
-                @foreach ($user->leaves as $index => $leave)
+            @if (count($leaves))
+                @foreach ($leaves as $index => $leave)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
                         @if (!empty($request->leave_date_time))
