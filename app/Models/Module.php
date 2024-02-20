@@ -22,12 +22,12 @@ class Module extends Model
     public function business_tier(){
         return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
     }
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 }

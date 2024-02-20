@@ -90,13 +90,13 @@ class JobPlatform extends Model
         return $this->belongsToMany(JobListing::class, 'job_listing_job_platforms', 'job_platform_id', 'job_listing_id');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 
 }

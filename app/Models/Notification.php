@@ -50,12 +50,12 @@ class Notification extends Model
         return $this->belongsTo(Business::class,'business_id', 'id')->withTrashed();
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 }

@@ -12,12 +12,12 @@ class SettingLeaveSpecialUser extends Model
     protected $fillable = [
         'setting_leave_id', 'user_id'
     ];
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 }

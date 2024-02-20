@@ -472,7 +472,17 @@ class AnnouncementController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $announcement =  Announcement::where([
+            $announcement =  Announcement::with([
+                "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "departments" => function ($query) {
+                    $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
+                }
+            ])
+
+->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

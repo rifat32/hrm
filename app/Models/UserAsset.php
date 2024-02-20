@@ -34,22 +34,28 @@ class UserAsset extends Model
     {
         return $this->belongsTo(User::class, 'created_by','id');
     }
-    public function getCreatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
-    public function getUpdatedAtAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
 
 
 
 
-    public function getDateAttribute($value)
-    {
-        return (new Carbon($value))->format('d-m-Y');
-    }
+
+    
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
+
+
+
+
+    // public function getDateAttribute($value)
+    // {
+    //     return (new Carbon($value))->format('d-m-Y');
+    // }
 
 
 
