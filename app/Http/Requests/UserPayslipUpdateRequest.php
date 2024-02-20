@@ -92,7 +92,7 @@ class UserPayslipUpdateRequest extends FormRequest
             "payroll_id" => [
                 'nullable',
                 'numeric',
-                function ($attribute, $value, $fail)  {
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
 
                   $exists =  Payroll::where(
@@ -100,8 +100,8 @@ class UserPayslipUpdateRequest extends FormRequest
                         "payrolls.user_id" => $this->user_id,
 
                     ])
-                    ->whereHas("departments", function($query)  {
-                        $query->whereIn("departments.id");
+                    ->whereHas("user.departments", function($query) use($all_manager_department_ids)  {
+                        $query->whereIn("departments.id",$all_manager_department_ids);
                      })
                      ->first();
 
