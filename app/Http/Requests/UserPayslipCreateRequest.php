@@ -73,7 +73,7 @@ class UserPayslipCreateRequest extends FormRequest
                         "payrolls.user_id" => $this->user_id,
 
                     ])
-                    ->whereHas("departments", function($query)  {
+                    ->whereHas("user.departments", function($query)  {
                         $query->whereIn("departments.id");
                      })
                      ->first();
