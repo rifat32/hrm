@@ -26,6 +26,7 @@ class Attendance extends Model
         "break_type",
         "break_hours",
         "total_paid_hours",
+
         "regular_work_hours",
 
         "work_shift_start_at",
@@ -82,7 +83,7 @@ class Attendance extends Model
     }
 
 
-  
+
 
 
 }

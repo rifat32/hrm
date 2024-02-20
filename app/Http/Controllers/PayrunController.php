@@ -488,7 +488,8 @@ class PayrunController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
 
-            $payruns = Payrun::where(
+            $payruns = Payrun::withCount("payrolls")
+            ->where(
                 [
                     "business_id" => $business_id
                 ]

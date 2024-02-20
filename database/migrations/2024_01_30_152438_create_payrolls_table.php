@@ -49,8 +49,8 @@ class CreatePayrollsTable extends Migration
 
 
 
-
-
+            $table->date('start_date');
+            $table->date('end_date');
 
             $table->boolean("is_active")->default(true);
             $table->unsignedBigInteger("business_id");

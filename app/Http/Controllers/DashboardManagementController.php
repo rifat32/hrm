@@ -695,7 +695,7 @@ class DashboardManagementController extends Controller
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -780,7 +780,7 @@ class DashboardManagementController extends Controller
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -855,7 +855,7 @@ class DashboardManagementController extends Controller
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -931,7 +931,7 @@ class DashboardManagementController extends Controller
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -1910,7 +1910,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $start_date_of_this_month = Carbon::now()->startOfMonth();
             $end_date_of_this_month = Carbon::now()->endOfMonth();
             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
-            $end_date_of_previous_month = Carbon::now()->endOfMonth()->subMonth(1);
+            $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
 
             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
@@ -2475,7 +2475,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -2554,7 +2554,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -2624,7 +2624,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -2674,7 +2674,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -2716,7 +2716,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -2796,7 +2796,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();
@@ -2885,7 +2885,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $startDateOfThisMonth = Carbon::now()->startOfMonth();
         $endDateOfThisMonth = Carbon::now()->endOfMonth();
         $startDateOfPreviousMonth = Carbon::now()->startOfMonth()->subMonth(1);
-        $endDateOfPreviousMonth = Carbon::now()->endOfMonth()->subMonth(1);
+        $endDateOfPreviousMonth = Carbon::now()->startOfMonth()->subDay(1);
 
         $startDateOfThisWeek = Carbon::now()->startOfWeek();
         $endDateOfThisWeek = Carbon::now()->endOfWeek();

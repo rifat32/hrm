@@ -35,7 +35,7 @@ class CreateCandidatesTable extends Migration
 
 
 
-            $table->string("cover_letter")->nullable();
+            $table->text("cover_letter")->nullable();
             $table->date("application_date");
             $table->date("interview_date")->nullable();
             $table->text("feedback");

@@ -33,6 +33,10 @@ class Payroll extends Model
         "overtime_salary",
         "holiday_hours",
 
+
+        "start_date",
+        "end_date",
+
         'status',
         'is_active',
         'business_id',

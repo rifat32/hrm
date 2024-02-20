@@ -827,7 +827,7 @@ class UserManagementController extends Controller
                         throw new Exception("Now work shift history found");
                     }
 
-                    $work_shift_history->users()->attach($user->id, ['from_date' => $user->joining_date, 'to_date' => NULL]);
+                    $work_shift_history->users()->attach($user->id, ['from_date' => auth()->user()->business->start_date, 'to_date' => NULL]);
                 } else {
                     $default_work_shift = WorkShift::where([
                         "business_id" => auth()->user()->business_id,
@@ -865,7 +865,7 @@ class UserManagementController extends Controller
                         throw new Exception("Now work shift history found");
                     }
 
-                    $work_shift_history->users()->attach($user->id, ['from_date' => $user->joining_date, 'to_date' => NULL]);
+                    $work_shift_history->users()->attach($user->id, ['from_date' => auth()->user()->business->start_date, 'to_date' => NULL]);
                 }
                 // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
@@ -1029,6 +1029,7 @@ class UserManagementController extends Controller
                     'first_Name',
                     'middle_Name',
                     'last_Name',
+                    "email",
                     'user_id',
                     'password',
                     'phone',
@@ -1389,6 +1390,7 @@ class UserManagementController extends Controller
                         'first_Name',
                         'last_Name',
                         'middle_Name',
+                        "email",
                         "color_theme_name",
                         'emergency_contact_details',
                         'gender',
@@ -5259,21 +5261,19 @@ class UserManagementController extends Controller
             }
 
             $leave_types =   SettingLeaveType::where(function ($query) use ($request, $created_by) {
-
-
                 $query->where('setting_leave_types.business_id', NULL)
                     ->where('setting_leave_types.is_default', 1)
                     ->where('setting_leave_types.is_active', 1)
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                         $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
                     })
-                    ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
-                        if (intval($request->is_active)) {
-                            return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
+
+
+                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                                 $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
-                            });
-                        }
-                    })
+                            })
+
+
 
 
                     ->orWhere(function ($query) use ($request, $created_by) {
@@ -5443,6 +5443,7 @@ class UserManagementController extends Controller
 
 
             foreach ($assigned_departments as $assigned_department) {
+                array_push($all_parent_department_ids,$assigned_department->id);
                 $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
             }
 
@@ -5598,6 +5599,7 @@ class UserManagementController extends Controller
 
 
             foreach ($assigned_departments as $assigned_department) {
+                array_push($all_parent_department_ids,$assigned_department->id);
                 $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
             }
 
@@ -5949,6 +5951,7 @@ class UserManagementController extends Controller
 
 
             foreach ($assigned_departments as $assigned_department) {
+                array_push($all_parent_department_ids,$assigned_department->id);
                 $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
             }
 

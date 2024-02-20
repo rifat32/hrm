@@ -316,6 +316,7 @@ class PayrollController extends Controller
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
             ])
+            ->whereNotIn("id",[auth()->user()->id])
             ->when(!empty($request->user_ids), function($query) use($request,$all_manager_department_ids) {
                 $user_ids = explode(',', $request->user_ids);
                 $query->whereIn("users.id",$user_ids)

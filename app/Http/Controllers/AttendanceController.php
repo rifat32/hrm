@@ -230,6 +230,7 @@ class AttendanceController extends Controller
 
 
                 foreach ($assigned_departments as $assigned_department) {
+                    array_push($all_parent_department_ids,$assigned_department->id);
                     $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                 }
                 $holiday =   Holiday::where([
@@ -736,6 +737,7 @@ class AttendanceController extends Controller
 
 
                     foreach ($assigned_departments as $assigned_department) {
+                        array_push($all_parent_department_ids,$assigned_department->id);
                         $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                     }
                     $holiday =   Holiday::where([
@@ -1217,6 +1219,7 @@ class AttendanceController extends Controller
 
 
                 foreach ($assigned_departments as $assigned_department) {
+                    array_push($all_parent_department_ids,$assigned_department->id);
                     $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                 }
                 $holiday =   Holiday::where([
@@ -2457,6 +2460,7 @@ class AttendanceController extends Controller
                         $query->where("users.id", $employee->id);
                     })->get();
                     foreach ($assigned_departments as $assigned_department) {
+                        array_push($all_parent_department_ids,$assigned_department->id);
                         $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                     }
                     // $work_shift =  WorkShift::whereHas('users', function ($query) use ($employee) {
@@ -3140,6 +3144,7 @@ return false;
 
 
                     foreach ($assigned_departments as $assigned_department) {
+                        array_push($all_parent_department_ids,$assigned_department->id);
                         $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                     }
                     $holiday =   Holiday::where([

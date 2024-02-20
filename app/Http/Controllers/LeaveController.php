@@ -289,6 +289,7 @@ $assigned_departments = Department::whereHas("users", function($query) use ($req
 
 
 foreach ($assigned_departments as $assigned_department) {
+    array_push($all_parent_department_ids,$assigned_department->id);
     $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
 }
 
@@ -1187,6 +1188,7 @@ foreach ($assigned_departments as $assigned_department) {
 
 
                 foreach ($assigned_departments as $assigned_department) {
+                    array_push($all_parent_department_ids,$assigned_department->id);
                     $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
                 }
 

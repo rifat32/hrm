@@ -26,7 +26,10 @@ class Holiday extends Model
         return $this->belongsTo(User::class, "created_by","id");
     }
 
-
+    public function payroll_holiday()
+    {
+        return $this->hasOne(PayrollHoliday::class, "holiday_id" ,'id');
+    }
 
 
 
