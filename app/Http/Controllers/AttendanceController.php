@@ -2591,6 +2591,7 @@ class AttendanceController extends Controller
                         $result_paid_hours = 0;
                         $result_balance_hours = 0;
 
+
                         if($leave_record) {
                             if ($leave_record->leave->leave_type->type == "paid") {
                                 $paid_leave_hours =  $leave_record->leave_hours;
@@ -2601,7 +2602,12 @@ class AttendanceController extends Controller
                         }
 
                         if ($holiday) {
-                            $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+
+                            if(!$employee->weekly_contractual_hours || !$employee->minimum_working_days_per_week) {
+                                $holiday_hours = 0;
+                            } else{
+                                $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+                            }
                             // if ($is_weekend) {
                             //     $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
                             // } else {
@@ -2634,7 +2640,8 @@ class AttendanceController extends Controller
                                 'is_present' => $result_is_present,
                                 'paid_hours' => $result_paid_hours,
                                 "result_balance_hours" => $result_balance_hours,
-                                'capacity_hours' => $attendance->capacity_hours,
+                                'capacity_hours' => $attendance?$attendance->capacity_hours:0,
+                                "paid_leave_hours"   => $leave_record?(($leave_record->leave->leave_type->type == "paid")?$leave_record->leave_hours:0):0
                             ];
                         }
 

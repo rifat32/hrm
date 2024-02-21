@@ -173,6 +173,9 @@ class User extends Authenticatable
     public function visa_detail() {
         return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
     }
+    public function right_to_work() {
+        return $this->hasOne(EmployeeRightToWork::class, 'user_id', 'id');
+    }
     public function sponsorship_details() {
         return $this->hasMany(EmployeeSponsorship::class, 'user_id', 'id');
     }
@@ -183,7 +186,9 @@ class User extends Authenticatable
     public function visa_details() {
         return $this->hasMany(EmployeeVisaDetail::class, 'user_id', 'id');
     }
-
+    public function right_to_works() {
+        return $this->hasMany(EmployeeRightToWork::class, 'user_id', 'id');
+    }
 
 
     public function assets() {

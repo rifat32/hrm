@@ -262,6 +262,13 @@ return [
                 "employee_visa_history_view",
                 "employee_visa_history_delete",
 
+
+                "employee_right_to_work_history_create",
+                "employee_right_to_work_history_update",
+                "employee_right_to_work_history_view",
+                "employee_right_to_work_history_delete",
+
+
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
@@ -481,6 +488,11 @@ return [
                 "employee_visa_history_view",
                 "employee_visa_history_delete",
 
+                "employee_right_to_work_history_create",
+                "employee_right_to_work_history_update",
+                "employee_right_to_work_history_view",
+                "employee_right_to_work_history_delete",
+
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
@@ -684,6 +696,11 @@ return [
                 "employee_visa_history_update",
                 "employee_visa_history_view",
                 "employee_visa_history_delete",
+
+                "employee_right_to_work_history_create",
+                "employee_right_to_work_history_update",
+                "employee_right_to_work_history_view",
+                "employee_right_to_work_history_delete",
 
                 "employee_sponsorship_history_create",
                 "employee_sponsorship_history_update",
@@ -922,6 +939,11 @@ return [
         "employee_visa_history_update",
         "employee_visa_history_view",
         "employee_visa_history_delete",
+
+        "employee_right_to_work_history_create",
+        "employee_right_to_work_history_update",
+        "employee_right_to_work_history_view",
+        "employee_right_to_work_history_delete",
 
         "employee_sponsorship_history_create",
         "employee_sponsorship_history_update",
@@ -1178,6 +1200,11 @@ return [
         "employee_visa_history_update" => "",
         "employee_visa_history_view" => "",
         "employee_visa_history_delete" => "",
+
+        "employee_right_to_work_history_create" => "",
+        "employee_right_to_work_history_update" => "",
+        "employee_right_to_work_history_view" => "",
+        "employee_right_to_work_history_delete" => "",
 
 
 
@@ -1450,6 +1477,14 @@ return [
         "employee_visa_history_update" => "update",
         "employee_visa_history_view" => "view",
         "employee_visa_history_delete" => "delete",
+
+        "employee_right_to_work_history_create" => "create",
+        "employee_right_to_work_history_update" => "update",
+        "employee_right_to_work_history_view" => "view",
+        "employee_right_to_work_history_delete" => "delete",
+
+
+
 
 
 
@@ -1817,6 +1852,16 @@ return [
                 "employee_visa_history_update",
                 "employee_visa_history_view",
                 "employee_visa_history_delete",
+            ],
+        ],
+
+        [
+            "header" => "employee_right_to_work_history",
+            "permissions" => [
+                "employee_right_to_work_history_create",
+                "employee_right_to_work_history_update",
+                "employee_right_to_work_history_view",
+                "employee_right_to_work_history_delete",
             ],
         ],
 
@@ -2329,7 +2374,16 @@ return [
             "db_table_name" => "employee_visa_details",
             "db_field_name" => "visa_expiry_date",
 
+        ],
+
+        [
+            "entity_name" => "right_to_work_expiry",
+            "db_table_name" => "employee_right_to_works",
+            "db_field_name" => "right_to_work_expiry_date",
+
         ]
+
+
 
 
         ]

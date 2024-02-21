@@ -837,12 +837,16 @@ class UserManagementController extends Controller
                         $employee_right_to_works  =  EmployeeRightToWork::create($request_data["right_to_works"]);
 
 
+
                         $ten_years_ago = Carbon::now()->subYears(10);
                         EmployeeRightToWorkHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
 
                         $request_data["right_to_works"]["from_date"] = now();
                         $request_data["right_to_works"]["right_to_work_id"] = $employee_right_to_works->id;
                         $employee_right_to_works_history  =  EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
+
                     }
                 }
 

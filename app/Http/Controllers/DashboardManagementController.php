@@ -1156,20 +1156,34 @@ class DashboardManagementController extends Controller
         $data["today_data_count"] = clone $data_query;
         $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
+
         $data["yesterday_data_count"] = clone $data_query;
         $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('users.created_at', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
+
 
         $data["this_week_data_count"] = clone $data_query;
         $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
+
+
+
         $data["previous_week_data_count"] = clone $data_query;
         $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('created_at', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
 
         $data["this_month_data_count"] = clone $data_query;
         $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
+
         $data["previous_month_data_count"] = clone $data_query;
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('created_at', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+
+
+
+
+
 
         return $data;
     }
@@ -2238,7 +2252,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            
+
             $data["upcoming_right_to_work_expiries"] = $this->upcoming_right_to_work_expiries(
                 $today,
                 $start_date_of_next_month,
@@ -2352,9 +2366,25 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
                 $data[($sponsorship_status . "_sponsorships")]["widget_name"] = ($sponsorship_status . "_sponsorships");
+
+
+
+
+
+
+
             }
 
+            $data["date_ranges"] = [
+                "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
+                "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
+                "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
+                "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
+                "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
+                "this_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+              ];
 
+              
 
             return response()->json($data, 200);
         } catch (Exception $e) {

@@ -51,6 +51,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserNoteController;
 use App\Http\Controllers\UserPassportHistoryController;
 use App\Http\Controllers\UserPayslipController;
+use App\Http\Controllers\UserRightToWorkHistoryController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\UserSponsorshipHistoryController;
 use App\Http\Controllers\UserVisaHistoryController;
@@ -339,6 +340,23 @@ Route::put('/v1.0/user-visa-histories', [UserVisaHistoryController::class, "upda
 Route::get('/v1.0/user-visa-histories', [UserVisaHistoryController::class, "getUserVisaHistories"]);
 Route::get('/v1.0/user-visa-histories/{id}', [UserVisaHistoryController::class, "getUserVisaHistoryById"]);
 Route::delete('/v1.0/user-visa-histories/{ids}', [UserVisaHistoryController::class, "deleteUserVisaHistoriesByIds"]);
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user passport history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user passport history  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/user-right-to-work-histories', [UserRightToWorkHistoryController::class, "createUserRightToWorkHistory"]);
+Route::put('/v1.0/user-right-to-work-histories', [UserRightToWorkHistoryController::class, "updateRightToWorkHistory"]);
+Route::get('/v1.0/user-right-to-work-histories', [UserRightToWorkHistoryController::class, "getUserRightToWorkHistories"]);
+Route::get('/v1.0/user-right-to-work-histories/{id}', [UserRightToWorkHistoryController::class, "getUserRightToWorkHistoryById"]);
+Route::delete('/v1.0/user-right-to-work-histories/{ids}', [UserRightToWorkHistoryController::class, "deleteUserRightToWorkHistoriesByIds"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user passport history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

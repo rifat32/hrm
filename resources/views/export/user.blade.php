@@ -646,7 +646,37 @@ return $formattedBreakTime;
     </table>
 @endif
 
+@if (!empty($request->current_right_to_works))
+<table>
+    <h3>Current Right To Works</h3>
+    <thead>
+        <tr class="table_head_row">
 
+            {{-- <th>From</th>
+            <th>To</th> --}}
+            <th>Check Date</th>
+            <th>Expiry Date</th>
+            <th>Code</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @if (!empty($user->visa_detail))
+
+                <tr class="table_row">
+                    {{-- <td>{{ $user->visa_detail->created_at }}</td>
+                    <td>{{ $user->visa_detail->updated_at }}</td> --}}
+                    <td>{{ format_date($user->right_to_work->right_to_work_check_date) }}</td>
+                    <td>{{ format_date($user->right_to_work->right_to_work_expiry_date) }}</td>
+                    <td>{{ $user->right_to_work->right_to_work_code }}</td>
+
+                </tr>
+
+
+        @endif
+    </tbody>
+</table>
+@endif
 
     {{-- 10. ADDRESS DETAILS  --}}
     @if (!empty($request->address_details))

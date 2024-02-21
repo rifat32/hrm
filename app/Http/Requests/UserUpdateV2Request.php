@@ -555,6 +555,15 @@ class UserUpdateV2Request extends BaseFormRequest
             'visa_details.visa_docs.*.file_name' => 'nullable|required_if:is_active_visa_details,1|string',
             'visa_details.visa_docs.*.description' => 'nullable|string',
 
+
+
+            'right_to_works.right_to_work_code' => 'nullable|required_if:is_active_right_to_works,1|string',
+            'right_to_works.right_to_work_check_date' => 'nullable|required_if:is_active_right_to_works,1|date',
+            'right_to_works.right_to_work_expiry_date' => 'nullable|required_if:is_active_right_to_works,1|date',
+            'right_to_works.right_to_work_docs' => 'nullable|required_if:is_active_right_to_works,1|array',
+            'right_to_works.right_to_work_docs.*.file_name' => 'nullable|required_if:is_active_right_to_works,1|string',
+            'right_to_works.right_to_work_docs.*.description' => 'nullable|string',
+
         ];
     }
 
