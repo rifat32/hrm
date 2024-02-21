@@ -43,8 +43,9 @@ class CreateUsersTable extends Migration
             $table->double('weekly_contractual_hours')->nullable()->default(0);
             $table->integer('minimum_working_days_per_week')->nullable()->default(0);
             $table->double('overtime_rate')->nullable()->default(0.0);
-            $table->double('is_active_visa_details')->nullable()->default(0);
 
+            $table->double('is_active_visa_details')->nullable()->default(0);
+            $table->double('is_active_right_to_works')->nullable()->default(0);
 
 
 

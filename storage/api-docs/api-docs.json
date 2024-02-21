@@ -482,6 +482,200 @@
                 ]
             }
         },
+        "/v1.0/clients/announcements": {
+            "get": {
+                "tags": [
+                    "administrator.announcements.client"
+                ],
+                "summary": "This method is to get announcements  ",
+                "description": "This method is to get announcements ",
+                "operationId": "getAnnouncementsClient",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/clients/announcements/change-status": {
+            "put": {
+                "tags": [
+                    "administrator.announcements.client"
+                ],
+                "summary": "This method is to update announcement status",
+                "description": "This method is to update announcement status",
+                "operationId": "updateAnnouncementStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "announcement_ids"
+                                ],
+                                "properties": {
+                                    "announcement_ids": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5,
+                                            6
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/asset-types": {
             "get": {
                 "tags": [
@@ -25881,6 +26075,20 @@
                 "operationId": "getUserJobHistories",
                 "parameters": [
                     {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    },
+                    {
                         "name": "user_id",
                         "in": "query",
                         "description": "user_id",
@@ -25914,6 +26122,48 @@
                         "description": "search_key",
                         "required": true,
                         "example": "search_key"
+                    },
+                    {
+                        "name": "job_history_job_title",
+                        "in": "query",
+                        "description": "Job History Job Title",
+                        "required": true,
+                        "example": "Software Engineer"
+                    },
+                    {
+                        "name": "job_history_company",
+                        "in": "query",
+                        "description": "Job History Company",
+                        "required": true,
+                        "example": "Tech Solutions Inc."
+                    },
+                    {
+                        "name": "job_history_start_on",
+                        "in": "query",
+                        "description": "Job History Start Date",
+                        "required": true,
+                        "example": "2020-03-15"
+                    },
+                    {
+                        "name": "job_history_end_at",
+                        "in": "query",
+                        "description": "Job History End Date",
+                        "required": true,
+                        "example": "2022-05-30"
+                    },
+                    {
+                        "name": "job_history_supervisor",
+                        "in": "query",
+                        "description": "Job History Supervisor",
+                        "required": true,
+                        "example": "John Smith"
+                    },
+                    {
+                        "name": "job_history_country",
+                        "in": "query",
+                        "description": "Job History Country",
+                        "required": true,
+                        "example": "United States"
                     },
                     {
                         "name": "order_by",

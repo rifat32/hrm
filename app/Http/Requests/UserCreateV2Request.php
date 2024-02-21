@@ -533,6 +533,7 @@ class UserCreateV2Request extends BaseFormRequest
         'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
 
         "is_active_visa_details" => 'required|boolean',
+        "is_active_right_to_works" => "required|boolean",
 
         "sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
         "sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
@@ -562,7 +563,8 @@ class UserCreateV2Request extends BaseFormRequest
         'visa_details.visa_docs.*.file_name' => 'nullable|required_if:is_active_visa_details,1|string',
         'visa_details.visa_docs.*.description' => 'nullable|string',
 
-        "is_active_visa_details"
+       
+
     ];
 
     }

@@ -57,6 +57,7 @@ class User extends Authenticatable
 
         'work_location_id',
         "is_active_visa_details",
+        "is_active_right_to_works",
 
 
         'bank_id',

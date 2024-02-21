@@ -608,6 +608,8 @@ class UserManagementController extends Controller
      *
      *  *  * *  @OA\Property(property="immigration_status", type="string", format="string",example="british_citizen"),
      *         @OA\Property(property="is_active_visa_details", type="boolean", format="boolean",example="1"),
+     *  *         @OA\Property(property="is_active_right_to_works", type="boolean", format="boolean",example="1"),
+     *
 
      *     @OA\Property(property="sponsorship_details", type="string", format="string", example={
      *    "date_assigned": "2023-01-01",
@@ -1413,6 +1415,7 @@ class UserManagementController extends Controller
                         "lat",
                         "long",
                         'is_active_visa_details',
+                        "is_active_right_to_works",
                         'is_sponsorship_offered',
                         "immigration_status",
 
@@ -3609,6 +3612,13 @@ class UserManagementController extends Controller
             } else {
                 return response()->json($users, 200);
             }
+
+
+
+
+
+
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

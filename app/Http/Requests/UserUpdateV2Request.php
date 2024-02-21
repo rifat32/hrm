@@ -521,6 +521,7 @@ class UserUpdateV2Request extends BaseFormRequest
 
 
             "is_active_visa_details" => "required|boolean",
+            "is_active_right_to_works" => "required|boolean",
 
 
 

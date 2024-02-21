@@ -13,6 +13,8 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserJobHistoryController extends Controller
 {
@@ -261,6 +263,20 @@ class UserJobHistoryController extends Controller
        *       security={
        *           {"bearerAuth": {}}
        *       },
+       *   *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
        *              @OA\Parameter(
        *         name="user_id",
        *         in="query",
@@ -297,6 +313,49 @@ class UserJobHistoryController extends Controller
        * required=true,
        * example="search_key"
        * ),
+       *
+       *   * @OA\Parameter(
+     *     name="job_history_job_title",
+     *     in="query",
+     *     description="Job History Job Title",
+     *     required=true,
+     *     example="Software Engineer"
+     * ),
+     *   * @OA\Parameter(
+     *     name="job_history_company",
+     *     in="query",
+     *     description="Job History Company",
+     *     required=true,
+     *     example="Tech Solutions Inc."
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_start_on",
+     *     in="query",
+     *     description="Job History Start Date",
+     *     required=true,
+     *     example="2020-03-15"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_end_at",
+     *     in="query",
+     *     description="Job History End Date",
+     *     required=true,
+     *     example="2022-05-30"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_supervisor",
+     *     in="query",
+     *     description="Job History Supervisor",
+     *     required=true,
+     *     example="John Smith"
+     * ),
+     * @OA\Parameter(
+     *     name="job_history_country",
+     *     in="query",
+     *     description="Job History Country",
+     *     required=true,
+     *     example="United States"
+     * ),
        * *  @OA\Parameter(
        * name="order_by",
        * in="query",
@@ -304,6 +363,7 @@ class UserJobHistoryController extends Controller
        * required=true,
        * example="ASC"
        * ),
+       *
 
        *      summary="This method is to get user job histories  ",
        *      description="This method is to get user job histories ",
@@ -403,9 +463,20 @@ class UserJobHistoryController extends Controller
                       return $query->get();
                   });;
 
+                  if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                    if (strtoupper($request->response_type) == 'PDF') {
+                        $pdf = PDF::loadView('pdf.users', ["user_job_histories" => $user_job_histories]);
+                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                    } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                        // return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+
+                    }
+                } else {
+                    return response()->json($user_job_histories, 200);
+                }
 
 
-              return response()->json($user_job_histories, 200);
           } catch (Exception $e) {
 
               return $this->sendError($e, 500, $request);
