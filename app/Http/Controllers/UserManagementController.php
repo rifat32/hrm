@@ -37,6 +37,10 @@ use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetail;
 use App\Models\EmployeeVisaDetailHistory;
+
+use App\Models\EmployeeRightToWork;
+use App\Models\EmployeeRightToWorkHistory;
+
 use App\Models\WorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\Leave;
@@ -620,7 +624,16 @@ class UserManagementController extends Controller
      *  *    "current_certificate_status": "pending",
      * *  *    "is_sponsorship_withdrawn": 1
      * }),
-     *       @OA\Property(property="visa_details", type="string", format="string", example={
+   *
+   * *
+   * *
+   * *
+   * *
+   * *
+   * *
+   *
+   *
+     *       @OA\Property(property="visa_details", type="string", format="array", example={
      *      "BRP_number": "BRP123",
      *      "visa_issue_date": "2023-01-01",
      *      "visa_expiry_date": "2024-01-01",
@@ -638,6 +651,35 @@ class UserManagementController extends Controller
      *
      * }
      * ),
+     * *
+* @OA\Property(
+*     property="right_to_works",
+*     type="string",
+*     format="string",
+*     example={
+*         "right_to_work_code": "Code123",
+*         "right_to_work_check_date": "2023-01-01",
+*         "right_to_work_expiry_date": "2024-01-01",
+*         "right_to_work_docs": {
+*             {
+*                 "file_name": "document1.pdf",
+*                 "description": "Description 1"
+*             },
+*             {
+*                 "file_name": "document2.pdf",
+*                 "description": "Description 2"
+*             }
+*         }
+*     }
+* ),
+
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      *  *     @OA\Property(property="passport_details", type="string", format="string", example={
      *    "passport_number": "ABC123",
      *    "passport_issue_date": "2023-01-01",
@@ -788,6 +830,19 @@ class UserManagementController extends Controller
                         $request_data["visa_details"]["from_date"] = now();
                         $request_data["visa_details"]["visa_detail_id"] = $employee_visa_details->id;
                         $employee_visa_details_history  =  EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+                    }
+                    if (!empty($request_data["right_to_works"]) && $request_data["is_active_right_to_works"]) {
+                        $request_data["right_to_works"]["user_id"] = $user->id;
+                        $request_data["right_to_works"]["business_id"] = $user->business_id;
+                        $employee_right_to_works  =  EmployeeRightToWork::create($request_data["right_to_works"]);
+
+
+                        $ten_years_ago = Carbon::now()->subYears(10);
+                        EmployeeRightToWorkHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+                        $request_data["right_to_works"]["from_date"] = now();
+                        $request_data["right_to_works"]["right_to_work_id"] = $employee_right_to_works->id;
+                        $employee_right_to_works_history  =  EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
                     }
                 }
 
@@ -1255,6 +1310,7 @@ class UserManagementController extends Controller
      *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
      *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
      * *         @OA\Property(property="is_active_visa_details", type="boolean", format="boolean",example="1"),
+     *  * *         @OA\Property(property="is_active_right_to_works", type="boolean", format="boolean",example="1"),
      *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
      * {
      * "recruitment_process_id":1,
@@ -1764,6 +1820,10 @@ class UserManagementController extends Controller
 
 
                     }
+
+
+
+
                     if (!empty($request_data["visa_details"]) && $request_data["is_active_visa_details"]) {
 
                         $request_data["visa_details"]["user_id"] = $user->id;
@@ -1862,6 +1922,114 @@ class UserManagementController extends Controller
                         // end history section
 
                     }
+
+
+
+
+
+
+
+      if (!empty($request_data["right_to_works"]) && $request_data["is_active_right_to_works"]) {
+
+                        $request_data["right_to_works"]["user_id"] = $user->id;
+
+
+                        $employee_right_to_works_query  =  EmployeeRightToWork::where([
+                            "user_id" =>  $request_data["right_to_works"]["user_id"]
+                        ]);
+
+                        $employee_right_to_works  =  $employee_right_to_works_query->first();
+
+                        if ($employee_right_to_works) {
+                            $employee_right_to_works_query->update(collect($request_data["right_to_works"])->only([
+                                // 'user_id',
+                                'right_to_work_code',
+                                'right_to_work_check_date',
+                                'right_to_work_expiry_date',
+                                'right_to_work_docs',
+                                // 'created_by'
+                            ])->toArray());
+                        } else {
+                            $request_data["right_to_works"]["business_id"] = $user->business_id;
+                            $employee_right_to_works  =  EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
+                        }
+
+
+
+
+                        // history section
+
+                        $ten_years_ago = Carbon::now()->subYears(10);
+                        EmployeeRightToWorkHistory::where('to_date', '<=', $ten_years_ago)->delete();
+
+
+                        $request_data["right_to_works"]["right_to_work_id"] = $employee_right_to_works->id;
+                        $request_data["right_to_works"]["from_date"] = now();
+
+
+                        $employee_right_to_works_history  =  EmployeeRightToWorkHistory::where([
+                            "user_id" =>  $request_data["right_to_works"]["user_id"],
+                            "to_date" => NULL
+                        ])
+                            ->latest('created_at')
+                            ->first();
+
+                        if ($employee_right_to_works_history) {
+                            $fields_to_check = [
+                                'right_to_work_code',
+                                'right_to_work_check_date',
+                                'right_to_work_expiry_date',
+                                'right_to_work_docs',
+                            ];
+
+
+
+                            $fields_changed = false; // Initialize to false
+                            foreach ($fields_to_check as $field) {
+                                $value1 = $employee_right_to_works_history->$field;
+                                $value2 = $request_data["right_to_works"][$field];
+                                if (in_array($field, ['right_to_work_check_date', 'right_to_work_expiry_date'])) {
+                                    $value1 = (new Carbon($value1))->format('Y-m-d');
+                                    $value2 = (new Carbon($value2))->format('Y-m-d');
+                                }
+                                if ($value1 !== $value2) {
+                                    $fields_changed = true;
+                                    break;
+                                }
+                            }
+
+
+
+
+
+
+
+
+
+                            if (
+                                $fields_changed
+                            ) {
+                                $employee_right_to_works_history->to_date = now();
+                                $employee_right_to_works_history->save();
+                                EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
+                            }
+                        } else {
+                            EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
+                        }
+
+                        // end history section
+
+                    }
+
+
+
+
+
+
+
+
+
+
                 }
 
 
@@ -3259,6 +3427,44 @@ class UserManagementController extends Controller
      * required=true,
      * example="50"
      * ),
+     * * @OA\Parameter(
+* name="start_right_to_work_check_date",
+* in="query",
+* description="start_right_to_work_check_date",
+* required=true,
+* example="2024-01-21"
+* ),
+*
+* @OA\Parameter(
+* name="end_right_to_work_check_date",
+* in="query",
+* description="end_right_to_work_check_date",
+* required=true,
+* example="2024-01-21"
+* ),
+* @OA\Parameter(
+* name="start_right_to_work_expiry_date",
+* in="query",
+* description="start_right_to_work_expiry_date",
+* required=true,
+* example="2024-01-21"
+* ),
+*
+* @OA\Parameter(
+* name="end_right_to_work_expiry_date",
+* in="query",
+* description="end_right_to_work_expiry_date",
+* required=true,
+* example="2024-01-21"
+* ),
+* @OA\Parameter(
+* name="right_to_work_expires_in_day",
+* in="query",
+* description="right_to_work_expires_in_day",
+* required=true,
+* example="50"
+* ),
+
      *
      *
      *  *      *     @OA\Parameter(
@@ -3570,6 +3776,48 @@ class UserManagementController extends Controller
                         $query->whereBetween("employee_visa_details.visa_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
                     });
                 })
+
+
+
+
+
+
+
+
+                ->when(!empty($request->start_right_to_work_check_date), function ($query) use ($request) {
+                    return $query->whereHas("right_to_works", function ($query) use ($request) {
+                        $query->where("employee_right_to_works.right_to_work_check_date", ">=", $request->start_right_to_work_check_date);
+                    });
+                })
+                ->when(!empty($request->end_right_to_work_check_date), function ($query) use ($request) {
+                    return $query->whereHas("right_to_works", function ($query) use ($request) {
+                        $query->where("employee_right_to_works.right_to_work_check_date", "<=", $request->end_right_to_work_check_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->start_right_to_work_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("right_to_works", function ($query) use ($request) {
+                        $query->where("employee_right_to_works.right_to_work_expiry_date", ">=", $request->start_right_to_work_expiry_date);
+                    });
+                })
+                ->when(!empty($request->end_right_to_work_expiry_date), function ($query) use ($request) {
+                    return $query->whereHas("right_to_works", function ($query) use ($request) {
+                        $query->where("employee_right_to_works.right_to_work_expiry_date", "<=", $request->end_right_to_work_expiry_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->right_to_work_expires_in_day), function ($query) use ($request, $today) {
+                    return $query->whereHas("right_to_works", function ($query) use ($request, $today) {
+                        $query_day = Carbon::now()->addDays($request->right_to_work_expires_in_day);
+                        $query->whereBetween("employee_right_to_works.right_to_work_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                    });
+           })
+
+
+
+
+
+
+
+
                 ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
                     if (intval($request->doesnt_have_payrun)) {
                         return $query->whereDoesntHave("payrun_users");
@@ -4392,6 +4640,13 @@ class UserManagementController extends Controller
      *     required=true,
      *     example="current_visa_details"
      * ),
+     *   * @OA\Parameter(
+     *     name="current_right_to_works",
+     *     in="query",
+     *     description="Current right to works",
+     *     required=true,
+     *     example="current_right_to_works"
+     * ),
      * @OA\Parameter(
      *     name="address_details",
      *     in="query",
@@ -4791,6 +5046,35 @@ class UserManagementController extends Controller
      *     required=true,
      *     example="United Kingdom"
      * ),
+     *
+     *  * @OA\Parameter(
+ *     name="current_right_to_works_right_to_work_code",
+ *     in="query",
+ *     description="Right to Work Code",
+ *     required=true,
+ *     example="123456"
+ * ),
+ * @OA\Parameter(
+ *     name="current_right_to_works_right_to_work_check_date",
+ *     in="query",
+ *     description="Right to Work Check Date",
+ *     required=true,
+ *     example="2023-01-01"
+ * ),
+ * @OA\Parameter(
+ *     name="current_right_to_works_right_to_work_expiry_date",
+ *     in="query",
+ *     description="Right to Work Expiry Date",
+ *     required=true,
+ *     example="2025-01-01"
+ * ),
+ * @OA\Parameter(
+ *     name="current_right_to_works_right_to_work_docs",
+ *     in="query",
+ *     description="Right to Work Documents",
+ *     required=true,
+ *     example="Passport, Visa"
+ * ),
      * @OA\Parameter(
      *     name="address_details_address",
      *     in="query",
@@ -5120,6 +5404,7 @@ class UserManagementController extends Controller
                     "sponsorship_details",
                     "passport_details",
                     "visa_details",
+                    "right_to_works",
                     "work_shifts",
                     "recruitment_processes",
                     "work_location"

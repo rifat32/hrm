@@ -5,27 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeRightToWork extends Model
+class EmployeeRightToWorkHistory extends Model
 {
     use HasFactory;
 
-
-
-    use HasFactory;
-
     protected $fillable = [
-        'user_id',
-        'business_id',
+
         'right_to_work_code',
         'right_to_work_check_date',
         'right_to_work_expiry_date',
         'right_to_work_docs',
+
+
+
+
+
+        "is_manual",
+        'user_id',
+        "from_date",
+        "to_date",
+        "right_to_work_id",
         'created_by',
+
     ];
 
     protected $casts = [
 
-        'right_to_work_docs' => 'json',
+        'right_to_work_docs' => 'array',
     ];
 
     public function employee()
@@ -42,6 +48,7 @@ class EmployeeRightToWork extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
 
 
 }

@@ -10927,6 +10927,115 @@
                 ]
             }
         },
+        "/v1.0/histories/user-right-to-works": {
+            "get": {
+                "tags": [
+                    "histories"
+                ],
+                "summary": "This method is to get employee right to work history",
+                "description": "This method is to get right to work history",
+                "operationId": "getRightToWorksHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "user_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/histories/user-sponsorship-details": {
             "get": {
                 "tags": [
@@ -27157,6 +27266,41 @@
                         "example": "50"
                     },
                     {
+                        "name": "start_right_to_work_check_date",
+                        "in": "query",
+                        "description": "start_right_to_work_check_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_right_to_work_check_date",
+                        "in": "query",
+                        "description": "end_right_to_work_check_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_right_to_work_expiry_date",
+                        "in": "query",
+                        "description": "start_right_to_work_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_right_to_work_expiry_date",
+                        "in": "query",
+                        "description": "end_right_to_work_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "right_to_work_expires_in_day",
+                        "in": "query",
+                        "description": "right_to_work_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
                         "name": "project_id",
                         "in": "query",
                         "description": "project_id",
@@ -28007,6 +28151,11 @@
                                         "format": "boolean",
                                         "example": "1"
                                     },
+                                    "is_active_right_to_works": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    },
                                     "recruitment_processes": {
                                         "type": "string",
                                         "format": "array",
@@ -28318,6 +28467,11 @@
                                         "format": "boolean",
                                         "example": "1"
                                     },
+                                    "is_active_right_to_works": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    },
                                     "sponsorship_details": {
                                         "type": "string",
                                         "format": "string",
@@ -28333,13 +28487,32 @@
                                     },
                                     "visa_details": {
                                         "type": "string",
-                                        "format": "string",
+                                        "format": "array",
                                         "example": {
                                             "BRP_number": "BRP123",
                                             "visa_issue_date": "2023-01-01",
                                             "visa_expiry_date": "2024-01-01",
                                             "place_of_issue": "City",
                                             "visa_docs": [
+                                                {
+                                                    "file_name": "document1.pdf",
+                                                    "description": "Description 1"
+                                                },
+                                                {
+                                                    "file_name": "document2.pdf",
+                                                    "description": "Description 2"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "right_to_works": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": {
+                                            "right_to_work_code": "Code123",
+                                            "right_to_work_check_date": "2023-01-01",
+                                            "right_to_work_expiry_date": "2024-01-01",
+                                            "right_to_work_docs": [
                                                 {
                                                     "file_name": "document1.pdf",
                                                     "description": "Description 1"
@@ -29679,6 +29852,13 @@
                         "example": "current_visa_details"
                     },
                     {
+                        "name": "current_right_to_works",
+                        "in": "query",
+                        "description": "Current right to works",
+                        "required": true,
+                        "example": "current_right_to_works"
+                    },
+                    {
                         "name": "address_details",
                         "in": "query",
                         "description": "Address Details",
@@ -30076,6 +30256,34 @@
                         "description": "Visa Place of Issue",
                         "required": true,
                         "example": "United Kingdom"
+                    },
+                    {
+                        "name": "current_right_to_works_right_to_work_code",
+                        "in": "query",
+                        "description": "Right to Work Code",
+                        "required": true,
+                        "example": "123456"
+                    },
+                    {
+                        "name": "current_right_to_works_right_to_work_check_date",
+                        "in": "query",
+                        "description": "Right to Work Check Date",
+                        "required": true,
+                        "example": "2023-01-01"
+                    },
+                    {
+                        "name": "current_right_to_works_right_to_work_expiry_date",
+                        "in": "query",
+                        "description": "Right to Work Expiry Date",
+                        "required": true,
+                        "example": "2025-01-01"
+                    },
+                    {
+                        "name": "current_right_to_works_right_to_work_docs",
+                        "in": "query",
+                        "description": "Right to Work Documents",
+                        "required": true,
+                        "example": "Passport, Visa"
                     },
                     {
                         "name": "address_details_address",

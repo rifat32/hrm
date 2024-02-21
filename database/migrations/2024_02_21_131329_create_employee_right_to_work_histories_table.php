@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmployeeRightToWorksTable extends Migration
+class CreateEmployeeRightToWorkHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,25 +13,30 @@ class CreateEmployeeRightToWorksTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_right_to_works', function (Blueprint $table) {
+        Schema::create('employee_right_to_work_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger("business_id");
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
 
             $table->string('right_to_work_code');
             $table->date('right_to_work_check_date');
             $table->date('right_to_work_expiry_date');
             $table->json('right_to_work_docs');
+            
 
+            $table->date("from_date");
+            $table->date("to_date")->nullable();
+            $table->unsignedBigInteger("right_to_work_id")->nullable();
+            $table->foreign('right_to_work_id')->references('id')->on('employee_right_to_works')->onDelete('set null');
+            $table->boolean("is_manual")->default(0);
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')
                 ->on('users')
                 ->onDelete('set null');
+
             $table->timestamps();
         });
     }
@@ -43,6 +48,6 @@ class CreateEmployeeRightToWorksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_right_to_works');
+        Schema::dropIfExists('employee_right_to_work_histories');
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Candidate;
 use App\Models\DashboardWidget;
 use App\Models\Department;
 use App\Models\EmployeePassportDetail;
+use App\Models\EmployeeRightToWork;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeVisaDetail;
 use App\Models\JobListing;
@@ -1734,6 +1735,61 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         return $data;
     }
+    public function upcoming_right_to_work_expiries(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+    ) {
+
+        $data_query  = EmployeeRightToWork::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+        ->where("right_to_work_expiry_date",">=", today())
+        ->where("business_id",auth()->user()->business_id);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('right_to_work_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('right_to_work_expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+        $expires_in_days = [15,30,60];
+        foreach($expires_in_days as $expires_in_day){
+            $query_day = Carbon::now()->addDays($expires_in_day);
+            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('right_to_work_expiry_date', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
+        }
+
+        return $data;
+    }
     public function upcoming_sponsorship_expiries(
         $today,
         $start_date_of_next_month,
@@ -2172,6 +2228,55 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["upcoming_visa_expiries"]["widget_name"] = "upcoming_visa_expiries";
+
+
+
+
+
+
+
+
+
+
+            
+            $data["upcoming_right_to_work_expiries"] = $this->upcoming_right_to_work_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+            $widget = $dashboard_widgets->get("upcoming_right_to_work_expiries");
+
+
+            $data["upcoming_right_to_work_expiries"]["id"] = 6 + $index;
+            if($widget) {
+                $data["upcoming_right_to_work_expiries"]["widget_id"] = $widget->id;
+                $data["upcoming_right_to_work_expiries"]["widget_order"] = $widget->widget_order;
+            }
+            else {
+                $data["upcoming_right_to_work_expiries"]["widget_id"] = 0;
+                $data["upcoming_right_to_work_expiries"]["widget_order"] = 0;
+            }
+
+
+            $data["upcoming_right_to_work_expiries"]["widget_name"] = "upcoming_right_to_work_expiries";
+
+
+
+
+
+
+
 
 
 
