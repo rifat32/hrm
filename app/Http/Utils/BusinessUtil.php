@@ -543,6 +543,50 @@ trait BusinessUtil
 
 
 
+    public function loadDefaultSettingLeaveType($business_id = NULL)
+    {
+        $defaultSettingLeaveTypes = SettingLeaveType::where(function($query)  {
+            $query->where(function($query)  {
+                $query->where('setting_leave_types.business_id', NULL)
+                ->where('setting_leave_types.is_default', 1)
+                ->where('setting_leave_types.is_active', 1)
+                ->whereDoesntHave("disabled", function($q)  {
+                    $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
+                })
+
+              ;
+            })
+            ->orWhere(function ($query) {
+                $query->where('setting_leave_types.business_id', NULL)
+                    ->where('setting_leave_types.is_default', 0)
+                    ->where('setting_leave_types.created_by', auth()->user()->id)
+                    ->where('setting_leave_types.is_active', 1);
+            });
+        })
+        ->get();
+
+
+
+
+
+        foreach ($defaultSettingLeaveTypes as $defaultSettingLeave) {
+            error_log($defaultSettingLeave);
+            $insertableData = [
+        'name'=> $defaultSettingLeave->start_month,
+        'type'=> $defaultSettingLeave->start_month,
+        'amount'=> $defaultSettingLeave->start_month,
+        'is_earning_enabled'=> $defaultSettingLeave->start_month,
+        "is_active"=> $defaultSettingLeave->start_month,
+        "is_default"=> 0,
+        "business_id" => $business_id,
+            ];
+
+            $setting_leave_type  = SettingLeaveType::create($insertableData);
+        }
+    }
+
+
+
     public function loadDefaultSettingLeave($business_id = NULL)
     {
         // load setting leave
@@ -827,7 +871,7 @@ trait BusinessUtil
 
 
 
-
+        $this->loadDefaultSettingLeaveType($business_id);
 
 
         $this->loadDefaultSettingLeave($business_id);

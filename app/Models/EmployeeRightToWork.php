@@ -30,7 +30,7 @@ class EmployeeRightToWork extends Model
 
     public function employee()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,"user_id","id");
     }
 
     public function business()
