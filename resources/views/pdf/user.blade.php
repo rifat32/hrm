@@ -714,7 +714,7 @@ return $formattedBreakTime;
         <tbody>
             @if (1)
                 <tr class="table_row">
-                    <td class="index_col"></td>
+                    <td class="index_col">1</td>
                     @if (!empty($request->current_cos_details_date_assigned))
                         <td>{{ format_date($user->sponsorship_detail->date_assigned) }}</td>
                     @endif
@@ -769,7 +769,7 @@ return $formattedBreakTime;
     <tbody>
         @if (1)
             <tr class="table_row">
-                <td class="index_col"></td>
+                <td class="index_col">1</td>
                 @if (!empty($request->current_pension_details_pension_scheme_status))
                     <td>{{ format_date($user->pension_detail->pension_scheme_status) }}</td>
                 @endif
@@ -821,7 +821,7 @@ return $formattedBreakTime;
         <tbody>
             @if (1)
                 <tr class="table_row">
-                    <td class="index_col"></td>
+                    <td class="index_col">1</td>
                     @if (!empty($request->current_passport_details_issue_date))
                         <td>{{ format_date($user->passport_detail->passport_issue_date) }}</td>
                     @endif
@@ -871,7 +871,7 @@ return $formattedBreakTime;
         <tbody>
             @if (1)
                 <tr class="table_row">
-                    <td class="index_col"></td>
+                    <td class="index_col">1</td>
                     @if (!empty($request->current_visa_details_issue_date))
                         <td>{{ format_date($user->visa_detail->visa_issue_date) }}</td>
                     @endif
@@ -900,12 +900,19 @@ return $formattedBreakTime;
     <h3>Current Right To Works</h3>
     <thead>
         <tr class="table_head_row">
-
-            {{-- <th>From</th>
-            <th>To</th> --}}
+            <th class="index_col">1</th>
+            @if (!empty($request->current_right_to_works_right_to_work_check_date))
             <th>Check Date</th>
-            <th>Expiry Date</th>
-            <th>Code</th>
+        @endif
+        @if (!empty($request->current_right_to_works_right_to_work_expiry_date))
+        <th>Expiry Date</th>
+    @endif
+    @if (!empty($request->current_right_to_works_right_to_work_code))
+    <th>Code</th>
+    @endif
+
+
+
 
         </tr>
     </thead>
@@ -915,9 +922,22 @@ return $formattedBreakTime;
                 <tr class="table_row">
                     {{-- <td>{{ $user->visa_detail->created_at }}</td>
                     <td>{{ $user->visa_detail->updated_at }}</td> --}}
+                    <td class="index_col">1</td>
+
+
+
+                    @if (!empty($request->current_right_to_works_right_to_work_check_date))
                     <td>{{ format_date($user->right_to_work->right_to_work_check_date) }}</td>
+                    @endif
+
+
+                    @if (!empty($request->current_right_to_works_right_to_work_expiry_date))
                     <td>{{ format_date($user->right_to_work->right_to_work_expiry_date) }}</td>
+                    @endif
+
+                    @if (!empty($request->current_right_to_works_right_to_work_code))
                     <td>{{ $user->right_to_work->right_to_work_code }}</td>
+                    @endif
 
                 </tr>
 
@@ -954,7 +974,7 @@ return $formattedBreakTime;
         <tbody>
             @if (1)
                 <tr class="table_row">
-                    <td class="index_col"></td>
+                    <td class="index_col">1</td>
                     @if (!empty($request->address_details_address))
                         <td>{{ $user->address_line_1 }}</td>
                     @endif
@@ -1016,35 +1036,38 @@ return $formattedBreakTime;
         <tbody>
             @if (1)
                 @foreach (($user->emergency_contact_details) as $index => $emergency_contact)
-                    <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
+                @if (!empty($emergency_contact["mobile_tel_number"]))
+                <tr class="table_row">
+                    <td class="index_col">{{ $index + 1 }}</td>
 
-                        @if (!empty($request->contact_details_first_name))
-                            <td>{{ isset($emergency_contact["first_name"]) ? $emergency_contact["first_name"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_last_name))
-                            <td>{{ isset($emergency_contact["last_name"]) ? $emergency_contact["last_name"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_relationship))
-                            <td>{{ isset($emergency_contact["relationship_of_above_to_you"]) ? $emergency_contact["relationship_of_above_to_you"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_address))
-                            <td>{{ isset($emergency_contact["address_line_1"]) ? $emergency_contact["address_line_1"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_postcode))
-                            <td>{{ isset($emergency_contact["postcode"]) ? $emergency_contact["postcode"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_day_time_tel_number))
-                            <td>{{ isset($emergency_contact["day_time_tel_number"]) ? $emergency_contact["day_time_tel_number"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_evening_time_tel_number))
-                            <td>{{ isset($emergency_contact["evening_time_tel_number"]) ? $emergency_contact["evening_time_tel_number"] : '' }}</td>
-                        @endif
-                        @if (!empty($request->contact_details_mobile_tel_number))
-                            <td>{{ isset($emergency_contact["mobile_tel_number"]) ? $emergency_contact["mobile_tel_number"] : '' }}</td>
-                        @endif
+                    @if (!empty($request->contact_details_first_name))
+                        <td>{{ isset($emergency_contact["first_name"]) ? $emergency_contact["first_name"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_last_name))
+                        <td>{{ isset($emergency_contact["last_name"]) ? $emergency_contact["last_name"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_relationship))
+                        <td>{{ isset($emergency_contact["relationship_of_above_to_you"]) ? $emergency_contact["relationship_of_above_to_you"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_address))
+                        <td>{{ isset($emergency_contact["address_line_1"]) ? $emergency_contact["address_line_1"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_postcode))
+                        <td>{{ isset($emergency_contact["postcode"]) ? $emergency_contact["postcode"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_day_time_tel_number))
+                        <td>{{ isset($emergency_contact["day_time_tel_number"]) ? $emergency_contact["day_time_tel_number"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_evening_time_tel_number))
+                        <td>{{ isset($emergency_contact["evening_time_tel_number"]) ? $emergency_contact["evening_time_tel_number"] : '' }}</td>
+                    @endif
+                    @if (!empty($request->contact_details_mobile_tel_number))
+                        <td>{{ isset($emergency_contact["mobile_tel_number"]) ? $emergency_contact["mobile_tel_number"] : '' }}</td>
+                    @endif
 
-                    </tr>
+                </tr>
+                @endif
+
                 @endforeach
             @else
                 <tr>

@@ -3355,6 +3355,53 @@ class UserManagementController extends Controller
      * required=true,
      * example="2024-01-21"
      * ),
+     *
+     *
+     *    *    *  *   @OA\Parameter(
+     * name="start_pension_pension_enrolment_issue_date",
+     * in="query",
+     * description="start_pension_pension_enrolment_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_pension_pension_enrolment_issue_date",
+     * in="query",
+     * description="end_pension_pension_enrolment_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *    *  *   @OA\Parameter(
+     * name="start_pension_re_enrollment_due_date_date",
+     * in="query",
+     * description="start_pension_re_enrollment_due_date_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_pension_re_enrollment_due_date_date",
+     * in="query",
+     * description="end_pension_re_enrollment_due_date_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *   @OA\Parameter(
+     * name="pension_re_enrollment_due_date_in_day",
+     * in="query",
+     * description="pension_re_enrollment_due_date_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      *    *  *   @OA\Parameter(
      * name="start_sponsorship_date_assigned",
      * in="query",
@@ -3763,6 +3810,72 @@ class UserManagementController extends Controller
                         $query->whereBetween("employee_sponsorships.expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
                     });
                 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ->when(!empty($request->start_pension_pension_enrolment_issue_date), function ($query) use ($request) {
+                    return $query->whereHas("pension_details", function ($query) use ($request) {
+                        $query->where("employee_pensions.pension_enrolment_issue_date", ">=", ($request->start_pension_pension_enrolment_issue_date));
+                    });
+                })
+                ->when(!empty($request->end_pension_pension_enrolment_issue_date), function ($query) use ($request) {
+                    return $query->whereHas("pension_details", function ($query) use ($request) {
+                        $query->where("employee_pensions.pension_enrolment_issue_date", "<=", ($request->end_pension_pension_enrolment_issue_date . ' 23:59:59'));
+                    });
+                })
+
+
+                ->when(!empty($request->start_pension_pension_re_enrollment_due_date), function ($query) use ($request) {
+                    return $query->whereHas("pension_details", function ($query) use ($request) {
+                        $query->where("employee_pensions.pension_re_enrollment_due_date", ">=", $request->start_pension_pension_re_enrollment_due_date);
+                    });
+                })
+                ->when(!empty($request->end_pension_pension_re_enrollment_due_date), function ($query) use ($request) {
+                    return $query->whereHas("pension_details", function ($query) use ($request) {
+                        $query->where("employee_pensions.pension_re_enrollment_due_date", "<=", $request->end_pension_pension_re_enrollment_due_date . ' 23:59:59');
+                    });
+                })
+                ->when(!empty($request->pension_pension_re_enrollment_due_date_in_day), function ($query) use ($request, $today) {
+                    return $query->whereHas("pension_details", function ($query) use ($request, $today) {
+                        $query_day = Carbon::now()->addDays($request->pension_pension_re_enrollment_due_date_in_day);
+                        $query->whereBetween("employee_pensions.pension_re_enrollment_due_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                    });
+                })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 ->when(!empty($request->start_passport_issue_date), function ($query) use ($request) {
                     return $query->whereHas("passport_details", function ($query) use ($request) {
@@ -5010,8 +5123,37 @@ class UserManagementController extends Controller
      *     example="United States"
      * ),
      *
-     *current_pension_details_pension_scheme_status
-    * current_pension_details_pension_enrolment_issue_date
+     *  * @OA\Parameter(
+     *     name="current_pension_details_pension_scheme_status",
+     *     in="query",
+     *     description="current_pension_details_pension_scheme_status",
+     *     required=true,
+     *     example="2023-05-15"
+     * ),
+     *  * @OA\Parameter(
+     *     name="current_pension_details_pension_enrolment_issue_date",
+     *     in="query",
+     *     description="current_pension_details_pension_enrolment_issue_date",
+     *     required=true,
+     *     example="2023-05-15"
+     * ),
+     *  * @OA\Parameter(
+     *     name="current_pension_details_pension_scheme_opt_out_date",
+     *     in="query",
+     *     description="current_pension_details_pension_scheme_opt_out_date",
+     *     required=true,
+     *     example="2023-05-15"
+     * ),
+     *  * @OA\Parameter(
+     *     name="current_pension_details_pension_re_enrollment_due_date",
+     *     in="query",
+     *     description="current_pension_details_pension_re_enrollment_due_date",
+     *     required=true,
+     *     example="2023-05-15"
+     * ),
+
+    *
+
      *
      * @OA\Parameter(
      *     name="current_cos_details_date_assigned",
