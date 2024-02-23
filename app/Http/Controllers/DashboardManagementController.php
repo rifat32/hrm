@@ -2070,14 +2070,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $start_date_of_previous_week,
         $end_date_of_previous_week,
         $all_manager_department_ids,
-        $current_certificate_status
+        $pension_scheme_status
     ) {
 
         $data_query  = EmployeePension::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->where([
-            "current_certificate_status"=>$current_certificate_status,
+            "pension_scheme_status"=>$pension_scheme_status,
             "business_id"=>auth()->user()->business_id
         ]);
 

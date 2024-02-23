@@ -568,15 +568,14 @@ trait BusinessUtil
 
 
 
-
         foreach ($defaultSettingLeaveTypes as $defaultSettingLeave) {
             error_log($defaultSettingLeave);
             $insertableData = [
-        'name'=> $defaultSettingLeave->start_month,
-        'type'=> $defaultSettingLeave->start_month,
-        'amount'=> $defaultSettingLeave->start_month,
-        'is_earning_enabled'=> $defaultSettingLeave->start_month,
-        "is_active"=> $defaultSettingLeave->start_month,
+        'name'=> $defaultSettingLeave->name,
+        'type'=> $defaultSettingLeave->type,
+        'amount'=> $defaultSettingLeave->amount,
+        'is_earning_enabled'=> $defaultSettingLeave->is_earning_enabled,
+        "is_active"=> 1,
         "is_default"=> 0,
         "business_id" => $business_id,
             ];

@@ -96,6 +96,7 @@ class UserRightToWorkHistoryController extends Controller
                     ], 401);
                 }
 
+
                 $request_data = $request->validated();
                 $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["created_by"] = $request->user()->id;
@@ -116,7 +117,7 @@ class UserRightToWorkHistoryController extends Controller
                     if ($new_expiry_date->gt($current_expiry_date)) {
                         // Update the passport expiry date
                         $request_data["is_manual"] = 0;
-                        $user_right_to_work  =  $current_expiry_date->update(
+                        $user_right_to_work  =  $current_right_to_work->update(
                             collect($request_data)->only([
                                 'right_to_work_code',
                                 'right_to_work_check_date',
@@ -131,7 +132,7 @@ class UserRightToWorkHistoryController extends Controller
                     }
                 } else {
                     $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                    $today = Carbon::now();
+                    $today = now();
 
                     if ($new_expiry_date->gt($today)) {
                         // Handle the case where the new expiry date is later than today's date
