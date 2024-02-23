@@ -2,33 +2,31 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeSponsorship extends Model
+class EmployeePension extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'business_id',
-        'date_assigned',
-        'expiry_date',
-        'status',
-        'note',
-        "certificate_number",
-        "current_certificate_status",
-        "is_sponsorship_withdrawn",
-
+        'pension_eligible',
+        'pension_enrolment_issue_date',
+        'pension_letters',
+        'pension_scheme_status',
+        'pension_scheme_opt_out_date',
+        'pension_re_enrollment_due_date',
         'created_by'
     ];
 
     public function employee(){
         return $this->hasOne(User::class,'id', 'user_id');
     }
-
-
-
+    protected $casts = [
+        'pension_letters' => 'array',
+    ];
 
 
 

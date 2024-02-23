@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserRightToWorkHistoryCreateRequest;
-use App\Http\Requests\UserRightToWorkHistoryUpdateRequest;
+use App\Http\Requests\UserPensionHistoryCreateRequest;
+use App\Http\Requests\UserPensionHistoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
-use App\Models\EmployeeRightToWork;
-use App\Models\EmployeeRightToWorkHistory;
+use App\Models\EmployeePension;
+use App\Models\EmployeePensionHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserRightToWorkHistoryController extends Controller
+class UserPensionHistoryController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
@@ -27,25 +27,31 @@ class UserRightToWorkHistoryController extends Controller
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/user-right-to-work-histories",
-     *      operationId="createUserRightToWorkHistory",
-     *      tags={"user_right_to_work_histories"},
+     *      path="/v1.0/user-pension-histories",
+     *      operationId="createUserPensionHistory",
+     *      tags={"user_pension_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store user right to work history",
-     *      description="This method is to store user right to work history",
+     *      summary="This method is to store user pension history",
+     *      description="This method is to store user pension history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-* @OA\Property(property="right_to_work_code", type="string", format="string", example="Your BRP Number"),
-* @OA\Property(property="right_to_work_check_date", type="string", format="date", example="Your right_to_work Issue Date"),
-* @OA\Property(property="right_to_work_expiry_date", type="string", format="date", example="Your right_to_work Expiry Date"),
-* @OA\Property(property="right_to_work_docs", type="string", format="string", example="Your right_to_work Documents"),
-* @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
-* @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
-* @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
+     *  * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
+  *      @OA\Property(property="pension_eligible", type="boolean", format="boolean", example="1"),
+ *      @OA\Property(property="pension_letters", type="string", format="array", example={{"file_name":"sss"}}),
+ *      @OA\Property(property="pension_scheme_status", type="string", format="string", example="pension_scheme_status"),
+ *      @OA\Property(property="pension_enrolment_issue_date", type="string", format="string", example="pension_enrolment_issue_date"),
+ *      @OA\Property(property="pension_scheme_opt_out_date", type="string", format="string", example="pension_scheme_opt_out_date"),
+ *      @OA\Property(property="pension_re_enrollment_due_date", type="string", format="date", example="pension_re_enrollment_due_date"),
+ *
+ *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+ *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
+
+
+ *
  *
  *
      *
@@ -85,44 +91,48 @@ class UserRightToWorkHistoryController extends Controller
      *     )
      */
 
-    public function createUserRightToWorkHistory(UserRightToWorkHistoryCreateRequest $request)
+    public function createUserPensionHistory(UserPensionHistoryCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_right_to_work_history_create')) {
+                if (!$request->user()->hasPermissionTo('employee_pension_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
 
                 $request_data = $request->validated();
-                $request_data["business_id"] = auth()->user()->business_id;
+
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
 
 
-                $current_right_to_work =  EmployeeRightToWorkHistory::where(
+
+
+                $current_pension_detail =  EmployeePension::where(
                     [
                         "user_id" => $request["user_id"],
                     ]
                 )->latest()->first();
 
-                if ($current_right_to_work) {
+                if ($current_pension_detail) {
                     // Parse the new expiry date using Carbon
-                    $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                    $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
+                    $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
+                    $current_expiry_date = Carbon::parse($current_pension_detail->pension_re_enrollment_due_date);
 
                     if ($new_expiry_date->gt($current_expiry_date)) {
                         // Update the passport expiry date
                         $request_data["is_manual"] = 0;
-                        $user_right_to_work  =  $current_expiry_date->update(
+                        $user_pension  =  $current_expiry_date->update(
                             collect($request_data)->only([
-                                'right_to_work_code',
-                                'right_to_work_check_date',
-                                'right_to_work_expiry_date',
-                                'right_to_work_docs',
-                                 "created_by"
+                                'pension_eligible',
+                                'pension_enrolment_issue_date',
+                                'pension_letters',
+                                'pension_scheme_status',
+                                'pension_scheme_opt_out_date',
+                                'pension_re_enrollment_due_date',
+        "created_by"
 
                             ])->toArray()
                         );
@@ -130,22 +140,24 @@ class UserRightToWorkHistoryController extends Controller
                         // Now $current_passport_detail holds the updated passport detail with the later expiry date
                     }
                 } else {
-                    $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
+                    $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
                     $today = Carbon::now();
 
                     if ($new_expiry_date->gt($today)) {
                         // Handle the case where the new expiry date is later than today's date
                         $request_data["is_manual"] = 0;
-                        $user_right_to_work = EmployeeRightToWork::create($request_data);
+                        $user_pension = EmployeePension::create($request_data);
                     }
                 }
 
 
-                $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
+
+
+                $user_pension_history =  EmployeePensionHistory::create($request_data);
 
 
 
-                return response($user_right_to_work_history, 201);
+                return response($user_pension_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -156,29 +168,31 @@ class UserRightToWorkHistoryController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/user-right-to-work-histories",
-     *      operationId="updateRightToWorkHistory",
-     *      tags={"user_right_to_work_histories"},
+     *      path="/v1.0/user-pension-histories",
+     *      operationId="updateUserPensionHistory",
+     *      tags={"user_pension_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update  user right to work history ",
-     *      description="This method is to update user right to work history",
+     *      summary="This method is to update  user pension history ",
+     *      description="This method is to update user pension history",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-* @OA\Property(property="right_to_work_code", type="string", format="string", example="Your BRP Number"),
-* @OA\Property(property="right_to_work_check_date", type="string", format="date", example="Your right_to_work Issue Date"),
-* @OA\Property(property="right_to_work_expiry_date", type="string", format="date", example="Your right_to_work Expiry Date"),
-* @OA\Property(property="right_to_work_docs", type="string", format="string", example="Your right_to_work Documents"),
-* @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
-* @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
-* @OA\Property(property="to_date", type="string", format="date", example="Your To Date"),
-
+     *  * @OA\Property(property="user_id", type="string", format="string", example="Your Employee ID"),
+  *      @OA\Property(property="pension_eligible", type="boolean", format="boolean", example="1"),
+ *      @OA\Property(property="pension_letters", type="string", format="array", example={{"file_name":"sss"}}),
+ *      @OA\Property(property="pension_scheme_status", type="string", format="string", example="pension_scheme_status"),
+ *      @OA\Property(property="pension_enrolment_issue_date", type="string", format="string", example="pension_enrolment_issue_date"),
+ *      @OA\Property(property="pension_scheme_opt_out_date", type="string", format="string", example="pension_scheme_opt_out_date"),
+ *      @OA\Property(property="pension_re_enrollment_due_date", type="string", format="date", example="pension_re_enrollment_due_date"),
  *
-*
+ *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
+ *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
+ *
+ *
  *
 
      *
@@ -218,43 +232,48 @@ class UserRightToWorkHistoryController extends Controller
      *     )
      */
 
-    public function updateRightToWorkHistory(UserRightToWorkHistoryUpdateRequest $request)
+    public function updateUserPensionHistory(UserPensionHistoryUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('employee_right_to_work_history_update')) {
+                if (!$request->user()->hasPermissionTo('employee_pension_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
                 $request_data = $request->validated();
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
 
-                $current_right_to_work =  EmployeeRightToWork::where(
+
+
+
+                $current_pension_detail =  EmployeePension::where(
                     [
                         "user_id" => $request["user_id"],
                     ]
                 )->latest()->first();
 
-                if ($current_right_to_work) {
+                if ($current_pension_detail) {
                     // Parse the new expiry date using Carbon
-                    $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                    $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
+                    $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
+                    $current_expiry_date = Carbon::parse($current_pension_detail->expiry_date);
 
                     if ($new_expiry_date->gt($current_expiry_date)) {
                         // Update the passport expiry date
                         $request_data["is_manual"] = 0;
-                        $user_right_to_work  =  $current_expiry_date->update(
+                        $user_pension  =  $current_expiry_date->update(
                             collect($request_data)->only([
-                                'right_to_work_code',
-                                'right_to_work_check_date',
-                                'right_to_work_expiry_date',
-                                'right_to_work_docs',
-                                 "created_by"
+                                'pension_eligible',
+                                'pension_enrolment_issue_date',
+                                'pension_letters',
+                                'pension_scheme_status',
+                                'pension_scheme_opt_out_date',
+                                'pension_re_enrollment_due_date',
+                                "created_by"
 
                             ])->toArray()
                         );
@@ -262,53 +281,58 @@ class UserRightToWorkHistoryController extends Controller
                         // Now $current_passport_detail holds the updated passport detail with the later expiry date
                     }
                 } else {
-                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
                     $today = Carbon::now();
 
                     if ($new_expiry_date->gt($today)) {
                         // Handle the case where the new expiry date is later than today's date
                         $request_data["is_manual"] = 0;
-                        $user_right_to_work = EmployeeRightToWork::create($request_data);
+                        $user_pension = EmployeePension::create($request_data);
                     }
                 }
 
 
-                $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
 
 
 
-
-                $user_right_to_work_history_query_params = [
+                $user_pension_history_query_params = [
                     "id" => $request_data["id"],
-                    "is_manual" => 1
+                    // "is_manual" => 1
                 ];
+                // $user_pension_history_prev = UserPensionHistory::where($user_pension_history_query_params)
+                //     ->first();
+                // if (!$user_pension_history_prev) {
+                //     return response()->json([
+                //         "message" => "no user pension history found"
+                //     ], 404);
+                // }
 
-                $user_right_to_work_history  =  tap(EmployeeRightToWorkHistory::where($user_right_to_work_history_query_params))->update(
+                $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
                     collect($request_data)->only([
-                        'right_to_work_code',
-                        'right_to_work_check_date',
-                        'right_to_work_expiry_date',
-                        'right_to_work_docs',
-
+                        'pension_eligible',
+                        'pension_enrolment_issue_date',
+                        'pension_letters',
+                        'pension_scheme_status',
+                        'pension_scheme_opt_out_date',
+                        'pension_re_enrollment_due_date',
         "is_manual",
         'user_id',
+        "pension_id",
         "from_date",
         "to_date",
-
-
 
                     ])->toArray()
                 )
                     // ->with("somthing")
 
                     ->first();
-                if (!$user_right_to_work_history) {
+                if (!$user_pension_history) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
-                return response($user_right_to_work_history, 201);
+                return response($user_pension_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -320,9 +344,9 @@ class UserRightToWorkHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-right-to-work-histories",
-     *      operationId="getUserRightToWorkHistories",
-     *      tags={"user_right_to_work_histories"},
+     *      path="/v1.0/user-pension-histories",
+     *      operationId="getUserPensionHistories",
+     *      tags={"user_pension_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -370,8 +394,8 @@ class UserRightToWorkHistoryController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get user right to work histories  ",
-     *      description="This method is to get user right to work histories ",
+     *      summary="This method is to get user pension histories  ",
+     *      description="This method is to get user pension histories ",
      *
 
      *      @OA\Response(
@@ -408,11 +432,11 @@ class UserRightToWorkHistoryController extends Controller
      *     )
      */
 
-    public function getUserRightToWorkHistories(Request $request)
+    public function getUserPensionHistories(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_right_to_work_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_pension_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -424,7 +448,7 @@ class UserRightToWorkHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_right_to_work_histories = EmployeeRightToWorkHistory::with([
+            $user_pension_histories = EmployeePensionHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
@@ -438,29 +462,33 @@ class UserRightToWorkHistoryController extends Controller
             ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("employee_right_to_work_histories.name", "like", "%" . $term . "%");
-                        //     ->orWhere("employee_right_to_work_histories.description", "like", "%" . $term . "%");
+                        $query->where("employee_pension_histories.name", "like", "%" . $term . "%");
+                        //     ->orWhere("employee_pension_histories.description", "like", "%" . $term . "%");
                     });
                 })
-
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('employee_right_to_work_histories.user_id', $request->user_id);
+                    return $query->where('employee_pension_histories.user_id', $request->user_id);
                 })
                 ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('employee_right_to_work_histories.user_id', $request->user()->id);
+                    return $query->where('employee_pension_histories.user_id', $request->user()->id);
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('employee_right_to_work_histories.created_at', ">=", $request->start_date);
+                    return $query->where('employee_pension_histories.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('employee_right_to_work_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('employee_pension_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("employee_right_to_work_histories.right_to_work_expiry_date", $request->order_by);
+                    return $query->orderBy("employee_pension_histories.pension_re_enrollment_due_date", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("employee_right_to_work_histories.right_to_work_expiry_date", "DESC");
+                    return $query->orderBy("employee_pension_histories.pension_re_enrollment_due_date", "DESC");
                 })
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -469,7 +497,7 @@ class UserRightToWorkHistoryController extends Controller
 
 
 
-            return response()->json($user_right_to_work_histories, 200);
+            return response()->json($user_pension_histories, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -479,9 +507,9 @@ class UserRightToWorkHistoryController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/user-right-to-work-histories/{id}",
-     *      operationId="getUserRightToWorkHistoryById",
-     *      tags={"user_right_to_work_histories"},
+     *      path="/v1.0/user-pension-histories/{id}",
+     *      operationId="getUserPensionHistoryById",
+     *      tags={"user_pension_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -492,8 +520,8 @@ class UserRightToWorkHistoryController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get user right to work history by id",
-     *      description="This method is to get user right to work history by id",
+     *      summary="This method is to get user pension history by id",
+     *      description="This method is to get user pension history by id",
      *
 
      *      @OA\Response(
@@ -531,11 +559,11 @@ class UserRightToWorkHistoryController extends Controller
      */
 
 
-    public function getUserRightToWorkHistoryById($id, Request $request)
+    public function getUserPensionHistoryById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_right_to work_history_view')) {
+            if (!$request->user()->hasPermissionTo('employee_pension_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -547,7 +575,7 @@ class UserRightToWorkHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
-            $user_right_to_work_history =  EmployeeRightToWorkHistory::where([
+            $user_pension_history =  EmployeePensionHistory::where([
                 "id" => $id,
                 "is_manual" => 1
             ])
@@ -556,7 +584,7 @@ class UserRightToWorkHistoryController extends Controller
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
-            if (!$user_right_to_work_history) {
+            if (!$user_pension_history) {
                 $this->storeError(
                     "no data found"
                     ,
@@ -569,7 +597,7 @@ class UserRightToWorkHistoryController extends Controller
                 ], 404);
             }
 
-            return response()->json($user_right_to_work_history, 200);
+            return response()->json($user_pension_history, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -581,9 +609,9 @@ class UserRightToWorkHistoryController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/user-right-to-work-histories/{ids}",
-     *      operationId="deleteUserRightToWorkHistoriesByIds",
-     *      tags={"user_right_to_work_histories"},
+     *      path="/v1.0/user-pension-histories/{ids}",
+     *      operationId="deleteUserPensionHistoriesByIds",
+     *      tags={"user_pension_histories"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -594,8 +622,8 @@ class UserRightToWorkHistoryController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete user right to work history by id",
-     *      description="This method is to delete user right to work history by id",
+     *      summary="This method is to delete user pension history by id",
+     *      description="This method is to delete user pension history by id",
      *
 
      *      @OA\Response(
@@ -632,12 +660,12 @@ class UserRightToWorkHistoryController extends Controller
      *     )
      */
 
-    public function deleteUserRightToWorkHistoriesByIds(Request $request, $ids)
+    public function deleteUserPensionHistoriesByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_right_to_work_history_delete')) {
+            if (!$request->user()->hasPermissionTo('employee_pension_history_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -650,7 +678,7 @@ class UserRightToWorkHistoryController extends Controller
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
             $idsArray = explode(',', $ids);
-            $existingIds = EmployeeRightToWorkHistory::whereIn('id', $idsArray)
+            $existingIds = EmployeePensionHistory::whereIn('id', $idsArray)
             // ->where(["is_manual" => 1])
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
@@ -673,7 +701,7 @@ class UserRightToWorkHistoryController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            EmployeeRightToWorkHistory::destroy($existingIds);
+            EmployeePensionHistory::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

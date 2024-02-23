@@ -24,7 +24,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Mail\VerifyMail;
+
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Business;
@@ -32,6 +32,8 @@ use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
+use App\Models\EmployeePension;
+use App\Models\EmployeePensionHistory;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
@@ -784,6 +786,42 @@ class UserManagementController extends Controller
                 $user->save();
                 $user->departments()->sync($request_data['departments'], []);
                 $user->assignRole($request_data['role']);
+
+
+         $employee_pension =     EmployeePension::create([
+                    'user_id' => $user->id,
+                    'business_id' => $user->business_id,
+                    'pension_eligible' => false,
+                    'pension_enrolment_issue_date' => NULL,
+                    'pension_letters' => [],
+                    'pension_scheme_status' => NULL,
+                    'pension_scheme_opt_out_date'=> NULL,
+                    'pension_re_enrollment_due_date' => NULL,
+                    'created_by' => auth()->user()->id
+                ]);
+
+                EmployeePensionHistory::create([
+                    'user_id' => $user->id,
+                    'pension_eligible' => false,
+                    'pension_enrolment_issue_date' => NULL,
+                    'pension_letters' => [],
+                    'pension_scheme_status' => NULL,
+                    'pension_scheme_opt_out_date'=> NULL,
+                    'pension_re_enrollment_due_date' => NULL,
+
+
+                    "is_manual" => 0,
+
+                    "pension_id" => $employee_pension->id,
+                    "from_date" => now(),
+                    "to_date" => NULL,
+
+                    'created_by' => auth()->user()->id
+
+                ]);
+
+
+
 
                 if (!empty($request_data["recruitment_processes"])) {
                     $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
@@ -1950,7 +1988,7 @@ class UserManagementController extends Controller
                                 'right_to_work_code',
                                 'right_to_work_check_date',
                                 'right_to_work_expiry_date',
-                                'right_to_work_docs',
+                                'ocs',
                                 // 'created_by'
                             ])->toArray());
                         } else {
@@ -1983,7 +2021,7 @@ class UserManagementController extends Controller
                                 'right_to_work_code',
                                 'right_to_work_check_date',
                                 'right_to_work_expiry_date',
-                                'right_to_work_docs',
+                                'ocs',
                             ];
 
 
@@ -4630,6 +4668,18 @@ class UserManagementController extends Controller
      *     required=true,
      *     example="current_cos_details"
      * ),
+     *
+     *
+     *    * @OA\Parameter(
+     *     name="current_pension_details",
+     *     in="query",
+     *     description="Current COS Details",
+     *     required=true,
+     *     example="current_pension_details"
+     * ),
+     *
+     *
+     *
      * @OA\Parameter(
      *     name="current_passport_details",
      *     in="query",
@@ -4959,6 +5009,10 @@ class UserManagementController extends Controller
      *     required=true,
      *     example="United States"
      * ),
+     *
+     *current_pension_details_pension_scheme_status
+    * current_pension_details_pension_enrolment_issue_date
+     *
      * @OA\Parameter(
      *     name="current_cos_details_date_assigned",
      *     in="query",
@@ -5072,13 +5126,7 @@ class UserManagementController extends Controller
  *     required=true,
  *     example="2025-01-01"
  * ),
- * @OA\Parameter(
- *     name="current_right_to_works_right_to_work_docs",
- *     in="query",
- *     description="Right to Work Documents",
- *     required=true,
- *     example="Passport, Visa"
- * ),
+
      * @OA\Parameter(
      *     name="address_details_address",
      *     in="query",

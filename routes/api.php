@@ -51,6 +51,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserNoteController;
 use App\Http\Controllers\UserPassportHistoryController;
 use App\Http\Controllers\UserPayslipController;
+use App\Http\Controllers\UserPensionHistoryController;
 use App\Http\Controllers\UserRightToWorkHistoryController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\UserSponsorshipHistoryController;
@@ -377,6 +378,41 @@ Route::delete('/v1.0/user-sponsorship-histories/{ids}', [UserSponsorshipHistoryC
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user sponsorship  history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user pension history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-pension-histories', [UserPensionHistoryController::class, "createUserPensionHistory"]);
+Route::put('/v1.0/user-pension-histories', [UserPensionHistoryController::class, "updateUserPensionHistory"]);
+Route::get('/v1.0/user-pension-histories', [UserPensionHistoryController::class, "getUserPensionHistories"]);
+Route::get('/v1.0/user-pension-histories/{id}', [UserPensionHistoryController::class, "getUserPensionHistoryById"]);
+Route::delete('/v1.0/user-pension-histories/{ids}', [UserPensionHistoryController::class, "deleteUserPensionHistoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user pension  history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -832,6 +868,7 @@ Route::get('/v1.0/histories/user-passport-details', [HistoryDetailsController::c
 Route::get('/v1.0/histories/user-visa-details', [HistoryDetailsController::class, "getUserVisaDetailsHistory"]);
 Route::get('/v1.0/histories/user-right-to-works', [HistoryDetailsController::class, 'getRightToWorksHistory']);
 Route::get('/v1.0/histories/user-sponsorship-details', [HistoryDetailsController::class, "getUserSponsorshipDetailsHistory"]);
+Route::get('/v1.0/histories/user-pension-details', [HistoryDetailsController::class, "getUserPensionDetailsHistory"]);
 Route::get('/v1.0/histories/user-address-details', [HistoryDetailsController::class, "getUserAddressDetailsHistory"]);
 Route::get('/v1.0/histories/user-attendance-details', [HistoryDetailsController::class, "getUserAttendanceDetailsHistory"]);
 Route::get('/v1.0/histories/user-leave-details', [HistoryDetailsController::class, "getUserLeaveDetailsHistory"]);

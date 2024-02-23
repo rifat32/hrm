@@ -13,6 +13,7 @@ use App\Models\Department;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeeRightToWork;
 use App\Models\EmployeeSponsorship;
+use App\Models\EmployeePension;
 use App\Models\EmployeeVisaDetail;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
@@ -1929,6 +1930,78 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         return $data;
     }
+
+    public function upcoming_pension_expiries(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+    ) {
+
+        $data_query  = EmployeePension::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+
+        ->where("pension_re_enrollment_due_date",">=", today())
+        ->where("business_id",auth()->user()->business_id);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('pension_re_enrollment_due_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pension_re_enrollment_due_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+        $expires_in_days = [15,30,60];
+        foreach($expires_in_days as $expires_in_day){
+            $query_day = Carbon::now()->addDays($expires_in_day);
+            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('pension_re_enrollment_due_date', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
+        }
+
+
+        $data["date_ranges"] = [
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
+            "this_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+          ];
+
+        return $data;
+    }
+
+
+
+
+
     public function sponsorships(
         $today,
         $start_date_of_next_month,
@@ -1977,6 +2050,59 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["previous_month_data_count"] = clone $data_query;
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('expiry_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+        return $data;
+    }
+
+
+    public function pensions(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $current_certificate_status
+    ) {
+
+        $data_query  = EmployeePension::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+        ->where([
+            "current_certificate_status"=>$current_certificate_status,
+            "business_id"=>auth()->user()->business_id
+        ]);
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('pension_re_enrollment_due_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
         return $data;
     }
@@ -2437,11 +2563,88 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $data[($sponsorship_status . "_sponsorships")]["widget_name"] = ($sponsorship_status . "_sponsorships");
 
 
+            }
 
 
 
 
 
+
+
+
+
+            $data["upcoming_pension_expiries"] = $this->upcoming_pension_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+
+
+            $widget = $dashboard_widgets->get("upcoming_pension_expiries");
+
+
+
+            $data["upcoming_pension_expiries"]["id"] = 7  + $index;
+            if($widget) {
+                $data["upcoming_pension_expiries"]["widget_id"] = $widget->id;
+                $data["upcoming_pension_expiries"]["widget_order"] = $widget->widget_order;
+            }
+            else {
+                $data["upcoming_pension_expiries"]["widget_id"] = 0;
+                $data["upcoming_pension_expiries"]["widget_order"] = 0;
+            }
+
+
+
+            $data["upcoming_pension_expiries"]["widget_name"] = "upcoming_pension_expiries";
+
+
+
+            $pension_statuses = ["opt_in", "opt_out"];
+            foreach ($pension_statuses as $index2=>$pension_status) {
+                $data[($pension_status . "_pensions")] = $this->pensions(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    $pension_status
+                );
+                $widget = $dashboard_widgets->get(($pension_status . "_pensions"));
+
+
+                $data[($pension_status . "_pensions")]["id"] = 8 + $index + $index2;
+                if($widget) {
+                    $data[($pension_status . "_pensions")]["widget_id"] = $widget->id;
+                    $data[($pension_status . "_pensions")]["widget_order"] = $widget->widget_order;
+                }
+                else {
+                    $data[($pension_status . "_pensions")]["widget_id"] = 0;
+                    $data[($pension_status . "_pensions")]["widget_order"] = 0;
+                }
+
+
+                $data[($pension_status . "_pensions")]["widget_name"] = ($pension_status . "_pensions");
             }
 
 

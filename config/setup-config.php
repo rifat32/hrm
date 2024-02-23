@@ -274,6 +274,11 @@ return [
                 "employee_sponsorship_history_view",
                 "employee_sponsorship_history_delete",
 
+                "employee_pension_history_create",
+                "employee_pension_history_update",
+                "employee_pension_history_view",
+                "employee_pension_history_delete",
+
 
 
                 "employee_asset_create",
@@ -498,6 +503,11 @@ return [
                 "employee_sponsorship_history_view",
                 "employee_sponsorship_history_delete",
 
+                "employee_pension_history_create",
+                "employee_pension_history_update",
+                "employee_pension_history_view",
+                "employee_pension_history_delete",
+
 
                 "employee_asset_create",
                 "employee_asset_update",
@@ -706,6 +716,11 @@ return [
                 "employee_sponsorship_history_update",
                 "employee_sponsorship_history_view",
                 "employee_sponsorship_history_delete",
+
+                "employee_pension_history_create",
+                "employee_pension_history_update",
+                "employee_pension_history_view",
+                "employee_pension_history_delete",
 
 
                 "employee_asset_create",
@@ -949,6 +964,11 @@ return [
         "employee_sponsorship_history_update",
         "employee_sponsorship_history_view",
         "employee_sponsorship_history_delete",
+
+        "employee_pension_history_create",
+                "employee_pension_history_update",
+                "employee_pension_history_view",
+                "employee_pension_history_delete",
 
 
         "employee_asset_create",
@@ -1208,10 +1228,15 @@ return [
 
 
 
-        "employee_sponsorship_history_create",
-        "employee_sponsorship_history_update",
-        "employee_sponsorship_history_view",
-        "employee_sponsorship_history_delete",
+        "employee_sponsorship_history_create" => "",
+        "employee_sponsorship_history_update" => "",
+        "employee_sponsorship_history_view" => "",
+        "employee_sponsorship_history_delete" => "",
+
+                "employee_pension_history_create" => "",
+                "employee_pension_history_update" => "",
+                "employee_pension_history_view" => "",
+                "employee_pension_history_delete" => "",
 
 
 
@@ -1496,6 +1521,10 @@ return [
         "employee_sponsorship_history_delete" => "delete",
 
 
+        "employee_pension_history_create" => "create",
+        "employee_pension_history_update" => "update",
+        "employee_pension_history_view" => "view",
+        "employee_pension_history_delete" => "delete",
 
 
 
@@ -1879,6 +1908,23 @@ return [
 
             ],
         ],
+
+
+        [
+            "header" => "employee_pension_history",
+            "permissions" => [
+
+                "employee_pension_history_create",
+                "employee_pension_history_update",
+                "employee_pension_history_view",
+                "employee_pension_history_delete",
+
+
+            ],
+        ],
+
+
+
 
 
 
@@ -2355,10 +2401,19 @@ return [
 
 
     "reminder_options"  => [
+
+        [
+            "entity_name" => "pension_expiry",
+            "db_table_name" => "employee_pensionss",
+            "db_field_name" => "expiry_date",
+
+        ],
+
+
         [
             "entity_name" => "sponsorship_expiry",
             "db_table_name" => "employee_sponsorships",
-            "db_field_name" => "expiry_date",
+            "db_field_name" => "pension_re_enrollment_due_date",
 
         ],
 

@@ -11,8 +11,12 @@ use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeeProjectHistory;
 use App\Models\EmployeeRightToWork;
-use App\Models\EmployeeSponsorship;
+
 use App\Models\EmployeeSponsorshipHistory;
+
+use App\Models\EmployeePensionHistory;
+
+
 use App\Models\EmployeeUserWorkShiftHistory;
 
 use App\Models\EmployeeVisaDetailHistory;
@@ -818,7 +822,156 @@ class HistoryDetailsController extends Controller
              return $this->sendError($e, 500, $request);
          }
      }
+   /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/histories/user-pension-details",
+     *      operationId="getUserPensionDetailsHistory",
+     *      tags={"histories"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get employee pension history",
+     *      description="This method is to get pension history",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserPensionDetailsHistory(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+             $employee_pension_details_history = EmployeePensionHistory::where(["is_manual" => 0])
+
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_pension_histories.user_id', $request->user_id);
+            })
+            ->when(empty($request->user_id), function ($query) use ($request) {
+                return $query->where('employee_pension_histories.user_id', $request->user()->id);
+            })
+                //  ->when(!empty($request->search_key), function ($query) use ($request) {
+                //      return $query->where(function ($query) use ($request) {
+                //          $term = $request->search_key;
+                //          $query->where("employee_sponsorship_histories.certificate_number", "like", "%" . $term . "%");
+                //      });
+                //  })
+                 ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('employee_pension_histories.created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('employee_pension_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("employee_pension_histories.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("employee_pension_histories.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });;
+
+
+
+             return response()->json($employee_pension_details_history, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
        /**
      *
      * @OA\Get(

@@ -100,6 +100,7 @@ class UserVisaHistoryController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_manual"] = 1;
 
 
@@ -132,7 +133,7 @@ class UserVisaHistoryController extends Controller
                         // Now $current_passport_detail holds the updated passport detail with the later expiry date
                     }
                 } else {
-                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+                    $new_expiry_date = Carbon::parse($request_data["visa_expiry_date"]);
                     $today = Carbon::now();
 
                     if ($new_expiry_date->gt($today)) {

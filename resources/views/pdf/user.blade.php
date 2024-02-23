@@ -250,7 +250,7 @@ return $formattedBreakTime;
 
 
     {{-- 2. LEAVE ALLOWANCE  --}}
-    @if (!empty($request->leave_allowances))
+    @if (!empty($request->leave_allowances) && count($leave_types))
     <table>
         <h3>Leave Allowances</h3>
         <thead>
@@ -274,7 +274,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($leave_types))
+            @if (1)
                 @foreach ($leave_types as $key => $leave_type)
                     @php
                         $total_recorded_hours = \App\Models\LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
@@ -320,7 +320,7 @@ return $formattedBreakTime;
 @endif
 
     {{-- 3. ATTENDANCE  --}}
-    @if (!empty($request->attendances))
+    @if (!empty($request->attendances) && count($user->attendances))
     <table>
         <h3>Attendances</h3>
         <thead>
@@ -347,7 +347,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->attendances))
+            @if (1)
                 @foreach ($user->attendances as $index => $attendance)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -383,7 +383,7 @@ return $formattedBreakTime;
 
 
     {{-- 4. LEAVE  --}}
-    @if (!empty($request->leaves))
+    @if (!empty($request->leaves) && count($user->leaves))
     <table>
         <h3>Leaves</h3>
         <thead>
@@ -405,7 +405,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->leaves))
+            @if (1)
                 @foreach ($user->leaves as $index => $leave)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -445,7 +445,7 @@ return $formattedBreakTime;
 
 
     {{-- 5. DOCUMENTS  --}}
-    @if (!empty($request->documents))
+    @if (!empty($request->documents) && count($user->documents))
     <table>
         <h3>Documents</h3>
         <thead>
@@ -461,7 +461,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->documents))
+            @if (1)
                 @foreach ($user->documents as $index => $document)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -485,7 +485,7 @@ return $formattedBreakTime;
 
 
     {{-- 6. ASSETS  --}}
-    @if (!empty($request->assets))
+    @if (!empty($request->assets) && count($user->assets))
     <table>
         <h3>Assets</h3>
         <thead>
@@ -515,7 +515,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->assets))
+            @if (1)
                 @foreach ($user->assets as $index => $asset)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -555,7 +555,7 @@ return $formattedBreakTime;
 
 
     {{-- 7. EDUCATIONAL HISTORY  --}}
-    @if (!empty($request->educational_history))
+    @if (!empty($request->educational_history) && count($user->education_histories))
     <table>
         <h3>Educational History</h3>
         <thead>
@@ -580,7 +580,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->education_histories))
+            @if (1)
                 @foreach ($user->education_histories as $index => $education_history)
                     <tr class="table_row">
                         <td style="padding:0px 10px">{{ $index + 1 }}</td>
@@ -615,7 +615,7 @@ return $formattedBreakTime;
 
 
     {{-- 8. JOB HISTORY  --}}
-    @if (!empty($request->job_history))
+    @if (!empty($request->job_history) && count($user->job_histories))
     <table>
         <h3>Job History</h3>
         <thead>
@@ -644,7 +644,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->job_histories))
+            @if (1)
                 @foreach ($user->job_histories as $index => $job_history)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -688,7 +688,7 @@ return $formattedBreakTime;
     {{-- 9. IMMIGRATION DERAILS  --}}
 
     {{-- COS HISTORY --}}
-    @if (!empty($request->current_cos_details))
+    @if (!empty($request->current_cos_details) && !empty($user->sponsorship_detail))
     <table>
         <h3> Current COS Details</h3>
         <thead>
@@ -712,7 +712,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (!empty($user->sponsorship_detail))
+            @if (1)
                 <tr class="table_row">
                     <td class="index_col"></td>
                     @if (!empty($request->current_cos_details_date_assigned))
@@ -742,8 +742,63 @@ return $formattedBreakTime;
 
 
 
+@if (!empty($request->current_pension_details) && !empty($user->pension_detail))
+@if (!$user->pension_detail->pension_eligible)
+
+
+<table>
+    <h3> Current Pension Details</h3>
+    <thead>
+        <tr class="table_head_row">
+            <th class="index_col"></th>
+            @if (!empty($request->current_pension_details_pension_scheme_status))
+                <th>Status</th>
+            @endif
+            @if (!empty($request->current_pension_details_pension_enrolment_issue_date))
+                <th>Issue Date</th>
+            @endif
+            @if (!empty($request->current_pension_details_pension_scheme_opt_out_date))
+                <th>Opt Out Date</th>
+            @endif
+            @if (!empty($request->current_pension_details_pension_re_enrollment_due_date))
+                <th>Re Enrollment Due Date</th>
+            @endif
+
+        </tr>
+    </thead>
+    <tbody>
+        @if (1)
+            <tr class="table_row">
+                <td class="index_col"></td>
+                @if (!empty($request->current_pension_details_pension_scheme_status))
+                    <td>{{ format_date($user->pension_detail->pension_scheme_status) }}</td>
+                @endif
+                @if (!empty($request->current_pension_details_pension_enrolment_issue_date))
+                    <td>{{ format_date($user->pension_detail->pension_enrolment_issue_date) }}</td>
+                @endif
+                @if (!empty($request->current_pension_details_pension_scheme_opt_out_date))
+                    <td>{{ $user->pension_detail->pension_scheme_opt_out_date }}</td>
+                @endif
+                @if (!empty($request->current_pension_details_pension_re_enrollment_due_date))
+                    <td>{{ $user->pension_detail->pension_re_enrollment_due_date }}</td>
+                @endif
+
+            </tr>
+        @else
+            <tr>
+                <td colspan="8" style="text-align: center;">No Data Found</td>
+            </tr>
+        @endif
+    </tbody>
+</table>
+@endif
+@endif
+
+
+
+
     {{-- PASSPORT HISTORY --}}
-    @if (!empty($request->current_passport_details))
+    @if (!empty($request->current_passport_details) && !empty($user->passport_detail))
     <table>
         <h3>Current Passport Details</h3>
         <thead>
@@ -764,7 +819,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (!empty($user->passport_detail))
+            @if (1)
                 <tr class="table_row">
                     <td class="index_col"></td>
                     @if (!empty($request->current_passport_details_issue_date))
@@ -793,7 +848,7 @@ return $formattedBreakTime;
 
 
     {{-- VISA HISTORY --}}
-    @if (!empty($request->current_visa_details))
+    @if (!empty($request->current_visa_details) && !empty($user->visa_detail))
     <table>
         <h3>Current Visa Details</h3>
         <thead>
@@ -814,7 +869,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (!empty($user->visa_detail))
+            @if (1)
                 <tr class="table_row">
                     <td class="index_col"></td>
                     @if (!empty($request->current_visa_details_issue_date))
@@ -840,7 +895,7 @@ return $formattedBreakTime;
 @endif
 
 
-@if (!empty($request->current_right_to_works))
+@if (!empty($request->current_right_to_works) && !empty($user->right_to_work))
 <table>
     <h3>Current Right To Works</h3>
     <thead>
@@ -855,7 +910,7 @@ return $formattedBreakTime;
         </tr>
     </thead>
     <tbody>
-        @if (!empty($user->visa_detail))
+        @if (1)
 
                 <tr class="table_row">
                     {{-- <td>{{ $user->visa_detail->created_at }}</td>
@@ -876,7 +931,7 @@ return $formattedBreakTime;
 
 
     {{-- 10. ADDRESS DETAILS  --}}
-    @if (!empty($request->address_details))
+    @if (!empty($request->address_details) && !empty($user->address_line_1))
     <table>
         <h3>Address Details</h3>
         <thead>
@@ -897,7 +952,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (!empty($user->address_line_1))
+            @if (1)
                 <tr class="table_row">
                     <td class="index_col"></td>
                     @if (!empty($request->address_details_address))
@@ -926,7 +981,7 @@ return $formattedBreakTime;
 
 
     {{-- 11. CONTACT  --}}
-    @if (!empty($request->contact_details))
+    @if (!empty($request->contact_details) && count($user->emergency_contact_details))
     <table>
         <h3>Contact Details</h3>
         <thead>
@@ -959,7 +1014,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->emergency_contact_details))
+            @if (1)
                 @foreach (($user->emergency_contact_details) as $index => $emergency_contact)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -1003,7 +1058,7 @@ return $formattedBreakTime;
 
 
     {{-- 12. NOTES  --}}
-    @if (!empty($request->notes))
+    @if (!empty($request->notes) && count($user->notes))
     <table>
         <h3>Notes</h3>
         <thead>
@@ -1018,7 +1073,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->notes))
+            @if (1)
                 @foreach ($user->notes as $index => $note)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
@@ -1042,7 +1097,7 @@ return $formattedBreakTime;
 
 
     {{-- 13. BANK DETAILS  --}}
-    @if (!empty($request->bank_details))
+    @if (!empty($request->bank_details) && !empty($user->bank_details_name))
     <table>
         <h3>Bank Details</h3>
         <thead>
@@ -1063,7 +1118,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if ($user->bank)
+            @if (1)
                 <tr class="table_row">
                     <td class="index_col">1</td>
                     @if (!empty($request->bank_details_name))
@@ -1091,7 +1146,7 @@ return $formattedBreakTime;
 
 
     {{-- 14. SOCIAL LINKS  --}}
-    @if (!empty($request->social_links))
+    @if (!empty($request->social_links) && count($user->social_links))
     <table>
         <h3>Social Links</h3>
         <thead>
@@ -1106,7 +1161,7 @@ return $formattedBreakTime;
             </tr>
         </thead>
         <tbody>
-            @if (count($user->social_links))
+            @if (1)
                 @foreach ($user->social_links as $index => $social_link)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
