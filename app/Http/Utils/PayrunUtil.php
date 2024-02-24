@@ -46,7 +46,7 @@ trait PayrunUtil
                         $start_date = Carbon::now()->startOfMonth()->subMonth(1);
                     }
                     if (!$end_date) {
-                        $end_date = Carbon::now()->startOfMonth();
+                        $end_date = Carbon::now()->startOfMonth()->subDay(1);
                     }
                     break;
                 default:

@@ -103,6 +103,14 @@ class User extends Authenticatable
     }
 
 
+    public function payrolls()
+    {
+        return $this->hasMany(Payroll::class, "user_id" ,'id');
+    }
+
+
+
+
 
     public function projects() {
         return $this->belongsToMany(Project::class, 'user_projects', 'user_id', 'project_id');

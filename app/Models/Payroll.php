@@ -43,6 +43,15 @@ class Payroll extends Model
         'created_by',
     ];
 
+
+
+
+
+
+
+
+
+
     protected $casts = [
         'is_active' => 'boolean',
     ];
@@ -84,6 +93,9 @@ class Payroll extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+
+
 
 
     // public function getCreatedAtAttribute($value)

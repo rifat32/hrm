@@ -23,6 +23,44 @@ class Payrun extends Model
         "business_id",
         "created_by"
     ];
+    protected $appends = ['available_users_for_payroll'];
+    public function getAvailableUsersForPayrollAttribute($value) {
+          $all_manager_department_ids = [];
+          $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+          foreach ($manager_departments as $manager_department) {
+              $all_manager_department_ids[] = $manager_department->id;
+              $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+          };
+
+          $employee_count = User::where([
+            "business_id" => $this->business_id,
+            "is_active" => 1
+        ])
+            ->whereDoesntHave("payrolls", function ($q)  {
+                $q->where("payrolls.start_date", $this->start_date)
+                    ->where("payrolls.end_date", $this->end_date);
+            })
+
+            ->whereNotIn("id", [auth()->user()->id])
+            ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+            })
+
+            ->where(function ($query)  {
+                $query->whereHas("departments.payrun_department", function ($query)  {
+                    $query->where("payrun_departments.payrun_id", $this->id);
+                })
+                    ->orWhereHas("payrun_user", function ($query)  {
+                        $query->where("payrun_users.payrun_id", $this->id);
+                    });
+            })
+
+
+            ->count();
+            return $employee_count;
+
+
+        }
 
     public function getStartDateAttribute($value)
     {
@@ -85,7 +123,6 @@ class Payrun extends Model
     public function users() {
         return $this->belongsToMany(User::class, 'payrun_users', 'payrun_id', 'user_id');
     }
-
 
     public function payrolls() {
         return $this->hasMany(Payroll::class, 'payrun_id', 'id');

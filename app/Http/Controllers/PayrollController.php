@@ -17,11 +17,11 @@ use Illuminate\Support\Facades\DB;
 
 class PayrollController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil,PayrunUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, PayrunUtil;
 
 
 
-      /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/payrolls",
@@ -80,49 +80,70 @@ class PayrollController extends Controller
      *     )
      */
 
-     public function createPayroll(PayrollCreateRequest $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             return DB::transaction(function () use ($request) {
-                 if (!$request->user()->hasPermissionTo('payrun_create')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
+    public function createPayroll(PayrollCreateRequest $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            return DB::transaction(function () use ($request) {
+                if (!$request->user()->hasPermissionTo('payrun_create')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
 
-                 $request_data = $request->validated();
-
-
-                 $payrun = Payrun::where([
-                     "id" => $request_data["payrun_id"],
-                     "business_id" => auth()->user()->business_id
-                 ])
-
-                 ->first();
-
-                 if(!$payrun) {
-                     $error = [ "message" => "The given data was invalid.",
-                     "errors" => ["payrun_id"=>["The payrun_id field is invalid."]]
-                     ];
-                         throw new Exception(json_encode($error),500);
-                  }
-
-                 $employees = User::whereIn("id",$request_data["users"])
-                     ->get();
-                $processed_employees =  $this->process_payrun($payrun,$employees,$request_data["start_date"],$request_data["end_date"],true,true);
-
-                 return response()->json($processed_employees,201);
+                $request_data = $request->validated();
 
 
+                $payrun = Payrun::where([
+                    "id" => $request_data["payrun_id"],
+                    "business_id" => auth()->user()->business_id
+                ])
+
+                    ->first();
+
+                if (!$payrun) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => ["payrun_id" => ["The payrun_id field is invalid."]]
+                    ];
+                    throw new Exception(json_encode($error), 500);
+                }
+
+                $employees = User::whereIn("id", $request_data["users"])
+                    ->whereDoesntHave("payrolls", function ($q) use ($payrun) {
+                        $q->where("payrolls.start_date", $payrun->start_date)
+                            ->where("payrolls.end_date", $payrun->end_date);
+                    })
+                    ->where(function ($query) use ($payrun) {
+                        $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
+                            $query->where("payrun_departments.payrun_id", $payrun->id);
+                        })
+                            ->orWhereHas("payrun_user", function ($query) use ($payrun) {
+                                $query->where("payrun_users.payrun_id", $payrun->id);
+                            });
+                    })
 
 
-             });
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+
+
+
+                    ->get();
+
+
+
+
+
+
+                $processed_employees =  $this->process_payrun($payrun, $employees, $request_data["start_date"], $request_data["end_date"], true, true);
+
+                return response()->json($processed_employees, 201);
+            });
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -144,7 +165,7 @@ class PayrollController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-   *      * *  @OA\Parameter(
+     *      * *  @OA\Parameter(
      * name="payrun_id",
      * in="query",
      * description="payrun_id",
@@ -248,7 +269,7 @@ class PayrollController extends Controller
     public function getPayrolls(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             if (!$request->user()->hasPermissionTo('payrun_create')) {
                 return response()->json([
@@ -263,11 +284,12 @@ class PayrollController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             };
-            if(!$request->payrun_id) {
-               $error = [ "message" => "The given data was invalid.",
-               "errors" => ["payrun_id"=>["The payrun_id field is required."]]
-               ];
-                   throw new Exception(json_encode($error),422);
+            if (!$request->payrun_id) {
+                $error = [
+                    "message" => "The given data was invalid.",
+                    "errors" => ["payrun_id" => ["The payrun_id field is required."]]
+                ];
+                throw new Exception(json_encode($error), 422);
             }
 
             // if(!isset($request->start_date)) {
@@ -293,22 +315,25 @@ class PayrollController extends Controller
                 "id" => $request->payrun_id,
                 "business_id" => auth()->user()->business_id
             ])
-            ->where(function($query) use($all_manager_department_ids) {
-                $query->whereHas("departments", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 })
-                 ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 });
-            })
-            ->first();
+                ->where(function ($query) use ($all_manager_department_ids) {
+                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    })
+                        ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        });
+                })
+                ->first();
 
-            if(!$payrun) {
-                $error = [ "message" => "The given data was invalid.",
-                "errors" => ["payrun_id"=>["The payrun_id field is invalid."]]
+            if (!$payrun) {
+                $error = [
+                    "message" => "The given data was invalid.",
+                    "errors" => ["payrun_id" => ["The payrun_id field is invalid."]]
                 ];
-                    throw new Exception(json_encode($error),422);
-             }
+                throw new Exception(json_encode($error), 422);
+            }
+
+
 
 
 
@@ -316,34 +341,36 @@ class PayrollController extends Controller
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
             ])
-            ->whereNotIn("id",[auth()->user()->id])
-            ->when(!empty($request->user_ids), function($query) use($request,$all_manager_department_ids) {
-                $user_ids = explode(',', $request->user_ids);
-                $query->whereIn("users.id",$user_ids)
-                ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 })
-                ;
-            })
-            ->where(function($query) use($payrun) {
-                $query->whereHas("departments.payrun_department",function($query) use($payrun) {
-                    $query->where("payrun_departments.payrun_id", $payrun->id);
+                ->whereDoesntHave("payrolls", function ($q) use ($payrun) {
+                    $q->where("payrolls.start_date", $payrun->start_date)
+                        ->where("payrolls.end_date", $payrun->end_date);
                 })
-                ->orWhereHas("payrun_user", function($query) use($payrun)  {
-                    $query->where("payrun_users.payrun_id", $payrun->id);
-                });
-            })
+
+                ->whereNotIn("id", [auth()->user()->id])
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->when(!empty($request->user_ids), function ($query) use ($request, $all_manager_department_ids) {
+                    $user_ids = explode(',', $request->user_ids);
+                    $query->whereIn("users.id", $user_ids);
+                })
+                ->where(function ($query) use ($payrun) {
+                    $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
+                        $query->where("payrun_departments.payrun_id", $payrun->id);
+                    })
+                        ->orWhereHas("payrun_user", function ($query) use ($payrun) {
+                            $query->where("payrun_users.payrun_id", $payrun->id);
+                        });
+                })
 
 
                 ->get();
 
 
-           $processed_employees =  $this->process_payrun($payrun,$employees,$request->start_date,$request->end_date,true,false);
+            $processed_employees =  $this->process_payrun($payrun, $employees, $request->start_date, $request->end_date, true, false);
 
 
-            return response()->json($processed_employees,200);
-
-
+            return response()->json($processed_employees, 200);
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -358,7 +385,7 @@ class PayrollController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-   *      * *  @OA\Parameter(
+     *      * *  @OA\Parameter(
      * name="payrun_id",
      * in="query",
      * description="payrun_id",
@@ -459,24 +486,24 @@ class PayrollController extends Controller
      */
 
 
-     public function getPayrollList(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function getPayrollList(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             if (!$request->user()->hasPermissionTo('payrun_create')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('payrun_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             };
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            };
             //  if(!$request->payrun_id) {
             //     $error = [ "message" => "The given data was invalid.",
             //     "errors" => ["payrun_id"=>["The payrun_id field is required."]]
@@ -490,72 +517,69 @@ class PayrollController extends Controller
 
 
 
-                 if(!empty($request->payrun_id)) {
-                    $payrun = Payrun::where([
+            if (!empty($request->payrun_id)) {
+                $payrun = Payrun::where([
 
-                        "business_id" => auth()->user()->business_id
-                    ])
+                    "business_id" => auth()->user()->business_id
+                ])
 
 
-                    ->where(function($query) use($all_manager_department_ids) {
-                        $query->whereHas("departments", function($query) use($all_manager_department_ids) {
-                            $query->whereIn("departments.id",$all_manager_department_ids);
-                         })
-                         ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
-                            $query->whereIn("departments.id",$all_manager_department_ids);
-                         });
+                    ->where(function ($query) use ($all_manager_department_ids) {
+                        $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        })
+                            ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });
                     })
                     ->first();
 
-                    if(!$payrun) {
-                        $error = [ "message" => "The given data was invalid.",
-                        "errors" => ["payrun_id"=>["The payrun_id field is invalid."]]
-                        ];
-                            throw new Exception(json_encode($error),422);
-                     }
-
+                if (!$payrun) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => ["payrun_id" => ["The payrun_id field is invalid."]]
+                    ];
+                    throw new Exception(json_encode($error), 422);
                 }
+            }
 
 
 
-            $payrolls = Payroll::
-            with("user","payrun")
-            ->when(!empty($request->payrun_id), function($query) use($request) {
-                $query->where([
-                    "payrun_id" => $request->payrun_id
-                ]);
-            })
+            $payrolls = Payroll::with("user", "payrun")
+                ->when(!empty($request->payrun_id), function ($query) use ($request) {
+                    $query->where([
+                        "payrun_id" => $request->payrun_id
+                    ]);
+                })
 
-            ->when(!empty($request->user_ids), function($query) use($request) {
-                $user_ids = explode(',', $request->user_ids);
-                $query->orWhereHas("user", function($query) use($user_ids) {
-                    $query->whereIn("users..id",$user_ids);
-                 });
-            })
-            ->where(function($query) use($all_manager_department_ids) {
-                 $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 });
-            })
-            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("payrolls.id", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("payrolls.id", "DESC");
-            })
+                ->when(!empty($request->user_ids), function ($query) use ($request) {
+                    $user_ids = explode(',', $request->user_ids);
+                    $query->orWhereHas("user", function ($query) use ($user_ids) {
+                        $query->whereIn("users..id", $user_ids);
+                    });
+                })
+                ->where(function ($query) use ($all_manager_department_ids) {
+                    $query->whereHas("user.departments", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    });
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("payrolls.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("payrolls.id", "DESC");
+                })
 
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
-
-
-             return response()->json($payrolls,200);
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
 
 
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response()->json($payrolls, 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 }
