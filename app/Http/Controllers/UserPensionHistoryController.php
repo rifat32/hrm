@@ -106,7 +106,7 @@ class UserPensionHistoryController extends Controller
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
-
+                $request_data["business_id"] = $request->user()->business_id;
 
 
 
@@ -124,7 +124,7 @@ class UserPensionHistoryController extends Controller
                     if ($new_expiry_date->gt($current_expiry_date)) {
                         // Update the passport expiry date
                         $request_data["is_manual"] = 0;
-                        $user_pension  =  $current_expiry_date->update(
+                        $user_pension  =  $current_pension_detail->update(
                             collect($request_data)->only([
                                 'pension_eligible',
                                 'pension_enrolment_issue_date',
@@ -132,7 +132,7 @@ class UserPensionHistoryController extends Controller
                                 'pension_scheme_status',
                                 'pension_scheme_opt_out_date',
                                 'pension_re_enrollment_due_date',
-        "created_by"
+                                "created_by"
 
                             ])->toArray()
                         );

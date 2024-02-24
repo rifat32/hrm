@@ -117,8 +117,8 @@ class SettingPayrollController extends Controller
                 }
 
                 $setting_payrun =     SettingPayrun::updateOrCreate($check_data, $request_data);
-                $setting_payrun->restricted_users()->sync($request_data['restricted_users'], []);
-                $setting_payrun->restricted_departments()->sync($request_data['restricted_departments'], []);
+                $setting_payrun->restricted_users()->sync($request_data['restricted_users']);
+                $setting_payrun->restricted_departments()->sync($request_data['restricted_departments']);
 
 
 

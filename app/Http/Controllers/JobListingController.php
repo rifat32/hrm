@@ -105,7 +105,7 @@ class JobListingController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $job_listing =  JobListing::create($request_data);
-                $job_listing->job_platforms()->sync($request_data['job_platforms'], []);
+                $job_listing->job_platforms()->sync($request_data['job_platforms']);
 
                 return response($job_listing, 201);
             });
@@ -240,7 +240,7 @@ class JobListingController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $job_listing->job_platforms()->sync($request_data['job_platforms'], []);
+                $job_listing->job_platforms()->sync($request_data['job_platforms']);
 
                 return response($job_listing, 201);
             });

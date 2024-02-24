@@ -100,7 +100,7 @@ class AnnouncementController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $announcement =  Announcement::create($request_data);
-                $announcement->departments()->sync($request_data['departments'],[]);
+                $announcement->departments()->sync($request_data['departments']);
 
 
 
@@ -232,7 +232,7 @@ class AnnouncementController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $announcement->departments()->sync($request_data['departments'],[]);
+                $announcement->departments()->sync($request_data['departments']);
 
 
 

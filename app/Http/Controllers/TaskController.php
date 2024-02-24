@@ -112,7 +112,7 @@ class TaskController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["assigned_by"] = $request->user()->id;
                 $task =  Task::create($request_data);
-                $task->assignees()->sync($request_data['assignees'],[]);
+                $task->assignees()->sync($request_data['assignees']);
                 return response($task, 201);
             });
         } catch (Exception $e) {
@@ -249,7 +249,7 @@ class TaskController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $task->assignees()->sync($request_data['assignees'],[]);
+                $task->assignees()->sync($request_data['assignees']);
                 return response($task, 201);
             });
         } catch (Exception $e) {

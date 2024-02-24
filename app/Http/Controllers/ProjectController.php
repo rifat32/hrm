@@ -119,7 +119,7 @@ class ProjectController extends Controller
                 }
 
 
-                $project->departments()->sync($request_data['departments'], []);
+                $project->departments()->sync($request_data['departments']);
                 return response($project, 201);
             });
         } catch (Exception $e) {
@@ -924,7 +924,7 @@ class ProjectController extends Controller
                 if(empty($request_data['departments'])) {
                     $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
                 }
-                $project->departments()->sync($request_data['departments'], []);
+                $project->departments()->sync($request_data['departments']);
 
                 return response($project, 201);
             });

@@ -8,7 +8,7 @@ use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
 use App\Http\Requests\AttendanceCreateRequest;
 use App\Http\Requests\AttendanceMultipleCreateRequest;
 use App\Http\Requests\AttendanceUpdateRequest;
-
+use App\Http\Utils\BasicNotificationUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\PayrunUtil;
@@ -30,12 +30,13 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, PayrunUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, PayrunUtil, BasicNotificationUtil;
 
 
 
@@ -512,8 +513,8 @@ class AttendanceController extends Controller
 
 
 
-                // Dispatch the job
-                SendNotificationJob::dispatch($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
+
+                $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
 
 
 
@@ -1029,8 +1030,8 @@ class AttendanceController extends Controller
 
                     // Return the created attendance records in the response
 
-                      // Dispatch the job
-                SendNotificationJob::dispatch($created_attendances, $employee, "Attendance Taken", "create", "attendance");
+                     
+                      $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
 
 
 
@@ -1430,7 +1431,7 @@ class AttendanceController extends Controller
                     throw new Exception("some thing went wrong");
                 }
 
-                SendNotificationJob::dispatch($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
+                $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
 
 
                 return response($attendance, 201);
@@ -1610,9 +1611,9 @@ class AttendanceController extends Controller
                 }
 
                 if ($attendance->status == "approved") {
-                    SendNotificationJob::dispatch($attendance, $attendance->employee, "Attendance approved", "approve", "attendance");
+                    $this->send_notification($attendance, $attendance->employee, "Attendance approved", "approve", "attendance");
                 } else {
-                    SendNotificationJob::dispatch($attendance, $attendance->employee, "Attendance rejected", "reject", "attendance");
+                    $this->send_notification($attendance, $attendance->employee, "Attendance rejected", "reject", "attendance");
                 }
 
 
@@ -2895,7 +2896,7 @@ class AttendanceController extends Controller
 
             Attendance::destroy($existingIds);
 
-            SendNotificationJob::dispatch($attendances, $attendances->first()->employee, "Attendance deleted", "delete", "attendance");
+            $this->send_notification($attendances, $attendances->first()->employee, "Attendance deleted", "delete", "attendance");
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
@@ -3436,8 +3437,8 @@ return false;
 
                     // Return the created attendance records in the response
 
-                      // Dispatch the job
-                SendNotificationJob::dispatch($created_attendances, $user, "Attendance Taken", "create", "attendance");
+
+                      $this->send_notification($created_attendances, $user, "Attendance Taken", "create", "attendance");
 
 
 

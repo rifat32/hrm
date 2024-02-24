@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class SendNotificationJob implements ShouldQueue
 {
@@ -72,6 +73,7 @@ class SendNotificationJob implements ShouldQueue
 
         $all_parent_department_manager_ids = [];
         foreach ($departments as $department) {
+            array_push($all_parent_department_manager_ids,$department->manager_id);
             $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $department->getAllParentManagerIds());
         }
         $unique_all_parent_department_manager_ids = array_unique($all_parent_department_manager_ids);

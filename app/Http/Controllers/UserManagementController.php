@@ -784,7 +784,7 @@ class UserManagementController extends Controller
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
                 $user->save();
-                $user->departments()->sync($request_data['departments'], []);
+                $user->departments()->sync($request_data['departments']);
                 $user->assignRole($request_data['role']);
 
 
@@ -1443,8 +1443,22 @@ class UserManagementController extends Controller
                 if (!empty($request_data["work_shift_id"])) {
                     $work_shift =  WorkShift::where([
                         "id" => $request_data["work_shift_id"],
-                        "business_id" => auth()->user()->business_id
                     ])
+                    ->where(function ($query) {
+                        $query->where([
+                            "business_id" => auth()->user()->business_id
+                        ]) ->orWhere(function($query)  {
+                            $query->where([
+                                "is_active" => 1,
+                                "business_id" => NULL,
+                                "is_default" => 1
+                            ]);
+
+                        });
+
+                    })
+
+
                         ->first();
                     if (!$work_shift) {
                         $this->storeError(
@@ -1606,7 +1620,7 @@ class UserManagementController extends Controller
 
 
 
-                $user->departments()->sync($request_data['departments'], []);
+                $user->departments()->sync($request_data['departments']);
                 $user->syncRoles([$request_data['role']]);
 
                 if (!empty($request_data["recruitment_processes"])) {

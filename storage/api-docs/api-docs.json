@@ -27270,6 +27270,41 @@
                         "example": "2024-01-21"
                     },
                     {
+                        "name": "start_pension_pension_enrolment_issue_date",
+                        "in": "query",
+                        "description": "start_pension_pension_enrolment_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_pension_pension_enrolment_issue_date",
+                        "in": "query",
+                        "description": "end_pension_pension_enrolment_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_pension_re_enrollment_due_date_date",
+                        "in": "query",
+                        "description": "start_pension_re_enrollment_due_date_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_pension_re_enrollment_due_date_date",
+                        "in": "query",
+                        "description": "end_pension_re_enrollment_due_date_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "pension_re_enrollment_due_date_in_day",
+                        "in": "query",
+                        "description": "pension_re_enrollment_due_date_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
                         "name": "start_sponsorship_date_assigned",
                         "in": "query",
                         "description": "start_sponsorship_date_assigned",

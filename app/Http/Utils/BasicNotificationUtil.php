@@ -1,0 +1,108 @@
+<?php
+
+namespace App\Http\Utils;
+
+use App\Models\ActivityLog;
+use App\Models\Department;
+use App\Models\ErrorLog;
+use App\Models\Notification;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+trait BasicNotificationUtil
+{
+    // this function do all the task and returns transaction id or -1
+    public function send_notification($data, $user, $title, $type, $entity_name)
+    {
+
+
+
+            if ($data instanceof \Illuminate\Support\Collection) {
+                // If it's a collection, check if it's empty
+                if ($data->isNotEmpty()) {
+                    // If not empty, take the first element as the entity
+                    $entity_ids = $data->pluck('id')->toArray();
+
+                    $entity = $data->first();
+                    $notification_link = ($entity_name) . "/" . implode('_', $entity_ids);
+
+                } else {
+                    // Handle the case where the collection is empty
+                    return; // or do something else, depending on your requirements
+                }
+            } else {
+                // If it's not a collection, it's assumed to be a single entity
+                $entity_ids = [];
+                $entity = $data;
+                $notification_link = ($entity_name) . "/" . ($entity->id);
+            }
+
+
+            $departments = Department::whereHas("users", function ($query) use ($entity) {
+                $query->where("users.id", $entity->user_id);
+            })
+                ->get();
+
+
+
+            $notification_description = '';
+
+
+            if ($type == "create") {
+                $notification_description = (explode('_', $entity_name)[0]) . " taken for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+
+            }
+            if ($type == "update") {
+                $notification_description = (explode('_', $entity_name)[0]) . " updated for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+
+            }
+            if ($type == "approve") {
+                $notification_description = (explode('_', $entity_name)[0]) . " approved for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+
+            }
+            if ($type == "reject") {
+                $notification_description = (explode('_', $entity_name)[0]) . " rejected for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+
+            }
+            if ($type == "delete") {
+                $notification_description = (explode('_', $entity_name)[0]) . " deleted for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+
+            }
+
+
+
+            $all_parent_department_manager_ids = [];
+            foreach ($departments as $department) {
+                array_push($all_parent_department_manager_ids,$department->manager_id);
+                $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $department->getAllParentManagerIds());
+            }
+            $unique_all_parent_department_manager_ids = array_unique($all_parent_department_manager_ids);
+
+
+
+            foreach ($unique_all_parent_department_manager_ids as $manager_id) {
+                // Create notification
+                $notification = [
+                    "entity_id" => $entity->id,
+                    "entity_ids" => $entity_ids,
+                    "entity_name" => $entity_name,
+                    'notification_title' => $title,
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => 1,
+                    "receiver_id" => $manager_id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                ];
+
+                Notification::create($notification);
+            }
+
+
+    }
+
+
+
+}

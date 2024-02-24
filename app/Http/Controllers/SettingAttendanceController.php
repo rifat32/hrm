@@ -129,8 +129,8 @@ class SettingAttendanceController extends Controller
 
 
 
-                 $setting_attendance->special_users()->sync($request_data['special_users'],[]);
-                 $setting_attendance->special_roles()->sync($request_data['special_roles'],[]);
+                 $setting_attendance->special_users()->sync($request_data['special_users']);
+                 $setting_attendance->special_roles()->sync($request_data['special_roles']);
 
                  $permission = 'attendance_approve';
 

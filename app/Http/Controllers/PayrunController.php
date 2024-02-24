@@ -110,7 +110,7 @@ class PayrunController extends Controller
 
 
 
-                $payrun->departments()->sync($request_data['departments'], []);
+                $payrun->departments()->sync($request_data['departments']);
                 // $payrun->departments()->sync($request_data['departments'], []);
                 // $payrun->users()->sync($request_data['users'], []);
 

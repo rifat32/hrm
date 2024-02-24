@@ -173,7 +173,7 @@ class WorkShiftController extends Controller
                 $request_data["attendances_count"] = 0;
                 $work_shift =  WorkShift::create($request_data);
 
-                $work_shift->departments()->sync($request_data['departments'], []);
+                $work_shift->departments()->sync($request_data['departments']);
                 // $work_shift->users()->sync($request_data['users'], []);
                 $work_shift->details()->createMany($request_data['details']);
 
@@ -185,7 +185,7 @@ class WorkShiftController extends Controller
                 $employee_work_shift_history_data["to_date"] = NULL;
 
                  $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                 $employee_work_shift_history->departments()->sync($request_data['departments'], []);
+                 $employee_work_shift_history->departments()->sync($request_data['departments']);
                  $employee_work_shift_history->details()->createMany($request_data['details']);
 
 
@@ -474,7 +474,7 @@ if(!$fields_changed){
         $employee_work_shift_history_data["to_date"] = NULL;
          $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
          $employee_work_shift_history->details()->createMany($request_data['details']);
-        //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
+        //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"));
 
         $user_ids = $work_shift->users()->pluck('users.id')->toArray();
 
@@ -671,7 +671,7 @@ if(!$check_work_shift_details["ok"]) {
                 // $employee_work_shift_history_data["to_date"] = NULL;
                 // $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
                 // $employee_work_shift_history->details()->createMany($request_data['details']);
-                // //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"),[]);
+                // //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"));
 
                 // $user_ids = $work_shift->users()->pluck('users.id')->toArray();
 

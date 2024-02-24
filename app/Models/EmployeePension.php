@@ -27,6 +27,10 @@ class EmployeePension extends Model
     protected $casts = [
         'pension_letters' => 'array',
     ];
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by',"id");
+    }
 
 
 

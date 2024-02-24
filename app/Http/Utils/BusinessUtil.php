@@ -631,14 +631,14 @@ trait BusinessUtil
             ])
                 ->pluck("id");
 
-            $setting_leave->special_roles()->sync($business_owner_role_id, []);
+            $setting_leave->special_roles()->sync($business_owner_role_id);
 
 
             $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
-            $setting_leave->paid_leave_employment_statuses()->sync($default_paid_leave_employment_statuses, []);
+            $setting_leave->paid_leave_employment_statuses()->sync($default_paid_leave_employment_statuses);
 
             $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
-            $setting_leave->unpaid_leave_employment_statuses()->sync($default_unpaid_leave_employment_statuses, []);
+            $setting_leave->unpaid_leave_employment_statuses()->sync($default_unpaid_leave_employment_statuses);
         }
 
         // end load setting leave
@@ -709,7 +709,7 @@ trait BusinessUtil
                 "name" => ("business_owner#" . $business_id)
             ])
                 ->pluck("id");
-            $setting_attendance->special_roles()->sync($business_owner_role_id, []);
+            $setting_attendance->special_roles()->sync($business_owner_role_id);
         }
 
         // end load setting attendance

@@ -100,8 +100,8 @@ class HolidayController extends Controller
                 $holiday =  Holiday::create($request_data);
 
 
-                 $holiday->departments()->sync($request_data['departments'],[]);
-                 $holiday->users()->sync($request_data['users'],[]);
+                 $holiday->departments()->sync($request_data['departments']);
+                 $holiday->users()->sync($request_data['users']);
 
 
 
@@ -231,8 +231,8 @@ class HolidayController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $holiday->departments()->sync($request_data['departments'],[]);
-                $holiday->users()->sync($request_data['users'],[]);
+                $holiday->departments()->sync($request_data['departments']);
+                $holiday->users()->sync($request_data['users']);
                 return response($holiday, 201);
             });
         } catch (Exception $e) {
