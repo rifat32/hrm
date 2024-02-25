@@ -246,6 +246,9 @@ class BusinessController extends Controller
      *
      *  @OA\Property(property="business", type="string", format="array",example={
      *  "owner_id":"1",
+     *    *   "pension_scheme_registered" : 1,
+     *   "pension_scheme_name" : "hh",
+     *   "pension_scheme_letters" : {"file" :"vv.jpg"},
      * * "start_date":"start_date",
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
@@ -554,6 +557,9 @@ if(!$user->hasRole('business_owner')) {
      *
      *
      *  @OA\Property(property="business", type="string", format="array",example={
+     *   "pension_scheme_registered" : 1,
+     *   "pension_scheme_name" : "hh",
+     *   "pension_scheme_letters" : {"file" :"vv.jpg"},
      * "name":"ABCD businesses",
      * "start_date":"start_date",
      * "about":"Best businesses in Dhaka",
@@ -673,6 +679,14 @@ if(!$user->hasRole('business_owner')) {
         $request_data['business']['owner_id'] = $user->id;
         $request_data['business']['created_by'] = $request->user()->id;
         $request_data['business']['is_active'] = true;
+
+
+
+
+
+
+
+
         $business =  Business::create($request_data['business']);
 
 
@@ -1090,6 +1104,127 @@ if(!$user->hasRole('business_owner')) {
 
     }
 
+
+
+/**
+        *
+     * @OA\Put(
+     *      path="/v1.0/business-pension-information",
+     *      operationId="updateBusinessPensionInformation",
+     *      tags={"business_management"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update business pension information",
+     *      description="This method is to update pension information",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+     *
+     *  @OA\Property(property="business", type="string", format="array",example={
+     *   *  * "id":1,
+    *   "pension_scheme_registered" : 1,
+     *   "pension_scheme_name" : "hh",
+     *   "pension_scheme_letters" : {"file" :"vv.jpg"}
+     *
+     * }),
+     *
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function updateBusinessPensionInformation(BusinessUpdateRequest $request) {
+
+        try{
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+     return  DB::transaction(function ()use (&$request) {
+        if(!$request->user()->hasPermissionTo('business_update')){
+            return response()->json([
+               "message" => "You can not perform this action"
+            ],401);
+       }
+
+       if (!$this->businessOwnerCheck($request["business"]["id"])) {
+        return response()->json([
+            "message" => "you are not the owner of the business or the requested business does not exist."
+        ], 401);
+    }
+
+       $request_data = $request->validated();
+
+        $business  =  tap(Business::where([
+            "id" => $request_data['business']["id"]
+            ]))->update(collect($request_data['business'])->only([
+        "pension_scheme_registered",
+        "pension_scheme_name",
+        "pension_scheme_letters",
+
+        ])->toArray()
+        )
+            // ->with("somthing")
+
+            ->first();
+            if(!$business) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ],500);
+
+            }
+
+
+
+
+
+
+        return response([
+
+            "business" => $business
+        ], 201);
+        });
+        } catch(Exception $e){
+
+        return $this->sendError($e,500,$request);
+        }
+
+    }
 
 
      /**

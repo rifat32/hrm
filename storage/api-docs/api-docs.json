@@ -4471,6 +4471,11 @@
                                         "format": "array",
                                         "example": {
                                             "owner_id": "1",
+                                            "pension_scheme_registered": 1,
+                                            "pension_scheme_name": "hh",
+                                            "pension_scheme_letters": {
+                                                "file": "vv.jpg"
+                                            },
                                             "start_date": "start_date",
                                             "name": "ABCD businesses",
                                             "about": "Best businesses in Dhaka",
@@ -4773,6 +4778,11 @@
                                         "type": "string",
                                         "format": "array",
                                         "example": {
+                                            "pension_scheme_registered": 1,
+                                            "pension_scheme_name": "hh",
+                                            "pension_scheme_letters": {
+                                                "file": "vv.jpg"
+                                            },
                                             "name": "ABCD businesses",
                                             "start_date": "start_date",
                                             "about": "Best businesses in Dhaka",
@@ -4795,6 +4805,99 @@
                                                 "/b",
                                                 "/c"
                                             ]
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-pension-information": {
+            "put": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "This method is to update business pension information",
+                "description": "This method is to update pension information",
+                "operationId": "updateBusinessPensionInformation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user",
+                                    "business"
+                                ],
+                                "properties": {
+                                    "business": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "id": 1,
+                                            "pension_scheme_registered": 1,
+                                            "pension_scheme_name": "hh",
+                                            "pension_scheme_letters": {
+                                                "file": "vv.jpg"
+                                            }
                                         }
                                     }
                                 },

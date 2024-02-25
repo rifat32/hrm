@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Business extends Model
 {
     use HasFactory,  SoftDeletes;
+
+
+
+
+
     protected $fillable = [
         "name",
         "start_date",
@@ -30,7 +35,13 @@ class Business extends Model
         "image",
         "background_image",
         "status",
-         "is_active",
+        "is_active",
+
+
+        "pension_scheme_registered",
+        "pension_scheme_name",
+        "pension_scheme_letters",
+
 
 
 
@@ -39,6 +50,11 @@ class Business extends Model
         'created_by'
 
     ];
+
+    protected $casts = [
+        'pension_scheme_letters' => 'array',
+    ];
+
 
     public function owner(){
         return $this->belongsTo(User::class,'owner_id', 'id');

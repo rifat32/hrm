@@ -42,6 +42,12 @@ class CreateBusinessesTable extends Migration
 
 
 
+            $table->boolean('pension_scheme_registered')->default(false);
+            $table->string('pension_scheme_name')->nullable();
+            $table->json('pension_scheme_letters')->nullable();
+
+
+
             $table->string('status')->default("pending");
             // $table->enum('status', ['status1', 'status2',  'status3'])->default("status1");
             $table->boolean("is_active")->default(false);

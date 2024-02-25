@@ -456,6 +456,18 @@ Route::post('/v1.0/auth/register-with-business', [BusinessController::class, "re
 Route::post('/v1.0/businesses', [BusinessController::class, "createBusiness"]);
 Route::put('/v1.0/businesses/toggle-active', [BusinessController::class, "toggleActiveBusiness"]);
 Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
+
+Route::put('/v1.0/business-pension-information', [BusinessController::class, "updateBusinessPensionInformation"]);
+
+
+
+
+
+
+
+
+
+
 Route::put('/v1.0/businesses/separate', [BusinessController::class, "updateBusinessSeparate"]);
 Route::get('/v1.0/businesses', [BusinessController::class, "getBusinesses"]);
 Route::get('/v1.0/businesses/{id}', [BusinessController::class, "getBusinessById"]);

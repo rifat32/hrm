@@ -86,6 +86,13 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
 
 
+            'business.pension_scheme_registered' => 'required|boolean',
+            'business.pension_scheme_name' => 'nullable|required_if:business.pension_scheme_registered,1|string',
+            'business.pension_scheme_registered' => 'present|array',
+
+
+
+
 
             // 'work_shift.name' => 'required|string',
             // 'work_shift.description' => 'nullable|string',
