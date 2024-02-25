@@ -2299,9 +2299,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $data["employee_on_holiday"]["widget_name"] = "employee_on_holiday";
             $data["employee_on_holiday"]["route"] =  '/employee/all-employees?is_on_holiday=1';
 
-
+            $start_id = 3;
             $leave_statuses = ['pending_approval','progress', 'approved','rejected'];
-            foreach ($leave_statuses as $index=>$leave_status) {
+            foreach ($leave_statuses as $leave_status) {
                 $data[($leave_status . "_leaves")] = $this->leaves(
                     $today,
                     $start_date_of_next_month,
@@ -2323,7 +2323,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-                $data[($leave_status . "_leaves")]["id"] = 3 + $index;
+                $data[($leave_status . "_leaves")]["id"] = $start_id++;
                 if($widget) {
                     $data[($leave_status . "_leaves")]["widget_id"] = $widget->id;
                     $data[($leave_status . "_leaves")]["widget_order"] = $widget->widget_order;
@@ -2360,7 +2360,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $widget = $dashboard_widgets->get("open_roles");
 
 
-            $data["open_roles"]["id"] = 4 + $index;
+            $data["open_roles"]["id"] = $start_id++;
             if($widget) {
                 $data["open_roles"]["widget_id"] = $widget->id;
                 $data["open_roles"]["widget_order"] = $widget->widget_order;
@@ -2394,7 +2394,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $widget = $dashboard_widgets->get("upcoming_passport_expiries");
 
 
-            $data["upcoming_passport_expiries"]["id"] = 5 + $index;
+            $data["upcoming_passport_expiries"]["id"] =$start_id++;
             if($widget) {
                 $data["upcoming_passport_expiries"]["widget_id"] = $widget->id;
                 $data["upcoming_passport_expiries"]["widget_order"] = $widget->widget_order;
@@ -2430,7 +2430,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $widget = $dashboard_widgets->get("upcoming_visa_expiries");
 
 
-            $data["upcoming_visa_expiries"]["id"] = 6 + $index;
+            $data["upcoming_visa_expiries"]["id"] = $start_id++;
             if($widget) {
                 $data["upcoming_visa_expiries"]["widget_id"] = $widget->id;
                 $data["upcoming_visa_expiries"]["widget_order"] = $widget->widget_order;
@@ -2472,7 +2472,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $widget = $dashboard_widgets->get("upcoming_right_to_work_expiries");
 
 
-            $data["upcoming_right_to_work_expiries"]["id"] = 6 + $index;
+            $data["upcoming_right_to_work_expiries"]["id"] = $start_id++;
             if($widget) {
                 $data["upcoming_right_to_work_expiries"]["widget_id"] = $widget->id;
                 $data["upcoming_right_to_work_expiries"]["widget_order"] = $widget->widget_order;
@@ -2516,7 +2516,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            $data["upcoming_sponsorship_expiries"]["id"] = 7  + $index;
+            $data["upcoming_sponsorship_expiries"]["id"] = $start_id++;
             if($widget) {
                 $data["upcoming_sponsorship_expiries"]["widget_id"] = $widget->id;
                 $data["upcoming_sponsorship_expiries"]["widget_order"] = $widget->widget_order;
@@ -2535,7 +2535,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $sponsorship_statuses = ['unassigned', 'assigned', 'visa_applied','visa_rejected','visa_grantes','withdrawal'];
-            foreach ($sponsorship_statuses as $index2=>$sponsorship_status) {
+            foreach ($sponsorship_statuses as $sponsorship_status) {
                 $data[($sponsorship_status . "_sponsorships")] = $this->sponsorships(
                     $today,
                     $start_date_of_next_month,
@@ -2556,7 +2556,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $widget = $dashboard_widgets->get(($sponsorship_status . "_sponsorships"));
 
 
-                $data[($sponsorship_status . "_sponsorships")]["id"] = 8 + $index + $index2;
+                $data[($sponsorship_status . "_sponsorships")]["id"] = $start_id++;
                 if($widget) {
                     $data[($sponsorship_status . "_sponsorships")]["widget_id"] = $widget->id;
                     $data[($sponsorship_status . "_sponsorships")]["widget_order"] = $widget->widget_order;
@@ -2602,7 +2602,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            $data["upcoming_pension_expiries"]["id"] = 7  + $index;
+            $data["upcoming_pension_expiries"]["id"] = $start_id++;
             if($widget) {
                 $data["upcoming_pension_expiries"]["widget_id"] = $widget->id;
                 $data["upcoming_pension_expiries"]["widget_order"] = $widget->widget_order;
@@ -2622,7 +2622,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $pension_statuses = ["opt_in", "opt_out"];
-            foreach ($pension_statuses as $index2=>$pension_status) {
+            foreach ($pension_statuses as $pension_status) {
                 $data[($pension_status . "_pensions")] = $this->pensions(
                     $today,
                     $start_date_of_next_month,
@@ -2643,7 +2643,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $widget = $dashboard_widgets->get(($pension_status . "_pensions"));
 
 
-                $data[($pension_status . "_pensions")]["id"] = 8 + $index + $index2;
+                $data[($pension_status . "_pensions")]["id"] = $start_id++;
                 if($widget) {
                     $data[($pension_status . "_pensions")]["widget_id"] = $widget->id;
                     $data[($pension_status . "_pensions")]["widget_order"] = $widget->widget_order;
