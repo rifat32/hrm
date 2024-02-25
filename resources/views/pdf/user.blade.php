@@ -754,7 +754,7 @@ return $formattedBreakTime;
             @if (!empty($request->current_pension_details_pension_scheme_status))
                 <th>Status</th>
             @endif
-            @if (!empty($request->current_pension_details_pension_enrolment_issue_date))
+            @if (!empty($request->current_pension_details_pension_enrollment_issue_date))
                 <th>Issue Date</th>
             @endif
             @if (!empty($request->current_pension_details_pension_scheme_opt_out_date))
@@ -773,8 +773,8 @@ return $formattedBreakTime;
                 @if (!empty($request->current_pension_details_pension_scheme_status))
                     <td>{{ format_date($user->pension_detail->pension_scheme_status) }}</td>
                 @endif
-                @if (!empty($request->current_pension_details_pension_enrolment_issue_date))
-                    <td>{{ format_date($user->pension_detail->pension_enrolment_issue_date) }}</td>
+                @if (!empty($request->current_pension_details_pension_enrollment_issue_date))
+                    <td>{{ format_date($user->pension_detail->pension_enrollment_issue_date) }}</td>
                 @endif
                 @if (!empty($request->current_pension_details_pension_scheme_opt_out_date))
                     <td>{{ $user->pension_detail->pension_scheme_opt_out_date }}</td>

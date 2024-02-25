@@ -20,7 +20,7 @@ class CreateEmployeePensionHistoriesTable extends Migration
 
 
             $table->boolean('pension_eligible');
-            $table->date('pension_enrolment_issue_date')->nullable();
+            $table->date('pension_enrollment_issue_date')->nullable();
             $table->json('pension_letters')->nullable();
             $table->enum('pension_scheme_status', ["opt_in", "opt_out"])->nullable();
 

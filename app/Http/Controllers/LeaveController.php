@@ -1832,6 +1832,13 @@ foreach ($assigned_departments as $assigned_department) {
  *     required=true,
  *     example="8"
  * ),
+ *  * @OA\Parameter(
+ *     name="status",
+ *     in="query",
+ *     description="status",
+ *     required=true,
+ *     example="status"
+ * ),
  * @OA\Parameter(
  *     name="total_leave_hours",
  *     in="query",
@@ -1926,6 +1933,10 @@ foreach ($assigned_departments as $assigned_department) {
                 ->when(!empty($request->leave_type_id), function ($query) use ($request) {
                     return $query->where('leaves.leave_type_id', $request->leave_type_id);
                 })
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('leaves.status', $request->status);
+                })
+
 
                 ->when(!empty($request->department_id), function ($query) use ($request) {
                     return $query->whereHas("employee.departments", function($query) use($request) {
@@ -2027,6 +2038,13 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="1"
      * ),
+     *  *  * @OA\Parameter(
+ *     name="status",
+ *     in="query",
+ *     description="status",
+ *     required=true,
+ *     example="status"
+ * ),
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -2034,6 +2052,7 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="ASC"
      * ),
+     *
 
      *      summary="This method is to get leaves  ",
      *      description="This method is to get leaves ",
@@ -2132,6 +2151,9 @@ foreach ($assigned_departments as $assigned_department) {
                         // $query->where("leaves.name", "like", "%" . $term . "%")
                         //     ->orWhere("leaves.description", "like", "%" . $term . "%");
                     });
+                })
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('leaves.status', $request->status);
                 })
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('leaves.user_id', $request->user_id);
@@ -2254,6 +2276,13 @@ foreach ($assigned_departments as $assigned_department) {
      * required=true,
      * example="1"
      * ),
+     *  *  * @OA\Parameter(
+ *     name="status",
+ *     in="query",
+ *     description="status",
+ *     required=true,
+ *     example="status"
+ * ),
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -2355,6 +2384,9 @@ foreach ($assigned_departments as $assigned_department) {
                         "users.business_id" => $business_id
                     ]
                 )
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('leaves.status', $request->status);
+                })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -2522,6 +2554,13 @@ return $employee;
      * required=true,
      * example="1"
      * ),
+     *  *  * @OA\Parameter(
+ *     name="status",
+ *     in="query",
+ *     description="status",
+ *     required=true,
+ *     example="status"
+ * ),
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -2648,7 +2687,9 @@ return $employee;
                  ->when(!empty($request->end_date), function ($query) use ($request) {
                     $query->where('leaves.end_date', '<=', $request->end_date);
                  })
-
+                 ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('leaves.status', $request->status);
+                })
 
 
 

@@ -792,7 +792,7 @@ class UserManagementController extends Controller
                     'user_id' => $user->id,
                     'business_id' => $user->business_id,
                     'pension_eligible' => false,
-                    'pension_enrolment_issue_date' => NULL,
+                    'pension_enrollment_issue_date' => NULL,
                     'pension_letters' => [],
                     'pension_scheme_status' => NULL,
                     'pension_scheme_opt_out_date'=> NULL,
@@ -803,7 +803,7 @@ class UserManagementController extends Controller
                 EmployeePensionHistory::create([
                     'user_id' => $user->id,
                     'pension_eligible' => false,
-                    'pension_enrolment_issue_date' => NULL,
+                    'pension_enrollment_issue_date' => NULL,
                     'pension_letters' => [],
                     'pension_scheme_status' => NULL,
                     'pension_scheme_opt_out_date'=> NULL,
@@ -3319,7 +3319,13 @@ class UserManagementController extends Controller
      * required=true,
      * example="immigration_status"
      * ),
-     *    *
+     *      *  @OA\Parameter(
+     * name="pension_scheme_status",
+     * in="query",
+     * description="pension_scheme_status",
+     * required=true,
+     * example="pension_scheme_status"
+     * ),
      *  @OA\Parameter(
      * name="sponsorship_status",
      * in="query",
@@ -3327,6 +3333,7 @@ class UserManagementController extends Controller
      * required=true,
      * example="sponsorship_status"
      * ),
+
      * *  @OA\Parameter(
      * name="sponsorship_note",
      * in="query",
@@ -3372,17 +3379,17 @@ class UserManagementController extends Controller
      *
      *
      *    *    *  *   @OA\Parameter(
-     * name="start_pension_pension_enrolment_issue_date",
+     * name="start_pension_pension_enrollment_issue_date",
      * in="query",
-     * description="start_pension_pension_enrolment_issue_date",
+     * description="start_pension_pension_enrollment_issue_date",
      * required=true,
      * example="2024-01-21"
      * ),
      *
      *   @OA\Parameter(
-     * name="end_pension_pension_enrolment_issue_date",
+     * name="end_pension_pension_enrollment_issue_date",
      * in="query",
-     * description="end_pension_pension_enrolment_issue_date",
+     * description="end_pension_pension_enrollment_issue_date",
      * required=true,
      * example="2024-01-21"
      * ),
@@ -3411,12 +3418,7 @@ class UserManagementController extends Controller
      * ),
      *
      *
-     *
-     *
-     *
-     *
-     *
-     *    *  *   @OA\Parameter(
+     * @OA\Parameter(
      * name="start_sponsorship_date_assigned",
      * in="query",
      * description="start_sponsorship_date_assigned",
@@ -3608,6 +3610,26 @@ class UserManagementController extends Controller
      * required=true,
      * example="admin,manager"
      * ),
+     *
+     *  @OA\Parameter(
+     * name="is_on_holiday",
+     * in="query",
+     * description="is_on_holiday",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *  @OA\Parameter(
+     * name="upcoming_expiries",
+     * in="query",
+     * description="upcoming_expiries",
+     * required=true,
+     * example="passport"
+     * ),
+     *
+     *
+     *
+     *
      *      summary="This method is to get user",
      *      description="This method is to get user",
      *
@@ -3657,6 +3679,10 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
+            $total_departments = Department::where([
+                "business_id" => auth()->user()->business_id,
+                "is_active" => 1
+            ])->count();
 
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
@@ -3700,6 +3726,7 @@ class UserManagementController extends Controller
                         });
                     }
                 })
+
                 ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $all_manager_department_ids) {
                     return $query->where(function ($query) use ($all_manager_department_ids) {
                         return  $query->where('business_id', auth()->user()->business_id)
@@ -3708,17 +3735,12 @@ class UserManagementController extends Controller
                             });;
                     });
                 })
-
-
                 ->when(!empty($request->role), function ($query) use ($request) {
                     $rolesArray = explode(',', $request->role);
                     return   $query->whereHas("roles", function ($q) use ($rolesArray) {
                         return $q->whereIn("name", $rolesArray);
                     });
                 })
-
-
-
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     $term = $request->search_key;
                     return $query->where(function ($subquery) use ($term) {
@@ -3735,6 +3757,97 @@ class UserManagementController extends Controller
                 ->when(!empty($request->employment_status_id), function ($query) use ($request) {
                     return $query->where('employment_status_id', ($request->employment_status_id));
                 })
+                ->when(!isset($request->is_on_holiday), function ($query) use ($today,$total_departments, $request ) {
+                    if(intval($request->is_on_holiday) == 1){
+                        $query->where(function($query) use ($today, $total_departments)  {
+                            $query->where(function($query) use ($today, $total_departments) {
+                               $query->where(function($query) use ($today,$total_departments) {
+                                   $query->whereHas('holidays', function ($query) use ($today) {
+                                       $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
+                                       ->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
+
+                                   })
+                                   ->orWhere(function($query) use($today, $total_departments) {
+                                         $query->whereHasRecursiveHolidays($today,$total_departments);
+                                   });
+                               })
+                               ->where(function($query) use ($today) {
+                                   $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
+                                       $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
+                                             ->where('holidays.end_date', ">=",  $today->copy()->endOfDay())
+                                             ->orWhere(function ($query) {
+                                               $query->whereDoesntHave("users")
+                                                   ->whereDoesntHave("departments");
+                                           });
+
+
+                                   });
+                               });
+                           })
+                           ->orWhere(
+                               function($query) use ($today) {
+                               $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
+                                   $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay());
+                                   $query->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
+                                   $query->doesntHave('users');
+
+                               });
+
+                           }
+                       );
+                   });
+                    }else {
+                        // Inverted logic for when employees are not on holiday
+                        $query->whereDoesntHave('holidays')
+                              ->orWhere(function ($query) use ($today, $total_departments) {
+                                  $query->whereDoesntHave('departments')
+                                        ->orWhereHas('departments', function ($subQuery) use ($today, $total_departments) {
+                                            $subQuery->whereDoesntHave('holidays');
+                                        });
+                              });
+                    }
+
+                })
+
+
+                ->when(!empty($request->upcoming_expiries), function ($query) use ($request) {
+
+                    if($request->upcoming_expiries == "passport") {
+                        $query->whereHas("passport_detail", function($query) {
+                              $query->where("employee_passport_details.passport_expiry_date",">=", today());
+                        });
+                    }
+
+                    else if($request->upcoming_expiries == "visa") {
+                        $query->whereHas("visa_detail", function($query) {
+                            $query->where("employee_visa_details.visa_expiry_date",">=", today());
+                      });
+                    }
+
+                    else if ($request->upcoming_expiries == "right_to_work") {
+                        $query->whereHas("right_to_work", function($query) {
+                            $query->where("employee_right_to_works.right_to_work_expiry_date",">=", today());
+                      });
+                    }
+
+                    else if ($request->upcoming_expiries == "sponsorship") {
+                        $query->whereHas("sponsorship_details", function($query) {
+                            $query->where("employee_sponsorships.expiry_date",">=", today());
+                      });
+                    }
+
+                    else if ($request->upcoming_expiries == "pension") {
+                        $query->whereHas("pension_details", function($query) {
+                            $query->where("employee_pensions.pension_re_enrollment_due_date",">=", today());
+                      });
+                    }
+
+
+
+
+                })
+
+
                 ->when(!empty($request->immigration_status), function ($query) use ($request) {
                     return $query->where('immigration_status', ($request->immigration_status));
                 })
@@ -3743,6 +3856,8 @@ class UserManagementController extends Controller
                         $query->where("employee_sponsorships.status", $request->sponsorship_status);
                     });
                 })
+             
+                
                 ->when(!empty($request->sponsorship_note), function ($query) use ($request) {
                     return $query->whereHas("sponsorship_details", function ($query) use ($request) {
                         $query->where("employee_sponsorships.note", $request->sponsorship_note);
@@ -3846,14 +3961,14 @@ class UserManagementController extends Controller
 
 
 
-                ->when(!empty($request->start_pension_pension_enrolment_issue_date), function ($query) use ($request) {
+                ->when(!empty($request->start_pension_pension_enrollment_issue_date), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.pension_enrolment_issue_date", ">=", ($request->start_pension_pension_enrolment_issue_date));
+                        $query->where("employee_pensions.pension_enrollment_issue_date", ">=", ($request->start_pension_pension_enrollment_issue_date));
                     });
                 })
-                ->when(!empty($request->end_pension_pension_enrolment_issue_date), function ($query) use ($request) {
+                ->when(!empty($request->end_pension_pension_enrollment_issue_date), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.pension_enrolment_issue_date", "<=", ($request->end_pension_pension_enrolment_issue_date . ' 23:59:59'));
+                        $query->where("employee_pensions.pension_enrollment_issue_date", "<=", ($request->end_pension_pension_enrollment_issue_date . ' 23:59:59'));
                     });
                 })
 
@@ -3875,7 +3990,12 @@ class UserManagementController extends Controller
                     });
                 })
 
-
+                ->when(!empty($request->pension_scheme_status), function ($query) use ($request) {
+                    return $query->whereHas("pension_details", function ($query) use ($request) {
+                        $query->where("employee_pensions.status", $request->pension_scheme_status);
+                    });
+                })
+               
 
 
 
@@ -5145,9 +5265,9 @@ class UserManagementController extends Controller
      *     example="2023-05-15"
      * ),
      *  * @OA\Parameter(
-     *     name="current_pension_details_pension_enrolment_issue_date",
+     *     name="current_pension_details_pension_enrollment_issue_date",
      *     in="query",
-     *     description="current_pension_details_pension_enrolment_issue_date",
+     *     description="current_pension_details_pension_enrollment_issue_date",
      *     required=true,
      *     example="2023-05-15"
      * ),
@@ -6005,6 +6125,13 @@ class UserManagementController extends Controller
      *         required=true,
      *  example="6"
      *      ),
+     *     *              @OA\Parameter(
+     *         name="is_including_attendance",
+     *         in="path",
+     *         description="is_including_attendance",
+     *         required=true,
+     *  example="1"
+     *      ),
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
@@ -6140,7 +6267,7 @@ class UserManagementController extends Controller
 
 
 
-            Log::info(json_encode($holidays));
+
 
 
 
@@ -6311,13 +6438,40 @@ class UserManagementController extends Controller
 
 
 
-            // Merge the collections and remove duplicates
-            $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
 
 
-            // $result_collection now contains all unique dates from holidays and weekends
-            $result_array = $result_collection->values()->all();
-            Log::info(json_encode($result_collection));
+
+            $already_taken_attendances =  Attendance::where([
+                "user_id" => $user->id
+            ])
+                ->where('attendances.in_date', '>=', $start_of_year)
+                ->where('attendances.in_date', '<=', $end_date_of_year . ' 23:59:59')
+                ->get();
+
+
+            $already_taken_attendance_dates = $already_taken_attendances->flatMap(function ($attendance) {
+                return Carbon::parse($attendance->in_date)->format('d-m-Y');
+            })->toArray();
+
+
+
+
+
+
+            $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates);
+
+            if(isset($request->is_including_attendance)) {
+                if(intval($request->is_including_attendance) == 1) {
+                 $result_collection = $result_collection->merge($already_taken_attendance_dates);
+                }
+
+            }
+
+
+            $unique_result_collection = $result_collection->unique();
+
+            $result_array = $unique_result_collection->values()->all();
+
 
 
             return response()->json($result_array, 200);

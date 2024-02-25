@@ -4473,9 +4473,11 @@
                                             "owner_id": "1",
                                             "pension_scheme_registered": 1,
                                             "pension_scheme_name": "hh",
-                                            "pension_scheme_letters": {
-                                                "file": "vv.jpg"
-                                            },
+                                            "pension_scheme_letters": [
+                                                {
+                                                    "file": "vv.jpg"
+                                                }
+                                            ],
                                             "start_date": "start_date",
                                             "name": "ABCD businesses",
                                             "about": "Best businesses in Dhaka",
@@ -4780,9 +4782,191 @@
                                         "example": {
                                             "pension_scheme_registered": 1,
                                             "pension_scheme_name": "hh",
-                                            "pension_scheme_letters": {
-                                                "file": "vv.jpg"
+                                            "pension_scheme_letters": [
+                                                {
+                                                    "file": "vv.jpg"
+                                                }
+                                            ],
+                                            "name": "ABCD businesses",
+                                            "start_date": "start_date",
+                                            "about": "Best businesses in Dhaka",
+                                            "web_page": "https://www.facebook.com/",
+                                            "phone": "01771034383",
+                                            "email": "rifatalashwad@gmail.com",
+                                            "additional_information": "No Additional Information",
+                                            "address_line_1": "Dhaka",
+                                            "address_line_2": "Dinajpur",
+                                            "lat": "23.704263332849386",
+                                            "long": "90.44707059805279",
+                                            "country": "Bangladesh",
+                                            "city": "Dhaka",
+                                            "currency": "BDT",
+                                            "postcode": "Dinajpur",
+                                            "logo": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "images": [
+                                                "/a",
+                                                "/b",
+                                                "/c"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/client/auth/register-with-business": {
+            "post": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "This method is to store user with business",
+                "description": "This method is to store user with business",
+                "operationId": "registerUserWithBusinessClient",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user",
+                                    "business"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "first_Name": "Rifat",
+                                            "last_Name": "Al-Ashwad",
+                                            "middle_Name": "Al-Ashwad",
+                                            "email": "rifatalashwad@gmail.com",
+                                            "password": "12345678",
+                                            "password_confirmation": "12345678",
+                                            "phone": "01771034383",
+                                            "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "send_password": 1,
+                                            "gender": "male"
+                                        }
+                                    },
+                                    "times": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "day": 0,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
                                             },
+                                            {
+                                                "day": 1,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
+                                            },
+                                            {
+                                                "day": 2,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
+                                            },
+                                            {
+                                                "day": 3,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
+                                            },
+                                            {
+                                                "day": 4,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
+                                            },
+                                            {
+                                                "day": 5,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
+                                            },
+                                            {
+                                                "day": 6,
+                                                "start_at": "10:10:00",
+                                                "end_at": "10:15:00",
+                                                "is_weekend": true
+                                            }
+                                        ]
+                                    },
+                                    "business": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "pension_scheme_registered": 1,
+                                            "pension_scheme_name": "hh",
+                                            "pension_scheme_letters": [
+                                                {
+                                                    "file": "vv.jpg"
+                                                }
+                                            ],
                                             "name": "ABCD businesses",
                                             "start_date": "start_date",
                                             "about": "Best businesses in Dhaka",
@@ -4895,9 +5079,11 @@
                                             "id": 1,
                                             "pension_scheme_registered": 1,
                                             "pension_scheme_name": "hh",
-                                            "pension_scheme_letters": {
-                                                "file": "vv.jpg"
-                                            }
+                                            "pension_scheme_letters": [
+                                                {
+                                                    "file": "vv.jpg"
+                                                }
+                                            ]
                                         }
                                     }
                                 },
@@ -27373,16 +27559,16 @@
                         "example": "2024-01-21"
                     },
                     {
-                        "name": "start_pension_pension_enrolment_issue_date",
+                        "name": "start_pension_pension_enrollment_issue_date",
                         "in": "query",
-                        "description": "start_pension_pension_enrolment_issue_date",
+                        "description": "start_pension_pension_enrollment_issue_date",
                         "required": true,
                         "example": "2024-01-21"
                     },
                     {
-                        "name": "end_pension_pension_enrolment_issue_date",
+                        "name": "end_pension_pension_enrollment_issue_date",
                         "in": "query",
-                        "description": "end_pension_pension_enrolment_issue_date",
+                        "description": "end_pension_pension_enrollment_issue_date",
                         "required": true,
                         "example": "2024-01-21"
                     },
@@ -30428,9 +30614,9 @@
                         "example": "2023-05-15"
                     },
                     {
-                        "name": "current_pension_details_pension_enrolment_issue_date",
+                        "name": "current_pension_details_pension_enrollment_issue_date",
                         "in": "query",
-                        "description": "current_pension_details_pension_enrolment_issue_date",
+                        "description": "current_pension_details_pension_enrollment_issue_date",
                         "required": true,
                         "example": "2023-05-15"
                     },
@@ -33295,10 +33481,10 @@
                                         "format": "string",
                                         "example": "pension_scheme_status"
                                     },
-                                    "pension_enrolment_issue_date": {
+                                    "pension_enrollment_issue_date": {
                                         "type": "string",
                                         "format": "string",
-                                        "example": "pension_enrolment_issue_date"
+                                        "example": "pension_enrollment_issue_date"
                                     },
                                     "pension_scheme_opt_out_date": {
                                         "type": "string",
@@ -33419,10 +33605,10 @@
                                         "format": "string",
                                         "example": "pension_scheme_status"
                                     },
-                                    "pension_enrolment_issue_date": {
+                                    "pension_enrollment_issue_date": {
                                         "type": "string",
                                         "format": "string",
-                                        "example": "pension_enrolment_issue_date"
+                                        "example": "pension_enrollment_issue_date"
                                     },
                                     "pension_scheme_opt_out_date": {
                                         "type": "string",

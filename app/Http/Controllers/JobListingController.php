@@ -290,6 +290,13 @@ class JobListingController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *     * *  @OA\Parameter(
+     * name="is_open_roles",
+     * in="query",
+     * description="is_open_roles",
+     * required=true,
+     * example="1"
+     * ),
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -297,6 +304,7 @@ class JobListingController extends Controller
      * required=true,
      * example="ASC"
      * ),
+     *
 
      *      summary="This method is to get job listings  ",
      *      description="This method is to get job listings ",
@@ -364,11 +372,20 @@ class JobListingController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+                ->when(isset($request->is_open_roles), function ($query) use ($request) {
+                    if( intval($request->is_open_roles) == 1) {
+                        $query->where("application_deadline",">=", today());
+                    } else {
+                        $query->where("application_deadline","<", today());
+                    }
+
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("job_listings.id", $request->order_by);

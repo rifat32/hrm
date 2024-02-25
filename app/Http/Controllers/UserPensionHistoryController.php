@@ -43,7 +43,7 @@ class UserPensionHistoryController extends Controller
   *      @OA\Property(property="pension_eligible", type="boolean", format="boolean", example="1"),
  *      @OA\Property(property="pension_letters", type="string", format="array", example={{"file_name":"sss"}}),
  *      @OA\Property(property="pension_scheme_status", type="string", format="string", example="pension_scheme_status"),
- *      @OA\Property(property="pension_enrolment_issue_date", type="string", format="string", example="pension_enrolment_issue_date"),
+ *      @OA\Property(property="pension_enrollment_issue_date", type="string", format="string", example="pension_enrollment_issue_date"),
  *      @OA\Property(property="pension_scheme_opt_out_date", type="string", format="string", example="pension_scheme_opt_out_date"),
  *      @OA\Property(property="pension_re_enrollment_due_date", type="string", format="date", example="pension_re_enrollment_due_date"),
  *
@@ -127,7 +127,7 @@ class UserPensionHistoryController extends Controller
                         $user_pension  =  $current_pension_detail->update(
                             collect($request_data)->only([
                                 'pension_eligible',
-                                'pension_enrolment_issue_date',
+                                'pension_enrollment_issue_date',
                                 'pension_letters',
                                 'pension_scheme_status',
                                 'pension_scheme_opt_out_date',
@@ -185,7 +185,7 @@ class UserPensionHistoryController extends Controller
   *      @OA\Property(property="pension_eligible", type="boolean", format="boolean", example="1"),
  *      @OA\Property(property="pension_letters", type="string", format="array", example={{"file_name":"sss"}}),
  *      @OA\Property(property="pension_scheme_status", type="string", format="string", example="pension_scheme_status"),
- *      @OA\Property(property="pension_enrolment_issue_date", type="string", format="string", example="pension_enrolment_issue_date"),
+ *      @OA\Property(property="pension_enrollment_issue_date", type="string", format="string", example="pension_enrollment_issue_date"),
  *      @OA\Property(property="pension_scheme_opt_out_date", type="string", format="string", example="pension_scheme_opt_out_date"),
  *      @OA\Property(property="pension_re_enrollment_due_date", type="string", format="date", example="pension_re_enrollment_due_date"),
  *
@@ -268,7 +268,7 @@ class UserPensionHistoryController extends Controller
                         $user_pension  =  $current_expiry_date->update(
                             collect($request_data)->only([
                                 'pension_eligible',
-                                'pension_enrolment_issue_date',
+                                'pension_enrollment_issue_date',
                                 'pension_letters',
                                 'pension_scheme_status',
                                 'pension_scheme_opt_out_date',
@@ -310,7 +310,7 @@ class UserPensionHistoryController extends Controller
                 $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
                     collect($request_data)->only([
                         'pension_eligible',
-                        'pension_enrolment_issue_date',
+                        'pension_enrollment_issue_date',
                         'pension_letters',
                         'pension_scheme_status',
                         'pension_scheme_opt_out_date',

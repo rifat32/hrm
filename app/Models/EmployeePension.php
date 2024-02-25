@@ -13,7 +13,7 @@ class EmployeePension extends Model
         'user_id',
         'business_id',
         'pension_eligible',
-        'pension_enrolment_issue_date',
+        'pension_enrollment_issue_date',
         'pension_letters',
         'pension_scheme_status',
         'pension_scheme_opt_out_date',

@@ -11,7 +11,7 @@ class EmployeePensionHistory extends Model
     protected $fillable = [
 
         'pension_eligible',
-        'pension_enrolment_issue_date',
+        'pension_enrollment_issue_date',
         'pension_letters',
         'pension_scheme_status',
         'pension_scheme_opt_out_date',

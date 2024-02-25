@@ -1030,7 +1030,7 @@ class AttendanceController extends Controller
 
                     // Return the created attendance records in the response
 
-                     
+
                       $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
 
 
@@ -2748,7 +2748,7 @@ class AttendanceController extends Controller
             }
             $business_id =  $request->user()->business_id;
 
-            $attendance =  Attendance::where([
+            $attendance =  Attendance::with("employee")->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

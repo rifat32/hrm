@@ -1165,6 +1165,7 @@ Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::clas
 
 Route::get('/v1.0/client/job-listings', [JobListingController::class, "getJobListingsClient"]);
 Route::post('/v1.0/client/candidates', [CandidateController::class, "createCandidateClient"]);
+Route::post('/v1.0/client/auth/register-with-business', [BusinessController::class, "registerUserWithBusinessClient"]);
 
 
 

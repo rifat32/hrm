@@ -44,7 +44,7 @@ class UserPensionHistoryUpdateRequest extends FormRequest
             'pension_eligible' => 'required|boolean',
             'pension_letters' => 'present|array',
             'pension_scheme_status' => 'required_if:pension_eligible,1|string|in:opt_in,opt_out',
-            'pension_enrolment_issue_date' => 'required_if:pension_scheme_status,opt_in|date',
+            'pension_enrollment_issue_date' => 'required_if:pension_scheme_status,opt_in|date',
             'pension_scheme_opt_out_date' => 'required_if:pension_scheme_status,opt_out|date',
             'pension_re_enrollment_due_date' => 'required_if:pension_scheme_status,opt_in,opt_out|date',
 
