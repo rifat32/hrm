@@ -989,13 +989,21 @@ class ProjectController extends Controller
      * required=true,
      * example="ASC"
      * ),
-     *      * *  @OA\Parameter(
+     * @OA\Parameter(
      * name="user_id",
      * in="query",
      * description="user_id",
      * required=true,
      * example="1"
      * ),
+     * @OA\Parameter(
+     * name="assigned_user_id_not",
+     * in="query",
+     * description="assigned_user_id_not",
+     * required=true,
+     * example="1"
+     * ),
+
 
      *      summary="This method is to get project listings  ",
      *      description="This method is to get project listings ",
@@ -1072,11 +1080,17 @@ class ProjectController extends Controller
             )  ->whereHas("departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
-            //  ->when(!empty($request->user_id), function ($query) use ($request) {
-            //     return $query->whereHas('users', function($query) use($request) {
-            //             $query->where("users.id",$request->user_id);
-            //     });
-            // })
+             ->when(!empty($request->user_id), function ($query) use ($request) {
+                return $query->whereHas('users', function($query) use($request) {
+                        $query->where("users.id",$request->user_id);
+                });
+            })
+            ->when(!empty($request->assigned_user_id_not), function ($query) use ($request) {
+                return $query->whereDoesntHave('users', function($query) use($request) {
+                        $query->where("users.id",$request->assigned_user_id_not);
+                });
+            })
+
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -1108,9 +1122,7 @@ class ProjectController extends Controller
                     return $query->orderBy("projects.id", "DESC");
                 })
 
-                ->select('projects.*',
-
-                 )
+                ->select('projects.*')
 
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);

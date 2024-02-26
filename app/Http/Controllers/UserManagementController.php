@@ -5732,8 +5732,8 @@ class UserManagementController extends Controller
                     "designation",
                     "employment_status",
                     "business",
-                    "work_location"
-
+                    "work_location",
+                    "pension_detail"
 
                 ]
             )

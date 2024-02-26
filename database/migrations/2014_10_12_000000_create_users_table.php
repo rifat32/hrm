@@ -19,6 +19,9 @@ class CreateUsersTable extends Migration
             $table->string('middle_Name')->nullable();
             $table->string('last_Name');
 
+            $table->string('stripe_id')->nullable();
+
+
             $table->string('user_name')->nullable();
 
             $table->json('emergency_contact_details')->nullable();

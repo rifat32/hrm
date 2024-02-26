@@ -662,7 +662,7 @@ class JobListingController extends Controller
  /**
      *
      * @OA\Get(
-     *      path="/v1.0/job-listings/{id}",
+     *      path="/v1.0/client/job-listings/{id}",
      *      operationId="getJobListingByIdClient",
      *      tags={"job_listing"},
      *       security={

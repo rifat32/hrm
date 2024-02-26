@@ -35,6 +35,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RecruitmentProcessController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\ServicePlanController;
 use App\Http\Controllers\SettingAttendanceController;
 use App\Http\Controllers\SettingLeaveController;
 use App\Http\Controllers\SettingLeaveTypeController;
@@ -58,7 +59,6 @@ use App\Http\Controllers\UserSponsorshipHistoryController;
 use App\Http\Controllers\UserVisaHistoryController;
 use App\Http\Controllers\WorkLocationController;
 use App\Http\Controllers\WorkShiftController;
-use App\Models\ServicePlanController;
 use Illuminate\Support\Facades\Route;
 
 /*

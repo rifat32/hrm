@@ -265,7 +265,7 @@ class UserPensionHistoryController extends Controller
                     if ($new_expiry_date->gt($current_expiry_date)) {
                         // Update the passport expiry date
                         $request_data["is_manual"] = 0;
-                        $user_pension  =  $current_expiry_date->update(
+                        $user_pension  =  $current_pension_detail->update(
                             collect($request_data)->only([
                                 'pension_eligible',
                                 'pension_enrollment_issue_date',

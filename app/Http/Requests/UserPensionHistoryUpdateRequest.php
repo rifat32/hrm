@@ -33,7 +33,7 @@ class UserPensionHistoryUpdateRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $exists = EmployeePensionHistory::where('id', $value)
                         ->where('employee_pension_histories.user_id', '=', $this->user_id)
-                        ->where('employee_pension_histories.is_manual', '=', 1)
+
                         ->exists();
 
                     if (!$exists) {

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\SetUpController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SwaggerLoginController;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
@@ -46,12 +48,24 @@ Route::get('/migrate', [SetUpController::class, "migrate"]);
 
 
 
+
+
+
 Route::get("/swagger-login",[SwaggerLoginController::class,"login"])->name("login.view");
 Route::post("/swagger-login",[SwaggerLoginController::class,"passUser"]);
 
 
 
 
+Route::get("/subscriptions/redirect-to-stripe",[SubscriptionController::class,"redirectUserToStripe"]);
+Route::get("/subscriptions/get-success-payment",[SubscriptionController::class,"stripePaymentSuccess"])->name("subscription.success_payment");
+Route::get("/subscriptions/get-failed-payment",[SubscriptionController::class,"stripePaymentFailed"])->name("subscription.failed_payment");
+
+Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"]);
+
+
+
+Route::get("/",[SwaggerLoginController::class,"login"])->name("login.view");
 
 
 Route::get("/activate/{token}",function(Request $request,$token) {
