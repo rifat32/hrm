@@ -3759,7 +3759,10 @@ class UserManagementController extends Controller
                 })
                 ->when(!isset($request->is_on_holiday), function ($query) use ($today,$total_departments, $request ) {
                     if(intval($request->is_on_holiday) == 1){
-                        $query->where(function($query) use ($today, $total_departments)  {
+                        $query
+                        ->where("business_id", auth()->user()->business_id)
+
+                        ->where(function($query) use ($today, $total_departments)  {
                             $query->where(function($query) use ($today, $total_departments) {
                                $query->where(function($query) use ($today,$total_departments) {
                                    $query->whereHas('holidays', function ($query) use ($today) {
@@ -3798,13 +3801,17 @@ class UserManagementController extends Controller
                    });
                     }else {
                         // Inverted logic for when employees are not on holiday
-                        $query->whereDoesntHave('holidays')
-                              ->orWhere(function ($query) use ($today, $total_departments) {
-                                  $query->whereDoesntHave('departments')
-                                        ->orWhereHas('departments', function ($subQuery) use ($today, $total_departments) {
-                                            $subQuery->whereDoesntHave('holidays');
-                                        });
-                              });
+                        $query->where( function($query) use ($today, $total_departments) {
+                            $query->whereDoesntHave('holidays')
+                            ->orWhere(function ($query) use ($today, $total_departments) {
+                                $query->whereDoesntHave('departments')
+                                      ->orWhereHas('departments', function ($subQuery) use ($today, $total_departments) {
+                                          $subQuery->whereDoesntHave('holidays');
+                                      });
+                            });
+                        });
+
+
                     }
 
                 })
@@ -3856,8 +3863,8 @@ class UserManagementController extends Controller
                         $query->where("employee_sponsorships.status", $request->sponsorship_status);
                     });
                 })
-             
-                
+
+
                 ->when(!empty($request->sponsorship_note), function ($query) use ($request) {
                     return $query->whereHas("sponsorship_details", function ($query) use ($request) {
                         $query->where("employee_sponsorships.note", $request->sponsorship_note);
@@ -3995,7 +4002,7 @@ class UserManagementController extends Controller
                         $query->where("employee_pensions.status", $request->pension_scheme_status);
                     });
                 })
-               
+
 
 
 
