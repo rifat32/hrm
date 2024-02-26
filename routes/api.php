@@ -58,6 +58,7 @@ use App\Http\Controllers\UserSponsorshipHistoryController;
 use App\Http\Controllers\UserVisaHistoryController;
 use App\Http\Controllers\WorkLocationController;
 use App\Http\Controllers\WorkShiftController;
+use App\Models\ServicePlanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -147,6 +148,22 @@ Route::delete('/v1.0/business-tiers/{ids}', [BusinessTierController::class, "del
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/service-plans', [ServicePlanController::class, "createServicePlan"]);
+Route::put('/v1.0/service-plans', [ServicePlanController::class, "updateServicePlan"]);
+Route::get('/v1.0/service-plans', [ServicePlanController::class, "getServicePlans"]);
+Route::get('/v1.0/service-plans/{id}', [ServicePlanController::class, "getServicePlanById"]);
+Route::delete('/v1.0/service-plans/{ids}', [ServicePlanController::class, "deleteServicePlansByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end job platform management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // notification management section
@@ -180,6 +197,7 @@ Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"])
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
 
 Route::put('/v1.0/users/assign-roles', [UserManagementController::class, "assignUserRole"]);
+Route::put('/v1.0/users/assign-permissions', [UserManagementController::class, "assignUserPermission"]);
 
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
@@ -1164,9 +1182,11 @@ Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::clas
 
 
 Route::get('/v1.0/client/job-listings', [JobListingController::class, "getJobListingsClient"]);
+Route::get('/v1.0/client/job-listings/{id}', [JobListingController::class, "getJobListingByIdClient"]);
+
 Route::post('/v1.0/client/candidates', [CandidateController::class, "createCandidateClient"]);
 Route::post('/v1.0/client/auth/register-with-business', [BusinessController::class, "registerUserWithBusinessClient"]);
-
+Route::post('/v1.0/client/service-plans', [ServicePlanController::class, "getServicePlanClient"]);
 
 
 

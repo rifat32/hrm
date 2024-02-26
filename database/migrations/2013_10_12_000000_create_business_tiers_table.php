@@ -31,8 +31,6 @@ class CreateBusinessTiersTable extends Migration
             "is_active" => 1,
             'created_by' => NULL
            ],
-
-
         ));
 
 

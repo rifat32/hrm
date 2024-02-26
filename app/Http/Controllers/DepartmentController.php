@@ -693,8 +693,9 @@ class DepartmentController extends Controller
                 "manager" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
                     'users.last_Name');
-                }
-
+                },
+                'recursiveChildren.manager',
+                'recursiveChildren.recursiveChildren'
 
             ])
             ->where(
@@ -722,7 +723,7 @@ class DepartmentController extends Controller
                     ], 404);
                 }
 
-                $department->children_recursive = $department->children_recursive;
+
 
                 $department->total_users_counts = User::where([
                     "business_id" => $business_id

@@ -17,6 +17,13 @@ return [
                 "business_tier_view",
                 "business_tier_delete",
 
+
+                "service_plan_create",
+                "service_plan_update",
+                "service_plan_view",
+                "service_plan_delete",
+
+
                 "work_shift_update",
                 "work_shift_view",
 
@@ -127,7 +134,10 @@ return [
 
                 "role_view",
 
-
+                "service_plan_create",
+                "service_plan_update",
+                "service_plan_view",
+                "service_plan_delete",
 
                 "user_create",
                 "user_update",
@@ -890,6 +900,8 @@ return [
     ],
     "permissions" => [
 
+        "handle_self_registered_businesses",
+
         "business_owner",
 
         "reminder_create",
@@ -908,6 +920,15 @@ return [
         "business_tier_update",
         "business_tier_view",
         "business_tier_delete",
+
+        "service_plan_create",
+        "service_plan_update",
+        "service_plan_view",
+        "service_plan_delete",
+
+
+
+
 
         "user_create",
         "user_update",
@@ -1172,6 +1193,12 @@ return [
         "business_tier_update" => "Can update business tier",
         "business_tier_view" => "Can view business tier",
         "business_tier_delete" => "Can delete business tier",
+
+        "service_plan_create" => "",
+        "service_plan_update" => "",
+        "service_plan_view" => "",
+        "service_plan_delete" => "",
+
 
 
         "user_create" => "Can create user",
@@ -1463,6 +1490,14 @@ return [
         "business_tier_update" => "update",
         "business_tier_view" => "view",
         "business_tier_delete" => "delete",
+
+        "service_plan_create" => "create",
+        "service_plan_update" => "update",
+        "service_plan_view" => "view",
+        "service_plan_delete" => "delete",
+
+
+
 
         "employee_document_create" => "create",
         "employee_document_update"  => "update",
@@ -1761,6 +1796,22 @@ return [
             ],
 
         ],
+
+
+        [
+            "header" => "service_plan",
+            "permissions" => [
+                "service_plan_create",
+                "service_plan_update",
+                "service_plan_view",
+                "service_plan_delete",
+            ],
+
+        ],
+
+
+
+
 
 
 

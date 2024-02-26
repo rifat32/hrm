@@ -882,7 +882,7 @@ class BusinessController extends Controller
                 $request_data['business']['status'] = "pending";
                 $request_data['business']['owner_id'] = $user->id;
                 $request_data['business']['created_by'] = $user->id;
-                $request_data['business']['is_active'] = true;
+                $request_data['business']['is_active'] = false;
 
 
                 $business =  Business::create($request_data['business']);
