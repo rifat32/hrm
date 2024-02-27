@@ -110,6 +110,8 @@ class ProjectController extends Controller
 
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
+                $request_data["is_default"] = false;
+
                 $request_data["created_by"] = $request->user()->id;
 
                 $project =  Project::create($request_data);

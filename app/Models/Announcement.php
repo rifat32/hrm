@@ -18,6 +18,28 @@ class Announcement extends Model
         "business_id",
         "created_by"
     ];
+    protected $appends = ['status'];
+
+
+    public function getStatusAttribute($value) {
+
+
+    $user_announcement = UserAnnouncement::where([
+        "user_id" => auth()->user()->id,
+        "announcement_id" =>$this->id
+    ])
+    ->first();
+    if(!$user_announcement) {
+return "invalid";
+    }else {
+        return $user_announcement->status;
+    }
+
+
+
+        }
+
+
 
     public function creator() {
         return $this->belongsTo(User::class, "created_by","id");

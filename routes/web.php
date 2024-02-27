@@ -65,7 +65,7 @@ Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWeb
 
 
 
-Route::get("/",[SwaggerLoginController::class,"login"])->name("login.view");
+
 
 
 Route::get("/activate/{token}",function(Request $request,$token) {

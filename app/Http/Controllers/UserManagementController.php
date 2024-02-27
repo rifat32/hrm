@@ -35,6 +35,7 @@ use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeePension;
 use App\Models\EmployeePensionHistory;
+use App\Models\EmployeeProjectHistory;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
@@ -48,6 +49,7 @@ use App\Models\WorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
+use App\Models\Project;
 use App\Models\Role;
 use App\Models\SettingLeaveType;
 use App\Models\User;
@@ -791,7 +793,10 @@ class UserManagementController extends Controller
                 $user->assignRole($request_data['role']);
 
 
-         $employee_pension =     EmployeePension::create([
+
+
+
+         $employee_pension =  EmployeePension::create([
                     'user_id' => $user->id,
                     'business_id' => $user->business_id,
                     'pension_eligible' => false,
@@ -811,17 +816,29 @@ class UserManagementController extends Controller
                     'pension_scheme_status' => NULL,
                     'pension_scheme_opt_out_date'=> NULL,
                     'pension_re_enrollment_due_date' => NULL,
-
-
                     "is_manual" => 0,
-
                     "pension_id" => $employee_pension->id,
                     "from_date" => now(),
                     "to_date" => NULL,
-
                     'created_by' => auth()->user()->id
 
                 ]);
+
+
+
+                $project = Project::where([
+                  "business_id" => $user->business_id,
+                  "is_default" => 1
+                ])
+                ->first();
+                $employee_project_history_data = $project->toArray();
+                $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
+                $employee_project_history_data["user_id"] = $user->id;
+                $employee_project_history_data["from_date"] = now();
+                $employee_project_history_data["to_date"] = NULL;
+                EmployeeProjectHistory::create($employee_project_history_data);
+                $user->projects()->attach([$project->id]);
+
 
 
 
@@ -6216,7 +6233,7 @@ class UserManagementController extends Controller
                 ->get();
 
 
-            $already_taken_attendance_dates = $already_taken_attendances->flatMap(function ($attendance) {
+            $already_taken_attendance_dates = $already_taken_attendances->map(function ($attendance) {
                 return Carbon::parse($attendance->in_date)->format('d-m-Y');
             })->toArray();
 
@@ -6579,7 +6596,7 @@ class UserManagementController extends Controller
                 ->get();
 
 
-            $already_taken_attendance_dates = $already_taken_attendances->flatMap(function ($attendance) {
+            $already_taken_attendance_dates = $already_taken_attendances->map(function ($attendance) {
                 return Carbon::parse($attendance->in_date)->format('d-m-Y');
             })->toArray();
 

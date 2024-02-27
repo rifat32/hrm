@@ -1187,14 +1187,14 @@ class DashboardManagementController extends Controller
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
 
@@ -1546,14 +1546,14 @@ class DashboardManagementController extends Controller
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -1617,14 +1617,14 @@ class DashboardManagementController extends Controller
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
         return $data;
     }
@@ -1670,14 +1670,14 @@ class DashboardManagementController extends Controller
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -1736,14 +1736,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('passport_expiry_date', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
         }
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -1803,14 +1803,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         }
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -1869,14 +1869,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         }
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -1937,14 +1937,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -2006,14 +2006,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
         return $data;
@@ -2072,14 +2072,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $data["previous_month_data_count"] = clone $data_query;
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('expiry_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
 
@@ -2137,14 +2137,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() . ' 23:59:59'],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay() . ' 23:59:59'],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')],
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
 

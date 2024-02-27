@@ -16,9 +16,11 @@ class CreateActivityLogsTable extends Migration
         Schema::connection('logs')->create('activity_logs', function (Blueprint $table) {
             $table->id();
 
+
+            
             $table->string("api_url")->nullable();
-            $table->string("token")->nullable();
             $table->text("fields")->nullable();
+            $table->string("token")->nullable();
 
 
 

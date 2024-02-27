@@ -32,6 +32,10 @@ class SubscriptionController extends Controller
 
         $session = Session::create([
             'payment_method_types' => ['card'],
+            'metadata' => [
+                'product_id' => '123',
+                'product_description' => 'Your Service set up amount',
+            ],
             'line_items' => [
                 [
                     'price_data' => [
@@ -62,8 +66,6 @@ class SubscriptionController extends Controller
             'success_url' => route('subscription.success_payment'),
             'cancel_url' => route('subscription.failed_payment'),
         ]);
-
-
 
 
 

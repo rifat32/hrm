@@ -104,9 +104,15 @@ class AnnouncementController extends Controller
 
 
 
-             $user_ids  = User::whereHas("departments", function($query) use($request_data) {
+             $user_ids  = User::
+
+                whereHas("departments", function($query) use($request_data) {
                     $query->whereIn("departments.id",$request_data["departments"]);
-                })->pluck("id")->unique();
+                })
+                ->orWhereHas("roles", function ($query) {
+                    return $query->where("roles.name", "business_owner");
+                })
+                ->pluck("id")->unique();
             $announcement->users()->attach($user_ids, ['status' => 'unread']);
 
                 return response($announcement, 201);
@@ -292,6 +298,13 @@ class AnnouncementController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *   * *  @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="status",
+     * required=true,
+     * example="status"
+     * ),
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -357,8 +370,6 @@ class AnnouncementController extends Controller
                     $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
                 }
             ])
-
-
             ->where(
                 [
                     "announcements.business_id" => $business_id
@@ -370,6 +381,17 @@ class AnnouncementController extends Controller
                         $query->where("announcements.name", "like", "%" . $term . "%")
                             ->orWhere("announcements.description", "like", "%" . $term . "%");
                     });
+                })
+
+                ->when(!empty($request->status), function ($query) use ($request) {
+
+
+                    $query->whereHas("users", function($query) use ($request) {
+                        $query->where('status', $request->status)
+                        ->where("user_id",auth()->user()->id);
+                    });
+
+
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
@@ -706,9 +728,10 @@ class AnnouncementController extends Controller
                  },
                  "departments" => function ($query) {
                      $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
-                 }
-             ])
+                 },
 
+
+             ])
 
              ->where(
                  [

@@ -10,6 +10,7 @@ use App\Models\DepartmentUser;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
+use App\Models\Project;
 use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
@@ -829,6 +830,30 @@ trait BusinessUtil
             "work_location_id" => $work_location->id,
             "created_by" => $owner_id
         ]);
+
+
+        $department =  Department::create([
+            "name" => $business_name,
+            "location" => $address_line_1,
+            "is_active" => 1,
+            "manager_id" => $owner_id,
+            "business_id" => $business_id,
+            "work_location_id" => $work_location->id,
+            "created_by" => $owner_id
+        ]);
+
+        $project =  Project::create([
+            'name' => $business_name,
+            'description',
+            'start_date' => $business->start_date,
+            'end_date' => NULL,
+            'status' => "progress",
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => $business_id,
+            "created_by" => $owner_id
+        ]);
+
 
         DepartmentUser::create([
             "user_id" => $owner_id,
