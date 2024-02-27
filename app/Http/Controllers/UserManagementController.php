@@ -741,12 +741,9 @@ class UserManagementController extends Controller
 
     public function createUserV2(UserCreateV2Request $request)
     {
-
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-
-
-            return DB::transaction(function () use ($request) {
 
                 if (!$request->user()->hasPermissionTo('user_create')) {
                     return response()->json([
@@ -804,20 +801,13 @@ class UserManagementController extends Controller
                     $this->store_right_to_works($request_data, $user);
                 }
 
-
                 $user->roles = $user->roles->pluck('name');
-
-
-
-                // $user->permissions  = $user->getAllPermissions()->pluck('name');
-                // error_log("cccccc");
-                // $data["user"] = $user;
-                // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
-                // $data["roles"] = $user->roles->pluck('name');
-                // $data["token"] = $token;
+                DB::commit();
                 return response($user, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
+
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
