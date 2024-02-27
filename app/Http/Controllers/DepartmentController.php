@@ -196,11 +196,6 @@ class DepartmentController extends Controller
 
 
 
-
-
-
-
-
                 $department_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id

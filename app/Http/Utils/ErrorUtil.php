@@ -21,6 +21,10 @@ trait ErrorUtil
             $statusCode = 400;
             return response()->json(json_decode($e->getMessage()), 400);
         }
+        if ($e->getCode() == 403) {
+            $statusCode = 403;
+            return response()->json($e->getMessage(), 403);
+        }
 
 
         if (env("APP_DEBUG") === false) {

@@ -72,16 +72,20 @@ trait BasicNotificationUtil
 
 
 
-            $all_parent_department_manager_ids = [];
+            $all_parent_department_manager_ids = collect([]);
             foreach ($departments as $department) {
-                array_push($all_parent_department_manager_ids,$department->manager_id);
-                $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $department->getAllParentManagerIds());
+                $all_parent_department_manager_ids->push($department->manager_id);
+                $all_parent_department_manager_ids = $all_parent_department_manager_ids->merge($department->getAllParentManagerIds());
             }
-            $unique_all_parent_department_manager_ids = array_unique($all_parent_department_manager_ids);
+            $unique_all_parent_department_manager_ids = $all_parent_department_manager_ids
+                ->filter() // Removes null values
+                ->unique()
+                ->values(); // Extracts the values from the collection
 
 
 
-            foreach ($unique_all_parent_department_manager_ids as $manager_id) {
+            foreach ($unique_all_parent_department_manager_ids->all() as $manager_id) {
+
                 // Create notification
                 $notification = [
                     "entity_id" => $entity->id,

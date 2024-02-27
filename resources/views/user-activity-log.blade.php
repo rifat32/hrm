@@ -17,23 +17,38 @@
         <table class="table table-responsive">
             <thead>
                 <th>id</th>
-<th>api_url</th>
-<th>user</th>
-<th>user_id</th>
-<th>activity</th>
-<th>ip_address</th>
-<th>request_method</th>
+                <th>api_url</th>
+                <th>user</th>
+                <th>user_id</th>
+                <th>message</th>
+                <th>status_code</th>
+                <th>line</th>
+                <th>file</th>
+                <th>fields</th>
+                <th>token</th>
+                <th>ip_address</th>
+                <th>request_method</th>
             </thead>
             <tbody>
                 @foreach ($activity_logs as $activity_log)
                 <tr>
-                    <td>{{$activity_log->id}} </td>
-                    <td>{{$activity_log->api_url}} </td>
-<td> {{$activity_log->user}} </td>
-<td>{{$activity_log->user_id}} </td>
-<td>{{$activity_log->activity}} </td>
-<td>{{$activity_log->ip_address}} </td>
-<td>{{$activity_log->request_method}} </td>
+                    <tr>
+                        <td>{{$activity_log->id}} </td>
+                        <td>{{$activity_log->api_url}} </td>
+
+    <td> @if ($activity_log->ERRuser)
+        {{ ($activity_log->ERRuser->first_Name ." ". $activity_log->ERRuser->last_Name ." ". $activity_log->ERRuser->last_Name )}}
+    @endif </td>
+    <td>{{$activity_log->user_id}} </td>
+    <td>{{$activity_log->message}} </td>
+    <td>{{$activity_log->status_code}} </td>
+    <td>{{$activity_log->line}} </td>
+    <td>{{$activity_log->file}} </td>
+    <td>{{$activity_log->fields}} </td>
+    <td>{{$activity_log->token}} </td>
+    <td>{{$activity_log->ip_address}} </td>
+    <td>{{$activity_log->request_method}} </td>
+                    </tr>
                 </tr>
                 @endforeach
 

@@ -42,6 +42,8 @@ class UserJobHistoryController extends Controller
        *         @OA\JsonContent(
   *     @OA\Property(property="user_id", type="integer", format="int", example=1),
  *     @OA\Property(property="company_name", type="string", format="string", example="Your Company Name"),
+ *  *     @OA\Property(property="country", type="string", format="string", example="country"),
+ *
  *     @OA\Property(property="job_title", type="string", format="string", example="Your Job Title"),
  *     @OA\Property(property="employment_start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="employment_end_date", type="string", format="date", example="2023-12-31"),
@@ -143,6 +145,7 @@ class UserJobHistoryController extends Controller
   *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
  *     @OA\Property(property="user_id", type="integer", format="int", example=1),
  *     @OA\Property(property="company_name", type="string", format="string", example="Your Company Name"),
+ *  *  *     @OA\Property(property="country", type="string", format="string", example="country"),
  *     @OA\Property(property="job_title", type="string", format="string", example="Your Job Title"),
  *     @OA\Property(property="employment_start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="employment_end_date", type="string", format="date", example="2023-12-31"),
@@ -224,6 +227,7 @@ class UserJobHistoryController extends Controller
                       collect($request_data)->only([
                         'user_id',
                         'company_name',
+                        'country',
                         'job_title',
                         'employment_start_date',
                         'employment_end_date',

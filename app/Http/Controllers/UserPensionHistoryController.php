@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserPensionHistoryCreateRequest;
 use App\Http\Requests\UserPensionHistoryUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserPensionHistoryController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
 
@@ -248,8 +249,10 @@ class UserPensionHistoryController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
 
-
-
+                $user_pension_history_query_params = [
+                    "id" => $request_data["id"],
+                    // "is_manual" => 1
+                ];
 
                 $current_pension_detail =  EmployeePension::where(
                     [
@@ -295,10 +298,7 @@ class UserPensionHistoryController extends Controller
 
 
 
-                $user_pension_history_query_params = [
-                    "id" => $request_data["id"],
-                    // "is_manual" => 1
-                ];
+
                 // $user_pension_history_prev = UserPensionHistory::where($user_pension_history_query_params)
                 //     ->first();
                 // if (!$user_pension_history_prev) {
@@ -306,6 +306,37 @@ class UserPensionHistoryController extends Controller
                 //         "message" => "no user pension history found"
                 //     ], 404);
                 // }
+
+                $employee_pension_history =  EmployeePensionHistory::where($user_pension_history_query_params)->first();
+
+
+                if($employee_pension_history) {
+                    $fields_to_check = [
+                        'pension_eligible',
+                        'pension_enrollment_issue_date',
+                        'pension_letters',
+                        'pension_scheme_status',
+                        'pension_scheme_opt_out_date',
+                        'pension_re_enrollment_due_date',
+
+                    ];
+                    $date_fields = [
+                        'pension_enrollment_issue_date',
+                        'pension_scheme_opt_out_date',
+                        'pension_re_enrollment_due_date',
+                    ];
+                    $fields_changed = $this->fieldsHaveChanged($fields_to_check, $employee_pension_history, $request_data, $date_fields);
+                    if (
+                        $fields_changed
+                    ) {
+                        EmployeePensionHistory::create($request_data);
+                    }
+                }
+
+
+
+
+
 
                 $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
                     collect($request_data)->only([

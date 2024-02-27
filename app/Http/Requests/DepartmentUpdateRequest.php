@@ -45,7 +45,6 @@ class DepartmentUpdateRequest extends BaseFormRequest
 
                         $department = Department::where('id', $value)
                         ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->whereNotIn("id",[$value])
                         ->first();
 
                     if (!$department) {
@@ -135,7 +134,7 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'description' => 'nullable|string',
             'manager_id' => 'nullable|numeric',
             'manager_id' => [
-                'required',
+                'nullable',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 

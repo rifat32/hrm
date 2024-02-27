@@ -738,8 +738,11 @@ class AnnouncementController extends Controller
                      "announcements.business_id" => $business_id
                  ]
              )
-             ->whereHas("users", function($query) {
-                $query->where("users.id",auth()->user()->id);
+             ->whereHas("users", function($query) use($request) {
+                $query->where("user_announcements.user_id",auth()->user()->id)
+                ->when(!empty($request->status), function ($query) use ($request) {
+                 $query->where('user_announcements.status', $request->status);
+                });
             })
 
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -749,9 +752,7 @@ class AnnouncementController extends Controller
                              ->orWhere("announcements.description", "like", "%" . $term . "%");
                      });
                  })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
+
                  ->when(!empty($request->start_date), function ($query) use ($request) {
                      return $query->where('announcements.created_at', ">=", $request->start_date);
                  })
@@ -778,7 +779,155 @@ class AnnouncementController extends Controller
          }
      }
 
+     /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/clients/announcements-count",
+     *      operationId="getAnnouncementsCountClient",
+     *      tags={"administrator.announcements.client"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get announcements count  ",
+     *      description="This method is to get announcements count ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getAnnouncementsCountClient(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+             $business_id =  $request->user()->business_id;
+             $announcements = Announcement::with([
+                 "creator" => function ($query) {
+                     $query->select('users.id', 'users.first_Name','users.middle_Name',
+                     'users.last_Name');
+                 },
+                 "departments" => function ($query) {
+                     $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
+                 },
+
+
+             ])
+
+             ->where(
+                 [
+                     "announcements.business_id" => $business_id
+                 ]
+             )
+             ->whereHas("users", function($query) use($request) {
+                $query->where("user_announcements.user_id",auth()->user()->id)
+                ->when(!empty($request->status), function ($query) use ($request) {
+                 $query->where('user_announcements.status', $request->status);
+                });
+            })
+
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         $query->where("announcements.name", "like", "%" . $term . "%")
+                             ->orWhere("announcements.description", "like", "%" . $term . "%");
+                     });
+                 })
+
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('announcements.created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('announcements.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("announcements.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("announcements.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 })
+                 ->count();
+
+
+
+             return response()->json($announcements, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
      /**
      *
@@ -845,7 +994,7 @@ class AnnouncementController extends Controller
                 $request_data = $request->validated();
 
 
-     UserAnnouncement::whereIn('id', $request_data["announcement_ids"])
+     UserAnnouncement::whereIn('announcement_id', $request_data["announcement_ids"])
     ->where('user_id', auth()->user()->id)
     ->update([
         "status" => "read"

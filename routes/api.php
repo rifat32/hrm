@@ -276,6 +276,8 @@ Route::delete('/v1.0/user-job-histories/{ids}', [UserJobHistoryController::class
 // end user job history management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user education history  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -661,6 +663,7 @@ Route::get('/v1.0/announcements/{id}', [AnnouncementController::class, "getAnnou
 Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "deleteAnnouncementsByIds"]);
 
 Route::get('/v1.0/clients/announcements', [AnnouncementController::class, "getAnnouncementsClient"]);
+Route::get('/v1.0/clients/announcements-count', [AnnouncementController::class, "getAnnouncementsCountClient"]);
 Route::put('/v1.0/clients/announcements/change-status', [AnnouncementController::class, "updateAnnouncementStatus"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

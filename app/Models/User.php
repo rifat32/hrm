@@ -30,7 +30,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_Name',
         'last_Name',
-    
+
         'middle_Name',
         "color_theme_name",
         'emergency_contact_details',
@@ -191,20 +191,20 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeRightToWork::class, 'user_id', 'id');
     }
     public function sponsorship_details() {
-        return $this->hasMany(EmployeeSponsorship::class, 'user_id', 'id');
+        return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
     }
     public function pension_details() {
-        return $this->hasMany(EmployeePension::class, 'user_id', 'id');
+        return $this->hasOne(EmployeePension::class, 'user_id', 'id');
     }
 
     public function passport_details() {
-        return $this->hasMany(EmployeePassportDetail::class, 'user_id', 'id');
+        return $this->hasOne(EmployeePassportDetail::class, 'user_id', 'id');
     }
     public function visa_details() {
-        return $this->hasMany(EmployeeVisaDetail::class, 'user_id', 'id');
+        return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
     }
     public function right_to_works() {
-        return $this->hasMany(EmployeeRightToWork::class, 'user_id', 'id');
+        return $this->hasOne(EmployeeRightToWork::class, 'user_id', 'id');
     }
 
 

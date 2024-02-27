@@ -1079,9 +1079,7 @@ class ProjectController extends Controller
                 [
                     "business_id" => $business_id
                 ]
-            )  ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+            )
              ->when(!empty($request->user_id), function ($query) use ($request) {
                 return $query->whereHas('users', function($query) use($request) {
                         $query->where("users.id",$request->user_id);

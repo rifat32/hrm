@@ -12,6 +12,7 @@ class UserJobHistory extends Model
     protected $fillable = [
         'user_id',
         'company_name',
+        'country',
         'job_title',
         'employment_start_date',
         'employment_end_date',

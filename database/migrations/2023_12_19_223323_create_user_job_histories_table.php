@@ -21,13 +21,14 @@ class CreateUserJobHistoriesTable extends Migration
                 ->on('users')
                 ->onDelete('cascade');
             $table->string('company_name');
+            $table->string('country');
             $table->string('job_title');
             $table->date('employment_start_date');
             $table->date('employment_end_date')->nullable();
             $table->text('responsibilities')->nullable();
             $table->string('supervisor_name')->nullable();
             $table->string('contact_information')->nullable();
-       
+
             $table->string('work_location')->nullable();
             $table->text('achievements')->nullable();
 

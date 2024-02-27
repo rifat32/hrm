@@ -821,15 +821,6 @@ trait BusinessUtil
         ]);
 
 
-        $department =  Department::create([
-            "name" => $business_name,
-            "location" => $address_line_1,
-            "is_active" => 1,
-            "manager_id" => $owner_id,
-            "business_id" => $business_id,
-            "work_location_id" => $work_location->id,
-            "created_by" => $owner_id
-        ]);
 
 
         $department =  Department::create([
