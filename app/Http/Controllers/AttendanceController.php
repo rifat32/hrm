@@ -504,7 +504,7 @@ class AttendanceController extends Controller
 
                 // $attendance_history = AttendanceHistory::create($attendance_history_data);
 
-                
+
                 $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
 
 
@@ -2354,7 +2354,7 @@ class AttendanceController extends Controller
 
                     // "attendances.project"
 
-
+                  "departments"
 
 
                 ]

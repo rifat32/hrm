@@ -10,16 +10,20 @@ class ServicePlan extends Model
     use HasFactory;
 
     protected $fillable = [
+      "name",
+      "description",
         'set_up_amount',
-        'monthly_amount',
+        'duration_months',
+        'price',
         'business_tier_id',
         "created_by"
     ];
 
-    public function business_tier()
-    {
-        return $this->belongsTo(BusinessTier::class);
+    public function business_tier(){
+        return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
     }
+
+
 
 
 }

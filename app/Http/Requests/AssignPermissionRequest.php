@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Spatie\Permission\Models\Permission;
 
-class AssignPermissionRequest extends FormRequest
+class AssignPermissionRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -40,7 +40,7 @@ class AssignPermissionRequest extends FormRequest
 
                     }
 
-               
+
 
 
                 },

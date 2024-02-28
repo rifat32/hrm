@@ -7,7 +7,7 @@ use App\Models\Payrun;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PayrollCreateRequest extends FormRequest
+class PayrollCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

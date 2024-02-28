@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\WorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceBypassMultipleCreateRequest extends FormRequest
+class AttendanceBypassMultipleCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -69,7 +69,7 @@ class AttendanceBypassMultipleCreateRequest extends FormRequest
             "start_date" => "required|date",
             "end_date" => "required|date|after_or_equal:start_date",
 
-         
+
 
 
         ];

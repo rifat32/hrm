@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SettingPaymentDateCreateRequest extends FormRequest
+class SettingPaymentDateCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

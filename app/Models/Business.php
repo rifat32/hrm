@@ -11,10 +11,6 @@ class Business extends Model
 {
     use HasFactory,  SoftDeletes;
 
-
-
-
-
     protected $fillable = [
         "name",
         "start_date",
@@ -36,6 +32,10 @@ class Business extends Model
         "background_image",
         "status",
         "is_active",
+        "is_self_registered_businesses",
+        "service_plan_id",
+
+
 
 
         "pension_scheme_registered",
@@ -45,7 +45,7 @@ class Business extends Model
 
 
 
-        "business_tier_id",
+
         "owner_id",
         'created_by'
 
@@ -61,8 +61,8 @@ class Business extends Model
     }
 
 
-    public function business_tier(){
-        return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
+    public function service_plan(){
+        return $this->belongsTo(ServicePlan::class,'service_plan_id', 'id');
     }
 
 

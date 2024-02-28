@@ -11,12 +11,7 @@ use Stripe\Stripe;
 class SubscriptionController extends Controller
 {
     public function redirectUserToStripe(Request $request) {
-
-
-
-
-        $user = User::find(1); // Assuming you want to find user with ID 1
-
+        $user = User::findOrFail($request->id); // Assuming you want to find user with ID 1
         Stripe::setApiKey(config('services.stripe.secret'));
 
         if (empty($user->stripe_id)) {
@@ -61,13 +56,11 @@ class SubscriptionController extends Controller
                     'quantity' => 1,
                 ],
             ],
-            'customer' => $stripe_customer_id ?? null, // Pass customer ID if exists
-            'mode' => 'subscription', // Switch mode to subscription
+            'customer' => $stripe_customer_id ?? null,
+            'mode' => 'subscription',
             'success_url' => route('subscription.success_payment'),
             'cancel_url' => route('subscription.failed_payment'),
         ]);
-
-
 
         return redirect()->to($session->url);
     }
@@ -75,9 +68,13 @@ class SubscriptionController extends Controller
 
 
     public function stripePaymentSuccess (Request $request) {
-        return "success";
+        return redirect()->away(env("FRONT_END_URL") . '/auth/login');
     }
     public function stripePaymentFailed (Request $request) {
-        return "fail";
+        return redirect()->away(env("FRONT_END_URL") . '/auth/login');
     }
+
+
+
+
 }

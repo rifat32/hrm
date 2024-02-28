@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Comment;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CommentUpdateRequest extends FormRequest
+class CommentUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

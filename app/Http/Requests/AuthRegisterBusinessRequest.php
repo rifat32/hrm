@@ -93,6 +93,12 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
 
 
+            'business.service_plan_id' => 'required|numeric|exists:service_plans,id"',
+
+
+
+
+
 
             // 'work_shift.name' => 'required|string',
             // 'work_shift.description' => 'nullable|string',

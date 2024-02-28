@@ -7,7 +7,7 @@ use App\Models\EmployeePensionHistory;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserPensionHistoryUpdateRequest extends FormRequest
+class UserPensionHistoryUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

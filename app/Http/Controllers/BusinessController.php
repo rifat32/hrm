@@ -311,10 +311,10 @@ class BusinessController extends Controller
      */
     public function createBusiness(BusinessCreateRequest $request)
     {
-
+DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return  DB::transaction(function () use (&$request) {
+
                 if (!$request->user()->hasPermissionTo('business_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -349,28 +349,20 @@ class BusinessController extends Controller
 
                 $request_data['business']['created_by'] = $request->user()->id;
                 $request_data['business']['is_active'] = true;
+                $request_data['business']['is_self_registered_businesses'] = false;
                 $business =  Business::create($request_data['business']);
-
-
 
                 $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
 
-
-
-
-
-
-
-
-
+                DB::commit();
 
                 return response([
 
                     "business" => $business
                 ], 201);
-            });
-        } catch (Exception $e) {
 
+        } catch (Exception $e) {
+    DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -618,9 +610,10 @@ class BusinessController extends Controller
      */
     public function registerUserWithBusiness(AuthRegisterBusinessRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return  DB::transaction(function () use (&$request) {
+
 
                 if (!$request->user()->hasPermissionTo('business_create')) {
                     return response()->json([
@@ -667,6 +660,7 @@ class BusinessController extends Controller
                 $request_data['business']['owner_id'] = $user->id;
                 $request_data['business']['created_by'] = $request->user()->id;
                 $request_data['business']['is_active'] = true;
+                $request_data['business']['is_self_registered_businesses'] = false;
 
 
                 $business =  Business::create($request_data['business']);
@@ -711,15 +705,15 @@ class BusinessController extends Controller
 
 
 
-                // }
+                DB::commit();
 
                 return response([
                     "user" => $user,
                     "business" => $business
                 ], 201);
-            });
-        } catch (Exception $e) {
 
+        } catch (Exception $e) {
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -841,9 +835,10 @@ class BusinessController extends Controller
      */
     public function registerUserWithBusinessClient(AuthRegisterBusinessRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return  DB::transaction(function () use (&$request) {
+
 
 
                 $request_data = $request->validated();
@@ -882,7 +877,9 @@ class BusinessController extends Controller
                 $request_data['business']['status'] = "pending";
                 $request_data['business']['owner_id'] = $user->id;
                 $request_data['business']['created_by'] = $user->id;
-                $request_data['business']['is_active'] = false;
+                $request_data['business']['is_active'] = true;
+                $request_data['business']['is_self_registered_businesses'] = true;
+
 
 
                 $business =  Business::create($request_data['business']);
@@ -918,10 +915,6 @@ class BusinessController extends Controller
 
 
 
-                //  if($request_data['user']['send_password']) {
-
-
-
                 if (env("SEND_EMAIL") == true) {
                     Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
                 }
@@ -929,18 +922,14 @@ class BusinessController extends Controller
 
 
 
-                // }
-
-
-
-
+                DB::commit();
                 return response([
                     "user" => $user,
                     "business" => $business
                 ], 201);
-            });
-        } catch (Exception $e) {
 
+        } catch (Exception $e) {
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }

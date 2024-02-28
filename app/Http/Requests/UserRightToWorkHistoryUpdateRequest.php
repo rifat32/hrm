@@ -7,7 +7,7 @@ use App\Models\EmployeeRightToWorkHistory;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRightToWorkHistoryUpdateRequest extends FormRequest
+class UserRightToWorkHistoryUpdateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -15,8 +15,8 @@ class BusinessTier extends Model
         'created_by'
     ];
 
-    public function businesses(){
-        return $this->hasMany(Business::class,'business_tier_id', 'id');
+    public function service_plans(){
+        return $this->hasMany(ServicePlan::class,'business_tier_id', 'id');
     }
 
     public function modules(){
@@ -33,5 +33,5 @@ class BusinessTier extends Model
 
 
 
-   
+
 }

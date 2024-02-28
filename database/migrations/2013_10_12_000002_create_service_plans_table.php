@@ -16,10 +16,16 @@ class CreateServicePlansTable extends Migration
         Schema::create('service_plans', function (Blueprint $table) {
             $table->id();
 
+
+            $table->string('name');
+            $table->text('description')->nullable();
             $table->double('set_up_amount');
-            $table->double('monthly_amount');
+            $table->double('duration_months');
+            $table->double('price');
             $table->unsignedBigInteger('business_tier_id')->unique();
             $table->foreign('business_tier_id')->references('id')->on('business_tiers')->onDelete('cascade');
+
+
 
 
             $table->unsignedBigInteger("created_by")->nullable();
