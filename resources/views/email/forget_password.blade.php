@@ -23,7 +23,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 20px 30px; text-align: center;">
-                        <a href="/ff" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px;">Reset Password</a>
+                        <a href="{{$url}}" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px;">Reset Password</a>
                     </td>
                 </tr>
                 <tr>

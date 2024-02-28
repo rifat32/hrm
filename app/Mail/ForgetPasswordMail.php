@@ -44,7 +44,9 @@ class ForgetPasswordMail extends Mailable
      */
     public function build()
     {
-        return $this->view('email.forget_password');
+
+
+
         $email_content = EmailTemplate::where([
             "type" => "forget_password_mail",
             "is_active" => 1
@@ -83,6 +85,11 @@ class ForgetPasswordMail extends Mailable
         $html_final = json_decode($email_template_wrapper->template);
         $html_final =  str_replace("[content]", $html_content, $html_final);
 
+
+
+        return $this->view('email.forget_password',[
+            "url" => ($front_end_url.'/auth/change-password?token='.$this->user->resetPasswordToken)
+        ]);
 
 
 
