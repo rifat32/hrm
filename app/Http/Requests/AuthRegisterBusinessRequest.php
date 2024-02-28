@@ -31,7 +31,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
     public function rules()
     {
 
-        return [
+        $rules = [
             'user.first_Name' => 'required|string|max:255',
             'user.middle_Name' => 'nullable|string|max:255',
             'user.last_Name' => 'required|string|max:255',
@@ -93,7 +93,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
 
 
-            'business.service_plan_id' => 'required|numeric|exists:service_plans,id"',
+
 
 
 
@@ -176,6 +176,13 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
 
         ];
+
+        if(!auth()->user()) {
+            $rules['business.service_plan_id'] = 'required|numeric|exists:service_plans,id"';
+        }
+
+
+        return $rules;
 
 
     }

@@ -1,43 +1,45 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                color: #333;
-                background-color: #f5f5f5;
-                padding: 40px;
-            }
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Forgot Password</title>
+</head>
+<body style="font-family: Arial, sans-serif;">
 
-            h1 {
-                font-size: 24px;
-                margin-bottom: 20px;
-            }
+<table width="100%" cellspacing="0" cellpadding="0">
+    <tr>
+        <td style="background-color: #f5f5f5; padding: 20px;">
+            <table align="center" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <tr>
+                    <td style="padding: 40px 30px; text-align: center;">
+                        <h2 style="color: #333333;">HRMS - Forgot Password</h2>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 0 30px;">
+                        <p style="color: #666666; line-height: 1.6;">You've requested to reset your password. To reset your password, please click the button below:</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 20px 30px; text-align: center;">
+                        <a href="/ff" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px;">Reset Password</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 20px 30px;">
+                        <p style="color: #666666; line-height: 1.6;">If you did not request to reset your password, you can safely ignore this email. Your password will remain unchanged.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color: #007bff; padding: 20px 30px; border-radius: 0 0 10px 10px;">
+                        <p style="color: #ffffff; margin: 0;">Thank you, <br> The HRMS Team</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
-            p {
-                margin-bottom: 20px;
-                font-size: 16px;
-                line-height: 1.5;
-            }
-
-            a {
-                color: #007bff;
-                text-decoration: none;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Dear {{ $user->name }},</h1>
-        <p>We received a request to reset the password for your account. If you made this request, please follow the instructions below to reset your password.</p>
-        <p>Please click the link below to reset your password:</p>
-        <p><a href="http://localhost:3000/fotget-password/{{$token}}">http://localhost:3000/fotget-password/{{$token}}</a></p>
-        <p>If you cannot click the link, please copy and paste it into your browser's address bar.</p>
-        <p>If you did not request to reset your password, please ignore this email. Your account will remain secure and no changes will be made.</p>
-        <p>If you have any questions or concerns, please do not hesitate to reach out to us at {{ $contactEmail }}. We're here to help!</p>
-        <p>Best regards,</p>
-        <p>{{env('APP_NAME')}}</p>
-    </body>
+</body>
 </html>

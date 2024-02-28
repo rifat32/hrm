@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
@@ -11,7 +13,19 @@ use Stripe\Stripe;
 class SubscriptionController extends Controller
 {
     public function redirectUserToStripe(Request $request) {
-        $user = User::findOrFail($request->id); // Assuming you want to find user with ID 1
+        $id = $request->id;
+
+// Check if the string is at least 20 characters long to ensure it has enough characters to remove
+if (strlen($id) >= 20) {
+    // Remove the first ten characters and the last ten characters
+    $trimmed_id = substr($id, 10, -10);
+    // $trimmedId now contains the string with the first ten and last ten characters removed
+}
+else {
+    throw new Exception("invalid id");
+}
+        $business = Business::findOrFail($trimmed_id);
+        $user = User::findOrFail($business->owner_id);
         Stripe::setApiKey(config('services.stripe.secret'));
 
         if (empty($user->stripe_id)) {

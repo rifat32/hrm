@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ServicePlan;
-use App\Models\Subscription;
+use App\Models\BusinessSubscription;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -59,7 +59,7 @@ class CustomWebhookController extends WebhookController
         $user = User::where("stripe_id",$customerID)->first();
 
         $service_plan = ServicePlan::find($user->business->service_plan_id);
-        Subscription::create([
+        BusinessSubscription::create([
             'business_id' => $user->business->id,
             'service_plan_id' => $user->business->service_plan_id,
             'start_date' => now(),  // Start date of the subscription
@@ -71,7 +71,7 @@ class CustomWebhookController extends WebhookController
 
 
 
-    //     $subscription = Subscription::where('business_id', $user->business->id)
+    //     $subscription = BusinessBusinessBusinessSubscription::where('business_id', $user->business->id)
     //     ->where("service_plan_id",  $user->business->service_plan_id)
     //     ->where('start_date', '<=', now()) // Start date is in the past or now
     //     ->where('end_date', '>=', now())   // End date is in the future or now
@@ -87,7 +87,7 @@ class CustomWebhookController extends WebhookController
     //     $service_plan = ServicePlan::find($user->business->service_plan_id);
 
     //     // Create a new subscription with appropriate date conditions
-    //     Subscription::create([
+    //     BusinessBusinessBusinessSubscription::create([
     //         'business_id' => $user->business->id,
     //         'service_plan_id' => $user->business->service_plan_id,
     //         'start_date' => now(),  // Assuming the subscription starts immediately upon payment

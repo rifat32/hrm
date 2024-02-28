@@ -111,9 +111,22 @@ Route::post('/v1.0/business-image-multiple', [BusinessController::class, "create
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
 // Protected Routes
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
-Route::middleware(['auth:api'])->group(function () {
+
+Route::middleware(['auth:api',"business.subscription.check"])->group(function () {
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
+
+});
+
+
+
+
+Route::middleware(['auth:api',"business.subscription.check"])->group(function () {
+
+
+
+
+
     Route::patch('/auth/changepassword', [AuthController::class, "changePassword"]);
     Route::put('/v1.0/update-user-info', [AuthController::class, "updateUserInfo"]);
 
@@ -1275,39 +1288,5 @@ Route::post('/v1.0/client/service-plans', [ServicePlanController::class, "getSer
 
 
 
-Route::middleware(['auth:api'])->group(function () {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-});
 
 

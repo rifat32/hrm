@@ -37,7 +37,43 @@ class CreateEmailTemplatesTable extends Migration
                 [
                     'wrapper_id' => 1,
                     'type' => 'forget_password_mail',
-                    "template"=>json_encode("\n<!doctype html>\n<html lang=\"en-US\">\n\n<head>\n    <meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n    <title>Reset Password Email Template</title>\n    <meta name=\"description\" content=\"Reset Password Email Template.\">\n    <style type=\"text/css\">\n        a:hover {text-decoration: underline !important;}\n    </style>\n</head>\n\n<body marginheight=\"0\" topmargin=\"0\" marginwidth=\"0\" style=\"margin: 0px; background-color: #f2f3f8;\" leftmargin=\"0\">\n    <!--100% body table-->\n    <table cellspacing=\"0\" border=\"0\" cellpadding=\"0\" width=\"100%\" bgcolor=\"#f2f3f8\"\n        style=\"@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;\">\n        <tr>\n            <td>\n                <table style=\"background-color: #f2f3f8; max-width:670px;  margin:0 auto;\" width=\"100%\" border=\"0\"\n                    align=\"center\" cellpadding=\"0\" cellspacing=\"0\">\n                    <tr>\n                        <td style=\"height:80px;\">&nbsp;</td>\n                    </tr>\n                    <tr>\n                        <td style=\"text-align:center;\">\n                          <a href=\"https://rakeshmandal.com\" title=\"logo\" target=\"_blank\">\n                            <img width=\"60\" src=\"https://i.ibb.co/hL4XZp2/android-chrome-192x192.png\" title=\"logo\" alt=\"logo\">\n                          </a>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"height:20px;\">&nbsp;</td>\n                    </tr>\n                    <tr>\n                        <td>\n                            <table width=\"95%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"\n                                style=\"max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);\">\n                                <tr>\n                                    <td style=\"height:40px;\">&nbsp;</td>\n                                </tr>\n                                <tr>\n                                    <td style=\"padding:0 35px;\">\n                                        <h1 style=\"color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;\">You have\n                                            requested to reset your password</h1>\n                                        <span\n                                            style=\"display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;\"></span>\n                                        <p style=\"color:#455056; font-size:15px;line-height:24px; margin:0;\">\n                                            We cannot simply send you your old password. A unique link to reset your\n                                            password has been generated for you. To reset your password, click the\n                                            following link and follow the instructions.\n                                        </p>\n                                        <a href=\"[ForgotPasswordLink]\"\n                                            style=\"background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;\">Reset\n                                            Password</a>\n                                    </td>\n                                </tr>\n                                <tr>\n                                    <td style=\"height:40px;\">&nbsp;</td>\n                                </tr>\n                            </table>\n                        </td>\n                    <tr>\n                        <td style=\"height:20px;\">&nbsp;</td>\n                    </tr>\n                    <tr>\n                        <td style=\"text-align:center;\">\n                            <p style=\"font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;\">&copy; <strong>www.rakeshmandal.com</strong></p>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"height:80px;\">&nbsp;</td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n    <!--/100% body table-->\n</body>\n\n</html>"),
+                    "template"=> ('
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Reset Your HR Management Software Password</title>
+                    </head>
+                    <body>
+                        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+                            <tr>
+                                <td align="center" bgcolor="#f8f9fa" style="padding: 40px 0;">
+                                    <h1>Reset Your HR Management Software Password</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center" bgcolor="#ffffff" style="padding: 40px 0;">
+                                    <p>Dear [FirstName] [MiddleName] [LastName],</p>
+                                    <p>We noticed that you requested to reset your password for accessing our HR Management Software. To ensure the security of your account, please follow the instructions below to reset your password:</p>
+                                    <ol>
+                                        <li>Click on the following link to reset your password: <a href="[ForgotPasswordLink]">Reset Password</a></li>
+                                        <li>If the link does not work, please copy and paste the following URL into your browser\'s address bar: [Reset Password URL]</li>
+                                        <li>You will be directed to a page where you can create a new password. Make sure to choose a strong password that contains a combination of letters, numbers, and special characters.</li>
+                                        <li>Once your password has been successfully reset, you can log in to your account using your new credentials.</li>
+                                    </ol>
+                                    <p>If you did not request this password reset, please disregard this email. Your account is secure, and no changes have been made.</p>
+                                    <p>If you have any questions or need further assistance, please don\'t hesitate to contact our support team at <a href="mailto:asjadtariq@gmail.com">asjadtariq@gmail.com</a>.</p>
+                                    <p>Thank you for using our HR Management Software.</p>
+                                    <p>Best regards,<br>[Your Company Name] Team</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>
+
+
+                    '),
                     "is_active" => 1
                 ],
 

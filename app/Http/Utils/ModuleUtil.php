@@ -22,7 +22,7 @@ trait ModuleUtil
 
             if ($business) {
                 $query_params["is_default"] = 0;
-                $query_params["business_tier_id"] = $business->service_plan->business_tier->id;
+                $query_params["business_tier_id"] = $business->service_plan?$business->service_plan->business_tier->id:1;
             }
         }
 

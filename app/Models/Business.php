@@ -36,8 +36,6 @@ class Business extends Model
         "service_plan_id",
 
 
-
-
         "pension_scheme_registered",
         "pension_scheme_name",
         "pension_scheme_letters",

@@ -44,6 +44,7 @@ class ForgetPasswordMail extends Mailable
      */
     public function build()
     {
+        return $this->view('email.forget_password');
         $email_content = EmailTemplate::where([
             "type" => "forget_password_mail",
             "is_active" => 1

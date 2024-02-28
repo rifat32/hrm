@@ -5228,9 +5228,12 @@ class UserManagementController extends Controller
             }
 
             $leave_types =   SettingLeaveType::where(function ($query) use ($request, $created_by) {
-                $query->where('setting_leave_types.business_id', NULL)
-                    ->where('setting_leave_types.is_default', 1)
+                $query->where('setting_leave_types.business_id', auth()->user()->business_id)
+                    ->where('setting_leave_types.is_default', 0)
                     ->where('setting_leave_types.is_active', 1)
+
+
+
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                         $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
                     })
@@ -5238,32 +5241,8 @@ class UserManagementController extends Controller
 
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                         $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
-                    })
-
-
-
-
-                    ->orWhere(function ($query) use ($request, $created_by) {
-                        $query->where('setting_leave_types.business_id', NULL)
-                            ->where('setting_leave_types.is_default', 0)
-                            ->where('setting_leave_types.created_by', $created_by)
-                            ->where('setting_leave_types.is_active', 1)
-
-                            ->when(isset($request->is_active), function ($query) use ($request) {
-                                if (intval($request->is_active)) {
-                                    return $query->whereDoesntHave("disabled", function ($q) {
-                                        $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
-                                    });
-                                }
-                            });
-                    })
-                    ->orWhere(function ($query) use ($request) {
-                        $query->where('setting_leave_types.business_id', auth()->user()->business_id)
-                            ->where('setting_leave_types.is_default', 0)
-                            ->when(isset($request->is_active), function ($query) use ($request) {
-                                return $query->where('setting_leave_types.is_active', intval($request->is_active));
-                            });;
                     });
+
             })
 
 
