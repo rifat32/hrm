@@ -113,8 +113,12 @@ class ReminderController extends Controller
                 }
 
 
-                $request_data["db_table_name"] = $reminder_option["db_table_name"];
-                $request_data["db_field_name"] = $reminder_option["db_field_name"];
+                $request_data["model_name"] = $reminder_option["model_name"];
+                $request_data["issue_date_column"] = $reminder_option["issue_date_column"];
+                $request_data["expiry_date_column"] = $reminder_option["expiry_date_column"];
+                $request_data["user_eligible_field"] = $reminder_option["user_eligible_field"];
+                $request_data["user_relationship"] = $reminder_option["user_relationship"];
+
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -223,8 +227,12 @@ class ReminderController extends Controller
                 }
 
 
-                $request_data["db_table_name"] = $reminder_option["db_table_name"];
-                $request_data["db_field_name"] = $reminder_option["db_field_name"];
+                $request_data["model_name"] = $reminder_option["model_name"];
+                $request_data["issue_date_column"] = $reminder_option["issue_date_column"];
+                $request_data["expiry_date_column"] = $reminder_option["expiry_date_column"];
+                $request_data["user_eligible_field"] = $reminder_option["user_eligible_field"];
+                $request_data["user_relationship"] = $reminder_option["user_relationship"];
+
 
 
                 $reminder_query_params = [
@@ -242,8 +250,11 @@ class ReminderController extends Controller
                 $reminder  =  tap(Reminder::where($reminder_query_params))->update(
                     collect($request_data)->only([
                         'title',
-                        'db_table_name',
-                        'db_field_name',
+                        'model_name',
+                        "issue_date_column",
+                        'expiry_date_column',
+                        "user_eligible_field",
+                        "user_relationship",
                         'duration',
                         'duration_unit',
                         'send_time',

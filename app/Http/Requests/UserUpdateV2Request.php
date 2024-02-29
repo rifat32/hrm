@@ -48,6 +48,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'middle_Name' => 'nullable|string|max:255',
 
             'last_Name' => 'required|string|max:255',
+            "NI_number" => "required|string",
 
             'user_id' => [
                 "required",

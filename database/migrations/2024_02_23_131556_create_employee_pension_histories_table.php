@@ -18,6 +18,10 @@ class CreateEmployeePensionHistoriesTable extends Migration
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
+            $table->unsignedBigInteger("business_id");
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
 
             $table->boolean('pension_eligible');
             $table->date('pension_enrollment_issue_date')->nullable();

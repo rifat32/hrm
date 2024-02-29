@@ -9,13 +9,12 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
-use App\Models\EmployeePension;
 use App\Models\EmployeePensionHistory;
-use Carbon\Carbon;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
+
 
 class UserPensionHistoryController extends Controller
 {
@@ -256,9 +255,9 @@ class UserPensionHistoryController extends Controller
 
 
                 $current_user_id = request()->user_id;
-                $issue_date = 'pension_enrollment_issue_date';
-                $expiry_date = 'pension_re_enrollment_due_date';
-                $current_pension = $this->getCurrentHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $all_manager_department_ids, $issue_date, $expiry_date);
+                $issue_date_column = 'pension_enrollment_issue_date';
+                $expiry_date_column = 'pension_re_enrollment_due_date';
+                $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
                 $user_pension_history_query_params = [
@@ -268,7 +267,15 @@ class UserPensionHistoryController extends Controller
 
                 if ($current_pension && $current_pension->id == $request_data["id"]) {
                     $request_data["is_manual"] = 0;
-                    EmployeePensionHistory::create($request_data);
+                    $user_pension_history =   EmployeePensionHistory::create($request_data);
+                    if($user_pension_history->pension_eligible) {
+                        User::where([
+                            "id" => $user_pension_history->user_id
+                        ])
+                        ->update([
+                            "pension_eligible" => $user_pension_history->pension_eligible
+                        ]);
+                    }
                 } else {
                     $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
                         collect($request_data)->only([
@@ -510,7 +517,7 @@ class UserPensionHistoryController extends Controller
             $current_user_id = request()->user_id;
             $issue_date = 'pension_enrollment_issue_date';
             $expiry_date = 'pension_re_enrollment_due_date';
-            $current_pension = $this->getCurrentHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $all_manager_department_ids, $issue_date, $expiry_date);
+            $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date, $expiry_date);
 
 
 
@@ -657,10 +664,7 @@ class UserPensionHistoryController extends Controller
 
 
 
-            $current_user_id = request()->user_id;
-            $issue_date = 'pension_enrollment_issue_date';
-            $expiry_date = 'pension_re_enrollment_due_date';
-            $current_pension = $this->getCurrentHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $all_manager_department_ids, $issue_date, $expiry_date);
+
 
 
             $user_pension_history =  EmployeePensionHistory::where([
@@ -684,6 +688,8 @@ class UserPensionHistoryController extends Controller
                 ], 404);
             }
 
+
+            
             return response()->json($user_pension_history, 200);
         } catch (Exception $e) {
 
@@ -757,6 +763,9 @@ class UserPensionHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+
+
             $business_id =  $request->user()->business_id;
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();

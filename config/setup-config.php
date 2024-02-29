@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\EmployeePensionHistory;
+
 return [
     "roles_permission" => [
         [
@@ -2455,37 +2457,51 @@ return [
 
         [
             "entity_name" => "pension_expiry",
-            "db_table_name" => "employee_pensionss",
-            "db_field_name" => "expiry_date",
+            "model_name" => "EmployeePensionHistory",
+            "user_relationship" => "employee",
+            "issue_date_column" => "pension_enrollment_issue_date",
+            'expiry_date_column' => "pension_re_enrollment_due_date",
+            "user_eligible_field" => "pension_eligible"
 
         ],
 
 
         [
             "entity_name" => "sponsorship_expiry",
-            "db_table_name" => "employee_sponsorships",
-            "db_field_name" => "pension_re_enrollment_due_date",
-
+            "model_name" => "EmployeeSponsorshipHistory",
+            "user_relationship" => "employee",
+            "issue_date_column" => "date_assigned",
+            'expiry_date_column' => "expiry_date",
+            "user_eligible_field" => "is_active"
         ],
 
         [
             "entity_name" => "passport_expiry",
-            "db_table_name" => "employee_passport_details",
-            "db_field_name" => "passport_expiry_date",
+            "model_name" => "EmployeePassportDetailHistory",
+            "user_relationship" => "employee",
+            "issue_date_column" => "passport_issue_date",
+            'expiry_date_column' => "passport_expiry_date",
+            "user_eligible_field" => "is_active"
 
         ],
 
         [
             "entity_name" => "visa_expiry",
-            "db_table_name" => "employee_visa_details",
-            "db_field_name" => "visa_expiry_date",
+            "model_name" => "EmployeeVisaDetailHistory",
+            "user_relationship" => "employee",
+            "issue_date_column" => "visa_issue_date",
+            'expiry_date_column' => "visa_expiry_date",
+            "user_eligible_field" => "is_active"
 
         ],
 
         [
             "entity_name" => "right_to_work_expiry",
-            "db_table_name" => "employee_right_to_works",
-            "db_field_name" => "right_to_work_expiry_date",
+            "model_name" => "EmployeeRightToWorkHistory",
+            "user_relationship" => "employee",
+            "issue_date_column" => "right_to_work_check_date",
+            'expiry_date_column' => "right_to_work_expiry_date",
+            "user_eligible_field" => "is_active"
 
         ]
 

@@ -10,8 +10,11 @@ class Reminder extends Model
     use HasFactory;
     protected $fillable = [
         'title',
-        'db_table_name',
-        'db_field_name',
+        'model_name',
+        "issue_date_column",
+        'expiry_date_column',
+        "user_eligible_field",
+        "user_relationship",
         'duration',
         'duration_unit',
         'send_time',
@@ -26,7 +29,8 @@ class Reminder extends Model
         'keep_sending_until_update' => 'boolean',
     ];
     protected $hidden = [
-        'db_table_name',
-        'db_field_name',
+        'model_name',
+        "issue_date_column",
+        'expiry_date_column',
     ];
 }

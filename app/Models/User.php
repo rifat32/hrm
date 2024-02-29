@@ -32,6 +32,8 @@ class User extends Authenticatable
         'last_Name',
 
         'middle_Name',
+        "NI_number",
+        "pension_eligible",
         "color_theme_name",
         'emergency_contact_details',
         'gender',
@@ -177,21 +179,7 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
     }
 
-    public function pension_detail() {
-        $issue_date = 'pension_enrollment_issue_date';
-        $expiry_date = 'pension_re_enrollment_due_date';
-        return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-        ->where('user_id', $this->id)
-        ->where("business_id",auth()->user()->business_id)
-        ->where($expiry_date, function ($query) use ( $expiry_date) {
-            $query->max($expiry_date);
-        })
-        ->where($issue_date, function ($query) use ($issue_date) {
-            $query->where($issue_date, '<', now())
-                ->max($issue_date);
-        })
-        ->orderByDesc($issue_date);
-    }
+
 
     public function passport_detail() {
         return $this->hasOne(EmployeePassportDetail::class, 'user_id', 'id');
@@ -211,26 +199,67 @@ class User extends Authenticatable
 
     private function manipulateHistory($query, $issue_date, $expiry_date) {
         return $query
-        ->where('user_id', $this->id)
-        ->where("business_id",auth()->user()->business_id)
-        ->where($expiry_date, function ($query) use ( $expiry_date) {
-            $query->max($expiry_date);
-        })
-        ->where($issue_date, function ($query) use ($issue_date) {
-            $query->where($issue_date, '<', now())
-                ->max($issue_date);
-        })
-        ->orderByDesc($issue_date);
+        ;
     }
 
     public function pension_details() {
-        $issue_date = 'pension_enrollment_issue_date';
-        $expiry_date = 'pension_re_enrollment_due_date';
-        return    $this->manipulateHistory(
-            $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id'),
-            $issue_date,
-            $expiry_date
-        );
+        $issue_date_column = 'pension_enrollment_issue_date';
+        $expiry_date_column = 'pension_re_enrollment_due_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+          $current_data = NULL;
+        if(!$user->pension_eligible) {
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+            ->where("pension_eligible",0)
+            ->latest()->first();
+        } else {
+            $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            ->first();
+            if($latest_expired_record) {
+                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+        }
+
+
+
+        return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
+    }
+
+    public function pension_detail() {
+        $issue_date_column = 'pension_enrollment_issue_date';
+        $expiry_date_column = 'pension_re_enrollment_due_date';
+        $current_user_id = request()->id;
+
+
+        $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
+        ->where($issue_date_column, '<', now())
+        ->orderByDesc($expiry_date_column)
+        ->first();
+
+        if($latest_expired_record) {
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+            ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+            ->orderByDesc($issue_date_column)
+            ->first();
+        }
+        if(empty($current_data)) {
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)->latest()->first();
+        }
+
+
+        return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+        ->where("id",$current_data->id);
     }
 
     public function passport_details() {

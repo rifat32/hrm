@@ -46,6 +46,11 @@ class ReminderScheduler extends Command
      * @return int
      */
 
+     // Define a helper function to resolve class name dynamically
+function resolveClassName($className) {
+    return "App\\Models\\" . $className; // Assuming your models are stored in the "App\Models" namespace
+}
+
     public function sendNotification($reminder, $data, $business)
     {
 
@@ -57,9 +62,10 @@ class ReminderScheduler extends Command
 
 
 
-        $field_name = $reminder->db_field_name;
+        $expiry_date_column = $reminder->expiry_date_column;
+
         $now = now();
-        $days_difference = $now->diffInDays($data->$field_name);
+        $days_difference = $now->diffInDays($data->$expiry_date_column);
 
         if ($reminder->send_time == "after_expiry") {
 
@@ -108,7 +114,6 @@ class ReminderScheduler extends Command
                 "status" => "unread",
             ]);
         }
- 
     }
     public function handle()
     {
@@ -146,34 +151,66 @@ class ReminderScheduler extends Command
                 }
 
 
-
-                $table_name = $reminder->db_table_name;
-                $field_name = $reminder->db_field_name;
-
                 $now = Carbon::now();
+                $model_name = $reminder->model_name;
+                $user_relationship = $reminder->user_relationship;
+                $user_eligible_field = $reminder->user_eligible_field;
+                $issue_date_column = $reminder->issue_date_column;
+
+                $expiry_date_column = $reminder->expiry_date_column;
 
 
 
-                $all_reminder_data = DB::table($table_name)
-                    ->where([
-                        "business_id" => $business->id
-                    ])
-                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $field_name, $now) {
 
 
+                $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
+                ->where([
+                    "business_id" => $business->id
+                ])
+                ->whereHas($user_relationship, function ($query) use ($user_eligible_field)  {
+                    $query->where(("users." . $user_eligible_field),">",0)
+                    ->where("is_active",1);
+                })
+                ->where($issue_date_column, '<', now())
+                ->whereNotNull($expiry_date_column)
+                ->groupBy('user_id')
+                ->get()
+                ->map(function ($record) use ($model_name,$issue_date_column, $expiry_date_column)  {
+                    $latest_expired_record = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                    ->where($issue_date_column, '<', now())
+                    ->orderByDesc($expiry_date_column)
+                    ->first();
+
+                        $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                        ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+                        ->orderByDesc($issue_date_column)
+                        ->first();
+                        return $current_data->id;
+                });
+
+
+
+                $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id",$all_current_data_ids)
+                ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
                         return $query->where([
-                            ($field_name) => $now->copy()->addDays($reminder->duration)
+                            ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
                         ]);
                     })
-                    ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $field_name, $now) {
+                    ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
 
                         return $query->where(
-                            ($field_name),
+                            ($expiry_date_column),
                             "<=",
                             $now->copy()->subDays($reminder->duration)
                         );
                     })
                     ->get();
+
+
+
+
+
+
 
 
                 foreach ($all_reminder_data as $data) {
@@ -186,15 +223,15 @@ class ReminderScheduler extends Command
                         $reminder_date =   $now->copy()->subDays($reminder->duration);
 
 
-                        if ($reminder_date->eq($data->$field_name)) {
+                        if ($reminder_date->eq($data->$expiry_date_column)) {
 
                             // send notification or email based on setting
                             // send notification or email based on setting
                             $this->sendNotification($reminder, $data, $business);
-                        } else if ($reminder_date->gt($data->$field_name)) {
+                        } else if ($reminder_date->gt($data->$expiry_date_column)) {
                             if ($reminder->keep_sending_until_update == 1 && !empty($reminder->frequency_after_first_reminder)) {
 
-                                $days_difference = $reminder_date->diffInDays($data->$field_name);
+                                $days_difference = $reminder_date->diffInDays($data->$expiry_date_column);
                                 if ((($days_difference % $reminder->frequency_after_first_reminder) == 0)) {
                                     // send notification or email based on setting
                                     // send notification or email based on setting

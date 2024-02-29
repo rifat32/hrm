@@ -221,7 +221,7 @@ class ServicePlanController extends Controller
      *
      * @OA\Get(
      *      path="/v1.0/service-plans",
-     *      operationId="getServicePlan",
+     *      operationId="getServicePlans",
      *      tags={"service_plans"},
      *       security={
      *           {"bearerAuth": {}}
@@ -302,7 +302,7 @@ class ServicePlanController extends Controller
      *     )
      */
 
-    public function getServicePlan(Request $request)
+    public function getServicePlans(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
@@ -313,7 +313,7 @@ class ServicePlanController extends Controller
             }
 
 
-            $service_plans = ServicePlan::with("modules")
+            $service_plans = ServicePlan::with("business_tier")
             ->when(!empty($request->search_key), function ($query) use ($request) {
                 return $query->where(function ($query) use ($request) {
                     $term = $request->search_key;
@@ -447,11 +447,7 @@ class ServicePlanController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('service_plan_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+
 
 
              $service_plans = ServicePlan::with("business_tier")

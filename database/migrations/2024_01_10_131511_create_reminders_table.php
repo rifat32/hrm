@@ -19,8 +19,14 @@ class CreateRemindersTable extends Migration
             $table->string('title');
 
 
-            $table->string('db_table_name');
-            $table->string('db_field_name');
+            $table->string('model_name');
+            $table->string('issue_date_column');
+            $table->string('expiry_date_column');
+            $table->string('user_relationship');
+
+            $table->string('user_eligible_field');
+
+
             $table->string('entity_name');
 
 

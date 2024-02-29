@@ -382,6 +382,8 @@ class UserManagementController extends Controller
      *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *      *            @OA\Property(property="middle_Name", type="string", format="string",example="Al"),
+     *      *      *            @OA\Property(property="NI_number", type="string", format="string",example="drtjdjdj"),
+     *
      *
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
      *
@@ -554,6 +556,7 @@ class UserManagementController extends Controller
      *            required={"first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *      *            @OA\Property(property="middle_Name", type="string", format="string",example="Al"),
+     *     *      *      *            @OA\Property(property="NI_number", type="string", format="string",example="drtjdjdj"),
      *
      *            @OA\Property(property="last_Name", type="string", format="string",example="Al"),
      * *            @OA\Property(property="user_id", type="string", format="string",example="045674"),
@@ -772,6 +775,7 @@ class UserManagementController extends Controller
                 $user =  User::create($request_data);
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
+                $user->pension_eligible = 0;
                 $user->save();
                 $user->departments()->sync($request_data['departments']);
                 $user->assignRole($request_data['role']);
@@ -826,6 +830,7 @@ class UserManagementController extends Controller
      *           @OA\Property(property="id", type="string", format="number",example="1"),
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *   *            @OA\Property(property="middle_Name", type="string", format="string",example="How was this?"),
+     *     *      *      *            @OA\Property(property="NI_number", type="string", format="string",example="drtjdjdj"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
      *
      *
@@ -945,6 +950,8 @@ class UserManagementController extends Controller
                 collect($request_data)->only([
                     'first_Name',
                     'middle_Name',
+                    'NI_number',
+
                     'last_Name',
                     "email",
                     'user_id',
@@ -1266,6 +1273,7 @@ class UserManagementController extends Controller
      *           @OA\Property(property="id", type="string", format="number",example="1"),
      *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
      *   *            @OA\Property(property="middle_Name", type="string", format="string",example="How was this?"),
+     *     *      *      *            @OA\Property(property="NI_number", type="string", format="string",example="drtjdjdj"),
      *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
      *
      *
@@ -1399,6 +1407,8 @@ class UserManagementController extends Controller
                     'first_Name',
                     'last_Name',
                     'middle_Name',
+                    "NI_number",
+
                     "email",
                     "color_theme_name",
                     'emergency_contact_details',
@@ -2453,6 +2463,7 @@ class UserManagementController extends Controller
                 collect($request_data)->only([
                     'first_Name',
                     'middle_Name',
+
                     'last_Name',
                     'password',
                     'phone',
@@ -4131,6 +4142,7 @@ class UserManagementController extends Controller
                     'first_Name',
                     'last_Name',
                     'middle_Name',
+                    "NI_number",
                     'gender',
                     'phone',
                     'image',

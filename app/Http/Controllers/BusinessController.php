@@ -765,6 +765,7 @@ DB::beginTransaction();
      *
      *
      *  @OA\Property(property="business", type="string", format="array",example={
+     * "service_plan_id" : 0,
      *   "pension_scheme_registered" : 1,
      *   "pension_scheme_name" : "hh",
      *   "pension_scheme_letters" : {{"file" :"vv.jpg"}},
@@ -920,7 +921,7 @@ DB::beginTransaction();
                 }
 
 
-
+                $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
 
                 DB::commit();
                 return response([

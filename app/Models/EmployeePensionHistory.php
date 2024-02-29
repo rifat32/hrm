@@ -10,7 +10,7 @@ class EmployeePensionHistory extends Model
 {
     use HasFactory;
     protected $fillable = [
-
+        'business_id',
         'pension_eligible',
         'pension_enrollment_issue_date',
         'pension_letters',
@@ -28,9 +28,7 @@ class EmployeePensionHistory extends Model
 
     public function getIsCurrentAttribute() {
         $current_pension_id = Session::get('current_pension_id');
-
         return $current_pension_id === $this->id;
-
     }
 
 

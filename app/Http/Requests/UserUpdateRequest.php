@@ -33,6 +33,7 @@ class UserUpdateRequest extends BaseFormRequest
             'id' => "required|numeric",
             'first_Name' => 'required|string|max:255',
         'middle_Name' => 'nullable|string|max:255',
+        "NI_number" => "nullable|string",
 
         'last_Name' => 'required|string|max:255',
 

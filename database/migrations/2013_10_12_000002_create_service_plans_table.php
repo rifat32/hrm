@@ -22,14 +22,14 @@ class CreateServicePlansTable extends Migration
             $table->double('set_up_amount');
             $table->double('duration_months');
             $table->double('price');
-            $table->unsignedBigInteger('business_tier_id')->unique();
+            $table->unsignedBigInteger('business_tier_id');
             $table->foreign('business_tier_id')->references('id')->on('business_tiers')->onDelete('cascade');
 
 
 
 
             $table->unsignedBigInteger("created_by")->nullable();
-           
+
 
 
             $table->timestamps();

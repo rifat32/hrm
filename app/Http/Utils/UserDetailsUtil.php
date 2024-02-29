@@ -6,7 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
-use App\Models\EmployeePension;
+
 use App\Models\EmployeePensionHistory;
 use App\Models\EmployeeProjectHistory;
 use App\Models\EmployeeRightToWork;
@@ -218,11 +218,10 @@ trait UserDetailsUtil
             // "pension_id" => $employee_pension->id,
             "from_date" => now(),
             "to_date" => NULL,
+            "business_id"=> auth()->user()->business_id,
             'created_by' => auth()->user()->id
 
         ]);
-
-
 
     }
 

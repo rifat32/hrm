@@ -2,6 +2,8 @@
 
 namespace App\Http\Utils;
 
+use App\Models\EmployeePensionHistory;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
@@ -28,55 +30,41 @@ trait BasicUtil
         return false;
     }
 
-    public function getCurrentHistory(string $modelClass,$session_name ,$current_user_id, $all_manager_department_ids, $issue_date, $expiry_date)
+    public function getCurrentPensionHistory(string $modelClass,$session_name ,$current_user_id, $issue_date_column, $expiry_date_column)
     {
-    $model = new $modelClass;
-       $current_data = $model::where('user_id', $current_user_id)
-       ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-            $query->whereIn("departments.id",$all_manager_department_ids);
-         })
-        ->where($expiry_date, function ($query) use ( $expiry_date) {
-            $query->max($expiry_date);
-        })
-        ->where($issue_date, function ($query) use ($issue_date) {
-            $query->where($issue_date, '<', now())
-                ->max($issue_date);
-        })
-        ->orderByDesc($issue_date)
+
+        $model = new $modelClass;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
         ->first();
+
+          $current_data = NULL;
+        if(!$user->pension_eligible) {
+            $current_data = $model::where('user_id', $current_user_id)
+            ->where("pension_eligible",0)
+            ->latest()->first();
+        } else {
+            $latest_expired_record = $model::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            ->first();
+            if($latest_expired_record) {
+                $current_data = $model::where('user_id', $current_user_id)
+                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+        }
 
         Session::put($session_name, $current_data?$current_data->id:NULL);
         return $current_data;
 
+
+
     }
 
-    public function getHistoryQuery(string $modelClass, $user_ids, $all_manager_department_ids, $issue_date, $expiry_date,$status_column='',$status_value='')
-    {
-    $model = new $modelClass;
-       $query = $model::whereIn('user_id', $user_ids)
-       ->where("business_id",auth()->user()->business_id)
-       ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-           $query->whereIn("departments.id",$all_manager_department_ids);
-        })
-       ->where($expiry_date, function ($query) use($expiry_date) {
-           $query->max($expiry_date);
-       })
-       ->where($issue_date, function ($query) use ($issue_date)  {
-           $query->where($issue_date, '<', now())
-               ->max($issue_date);
-       })
-       ->when(!empty($status_column), function($query) use ($status_column,$status_value) {
-        $query->where($status_column, $status_value);
-       })
-
-       ->orderByDesc($issue_date)
-       ->groupBy('user_id');
-
-
-        return $query;
-
-    }
 
 
 
