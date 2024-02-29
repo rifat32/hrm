@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\WidgetCreateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -14,6 +15,7 @@ use App\Models\EmployeePassportDetail;
 use App\Models\EmployeeRightToWork;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeePension;
+use App\Models\EmployeePensionHistory;
 use App\Models\EmployeeVisaDetail;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
@@ -25,7 +27,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardManagementController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, BasicUtil;
 
     /**
      *
@@ -1964,44 +1966,58 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
-        $all_manager_department_ids
+        $all_manager_department_ids,
+        $user_ids
+
     ) {
 
-        $data_query  = EmployeePension::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-            $query->whereIn("departments.id", $all_manager_department_ids);
-        })
 
-        ->where("pension_re_enrollment_due_date",">=", today())
-        ->where("business_id",auth()->user()->business_id);
+
+        $issue_date = 'pension_enrollment_issue_date';
+        $expiry_date = 'pension_re_enrollment_due_date';
+        $data_query  = $this->getHistoryQuery(EmployeePensionHistory::class, $user_ids, $all_manager_department_ids, $issue_date, $expiry_date);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('pension_re_enrollment_due_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween($expiry_date, [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["yesterday_data_count"] = clone $data_query;
-        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pension_re_enrollment_due_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween($expiry_date, [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween($expiry_date, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
         $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween($expiry_date, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
 
         $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween($expiry_date, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
         $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween($expiry_date, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
         $expires_in_days = [15,30,60];
         foreach($expires_in_days as $expires_in_day){
             $query_day = Carbon::now()->addDays($expires_in_day);
             $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
-            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('pension_re_enrollment_due_date', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
+            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween($expiry_date, [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
         }
 
 
@@ -2102,39 +2118,42 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $start_date_of_previous_week,
         $end_date_of_previous_week,
         $all_manager_department_ids,
+        $user_ids,
         $pension_scheme_status
     ) {
 
-        $data_query  = EmployeePension::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-            $query->whereIn("departments.id", $all_manager_department_ids);
-        })
-        ->where([
-            "pension_scheme_status"=>$pension_scheme_status,
-            "business_id"=>auth()->user()->business_id
-        ]);
+
+
+        $issue_date = 'pension_enrollment_issue_date';
+        $expiry_date = 'pension_re_enrollment_due_date';
+        $data_query  = $this->getHistoryQuery(EmployeePensionHistory::class, $user_ids, $all_manager_department_ids, $issue_date, $expiry_date,"pension_scheme_status",$$pension_scheme_status);
+
+
+
+
 
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('pension_re_enrollment_due_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween($expiry_date, [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween($expiry_date, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
         $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween($expiry_date, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
         $data["previous_week_data_count"] = clone $data_query;
-        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween($expiry_date, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
 
         $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween($expiry_date, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
         $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween($expiry_date, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
         $data["previous_month_data_count"] = clone $data_query;
-        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('pension_re_enrollment_due_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween($expiry_date, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
         $data["date_ranges"] = [
             "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
@@ -2265,6 +2284,17 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
+            $user_ids =  User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+            })
+                ->whereNotIn('id', [auth()->user()->id])
+
+
+                ->where('is_in_employee', 1)
+                ->where('is_active', 1)
+                ->pluck("id");
+
+
             $data["employees"] = $this->employees(
                 $today,
                 $start_date_of_next_month,
@@ -2638,7 +2668,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $end_date_of_this_week,
                 $start_date_of_previous_week,
                 $end_date_of_previous_week,
-                $all_manager_department_ids
+                $all_manager_department_ids,
+                $user_ids
             );
 
 
@@ -2682,6 +2713,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                     $start_date_of_previous_week,
                     $end_date_of_previous_week,
                     $all_manager_department_ids,
+                    $user_ids,
                     $pension_status
                 );
                 $widget = $dashboard_widgets->get(($pension_status . "_pensions"));

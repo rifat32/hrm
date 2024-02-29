@@ -27,6 +27,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td style="padding: 0 30px;">
+                        <p style="color: #666666; line-height: 1.6;">Alternatively, you can copy and paste the following link into your browser:</p>
+                        <p style="color: #666666; line-height: 1.6;">{{$url}}</p>
+                    </td>
+                </tr>
+                <tr>
                     <td style="padding: 20px 30px;">
                         <p style="color: #666666; line-height: 1.6;">If you did not request to reset your password, you can safely ignore this email. Your password will remain unchanged.</p>
                     </td>

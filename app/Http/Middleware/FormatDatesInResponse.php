@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Session;
 
 class FormatDatesInResponse
 {
@@ -15,6 +16,7 @@ class FormatDatesInResponse
         $response = $next($request);
 
         if ($response->headers->get('content-type') === 'application/json') {
+            Session::flush();
             $content = $response->getContent();
             $convertedContent = $this->convertDatesInJson($content);
             $response->setContent($convertedContent);

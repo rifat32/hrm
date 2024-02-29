@@ -15,11 +15,7 @@ class EmployeeRightToWorkHistory extends Model
         'right_to_work_check_date',
         'right_to_work_expiry_date',
         'right_to_work_docs',
-
-
-
-
-
+        
         "is_manual",
         'user_id',
         "from_date",

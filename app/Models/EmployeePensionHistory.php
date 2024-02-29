@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
 
 class EmployeePensionHistory extends Model
 {
@@ -26,21 +27,13 @@ class EmployeePensionHistory extends Model
     protected $appends = ['is_current'];
 
     public function getIsCurrentAttribute() {
-        $current_user_id = request()->user_id;
+        $current_pension_id = Session::get('current_pension_id');
 
-        $max_pension_re_enrollment_due_date = static::where('user_id', $current_user_id)
-            ->max('pension_re_enrollment_due_date');
-
-            $max_id_with_max_date = static::where('user_id', $current_user_id)
-        ->where('pension_re_enrollment_due_date', $max_pension_re_enrollment_due_date)
-        ->max('id');
-
-        return $this->user_id == $current_user_id && $this->pension_re_enrollment_due_date == $max_pension_re_enrollment_due_date &&  $this->id == $max_id_with_max_date;
+        return $current_pension_id === $this->id;
 
     }
 
-
-            public function employee_pension(){
+      public function employee_pension(){
                 return $this->hasOne(EmployeePension::class,'id', 'pension_id');
             }
 
