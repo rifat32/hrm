@@ -254,7 +254,7 @@ class UserPensionHistoryController extends Controller
                 }
 
 
-                $current_user_id = request()->user_id;
+                $current_user_id =  $request_data["user_id"];
                 $issue_date_column = 'pension_enrollment_issue_date';
                 $expiry_date_column = 'pension_re_enrollment_due_date';
                 $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date_column, $expiry_date_column);
@@ -689,7 +689,7 @@ class UserPensionHistoryController extends Controller
             }
 
 
-            
+
             return response()->json($user_pension_history, 200);
         } catch (Exception $e) {
 
