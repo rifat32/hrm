@@ -71,7 +71,7 @@ trait BasicUtil
        })
 
        ->orderByDesc($issue_date)
-       ->groupBy('user_id') ;
+       ->groupBy('user_id');
 
 
         return $query;

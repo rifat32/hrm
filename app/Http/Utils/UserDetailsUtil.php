@@ -194,17 +194,17 @@ trait UserDetailsUtil
     }
 
     public function store_pension($request_data,$user) {
-        $employee_pension =  EmployeePension::create([
-            'user_id' => $user->id,
-            'business_id' => $user->business_id,
-            'pension_eligible' => false,
-            'pension_enrollment_issue_date' => NULL,
-            'pension_letters' => [],
-            'pension_scheme_status' => NULL,
-            'pension_scheme_opt_out_date'=> NULL,
-            'pension_re_enrollment_due_date' => NULL,
-            'created_by' => auth()->user()->id
-        ]);
+        // $employee_pension =  EmployeePension::create([
+        //     'user_id' => $user->id,
+        //     'business_id' => $user->business_id,
+        //     'pension_eligible' => false,
+        //     'pension_enrollment_issue_date' => NULL,
+        //     'pension_letters' => [],
+        //     'pension_scheme_status' => NULL,
+        //     'pension_scheme_opt_out_date'=> NULL,
+        //     'pension_re_enrollment_due_date' => NULL,
+        //     'created_by' => auth()->user()->id
+        // ]);
 
         EmployeePensionHistory::create([
             'user_id' => $user->id,
@@ -215,12 +215,15 @@ trait UserDetailsUtil
             'pension_scheme_opt_out_date'=> NULL,
             'pension_re_enrollment_due_date' => NULL,
             "is_manual" => 0,
-            "pension_id" => $employee_pension->id,
+            // "pension_id" => $employee_pension->id,
             "from_date" => now(),
             "to_date" => NULL,
             'created_by' => auth()->user()->id
 
         ]);
+
+
+
     }
 
     public function store_project($request_data,$user) {

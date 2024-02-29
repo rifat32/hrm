@@ -32,29 +32,21 @@ use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeePassportDetail;
-use App\Models\EmployeePassportDetailHistory;
-use App\Models\EmployeePension;
-use App\Models\EmployeePensionHistory;
-use App\Models\EmployeeProjectHistory;
-use App\Models\EmployeeSponsorship;
-use App\Models\EmployeeSponsorshipHistory;
-use App\Models\EmployeeUserWorkShiftHistory;
-use App\Models\EmployeeVisaDetail;
-use App\Models\EmployeeVisaDetailHistory;
 
-use App\Models\EmployeeRightToWork;
-use App\Models\EmployeeRightToWorkHistory;
+use App\Models\EmployeeSponsorship;
+
+use App\Models\EmployeeVisaDetail;
+
 
 use App\Models\WorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
-use App\Models\Project;
+
 use App\Models\Role;
 use App\Models\SettingLeaveType;
 use App\Models\User;
-use App\Models\UserWorkShift;
-use App\Models\WorkShift;
+
 use Carbon\Carbon;
 use DateTime;
 use Error;
@@ -5244,10 +5236,6 @@ class UserManagementController extends Controller
                     });
 
             })
-
-
-
-
                 ->get();
 
             foreach ($leave_types as $key => $leave_type) {

@@ -33,9 +33,7 @@ class EmployeePensionHistory extends Model
 
     }
 
-      public function employee_pension(){
-                return $this->hasOne(EmployeePension::class,'id', 'pension_id');
-            }
+
 
 
 

@@ -178,7 +178,19 @@ class User extends Authenticatable
     }
 
     public function pension_detail() {
-        return $this->hasOne(EmployeePension::class, 'user_id', 'id');
+        $issue_date = 'pension_enrollment_issue_date';
+        $expiry_date = 'pension_re_enrollment_due_date';
+        return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+        ->where('user_id', $this->id)
+        ->where("business_id",auth()->user()->business_id)
+        ->where($expiry_date, function ($query) use ( $expiry_date) {
+            $query->max($expiry_date);
+        })
+        ->where($issue_date, function ($query) use ($issue_date) {
+            $query->where($issue_date, '<', now())
+                ->max($issue_date);
+        })
+        ->orderByDesc($issue_date);
     }
 
     public function passport_detail() {
@@ -194,7 +206,19 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
     }
     public function pension_details() {
-        return $this->hasOne(EmployeePension::class, 'user_id', 'id');
+        $issue_date = 'pension_enrollment_issue_date';
+        $expiry_date = 'pension_re_enrollment_due_date';
+        return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+        ->where('user_id', $this->id)
+        ->where("business_id",auth()->user()->business_id)
+        ->where($expiry_date, function ($query) use ( $expiry_date) {
+            $query->max($expiry_date);
+        })
+        ->where($issue_date, function ($query) use ($issue_date) {
+            $query->where($issue_date, '<', now())
+                ->max($issue_date);
+        })
+        ->orderByDesc($issue_date);
     }
 
     public function passport_details() {
