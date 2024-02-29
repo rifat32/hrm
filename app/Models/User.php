@@ -205,10 +205,12 @@ class User extends Authenticatable
     public function sponsorship_details() {
         return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
     }
-    public function pension_details() {
-        $issue_date = 'pension_enrollment_issue_date';
-        $expiry_date = 'pension_re_enrollment_due_date';
-        return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+
+
+
+
+    private function manipulateHistory($query, $issue_date, $expiry_date) {
+        return $query
         ->where('user_id', $this->id)
         ->where("business_id",auth()->user()->business_id)
         ->where($expiry_date, function ($query) use ( $expiry_date) {
@@ -219,6 +221,16 @@ class User extends Authenticatable
                 ->max($issue_date);
         })
         ->orderByDesc($issue_date);
+    }
+
+    public function pension_details() {
+        $issue_date = 'pension_enrollment_issue_date';
+        $expiry_date = 'pension_re_enrollment_due_date';
+        return    $this->manipulateHistory(
+            $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id'),
+            $issue_date,
+            $expiry_date
+        );
     }
 
     public function passport_details() {
