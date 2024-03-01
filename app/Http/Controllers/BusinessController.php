@@ -922,6 +922,8 @@ DB::beginTransaction();
 
 
                 $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                $user->permissions = $user->getAllPermissions()->pluck('name');
+                $user->roles = $user->roles->pluck('name');
 
                 DB::commit();
                 return response([

@@ -86,6 +86,13 @@ class RecruitmentProcess extends Model
     }
 
 
+    // public function users() {
+    //     return $this->belongsToMany(User::class, 'user_recruitment_processes', 'recruitment_process_id', 'user_id');
+    // }
+    // public function user_recruitment_processes() {
+    //     return $this->hasOne(UserRecruitmentProcess::class, 'recruitment_process_id', 'id');
+    // }
+
 
     // public function getCreatedAtAttribute($value)
     // {

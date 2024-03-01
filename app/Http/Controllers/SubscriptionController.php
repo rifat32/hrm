@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Models\ServicePlan;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -26,6 +27,23 @@ else {
 }
         $business = Business::findOrFail($trimmed_id);
         $user = User::findOrFail($business->owner_id);
+
+
+        $service_plan = ServicePlan::where([
+            "id" => $business->service_plan_id
+        ])
+        ->first();
+
+
+        if(!$service_plan) {
+            return response()->json([
+                "message" => "no service plan found"
+            ],404);
+        }
+
+
+
+
         Stripe::setApiKey(config('services.stripe.secret'));
 
         if (empty($user->stripe_id)) {
@@ -52,7 +70,7 @@ else {
                         'product_data' => [
                             'name' => 'Your Service set up amount',
                         ],
-                        'unit_amount' => 1000, // Amount in cents
+                        'unit_amount' => $service_plan->set_up_amount * 100 , // Amount in cents
                     ],
                     'quantity' => 1,
                 ],
@@ -62,9 +80,10 @@ else {
                         'product_data' => [
                             'name' => 'Your Service monthly amount',
                         ],
-                        'unit_amount' => 1000, // Amount in cents
+                        'unit_amount' => $service_plan->price * 100, // Amount in cents
                         'recurring' => [
                             'interval' => 'month', // Recur monthly
+                            'interval_count' => $service_plan->duration_months, // Adjusted duration
                         ],
                     ],
                     'quantity' => 1,

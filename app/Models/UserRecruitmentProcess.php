@@ -27,6 +27,13 @@ class UserRecruitmentProcess extends Model
 
     ];
 
+    public function recruitment_process()
+    {
+        return $this->hasOne(RecruitmentProcess::class, 'id','recruitment_process_id');
+    }
+
+
+
     // public function getCreatedAtAttribute($value)
     // {
     //     return (new Carbon($value))->format('d-m-Y');

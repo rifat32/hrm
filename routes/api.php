@@ -16,6 +16,7 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\DropdownOptionsController;
 use App\Http\Controllers\EmploymentStatusController;
 use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
@@ -277,6 +278,7 @@ Route::get('/v1.0/users/get-attendances/{id}', [UserManagementController::class,
 Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
 Route::get('/v1.0/users/get-schedule-information/{id}', [UserManagementController::class, "getScheduleInformationByUserId"]);
 
+Route::get('/v1.0/users/get-recruitment-processes/{id}', [UserManagementController::class, "getRecruitmentProcessesByUserId"]);
 
 
 
@@ -1187,6 +1189,21 @@ Route::delete('/v1.0/reminders/{ids}', [ReminderController::class, "deleteRemind
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// dropdown  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+Route::get('/v1.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownData"]);
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end dropdown management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
