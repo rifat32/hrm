@@ -2195,10 +2195,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-
-
-
-
         $data["total_data_count"] = $data_query->count();
 
         $data["today_data_count"] = clone $data_query;

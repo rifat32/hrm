@@ -41,15 +41,32 @@ trait BasicUtil
         ->first();
 
           $current_data = NULL;
+
         if(!$user->pension_eligible) {
             $current_data = $model::where('user_id', $current_user_id)
             ->where("pension_eligible",0)
             ->latest()->first();
         } else {
             $latest_expired_record = $model::where('user_id', $current_user_id)
+            ->where("pension_eligible", 1)
             ->where($issue_date_column, '<', now())
-            ->orderByDesc($expiry_date_column)
+            ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
             ->first();
+
+            // $latest_expired_record = $model::where('user_id', $current_user_id)
+            // ->where("pension_eligible",1)
+            // ->where($issue_date_column, '<', now())
+            // ->whereNull($expiry_date_column)
+            // ->latest()
+            // ->first();
+            // if(!$latest_expired_record) {
+            //     $latest_expired_record = $model::where('user_id', $current_user_id)
+            //     ->where("pension_eligible",1)
+            //     ->where($issue_date_column, '<', now())
+            //     ->orderByDesc($expiry_date_column)
+            //     ->first();
+            // }
+
             if($latest_expired_record) {
                 $current_data = $model::where('user_id', $current_user_id)
                 ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
@@ -60,7 +77,6 @@ trait BasicUtil
 
         Session::put($session_name, $current_data?$current_data->id:NULL);
         return $current_data;
-
 
 
     }

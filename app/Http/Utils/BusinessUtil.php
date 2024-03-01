@@ -832,6 +832,10 @@ trait BusinessUtil
             "work_location_id" => $work_location->id,
             "created_by" => $owner_id
         ]);
+        DepartmentUser::create([
+            "user_id" => $owner_id,
+            "department_id" => $department->id
+        ]);
 
         $project =  Project::create([
             'name' => $business_name,
@@ -845,11 +849,32 @@ trait BusinessUtil
             "created_by" => $owner_id
         ]);
 
+        $default_work_shift_data = [
+            'name' => 'default work shift',
+            'type' => 'regular',
+            'description' => '',
+            'is_personal' => false,
+            'break_type' => 'unpaid',
+            'break_hours' => 1,
+            "attendances_count" => 0,
+            'details' => $business->times->toArray(),
+            "is_business_default" => 1,
+            "is_active",
+            "is_default" => 1,
+            "business_id" => $business_id,
+        ];
 
-        DepartmentUser::create([
-            "user_id" => $owner_id,
-            "department_id" => $department->id
-        ]);
+        $default_work_shift = WorkShift::create($default_work_shift_data);
+        $default_work_shift->details()->createMany($default_work_shift_data['details']);
+        $default_work_shift->departments()->sync([$department->id]);
+        $employee_work_shift_history_data = $default_work_shift->toArray();
+        $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
+        $employee_work_shift_history_data["from_date"] = $business->start_date;
+        $employee_work_shift_history_data["to_date"] = NULL;
+         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+         $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
+         $employee_work_shift_history->departments()->sync([$department->id]);
+
 
 
 
@@ -900,29 +925,7 @@ trait BusinessUtil
 
 
 
-        $default_work_shift_data = [
-            'name' => 'default work shift',
-            'type' => 'regular',
-            'description' => '',
-            'is_personal' => false,
-            'break_type' => 'unpaid',
-            'break_hours' => 1,
-            "attendances_count" => 0,
-            'details' => $business->times->toArray(),
-            "is_business_default" => 1,
-            "is_active",
-            "is_default" => 1,
-            "business_id" => $business_id,
-        ];
 
-        $default_work_shift = WorkShift::create($default_work_shift_data);
-        $default_work_shift->details()->createMany($default_work_shift_data['details']);
-        $employee_work_shift_history_data = $default_work_shift->toArray();
-        $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
-        $employee_work_shift_history_data["from_date"] = $business->start_date;
-        $employee_work_shift_history_data["to_date"] = NULL;
-         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
     }
 
 

@@ -157,7 +157,10 @@ class DropdownOptionsController extends Controller
 
   }
 
+
   private function get_departments($all_manager_department_ids) {
+
+
     $departments = Department::where(
         [
             "business_id" => auth()->user()->business_id
@@ -165,7 +168,15 @@ class DropdownOptionsController extends Controller
     )
     ->whereIn("id",$all_manager_department_ids)
         ->where('departments.is_active', 1)
-        ->get();
+        ->get()
+        ->map(function($record,$index) {
+
+            if ($index === 0) {
+                $record->is_current = true;
+            }
+            return $record;
+
+        });
 
          return $departments;
   }
@@ -274,6 +285,7 @@ class DropdownOptionsController extends Controller
 
              $all_manager_department_ids = [];
              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+
              foreach ($manager_departments as $manager_department) {
                  $all_manager_department_ids[] = $manager_department->id;
                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
@@ -283,6 +295,7 @@ class DropdownOptionsController extends Controller
              $data["work_locations"] = $this->get_work_locations($business_created_by);
              $data["designations"] = $this->get_designations($business_created_by);
              $data["employment_statuses"] = $this->get_employment_statuses($business_created_by);
+
              $data["work_shifts"] = $this->get_work_shifts($all_manager_department_ids);
              $data["roles"] = $this->get_roles();
              $data["departments"] = $this->get_departments($all_manager_department_ids);

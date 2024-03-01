@@ -21,6 +21,11 @@ class Department extends Model
         "created_by"
     ];
 
+
+
+
+
+
     public function parent(){
         return $this->belongsTo(Department::class,'parent_id', 'id');
     }
@@ -238,5 +243,5 @@ class Department extends Model
 
 
 
-    
+
 }

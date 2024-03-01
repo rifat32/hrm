@@ -70,9 +70,6 @@ class User extends Authenticatable
         'account_name',
 
 
-
-
-
         'business_id',
         'user_id',
         "created_by",
@@ -111,8 +108,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payroll::class, "user_id" ,'id');
     }
-
-
 
 
 
@@ -242,10 +237,19 @@ class User extends Authenticatable
         $current_user_id = request()->id;
 
 
+
+
         $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
+        ->where("pension_eligible", 1)
         ->where($issue_date_column, '<', now())
-        ->orderByDesc($expiry_date_column)
+        ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
         ->first();
+
+        // $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
+        // ->where($issue_date_column, '<', now())
+        // ->orderByDesc($expiry_date_column)
+        // ->first();
+
 
         if($latest_expired_record) {
             $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
@@ -253,12 +257,18 @@ class User extends Authenticatable
             ->orderByDesc($issue_date_column)
             ->first();
         }
+
+
         if(empty($current_data)) {
-            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)->latest()->first();
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+            ->latest()
+            ->first();
         }
 
 
-        return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+
+
+        return    $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
         ->where("id",$current_data->id);
     }
 

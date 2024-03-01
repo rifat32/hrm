@@ -8,6 +8,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
 use App\Models\BusinessTime;
+use App\Models\Department;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
 use Exception;
@@ -169,8 +170,12 @@ class BusinessTimesController extends Controller
                 "business_id" => $business->id,
             ];
 
+            $default_department =   Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first();
+
             $default_work_shift = WorkShift::create($default_work_shift_data);
             $default_work_shift->details()->createMany($default_work_shift_data['details']);
+            $default_work_shift->departments()->sync([$default_department->id]);
+
 
             $employee_work_shift_history_data = $default_work_shift->toArray();
             $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
@@ -178,6 +183,8 @@ class BusinessTimesController extends Controller
             $employee_work_shift_history_data["to_date"] = NULL;
              $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
              $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
+             $employee_work_shift_history->departments()->sync([$default_department->id]);
+
 
 
 
