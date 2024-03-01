@@ -243,6 +243,8 @@ class User extends Authenticatable
         ->where("pension_eligible", 1)
         ->where($issue_date_column, '<', now())
         ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+        ->orderBy('id', 'DESC')
+        // ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
         ->first();
 
         // $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
@@ -252,10 +254,15 @@ class User extends Authenticatable
 
 
         if($latest_expired_record) {
-            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-            ->orderByDesc($issue_date_column)
-            ->first();
+            if($latest_expired_record->expiry_date_column) {
+                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+                ->orderByDesc($issue_date_column)
+                ->first();
+            } else {
+                $current_data = $latest_expired_record;
+            }
+
         }
 
 

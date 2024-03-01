@@ -176,17 +176,29 @@ function resolveClassName($className) {
                 ->groupBy('user_id')
                 ->get()
                 ->map(function ($record) use ($model_name,$issue_date_column, $expiry_date_column)  {
+
                     $latest_expired_record = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
                     ->where($issue_date_column, '<', now())
-                    ->orderByDesc($expiry_date_column)
+                    ->where(function($query) use($expiry_date_column) {
+                        $query->whereNotNull($expiry_date_column)
+                        ->orWhereNull($expiry_date_column);
+                     })
+                     ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+                     ->orderBy('id', 'DESC')
                     ->first();
 
-                        $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
-                        ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-                        ->orderByDesc($issue_date_column)
-                        ->first();
+
+            if($latest_expired_record->expiry_date_column) {
+                $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+                ->orderByDesc($issue_date_column)
+                ->first();
+           } else {
+              return NULL;
+           }
+
                         return $current_data->id;
-                });
+                }) ->filter()->values();
 
 
 

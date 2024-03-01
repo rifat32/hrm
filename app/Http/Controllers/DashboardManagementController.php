@@ -1991,17 +1991,29 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
             $latest_expired_record = EmployeePensionHistory::where('user_id', $record->user_id)
             ->where($issue_date_column, '<', now())
-            ->orderByDesc($expiry_date_column)
+            ->where(function($query) use($expiry_date_column) {
+               $query->whereNotNull($expiry_date_column)
+               ->orWhereNull($expiry_date_column);
+            })
+            ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+            ->orderBy('id', 'DESC')
+            // ->orderByDesc($expiry_date_column)
+            // ->latest()
             ->first();
 
-                $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
                 ->orderByDesc($issue_date_column)
                 ->first();
+            } else {
+               return NULL;
+            }
+
 
                 return $current_data->id;
-
-        });
+        })
+        ->filter()->values();
 
         $data_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids);
 
@@ -2173,15 +2185,29 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
             $latest_expired_record = EmployeePensionHistory::where('user_id', $record->user_id)
             ->where($issue_date_column, '<', now())
-            ->orderByDesc($expiry_date_column)
+            ->where(function($query) use($expiry_date_column) {
+               $query->whereNotNull($expiry_date_column)
+               ->orWhereNull($expiry_date_column);
+            })
+            ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+            ->orderBy('id', 'DESC')
+            // ->orderByDesc($expiry_date_column)
+            // ->latest()
             ->first();
 
-                $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
                 ->orderByDesc($issue_date_column)
                 ->first();
+            } else {
+               return NULL;
+            }
+
+
                 return $current_data->id;
-        });
+        })
+        ->filter()->values();
 
 
 

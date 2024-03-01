@@ -1803,11 +1803,22 @@ DB::beginTransaction();
             $businesses = Business::with("owner")
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return   $query->where(function ($query) {
-                        return   $query->where('id', auth()->user()->business_id)
+                        return   $query
+                           ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
+                            $query->where('id', auth()->user()->business_id)
                             ->orWhere('created_by', auth()->user()->id)
                             ->orWhere('owner_id', auth()->user()->id);
+                           },
+                           function($query) {
+                            $query->where('is_self_registered_businesses', 1);
+                           }
+
+                        );
+
                     });
-                })
+                },
+                )
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     $term = $request->search_key;
                     return $query->where(function ($query) use ($term) {

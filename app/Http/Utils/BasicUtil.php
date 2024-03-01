@@ -51,6 +51,7 @@ trait BasicUtil
             ->where("pension_eligible", 1)
             ->where($issue_date_column, '<', now())
             ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+            ->orderBy('id', 'DESC')
             ->first();
 
             // $latest_expired_record = $model::where('user_id', $current_user_id)
