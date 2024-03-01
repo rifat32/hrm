@@ -39,11 +39,13 @@ class WorkShiftUpdateRequest extends BaseFormRequest
             'id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
                     $work_shift = WorkShift::where('id', $value)
                         ->where('work_shifts.business_id', '=', auth()->user()->business_id)
+                        ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        })
                         ->first();
-
                     if (!$work_shift) {
                         $fail($attribute . " is invalid.");
                         return;
@@ -54,7 +56,6 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                             return;
 
                     }
-
                 },
             ],
 

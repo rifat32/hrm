@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
+use App\Models\Role;
 use App\Models\WorkLocation;
+use App\Models\WorkShift;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -115,105 +118,56 @@ class DropdownOptionsController extends Controller
   }
 
 
-  private function get_work_shifts($business_created_by) {
-    $employment_statuses = EmploymentStatus::where(function($query) use($business_created_by) {
-     $query->where('employment_statuses.business_id', NULL)
-     ->where('employment_statuses.is_default', 1)
-     ->where('employment_statuses.is_active', 1)
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.created_by", [$business_created_by]);
-     })
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-     })
+  private function get_work_shifts($all_manager_department_ids) {
+          $work_shifts = WorkShift::where(function($query) use($all_manager_department_ids) {
+                    $query
+                    ->where([
+                        "work_shifts.business_id" => auth()->user()->business_id,
+                        "work_shifts.is_active" => 1,
+                    ])
+                    ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    });
+
+                })
+                ->orWhere(function($query)  {
+                    $query->where([
+                        "is_active" => 1,
+                        "business_id" => NULL,
+                        "is_default" => 1
+                    ]);
+
+                })
+
+            ->get();
 
 
 
-     ->orWhere(function ($query) use( $business_created_by){
-         $query->where('employment_statuses.business_id', NULL)
-             ->where('employment_statuses.is_default', 0)
-             ->where('employment_statuses.created_by', $business_created_by)
-             ->where('employment_statuses.is_active', 1)
-             ->whereDoesntHave("disabled", function($q) {
-                 $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-             });
-     })
-     ->orWhere(function ($query)  {
-         $query->where('employment_statuses.business_id', auth()->user()->business_id)
-         ->where('employment_statuses.is_active', 1);
-
-     });
- })
-         ->get();
-
-         return $employment_statuses;
+         return $work_shifts;
   }
-  private function get_roles($business_created_by) {
-    $employment_statuses = EmploymentStatus::where(function($query) use($business_created_by) {
-     $query->where('employment_statuses.business_id', NULL)
-     ->where('employment_statuses.is_default', 1)
-     ->where('employment_statuses.is_active', 1)
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.created_by", [$business_created_by]);
-     })
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-     })
+  private function get_roles() {
+
+    $roles = Role::with('permissions:name,id',"users")
+                  ->where("id",">",auth()->user()->id)
+                  ->where('business_id', auth()->user()->business_id)
+                  ->get();
+
+         return $roles;
 
 
-
-     ->orWhere(function ($query) use( $business_created_by){
-         $query->where('employment_statuses.business_id', NULL)
-             ->where('employment_statuses.is_default', 0)
-             ->where('employment_statuses.created_by', $business_created_by)
-             ->where('employment_statuses.is_active', 1)
-             ->whereDoesntHave("disabled", function($q) {
-                 $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-             });
-     })
-     ->orWhere(function ($query)  {
-         $query->where('employment_statuses.business_id', auth()->user()->business_id)
-         ->where('employment_statuses.is_active', 1);
-
-     });
- })
-         ->get();
-
-         return $employment_statuses;
   }
 
-  private function get_departments($business_created_by) {
-    $employment_statuses = EmploymentStatus::where(function($query) use($business_created_by) {
-     $query->where('employment_statuses.business_id', NULL)
-     ->where('employment_statuses.is_default', 1)
-     ->where('employment_statuses.is_active', 1)
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.created_by", [$business_created_by]);
-     })
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-     })
+  private function get_departments($all_manager_department_ids) {
+    $departments = Department::where(
+        [
+            "business_id" => auth()->user()->business_id
+        ]
+    )
+    ->whereIn("id",$all_manager_department_ids)
+        ->where('departments.is_active', 1)
+        ->get();
 
-
-
-     ->orWhere(function ($query) use( $business_created_by){
-         $query->where('employment_statuses.business_id', NULL)
-             ->where('employment_statuses.is_default', 0)
-             ->where('employment_statuses.created_by', $business_created_by)
-             ->where('employment_statuses.is_active', 1)
-             ->whereDoesntHave("disabled", function($q) {
-                 $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-             });
-     })
-     ->orWhere(function ($query)  {
-         $query->where('employment_statuses.business_id', auth()->user()->business_id)
-         ->where('employment_statuses.is_active', 1);
-
-     });
- })
-         ->get();
-
-         return $employment_statuses;
+         return $departments;
   }
 
 
@@ -318,12 +272,20 @@ class DropdownOptionsController extends Controller
              $business_id =  $business->id;
              $business_created_by = $business->created_by;
 
+             $all_manager_department_ids = [];
+             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+             foreach ($manager_departments as $manager_department) {
+                 $all_manager_department_ids[] = $manager_department->id;
+                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+             }
+
+
              $data["work_locations"] = $this->get_work_locations($business_created_by);
              $data["designations"] = $this->get_designations($business_created_by);
              $data["employment_statuses"] = $this->get_employment_statuses($business_created_by);
-             $data["work_shifts"] = $this->get_work_shifts($business_created_by);
-             $data["roles"] = $this->get_roles($business_created_by);
-             $data["departments"] = $this->get_departments($business_created_by);
+             $data["work_shifts"] = $this->get_work_shifts($all_manager_department_ids);
+             $data["roles"] = $this->get_roles();
+             $data["departments"] = $this->get_departments($all_manager_department_ids);
 
 
 

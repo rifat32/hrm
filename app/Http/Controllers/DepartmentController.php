@@ -801,6 +801,7 @@ class DepartmentController extends Controller
                 'business_id' => $business_id,
                 'manager_id' => auth()->user()->id,
             ])
+
             ->orderBy('id', 'ASC')
             ->get();
 

@@ -150,7 +150,9 @@ class WorkShiftController extends Controller
                     ], 401);
                 }
                 $request_data = $request->validated();
-
+                if(empty($request_data['departments'])) {
+                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+                }
            $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
                 if(!$check_work_shift_details["ok"]) {
                     $this->storeError(
@@ -325,7 +327,9 @@ class WorkShiftController extends Controller
 
 
                 $request_data = $request->validated();
-
+                if(empty($request_data['departments'])) {
+                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+                }
 
 
 
@@ -372,6 +376,7 @@ class WorkShiftController extends Controller
                     // ->with("somthing")
 
                     ->first();
+
                 if (!$work_shift) {
                     return response()->json([
                         "message" => "something went wrong."
@@ -383,7 +388,7 @@ class WorkShiftController extends Controller
 
                 // $work_shift->users()->delete();
                 // $work_shift->users()->sync($request_data['users'], []);
-
+                $work_shift->departments()->sync($request_data['departments']);
                 $work_shift_prev_details  =  ($work_shift_prev->details)->toArray();
 
                 $work_shift->details()->delete();
@@ -474,6 +479,7 @@ if(!$fields_changed){
         $employee_work_shift_history_data["to_date"] = NULL;
          $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
          $employee_work_shift_history->details()->createMany($request_data['details']);
+         $employee_work_shift_history->departments()->sync($request_data['departments']);
         //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"));
 
         $user_ids = $work_shift->users()->pluck('users.id')->toArray();
@@ -810,19 +816,33 @@ if(!$check_work_shift_details["ok"]) {
                     "message" => "You can not perform this action"
                 ], 401);
             }
-        $business_times =    BusinessTime::where([
+        $business_times =  BusinessTime::where([
                 "is_weekend" => 1,
                 "business_id" => auth()->user()->business_id,
             ])->get();
 
-
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
 
             $work_shifts = WorkShift::with("details","departments","users")
 
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($business_times) {
-                return $query->where([
-                    "work_shifts.business_id" => auth()->user()->business_id
-                ])
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($business_times, $all_manager_department_ids) {
+                return $query
+                ->where(function($query) use($all_manager_department_ids) {
+                    $query
+                    ->where([
+                        "work_shifts.business_id" => auth()->user()->business_id
+                    ])
+                    ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    });
+
+                })
+
                 ->orWhere(function($query) use($business_times) {
                     $query->where([
                         "is_active" => 1,
@@ -852,13 +872,12 @@ if(!$check_work_shift_details["ok"]) {
 
                 });
             })
-            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
 
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 return $query->where([
                     "work_shifts.is_default" => 1,
                     "work_shifts.business_id" => NULL
                 ]);
-
             })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -886,10 +905,6 @@ if(!$check_work_shift_details["ok"]) {
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('work_shifts.created_at', ">=", $request->start_date);
                 })
-
-
-
-
 
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('work_shifts.created_at', "<=", ($request->end_date . ' 23:59:59'));
@@ -979,10 +994,37 @@ if(!$check_work_shift_details["ok"]) {
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $work_shift =  WorkShift::with("details")->where([
-                "id" => $id,
-                // "business_id" => $business_id
+
+            $all_manager_department_ids = [];
+            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
+            foreach ($manager_departments as $manager_department) {
+                $all_manager_department_ids[] = $manager_department->id;
+                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+            }
+
+            $work_shift =  WorkShift::with("details")
+            ->where([
+                "id" => $id
             ])
+            ->where(function($query) use($all_manager_department_ids) {
+                $query
+                ->where([
+                    "work_shifts.business_id" => auth()->user()->business_id
+                ])
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                });
+
+            })
+
+            ->orWhere(function($query){
+                $query->where([
+                    "is_active" => 1,
+                    "business_id" => NULL,
+                    "is_default" => 1
+                ]);
+
+            })
                 ->first();
             if (!$work_shift) {
                 $this->storeError(
@@ -1001,9 +1043,9 @@ if(!$check_work_shift_details["ok"]) {
 
             return response()->json($work_shift, 200);
         } catch (Exception $e) {
-
             return $this->sendError($e, 500, $request);
         }
+
     }
 
 

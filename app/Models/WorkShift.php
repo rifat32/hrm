@@ -20,8 +20,6 @@ class WorkShift extends Model
         'is_business_default',
         'is_personal',
 
-      
-
         "is_default",
         "is_active",
         "business_id",

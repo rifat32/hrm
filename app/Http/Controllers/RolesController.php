@@ -323,15 +323,19 @@ class RolesController extends Controller
            }
 
            $roles = Role::with('permissions:name,id',"users")
+
            ->when((empty($request->user()->business_id)), function ($query) use ($request) {
-            return $query->where('business_id', NULL)->where('is_default', 1);
+            return $query->where('business_id', NULL)->where('is_default', 1)
+            ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
+                return $query->where('name', '!=', 'superadmin')
+                ->where("id",">",auth()->user()->id);
+            });
         })
         ->when(!(empty($request->user()->business_id)), function ($query) use ($request) {
-            return $query->where('business_id', $request->user()->business_id);
+            return $query->where('business_id', $request->user()->business_id)
+            ->where("id",">",auth()->user()->id);
         })
-          ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
-                return $query->where('name', '!=', 'superadmin');
-            })
+
            ->when(!empty($request->search_key), function ($query) use ($request) {
                $term = $request->search_key;
                $query->where("name", "like", "%" . $term . "%");

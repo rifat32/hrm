@@ -2453,6 +2453,7 @@ class UserManagementController extends Controller
                 unset($request_data['password']);
             }
 
+
             $userQuery = User::where([
                 "id" => $request["id"]
             ]);
@@ -3104,7 +3105,7 @@ class UserManagementController extends Controller
                         return  $query->where('business_id', auth()->user()->business_id)
                             ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
-                            });;
+                            });
                     });
                 })
                 ->when(!empty($request->role), function ($query) use ($request) {
