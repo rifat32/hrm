@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
 
 class EmployeePassportDetailHistory extends Model
 {
@@ -25,6 +26,13 @@ class EmployeePassportDetailHistory extends Model
         "passport_detail_id",
         'created_by'
     ];
+
+    protected $appends = ['is_current'];
+    public function getIsCurrentAttribute() {
+        $current_passport_id = Session::get('current_passport_id');
+        return $current_passport_id === $this->id;
+    }
+
 
 
     public function creator()

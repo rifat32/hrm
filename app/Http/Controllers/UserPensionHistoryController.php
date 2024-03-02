@@ -22,9 +22,6 @@ class UserPensionHistoryController extends Controller
 
 
 
-
-
-
     /**
      *
      * @OA\Post(
