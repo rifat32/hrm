@@ -19,6 +19,12 @@ class CreateEmployeeVisaDetailHistoriesTable extends Migration
 
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("business_id");
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
+
+
             $table->string("BRP_number");
             $table->date("visa_issue_date");
             $table->date("visa_expiry_date");

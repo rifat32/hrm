@@ -11,6 +11,7 @@ class EmployeeVisaDetailHistory extends Model
 {
     use HasFactory;
     protected $fillable = [
+        "business_id",
         'BRP_number',
         "visa_issue_date",
         "visa_expiry_date",

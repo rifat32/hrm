@@ -5,12 +5,13 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
 
 class EmployeeSponsorshipHistory extends Model
 {
     use HasFactory;
     protected $fillable = [
-
+        "business_id",
         'date_assigned',
         'expiry_date',
         // 'status',
@@ -26,6 +27,14 @@ class EmployeeSponsorshipHistory extends Model
         "to_date",
         'created_by'
     ];
+
+    protected $appends = ['is_current'];
+    public function getIsCurrentAttribute() {
+        $current_sponsorship_id = Session::get('current_sponsorship_id');
+
+        return $current_sponsorship_id === $this->id;
+    }
+
 
     public function creator()
     {

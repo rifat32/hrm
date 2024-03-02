@@ -17,13 +17,14 @@ class CreateEmployeeRightToWorkHistoriesTable extends Migration
             $table->id();
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
+            $table->unsignedBigInteger("business_id");
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
             $table->string('right_to_work_code');
             $table->date('right_to_work_check_date');
             $table->date('right_to_work_expiry_date');
             $table->json('right_to_work_docs');
-            
+
 
             $table->date("from_date");
             $table->date("to_date")->nullable();

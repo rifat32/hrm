@@ -9,7 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
-use App\Models\EmployeeVisaDetail;
+
 use App\Models\EmployeeVisaDetailHistory;
 use Carbon\Carbon;
 use Exception;

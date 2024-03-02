@@ -18,6 +18,8 @@ class CreateEmployeePassportDetailHistoriesTable extends Migration
 
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger("business_id");
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->string("passport_number");
             $table->date("passport_issue_date");
             $table->date("passport_expiry_date");

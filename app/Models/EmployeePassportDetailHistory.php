@@ -10,6 +10,7 @@ class EmployeePassportDetailHistory extends Model
 {
     use HasFactory;
     protected $fillable = [
+        "business_id",
         'passport_number',
         "passport_issue_date",
         "passport_expiry_date",
@@ -35,5 +36,5 @@ class EmployeePassportDetailHistory extends Model
         return $this->hasOne(User::class,'id', 'user_id');
     }
 
-  
+
 }
