@@ -6,6 +6,7 @@ use App\Models\EmployeePensionHistory;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 trait BasicUtil
@@ -47,33 +48,28 @@ trait BasicUtil
             ->where("pension_eligible",0)
             ->latest()->first();
         } else {
-            $latest_expired_record = $model::where('user_id', $current_user_id)
-            ->where("pension_eligible", 1)
-            ->where($issue_date_column, '<', now())
-            ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
-            ->orderBy('id', 'DESC')
-            ->first();
-
             // $latest_expired_record = $model::where('user_id', $current_user_id)
-            // ->where("pension_eligible",1)
+            // ->where("pension_eligible", 1)
             // ->where($issue_date_column, '<', now())
-            // ->whereNull($expiry_date_column)
-            // ->latest()
+            // ->orderBy('id', 'DESC') // Then order by id descending
+            // // ->orderBy(DB::raw("ISNULL($expiry_date_column)"), 'ASC') // Handle null values first
+            // // ->orderBy($expiry_date_column, 'DESC') // Order by expiry_date_column descending
+
             // ->first();
-            // if(!$latest_expired_record) {
-            //     $latest_expired_record = $model::where('user_id', $current_user_id)
-            //     ->where("pension_eligible",1)
-            //     ->where($issue_date_column, '<', now())
-            //     ->orderByDesc($expiry_date_column)
+
+
+
+            // if($latest_expired_record) {
+            //     $current_data = $model::where('user_id', $current_user_id)
+            //     ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+            //     ->orderByDesc($issue_date_column)
             //     ->first();
             // }
-
-            if($latest_expired_record) {
-                $current_data = $model::where('user_id', $current_user_id)
-                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-                ->orderByDesc($issue_date_column)
+            $current_data = $model::where('user_id', $current_user_id)
+            ->where("pension_eligible", 1)
+            ->where($issue_date_column, '<', now())
+                ->orderByDesc("id")
                 ->first();
-            }
         }
 
         Session::put($session_name, $current_data?$current_data->id:NULL);
@@ -83,6 +79,37 @@ trait BasicUtil
     }
 
 
+    public function getCurrentHistory(string $modelClass,$session_name ,$current_user_id, $issue_date_column, $expiry_date_column)
+    {
+
+        $model = new $modelClass;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        $current_data = NULL;
+
+           $latest_expired_record = $model::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+
+            if($latest_expired_record) {
+                $current_data = $model::where('user_id', $current_user_id)
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+
+        Session::put($session_name, $current_data?$current_data->id:NULL);
+        return $current_data;
+
+
+    }
 
 
 

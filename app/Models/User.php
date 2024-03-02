@@ -213,16 +213,22 @@ class User extends Authenticatable
             ->where("pension_eligible",0)
             ->latest()->first();
         } else {
-            $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
+            // $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
+            // ->where($issue_date_column, '<', now())
+            // ->orderByDesc($expiry_date_column)
+            // ->first();
+            // if($latest_expired_record) {
+            //     $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+            //     ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+            //     ->orderByDesc($issue_date_column)
+            //     ->first();
+            // }
+
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+            ->where("pension_eligible", 1)
             ->where($issue_date_column, '<', now())
-            ->orderByDesc($expiry_date_column)
-            ->first();
-            if($latest_expired_record) {
-                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-                ->orderByDesc($issue_date_column)
+                ->orderByDesc("id")
                 ->first();
-            }
         }
 
 

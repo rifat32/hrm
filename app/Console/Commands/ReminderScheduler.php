@@ -162,61 +162,61 @@ function resolveClassName($className) {
 
 
 
+                if($model_name == "EmployeePensionHistory") {
 
-                $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
-                ->where([
-                    "business_id" => $business->id
-                ])
-                ->whereHas($user_relationship, function ($query) use ($user_eligible_field)  {
-                    $query->where(("users." . $user_eligible_field),">",0)
-                    ->where("is_active",1);
-                })
-                ->where($issue_date_column, '<', now())
-                ->whereNotNull($expiry_date_column)
-                ->groupBy('user_id')
-                ->get()
-                ->map(function ($record) use ($model_name,$issue_date_column, $expiry_date_column)  {
-
-                    $latest_expired_record = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                    $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
+                    ->where([
+                        "business_id" => $business->id
+                    ])
+                    ->whereHas($user_relationship, function ($query) use ($user_eligible_field)  {
+                        $query->where(("users." . $user_eligible_field),">",0)
+                        ->where("is_active",1);
+                    })
                     ->where($issue_date_column, '<', now())
-                    ->where(function($query) use($expiry_date_column) {
-                        $query->whereNotNull($expiry_date_column)
-                        ->orWhereNull($expiry_date_column);
-                     })
-                     ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
-                     ->orderBy('id', 'DESC')
-                    ->first();
+                    ->whereNotNull($expiry_date_column)
+                    ->groupBy('user_id')
+                    ->get()
+                    ->map(function ($record) use ($model_name,$issue_date_column, $user_eligible_field)  {
 
 
-            if($latest_expired_record->expiry_date_column) {
-                $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
-                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-                ->orderByDesc($issue_date_column)
+
+            $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+            ->where($user_eligible_field, 1)
+            ->where($issue_date_column, '<', now())
+                ->orderByDesc("id")
                 ->first();
-           } else {
-              return NULL;
-           }
 
-                        return $current_data->id;
-                }) ->filter()->values();
-
+                if($current_data)
+                {
+                    return NULL;
+                }
 
 
-                $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id",$all_current_data_ids)
-                ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
-                        return $query->where([
-                            ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
-                        ]);
-                    })
-                    ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+                            return $current_data->id;
+                    }) ->filter()->values();
 
-                        return $query->where(
-                            ($expiry_date_column),
-                            "<=",
-                            $now->copy()->subDays($reminder->duration)
-                        );
-                    })
-                    ->get();
+
+
+                    $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id",$all_current_data_ids)
+                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+                            return $query->where([
+                                ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
+                            ]);
+                        })
+                        ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+
+                            return $query->where(
+                                ($expiry_date_column),
+                                "<=",
+                                $now->copy()->subDays($reminder->duration)
+                            );
+                        })
+                        ->get();
+                }
+                else {
+
+                }
+
 
 
 

@@ -170,7 +170,6 @@ class DropdownOptionsController extends Controller
         ->where('departments.is_active', 1)
         ->get()
         ->map(function($record,$index) {
-
             if ($index === 0) {
                 $record->is_current = true;
             }

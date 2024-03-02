@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
 
 class EmployeeVisaDetailHistory extends Model
 {
@@ -26,10 +27,21 @@ class EmployeeVisaDetailHistory extends Model
         'created_by'
     ];
 
+    protected $appends = ['is_current'];
+    public function getIsCurrentAttribute() {
+        $current_visa_id = Session::get('current_visa_id');
+        return $current_visa_id === $this->id;
+    }
+
+
+
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by',"id");
     }
+
+
 
 
     public function employee(){

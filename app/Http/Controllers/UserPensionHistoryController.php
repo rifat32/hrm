@@ -107,7 +107,7 @@ class UserPensionHistoryController extends Controller
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
 
 
@@ -244,8 +244,9 @@ class UserPensionHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
-                $request_data["created_by"] = $request->user()->id;
+                $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $all_manager_department_ids = [];
                 $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
                 foreach ($manager_departments as $manager_department) {
@@ -257,6 +258,7 @@ class UserPensionHistoryController extends Controller
                 $current_user_id =  $request_data["user_id"];
                 $issue_date_column = 'pension_enrollment_issue_date';
                 $expiry_date_column = 'pension_re_enrollment_due_date';
+
                 $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
@@ -504,7 +506,7 @@ class UserPensionHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {
@@ -653,7 +655,7 @@ class UserPensionHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {
@@ -766,7 +768,7 @@ class UserPensionHistoryController extends Controller
 
 
 
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = [];
             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
             foreach ($manager_departments as $manager_department) {

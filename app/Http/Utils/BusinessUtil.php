@@ -38,8 +38,25 @@ trait BusinessUtil
         $businessQuery  = Business::where(["id" => $business_id]);
         if (!auth()->user()->hasRole('superadmin')) {
             $businessQuery = $businessQuery->where(function ($query) {
-                $query->where('created_by', auth()->user()->id)
-                    ->orWhere('owner_id', auth()->user()->id);
+
+                $query->where(function ($query) {
+                    return   $query
+                       ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
+                        $query->where('id', auth()->user()->business_id)
+                        ->orWhere('created_by', auth()->user()->id)
+                        ->orWhere('owner_id', auth()->user()->id);
+                       },
+                       function($query) {
+                        $query->where('is_self_registered_businesses', 1)
+                        ->orWhere('created_by', auth()->user()->id);
+                       }
+
+                    );
+
+                });
+
+
+
             });
         }
 
