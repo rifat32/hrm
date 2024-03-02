@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRightToWorkHistoryCreateRequest;
 use App\Http\Requests\UserRightToWorkHistoryUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserRightToWorkHistoryController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
 
@@ -103,43 +104,43 @@ class UserRightToWorkHistoryController extends Controller
                 $request_data["is_manual"] = 1;
 
 
-                $current_right_to_work =  EmployeeRightToWorkHistory::where(
-                    [
-                        "user_id" => $request["user_id"],
-                    ]
-                )->latest()->first();
+                // $current_right_to_work =  EmployeeRightToWorkHistory::where(
+                //     [
+                //         "user_id" => $request["user_id"],
+                //     ]
+                // )->latest()->first();
 
-                if ($current_right_to_work) {
-                    // Parse the new expiry date using Carbon
-                    $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                    $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
+                // if ($current_right_to_work) {
+                //     // Parse the new expiry date using Carbon
+                //     $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
+                //     $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
 
-                    if ($new_expiry_date->gt($current_expiry_date)) {
-                        // Update the passport expiry date
-                        $request_data["is_manual"] = 0;
-                        $user_right_to_work  =  $current_right_to_work->update(
-                            collect($request_data)->only([
-                                'right_to_work_code',
-                                'right_to_work_check_date',
-                                'right_to_work_expiry_date',
-                                'right_to_work_docs',
-                                 "created_by"
+                //     if ($new_expiry_date->gt($current_expiry_date)) {
+                //         // Update the passport expiry date
+                //         $request_data["is_manual"] = 0;
+                //         $user_right_to_work  =  $current_right_to_work->update(
+                //             collect($request_data)->only([
+                //                 'right_to_work_code',
+                //                 'right_to_work_check_date',
+                //                 'right_to_work_expiry_date',
+                //                 'right_to_work_docs',
+                //                  "created_by"
 
-                            ])->toArray()
-                        );
+                //             ])->toArray()
+                //         );
 
-                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                    }
-                } else {
-                    $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                    $today = now();
+                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
+                //     }
+                // } else {
+                //     $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
+                //     $today = now();
 
-                    if ($new_expiry_date->gt($today)) {
-                        // Handle the case where the new expiry date is later than today's date
-                        $request_data["is_manual"] = 0;
-                        $user_right_to_work = EmployeeRightToWork::create($request_data);
-                    }
-                }
+                //     if ($new_expiry_date->gt($today)) {
+                //         // Handle the case where the new expiry date is later than today's date
+                //         $request_data["is_manual"] = 0;
+                //         $user_right_to_work = EmployeeRightToWork::create($request_data);
+                //     }
+                // }
 
 
                 $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
@@ -230,79 +231,59 @@ class UserRightToWorkHistoryController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
+
                 $request_data = $request->validated();
-                $request_data["created_by"] = $request->user()->id;
+                $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
-
-                $current_right_to_work =  EmployeeRightToWork::where(
-                    [
-                        "user_id" => $request["user_id"],
-                    ]
-                )->latest()->first();
-
-                if ($current_right_to_work) {
-                    // Parse the new expiry date using Carbon
-                    $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                    $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
-
-                    if ($new_expiry_date->gt($current_expiry_date)) {
-                        // Update the passport expiry date
-                        $request_data["is_manual"] = 0;
-                        $user_right_to_work  =  $current_expiry_date->update(
-                            collect($request_data)->only([
-                                'right_to_work_code',
-                                'right_to_work_check_date',
-                                'right_to_work_expiry_date',
-                                'right_to_work_docs',
-                                 "created_by"
-
-                            ])->toArray()
-                        );
-
-                        // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                    }
-                } else {
-                    $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-                    $today = Carbon::now();
-
-                    if ($new_expiry_date->gt($today)) {
-                        // Handle the case where the new expiry date is later than today's date
-                        $request_data["is_manual"] = 0;
-                        $user_right_to_work = EmployeeRightToWork::create($request_data);
-                    }
+                $request_data["business_id"] = auth()->user()->business_id;
+                $all_manager_department_ids = [];
+                $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+                foreach ($manager_departments as $manager_department) {
+                    $all_manager_department_ids[] = $manager_department->id;
+                    $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                 }
 
 
-                $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
+                $current_user_id =  $request_data["user_id"];
+                $issue_date_column = 'right_to_work_check_date';
+                $expiry_date_column = 'right_to_work_expiry_date';
+
+                $current_right_to_work = $this->getCurrentHistory(EmployeeRightToWorkHistory::class, 'current_right_to_work_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
-
-
-                $user_right_to_work_history_query_params = [
+                $user_right_ro_work_history_query_params = [
                     "id" => $request_data["id"],
-                    "is_manual" => 1
+                    // "is_manual" => 1
                 ];
 
-                $user_right_to_work_history  =  tap(EmployeeRightToWorkHistory::where($user_right_to_work_history_query_params))->update(
-                    collect($request_data)->only([
-                        'right_to_work_code',
-                        'right_to_work_check_date',
-                        'right_to_work_expiry_date',
-                        'right_to_work_docs',
+                if ($current_right_to_work && $current_right_to_work->id == $request_data["id"]) {
+                    $request_data["is_manual"] = 0;
+                    $user_right_to_work_history =   EmployeeRightToWorkHistory::create($request_data);
 
-        "is_manual",
-        'user_id',
-        "from_date",
-        "to_date",
+                } else {
+                    $user_right_to_work_history  =  tap(EmployeeRightToWorkHistory::where($user_right_ro_work_history_query_params))->update(
+                        collect($request_data)->only([
+                            'right_to_work_code',
+                            'right_to_work_check_date',
+                            'right_to_work_expiry_date',
+                            'right_to_work_docs',
+
+                            "is_manual",
+                            'user_id',
+                            "from_date",
+                            "to_date",
+                            "right_to_work_id",
+
+                        ])->toArray()
+                    )
+                        ->first();
+                }
 
 
 
-                    ])->toArray()
-                )
-                    // ->with("somthing")
 
-                    ->first();
+
                 if (!$user_right_to_work_history) {
                     return response()->json([
                         "message" => "something went wrong."
@@ -310,6 +291,89 @@ class UserRightToWorkHistoryController extends Controller
                 }
 
                 return response($user_right_to_work_history, 201);
+
+
+
+        //         $business_id =  $request->user()->business_id;
+        //         $request_data = $request->validated();
+        //         $request_data["created_by"] = $request->user()->id;
+        //         $request_data["is_manual"] = 1;
+
+        //         $current_right_to_work =  EmployeeRightToWork::where(
+        //             [
+        //                 "user_id" => $request["user_id"],
+        //             ]
+        //         )->latest()->first();
+
+        //         if ($current_right_to_work) {
+        //             // Parse the new expiry date using Carbon
+        //             $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
+        //             $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
+
+        //             if ($new_expiry_date->gt($current_expiry_date)) {
+        //                 // Update the passport expiry date
+        //                 $request_data["is_manual"] = 0;
+        //                 $user_right_to_work  =  $current_expiry_date->update(
+        //                     collect($request_data)->only([
+        //                         'right_to_work_code',
+        //                         'right_to_work_check_date',
+        //                         'right_to_work_expiry_date',
+        //                         'right_to_work_docs',
+        //                          "created_by"
+
+        //                     ])->toArray()
+        //                 );
+
+        //                 // Now $current_passport_detail holds the updated passport detail with the later expiry date
+        //             }
+        //         } else {
+        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
+        //             $today = Carbon::now();
+
+        //             if ($new_expiry_date->gt($today)) {
+        //                 // Handle the case where the new expiry date is later than today's date
+        //                 $request_data["is_manual"] = 0;
+        //                 $user_right_to_work = EmployeeRightToWork::create($request_data);
+        //             }
+        //         }
+
+
+        //         $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
+
+
+
+
+        //         $user_right_to_work_history_query_params = [
+        //             "id" => $request_data["id"],
+        //             "is_manual" => 1
+        //         ];
+
+        //         $user_right_to_work_history  =  tap(EmployeeRightToWorkHistory::where($user_right_to_work_history_query_params))->update(
+        //             collect($request_data)->only([
+        //                 'right_to_work_code',
+        //                 'right_to_work_check_date',
+        //                 'right_to_work_expiry_date',
+        //                 'right_to_work_docs',
+
+        // "is_manual",
+        // 'user_id',
+        // "from_date",
+        // "to_date",
+
+
+
+        //             ])->toArray()
+        //         )
+        //             // ->with("somthing")
+
+        //             ->first();
+        //         if (!$user_right_to_work_history) {
+        //             return response()->json([
+        //                 "message" => "something went wrong."
+        //             ], 500);
+        //         }
+
+        //         return response($user_right_to_work_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -425,6 +489,15 @@ class UserRightToWorkHistoryController extends Controller
                 $all_manager_department_ids[] = $manager_department->id;
                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
             }
+
+            $current_user_id = request()->user_id;
+            $issue_date_column = 'right_to_work_check_date';
+            $expiry_date_column = 'right_to_work_expiry_date';
+            $current_visa = $this->getCurrentHistory(EmployeeRightToWorkHistory::class, 'current_right_to_work_id', $current_user_id, $issue_date_column, $expiry_date_column);
+
+
+
+
             $user_right_to_work_histories = EmployeeRightToWorkHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',

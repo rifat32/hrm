@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
 
 class EmployeeRightToWorkHistory extends Model
 {
@@ -29,6 +30,14 @@ class EmployeeRightToWorkHistory extends Model
 
         'right_to_work_docs' => 'array',
     ];
+
+    protected $appends = ['is_current'];
+    public function getIsCurrentAttribute() {
+        $current_right_to_work_id = Session::get('current_right_to_work_id');
+        return $current_right_to_work_id === $this->id;
+    }
+
+
 
     public function employee()
     {
