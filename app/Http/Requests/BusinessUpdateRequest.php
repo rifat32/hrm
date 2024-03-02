@@ -49,6 +49,7 @@ class BusinessUpdateRequest extends BaseFormRequest
 
             'business.id' => 'required|numeric|required|exists:businesses,id',
             'business.name' => 'required|string|max:255',
+            'business.start_date' => 'required|date',
             'business.about' => 'nullable|string',
             'business.web_page' => 'nullable|string',
             'business.phone' => 'nullable|string',
