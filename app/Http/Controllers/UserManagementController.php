@@ -777,6 +777,7 @@ class UserManagementController extends Controller
                 $user->user_name = $username;
                 $user->pension_eligible = 0;
                 $user->save();
+                $this->delete_old_histories();
                 $user->departments()->sync($request_data['departments']);
                 $user->assignRole($request_data['role']);
 
@@ -1452,12 +1453,16 @@ class UserManagementController extends Controller
                 ], 404);
             }
 
+            $this->delete_old_histories();
+
+
             $user->departments()->sync($request_data['departments']);
             $user->syncRoles([$request_data['role']]);
 
             $this->update_work_shift($request_data, $user);
             $this->update_address_history($request_data, $user);
             $this->update_recruitment_processes($request_data, $user);
+
 
 
             if (in_array($request["immigration_status"], ['sponsored'])) {

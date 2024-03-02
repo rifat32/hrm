@@ -258,7 +258,6 @@ class UserSponsorshipHistoryController extends Controller
                     $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
                 }
 
-
                 $current_user_id =  $request_data["user_id"];
                 $issue_date_column = 'date_assigned';
                 $expiry_date_column = 'expiry_date';
