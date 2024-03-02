@@ -215,20 +215,61 @@ function resolveClassName($className) {
                 }
                 else {
 
+                    $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
+                    ->where([
+                        "business_id" => $business->id
+                    ])
+                    ->whereHas($user_relationship, function ($query) use ($user_eligible_field)  {
+                        $query->where(("users." . $user_eligible_field),">",0)
+                        ->where("is_active",1);
+                    })
+                    ->where($issue_date_column, '<', now())
+                    ->groupBy('user_id')
+                    ->get()
+                    ->map(function ($record) use ($issue_date_column, $expiry_date_column, $model_name) {
+
+                        $latest_expired_record = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                        ->where($issue_date_column, '<', now())
+                        ->orderByDesc($expiry_date_column)
+                        // ->latest()
+                        ->first();
+
+                        if($latest_expired_record->expiry_date_column) {
+                             $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                            ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                            ->where($issue_date_column, '<', now())
+                            ->orderByDesc($issue_date_column)
+                            ->first();
+                        } else {
+                           return NULL;
+                        }
+
+
+                            return $current_data->id;
+                    })
+                    ->filter()->values();
+
+                    $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id",$all_current_data_ids)
+                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+                            return $query->where([
+                                ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
+                            ]);
+                        })
+                        ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+
+                            return $query->where(
+                                ($expiry_date_column),
+                                "<=",
+                                $now->copy()->subDays($reminder->duration)
+                            );
+                        })
+                        ->get();
                 }
 
 
 
 
-
-
-
-
-
                 foreach ($all_reminder_data as $data) {
-
-
-
 
                     if ($reminder->send_time == "after_expiry") {
 
@@ -242,7 +283,6 @@ function resolveClassName($className) {
                             $this->sendNotification($reminder, $data, $business);
                         } else if ($reminder_date->gt($data->$expiry_date_column)) {
                             if ($reminder->keep_sending_until_update == 1 && !empty($reminder->frequency_after_first_reminder)) {
-
                                 $days_difference = $reminder_date->diffInDays($data->$expiry_date_column);
                                 if ((($days_difference % $reminder->frequency_after_first_reminder) == 0)) {
                                     // send notification or email based on setting
@@ -252,7 +292,6 @@ function resolveClassName($className) {
                             }
                         }
                     } else if ($reminder->send_time == "before_expiry") {
-
                         // send notification or email based on setting
                         $this->sendNotification($reminder, $data, $business);
                     }

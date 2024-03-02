@@ -11,12 +11,11 @@ use App\Models\Business;
 use App\Models\Candidate;
 use App\Models\DashboardWidget;
 use App\Models\Department;
-use App\Models\EmployeePassportDetail;
-use App\Models\EmployeeRightToWork;
-use App\Models\EmployeeSponsorship;
-use App\Models\EmployeePension;
+use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeePensionHistory;
-use App\Models\EmployeeVisaDetail;
+use App\Models\EmployeeRightToWorkHistory;
+use App\Models\EmployeeSponsorshipHistory;
+use App\Models\EmployeeVisaDetailHistory;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
 use App\Models\User;
@@ -1701,12 +1700,48 @@ class DashboardManagementController extends Controller
         $all_manager_department_ids
     ) {
 
-        $data_query  = EmployeePassportDetail::
-        whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        $issue_date_column = 'passport_issue_date';
+        $expiry_date_column = 'passport_expiry_date';
+
+
+        $employee_passport_history_ids = EmployeePassportDetailHistory::select('user_id')
+        ->where("business_id",auth()->user()->business_id)
+        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
-        ->where("passport_expiry_date",">=", today())
-        ->where("business_id",auth()->user()->business_id);
+        ->whereNotIn('user_id', [auth()->user()->id])
+        ->where($issue_date_column, '<', now())
+        ->groupBy('user_id')
+        ->get()
+        ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+            $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $record->user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            // ->latest()
+            ->first();
+
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeePassportDetailHistory::where('user_id', $record->user_id)
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc($issue_date_column)
+                ->first();
+            } else {
+               return NULL;
+            }
+
+
+                return $current_data->id;
+        })
+        ->filter()->values();
+
+
+
+        $data_query  = EmployeePassportDetailHistory::whereIn('id', $employee_passport_history_ids)
+        ->where($expiry_date_column,">=", today());
+
+
 
         $data["total_data_count"] = $data_query->count();
 
@@ -1768,11 +1803,59 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $all_manager_department_ids
     ) {
 
-        $data_query  = EmployeeVisaDetail::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        $issue_date_column = 'visa_issue_date';
+        $expiry_date_column = 'visa_expiry_date';
+
+
+        $employee_visa_history_ids = EmployeeVisaDetailHistory::select('user_id')
+        ->where("business_id",auth()->user()->business_id)
+        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
-        ->where("visa_expiry_date",">=", today())
-        ->where("business_id",auth()->user()->business_id);
+        ->whereNotIn('user_id', [auth()->user()->id])
+        ->where($issue_date_column, '<', now())
+        ->groupBy('user_id')
+        ->get()
+        ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+            $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $record->user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            // ->latest()
+            ->first();
+
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeeVisaDetailHistory::where('user_id', $record->user_id)
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc($issue_date_column)
+                ->first();
+            } else {
+               return NULL;
+            }
+
+
+                return $current_data->id;
+        })
+        ->filter()->values();
+
+
+
+
+        $data_query  = EmployeeVisaDetailHistory::whereIn('id', $employee_visa_history_ids)
+        ->where($expiry_date_column,">=", today());
+
+
+
+
+
+        // $data_query  = EmployeeVisaDetail::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        //     $query->whereIn("departments.id", $all_manager_department_ids);
+        // })
+        // ->where("visa_expiry_date",">=", today())
+        // ->where("business_id",auth()->user()->business_id);
+
+
 
         $data["total_data_count"] = $data_query->count();
 
@@ -1834,11 +1917,50 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $all_manager_department_ids
     ) {
 
-        $data_query  = EmployeeRightToWork::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        $issue_date_column = 'right_to_work_check_date';
+        $expiry_date_column = 'right_to_work_expiry_date';
+
+
+        $employee_right_to_work_history_ids = EmployeeRightToWorkHistory::select('user_id')
+        ->where("business_id",auth()->user()->business_id)
+        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
-        ->where("right_to_work_expiry_date",">=", today())
-        ->where("business_id",auth()->user()->business_id);
+        ->whereNotIn('user_id', [auth()->user()->id])
+        ->where($issue_date_column, '<', now())
+        ->groupBy('user_id')
+        ->get()
+        ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+            $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $record->user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            // ->latest()
+            ->first();
+
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeeRightToWorkHistory::where('user_id', $record->user_id)
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc($issue_date_column)
+                ->first();
+            } else {
+               return NULL;
+            }
+
+
+                return $current_data->id;
+        })
+        ->filter()->values();
+
+
+
+        $data_query  = EmployeeRightToWorkHistory::whereIn('id', $employee_right_to_work_history_ids)
+        ->where($expiry_date_column,">=", today());
+
+
+
+
 
         $data["total_data_count"] = $data_query->count();
 
@@ -1900,12 +2022,44 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $all_manager_department_ids
     ) {
 
-        $data_query  = EmployeeSponsorship::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        $issue_date_column = 'date_assigned';
+        $expiry_date_column = 'expiry_date';
+
+
+        $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
+        ->where("business_id",auth()->user()->business_id)
+        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
+        ->whereNotIn('user_id', [auth()->user()->id])
+        ->where($issue_date_column, '<', now())
+        ->groupBy('user_id')
+        ->get()
+        ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+            $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            // ->latest()
+            ->first();
 
-        ->where("expiry_date",">=", today())
-        ->where("business_id",auth()->user()->business_id);
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc($issue_date_column)
+                ->first();
+            } else {
+               return NULL;
+            }
+                return $current_data->id;
+        })
+        ->filter()->values();
+
+
+
+        $data_query  = EmployeeSponsorshipHistory::whereIn('id', $employee_sponsorship_history_ids)
+        ->where($expiry_date_column,">=", today());
+
 
         $data["total_data_count"] = $data_query->count();
 
@@ -2026,7 +2180,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         })
         ->filter()->values();
 
-        $data_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids);
+        $data_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids)->where($expiry_date_column,">=", today());
 
 
 
@@ -2108,13 +2262,49 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $current_certificate_status
     ) {
 
-        $data_query  = EmployeeSponsorship::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+
+        $issue_date_column = 'date_assigned';
+        $expiry_date_column = 'expiry_date';
+
+        $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
+        ->where("business_id",auth()->user()->business_id)
+        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
+        ->whereNotIn('user_id', [auth()->user()->id])
+        ->where($issue_date_column, '<', now())
+        ->groupBy('user_id')
+        ->get()
+        ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+            $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderByDesc($expiry_date_column)
+            // ->latest()
+            ->first();
+
+            if($latest_expired_record->expiry_date_column) {
+                 $current_data = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc($issue_date_column)
+                ->first();
+            } else {
+               return NULL;
+            }
+                return $current_data->id;
+        })
+        ->filter()->values();
+
+
+
+        $data_query  = EmployeeSponsorshipHistory::whereIn('id', $employee_sponsorship_history_ids)
         ->where([
             "current_certificate_status"=>$current_certificate_status,
             "business_id"=>auth()->user()->business_id
         ]);
+
+
+
 
         $data["total_data_count"] = $data_query->count();
 
@@ -2194,26 +2384,39 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         ->groupBy('user_id')
         ->get()
         ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
-            $latest_expired_record = EmployeePensionHistory::where('user_id', $record->user_id)
-            ->where($issue_date_column, '<', now())
-            ->where(function($query) use($expiry_date_column) {
-               $query->whereNotNull($expiry_date_column)
-               ->orWhereNull($expiry_date_column);
-            })
-            ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
-            ->orderBy('id', 'DESC')
-            // ->orderByDesc($expiry_date_column)
-            // ->latest()
-            ->first();
 
-            if($latest_expired_record->expiry_date_column) {
-                 $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
-                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-                ->orderByDesc($issue_date_column)
+            // $latest_expired_record = EmployeePensionHistory::where('user_id', $record->user_id)
+            // ->where($issue_date_column, '<', now())
+            // ->where(function($query) use($expiry_date_column) {
+            //    $query->whereNotNull($expiry_date_column)
+            //    ->orWhereNull($expiry_date_column);
+            // })
+            // ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+            // ->orderBy('id', 'DESC')
+            // // ->orderByDesc($expiry_date_column)
+            // // ->latest()
+            // ->first();
+
+            // if($latest_expired_record->expiry_date_column) {
+            //      $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+            //     ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
+            //     ->orderByDesc($issue_date_column)
+            //     ->first();
+            // } else {
+            //    return NULL;
+            // }
+
+     $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+            ->where("pension_eligible", 1)
+            ->where($issue_date_column, '<', now())
+                ->orderByDesc("id")
                 ->first();
-            } else {
-               return NULL;
-            }
+
+                if($current_data)
+                {
+                    return NULL;
+                }
+
 
 
                 return $current_data->id;

@@ -1148,6 +1148,7 @@ DB::beginTransaction();
                 ]))->update(
                     collect($request_data['business'])->only([
                         "name",
+                        "start_date",
                         "about",
                         "web_page",
                         "phone",
