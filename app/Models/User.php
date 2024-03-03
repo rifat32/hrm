@@ -171,31 +171,178 @@ class User extends Authenticatable
     }
 
     public function sponsorship_detail() {
-        return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
+        $issue_date_column = 'date_assigned';
+        $expiry_date_column = 'expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+            if($latest_expired_record) {
+                $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+        return    $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
 
 
 
     public function passport_detail() {
-        return $this->hasOne(EmployeePassportDetail::class, 'user_id', 'id');
+        $issue_date_column = 'passport_issue_date';
+        $expiry_date_column = 'passport_expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+
+            if($latest_expired_record) {
+                $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+
+
+
+        return    $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
     public function visa_detail() {
-        return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
+        $issue_date_column = 'visa_issue_date';
+        $expiry_date_column = 'visa_expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+
+            if($latest_expired_record) {
+                $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+        return    $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
     public function right_to_work() {
-        return $this->hasOne(EmployeeRightToWork::class, 'user_id', 'id');
+        $issue_date_column = 'right_to_work_check_date';
+        $expiry_date_column = 'right_to_work_expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+            if($latest_expired_record) {
+                $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+        return    $this->hasOne(EmployeeRightToWorkHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
     public function sponsorship_details() {
-        return $this->hasOne(EmployeeSponsorship::class, 'user_id', 'id');
+        $issue_date_column = 'date_assigned';
+        $expiry_date_column = 'expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+            if($latest_expired_record) {
+                $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+        return    $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
 
 
 
 
-    private function manipulateHistory($query, $issue_date, $expiry_date) {
-        return $query
-        ;
-    }
+
 
     public function pension_details() {
         $issue_date_column = 'pension_enrollment_issue_date';
@@ -213,16 +360,7 @@ class User extends Authenticatable
             ->where("pension_eligible",0)
             ->latest()->first();
         } else {
-            // $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
-            // ->where($issue_date_column, '<', now())
-            // ->orderByDesc($expiry_date_column)
-            // ->first();
-            // if($latest_expired_record) {
-            //     $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            //     ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-            //     ->orderByDesc($issue_date_column)
-            //     ->first();
-            // }
+
 
             $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
             ->where("pension_eligible", 1)
@@ -242,57 +380,135 @@ class User extends Authenticatable
         $expiry_date_column = 'pension_re_enrollment_due_date';
         $current_user_id = request()->id;
 
-
-
-
-        $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
-        ->where("pension_eligible", 1)
-        ->where($issue_date_column, '<', now())
-        ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
-        ->orderBy('id', 'DESC')
-        // ->orderByRaw("ISNULL($expiry_date_column), $expiry_date_column DESC")
+        $user = User::where([
+            "id" => $current_user_id
+        ])
         ->first();
-
-        // $latest_expired_record = EmployeePensionHistory::where('user_id', $current_user_id)
-        // ->where($issue_date_column, '<', now())
-        // ->orderByDesc($expiry_date_column)
-        // ->first();
-
-
-        if($latest_expired_record) {
-            if($latest_expired_record->expiry_date_column) {
-                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-                ->where($expiry_date_column, $latest_expired_record->expiry_date_column)
-                ->orderByDesc($issue_date_column)
-                ->first();
-            } else {
-                $current_data = $latest_expired_record;
-            }
-
+        if(!$user) {
+          return NULL;
         }
 
 
-        if(empty($current_data)) {
+
+        $current_data = NULL;
+
+        if(!$user->pension_eligible) {
             $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            ->latest()
-            ->first();
+            ->where("pension_eligible",0)
+            ->latest()->first();
+        } else {
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+            ->where("pension_eligible", 1)
+            ->where($issue_date_column, '<', now())
+                ->orderByDesc("id")
+                ->first();
         }
-
-
 
 
         return    $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-        ->where("id",$current_data->id);
+        ->where("id",$current_data?$current_data->id:NULL);
     }
 
     public function passport_details() {
-        return $this->hasOne(EmployeePassportDetail::class, 'user_id', 'id');
+        $issue_date_column = 'passport_issue_date';
+        $expiry_date_column = 'passport_expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+
+            if($latest_expired_record) {
+                $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+
+
+
+        return    $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
     public function visa_details() {
-        return $this->hasOne(EmployeeVisaDetail::class, 'user_id', 'id');
+        $issue_date_column = 'visa_issue_date';
+        $expiry_date_column = 'visa_expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+
+            if($latest_expired_record) {
+                $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+        return    $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
     public function right_to_works() {
-        return $this->hasOne(EmployeeRightToWork::class, 'user_id', 'id');
+        $issue_date_column = 'right_to_work_check_date';
+        $expiry_date_column = 'right_to_work_expiry_date';
+        $current_user_id = request()->id;
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+        ->first();
+
+        if(!$user) {
+            return NULL;
+          }
+
+        $current_data = NULL;
+
+           $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+            ->where($issue_date_column, '<', now())
+            ->orderBy($expiry_date_column, 'DESC')
+            ->first();
+
+            if($latest_expired_record) {
+                $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+                ->where($issue_date_column, '<', now())
+                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                ->orderByDesc($issue_date_column)
+                ->first();
+            }
+
+        return    $this->hasOne(EmployeeRightToWorkHistory::class, 'user_id', 'id')
+        ->where("id",$current_data?$current_data->id:NULL);
     }
 
 

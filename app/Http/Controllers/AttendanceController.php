@@ -271,8 +271,7 @@ class AttendanceController extends Controller
                     }
                 }
 
-             $leave_record = LeaveRecord::
-                    whereHas('leave',    function ($query) use ($request_data)  {
+             $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($request_data)  {
                         $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
                         ->where("leaves.status", "approved");
                     })
@@ -2190,7 +2189,13 @@ class AttendanceController extends Controller
             }
 
             if (!empty($setting_attendance->work_availability_definition)) {
-                if ($data["data_highlights"]["total_work_availability_per_centum"] >= $setting_attendance->work_availability_definition) {
+                if($attendances->isEmpty()) {
+                    $data["data_highlights"]["work_availability"] = "no data";
+                }
+            //    else if ($data["data_highlights"]["total_work_availability_per_centum"] == 0) {
+            //         $data["data_highlights"]["work_availability"] = "no data";
+            //     }
+                else if ($data["data_highlights"]["total_work_availability_per_centum"] >= $setting_attendance->work_availability_definition) {
                     $data["data_highlights"]["work_availability"] = "good";
                 } else {
                     $data["data_highlights"]["work_availability"] = "bad";

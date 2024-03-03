@@ -234,7 +234,7 @@ function resolveClassName($className) {
                         // ->latest()
                         ->first();
 
-                        if($latest_expired_record->expiry_date_column) {
+                        if($latest_expired_record) {
                              $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
                             ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                             ->where($issue_date_column, '<', now())
@@ -243,9 +243,7 @@ function resolveClassName($className) {
                         } else {
                            return NULL;
                         }
-
-
-                            return $current_data->id;
+                            return $current_data?$current_data->id:NULL;
                     })
                     ->filter()->values();
 
