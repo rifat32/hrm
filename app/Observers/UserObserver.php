@@ -15,7 +15,16 @@ class UserObserver
      */
     public function created(User $user)
     {
-        //
+        // Create a new SalaryHistory entry for the user
+        SalaryHistory::create([
+            'user_id' => $user->id,
+            'salary_per_annum' => $user->salary_per_annum,
+            'weekly_contractual_hours' => $user->weekly_contractual_hours,
+            'minimum_working_days_per_week' => $user->minimum_working_days_per_week,
+            'overtime_rate' => $user->overtime_rate,
+            'from_date' => $user->joining_date, // Assuming the change happened immediately
+            'to_date' => null, // No end date initially
+        ]);
     }
 
     /**
@@ -24,6 +33,9 @@ class UserObserver
      * @param  \App\Models\User  $user
      * @return void
      */
+
+
+
 
     public function updating(User $user)
     {

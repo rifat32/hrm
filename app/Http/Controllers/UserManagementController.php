@@ -947,12 +947,14 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $user  =  tap(User::where($userQueryTerms))->update(
-                collect($request_data)->only([
+
+            $user = User::where($userQueryTerms)->first();
+
+            if ($user) {
+                $user->fill(collect($request_data)->only([
                     'first_Name',
                     'middle_Name',
                     'NI_number',
-
                     'last_Name',
                     "email",
                     'user_id',
@@ -971,21 +973,15 @@ class UserManagementController extends Controller
                     'designation_id',
                     'employment_status_id',
                     'joining_date',
-
                     'emergency_contact_details',
-
-
-
                     'salary_per_annum',
                     'weekly_contractual_hours',
                     'minimum_working_days_per_week',
                     'overtime_rate',
+                ])->toArray());
 
-                ])->toArray()
-            )
-                // ->with("somthing")
-
-                ->first();
+                $user->save();
+            }
             if (!$user) {
                 $this->storeError(
                     "no data found",
@@ -1399,48 +1395,54 @@ class UserManagementController extends Controller
             $request_data['remember_token'] = Str::random(10);
 
 
-            $user_query  = User::where([
+
+
+
+            $userQueryTerms = [
                 "id" => $request_data["id"],
-            ]);
+            ];
 
-            $user  =  tap($user_query)->update(
-                collect($request_data)->only([
-                    'first_Name',
-                    'last_Name',
-                    'middle_Name',
-                    "NI_number",
 
-                    "email",
-                    "color_theme_name",
-                    'emergency_contact_details',
-                    'gender',
-                    'is_in_employee',
-                    'designation_id',
-                    'employment_status_id',
-                    'joining_date',
-                    'salary_per_annum',
-                    'weekly_contractual_hours',
-                    'minimum_working_days_per_week',
-                    'overtime_rate',
-                    'phone',
-                    'image',
-                    'address_line_1',
-                    'address_line_2',
-                    'country',
-                    'city',
-                    'postcode',
-                    "lat",
-                    "long",
-                    'is_active_visa_details',
-                    "is_active_right_to_works",
-                    'is_sponsorship_offered',
-                    "immigration_status",
-                    'work_location_id',
-                ])->toArray()
-            )
-                // ->with("somthing")
+            $user = User::where($userQueryTerms)->first();
+              
+                if ($user) {
+                    $user->fill(collect($request_data)->only([
+                        'first_Name',
+                        'last_Name',
+                        'middle_Name',
+                        "NI_number",
 
-                ->first();
+                        "email",
+                        "color_theme_name",
+                        'emergency_contact_details',
+                        'gender',
+                        'is_in_employee',
+                        'designation_id',
+                        'employment_status_id',
+                        'joining_date',
+                        'salary_per_annum',
+                        'weekly_contractual_hours',
+                        'minimum_working_days_per_week',
+                        'overtime_rate',
+                        'phone',
+                        'image',
+                        'address_line_1',
+                        'address_line_2',
+                        'country',
+                        'city',
+                        'postcode',
+                        "lat",
+                        "long",
+                        'is_active_visa_details',
+                        "is_active_right_to_works",
+                        'is_sponsorship_offered',
+                        "immigration_status",
+                        'work_location_id',
+
+                    ])->toArray());
+
+                    $user->save();
+                }
             if (!$user) {
                 $this->storeError(
                     "no data found",
