@@ -508,6 +508,7 @@ class UserUpdateV2Request extends BaseFormRequest
 
                 },
             ],
+            'date_of_birth' => "required|date",
             'salary_per_annum' => "required|numeric",
             'weekly_contractual_hours' => 'required|numeric',
             "minimum_working_days_per_week" => 'required|numeric|max:7',

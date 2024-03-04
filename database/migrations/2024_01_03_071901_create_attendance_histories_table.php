@@ -24,15 +24,25 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->date('attendance_updated_at');
 
 
+
+
+
+
+
+
+
             $table->text('note')->nullable();
             $table->string('in_geolocation')->nullable();
             $table->string('out_geolocation')->nullable();
 
-
-
-
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->unsignedBigInteger("work_location_id");
+            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
+
+            $table->unsignedBigInteger("project_id")->nullable();
+
 
 
             $table->date('in_date');
@@ -45,32 +55,42 @@ class CreateAttendanceHistoriesTable extends Migration
 
             $table->double('capacity_hours');
 
-            $table->boolean('is_weekend');
-            $table->unsignedBigInteger('holiday_id')->nullable();
-            $table->unsignedBigInteger('leave_record_id')->nullable();
-
-            $table->double('overtime_start_time')->nullable();
-            $table->double('overtime_end_time')->nullable();
-            $table->double('overtime_hours')->nullable();
-            $table->time('work_shift_start_at');
-            $table->time('work_shift_end_at');
-
-
-            $table->time('leave_start_time')->nullable();
-            $table->time('leave_end_time')->nullable();
-
-
             $table->enum('behavior', ['absent', 'late','regular','early']);
 
 
             $table->double('work_hours_delta');
             $table->double('regular_work_hours');
             $table->double('total_paid_hours');
-            $table->double('leave_hours');
-
 
             $table->enum('break_type', ['paid', 'unpaid']);
             $table->double('break_hours');
+
+
+              $table->boolean('is_weekend');
+            $table->unsignedBigInteger('holiday_id')->nullable();
+            $table->unsignedBigInteger('leave_record_id')->nullable();
+
+            $table->time('overtime_start_time')->nullable();
+            $table->time('overtime_end_time')->nullable();
+            $table->double('overtime_hours');
+            $table->time('work_shift_start_at');
+            $table->time('work_shift_end_at');
+            $table->unsignedBigInteger('work_shift_history_id');
+
+
+
+            $table->time('leave_start_time')->nullable();
+            $table->time('leave_end_time')->nullable();
+
+            $table->double('leave_hours');
+
+
+
+            $table->double('punch_in_time_tolerance')->nullable();
+
+
+
+
 
             $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
 
@@ -86,6 +106,17 @@ class CreateAttendanceHistoriesTable extends Migration
 
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
+
+            $table->double('regular_hours_salary');
+            $table->double('overtime_hours_salary');
+
+
+
+
+
+
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

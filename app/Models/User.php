@@ -63,6 +63,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_sponsorship_offered',
+        "date_of_birth",
+        
         "immigration_status",
 
         'work_location_id',

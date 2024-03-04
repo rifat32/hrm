@@ -513,7 +513,7 @@ class UserCreateV2Request extends BaseFormRequest
         ],
 
 
-
+        'date_of_birth' => "required|date",
 
         'salary_per_annum' => "required|numeric",
         'weekly_contractual_hours' => 'required|numeric',

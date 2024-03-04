@@ -465,6 +465,12 @@ return "swagger generated";
                 'name' => "Onboarding",
                 'description' => "Facilitate the onboarding process, including orientation, paperwork, and introductions to team members and company policies."
             ],
+            [
+                'name' => "Job Contract",
+                'description' => "Ensure the job contract is provided and understood by the new employee."
+            ],
+
+
 
         ];
 

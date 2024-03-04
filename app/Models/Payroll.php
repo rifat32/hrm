@@ -25,12 +25,17 @@ class Payroll extends Model
         'leave_hours_salary',
         'regular_attendance_hours_salary',
         'overtime_attendance_hours_salary',
+
+
         'regular_hours_salary',
         'overtime_hours_salary',
 
 
         "hourly_salary",
         "overtime_salary",
+
+
+
         "holiday_hours",
 
 

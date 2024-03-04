@@ -1404,7 +1404,7 @@ class UserManagementController extends Controller
 
 
             $user = User::where($userQueryTerms)->first();
-              
+
                 if ($user) {
                     $user->fill(collect($request_data)->only([
                         'first_Name',
@@ -1420,6 +1420,7 @@ class UserManagementController extends Controller
                         'designation_id',
                         'employment_status_id',
                         'joining_date',
+                        "date_of_birth",
                         'salary_per_annum',
                         'weekly_contractual_hours',
                         'minimum_working_days_per_week',
@@ -1436,6 +1437,7 @@ class UserManagementController extends Controller
                         'is_active_visa_details',
                         "is_active_right_to_works",
                         'is_sponsorship_offered',
+
                         "immigration_status",
                         'work_location_id',
 

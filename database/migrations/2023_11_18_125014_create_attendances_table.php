@@ -15,6 +15,8 @@ class CreateAttendancesTable extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
+
+
             $table->text('note')->nullable();
             $table->string('in_geolocation')->nullable();
             $table->string('out_geolocation')->nullable();
@@ -90,6 +92,17 @@ class CreateAttendancesTable extends Migration
 
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
+
+            $table->double('regular_hours_salary');
+            $table->double('overtime_hours_salary');
+
+
+
+
+
+
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

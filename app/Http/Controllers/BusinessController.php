@@ -311,7 +311,7 @@ class BusinessController extends Controller
      */
     public function createBusiness(BusinessCreateRequest $request)
     {
-DB::beginTransaction();
+           DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 

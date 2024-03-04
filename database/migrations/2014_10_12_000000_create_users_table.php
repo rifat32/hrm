@@ -46,6 +46,7 @@ class CreateUsersTable extends Migration
             $table->foreign('employment_status_id')->references('id')->on('employment_statuses')->onDelete('restrict');
 
             $table->date('joining_date')->nullable()->default(today());
+            $table->date('date_of_birth')->nullable();
             $table->double('salary_per_annum')->nullable()->default(0);
             $table->double('weekly_contractual_hours')->nullable()->default(0);
             $table->integer('minimum_working_days_per_week')->nullable()->default(0);

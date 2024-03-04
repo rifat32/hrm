@@ -37,9 +37,14 @@ class Attendance extends Model
         "is_weekend",
         "overtime_start_time",
         "overtime_end_time",
-        "overtime_hours",
         "leave_start_time",
         "leave_end_time",
+
+
+
+
+        "overtime_hours",
+
 
 
 
@@ -54,7 +59,10 @@ class Attendance extends Model
 
         "is_active",
         "business_id",
-        "created_by"
+        "created_by",
+
+        "regular_hours_salary",
+        "overtime_hours_salary",
     ];
 
     public function arrear(){

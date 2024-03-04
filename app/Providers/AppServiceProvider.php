@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Attendance;
 use App\Models\User;
+use App\Observers\AttendanceObserver;
 use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Console\ClientCommand;
@@ -35,5 +37,6 @@ class AppServiceProvider extends ServiceProvider
             KeysCommand::class,
         ]);
         User::observe(UserObserver::class);
+        Attendance::observe(AttendanceObserver::class);
     }
 }

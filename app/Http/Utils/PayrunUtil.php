@@ -12,6 +12,7 @@ use App\Models\Payroll;
 use App\Models\PayrollAttendance;
 use App\Models\PayrollLeaveRecord;
 use App\Models\Payrun;
+use App\Models\SalaryHistory;
 use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
@@ -20,6 +21,47 @@ use Illuminate\Support\Facades\DB;
 
 trait PayrunUtil
 {
+
+    public function get_salary_info ($user_id,$date) {
+
+      $salary_history = SalaryHistory::where([
+            "user_id" => $user_id
+        ])
+        ->where("from_date", "<=", $date)
+        ->where(function($query) use ($date) {
+            $query->where("to_date", ">", $date)
+            ->orWhereNull($date);
+        })
+
+        ->orderByDesc("to_date")
+        ->first();
+
+        $salary_per_annum = $salary_history->salary_per_annum; // in euros
+        $weekly_contractual_hours = $salary_history->weekly_contractual_hours;
+        $weeks_per_year = 52;
+        if(!$weekly_contractual_hours) {
+            $hourly_salary = 0;
+        }else {
+            $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
+        }
+
+        $overtime_salary_per_hour = $salary_history->overtime_rate ? $salary_history->overtime_rate : $hourly_salary;
+
+        if(!$weekly_contractual_hours || !$salary_history->minimum_working_days_per_week) {
+            $holiday_considered_hours = 0;
+        }else {
+            $holiday_considered_hours = $weekly_contractual_hours / $salary_history->minimum_working_days_per_week;
+        }
+
+        return [
+            "hourly_salary" => $hourly_salary,
+            "overtime_salary_per_hour" => $overtime_salary_per_hour,
+            "holiday_considered_hours" => $holiday_considered_hours
+        ];
+
+
+    }
+
     // this function do all the task and returns transaction id or -1
     public function process_payrun($payrun, $employees, $start_date, $end_date = NULL,$is_manual=false,$generate_payroll = false)
     {
@@ -450,23 +492,32 @@ trait PayrunUtil
     public function adjust_payroll_on_attendance_update($attendance) {
 
         DB::transaction(function() use($attendance) {
-            $attendance_arrear =   AttendanceArrear:: where(["attendance_id" => $attendance->id]) ->first();
+            $attendance_arrear =   AttendanceArrear:: where(["attendance_id" => $attendance->id])->first();
             $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
-
                 $query->where("payroll_attendances.attendance_id",$attendance->id);
-
            })->first();
+
            if(!$payroll) {
             if(!$attendance_arrear) {
-                $date = Carbon::parse($attendance["in_date"]);
-                $current_date = Carbon::now();
-                if ($date->diffInYears($current_date) >= 2) {
+
+                $last_payroll_exists = Payroll::where([
+                    "user_id" => $attendance->user_id,
+                ])
+                ->where("start_date",">",$attendance["in_date"])
+                ->exists();
+
+                if($last_payroll_exists) {
                     AttendanceArrear::create(["attendance_id" => $attendance->id,  "status" => "pending_approval"]);
                 }
+
+
+
+
             }
 
               return true;
            }
+
 
 
            if($attendance->status != "approved" || $attendance->total_paid_hours < 0) {
@@ -480,26 +531,21 @@ trait PayrunUtil
                 "status" => "pending_approval",
                ]);
             }
-
         }
-        if ($attendance->total_paid_hours > 0) {
-            PayrollAttendance:: updateOrCreate(
-                [
-                    "attendance_id" => $attendance->id,
-                    "payroll_id" => $payroll->id
-                ],
-                [
-                    "attendances" => $attendance->id,
-                    "payroll_id" => $payroll->id
-            ]
-            );
+       else if ($attendance->total_paid_hours > 0) {
             if($attendance_arrear) {
                 $attendance_arrear->update([
                  "status" => "approved",
                 ]);
              }
-
         }
+
+
+
+
+
+
+
 
         });
 
@@ -577,7 +623,6 @@ public function adjust_payroll_on_leave_update($leave_record) {
 
 
 public function recalculate_payroll($attendance) {
-
         $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
 
             $query->where("payroll_attendances.attendance_id",$attendance->id);
@@ -589,12 +634,14 @@ public function recalculate_payroll($attendance) {
        if(!$this->recalculate_payroll_values($payroll)) {
               return false;
        }
-
-
-
-
-
     return true;
+
+}
+
+public function recalculate_payrolls($payrolls) {
+  foreach($payrolls as $payroll){
+    $this->recalculate_payroll_values($payroll);
+  }
 
 }
 public function recalculate_payroll_values($payroll){
@@ -640,17 +687,26 @@ public function recalculate_payroll_values($payroll){
         }
 
 
-
         $payroll->leave_hours_salary = $payroll->total_paid_leave_hours * $payroll->hourly_salary;
 
+
+
+       $total_attendance_salary = 0;
+       $regular_attendance_hours_salary = 0;
+       $overtime_attendance_hours_salary = 0;
         if ($payroll->payroll_attendances->isNotEmpty()) {
             $total_regular_attendance_hours = 0;
             $overtime_hours = 0;
 
             foreach ($payroll->payroll_attendances as $payroll_attendance) {
                 if ($payroll_attendance->attendance) {
-                    $total_regular_attendance_hours += $payroll_attendance->attendance->regular_work_hours - $payroll_attendance->attendance->break_hours;
+                    $total_regular_attendance_hours += $payroll_attendance->attendance->regular_work_hours;
                     $overtime_hours += $payroll_attendance->attendance->overtime_hours;
+
+                    $total_attendance_salary += ($payroll_attendance->attendance->regular_hours_salary + $payroll_attendance->attendance->overtime_hours_salary);
+
+                    $regular_attendance_hours_salary += $payroll_attendance->attendance->regular_hours_salary;
+                    $overtime_attendance_hours_salary += $payroll_attendance->attendance->overtime_hours_salary;
                 }
             }
 
@@ -666,14 +722,13 @@ public function recalculate_payroll_values($payroll){
 
 
     $payroll->regular_hours =  $payroll->total_holiday_hours +  $payroll->total_paid_leave_hours +   $payroll->total_regular_attendance_hours;
-    $payroll->regular_hours_salary = ($payroll->total_holiday_hours + $payroll->total_paid_leave_hours +  $payroll->total_regular_attendance_hours) * $payroll->hourly_salary;
+    $payroll->regular_hours_salary = ($payroll->total_holiday_hours * $payroll->hourly_salary) + ($payroll->total_paid_leave_hours * $payroll->hourly_salary) +  $total_attendance_salary;
+    $payroll->regular_attendance_hours_salary = $regular_attendance_hours_salary;
+    $payroll->overtime_attendance_hours_salary = $overtime_attendance_hours_salary;
+    $payroll->overtime_hours_salary = $overtime_attendance_hours_salary;
 
-     $payroll->regular_attendance_hours_salary = $payroll->total_regular_attendance_hours * $payroll->hourly_salary;
-    $payroll->overtime_attendance_hours_salary = $payroll->total_overtime_attendance_hours * $payroll->overtime_salary;
 
 
-
-    $payroll->overtime_hours_salary = $payroll->total_overtime_attendance_hours * $payroll->overtime_salary;
     $payroll->save();
 
 
@@ -691,6 +746,7 @@ public function recalculate_payroll_values($payroll){
 public function update_attendance_accordingly($attendance,$leave_record = NULL) {
 
     DB::transaction(function() use($attendance, $leave_record) {
+        $user_salary_info = $this->get_salary_info($attendance->user_id,$attendance->in_date);
         $result_balance_hours = 0;
         $overtime_start_time = NULL;
         $overtime_end_time = NULL;
@@ -719,39 +775,47 @@ public function update_attendance_accordingly($attendance,$leave_record = NULL) 
               $balance_start_time = $attendance_in_time->max($leave_start_time);
               $balance_end_time = $attendance_out_time->min($leave_end_time);
 
-              // Check if there is any overlap
-              if ($balance_start_time < $balance_end_time) {
+                      if ($balance_start_time < $balance_end_time) {
                   $overtime_start_time = $attendance->in_time;
                   $overtime_end_time = $attendance->out_time;
                   $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
+                    }
+
+              // Check if there is any overlap
+            //   if ($balance_start_time < $balance_end_time) {
+            //       $overtime_start_time = $attendance->in_time;
+            //       $overtime_end_time = $attendance->out_time;
+            //       $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
 
 
-                  $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
-                  $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
-                  $uncommon_leave_start = $leave_start_time->min($balance_start_time);
-                  $uncommon_leave_end = $leave_end_time->max($balance_end_time);
+            //       $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
+            //       $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
+            //       $uncommon_leave_start = $leave_start_time->min($balance_start_time);
+            //       $uncommon_leave_end = $leave_end_time->max($balance_end_time);
 
-              } else {
-                  $uncommon_attendance_start = $attendance_in_time;
-                  $uncommon_attendance_end = $attendance_out_time;
+            //   } else {
+            //       $uncommon_attendance_start = $attendance_in_time;
+            //       $uncommon_attendance_end = $attendance_out_time;
 
-                  $uncommon_leave_start = $leave_start_time;
-                  $uncommon_leave_end = $leave_end_time;
-              }
+            //       $uncommon_leave_start = $leave_start_time;
+            //       $uncommon_leave_end = $leave_end_time;
+            //   }
 
-              $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
-              $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
+            //   $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
+            //   $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
 
-              $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
+            //   $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
 
 
         } else if ($attendance->work_hours_delta > 0) {
             $result_balance_hours = $attendance->work_hours_delta;
-        }  else if ($attendance->work_hours_delta < 0) {
-            $leave_hours = abs($attendance->work_hours_delta);
         }
+        // else if ($attendance->work_hours_delta < 0) {
+        //     $leave_hours = abs($attendance->work_hours_delta);
+        // }
 
      $regular_work_hours =  $attendance->total_paid_hours - $result_balance_hours;
+
 
 
 
@@ -765,6 +829,8 @@ public function update_attendance_accordingly($attendance,$leave_record = NULL) 
         "leave_record_id" => $leave_record?$leave_record->id:NULL,
         "leave_hours" => $leave_hours,
         // "total_paid_hours" => $regular_work_hours + $result_balance_hours,
+        "regular_hours_salary" => $regular_work_hours *   $user_salary_info["hourly_salary"],
+        "overtime_hours_salary" => $result_balance_hours *   $user_salary_info["overtime_salary_per_hour"],
 
        ]);
 

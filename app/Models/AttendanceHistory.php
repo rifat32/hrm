@@ -13,6 +13,7 @@ class AttendanceHistory extends Model
         "attendance_id",
         "actor_id",
         "action",
+
         "attendance_created_at",
         "attendance_updated_at",
 
