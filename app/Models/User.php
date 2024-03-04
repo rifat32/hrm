@@ -41,10 +41,16 @@ class User extends Authenticatable
         'designation_id',
         'employment_status_id',
         'joining_date',
+
+
+
         'salary_per_annum',
         'weekly_contractual_hours',
         'minimum_working_days_per_week',
         'overtime_rate',
+
+
+
         'phone',
         'image',
         'address_line_1',
@@ -566,35 +572,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'emergency_contact_details' => 'array',
-
-
-
     ];
-
-
-
-
-
-
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function ($user) {
-            // Cascade soft delete to related children
-            $user->leaves()->delete();
-            $user->attendances()->delete();
-
-        });
-
-        static::restoring(function ($user) {
-            // Cascade restore to related children
-            $user->leaves()->withTrashed()->restore();
-            $user->attendances()->withTrashed()->restore();
-        });
-
-    }
 
 
 

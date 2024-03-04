@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Console\ClientCommand;
 use Laravel\Passport\Console\InstallCommand;
@@ -32,5 +34,6 @@ class AppServiceProvider extends ServiceProvider
             ClientCommand::class,
             KeysCommand::class,
         ]);
+        User::observe(UserObserver::class);
     }
 }
