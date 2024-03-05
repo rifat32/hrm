@@ -189,7 +189,7 @@ trait UserDetailsUtil
 
 
      public function store_recruitment_processes($request_data,$user) {
-        if (!empty($request_data["recruitment_processes"])) {
+        if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
             $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
         }
     }
@@ -297,7 +297,7 @@ trait UserDetailsUtil
     }
 
     public function update_recruitment_processes($request_data,$user) {
-        if (!empty($request_data["recruitment_processes"])) {
+        if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
             $user->recruitment_processes()->delete();
             $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
         }

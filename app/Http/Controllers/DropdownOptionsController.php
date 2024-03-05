@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
@@ -13,6 +16,7 @@ use Illuminate\Http\Request;
 
 class DropdownOptionsController extends Controller
 {
+    use ErrorUtil, UserActivityUtil, BusinessUtil;
 
 
  private function get_work_locations($business_created_by) {
@@ -147,8 +151,7 @@ class DropdownOptionsController extends Controller
   }
   private function get_roles() {
 
-    $roles = Role::with('permissions:name,id',"users")
-                  ->where("id",">",auth()->user()->id)
+    $roles = Role::where("id",">",auth()->user()->id)
                   ->where('business_id', auth()->user()->business_id)
                   ->get();
 

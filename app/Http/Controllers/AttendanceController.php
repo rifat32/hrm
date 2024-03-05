@@ -121,123 +121,80 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+            // Prepare data for attendance creation
             $request_data = $this->prepare_request_on_attendance_create($request);
 
+            // Retrieve salary information for the user and date
             $user_salary_info = $this->get_salary_info($request_data["user_id"], $request_data["in_date"]);
 
-
+            // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
-              if (isset($setting_attendance->auto_approval) && $setting_attendance->auto_approval) {
-                    $request_data["status"] = "approved";
-                }
 
-            $work_shift_history =  $this->get_work_shift_history($request_data);
-            $work_shift_details =  $this->get_work_shift_details($work_shift_history,$request_data["in_date"]);
+            // Automatically approve attendance if auto-approval is enabled in settings
+            if (isset($setting_attendance->auto_approval) && $setting_attendance->auto_approval) {
+                $request_data["status"] = "approved";
+            }
 
-            $holiday = $this->get_holiday_details($request_data["in_date"]);
+            // Retrieve work shift history for the user and date
+            $work_shift_history =  $this->get_work_shift_history($request_data["in_date"],$request_data["user_id"]);
 
-           $leave_record = $this->get_leave_record_details($request_data["in_time"], $request_data["user_id"]);
+            // Retrieve work shift details based on work shift history and date
+            $work_shift_details =  $this->get_work_shift_details($work_shift_history, $request_data["in_date"]);
 
-            $request_data["behavior"] = "absent";
-            $request_data["capacity_hours"] = 0;
-            $request_data["work_hours_delta"] = 0;
-            $request_data["total_paid_hours"] = 0;
-            $request_data["regular_work_hours"] = 0;
+            // Retrieve holiday details for the user and date
+            $holiday = $this->get_holiday_details($request_data["in_date"],$request_data["user_id"]);
+
+            // Retrieve leave record details for the user and date
+            $leave_record = $this->get_leave_record_details($request_data["in_time"], $request_data["user_id"]);
+
+            // Calculate capacity hours based on work shift details
+            $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
+
+            // Calculate total present hours based on in and out times
+            $total_present_hours = $this->calculate_total_present_hours($request_data["in_time"], $request_data["out_time"]);
+
+            // Calculate tolerance time based on in time and work shift details
+            $tolerance_time = $this->calculate_tolerance_time($request_data["in_time"],$work_shift_details);
+
+            // Determine behavior based on tolerance time and attendance setting
+            $behavior = $this->determine_behavior($tolerance_time, $setting_attendance);
+
+            // Adjust paid hours based on break taken and work shift history
+            $total_paid_hours = $this->adjust_paid_hours($request_data["does_break_taken"],$total_present_hours, $work_shift_history);
+
+            // Calculate work hours delta
+            $work_hours_delta = $total_present_hours - $capacity_hours;
+
+            // Calculate overtime information
+            $overtime_information = $this->calculate_overtime($work_shift_details->is_weekend,$work_hours_delta, $total_paid_hours, $leave_record, $holiday, $request_data["in_time"],$request_data["out_time"]);
+
+            // Calculate regular work hours
+            $regular_work_hours = $this->calculate_regular_work_hours($total_paid_hours, $overtime_information["overtime_hours"]);
+
+
             $request_data["break_type"] = $work_shift_history->break_type;
             $request_data["break_hours"] = $work_shift_history->break_hours;
+            $request_data["behavior"] = $behavior;
+            $request_data["capacity_hours"] = $capacity_hours;
+            $request_data["work_hours_delta"] = $work_hours_delta;
+            $request_data["total_paid_hours"] = $total_paid_hours;
+            $request_data["regular_work_hours"] = $regular_work_hours;
+            $request_data["work_shift_start_at"] = $work_shift_details->start_at;
+            $request_data["work_shift_end_at"] =  $work_shift_details->end_at;
+            $request_data["work_shift_history_id"] = $work_shift_history->id;
+            $request_data["holiday_id"] = $holiday ? $holiday->id : NULL;
+            $request_data["leave_record_id"] = $leave_record ? $leave_record->id : NULL;
+            $request_data["is_weekend"] = $work_shift_details->is_weekend;
+            $request_data["overtime_start_time"] = $overtime_information["overtime_start_time"];
+            $request_data["overtime_end_time"] = $overtime_information["overtime_end_time"];
+            $request_data["overtime_hours"] = $overtime_information["overtime_hours"];
+            $request_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
+            $request_data["regular_hours_salary"] =   $regular_work_hours * $user_salary_info["hourly_salary"];
+            $request_data["overtime_hours_salary"] =   $overtime_information["overtime_hours"] * $user_salary_info["overtime_salary_per_hour"];
 
-
-
-
-                $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-
-                $in_time = Carbon::createFromFormat('H:i:s', $request_data["in_time"]);
-                $out_time = Carbon::createFromFormat('H:i:s', $request_data["out_time"]);
-                $total_present_hours = $out_time->diffInHours($in_time);
-
-                $tolerance_time = $in_time->diffInHours($work_shift_start_at);
-
-                $work_hours_delta = $total_present_hours - $capacity_hours;
-                $total_paid_hours = $total_present_hours;
-
-                if (empty($setting_attendance->punch_in_time_tolerance)) {
-                    $behavior = "regular";
-                } else {
-                    if ($tolerance_time > $setting_attendance->punch_in_time_tolerance) {
-                        $behavior = "late";
-                    } else if ($tolerance_time < (-$setting_attendance->punch_in_time_tolerance)) {
-                        $behavior = "early";
-                    } else {
-                        $behavior = "regular";
-                    }
-                }
-
-                if ($request_data["does_break_taken"]) {
-                    if ($work_shift_history->break_type == 'unpaid') {
-                        $total_paid_hours -= $work_shift_history->break_hours;
-                    }
-                }
-
-                $overtime_start_time = NULL;
-                $overtime_end_time = NULL;
-                $result_balance_hours = 0;
-                $leave_hours = 0;
-
-                if ($work_shift_details->is_weekend || $holiday) {
-                    $overtime_start_time = $request_data["in_time"];
-                    $overtime_end_time = $request_data["out_time"];
-                    $result_balance_hours = $total_paid_hours;
-                } else if ($leave_record) {
-
-                    $attendance_in_time = Carbon::parse($request_data["in_time"]);
-                    $attendance_out_time = Carbon::parse($request_data["out_time"]);
-
-                    $leave_start_time = Carbon::parse($leave_record->start_time);
-                    $leave_end_time = Carbon::parse($leave_record->end_time);
-
-                    $balance_start_time = $attendance_in_time->max($leave_start_time);
-                    $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                    if ($balance_start_time < $balance_end_time) {
-                        $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-                        $overtime_start_time = $balance_start_time;
-                        $overtime_end_time = $balance_end_time;
-                    }
-
-                } else if ($work_hours_delta > 0) {
-                    $result_balance_hours = $work_hours_delta;
-                }
-
-
-                $regular_work_hours =  $total_paid_hours - $result_balance_hours;
-                $request_data["behavior"] = $behavior;
-                $request_data["capacity_hours"] = $capacity_hours;
-                $request_data["work_hours_delta"] = $work_hours_delta;
-                $request_data["total_paid_hours"] = $total_paid_hours;
-                $request_data["regular_work_hours"] = $regular_work_hours;
-
-                $request_data["work_shift_start_at"] = $work_shift_start_at;
-                $request_data["work_shift_end_at"] = $work_shift_end_at;
-
-                // $request_data["work_shift_history_id"] = $work_shift_history->id;
-                $request_data["work_shift_history_id"] = $work_shift_history->id;
-
-                $request_data["holiday_id"] = $holiday ? $holiday->id : NULL;
-                $request_data["leave_record_id"] = $leave_record ? $leave_record->id : NULL;
-                $request_data["is_weekend"] = $work_shift_details->is_weekend;
-                $request_data["overtime_start_time"] = $overtime_start_time;
-                $request_data["overtime_end_time"] = $overtime_end_time;
-                $request_data["overtime_hours"] = $result_balance_hours;
-                $request_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
-
-
-            $request_data["regular_hours_salary"] =   $request_data["regular_work_hours"] * $user_salary_info["hourly_salary"];
-            $request_data["overtime_hours_salary"] =   $request_data["overtime_hours"] * $user_salary_info["overtime_salary_per_hour"];
-
+            // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($request_data);
-
 
             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
 
@@ -474,9 +431,9 @@ class AttendanceController extends Controller
                 }
 
                 $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($request_data) {
-                        $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
-                            ->where("leaves.status", "approved");
-                    })
+                    $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
+                        ->where("leaves.status", "approved");
+                })
                     ->where('date', '>=', $item["in_date"] . ' 00:00:00')
                     ->where('date', '<=', ($item["in_date"] . ' 23:59:59'))
                     ->first();
@@ -931,9 +888,9 @@ class AttendanceController extends Controller
             }
 
             $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($request_data) {
-                    $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
-                        ->where("leaves.status", "approved");
-                })
+                $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
+                    ->where("leaves.status", "approved");
+            })
                 ->where('date', '>=', $request_data["in_date"] . ' 00:00:00')
                 ->where('date', '<=', ($request_data["in_date"] . ' 23:59:59'))
                 ->first();
@@ -2178,9 +2135,9 @@ class AttendanceController extends Controller
 
 
                 $leave_records = LeaveRecord::whereHas('leave',    function ($query) use ($employee_ids) {
-                        $query->whereIn("leaves.user_id",  $employee_ids)
-                            ->where("leaves.status", "approved");
-                    })
+                    $query->whereIn("leaves.user_id",  $employee_ids)
+                        ->where("leaves.status", "approved");
+                })
                     ->where('date', '>=', $request->start_date . ' 00:00:00')
                     ->where('date', '<=', ($request->end_date . ' 23:59:59'))
                     ->get();
@@ -2636,14 +2593,13 @@ class AttendanceController extends Controller
 
             Attendance::destroy($existingIds);
 
-            $payrolls = Payroll::whereHas("payroll_attendances", function($query) use($existingIds) {
+            $payrolls = Payroll::whereHas("payroll_attendances", function ($query) use ($existingIds) {
 
-                $query->whereIn("payroll_attendances.attendance_id",$existingIds);
-
-           })->get();
+                $query->whereIn("payroll_attendances.attendance_id", $existingIds);
+            })->get();
             $this->recalculate_payrolls($payrolls);
-            PayrollAttendance::whereIn("attendance_id",$existingIds)
-            ->delete();
+            PayrollAttendance::whereIn("attendance_id", $existingIds)
+                ->delete();
 
 
             $this->send_notification($attendances, $attendances->first()->employee, "Attendance deleted", "delete", "attendance");
@@ -2944,9 +2900,9 @@ class AttendanceController extends Controller
                     }
 
                     $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($request_data) {
-                            $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
-                                ->where("leaves.status", "approved");
-                        })
+                        $query->whereIn("leaves.user_id",  [$request_data["user_id"]])
+                            ->where("leaves.status", "approved");
+                    })
                         ->where('date', '>=', $item["in_date"] . ' 00:00:00')
                         ->where('date', '<=', ($item["in_date"] . ' 23:59:59'))
                         ->first();

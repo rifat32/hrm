@@ -6367,6 +6367,7 @@ class UserManagementController extends Controller
       ->where([
         "user_id" =>$user->id
       ])
+      ->whereNotNull("description")
       ->get();
 
 

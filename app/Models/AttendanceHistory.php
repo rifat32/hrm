@@ -28,7 +28,6 @@ class AttendanceHistory extends Model
         'out_time',
         'in_date',
         'does_break_taken',
-
         "behavior",
         "capacity_hours",
         "work_hours_delta",
@@ -36,9 +35,6 @@ class AttendanceHistory extends Model
         "break_hours",
         "total_paid_hours",
         "regular_work_hours",
-
-
-
         "work_shift_start_at",
         "work_shift_end_at",
         "holiday_id",
@@ -46,17 +42,8 @@ class AttendanceHistory extends Model
         "is_weekend",
         "overtime_start_time",
         "overtime_end_time",
-
         "overtime_hours",
-
-        "leave_hours",
-
-        "leave_start_time",
-        "leave_end_time",
         "status",
-
-
-
         "is_active",
         "business_id",
         "created_by"

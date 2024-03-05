@@ -26,9 +26,7 @@ class Attendance extends Model
         "break_type",
         "break_hours",
         "total_paid_hours",
-
         "regular_work_hours",
-
         "work_shift_start_at",
         "work_shift_end_at",
         "work_shift_history_id",
@@ -37,30 +35,14 @@ class Attendance extends Model
         "is_weekend",
         "overtime_start_time",
         "overtime_end_time",
-        "leave_start_time",
-        "leave_end_time",
-
-
-
-
         "overtime_hours",
-
-
-
-
         "punch_in_time_tolerance",
-
-        "leave_hours",
         "status",
-
         'work_location_id',
         'project_id',
-
-
         "is_active",
         "business_id",
         "created_by",
-
         "regular_hours_salary",
         "overtime_hours_salary",
     ];
