@@ -36,6 +36,10 @@ trait PayrunUtil
         ->orderByDesc("to_date")
         ->first();
 
+        if(!$salary_history){
+            throw new Exception("No Salary History found",400);
+        }
+
         $salary_per_annum = $salary_history->salary_per_annum; // in euros
         $weekly_contractual_hours = $salary_history->weekly_contractual_hours;
         $weeks_per_year = 52;
@@ -489,9 +493,19 @@ trait PayrunUtil
         return $temp_payroll;
     }
 
+    private function create_attendance_arrear($attendance) {
+        $last_payroll_exists = Payroll::where([
+            "user_id" => $attendance->user_id,
+        ])
+        ->where("start_date",">",$attendance["in_date"])
+        ->exists();
+
+        if($last_payroll_exists) {
+            AttendanceArrear::create(["attendance_id" => $attendance->id,  "status" => "pending_approval"]);
+        }
+    }
     public function adjust_payroll_on_attendance_update($attendance) {
 
-        DB::transaction(function() use($attendance) {
             $attendance_arrear =   AttendanceArrear:: where(["attendance_id" => $attendance->id])->first();
             $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
                 $query->where("payroll_attendances.attendance_id",$attendance->id);
@@ -499,26 +513,10 @@ trait PayrunUtil
 
            if(!$payroll) {
             if(!$attendance_arrear) {
-
-                $last_payroll_exists = Payroll::where([
-                    "user_id" => $attendance->user_id,
-                ])
-                ->where("start_date",">",$attendance["in_date"])
-                ->exists();
-
-                if($last_payroll_exists) {
-                    AttendanceArrear::create(["attendance_id" => $attendance->id,  "status" => "pending_approval"]);
-                }
-
-
-
-
+              $this->create_attendance_arrear($attendance);
             }
-
               return true;
            }
-
-
 
            if($attendance->status != "approved" || $attendance->total_paid_hours < 0) {
             PayrollAttendance::where([
@@ -530,6 +528,8 @@ trait PayrunUtil
                $attendance_arrear->update([
                 "status" => "pending_approval",
                ]);
+            } else {
+                $this->create_attendance_arrear($attendance);
             }
         }
        else if ($attendance->total_paid_hours > 0) {
@@ -540,16 +540,10 @@ trait PayrunUtil
              }
         }
 
-
-
-
-
-
-
-
-        });
+        $this->recalculate_payroll_values($payroll);
 
         return true;
+
 
 
 }
@@ -624,7 +618,6 @@ public function adjust_payroll_on_leave_update($leave_record) {
 
 public function recalculate_payroll($attendance) {
         $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
-
             $query->where("payroll_attendances.attendance_id",$attendance->id);
 
        })->first();
@@ -646,25 +639,17 @@ public function recalculate_payrolls($payrolls) {
 }
 public function recalculate_payroll_values($payroll){
 
-    DB::transaction(function() use($payroll) {
-
         if ($payroll->payroll_holidays->isNotEmpty()) {
             $total_holiday_hours = 0;
 
             foreach ($payroll->payroll_holidays as $payroll_holiday) {
-
                     $total_holiday_hours += $payroll_holiday->hours;
-
             }
-
             $payroll->total_holiday_hours = $total_holiday_hours;
         } else {
             // Set total_paid_leave_hours to 0 if payroll_leave_records is empty
             $payroll->total_holiday_hours = 0;
         }
-
-
-
 
 
         if ($payroll->payroll_leave_records->isNotEmpty()) {
@@ -679,7 +664,6 @@ public function recalculate_payroll_values($payroll){
                     )->sum('leave_hours');
                 }
             }
-
             $payroll->total_paid_leave_hours = $total_paid_leave_hours;
         } else {
             // Set total_paid_leave_hours to 0 if payroll_leave_records is empty
@@ -718,25 +702,12 @@ public function recalculate_payroll_values($payroll){
             $payroll->overtime_hours = 0;
         }
 
-
-
-
     $payroll->regular_hours =  $payroll->total_holiday_hours +  $payroll->total_paid_leave_hours +   $payroll->total_regular_attendance_hours;
     $payroll->regular_hours_salary = ($payroll->total_holiday_hours * $payroll->hourly_salary) + ($payroll->total_paid_leave_hours * $payroll->hourly_salary) +  $total_attendance_salary;
     $payroll->regular_attendance_hours_salary = $regular_attendance_hours_salary;
     $payroll->overtime_attendance_hours_salary = $overtime_attendance_hours_salary;
     $payroll->overtime_hours_salary = $overtime_attendance_hours_salary;
-
-
-
     $payroll->save();
-
-
-
-
-
-
-    });
 
     return $payroll;
 

@@ -242,6 +242,9 @@ class AttendanceController extends Controller
 
             $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance) {
             $item = $this->process_attendance_data($item,$setting_attendance,$request_data["user_id"]);
+
+            Attendance::create($item);
+
             return  $item;
 
             });
@@ -254,24 +257,31 @@ class AttendanceController extends Controller
 
             if (!$employee) {
                 return response()->json([
-                    "message" => "someting_went_wrong"
+                    "message" => "someting_went_wrong",500
                 ]);
             }
 
 
 
             $created_attendances = $employee->attendances()->createMany($attendances_data);
+
+
+
             if (!empty($created_attendances)) {
                 $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
+            }
+
+
+            DB::commit();
+            if (!empty($created_attendances)) {
                 return response(['attendances' => $created_attendances], 201);
             } else {
                 // Handle the case where records were not successfully created
                 return response(['error' => 'Failed to create attendance records'], 500);
             }
-
-            DB::commit();
             return response([], 201);
         } catch (Exception $e) {
+
             DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -652,34 +662,43 @@ class AttendanceController extends Controller
             $attendance = Attendance::where($attendance_query_params)->first();
 
             if ($attendance) {
-                $attendance->update(
-                    collect($request_data)->only([
-                        'note',
-                        'in_geolocation',
-                        'out_geolocation',
-                        'user_id',
-                        'in_time',
-                        'out_time',
-                        'in_date',
-                        'does_break_taken',
-                        'behavior',
-                        "capacity_hours",
-                        "work_hours_delta",
-                        "work_location_id",
-                        "project_id",
-                        "is_weekend",
-                        "holiday_id",
-                        "leave_record_id",
-                        "total_paid_hours",
-                        "work_shift_history_id",
-                        "regular_hours_salary",
-                        "overtime_hours_salary",
-                        "regular_work_hours",
-                        "overtime_start_time",
-                        "overtime_end_time",
-                        // Add additional fields here
-                    ])->toArray()
-                );
+                $attendance->fill(collect($request_data)->only([
+                    'note',
+                    "in_geolocation",
+                    "out_geolocation",
+                    'user_id',
+                    'in_time',
+                    'out_time',
+                    'in_date',
+                    'does_break_taken',
+                    "behavior",
+                    "capacity_hours",
+                    "work_hours_delta",
+                    "break_type",
+                    "break_hours",
+                    "total_paid_hours",
+                    "regular_work_hours",
+                    "work_shift_start_at",
+                    "work_shift_end_at",
+                    "work_shift_history_id",
+                    "holiday_id",
+                    "leave_record_id",
+                    "is_weekend",
+                    "overtime_start_time",
+                    "overtime_end_time",
+                    "overtime_hours",
+                    "punch_in_time_tolerance",
+                    "status",
+                    'work_location_id',
+                    'project_id',
+                    "is_active",
+                    "business_id",
+                    "created_by",
+                    "regular_hours_salary",
+                    "overtime_hours_salary",
+                ])->toArray());
+
+                $attendance->save();
             }
 
 
@@ -691,37 +710,13 @@ class AttendanceController extends Controller
 
             $observer = new AttendanceObserver();
             $observer->update($attendance, 'update');
-            // $update_attendance_accordingly = $this->update_attendance_accordingly($attendance,$leave_record) ;
-            // if(!$update_attendance_accordingly) {
-            //     $this->storeError([], 422, "attendance update", "attendance controller");
-            //     throw new Exception("some thing went wrong");
-            // }
 
 
-
-            $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance);
-            if (!$adjust_payroll_on_attendance_update) {
-                $this->storeError([], 422, "attendance update", "attendance controller");
-                throw new Exception("some thing went wrong");
-            }
+            $this->adjust_payroll_on_attendance_update($attendance);
 
 
-
-            $attendance = Attendance::find($attendance->id);
-
-
-
-
-            $recalculate_payroll = $this->recalculate_payroll($attendance);
-
-            if (!$recalculate_payroll) {
-                $this->storeError([], 422, "attendance update", "attendance controller");
-                throw new Exception("some thing went wrong");
-            }
 
             $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
-
-
             DB::commit();
 
             return response($attendance, 201);
@@ -834,7 +829,6 @@ class AttendanceController extends Controller
             }
 
             $user = User::where([
-                // "id" =>  $single_leave_approval->created_by
                 "id" =>  auth()->user()->id
             ])
                 ->first();
@@ -882,18 +876,6 @@ class AttendanceController extends Controller
             $observer->update($attendance, 'approve');
 
 
-
-            // $attendance_history_data = $attendance->toArray();
-            // $attendance_history_data['attendance_id'] = $attendance->id;
-            // $attendance_history_data['actor_id'] = auth()->user()->id;
-            // $attendance_history_data['action'] = "approve";
-            // $attendance_history_data['attendance_created_at'] = $attendance->created_at;
-            // $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
-
-            // $attendance_history = AttendanceHistory::create($attendance_history_data);
-
-
-
             $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance);
             if (!$adjust_payroll_on_attendance_update) {
                 $this->storeError([], 422, "attendance update", "attendance controller");
@@ -905,6 +887,7 @@ class AttendanceController extends Controller
                 $this->storeError([], 422, "attendance update", "attendance controller");
                 throw new Exception("some thing went wrong");
             }
+
 
             if ($attendance->status == "approved") {
                 $this->send_notification($attendance, $attendance->employee, "Attendance approved", "approve", "attendance");

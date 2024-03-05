@@ -28,6 +28,7 @@ class AttendanceHistory extends Model
         'out_time',
         'in_date',
         'does_break_taken',
+
         "behavior",
         "capacity_hours",
         "work_hours_delta",
@@ -37,16 +38,22 @@ class AttendanceHistory extends Model
         "regular_work_hours",
         "work_shift_start_at",
         "work_shift_end_at",
+        "work_shift_history_id",
         "holiday_id",
         "leave_record_id",
         "is_weekend",
         "overtime_start_time",
         "overtime_end_time",
         "overtime_hours",
+        "punch_in_time_tolerance",
         "status",
+        'work_location_id',
+        'project_id',
         "is_active",
         "business_id",
-        "created_by"
+        "created_by",
+        "regular_hours_salary",
+        "overtime_hours_salary",
     ];
 
     public function employee(){

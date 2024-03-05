@@ -35,7 +35,7 @@ class AttendanceObserver
      * @param  \App\Models\Attendance  $attendance
      * @return void
      */
-    public function updated(Attendance $attendance,$action)
+    public function updated(Attendance $attendance)
     {
         // $attendance_history_data = $attendance->toArray();
 
@@ -72,7 +72,7 @@ class AttendanceObserver
     {
 
         $attendance_history_data = $attendance->toArray();
-        $attendance_history_data['attendance_id'] = $attendance->id;
+        $attendance_history_data['attendance_id'] = NULL;
         $attendance_history_data['actor_id'] = auth()->user()->id;
         $attendance_history_data['action'] = "delete";
         $attendance_history_data['attendance_created_at'] = $attendance->created_at;

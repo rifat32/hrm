@@ -43,17 +43,8 @@ trait UserDetailsUtil
                 throw new Exception("Work shift validation failed");
             }
             if (!$work_shift->is_active) {
-                $this->storeError(
-                    ("Please activate the work shift named '" . $work_shift->name . "'"),
-                    400,
-                    "front end error",
-                    "front end error"
-                );
-                $error =  [
-                    "message" => ("Please activate the work shift named '" . $work_shift->name . "'"),
 
-                ];
-                throw new Exception(json_encode($error), 400);
+                throw new Exception(("Please activate the work shift named '" . $work_shift->name . "'"), 400);
                 // return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
             }
             $work_shift->users()->attach($user->id);
@@ -134,7 +125,7 @@ trait UserDetailsUtil
             // $employee_right_to_works  =  EmployeeRightToWork::create($request_data["right_to_works"]);
             $request_data["right_to_works"]["from_date"] = now();
             // $request_data["right_to_works"]["right_to_work_id"] = $employee_right_to_works->id;
-            $employee_right_to_works_history  =  EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
+            EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
 
 
 
@@ -432,7 +423,7 @@ trait UserDetailsUtil
             $request_data["right_to_works"]["business_id"] = auth()->user()->business_id;
             $request_data["right_to_works"]["user_id"] = $user->id;
             $request_data["right_to_works"]["from_date"] = now();
-            EmployeeVisaDetailHistory::create($request_data["right_to_works"]);
+            EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
 
 
 

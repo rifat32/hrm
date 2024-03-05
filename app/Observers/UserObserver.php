@@ -15,7 +15,15 @@ class UserObserver
      */
     public function created(User $user)
     {
-
+        SalaryHistory::create([
+            'user_id' => $user->id,
+            'salary_per_annum' => $user->salary_per_annum,
+            'weekly_contractual_hours' => $user->weekly_contractual_hours,
+            'minimum_working_days_per_week' => $user->minimum_working_days_per_week,
+            'overtime_rate' => $user->overtime_rate,
+            'from_date' =>  $user->joining_date, // Assuming the change happened immediately
+            'to_date' => NULL, // No end date initially
+        ]);
     }
 
     /**
@@ -26,7 +34,7 @@ class UserObserver
      */
 
 
-     public function saved(User $user)
+     public function updating(User $user)
      {
          // Check if any of the tracked fields are being updated
          $changedFields = $user->getDirty();
@@ -47,8 +55,6 @@ class UserObserver
                  'to_date' => now(),
              ]);
 
-
-
              SalaryHistory::create([
                  'user_id' => $user->id,
                  'salary_per_annum' => $user->salary_per_annum,
@@ -58,13 +64,15 @@ class UserObserver
                  'from_date' => now(), // Assuming the change happened immediately
                  'to_date' => NULL, // No end date initially
              ]);
+
+
          }
      }
 
 
-    public function updating(User $user)
+    public function saved(User $user)
     {
-        
+
     }
 
     /**

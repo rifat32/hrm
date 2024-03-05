@@ -42,23 +42,37 @@ use PayrunUtil;
 
     public function get_work_shift_history($in_date,$user_id)
     {
-        $work_shift_history =  WorkShiftHistory::where("from_date", "<", $in_date)
-            ->where(function ($query) use ($in_date) {
-                $query->where("to_date", ">=", $in_date)
-                    ->orWhereNull("to_date");
+        $work_shift_history =  WorkShiftHistory::
+           where(function($query) use($in_date,$user_id) {
+          $query ->where("from_date", "<=", $in_date)
+          ->where(function ($query) use ($in_date) {
+              $query->where("to_date", ">", $in_date)
+                  ->orWhereNull("to_date");
+          })
+
+          ->whereHas("users", function ($query) use ($in_date, $user_id) {
+              $query->where("users.id", $user_id)
+                  ->where("employee_user_work_shift_histories.from_date", "<=", $in_date)
+                  ->where(function ($query) use ($in_date) {
+                      $query->where("employee_user_work_shift_histories.to_date", ">", $in_date)
+                          ->orWhereNull("employee_user_work_shift_histories.to_date");
+                  });
+          });
             })
-            ->whereHas("users", function ($query) use ($in_date,$user_id) {
-                $query->where("users.id", $user_id)
-                    ->where("employee_user_work_shift_histories.from_date", "<", $in_date)
-                    ->where(function ($query) use ($in_date) {
-                        $query->where("employee_user_work_shift_histories.to_date", ">=", $in_date)
-                            ->orWhereNull("employee_user_work_shift_histories.to_date");
-                    });
+            ->orWhere(function($query) {
+               $query->where([
+                "business_id" => NULL,
+                "is_active" => 1,
+                "is_default" => 1
+               ]);
             })
+
+
             ->first();
         if (!$work_shift_history) {
             throw new Exception("Please define workshift first");
-        }
+        } 
+
         return $work_shift_history;
     }
 

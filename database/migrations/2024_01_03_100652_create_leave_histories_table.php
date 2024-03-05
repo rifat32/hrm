@@ -16,7 +16,6 @@ class CreateLeaveHistoriesTable extends Migration
         Schema::create('leave_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("leave_id")->nullable();
-            $table->foreign('leave_id')->references('id')->on('leaves')->onDelete('set null');
             $table->unsignedBigInteger("actor_id")->nullable();
             $table->foreign('actor_id')->references('id')->on('users')->onDelete('set null');
             $table->string('action');

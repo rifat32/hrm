@@ -46,12 +46,24 @@ trait ErrorUtil
 
         if ($e->getCode() == 400) {
             $statusCode = 400;
-            return response()->json($e->getMessage(), 400);
+            return response()->json(
+                [
+                    "message" =>  $e->getMessage()
+                ],
+
+
+                400);
         }
 
         if ($e->getCode() == 403) {
             $statusCode = 403;
-            return response()->json($e->getMessage(), 403);
+            return response()->json(
+                [
+                    "message" =>  $e->getMessage()
+                ],
+
+
+                403);
         }
         return response()->json($data, $statusCode);
     }

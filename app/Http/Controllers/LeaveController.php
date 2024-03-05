@@ -1680,15 +1680,6 @@ foreach ($assigned_departments as $assigned_department) {
 
              $regular_work_hours =  $attendance->total_paid_hours - $result_balance_hours;
 
-               // if ($work_hours_delta > 0) {
-               //     $regular_work_hours =  $total_paid_hours - $work_hours_delta;
-               // } else {
-               //     $regular_work_hours = $total_paid_hours;
-               // }
-
-
-
-
 
 
 
@@ -1708,10 +1699,6 @@ foreach ($assigned_departments as $assigned_department) {
                    $this->storeError([], 422, "leave update", "leave controller");
                    throw new Exception("some thing went wrong");
                }
-
-
-
-
 
                 }
 

@@ -45,6 +45,7 @@ class Attendance extends Model
         "created_by",
         "regular_hours_salary",
         "overtime_hours_salary",
+
     ];
 
     public function arrear(){

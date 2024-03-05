@@ -5421,7 +5421,7 @@ class UserManagementController extends Controller
 
             $already_taken_attendance_dates = $already_taken_attendances->map(function ($attendance) {
                 return Carbon::parse($attendance->in_date)->format('d-m-Y');
-            })->toArray();
+            });
 
 
 
