@@ -708,9 +708,7 @@ public function recalculate_payroll_values($payroll){
     $payroll->overtime_attendance_hours_salary = $overtime_attendance_hours_salary;
     $payroll->overtime_hours_salary = $overtime_attendance_hours_salary;
     $payroll->save();
-
     return $payroll;
-
 }
 
 

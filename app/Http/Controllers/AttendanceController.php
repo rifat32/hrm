@@ -597,7 +597,7 @@ class AttendanceController extends Controller
             if ($request_data["is_weekend"] || $request_data["holiday_id"]) {
                 $overtime_start_time = $request_data["in_date"];
                 $overtime_end_time = $request_data["out_date"];
-                $result_balance_hours = $attendance->total_paid_hours;
+                $result_balance_hours = $attendance_prev->total_paid_hours;
             } else if ($leave_record) {
 
                 $attendance_in_time = $request_data["in_time"];
@@ -614,47 +614,18 @@ class AttendanceController extends Controller
                     $request_data["overtime_end_time"] = $balance_end_time;
                 }
 
-                // Check if there is any overlap
-                //   if ($balance_start_time < $balance_end_time) {
-                //       $overtime_start_time = $attendance->in_time;
-                //       $overtime_end_time = $attendance->out_time;
-                //       $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-
-
-                //       $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
-                //       $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
-                //       $uncommon_leave_start = $leave_start_time->min($balance_start_time);
-                //       $uncommon_leave_end = $leave_end_time->max($balance_end_time);
-
-                //   } else {
-                //       $uncommon_attendance_start = $attendance_in_time;
-                //       $uncommon_attendance_end = $attendance_out_time;
-
-                //       $uncommon_leave_start = $leave_start_time;
-                //       $uncommon_leave_end = $leave_end_time;
-                //   }
-
-                //   $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
-                //   $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
-
-                //   $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
 
 
             } else if ($request_data["work_hours_delta"] > 0) {
                 $result_balance_hours = $request_data["work_hours_delta"];
             }
-            //  else if ($attendance->work_hours_delta < 0) {
-            //     $leave_hours = abs($attendance->work_hours_delta);
-            // }
+
 
             $request_data["regular_work_hours"] =  $request_data["total_paid_hours"] - $result_balance_hours;
 
 
 
             $request_data["overtime_hours"] = $request_data["regular_work_hours"];
-
-
-
 
             $request_data["regular_hours_salary"] =  $request_data["regular_work_hours"] *   $user_salary_info["hourly_salary"];
             $request_data["overtime_hours_salary"] =  $request_data["overtime_hours"] *   $user_salary_info["overtime_salary_per_hour"];
@@ -702,15 +673,8 @@ class AttendanceController extends Controller
             }
 
 
-            if (!$attendance) {
-                return response()->json([
-                    "message" => "something went wrong."
-                ], 500);
-            }
-
             $observer = new AttendanceObserver();
             $observer->update($attendance, 'update');
-
 
             $this->adjust_payroll_on_attendance_update($attendance);
 
