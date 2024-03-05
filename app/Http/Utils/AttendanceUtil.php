@@ -13,16 +13,17 @@ use Exception;
 
 trait AttendanceUtil
 {
+use PayrunUtil;
 
-
-    public function prepare_request_on_attendance_create($request)
+    public function prepare_data_on_attendance_create($raw_data,$user_id)
     {
-        $request_data = $request->validated();
-        $request_data["business_id"] = $request->user()->business_id;
-        $request_data["is_active"] = true;
-        $request_data["created_by"] = $request->user()->id;
-        $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
-        return $$request_data;
+
+        $raw_data["user_id"] = $user_id;
+        $raw_data["business_id"] = auth()->user()->business_id;
+        $raw_data["is_active"] = true;
+        $raw_data["created_by"] = auth()->user()->id;
+        $raw_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
+        return $raw_data;
     }
 
 
@@ -217,5 +218,83 @@ trait AttendanceUtil
 
     function calculate_regular_work_hours($total_paid_hours, $result_balance_hours) {
         return $total_paid_hours - $result_balance_hours;
+    }
+
+
+
+
+
+
+
+    public function process_attendance_data($raw_data,$setting_attendance,$user_id) {
+  // Prepare data for attendance creation
+  $attendance_data = $this->prepare_data_on_attendance_create($raw_data,$user_id);
+
+  // Automatically approve attendance if auto-approval is enabled in settings
+  if (isset($setting_attendance->auto_approval) && $setting_attendance->auto_approval) {
+     $attendance_data["status"] = "approved";
+ }
+
+ // Retrieve salary information for the user and date
+ $user_salary_info = $this->get_salary_info($user_id, $attendance_data["in_date"]);
+
+ // Retrieve work shift history for the user and date
+ $work_shift_history =  $this->get_work_shift_history($attendance_data["in_date"],$user_id);
+
+ // Retrieve work shift details based on work shift history and date
+ $work_shift_details =  $this->get_work_shift_details($work_shift_history, $attendance_data["in_date"]);
+
+ // Retrieve holiday details for the user and date
+ $holiday = $this->get_holiday_details($attendance_data["in_date"],$user_id);
+
+ // Retrieve leave record details for the user and date
+ $leave_record = $this->get_leave_record_details($attendance_data["in_time"], $user_id);
+
+ // Calculate capacity hours based on work shift details
+ $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
+
+ // Calculate total present hours based on in and out times
+ $total_present_hours = $this->calculate_total_present_hours($attendance_data["in_time"], $attendance_data["out_time"]);
+
+ // Calculate tolerance time based on in time and work shift details
+ $tolerance_time = $this->calculate_tolerance_time($attendance_data["in_time"],$work_shift_details);
+
+ // Determine behavior based on tolerance time and attendance setting
+ $behavior = $this->determine_behavior($tolerance_time, $setting_attendance);
+
+ // Adjust paid hours based on break taken and work shift history
+ $total_paid_hours = $this->adjust_paid_hours($attendance_data["does_break_taken"],$total_present_hours, $work_shift_history);
+
+ // Calculate work hours delta
+ $work_hours_delta = $total_present_hours - $capacity_hours;
+
+ // Calculate overtime information
+ $overtime_information = $this->calculate_overtime($work_shift_details->is_weekend,$work_hours_delta, $total_paid_hours, $leave_record, $holiday, $attendance_data["in_time"],$attendance_data["out_time"]);
+
+ // Calculate regular work hours
+ $regular_work_hours = $this->calculate_regular_work_hours($total_paid_hours, $overtime_information["overtime_hours"]);
+
+
+ $attendance_data["break_type"] = $work_shift_history->break_type;
+ $attendance_data["break_hours"] = $work_shift_history->break_hours;
+ $attendance_data["behavior"] = $behavior;
+ $attendance_data["capacity_hours"] = $capacity_hours;
+ $attendance_data["work_hours_delta"] = $work_hours_delta;
+ $attendance_data["total_paid_hours"] = $total_paid_hours;
+ $attendance_data["regular_work_hours"] = $regular_work_hours;
+ $attendance_data["work_shift_start_at"] = $work_shift_details->start_at;
+ $attendance_data["work_shift_end_at"] =  $work_shift_details->end_at;
+ $attendance_data["work_shift_history_id"] = $work_shift_history->id;
+ $attendance_data["holiday_id"] = $holiday ? $holiday->id : NULL;
+ $attendance_data["leave_record_id"] = $leave_record ? $leave_record->id : NULL;
+ $attendance_data["is_weekend"] = $work_shift_details->is_weekend;
+ $attendance_data["overtime_start_time"] = $overtime_information["overtime_start_time"];
+ $attendance_data["overtime_end_time"] = $overtime_information["overtime_end_time"];
+ $attendance_data["overtime_hours"] = $overtime_information["overtime_hours"];
+ $attendance_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
+ $attendance_data["regular_hours_salary"] =   $regular_work_hours * $user_salary_info["hourly_salary"];
+ $attendance_data["overtime_hours_salary"] =   $overtime_information["overtime_hours"] * $user_salary_info["overtime_salary_per_hour"];
+
+ return $attendance_data;
     }
 }

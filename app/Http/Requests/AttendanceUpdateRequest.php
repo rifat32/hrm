@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\Project;
 use App\Models\User;
@@ -64,13 +65,27 @@ class AttendanceUpdateRequest extends BaseFormRequest
                 return;
             }
 
-
-
                 },
             ],
             'in_time' => 'nullable|date_format:H:i:s',
             'out_time' => 'nullable|date_format:H:i:s|after_or_equal:in_time',
-            'in_date' => 'required|date',
+
+            'in_date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $exists = Attendance::
+                    whereNotIn("id",[$this->id])
+                        ->where('attendances.user_id', $this->user_id)
+                        ->where('attendances.in_date', $value)
+                        ->where('attendances.business_id', '=', auth()->user()->business_id)
+                        ->exists();
+
+                    if ($exists) {
+                        $fail($attribute . " is invalid. attendance already exists in this date");
+                    }
+                },
+            ],
             'does_break_taken' => "required|boolean",
             'attendance_details.*.project_id' => [
                 'required',
