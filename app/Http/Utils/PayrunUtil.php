@@ -30,7 +30,7 @@ trait PayrunUtil
         ->where("from_date", "<=", $date)
         ->where(function($query) use ($date) {
             $query->where("to_date", ">", $date)
-            ->orWhereNull($date);
+            ->orWhereNull("to_date");
         })
 
         ->orderByDesc("to_date")

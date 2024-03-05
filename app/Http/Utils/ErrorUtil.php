@@ -11,21 +11,6 @@ trait ErrorUtil
     // this function do all the task and returns transaction id or -1
     public function sendError(Exception $e, $statusCode, Request $request)
     {
-        // first return 422 custom error
-        if ($e->getCode() == 422) {
-            $statusCode = 422;
-            return response()->json(json_decode($e->getMessage()), 422);
-        }
-
-        if ($e->getCode() == 400) {
-            $statusCode = 400;
-            return response()->json(json_decode($e->getMessage()), 400);
-        }
-        if ($e->getCode() == 403) {
-            $statusCode = 403;
-            return response()->json($e->getMessage(), 403);
-        }
-
 
         if (env("APP_DEBUG") === false) {
             $data["message"] = "something went wrong";
@@ -33,13 +18,10 @@ trait ErrorUtil
             $data["message"] = $e->getMessage();
         }
 
-
-
         $user = auth()->user();
         $authorizationHeader = request()->header('Authorization');
 
         $token = str_replace('Bearer ', '', $authorizationHeader);
-
 
         $errorLog = [
             "api_url" => $request->fullUrl(),
@@ -49,15 +31,28 @@ trait ErrorUtil
             "user" => !empty($user) ? (json_encode($user)) : "",
             "user_id" => !empty($user) ? $user->id : "",
             "message" => $e->getMessage(),
-            "status_code" => $statusCode,
+            "status_code" => $e->getCode(),
             "line" => $e->getLine(),
             "file" => $e->getFile(),
             "ip_address" =>  $request->header('X-Forwarded-For'),
-
             "request_method" => $request->method()
-
         ];
         ErrorLog::create($errorLog);
+
+        if ($e->getCode() == 422) {
+            $statusCode = 422;
+            return response()->json(json_decode($e->getMessage()), 422);
+        }
+
+        if ($e->getCode() == 400) {
+            $statusCode = 400;
+            return response()->json($e->getMessage(), 400);
+        }
+
+        if ($e->getCode() == 403) {
+            $statusCode = 403;
+            return response()->json($e->getMessage(), 403);
+        }
         return response()->json($data, $statusCode);
     }
     public function storeError($e, $statusCode,$line,$file)
