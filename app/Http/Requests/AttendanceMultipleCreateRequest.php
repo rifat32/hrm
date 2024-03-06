@@ -2,15 +2,21 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
+use App\Rules\UniqueAttendanceDate;
+use App\Rules\ValidProjectId;
+use App\Rules\ValidUserId;
+use App\Rules\ValidWorkLocationId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceMultipleCreateRequest extends BaseFormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -29,42 +35,14 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
     public function rules()
     {
 
-        $all_manager_department_ids = [];
-        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-        foreach ($manager_departments as $manager_department) {
-            $all_manager_department_ids[] = $manager_department->id;
-            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-        }
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
         return [
             'user_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-
-                  $exists =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
-
-                    ])
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->whereNotIn("users.id",[auth()->user()->id])
-
-                     ->first();
-
-            if (!$exists) {
-                $fail($attribute . " is invalid.");
-                return;
-            }
-
-
-
-                },
+                new ValidUserId($all_manager_department_ids),
             ],
 
 
@@ -93,16 +71,7 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
             'attendance_details.*.in_date' => [
                  "required",
                  "date",
-                 function ($attribute, $value, $fail) {
-                    $exists = Attendance::where('attendances.user_id', $this->id)
-                    ->whereDate('attendances.business_id', '=', auth()->user()->business_id)
-                    ->exists();
-
-                if ($exists) {
-                    $fail($attribute . " is invalid.");
-                }
-
-                },
+                 new UniqueAttendanceDate(NULL, $this->user_id),
 
             ],
 
@@ -114,88 +83,14 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
             'attendance_details.*.project_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Project::
-                        where('id', $value)
-                        ->where('projects.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
+                new ValidProjectId
             ],
 
 
             'attendance_details.*.work_location_id' => [
                 "required",
                 'numeric',
-                function ($attribute, $value, $fail) {
-
-                    $created_by  = NULL;
-                    if(auth()->user()->business) {
-                        $created_by = auth()->user()->business->created_by;
-                    }
-
-                    $exists = WorkLocation::where("work_locations.id",$value)
-                    ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
-                        if (auth()->user()->hasRole('superadmin')) {
-                            return $query->where('work_locations.business_id', NULL)
-                                ->where('work_locations.is_default', 1)
-                                ->where('work_locations.is_active', 1);
-
-                        } else {
-                            return $query->where('work_locations.business_id', NULL)
-                                ->where('work_locations.is_default', 1)
-                                ->where('work_locations.is_active', 1)
-                                ->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_work_locations.created_by", [auth()->user()->id]);
-                                })
-
-                                ->orWhere(function ($query) use($value)  {
-                                    $query->where("work_locations.id",$value)->where('work_locations.business_id', NULL)
-                                        ->where('work_locations.is_default', 0)
-                                        ->where('work_locations.created_by', auth()->user()->id)
-                                        ->where('work_locations.is_active', 1);
-
-
-                                });
-                        }
-                    })
-                        ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
-                            return $query->where('work_locations.business_id', NULL)
-                                ->where('work_locations.is_default', 1)
-                                ->where('work_locations.is_active', 1)
-                                ->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_work_locations.created_by", [$created_by]);
-                                })
-                                ->whereDoesntHave("disabled", function($q)  {
-                                    $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
-                                })
-
-                                ->orWhere(function ($query) use( $created_by, $value){
-                                    $query->where("work_locations.id",$value)->where('work_locations.business_id', NULL)
-                                        ->where('work_locations.is_default', 0)
-                                        ->where('work_locations.created_by', $created_by)
-                                        ->where('work_locations.is_active', 1)
-                                        ->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
-                                        });
-                                })
-                                ->orWhere(function ($query) use($value)  {
-                                    $query->where("work_locations.id",$value)->where('work_locations.business_id', auth()->user()->business_id)
-                                        // ->where('work_locations.is_default', 0)
-                                        ->where('work_locations.is_active', 1);
-
-                                });
-                        })
-                    ->exists();
-
-                if (!$exists) {
-                    $fail($attribute . " is invalid.");
-                }
-
-                },
+                new ValidWorkLocationId
             ],
 
 

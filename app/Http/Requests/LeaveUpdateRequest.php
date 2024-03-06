@@ -39,6 +39,7 @@ class LeaveUpdateRequest extends BaseFormRequest
                 'numeric',
                 function ($attribute, $value, $fail) {
                     $exists = Leave::where('id', $value)
+                    ->where("user_id",$this->user_id)
                         ->exists();
                     if (!$exists) {
                         $fail($attribute . " is invalid.");
