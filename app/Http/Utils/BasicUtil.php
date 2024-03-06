@@ -2,6 +2,7 @@
 
 namespace App\Http\Utils;
 
+use App\Models\Department;
 use App\Models\EmployeePensionHistory;
 use App\Models\User;
 use Carbon\Carbon;
@@ -33,7 +34,6 @@ trait BasicUtil
 
     public function getCurrentPensionHistory(string $modelClass,$session_name ,$current_user_id, $issue_date_column, $expiry_date_column)
     {
-
         $model = new $modelClass;
 
         $user = User::where([
@@ -64,7 +64,6 @@ trait BasicUtil
 
 
     }
-
 
     public function getCurrentHistory(string $modelClass,$session_name ,$current_user_id, $issue_date_column, $expiry_date_column)
     {
@@ -102,6 +101,35 @@ trait BasicUtil
 
 
     }
+
+
+
+    public function get_all_departments_of_manager() {
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
+        return $all_manager_department_ids;
+    }
+
+
+    public function all_parent_departments_of_user($user_id) {
+        $all_parent_department_ids = [];
+        $assigned_departments = Department::whereHas("users", function ($query) use ($user_id) {
+            $query->where("users.id", $user_id);
+        })->get();
+
+
+        foreach ($assigned_departments as $assigned_department) {
+            array_push($all_parent_department_ids, $assigned_department->id);
+            $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
+        }
+
+        return $all_parent_department_ids;
+    }
+
 
 
 

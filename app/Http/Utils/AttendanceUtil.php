@@ -2,10 +2,12 @@
 
 namespace App\Http\Utils;
 
+use App\Models\Attendance;
 use App\Models\Coupon;
 use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\LeaveRecord;
+use App\Models\Role;
 use App\Models\SettingAttendance;
 use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
@@ -13,7 +15,7 @@ use Exception;
 
 trait AttendanceUtil
 {
-use PayrunUtil;
+use PayrunUtil, BasicUtil;
 
     public function prepare_data_on_attendance_create($raw_data,$user_id)
     {
@@ -71,7 +73,7 @@ use PayrunUtil;
             ->first();
         if (!$work_shift_history) {
             throw new Exception("Please define workshift first");
-        } 
+        }
 
         return $work_shift_history;
     }
@@ -93,18 +95,8 @@ use PayrunUtil;
         return $work_shift_details;
     }
 
-    public function get_holiday_details($in_date,$user_id)
+    public function get_holiday_details($in_date,$user_id, $all_parent_department_ids)
     {
-        $all_parent_department_ids = [];
-        $assigned_departments = Department::whereHas("users", function ($query) use ($user_id) {
-            $query->where("users.id", $user_id);
-        })->get();
-
-
-        foreach ($assigned_departments as $assigned_department) {
-            array_push($all_parent_department_ids, $assigned_department->id);
-            $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-        }
 
         $holiday =   Holiday::where([
             "business_id" => auth()->user()->business_id
@@ -259,7 +251,8 @@ use PayrunUtil;
  $work_shift_details =  $this->get_work_shift_details($work_shift_history, $attendance_data["in_date"]);
 
  // Retrieve holiday details for the user and date
- $holiday = $this->get_holiday_details($attendance_data["in_date"],$user_id);
+  $all_parent_departments_of_user = $this->all_parent_departments_of_user($user_id);
+ $holiday = $this->get_holiday_details($attendance_data["in_date"],$user_id,$all_parent_departments_of_user);
 
  // Retrieve leave record details for the user and date
  $leave_record = $this->get_leave_record_details($attendance_data["in_time"], $user_id);
@@ -311,4 +304,50 @@ use PayrunUtil;
 
  return $attendance_data;
     }
+
+
+    public function is_special_user($user,$setting_attendance)
+{
+    return $setting_attendance
+        ->special_users()
+        ->where(["setting_attendance_special_users.user_id" => $user->id])
+        ->first();
+}
+
+public function is_special_role($user,$setting_attendance)
+{
+    $role_names = $user->getRoleNames()->toArray();
+    $roles = Role::whereIn("name", $role_names)->get();
+
+    foreach ($roles as $role) {
+        $special_role = $setting_attendance->special_roles()->where(["role_id" => $role->id])->first();
+        if ($special_role) {
+            return true;
+        }
+    }
+    return false;
+}
+
+public function find_attendance($attendance_query_params) {
+  $attendance =  Attendance::where($attendance_query_params)->first();
+  if(!$attendance) {
+    throw new Exception("Some thing went wrong");
+  }
+  return $attendance;
+
+}
+
+public function calculate_behavior_counts($attendances) {
+    return [
+        'absent' => $attendances->filter(fn($attendance) => $attendance->behavior === 'absent')->count(),
+        'regular' => $attendances->filter(fn($attendance) => $attendance->behavior === 'regular')->count(),
+        'early' => $attendances->filter(fn($attendance) => $attendance->behavior === 'early')->count(),
+        'late' => $attendances->filter(fn($attendance) => $attendance->behavior === 'late')->count(),
+    ];
+}
+
+public function calculate_max_behavior($behaviorCounts) {
+    return max($behaviorCounts);
+}
+
 }

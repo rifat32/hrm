@@ -65,6 +65,16 @@ trait ErrorUtil
 
                 403);
         }
+        if ($e->getCode() == 404) {
+            $statusCode = 404;
+            return response()->json(
+                [
+                    "message" =>  $e->getMessage()
+                ],
+
+
+                404);
+        }
         return response()->json($data, $statusCode);
     }
     public function storeError($e, $statusCode,$line,$file)
