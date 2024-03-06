@@ -35,8 +35,7 @@ class CreateEmployeePensionHistoriesTable extends Migration
 
             $table->date("from_date");
             $table->date("to_date")->nullable();
-            $table->unsignedBigInteger("pension_id")->nullable();
-            $table->foreign('pension_id')->references('id')->on('employee_pensions')->onDelete('set null');
+       
 
             $table->boolean("is_manual")->default(0);
             $table->unsignedBigInteger("created_by")->nullable();

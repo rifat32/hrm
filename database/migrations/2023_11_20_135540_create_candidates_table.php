@@ -42,7 +42,7 @@ class CreateCandidatesTable extends Migration
 
             $table->enum('status', [
                 'applied',
-                'progress',
+                'in_progress',
                 'interview_stage_1',
                 'interview_stage_2',
                 'final_interview',

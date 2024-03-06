@@ -16,14 +16,10 @@ class EmployeePassportDetailHistory extends Model
         "passport_issue_date",
         "passport_expiry_date",
         "place_of_issue",
-
-
         "from_date",
         "to_date",
         "user_id",
-
         "is_manual",
-        "passport_detail_id",
         'created_by'
     ];
 

@@ -21,7 +21,7 @@ class UserObserver
             'weekly_contractual_hours' => $user->weekly_contractual_hours,
             'minimum_working_days_per_week' => $user->minimum_working_days_per_week,
             'overtime_rate' => $user->overtime_rate,
-            'from_date' =>  $user->joining_date, // Assuming the change happened immediately
+            'from_date' => auth()->user()->business->start_date,
             'to_date' => NULL, // No end date initially
         ]);
     }
@@ -64,9 +64,14 @@ class UserObserver
                  'from_date' => now(), // Assuming the change happened immediately
                  'to_date' => NULL, // No end date initially
              ]);
-
-
          }
+
+        //  if (array_intersect(array_keys($changedFields), [
+        //     'joining_date',
+
+        // ])){
+
+        //  }
      }
 
 

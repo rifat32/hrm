@@ -19,7 +19,7 @@ class CreateEmployeeProjectHistoriesTable extends Migration
             $table->text("description")->nullable();
             $table->date("start_date");
             $table->date("end_date")->nullable();
-            $table->enum('status', ['pending','progress', 'completed']);
+            $table->enum('status', ['pending','in_progress', 'completed']);
 
 
 

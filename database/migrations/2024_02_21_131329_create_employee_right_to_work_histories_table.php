@@ -28,8 +28,7 @@ class CreateEmployeeRightToWorkHistoriesTable extends Migration
 
             $table->date("from_date");
             $table->date("to_date")->nullable();
-            $table->unsignedBigInteger("right_to_work_id")->nullable();
-            $table->foreign('right_to_work_id')->references('id')->on('employee_right_to_works')->onDelete('set null');
+          
             $table->boolean("is_manual")->default(0);
 
             $table->unsignedBigInteger("created_by")->nullable();

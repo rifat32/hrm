@@ -24,7 +24,6 @@ class EmployeeVisaDetailHistory extends Model
         'user_id',
         "from_date",
         "to_date",
-        "visa_detail_id",
         'created_by'
     ];
 

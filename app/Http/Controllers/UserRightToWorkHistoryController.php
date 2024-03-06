@@ -104,43 +104,6 @@ class UserRightToWorkHistoryController extends Controller
                 $request_data["is_manual"] = 1;
 
 
-                // $current_right_to_work =  EmployeeRightToWorkHistory::where(
-                //     [
-                //         "user_id" => $request["user_id"],
-                //     ]
-                // )->latest()->first();
-
-                // if ($current_right_to_work) {
-                //     // Parse the new expiry date using Carbon
-                //     $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                //     $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
-
-                //     if ($new_expiry_date->gt($current_expiry_date)) {
-                //         // Update the passport expiry date
-                //         $request_data["is_manual"] = 0;
-                //         $user_right_to_work  =  $current_right_to_work->update(
-                //             collect($request_data)->only([
-                //                 'right_to_work_code',
-                //                 'right_to_work_check_date',
-                //                 'right_to_work_expiry_date',
-                //                 'right_to_work_docs',
-                //                  "created_by"
-
-                //             ])->toArray()
-                //         );
-
-                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                //     }
-                // } else {
-                //     $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-                //     $today = now();
-
-                //     if ($new_expiry_date->gt($today)) {
-                //         // Handle the case where the new expiry date is later than today's date
-                //         $request_data["is_manual"] = 0;
-                //         $user_right_to_work = EmployeeRightToWork::create($request_data);
-                //     }
-                // }
 
 
                 $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
@@ -273,7 +236,7 @@ class UserRightToWorkHistoryController extends Controller
                             'user_id',
                             "from_date",
                             "to_date",
-                            "right_to_work_id",
+                      
 
                         ])->toArray()
                     )
@@ -294,86 +257,6 @@ class UserRightToWorkHistoryController extends Controller
 
 
 
-        //         $business_id =  $request->user()->business_id;
-        //         $request_data = $request->validated();
-        //         $request_data["created_by"] = $request->user()->id;
-        //         $request_data["is_manual"] = 1;
-
-        //         $current_right_to_work =  EmployeeRightToWork::where(
-        //             [
-        //                 "user_id" => $request["user_id"],
-        //             ]
-        //         )->latest()->first();
-
-        //         if ($current_right_to_work) {
-        //             // Parse the new expiry date using Carbon
-        //             $new_expiry_date = Carbon::parse($request_data["right_to_work_expiry_date"]);
-        //             $current_expiry_date = Carbon::parse($current_right_to_work->right_to_work_expiry_date);
-
-        //             if ($new_expiry_date->gt($current_expiry_date)) {
-        //                 // Update the passport expiry date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_right_to_work  =  $current_expiry_date->update(
-        //                     collect($request_data)->only([
-        //                         'right_to_work_code',
-        //                         'right_to_work_check_date',
-        //                         'right_to_work_expiry_date',
-        //                         'right_to_work_docs',
-        //                          "created_by"
-
-        //                     ])->toArray()
-        //                 );
-
-        //                 // Now $current_passport_detail holds the updated passport detail with the later expiry date
-        //             }
-        //         } else {
-        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-        //             $today = Carbon::now();
-
-        //             if ($new_expiry_date->gt($today)) {
-        //                 // Handle the case where the new expiry date is later than today's date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_right_to_work = EmployeeRightToWork::create($request_data);
-        //             }
-        //         }
-
-
-        //         $user_right_to_work_history =  EmployeeRightToWorkHistory::create($request_data);
-
-
-
-
-        //         $user_right_to_work_history_query_params = [
-        //             "id" => $request_data["id"],
-        //             "is_manual" => 1
-        //         ];
-
-        //         $user_right_to_work_history  =  tap(EmployeeRightToWorkHistory::where($user_right_to_work_history_query_params))->update(
-        //             collect($request_data)->only([
-        //                 'right_to_work_code',
-        //                 'right_to_work_check_date',
-        //                 'right_to_work_expiry_date',
-        //                 'right_to_work_docs',
-
-        // "is_manual",
-        // 'user_id',
-        // "from_date",
-        // "to_date",
-
-
-
-        //             ])->toArray()
-        //         )
-        //             // ->with("somthing")
-
-        //             ->first();
-        //         if (!$user_right_to_work_history) {
-        //             return response()->json([
-        //                 "message" => "something went wrong."
-        //             ], 500);
-        //         }
-
-        //         return response($user_right_to_work_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());

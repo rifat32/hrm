@@ -12,8 +12,6 @@ class EmployeeProjectHistory extends Model
 
     protected $fillable = [
 
-
-
         'name',
         'description',
         'start_date',

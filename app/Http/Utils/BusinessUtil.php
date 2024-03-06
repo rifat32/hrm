@@ -859,7 +859,7 @@ trait BusinessUtil
             'description',
             'start_date' => $business->start_date,
             'end_date' => NULL,
-            'status' => "progress",
+            'status' => "in_progress",
             "is_active" => 1,
             "is_default" => 1,
             "business_id" => $business_id,

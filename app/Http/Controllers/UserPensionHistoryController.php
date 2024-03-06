@@ -108,47 +108,6 @@ class UserPensionHistoryController extends Controller
 
 
 
-                // $current_pension_detail =  EmployeePension::where(
-                //     [
-                //         "user_id" => $request["user_id"],
-                //     ]
-                // )->latest()->first();
-
-                // if ($current_pension_detail) {
-                //     // Parse the new expiry date using Carbon
-                //     $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
-                //     $current_expiry_date = Carbon::parse($current_pension_detail->pension_re_enrollment_due_date);
-
-                //     if ($new_expiry_date->gt($current_expiry_date)) {
-                //         // Update the passport expiry date
-                //         $request_data["is_manual"] = 0;
-                //         $user_pension  =  $current_pension_detail->update(
-                //             collect($request_data)->only([
-                //                 'pension_eligible',
-                //                 'pension_enrollment_issue_date',
-                //                 'pension_letters',
-                //                 'pension_scheme_status',
-                //                 'pension_scheme_opt_out_date',
-                //                 'pension_re_enrollment_due_date',
-                //                 "created_by"
-
-                //             ])->toArray()
-                //         );
-
-                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                //     }
-                // } else {
-                //     $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
-                //     $today = Carbon::now();
-
-                //     if ($new_expiry_date->gt($today)) {
-                //         // Handle the case where the new expiry date is later than today's date
-                //         $request_data["is_manual"] = 0;
-                //         $user_pension = EmployeePension::create($request_data);
-                //     }
-                // }
-
-
                 $user_pension_history =  EmployeePensionHistory::create($request_data);
 
 
@@ -230,10 +189,10 @@ class UserPensionHistoryController extends Controller
 
     public function updateUserPensionHistory(UserPensionHistoryUpdateRequest $request)
     {
-
+DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_pension_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -267,14 +226,16 @@ class UserPensionHistoryController extends Controller
                 if ($current_pension && $current_pension->id == $request_data["id"]) {
                     $request_data["is_manual"] = 0;
                     $user_pension_history =   EmployeePensionHistory::create($request_data);
-                    if($user_pension_history->pension_eligible) {
+
                         User::where([
                             "id" => $user_pension_history->user_id
                         ])
                         ->update([
                             "pension_eligible" => $user_pension_history->pension_eligible
                         ]);
-                    }
+
+
+
                 } else {
                     $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
                         collect($request_data)->only([
@@ -286,7 +247,7 @@ class UserPensionHistoryController extends Controller
                             'pension_re_enrollment_due_date',
                             "is_manual",
                             'user_id',
-                            "pension_id",
+
                             "from_date",
                             "to_date",
 
@@ -296,107 +257,25 @@ class UserPensionHistoryController extends Controller
                 }
 
 
-
-
-
                 if (!$user_pension_history) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
+
+
+
+
+
+
+
+
+                DB::commit();
                 return response($user_pension_history, 201);
 
-                // $current_pension_detail =  EmployeePension::where(
-                //     [
-                //         "user_id" => $request["user_id"],
-                //     ]
-                // )->latest()->first();
-
-                // if ($current_pension_detail) {
-                //     // Parse the new expiry date using Carbon
-                //     $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
-                //     $current_expiry_date = Carbon::parse($current_pension_detail->expiry_date);
-
-                //     if ($new_expiry_date->gt($current_expiry_date)) {
-                //         // Update the passport expiry date
-                //         $request_data["is_manual"] = 0;
-                //         $user_pension  =  $current_pension_detail->update(
-                //             collect($request_data)->only([
-                //                 'pension_eligible',
-                //                 'pension_enrollment_issue_date',
-                //                 'pension_letters',
-                //                 'pension_scheme_status',
-                //                 'pension_scheme_opt_out_date',
-                //                 'pension_re_enrollment_due_date',
-                //                 "created_by"
-
-                //             ])->toArray()
-                //         );
-
-                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                //     }
-                // } else {
-                //     $new_expiry_date = Carbon::parse($request_data["pension_re_enrollment_due_date"]);
-                //     $today = Carbon::now();
-
-                //     if ($new_expiry_date->gt($today)) {
-                //         // Handle the case where the new expiry date is later than today's date
-                //         $request_data["is_manual"] = 0;
-                //         $user_pension = EmployeePension::create($request_data);
-                //     }
-                // }
-                // $user_pension_history_prev = UserPensionHistory::where($user_pension_history_query_params)
-                //     ->first();
-                // if (!$user_pension_history_prev) {
-                //     return response()->json([
-                //         "message" => "no user pension history found"
-                //     ], 404);
-                // }
-
-
-
-
-
-
-
-
-
-                // $employee_pension_history =  EmployeePensionHistory::where($user_pension_history_query_params)->first();
-                // if($employee_pension_history) {
-                //     $fields_to_check = [
-                //         'pension_eligible',
-                //         'pension_enrollment_issue_date',
-                //         'pension_letters',
-                //         'pension_scheme_status',
-                //         'pension_scheme_opt_out_date',
-                //         'pension_re_enrollment_due_date',
-
-                //     ];
-                //     $date_fields = [
-                //         'pension_enrollment_issue_date',
-                //         'pension_scheme_opt_out_date',
-                //         'pension_re_enrollment_due_date',
-                //     ];
-                //     $fields_changed = $this->fieldsHaveChanged($fields_to_check, $employee_pension_history, $request_data, $date_fields);
-                //     if (
-                //         $fields_changed
-                //     ) {
-
-                //     }
-
-
-                // }
-
-
-
-
-
-
-
-
-            });
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }

@@ -106,43 +106,7 @@ class UserPassportHistoryController extends Controller
                 $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_manual"] = 1;
 
-                // $current_passport_detail =  EmployeePassportDetail::where(
-                //     [
-                //         "user_id" => $request["user_id"],
-                //     ]
-                // )->latest()->first();
 
-                // if ($current_passport_detail) {
-                //     // Parse the new expiry date using Carbon
-                //     $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
-                //     $current_expiry_date = Carbon::parse($current_passport_detail->passport_expiry_date);
-
-                //     if ($new_expiry_date->gt($current_expiry_date)) {
-                //         // Update the passport expiry date
-                //         $request_data["is_manual"] = 0;
-                //         $user_passport_history  =  $current_expiry_date->update(
-                //             collect($request_data)->only([
-                //                 'passport_number',
-                //                 "passport_issue_date",
-                //                 "passport_expiry_date",
-                //                 "place_of_issue",
-                //                 "created_by"
-
-                //             ])->toArray()
-                //         );
-
-                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                //     }
-                // } else {
-                //     $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
-                //     $today = Carbon::now();
-
-                //     if ($new_expiry_date->gt($today)) {
-                //         // Handle the case where the new expiry date is later than today's date
-                //         $request_data["is_manual"] = 0;
-                //         $user_passport_history = EmployeePassportDetail::create($request_data);
-                //     }
-                // }
 
 
 
@@ -229,17 +193,15 @@ class UserPassportHistoryController extends Controller
     public function updateUserPassportHistory(UserPassportHistoryUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+           
                 if (!$request->user()->hasPermissionTo('employee_passport_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-
-
-
 
                 $request_data = $request->validated();
                 $request_data["created_by"] = auth()->user()->id;
@@ -274,15 +236,15 @@ class UserPassportHistoryController extends Controller
                 } else {
                     $user_passport_history  =  tap(EmployeePassportDetailHistory::where($user_passport_history_query_params))->update(
                         collect($request_data)->only([
-        'passport_number',
-        "passport_issue_date",
-        "passport_expiry_date",
-        "place_of_issue",
-        "from_date",
-        "to_date",
+                  'passport_number',
+                  "passport_issue_date",
+                  "passport_expiry_date",
+                  "place_of_issue",
+                  "from_date",
+            "to_date",
         "user_id",
         "is_manual",
-        "passport_detail_id",
+  
 
                         ])->toArray()
                     )
@@ -297,92 +259,18 @@ class UserPassportHistoryController extends Controller
                     ], 500);
                 }
 
+
+
+                DB::commit();
                 return response($user_passport_history, 201);
 
 
 
 
-                // $business_id =  $request->user()->business_id;
-                // $request_data = $request->validated();
-                // $request_data["is_manual"] = 1;
 
-
-                // $current_passport_detail =  EmployeePassportDetail::where(
-                //     [
-                //         "user_id" => $request["user_id"],
-                //     ]
-                // )->latest()->first();
-
-                // if ($current_passport_detail) {
-                //     // Parse the new expiry date using Carbon
-                //     $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
-                //     $current_expiry_date = Carbon::parse($current_passport_detail->passport_expiry_date);
-
-                //     if ($new_expiry_date->gt($current_expiry_date)) {
-                //         // Update the passport expiry date
-                //         $request_data["is_manual"] = 0;
-                //         $user_passport_history  =  $current_expiry_date->update(
-                //             collect($request_data)->only([
-                //                 'passport_number',
-                //                 "passport_issue_date",
-                //                 "passport_expiry_date",
-                //                 "place_of_issue",
-                //                 "created_by"
-
-                //             ])->toArray()
-                //         );
-
-                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                //     }
-                // } else {
-                //     $new_expiry_date = Carbon::parse($request_data["passport_expiry_date"]);
-                //     $today = Carbon::now();
-
-                //     if ($new_expiry_date->gt($today)) {
-                //         // Handle the case where the new expiry date is later than today's date
-                //         $request_data["is_manual"] = 0;
-                //         $user_passport_history = EmployeePassportDetail::create($request_data);
-                //     }
-                // }
-
-
-                // $user_passport_history_query_params = [
-                //     "id" => $request_data["id"],
-                //     // "is_manual" => 1
-                // ];
-                // // $user_passport_history_prev = UserPassportHistory::where($user_passport_history_query_params)
-                // //     ->first();
-                // // if (!$user_passport_history_prev) {
-                // //     return response()->json([
-                // //         "message" => "no user passport history found"
-                // //     ], 404);
-                // // }
-
-                // $user_passport_history  =  tap(EmployeePassportDetailHistory::where($user_passport_history_query_params))->update(
-                //     collect($request_data)->only([
-                //         'passport_number',
-                //         "passport_issue_date",
-                //         "passport_expiry_date",
-                //         "place_of_issue",
-
-
-                //         "from_date",
-                //         "to_date",
-                //         "user_id",
-                //     ])->toArray()
-                // )
-                //     // ->with("somthing")
-
-                //     ->first();
-                // if (!$user_passport_history) {
-                //     return response()->json([
-                //         "message" => "something went wrong."
-                //     ], 500);
-                // }
-
-                // return response($user_passport_history, 201);
-            });
+        
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }

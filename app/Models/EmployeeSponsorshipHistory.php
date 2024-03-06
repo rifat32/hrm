@@ -22,7 +22,6 @@ class EmployeeSponsorshipHistory extends Model
 
         "is_manual",
         'user_id',
-        "sponsorship_id",
         "from_date",
         "to_date",
         'created_by'

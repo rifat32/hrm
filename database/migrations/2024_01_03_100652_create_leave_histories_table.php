@@ -37,7 +37,7 @@ class CreateLeaveHistoriesTable extends Migration
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
 
-            $table->enum('status', ['pending_approval','progress', 'approved','rejected'])->default("pending_approval");
+            $table->enum('status', ['pending_approval','in_progress', 'approved','rejected'])->default("pending_approval");
 
             $table->json('attachments')->nullable();
 

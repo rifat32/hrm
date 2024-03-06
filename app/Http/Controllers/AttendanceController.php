@@ -1046,7 +1046,11 @@ class AttendanceController extends Controller
             $data['data_highlights']['behavior'] = $behavior_counts;
             $data['data_highlights']['average_behavior'] = array_search($max_behavior, $behavior_counts);
             $data['data_highlights']['total_schedule_hours'] = $attendances->sum('capacity_hours');
-            $data['data_highlights']['total_leave_hours'] = $attendances->sum('leave_hours');
+
+            // $data['data_highlights']['total_leave_hours'] =  $attendances->sum('leave_hours');
+
+            $data['data_highlights']['total_leave_hours'] =  0;
+
             $total_available_hours = $data['data_highlights']['total_schedule_hours'] - $data['data_highlights']['total_leave_hours'];
 
             if ($total_available_hours == 0 || $data['data_highlights']['total_schedule_hours'] == 0) {
@@ -1694,13 +1698,13 @@ class AttendanceController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-// Check if the user is authorized to perform this action
+            // Check if the user is authorized to perform this action
             if (!$request->user()->hasRole('business_owner')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-// Validate the request data
+            // Validate the request data
             $request_data = $request->validated();
 
 
@@ -1708,7 +1712,7 @@ class AttendanceController extends Controller
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
 
-// Retrieve users based on request data
+            // Retrieve users based on request data
             if (empty($request_data["user_ids"])) {
                 $users  =  User::where([
                     "business_id" => auth()->user()->business_id
@@ -1722,19 +1726,19 @@ class AttendanceController extends Controller
                     ->get();
             }
 
-// Iterate over each user
+            // Iterate over each user
             foreach ($users as $user) {
 
-// Parse start and end dates
+                // Parse start and end dates
                 $start_date = Carbon::parse($request_data["start_date"]);
                 $end_date = Carbon::parse($request_data["end_date"]);
 
 
- // Create date range between start and end dates
+                // Create date range between start and end dates
                 $date_range = $start_date->daysUntil($end_date->addDay());
 
                 $attendance_details = [];
-// Map date range to create attendance details
+                // Map date range to create attendance details
                 return $date_range->map(function ($date) use ($user) {
                     $temp_data["in_date"] = $date;
                     $temp_data["does_break_taken"] = 1;
@@ -1754,10 +1758,10 @@ class AttendanceController extends Controller
                 // Get all parent department IDs of the employee
                 $all_parent_department_ids = $this->all_parent_departments_of_user($user->id);
 
- // Map attendance details to create attendances data
+                // Map attendance details to create attendances data
                 collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
 
- // Retrieve work shift history for the user and date
+                    // Retrieve work shift history for the user and date
                     $user_salary_info = $this->get_salary_info($user->user_id, $item["in_date"]);
 
                     // Retrieve work shift history for the user and date
@@ -1800,7 +1804,7 @@ class AttendanceController extends Controller
 
 
 
-    // Prepare attendance data
+                    // Prepare attendance data
                     $attendance_data["break_type"] = $work_shift_history->break_type;
                     $attendance_data["break_hours"] = $work_shift_history->break_hours;
                     $attendance_data["behavior"] = "regular";

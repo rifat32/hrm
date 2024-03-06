@@ -58,7 +58,7 @@ trait LeaveUtil
 
 
 
-        $leave->status = "progress";
+        $leave->status = "in_progress";
         $setting_leave = SettingLeave::where([
             "business_id" => auth()->user()->business_id,
             "is_default" => 0

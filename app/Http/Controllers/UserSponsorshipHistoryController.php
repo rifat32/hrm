@@ -111,46 +111,6 @@ class UserSponsorshipHistoryController extends Controller
 
 
 
-        //         $current_sponsorship_detail =  EmployeeSponsorship::where(
-        //             [
-        //                 "user_id" => $request["user_id"],
-        //             ]
-        //         )->latest()->first();
-
-        //         if ($current_sponsorship_detail) {
-        //             // Parse the new expiry date using Carbon
-        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-        //             $current_expiry_date = Carbon::parse($current_sponsorship_detail->expiry_date);
-
-        //             if ($new_expiry_date->gt($current_expiry_date)) {
-        //                 // Update the passport expiry date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_sponsorship  =  $current_expiry_date->update(
-        //                     collect($request_data)->only([
-        // 'date_assigned',
-        // 'expiry_date',
-        // 'status',
-        // 'note',
-        // "certificate_number",
-        // "current_certificate_status",
-        // "is_sponsorship_withdrawn",
-        // "created_by"
-
-        //                     ])->toArray()
-        //                 );
-
-        //                 // Now $current_passport_detail holds the updated passport detail with the later expiry date
-        //             }
-        //         } else {
-        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-        //             $today = Carbon::now();
-
-        //             if ($new_expiry_date->gt($today)) {
-        //                 // Handle the case where the new expiry date is later than today's date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_sponsorship = EmployeeSponsorship::create($request_data);
-        //             }
-        //         }
 
 
 
@@ -190,7 +150,6 @@ class UserSponsorshipHistoryController extends Controller
  *      @OA\Property(property="certificate_number", type="string", format="string", example="Your Certificate Number"),
  *      @OA\Property(property="current_certificate_status", type="string", format="string", example="Your Current Certificate Status"),
  *      @OA\Property(property="is_sponsorship_withdrawn", type="string", format="string", example="Your Is Sponsorship Withdrawn"),
- *      @OA\Property(property="sponsorship_id", type="string", format="string", example="Your Sponsorship ID"),
  *      @OA\Property(property="from_date", type="string", format="date", example="Your From Date"),
  *      @OA\Property(property="to_date", type="string", format="date", example="Your To Date")
  *
@@ -288,7 +247,6 @@ class UserSponsorshipHistoryController extends Controller
 
         "is_manual",
         'user_id',
-        "sponsorship_id",
         "from_date",
         "to_date",
 
@@ -312,98 +270,6 @@ class UserSponsorshipHistoryController extends Controller
 
 
 
-        //         $request_data = $request->validated();
-        //         $request_data["created_by"] = $request->user()->id;
-        //         $request_data["is_manual"] = 1;
-
-
-
-
-        //         $current_sponsorship_detail =  EmployeeSponsorship::where(
-        //             [
-        //                 "user_id" => $request["user_id"],
-        //             ]
-        //         )->latest()->first();
-
-        //         if ($current_sponsorship_detail) {
-        //             // Parse the new expiry date using Carbon
-        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-        //             $current_expiry_date = Carbon::parse($current_sponsorship_detail->expiry_date);
-
-        //             if ($new_expiry_date->gt($current_expiry_date)) {
-        //                 // Update the passport expiry date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_sponsorship  =  $current_expiry_date->update(
-        //                     collect($request_data)->only([
-        // 'date_assigned',
-        // 'expiry_date',
-        // 'status',
-        // 'note',
-        // "certificate_number",
-        // "current_certificate_status",
-        // "is_sponsorship_withdrawn",
-        // "created_by"
-
-        //                     ])->toArray()
-        //                 );
-
-        //                 // Now $current_passport_detail holds the updated passport detail with the later expiry date
-        //             }
-        //         } else {
-        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-        //             $today = Carbon::now();
-
-        //             if ($new_expiry_date->gt($today)) {
-        //                 // Handle the case where the new expiry date is later than today's date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_sponsorship = EmployeeSponsorship::create($request_data);
-        //             }
-        //         }
-
-
-
-
-
-        //         $user_sponsorship_history_query_params = [
-        //             "id" => $request_data["id"],
-        //             // "is_manual" => 1
-        //         ];
-        //         // $user_sponsorship_history_prev = UserSponsorshipHistory::where($user_sponsorship_history_query_params)
-        //         //     ->first();
-        //         // if (!$user_sponsorship_history_prev) {
-        //         //     return response()->json([
-        //         //         "message" => "no user sponsorship history found"
-        //         //     ], 404);
-        //         // }
-
-        //         $user_sponsorship_history  =  tap(EmployeeSponsorshipHistory::where($user_sponsorship_history_query_params))->update(
-        //             collect($request_data)->only([
-        //                 'date_assigned',
-        // 'expiry_date',
-        // // 'status',
-        // 'note',
-        // "certificate_number",
-        // "current_certificate_status",
-        // "is_sponsorship_withdrawn",
-
-        // "is_manual",
-        // 'user_id',
-        // "sponsorship_id",
-        // "from_date",
-        // "to_date",
-
-        //             ])->toArray()
-        //         )
-        //             // ->with("somthing")
-
-        //             ->first();
-        //         if (!$user_sponsorship_history) {
-        //             return response()->json([
-        //                 "message" => "something went wrong."
-        //             ], 500);
-        //         }
-
-        //         return response($user_sponsorship_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());

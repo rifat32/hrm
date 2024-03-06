@@ -105,44 +105,6 @@ class UserVisaHistoryController extends Controller
                 $request_data["is_manual"] = 1;
 
 
-                // $current_visa_detail =  EmployeeVisaDetail::where(
-                //     [
-                //         "user_id" => $request["user_id"],
-                //     ]
-                // )->latest()->first();
-
-                // if ($current_visa_detail) {
-                //     // Parse the new expiry date using Carbon
-                //     $new_expiry_date = Carbon::parse($request_data["visa_expiry_date"]);
-                //     $current_expiry_date = Carbon::parse($current_visa_detail->visa_expiry_date);
-
-                //     if ($new_expiry_date->gt($current_expiry_date)) {
-                //         // Update the passport expiry date
-                //         $request_data["is_manual"] = 0;
-                //         $user_visa  =  $current_expiry_date->update(
-                //             collect($request_data)->only([
-                //                 'BRP_number',
-                //                 "visa_issue_date",
-                //                 "visa_expiry_date",
-                //                 "place_of_issue",
-                //                 "visa_docs",
-                //                  "created_by"
-
-                //             ])->toArray()
-                //         );
-
-                //         // Now $current_passport_detail holds the updated passport detail with the later expiry date
-                //     }
-                // } else {
-                //     $new_expiry_date = Carbon::parse($request_data["visa_expiry_date"]);
-                //     $today = Carbon::now();
-
-                //     if ($new_expiry_date->gt($today)) {
-                //         // Handle the case where the new expiry date is later than today's date
-                //         $request_data["is_manual"] = 0;
-                //         $user_visa = EmployeeVisaDetail::create($request_data);
-                //     }
-                // }
 
 
                 $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
@@ -278,7 +240,7 @@ class UserVisaHistoryController extends Controller
                             'user_id',
                             "from_date",
                             "to_date",
-                            "visa_detail_id",
+                    
 
                         ])->toArray()
                     )
@@ -302,96 +264,7 @@ class UserVisaHistoryController extends Controller
 
 
 
-        //         $business_id =  $request->user()->business_id;
-        //         $request_data = $request->validated();
-        //         $request_data["created_by"] = $request->user()->id;
-        //         $request_data["is_manual"] = 1;
 
-        //         $current_visa_detail =  EmployeeVisaDetail::where(
-        //             [
-        //                 "user_id" => $request["user_id"],
-        //             ]
-        //         )->latest()->first();
-
-        //         if ($current_visa_detail) {
-        //             // Parse the new expiry date using Carbon
-        //             $new_expiry_date = Carbon::parse($request_data["visa_expiry_date"]);
-        //             $current_expiry_date = Carbon::parse($current_visa_detail->visa_expiry_date);
-
-        //             if ($new_expiry_date->gt($current_expiry_date)) {
-        //                 // Update the passport expiry date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_visa  =  $current_expiry_date->update(
-        //                     collect($request_data)->only([
-        //                         'BRP_number',
-        //                         "visa_issue_date",
-        //                         "visa_expiry_date",
-        //                         "place_of_issue",
-        //                         "visa_docs",
-        //                          "created_by"
-
-        //                     ])->toArray()
-        //                 );
-
-        //                 // Now $current_passport_detail holds the updated passport detail with the later expiry date
-        //             }
-        //         } else {
-        //             $new_expiry_date = Carbon::parse($request_data["expiry_date"]);
-        //             $today = Carbon::now();
-
-        //             if ($new_expiry_date->gt($today)) {
-        //                 // Handle the case where the new expiry date is later than today's date
-        //                 $request_data["is_manual"] = 0;
-        //                 $user_visa = EmployeeVisaDetail::create($request_data);
-        //             }
-        //         }
-
-
-        //         $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
-
-
-
-
-        //         $user_visa_history_query_params = [
-        //             "id" => $request_data["id"],
-        //             "is_manual" => 1
-        //         ];
-        //         // $user_visa_history_prev = UserVisaHistory::where($user_visa_history_query_params)
-        //         //     ->first();
-        //         // if (!$user_visa_history_prev) {
-        //         //     return response()->json([
-        //         //         "message" => "no user visa history found"
-        //         //     ], 404);
-        //         // }
-
-        //         $user_visa_history  =  tap(EmployeeVisaDetailHistory::where($user_visa_history_query_params))->update(
-        //             collect($request_data)->only([
-        //                 'BRP_number',
-        // "visa_issue_date",
-        // "visa_expiry_date",
-        // "place_of_issue",
-        // "visa_docs",
-
-
-        // "is_manual",
-        // 'user_id',
-        // "from_date",
-        // "to_date",
-
-
-
-        //             ])->toArray()
-        //         )
-        //             // ->with("somthing")
-
-        //             ->first();
-        //         if (!$user_visa_history) {
-        //             return response()->json([
-        //                 "message" => "something went wrong."
-        //             ], 500);
-        //         }
-
-        //         return response($user_visa_history, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());

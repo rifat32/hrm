@@ -38,7 +38,7 @@ class TaskController extends Controller
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="progress"),
+ *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
  *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3})
@@ -142,7 +142,7 @@ class TaskController extends Controller
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="progress"),
+ *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2")
  *

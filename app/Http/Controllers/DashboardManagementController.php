@@ -1849,11 +1849,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-        // $data_query  = EmployeeVisaDetail::whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-        //     $query->whereIn("departments.id", $all_manager_department_ids);
-        // })
-        // ->where("visa_expiry_date",">=", today())
-        // ->where("business_id",auth()->user()->business_id);
 
 
 
@@ -2658,7 +2653,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $data["employee_on_holiday"]["route"] =  '/employee/all-employees?is_on_holiday=1&';
 
             $start_id = 3;
-            $leave_statuses = ['pending_approval','progress', 'approved','rejected'];
+            $leave_statuses = ['pending_approval','in_progress', 'approved','rejected'];
             foreach ($leave_statuses as $leave_status) {
                 $data[($leave_status . "_leaves")] = $this->leaves(
                     $today,

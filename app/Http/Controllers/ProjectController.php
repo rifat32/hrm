@@ -44,7 +44,7 @@ class ProjectController extends Controller
  *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Project X's objectives and scope."),
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="progress"),
+ *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
  *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
  *
      *
@@ -819,7 +819,7 @@ class ProjectController extends Controller
  *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Project X's objectives and scope."),
  *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="progress"),
+ *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
  *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3})
  *
  *

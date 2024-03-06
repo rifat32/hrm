@@ -21,7 +21,6 @@ class EmployeeRightToWorkHistory extends Model
         'user_id',
         "from_date",
         "to_date",
-        "right_to_work_id",
         'created_by',
 
     ];

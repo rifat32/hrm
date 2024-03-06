@@ -19,7 +19,7 @@ class EmployeePensionHistory extends Model
         'pension_re_enrollment_due_date',
         "is_manual",
         'user_id',
-        "pension_id",
+      
         "from_date",
         "to_date",
         'created_by'
