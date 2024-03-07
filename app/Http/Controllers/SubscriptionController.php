@@ -53,9 +53,8 @@ else {
 
             $user->stripe_id = $stripe_customer->id;
             $user->save();
-        } else {
-            $stripe_customer_id = $user->stripe_id;
-        }
+        } 
+
 
         $session = Session::create([
             'payment_method_types' => ['card'],
@@ -89,7 +88,7 @@ else {
                     'quantity' => 1,
                 ],
             ],
-            'customer' => $stripe_customer_id ?? null,
+            'customer' => $user->stripe_id,
             'mode' => 'subscription',
             'success_url' => route('subscription.success_payment'),
             'cancel_url' => route('subscription.failed_payment'),

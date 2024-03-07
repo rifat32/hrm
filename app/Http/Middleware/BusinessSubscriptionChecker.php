@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\BusinessSubscription;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -30,13 +31,21 @@ class BusinessSubscriptionChecker
                     ->latest() // Get the latest subscription
                     ->first();
 
-                if (!$latest_subscription || $latest_subscription->end_date < now() || $latest_subscription->start_date > now()) {
-                    if ($latest_subscription) {
-                        return response()->json("Your subscription has expired.", 500);
-                    } else {
-                        return response()->json("Please subscribe to use the software.", 500);
-                    }
-                }
+
+// Check if there's no subscription
+if (!$latest_subscription) {
+    return response()->json(["message" => "Please subscribe to use the software."], 500);
+}
+
+// Check if the subscription has expired
+if (Carbon::parse($latest_subscription->end_date)->isPast()) {
+    return response()->json(["message" => "Your subscription has expired."], 500);
+}
+
+// Check if the subscription has not yet started
+if (Carbon::parse($latest_subscription->start_date)->isFuture()) {
+    return response()->json(["message" => "Your subscription will start soon."], 500);
+}
             }
         }
 

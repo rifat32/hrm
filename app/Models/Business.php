@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Business extends Model
 {
     use HasFactory,  SoftDeletes;
+    protected $appends = ['is_subscribed'];
 
     protected $fillable = [
         "name",
@@ -52,6 +53,37 @@ class Business extends Model
     protected $casts = [
         'pension_scheme_letters' => 'array',
     ];
+
+    public function getIsSubscribedAttribute($value) {
+        $user = auth()->user();
+        $business = $user->business;
+
+        if ($user && $user->business) {
+            $business = $user->business;
+
+            if ($business->is_self_registered_businesses) {
+                $latest_subscription = BusinessSubscription::where('business_id', $business->id)
+                    ->where('service_plan_id', $business->service_plan_id)
+                    ->latest() // Get the latest subscription
+                    ->first();
+
+
+// Check if there's no subscription
+if (!$latest_subscription || Carbon::parse($latest_subscription->end_date)->isPast() || Carbon::parse($latest_subscription->start_date)->isFuture()) {
+   return FALSE;
+}
+
+return TRUE;
+
+
+
+        }
+
+    }
+
+
+}
+
 
 
     public function owner(){

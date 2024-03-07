@@ -127,7 +127,7 @@ use PayrunUtil, BasicUtil;
         return $holiday;
     }
 
-    public function get_leave_record_details($in_date,$user_id) {
+    public function get_leave_record_details($in_date,$user_id,$in_time="",$out_time="") {
         $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($in_date, $user_id) {
             $query->whereIn("leaves.user_id",  [$user_id])
                 ->where("leaves.status", "approved");
@@ -137,9 +137,27 @@ use PayrunUtil, BasicUtil;
             ->first();
 
 
-        // if ($leave_record && !auth()->user()->hasRole("business_owner")) {
-        //     throw new Exception(("there is a leave on date" . $in_date), 400);
-        // }
+
+
+        if ($leave_record) {
+            if($leave_record->leave->leave_duration == "hours") {
+                $attendance_in_time = Carbon::parse($in_time);
+                $attendance_out_time = Carbon::parse($out_time);
+
+                $leave_start_time = Carbon::parse($leave_record->start_time);
+                $leave_end_time = Carbon::parse($leave_record->end_time);
+
+                $balance_start_time = $attendance_in_time->max($leave_start_time);
+                $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                if ($balance_start_time < $balance_end_time) {
+                    throw new Exception(("there is an hourly leave on date" . $in_date), 400);
+                }
+            } else {
+                throw new Exception(("there is a leave on date" . $in_date), 400);
+            }
+
+        }
 
         return $leave_record;
     }
@@ -232,7 +250,7 @@ use PayrunUtil, BasicUtil;
 
 
 
-    public function process_attendance_data($raw_data,$setting_attendance,$user_id) {
+public function process_attendance_data($raw_data,$setting_attendance,$user_id) {
   // Prepare data for attendance creation
   $attendance_data = $this->prepare_data_on_attendance_create($raw_data,$user_id);
 
@@ -252,10 +270,11 @@ use PayrunUtil, BasicUtil;
 
  // Retrieve holiday details for the user and date
   $all_parent_departments_of_user = $this->all_parent_departments_of_user($user_id);
+
  $holiday = $this->get_holiday_details($attendance_data["in_date"],$user_id,$all_parent_departments_of_user);
 
  // Retrieve leave record details for the user and date
- $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user_id);
+ $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user_id, $attendance_data["in_time"], $attendance_data["out_time"]);
 
  // Calculate capacity hours based on work shift details
  $capacity_hours = $this->calculate_capacity_hours($work_shift_details);

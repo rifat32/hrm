@@ -233,14 +233,7 @@ class AttendanceController extends Controller
             }
 
             $request_data = $request->validated();
-
-
-
-
             $setting_attendance = $this->get_attendance_setting();
-
-
-
             $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance) {
                 $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
 
@@ -248,8 +241,6 @@ class AttendanceController extends Controller
 
                 return  $item;
             });
-
-
             $employee = User::where([
                 "id" => $request_data["user_id"]
             ])
@@ -1786,7 +1777,7 @@ class AttendanceController extends Controller
                         return false;
                     }
                     // Retrieve leave record details for the user and date
-                    $leave_record = $this->get_leave_record_details($attendance_data["in_time"], $user->id);
+                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id);
 
                     if ($leave_record) {
                         return false;

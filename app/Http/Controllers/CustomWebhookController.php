@@ -6,6 +6,7 @@ use App\Models\ServicePlan;
 use App\Models\BusinessSubscription;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Http\Controllers\WebhookController;
@@ -56,6 +57,7 @@ class CustomWebhookController extends WebhookController
         $customerID = $paymentCharge['customer'] ?? null;
         // Add more fields as needed
 
+
         $user = User::where("stripe_id",$customerID)->first();
 
         $service_plan = ServicePlan::find($user->business->service_plan_id);
@@ -63,7 +65,7 @@ class CustomWebhookController extends WebhookController
             'business_id' => $user->business->id,
             'service_plan_id' => $user->business->service_plan_id,
             'start_date' => now(),  // Start date of the subscription
-            'end_date' => Carbon::now()->addDays($service_plan->duration),  // End date based on plan duration
+            'end_date' => Carbon::now()->addDays($service_plan->duration_months),  // End date based on plan duration
             'amount' => $paymentCharge['amount'],
             'paid_at' => now(),
 
