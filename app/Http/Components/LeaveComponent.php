@@ -4,6 +4,7 @@ namespace App\Http\Components;
 
 use App\Models\Leave;
 use Carbon\Carbon;
+use Exception;
 
 class LeaveComponent
 {
@@ -39,19 +40,97 @@ class LeaveComponent
         return $leave;
     }
 
-    public function getLeaveRecordDataItem($work_shift_details,$holiday,$previous_leave,$date) {
+    public function getLeaveRecordDataItem(
+        $work_shift_details,
+        $holiday,
+        $previous_leave,
+        $date,
+        $leave_duration,
+        $day_type = "",
+        $start_time="",
+        $end_time=""
+        ) {
         if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
-            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-            $leave_record_data["leave_hours"] =  $capacity_hours;
-            $leave_record_data["capacity_hours"] =  $capacity_hours;
-            $leave_record_data["start_time"] = $work_shift_details->start_at;
-            $leave_record_data["end_time"] = $work_shift_details->end_at;
-            $leave_record_data["date"] = ($date);
-            return $leave_record_data;
+        $leave_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+        $leave_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+
+        // Calculate capacity hours based on work shift details
+        $capacity_hours = $leave_end_at->diffInHours($leave_start_at);
+
+
+
+// Adjust leave hours based on the type of leave
+        if($leave_duration == "half_day") {
+            if ($day_type == "first_half") {
+                // For first half-day leave, adjust the end time
+                $leave_end_at = $leave_start_at->copy()->addHours($capacity_hours / 2);
+            } else if ($day_type == "last_half") {
+                // For last half-day leave, adjust the start time
+                $leave_start_at = $leave_end_at->copy()->subHours($capacity_hours / 2);
+            }
+        }
+        else if($leave_duration == "hours") {
+            $leave_start_at = Carbon::createFromFormat('H:i:s', $start_time);
+            $leave_end_at = Carbon::createFromFormat('H:i:s', $end_time);
+        }
+
+        // Calculate leave hours based on adjusted start and end times
+        $leave_hours = $leave_end_at->diffInHours($leave_start_at);
+
+        // Prepare leave record data
+        $leave_record_data["leave_hours"] =  $leave_hours;
+        $leave_record_data["capacity_hours"] =  $capacity_hours;
+        $leave_record_data["start_time"] = $work_shift_details->start_at;
+        $leave_record_data["end_time"] = $work_shift_details->end_at;
+        $leave_record_data["date"] = $date;
+        return $leave_record_data;
         }
         return [];
 
     }
+
+  // Function to handle processing of leave record data
+function processLeaveRecord($date, $work_shift_details, $holiday, $previous_leave, $leave_data, &$leave_record_data_list) {
+
+    $leave_record_data_list = [];
+
+    $leave_record_data_item = $this->getLeaveRecordDataItem(
+        $work_shift_details,
+        $holiday,
+        $previous_leave,
+        $date,
+        $leave_data["leave_duration"],
+        $leave_data["day_type"],
+        $leave_data["start_time"] ?? null,
+        $leave_data["end_time"] ?? null
+    );
+    if (!empty($leave_record_data_item)) {
+        array_push($leave_record_data_list, $leave_record_data_item);
+    }
+}
+
+public function validateLeaveTimes($workShiftDetails,$start_time,$end_time){
+
+    $start_time = Carbon::parse($start_time);
+    $end_time = Carbon::parse($end_time);
+
+    $workShiftStart = Carbon::parse($workShiftDetails->start_at);
+    $workShiftEnd = Carbon::parse($workShiftDetails->end_at);
+
+    if ($start_time->lt($workShiftStart)) {
+        throw new Exception(
+            "Employee does not start working at $start_time. Starts at " . $workShiftDetails->start_at,
+            400
+        );
+    }
+
+    if ($end_time->gt($workShiftEnd)) {
+        throw new Exception("Employee does not close working at $end_time", 400);
+    }
+}
+
+
+
+
+
 }

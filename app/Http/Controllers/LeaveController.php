@@ -230,280 +230,120 @@ class LeaveController extends Controller
 
 
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
 
-            $leave_data =   $this->leaveComponent->prepare_data_on_leave_create($request_data,$request_data["user_id"]);
-
-
-
+            $leave_data =   $this->leaveComponent->prepare_data_on_leave_create($request_data, $request_data["user_id"]);
 
 
 
-                $leave_record_data_list = [];
 
-                $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user($leave_data["user_id"]);
 
+
+            $leave_record_data_list = [];
+            $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user($leave_data["user_id"]);
+
+
+            if($leave_data["leave_duration"] != "multiple_day") {
+                $start_date = Carbon::parse($leave_data["date"]);
+                $end_date = Carbon::parse($leave_data["date"]);
+
+                // Retrieve work shift history for the user and date
+                $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_data["date"], $leave_data["user_id"]);
+                // Retrieve work shift details based on work shift history and date
+                $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $leave_data["date"]);
+                // Retrieve holiday based on date and user id
+
+                $holiday = $this->holidayComponent->get_holiday_details($leave_data["date"], $leave_data["user_id"], $all_parent_department_ids);
+                $previous_leave = $this->leaveComponent->findLeave($leave_data["user_id"], $leave_data["date"]);
 
 
                 if ($leave_data["leave_duration"] == "single_day") {
-
-                    $dateString = $leave_data["date"];
-                    $request_data["start_date"] = $leave_data["date"];
-                    $request_data["end_date"] = $leave_data["date"];
-
-
-                      // Retrieve work shift history for the user and date
-                      $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_data["date"], $leave_data["user_id"]);
-                      // Retrieve work shift details based on work shift history and date
-                      $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $leave_data["date"]);
-
-// Retrieve holiday based on date and user id
-                      $holiday = $this->holidayComponent->get_holiday_details($leave_data["date"], $leave_data["user_id"], $all_parent_department_ids);
-
-
-
-                    $previous_leave = $this->leaveComponent->findLeave($leave_data["user_id"],$leave_data["date"]);
-
-                    $leave_record_data_item = $this->leaveComponent->getLeaveRecordDataItem($work_shift_details,$holiday,$previous_leave,$$leave_data["date"]);
-                    if(!empty($leave_record_data_item)) {
+                    $leave_record_data_item = $this->leaveComponent->getLeaveRecordDataItem(
+                        $work_shift_details,
+                        $holiday,
+                        $previous_leave,
+                        $leave_data["date"],
+                        $leave_data["leave_duration"]
+                    );
+                    if (!empty($leave_record_data_item)) {
                         array_push($leave_record_data_list, $leave_record_data_item);
                     }
-
-
-                } else if ($request_data["leave_duration"] == "multiple_day") {
-
-                    $start_date = Carbon::parse($request_data["start_date"]);
-                    $end_date = Carbon::parse($request_data["end_date"]);
-
-
-                    $leave_dates = [];
-                    for ($date = $start_date; $date->lte($end_date); $date->addDay()) {
-                        $leave_dates[] = $date->format('Y-m-d');
+                } else if ($leave_data["leave_duration"] == "half_day") {
+                    $leave_record_data_item = $this->leaveComponent->getLeaveRecordDataItem(
+                        $work_shift_details,
+                        $holiday,
+                        $previous_leave,
+                        $leave_data["date"],
+                        $leave_data["leave_duration"],
+                        $leave_data["day_type"]
+                    );
+                    if (!empty($leave_record_data_item)) {
+                        array_push($leave_record_data_list, $leave_record_data_item);
                     }
-
-                    foreach ($leave_dates as $leave_date) {
-                        $dateString = $leave_date;
-                         // Retrieve work shift history for the user and date
-                      $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_date, $leave_data["user_id"]);
-                      // Retrieve work shift details based on work shift history and date
-                      $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $leave_date);
-// Retrieve holiday based on date and user id
-$holiday = $this->holidayComponent->get_holiday_details($leave_date, $leave_data["user_id"], $all_parent_department_ids);
-
-$previous_leave = $this->leaveComponent->findLeave($leave_data["user_id"],$leave_data["date"]);
+                }  else if ($leave_data["leave_duration"] == "hours") {
 
 
-$leave_record_data_item = $this->leaveComponent->getLeaveRecordDataItem($work_shift_details,$holiday,$previous_leave,$$leave_data["date"]);
-if(!empty($leave_record_data_item)) {
-    array_push($leave_record_data_list, $leave_record_data_item);
-}
-
-                    }
-                } else if ($request_data["leave_duration"] == "half_day") {
-
-                    $dateString = $request_data["date"];
-                    $request_data["start_date"] = $request_data["date"];
-                    $request_data["end_date"] = $request_data["date"];
-                    $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift_history->details()->where([
-                        "day" => $dayNumber
-                    ])
-                        ->first();
-                    if (!$work_shift_details) {
-                        $this->storeError(
-                            "No work shift details found",
-                            400,
-                            "front end error",
-                            "front end error"
-                        );
-                        return response()->json(["message" => "No work shift details found"], 400);
-                    }
-                    $holiday =   Holiday::where([
-                        "business_id" => $request->user()->business_id
-                    ])
-                        ->where('holidays.start_date', "<=", $request_data["date"])
-                        ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
-                        ->where(function ($query) use ($request_data, $all_parent_department_ids) {
-                            $query->whereHas("users", function ($query) use ($request_data) {
-                                $query->where([
-                                    "users.id" => $request_data['user_id']
-                                ]);
-                            })
-                                ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                                    $query->whereIn("departments.id", $all_parent_department_ids);
-                                })
-
-                                ->orWhere(function ($query) {
-                                    $query->whereDoesntHave("users")
-                                        ->whereDoesntHave("departments");
-                                });
-                        })
-                        ->first();
-
-                    $previous_leave =  Leave::where([
-                        "user_id" => $request_data["user_id"]
-                    ])
-                        ->whereHas('records', function ($query) use ($request_data) {
-                            $query->where('leave_records.date', $request_data["date"]);
-                        })->first();
-
-
-
-
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
-
-                        $leave_start_at = Carbon::parse($work_shift_details->start_at);
-                        $leave_end_at = Carbon::parse($work_shift_details->end_at);
-
-                        if ($request_data["day_type"] == "first_half") {
-                            // Create clones of $leave_start_at and $leave_end_at
-                            $temp_start_at = clone $leave_start_at;
-                            $temp_end_at = clone $leave_end_at;
-
-                            // Set $leave_end_at to be the middle time
-                            $leave_end_at = $temp_start_at->addMinutes($temp_start_at->diffInMinutes($temp_end_at) / 2);
-                        } elseif ($request_data["day_type"] == "last_half") {
-                            // Create clones of $leave_start_at and $leave_end_at
-                            $temp_start_at = clone $leave_start_at;
-                            $temp_end_at = clone $leave_end_at;
-
-                            // Set $leave_start_at to be the middle time
-                            $leave_start_at = $temp_start_at->addMinutes($temp_start_at->diffInMinutes($temp_end_at) / 2);
-                        }
-
-
-                        $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                        $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                        $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-                        $leave_record_data["capacity_hours"] =  $capacity_hours;
-
-
-
-                        $leave_hours = $leave_end_at->diffInHours($leave_start_at);
-                        $leave_record_data["leave_hours"] =  $leave_hours;
-
-
-
-
-
-
-                        $leave_record_data["start_time"] = $leave_start_at;
-                        $leave_record_data["end_time"] = $leave_end_at;
-                        $leave_record_data["date"] = $request_data["date"];
-                        array_push($leave_record_data_list, $leave_record_data);
-                    }
-                } else if ($request_data["leave_duration"] == "hours") {
-
-                    $dateString = $request_data["date"];
-                    $request_data["start_date"] = $request_data["date"];
-                    $request_data["end_date"] = $request_data["date"];
-
-                    $dayNumber = Carbon::parse($dateString)->dayOfWeek;
-                    $work_shift_details =  $work_shift_history->details()->where([
-                        "day" => $dayNumber
-                    ])
-                        ->first();
-                    if (!$work_shift_details) {
-                        $this->storeError(
-                            "No work shift details found",
-                            400,
-                            "front end error",
-                            "front end error"
-                        );
-                        return response()->json(["message" => "No work shift details found"], 400);
-                    }
-                    $start_time = Carbon::parse($request_data["start_time"]);
-                    $work_shift_start = Carbon::parse($work_shift_details->start_at);
-                    if ($start_time->lessThan($work_shift_start)) {
-                        $this->storeError(
-                            ("The employee does not start working at " . $request_data["start_time"]),
-                            400,
-                            "front end error",
-                            "front end error"
-                        );
-                        return response()->json(["message" => ("The employee does not start working at " . $request_data["start_time"] . ". He starts at " . $work_shift_details->start_at)], 400);
-                    }
-                    $end_time = Carbon::parse($request_data["end_time"]);
-                    $work_shift_end = Carbon::parse($work_shift_details->end_at);
-                    if ($end_time->greaterThan($work_shift_end)) {
-                        $this->storeError(
-                            ("The employee does not close working at " . $request_data["end_time"]),
-                            400,
-                            "front end error",
-                            "front end error"
-                        );
-                        return response()->json(["message" => ("The employee does not close working at " . $request_data["end_time"])], 400);
-                    }
-
-                    $holiday =   Holiday::where([
-                        "business_id" => $request->user()->business_id
-                    ])
-
-                        ->where('holidays.start_date', "<=", $request_data["date"])
-
-                        ->where('holidays.end_date', ">=", ($request_data["date"] . ' 23:59:59'))
-                        ->where(function ($query) use ($request_data, $all_parent_department_ids) {
-                            $query->whereHas("users", function ($query) use ($request_data) {
-                                $query->where([
-                                    "users.id" => $request_data['user_id']
-                                ]);
-                            })
-                                ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                                    $query->whereIn("departments.id", $all_parent_department_ids);
-                                })
-
-                                ->orWhere(function ($query) {
-                                    $query->whereDoesntHave("users")
-                                        ->whereDoesntHave("departments");
-                                });
-                        })
-                        ->first();
-
-                    $previous_leave =  Leave::where([
-                        "user_id" => $request_data["user_id"]
-                    ])
-                        ->whereHas('records', function ($query) use ($request_data) {
-                            $query->where('leave_records.date', $request_data["date"]);
-                        })->first();
-
-
-
-                    if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
-
-                        $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                        $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                        $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-                        $leave_record_data["capacity_hours"] =  $capacity_hours;
-
-                        $leave_start_at = Carbon::createFromFormat('H:i:s', $request_data["start_time"]);
-                        $leave_end_at = Carbon::createFromFormat('H:i:s', $request_data["end_time"]);
-                        $leave_hours = $leave_end_at->diffInHours($leave_start_at);
-                        $leave_record_data["leave_hours"] =  $leave_hours;
-
-
-
-                        $leave_record_data["start_time"] = $request_data["start_time"];
-                        $leave_record_data["end_time"] = $request_data["end_time"];
-                        $leave_record_data["date"] = $request_data["date"];
-                        array_push($leave_record_data_list, $leave_record_data);
+                    $this->leaveComponent->validateLeaveTimes($work_shift_details,$leave_data["start_time"],$leave_data["end_time"]);
+                    $leave_record_data_item = $this->leaveComponent->getLeaveRecordDataItem(
+                        $work_shift_details,
+                        $holiday,
+                        $previous_leave,
+                        $leave_data["date"],
+                        $leave_data["leave_duration"],
+                        $leave_data["day_type"],
+                        $leave_data["start_time"],
+                        $leave_data["end_time"]
+                    );
+                    if (!empty($leave_record_data_item)) {
+                        array_push($leave_record_data_list, $leave_record_data_item);
                     }
                 }
 
 
-                $leave =  Leave::create($request_data);
-                $leave_records =   $leave->records()->createMany($leave_record_data_list);
+            } else if ($leave_data["leave_duration"] == "multiple_day") {
+                $start_date = Carbon::parse($leave_data["start_date"]);
+                $end_date = Carbon::parse($leave_data["end_date"]);
+                $leave_dates = [];
+                for ($date = $start_date; $date->lte($end_date); $date->addDay()) {
+                    $leave_dates[] = $date->format('Y-m-d');
+                }
+                foreach ($leave_dates as $leave_date) {
+                    // Retrieve work shift history for the user and date
+                    $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_date, $leave_data["user_id"]);
+                    // Retrieve work shift details based on work shift history and date
+                    $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $leave_date);
+                    // Retrieve holiday based on date and user id
+                    $holiday = $this->holidayComponent->get_holiday_details($leave_date, $leave_data["user_id"], $all_parent_department_ids);
+
+                    $previous_leave = $this->leaveComponent->findLeave($leave_data["user_id"], $leave_data["date"]);
+                    $leave_record_data_item = $this->leaveComponent->getLeaveRecordDataItem(
+                        $work_shift_details,
+                        $holiday,
+                        $previous_leave,
+                        $leave_data["date"],
+                        $leave_data["leave_duration"]
+                    );
+                    if (!empty($leave_record_data_item)) {
+                        array_push($leave_record_data_list, $leave_record_data_item);
+                    }
+                }
+            }
+
+
+            $leave =  Leave::create($leave_data);
+            $leave_records =   $leave->records()->createMany($leave_record_data_list);
 
 
 
 
-                $leave_history_data = $leave->toArray();
-                $leave_history_data['leave_id'] = $leave->id;
-                $leave_history_data['actor_id'] = auth()->user()->id;
-                $leave_history_data['action'] = "create";
-                $leave_history_data['is_approved'] = NULL;
-                $leave_history_data['leave_created_at'] = $leave->created_at;
-                $leave_history_data['leave_updated_at'] = $leave->updated_at;
+            $leave_history_data = $leave->toArray();
+            $leave_history_data['leave_id'] = $leave->id;
+            $leave_history_data['actor_id'] = auth()->user()->id;
+            $leave_history_data['action'] = "create";
+            $leave_history_data['is_approved'] = NULL;
+            $leave_history_data['leave_created_at'] = $leave->created_at;
+            $leave_history_data['leave_updated_at'] = $leave->updated_at;
 
 
 
@@ -511,12 +351,11 @@ if(!empty($leave_record_data_item)) {
 
 
 
-                $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
+            $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
 
-                DB::commit();
+            DB::commit();
 
-                return response($leave, 200);
-
+            return response($leave, 200);
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());
