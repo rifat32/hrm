@@ -8,6 +8,21 @@ use Exception;
 
 class LeaveComponent
 {
+
+    protected $authorizationComponent;
+    protected $leaveComponent;
+    protected $departmentComponent;
+    protected $workShiftHistoryComponent;
+    protected $holidayComponent;
+
+    public function __construct(AuthorizationComponent $authorizationComponent, LeaveComponent $leaveComponent, DepartmentComponent $departmentComponent, WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent)
+    {
+        $this->authorizationComponent = $authorizationComponent;
+        $this->leaveComponent = $leaveComponent;
+        $this->departmentComponent = $departmentComponent;
+        $this->workShiftHistoryComponent = $workShiftHistoryComponent;
+        $this->holidayComponent = $holidayComponent;
+    }
     public function prepare_data_on_leave_create($raw_data, $user_id)
     {
         $raw_data["user_id"] = $user_id;
@@ -15,7 +30,6 @@ class LeaveComponent
         $raw_data["is_active"] = true;
         $raw_data["created_by"] = auth()->user()->id;
         $raw_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
-
 
         return $raw_data;
     }
@@ -29,11 +43,14 @@ class LeaveComponent
         }
     }
 
-    public function findLeave($user_id, $date)
+    public function findLeave($leave_id = NULL ,$user_id, $date)
     {
         $leave =    Leave::where([
             "user_id" => $user_id
         ])
+        ->when(!empty($leave_id), function($query) use($leave_id) {
+            $query->whereNotIn("id",[$leave_id]);
+        })
             ->whereHas('records', function ($query) use ($date) {
                 $query->where('leave_records.date', ($date));
             })->first();
@@ -131,6 +148,93 @@ public function validateLeaveTimes($workShiftDetails,$start_time,$end_time){
 
 
 
+public function generateLeaveDates ($start_date,$end_date) {
+    $start_date = Carbon::parse($start_date);
+    $end_date = Carbon::parse($end_date);
+    $leave_dates = [];
+    for ($date = $start_date; $date->lte($end_date); $date->addDay()) {
+        $leave_dates[] = $date->format('Y-m-d');
+    }
+    return $leave_dates;
+}
+
+
+
+
+
+public function processLeave($leave_data,$leave_date,$all_parent_department_ids,&$leave_record_data_list) {
+  // Retrieve work shift history for the user and date
+  $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_date, $leave_data["user_id"]);
+  // Retrieve work shift details based on work shift history and date
+  $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $leave_date);
+  // Retrieve holiday based on date and user id
+  $holiday = $this->holidayComponent->get_holiday_details($leave_date, $leave_data["user_id"], $all_parent_department_ids);
+
+  $previous_leave = $this->findLeave(
+ (!empty($leave_data["id"])?$leave_data["id"]:NULL),
+  $leave_data["user_id"],
+  $leave_date);
+
+
+if($leave_data["leave_duration"] == "hours") {
+    $this->validateLeaveTimes($work_shift_details,$leave_data["start_time"],$leave_data["end_time"]);
+}
+
+  $leave_record_data_item = $this->getLeaveRecordDataItem(
+      $work_shift_details,
+      $holiday,
+      $previous_leave,
+      $leave_date,
+      $leave_data["leave_duration"],
+      $leave_data["day_type"],
+      $leave_data["start_time"],
+      $leave_data["end_time"]
+  );
+  if (!empty($leave_record_data_item)) {
+      array_push($leave_record_data_list, $leave_record_data_item);
+  }
+
+}
+
+
+public function processLeaveRequest($raw_data) {
+
+
+    $leave_data =  !empty($raw_data["id"])?$raw_data:$this->prepare_data_on_leave_create($raw_data, $raw_data["user_id"]);
+
+
+
+    $leave_record_data_list = [];
+    $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user($leave_data["user_id"]);
+
+
+    switch ($leave_data["leave_duration"]) {
+        case "multiple_day":
+            $leave_dates = $this->generateLeaveDates($leave_data["start_date"],$leave_data["end_date"]);
+            foreach ($leave_dates as $leave_date) {
+                $this->processLeave($leave_data,$leave_date,$all_parent_department_ids,$leave_record_data_list);
+            }
+            break;
+
+        case "single_day":
+        case "half_day":
+        case "hours":
+        $leave_data["start_date"] = Carbon::parse($leave_data["date"]);
+        $leave_data["end_date"] = Carbon::parse($leave_data["date"]);
+        $this->processLeave($leave_data,$leave_data["date"],$all_parent_department_ids,$leave_record_data_list);
+            break;
+
+        default:
+            // Handle unsupported leave duration type
+            break;
+    }
+
+    return [
+        "leave_data" => $leave_data,
+        "leave_record_data_list" => $leave_record_data_list
+    ];
+
+}
 
 
 }

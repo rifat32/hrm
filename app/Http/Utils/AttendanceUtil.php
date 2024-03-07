@@ -255,7 +255,7 @@ use PayrunUtil, BasicUtil;
  $holiday = $this->get_holiday_details($attendance_data["in_date"],$user_id,$all_parent_departments_of_user);
 
  // Retrieve leave record details for the user and date
- $leave_record = $this->get_leave_record_details($attendance_data["in_time"], $user_id);
+ $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user_id);
 
  // Calculate capacity hours based on work shift details
  $capacity_hours = $this->calculate_capacity_hours($work_shift_details);

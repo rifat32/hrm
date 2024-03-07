@@ -712,7 +712,7 @@ public function recalculate_payroll_values($payroll){
 }
 
 
-public function update_attendance_accordingly($attendance,$leave_record = NULL) {
+public function update_attendance_accordingly($attendance,$leave_record) {
 
     DB::transaction(function() use($attendance, $leave_record) {
         $user_salary_info = $this->get_salary_info($attendance->user_id,$attendance->in_date);
@@ -727,7 +727,8 @@ public function update_attendance_accordingly($attendance,$leave_record = NULL) 
             $overtime_end_time = $attendance->out_time;
             $result_balance_hours = $attendance->total_paid_hours;
 
-        } else if ($attendance->leave_record_id) {
+        }
+        else if ($leave_record) {
             if(!$leave_record) {
                 $leave_record = LeaveRecord::where([
                     "id"=> $attendance->leave_record_id
@@ -750,38 +751,9 @@ public function update_attendance_accordingly($attendance,$leave_record = NULL) 
                   $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
                     }
 
-              // Check if there is any overlap
-            //   if ($balance_start_time < $balance_end_time) {
-            //       $overtime_start_time = $attendance->in_time;
-            //       $overtime_end_time = $attendance->out_time;
-            //       $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-
-
-            //       $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
-            //       $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
-            //       $uncommon_leave_start = $leave_start_time->min($balance_start_time);
-            //       $uncommon_leave_end = $leave_end_time->max($balance_end_time);
-
-            //   } else {
-            //       $uncommon_attendance_start = $attendance_in_time;
-            //       $uncommon_attendance_end = $attendance_out_time;
-
-            //       $uncommon_leave_start = $leave_start_time;
-            //       $uncommon_leave_end = $leave_end_time;
-            //   }
-
-            //   $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
-            //   $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
-
-            //   $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
-
-
         } else if ($attendance->work_hours_delta > 0) {
             $result_balance_hours = $attendance->work_hours_delta;
         }
-        // else if ($attendance->work_hours_delta < 0) {
-        //     $leave_hours = abs($attendance->work_hours_delta);
-        // }
 
      $regular_work_hours =  $attendance->total_paid_hours - $result_balance_hours;
 
@@ -793,11 +765,6 @@ public function update_attendance_accordingly($attendance,$leave_record = NULL) 
         "overtime_start_time" => $overtime_start_time,
         "overtime_end_time" => $overtime_end_time,
         "overtime_hours" => $result_balance_hours,
-        "leave_start_time" => $leave_start_time,
-        "leave_end_time" => $leave_end_time,
-        "leave_record_id" => $leave_record?$leave_record->id:NULL,
-        "leave_hours" => $leave_hours,
-        // "total_paid_hours" => $regular_work_hours + $result_balance_hours,
         "regular_hours_salary" => $regular_work_hours *   $user_salary_info["hourly_salary"],
         "overtime_hours_salary" => $result_balance_hours *   $user_salary_info["overtime_salary_per_hour"],
 
