@@ -493,7 +493,7 @@ trait PayrunUtil
         return $temp_payroll;
     }
 
-    private function create_attendance_arrear($attendance) {
+    private function create_attendance_arrear($attendance, $add_to_next_payroll) {
         $last_payroll_exists = Payroll::where([
             "user_id" => $attendance->user_id,
         ])
@@ -504,7 +504,7 @@ trait PayrunUtil
             AttendanceArrear::create(["attendance_id" => $attendance->id,  "status" => "pending_approval"]);
         }
     }
-    public function adjust_payroll_on_attendance_update($attendance) {
+    public function adjust_payroll_on_attendance_update($attendance,$add_to_next_payroll=0) {
 
             $attendance_arrear =   AttendanceArrear:: where(["attendance_id" => $attendance->id])->first();
             $payroll = Payroll::whereHas("payroll_attendances", function($query) use($attendance) {
@@ -513,7 +513,7 @@ trait PayrunUtil
 
            if(!$payroll) {
             if(!$attendance_arrear) {
-              $this->create_attendance_arrear($attendance);
+              $this->create_attendance_arrear($attendance,$add_to_next_payroll);
             }
               return true;
            }
@@ -529,13 +529,14 @@ trait PayrunUtil
                 "status" => "pending_approval",
                ]);
             } else {
-                $this->create_attendance_arrear($attendance);
+                $this->create_attendance_arrear($attendance,0);
             }
         }
        else if ($attendance->total_paid_hours > 0) {
             if($attendance_arrear) {
                 $attendance_arrear->update([
-                 "status" => "approved",
+                    "status" => 1?"approved":"pending_approval",
+
                 ]);
              }
         }
@@ -548,42 +549,68 @@ trait PayrunUtil
 
 }
 
+private function create_leave_arrear($leave_record,$add_to_next_payroll) {
+    $last_payroll_exists = Payroll::where([
+        "user_id" => $leave_record->leave->user_id,
+    ])
+    ->where("start_date",">",$leave_record["date"])
+    ->exists();
 
-public function adjust_payroll_on_leave_update($leave_record) {
-
-    DB::transaction(function() use($leave_record) {
-        $leave_record_arrear =   LeaveRecordArrear:: where(["leave_record_id" => $leave_record->id])->first();
-
-
-        $payroll = Payroll::whereHas("payroll_leave_records", function($query) use($leave_record) {
-            $query->where("payroll_leave_records.leave_record_id",$leave_record->id);
-       })->first();
-       if(!$payroll) {
-        if(!$leave_record_arrear) {
-        $date = Carbon::parse($leave_record["date"]);
-        $current_date = Carbon::now();
-        if ($date->diffInYears($current_date) >= 2) {
-            LeaveRecordArrear::create(["leave_record_id" => $leave_record->id,  "status" => "pending_approval"]);
-        }
+    if($last_payroll_exists) {
+        LeaveRecordArrear::create(["leave_record_id" => $leave_record->id,
+        "status" => $add_to_next_payroll?"approved":"pending_approval",
+    ]);
     }
+}
+
+public function adjust_payroll_on_leave_update($leave_record,$add_to_next_payroll = 0) {
 
 
-          return true;
-       }
+    $leave_record_arrear =   LeaveRecordArrear:: where(["leave_record_id" => $leave_record->id])->first();
+    $payroll = Payroll::whereHas("payroll_leave_records", function($query) use($leave_record) {
+        $query->where("payroll_leave_records.leave_record_id",$leave_record->id);
+   })->first();
 
-
-       if($leave_record->leave->status != "approved" || $leave_record->leave->leave_type != "paid") {
-        PayrollLeaveRecord::where([
-            "leave_record_id" => $leave_record->id,
-            "payroll_id" => $payroll->id
-        ])
-        ->delete();
-        if($leave_record_arrear) {
-           $leave_record_arrear->update([
-            "status" => "pending_approval",
-           ]);
-        }
+   if(!$payroll) {
+    if(!$leave_record_arrear) {
+      $this->create_leave_arrear($leave_record,$add_to_next_payroll);
     }
+      return true;
+   }
+
+   if($leave_record->leave->status != "approved" || $leave_record->leave->leave_type != "paid") {
+    PayrollLeaveRecord::where([
+        "leave_record_id" => $leave_record->id,
+        "payroll_id" => $payroll->id
+    ])
+    ->delete();
+
+    if($leave_record_arrear) {
+       $leave_record_arrear->update([
+        "status" => "pending_approval",
+       ]);
+    } else {
+        $this->create_leave_arrear($leave_record,0);
+    }
+}
+else if ($leave_record->leave_hours > 0) {
+    if($leave_record_arrear) {
+        $leave_record_arrear->update([
+         "status" => 1?"approved":"pending_approval",
+        ]);
+     }
+}
+
+$this->recalculate_payroll_values($payroll);
+
+return true;
+
+
+
+
+
+
+
 
 
     if ($leave_record->leave->leave_type == "paid") {
@@ -605,7 +632,7 @@ public function adjust_payroll_on_leave_update($leave_record) {
 
     }
 
-    });
+
 
     return true;
 

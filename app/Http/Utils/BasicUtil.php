@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 trait BasicUtil
@@ -130,7 +131,9 @@ trait BasicUtil
         return $all_parent_department_ids;
     }
 
-
+public function log($data) {
+   Log::info(json_encode($data));
+}
 
 
 

@@ -417,7 +417,7 @@ class AttendanceController extends Controller
             $observer = new AttendanceObserver();
             $observer->update($attendance, 'update');
 
-            $this->adjust_payroll_on_attendance_update($attendance);
+            $this->adjust_payroll_on_attendance_update($attendance,1);
 
 
 
@@ -537,7 +537,7 @@ class AttendanceController extends Controller
             $observer->update($attendance, 'approve');
 
             // Adjust payroll based on attendance update
-            $this->adjust_payroll_on_attendance_update($attendance);
+            $this->adjust_payroll_on_attendance_update($attendance,1);
 
             // Determine notification message based on attendance status
             $message = $attendance->status == "approved" ? "Attendance approved" : "Attendance rejected";
@@ -1433,12 +1433,7 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
 
             $attendance =  Attendance::with("employee")->where([
@@ -1535,12 +1530,7 @@ class AttendanceController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Attendance::where([
@@ -1576,9 +1566,6 @@ class AttendanceController extends Controller
 
 
 
-
-            Attendance::destroy($existingIds);
-
             $payrolls = Payroll::whereHas("payroll_attendances", function ($query) use ($existingIds) {
                 $query->whereIn("payroll_attendances.attendance_id", $existingIds);
             })->get();
@@ -1586,7 +1573,12 @@ class AttendanceController extends Controller
             PayrollAttendance::whereIn("attendance_id", $existingIds)
                 ->delete();
 
+
+
             $this->recalculate_payrolls($payrolls);
+
+
+            Attendance::destroy($existingIds);
             $this->send_notification($attendances, $attendances->first()->employee, "Attendance deleted", "delete", "attendance");
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);

@@ -19,5 +19,15 @@ class DepartmentComponent {
         return $all_parent_department_ids;
     }
 
+    public function get_all_departments_of_manager() {
+        $all_manager_department_ids = [];
+        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
+        foreach ($manager_departments as $manager_department) {
+            $all_manager_department_ids[] = $manager_department->id;
+            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
+        }
+        return $all_manager_department_ids;
+    }
+
 
 }

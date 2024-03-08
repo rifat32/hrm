@@ -21,6 +21,7 @@ class Leave extends Model
         'start_time',
         'end_time',
         'attachments',
+        "hourly_rate",
         "status",
         "is_active",
         "business_id",

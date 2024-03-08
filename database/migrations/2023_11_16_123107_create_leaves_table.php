@@ -29,7 +29,7 @@ class CreateLeavesTable extends Migration
             $table->time('end_time')->nullable();
 
             $table->enum('status', ['pending_approval','in_progress', 'approved','rejected'])->default("pending_approval");
-
+            $table->double('hourly_rate');
             $table->json('attachments')->nullable();
 
             $table->boolean("is_active")->default(true);

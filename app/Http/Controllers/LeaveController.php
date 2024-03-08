@@ -14,6 +14,7 @@ use App\Http\Requests\LeaveCreateRequest;
 use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BasicNotificationUtil;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\LeaveUtil;
@@ -27,7 +28,9 @@ use App\Models\Leave;
 use App\Models\LeaveApproval;
 use App\Models\LeaveHistory;
 use App\Models\LeaveRecord;
+use App\Models\Payroll;
 use App\Models\PayrollAttendance;
+use App\Models\PayrollLeaveRecord;
 use App\Models\Role;
 use App\Models\SettingLeave;
 use App\Models\User;
@@ -182,6 +185,7 @@ class LeaveController extends Controller
      *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
      *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
      *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="hourly_rate", type="number", format="number", example="5"),
      *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
      *
      *         ),
@@ -228,15 +232,11 @@ class LeaveController extends Controller
 
             $this->authorizationComponent->hasPermission('leave_create');
 
-
-
             $request_data = $request->validated();
-
             $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 
             $leave =  Leave::create($processed_leave_data["leave_data"]);
             $leave_records =   $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
-
 
             $leave_history_data = $leave->toArray();
             $leave_history_data['leave_id'] = $leave->id;
@@ -258,6 +258,7 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
     /**
      *
      * @OA\Put(
@@ -317,9 +318,10 @@ class LeaveController extends Controller
     public function approveLeave(LeaveApproveRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('leave_approve')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -337,11 +339,8 @@ class LeaveController extends Controller
 
 
 
-
-
                 $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"], $request_data["is_approved"]);
                 if (!$process_leave_approval["success"]) {
-
                     $this->storeError(
                         $process_leave_approval["message"],
                         $process_leave_approval["status"],
@@ -352,8 +351,6 @@ class LeaveController extends Controller
                         "message" => $process_leave_approval["message"]
                     ], $process_leave_approval["status"]);
                 }
-
-
 
                 $leave = Leave::where([
                     "id" => $request_data["leave_id"]
@@ -370,59 +367,60 @@ class LeaveController extends Controller
 
 
                 foreach ($leave->records as $leave_record) {
-                    $this->adjust_payroll_on_leave_update($leave_record);
+                    $this->adjust_payroll_on_leave_update($leave_record,1);
 
-                    $attendance = Attendance::where([
-                        "leave_record_id" => $leave_record->id
-                    ])
+                    // $attendance = Attendance::where([
+                    //     "leave_record_id" => $leave_record->id
+                    // ])
 
-                        ->first();
+                    //     ->first();
 
-                    $other_attendance =   Attendance::where([
-                        "user_id" => $leave->user_id
-                    ])
-                        ->where("in_date", "=", $leave_record->date)
-                        ->whereNotIn("leave_record_id", [$leave_record->id])
-                        ->first();
-                    if (!$attendance && !$other_attendance) {
-                        continue;
-                    }
-                    if ($attendance) {
-                        if ($attendance->leave_record_id) {
-                            $leave_record_date = Carbon::parse($leave_record->date);
-                            $attendance_date = Carbon::parse($attendance->in_date);
-                            if ($leave_record_date->isSameDay($attendance_date)) {
+                    // $other_attendance =   Attendance::where([
+                    //     "user_id" => $leave->user_id
+                    // ])
+                    //     ->where("in_date", "=", $leave_record->date)
+                    //     ->whereNotIn("leave_record_id", [$leave_record->id])
+                    //     ->first();
+                    // if (!$attendance && !$other_attendance) {
+                    //     continue;
+                    // }
+                    // if ($attendance) {
+                    //     if ($attendance->leave_record_id) {
+                    //         $leave_record_date = Carbon::parse($leave_record->date);
+                    //         $attendance_date = Carbon::parse($attendance->in_date);
+                    //         if ($leave_record_date->isSameDay($attendance_date)) {
 
-                                $this->update_attendance_accordingly($attendance, $leave_record);
-                            } else {
-                                $attendance->update([
-                                    "leave_start_time" => NULL,
-                                    "leave_end_time" => NULL,
-                                    "leave_record_id" => NULL,
-                                    "leave_hours" => 0
-                                ]);
-                            }
-                        }
-                    }
-                    if ($other_attendance) {
-                        $other_attendance = Attendance::find($other_attendance->id);
-                        $other_attendance->update([
-                            "leave_start_time" => $leave_record->start_time,
-                            "leave_end_time" => $leave_record->leave_end_time,
-                            "leave_record_id" => $leave_record->id,
-                            "leave_hours" => $leave_record->leave_hours,
-                        ]);
+                    //             $this->update_attendance_accordingly($attendance, $leave_record);
+                    //         } else {
+                    //             $attendance->update([
+                    //                 "leave_start_time" => NULL,
+                    //                 "leave_end_time" => NULL,
+                    //                 "leave_record_id" => NULL,
+                    //                 "leave_hours" => 0
+                    //             ]);
+                    //         }
+                    //     }
+                    // }
+                    // if ($other_attendance) {
+                    //     $other_attendance = Attendance::find($other_attendance->id);
+                    //     $other_attendance->update([
+                    //         "leave_start_time" => $leave_record->start_time,
+                    //         "leave_end_time" => $leave_record->leave_end_time,
+                    //         "leave_record_id" => $leave_record->id,
+                    //         "leave_hours" => $leave_record->leave_hours,
+                    //     ]);
 
-                        $this->update_attendance_accordingly($other_attendance, $leave_record);
-                    }
-                    //   call generate payrun
-                    if ($attendance) {
-                        $this->recalculate_payroll($attendance);
-                    }
+                    //     $this->update_attendance_accordingly($other_attendance, $leave_record);
+                    // }
+                    // //   call generate payrun
+                    // if ($attendance) {
+                    //     $this->recalculate_payroll($attendance);
+                    // }
 
-                    if ($other_attendance) {
-                        $this->recalculate_payroll($other_attendance);
-                    }
+                    // if ($other_attendance) {
+                    //     $this->recalculate_payroll($other_attendance);
+                    // }
+
                 }
 
 
@@ -434,10 +432,11 @@ class LeaveController extends Controller
                 }
 
 
-
+             DB::commit();
                 return response($leave_approval, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -498,9 +497,10 @@ class LeaveController extends Controller
     public function bypassLeave(LeaveBypassRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('leave_approve')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -548,7 +548,9 @@ class LeaveController extends Controller
                 $leave->save();
 
 
-
+                foreach ($leave->records as $leave_record) {
+                    $this->adjust_payroll_on_leave_update($leave_record,1);
+                }
 
                 $leave_history_data = $leave->toArray();
                 $leave_history_data['leave_id'] = $leave->id;
@@ -561,9 +563,11 @@ class LeaveController extends Controller
 
                 $this->send_notification($leave, $leave->employee, "Leave Request Approved", "approve", "leave");
 
+                DB::commit();
                 return response($leave, 200);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -595,6 +599,7 @@ class LeaveController extends Controller
      *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
      *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
      *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+     *    *   @OA\Property(property="hourly_rate", type="number", format="number", example="5"),
      *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
 
      *
@@ -637,9 +642,10 @@ class LeaveController extends Controller
     public function updateLeave(LeaveUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
+
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('leave_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -668,6 +674,7 @@ class LeaveController extends Controller
                         'start_time',
                         'end_time',
                         'attachments',
+                        "hourly_rate"
                         // "is_active",
                         // "business_id",
                         // "created_by"
@@ -682,10 +689,53 @@ class LeaveController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $leave->records()->delete();
 
 
-                $leave_records = $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
+                // Get the IDs of existing leave records
+$existingRecordIds = $leave->records()->pluck('id')->toArray();
+
+// Delete records that don't exist in the new data
+$recordsToDelete = array_diff($existingRecordIds, array_column($processed_leave_data["leave_record_data_list"], 'id'));
+
+
+// Update or create new records
+foreach ($processed_leave_data["leave_record_data_list"] as $recordData) {
+    $record = $leave->records()->find($recordData['id']);
+    if ($record) {
+        // Update existing record
+        $record->update($recordData);
+    } else {
+        // Create new record
+        $leave->records()->create($recordData);
+    }
+}
+
+
+
+
+
+
+$payrolls = Payroll::whereHas("payroll_leave_records", function ($query) use ($recordsToDelete) {
+    $query->whereIn("payroll_leave_records.leave_record_id", $recordsToDelete);
+})->get();
+
+PayrollLeaveRecord::whereIn("leave_record_id", $recordsToDelete)
+    ->delete();
+
+$this->recalculate_payrolls($payrolls);
+
+
+$leave->records()->whereIn('id', $recordsToDelete)->delete();
+
+
+
+
+
+                foreach ($leave->records as $leave_record) {
+                    $this->adjust_payroll_on_leave_update($leave_record,1);
+                }
+
+
 
                 $leave_history_data = $leave->toArray();
                 $leave_history_data['leave_id'] = $leave->id;
@@ -696,89 +746,19 @@ class LeaveController extends Controller
                 $leave_history_data['leave_updated_at'] = $leave->updated_at;
                 $leave_history = LeaveHistory::create($leave_history_data);
 
-                $leave_record_history = $leave_records->toArray();
+                $leave_record_history = $leave->records->toArray();
                 $leave_record_history["leave_id"] = $leave_history->id;
                 $leave_history->records()->createMany($processed_leave_data["leave_record_data_list"]);
 
-                foreach ($leave->records as $leave_record) {
-                    $attendance = Attendance::where([
-                        "leave_record_id" => $leave_record->id
-                    ])
-                        ->first();
-                    if (!$attendance) {
-                        continue;
-                    }
-                    $overtime_start_time = NULL;
-                    $overtime_end_time = NULL;
-                    $result_balance_hours = 0;
-                    $leave_hours = 0;
 
-                    if ($attendance->is_weekend || $attendance->holiday_id) {
-                        $overtime_start_time = $attendance->in_time;
-                        $overtime_end_time = $attendance->out_time;
-                        $result_balance_hours = $attendance->total_paid_hours;
-                    } else if ($attendance->leave_record_id) {
-                        $attendance_in_time = $attendance->in_time;
-                        $attendance_out_time = $attendance->out_time;
-
-                        $leave_start_time = Carbon::parse($leave_record->start_time);
-                        $leave_end_time = Carbon::parse($leave_record->end_time);
-
-                        $balance_start_time = $attendance_in_time->max($leave_start_time);
-                        $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                        // Check if there is any overlap
-                        if ($balance_start_time < $balance_end_time) {
-                            $overtime_start_time = $attendance->in_time;
-                            $overtime_end_time = $attendance->out_time;
-                            $result_balance_hours = $balance_start_time->diffInHours($balance_end_time);
-
-
-                            $uncommon_attendance_start = $attendance_in_time->min($balance_start_time);
-                            $uncommon_attendance_end = $attendance_out_time->max($balance_end_time);
-                            $uncommon_leave_start = $leave_start_time->min($balance_start_time);
-                            $uncommon_leave_end = $leave_end_time->max($balance_end_time);
-                        } else {
-                            $uncommon_attendance_start = $attendance_in_time;
-                            $uncommon_attendance_end = $attendance_out_time;
-
-                            $uncommon_leave_start = $leave_start_time;
-                            $uncommon_leave_end = $leave_end_time;
-                        }
-
-                        $uncommon_attendance_hours = $uncommon_attendance_start->diffInHours($uncommon_attendance_end);
-                        $uncommon_leave_hours = $uncommon_leave_start->diffInHours($uncommon_leave_end);
-
-                        $leave_hours = $attendance->capacity_hours - ($uncommon_attendance_hours + $uncommon_leave_hours + $result_balance_hours);
-                    } else if ($attendance->work_hours_delta > 0) {
-                        $result_balance_hours = $attendance->work_hours_delta;
-                    } else if ($attendance->work_hours_delta < 0) {
-                        $leave_hours = abs($attendance->work_hours_delta);
-                    }
-
-                    $regular_work_hours =  $attendance->total_paid_hours - $result_balance_hours;
-
-                    $attendance->update([
-                        "regular_work_hours" => $regular_work_hours,
-                        "overtime_start_time" => $overtime_start_time,
-                        "overtime_end_time" => $overtime_end_time,
-                        "overtime_hours" => $result_balance_hours,
-                        "leave_start_time" => $leave_record->start_time,
-                        "leave_end_time" => $leave_record->end_time,
-                    ]);
-
-                    $adjust_payroll_on_attendance_update = $this->adjust_payroll_on_attendance_update($attendance, $leave_record);
-                    if (!$adjust_payroll_on_attendance_update) {
-                        $this->storeError([], 422, "leave update", "leave controller");
-                        throw new Exception("some thing went wrong");
-                    }
-                }
 
                 $this->send_notification($leave, $leave->employee, "Leave Request Updated", "update", "leave");
 
+                DB::commit();
                 return response($leave, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -951,12 +931,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
 
 
             $business_id =  $request->user()->business_id;
@@ -1153,12 +1128,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
             $leaves = Leave::with([
                 "employee" => function ($query) {
@@ -1388,12 +1358,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
             $employees = User::with(
                 [
@@ -1662,12 +1627,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
             $leaves = Leave::with([
                 "employee" => function ($query) {
@@ -1761,7 +1721,6 @@ class LeaveController extends Controller
             }
             $data["data"] = $leaves;
 
-
             $data["data_highlights"] = [];
 
             //  $data["data_highlights"]["employees_on_leave"] = $leaves->count();
@@ -1794,8 +1753,6 @@ class LeaveController extends Controller
                 return $leave->records->count();
             });
 
-
-
             $data["data_highlights"]["upcoming_leaves_hours"] = $leaves->filter(function ($leave) {
 
                 return Carbon::parse($leave->start_date)->isFuture();
@@ -1807,7 +1764,6 @@ class LeaveController extends Controller
 
                 return Carbon::parse($leave->start_date)->isFuture();
             })->sum('total_leave_hours');
-
 
 
 
@@ -1889,12 +1845,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
             $leave =  Leave::where([
                 "id" => $id,
@@ -1923,6 +1874,87 @@ class LeaveController extends Controller
         }
     }
 
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/leaves-get-current-hourly-rate",
+     *      operationId="getLeaveCurrentHourlyRate",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *    *      *    * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="1"
+     * ),
+     *  *       },
+     *    *      *    * *  @OA\Parameter(
+     * name="date",
+     * in="query",
+     * description="date",
+     * required=true,
+     * example="date"
+     * ),
+     *
+     *      summary="This method is to get leave current hourly rate",
+     *      description="This method is to get leave current hourly rate",
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getLeaveCurrentHourlyRate(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('leave_create')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+         $salary_info = $this->get_salary_info((!empty($request->user_id)?$request->user_id:auth()->user()->id),(!empty($request->date)?$request->date:today()));
+
+             return response()->json($salary_info, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**
@@ -1989,12 +2021,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Leave::where([
@@ -2039,23 +2066,26 @@ class LeaveController extends Controller
                 $leave_history_data['is_approved'] = NULL;
                 $leave_history_data['leave_created_at'] = $leave->created_at;
                 $leave_history_data['leave_updated_at'] = $leave->updated_at;
-                // $leave_history = LeaveHistory::create($leave_history_data);
-
-
-
-                // $leave_record_history = $leave->records->toArray();
-                // $leave_record_history["leave_id"] = $leave_history->id;
-                // $leave_history->records()->createMany($leave_record_history);
-
-
             }
 
 
 
 
 
-            Leave::destroy($existingIds);
+            $recordsToDelete = LeaveRecord::whereHas("leave", function($query) use ($existingIds) {
+                       $query->whereIn("leaves.id",$existingIds);
+            })
+            ->pluck("leave_records.id");
 
+            $payrolls = Payroll::whereHas("payroll_leave_records", function ($query) use ($recordsToDelete) {
+                $query->whereIn("payroll_leave_records.leave_record_id", $recordsToDelete);
+            })->get();
+
+            PayrollLeaveRecord::whereIn("leave_record_id", $recordsToDelete)
+                ->delete();
+            $this->recalculate_payrolls($payrolls);
+
+            Leave::destroy($existingIds);
             $this->send_notification($leaves, $leaves->first()->employee, "Leave Request Deleted", "delete", "leave");
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
