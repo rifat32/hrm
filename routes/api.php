@@ -113,7 +113,7 @@ Route::post('/v1.0/business-image-multiple', [BusinessController::class, "create
 // Protected Routes
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
 
-Route::middleware(['auth:api',"business.subscription.check"])->group(function () {
+Route::middleware(['auth:api'])->group(function () {
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -164,6 +164,23 @@ Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::clas
 // end dashboard section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// announcements  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/announcements', [AnnouncementController::class, "createAnnouncement"]);
+Route::put('/v1.0/announcements', [AnnouncementController::class, "updateAnnouncement"]);
+Route::get('/v1.0/announcements', [AnnouncementController::class, "getAnnouncements"]);
+Route::get('/v1.0/announcements/{id}', [AnnouncementController::class, "getAnnouncementById"]);
+Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "deleteAnnouncementsByIds"]);
+
+Route::get('/v1.0/clients/announcements', [AnnouncementController::class, "getAnnouncementsClient"]);
+Route::get('/v1.0/clients/announcements-count', [AnnouncementController::class, "getAnnouncementsCountClient"]);
+Route::put('/v1.0/clients/announcements/change-status', [AnnouncementController::class, "updateAnnouncementStatus"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end announcements management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 });
@@ -703,23 +720,6 @@ Route::delete('/v1.0/work-shifts/{ids}', [WorkShiftController::class, "deleteWor
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// announcements  management section
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-Route::post('/v1.0/announcements', [AnnouncementController::class, "createAnnouncement"]);
-Route::put('/v1.0/announcements', [AnnouncementController::class, "updateAnnouncement"]);
-Route::get('/v1.0/announcements', [AnnouncementController::class, "getAnnouncements"]);
-Route::get('/v1.0/announcements/{id}', [AnnouncementController::class, "getAnnouncementById"]);
-Route::delete('/v1.0/announcements/{ids}', [AnnouncementController::class, "deleteAnnouncementsByIds"]);
-
-Route::get('/v1.0/clients/announcements', [AnnouncementController::class, "getAnnouncementsClient"]);
-Route::get('/v1.0/clients/announcements-count', [AnnouncementController::class, "getAnnouncementsCountClient"]);
-Route::put('/v1.0/clients/announcements/change-status', [AnnouncementController::class, "updateAnnouncementStatus"]);
-
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// end announcements management section
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

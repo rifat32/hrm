@@ -54,7 +54,8 @@ class Business extends Model
         'pension_scheme_letters' => 'array',
     ];
 
-    public function getIsSubscribedAttribute($value) {
+    public function getIsSubscribedAttribute($value)
+    {
         $user = auth()->user();
         $business = $user->business;
 
@@ -68,96 +69,38 @@ class Business extends Model
                     ->first();
 
 
-// Check if there's no subscription
-if (!$latest_subscription || Carbon::parse($latest_subscription->end_date)->isPast() || Carbon::parse($latest_subscription->start_date)->isFuture()) {
-   return FALSE;
-}
-
-return TRUE;
-
-
-
+                // Check if there's no subscription
+                if (!$latest_subscription || Carbon::parse($latest_subscription->end_date)->isPast() || Carbon::parse($latest_subscription->start_date)->isFuture()) {
+                    return 0;
+                }
+            }
         }
-
-    }
-
-
-}
-
-
-
-    public function owner(){
-        return $this->belongsTo(User::class,'owner_id', 'id');
-    }
-
-
-    public function service_plan(){
-        return $this->belongsTo(ServicePlan::class,'service_plan_id', 'id');
+        return 1;
     }
 
 
 
-
-    public function default_work_shift(){
-        return $this->hasOne(WorkShift::class,'business_id', 'id')->where('is_business_default',1);
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id', 'id');
     }
 
-    public function times(){
-        return $this->hasMany(BusinessTime::class,'business_id', 'id');
+
+    public function service_plan()
+    {
+        return $this->belongsTo(ServicePlan::class, 'service_plan_id', 'id');
     }
 
 
 
 
+    public function default_work_shift()
+    {
+        return $this->hasOne(WorkShift::class, 'business_id', 'id')->where('is_business_default', 1);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public function times()
+    {
+        return $this->hasMany(BusinessTime::class, 'business_id', 'id');
+    }
 }
