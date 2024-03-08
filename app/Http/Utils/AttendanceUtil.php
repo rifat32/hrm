@@ -88,6 +88,7 @@ trait AttendanceUtil
         if (!$work_shift_details) {
             throw new Exception(("No work shift details found  day " . $day_number), 400);
         }
+
         // if ($work_shift_details->is_weekend && !auth()->user()->hasRole("business_owner")) {
         //     throw new Exception(("there is a weekend on date " . $in_date), 400);
         // }
@@ -135,8 +136,6 @@ trait AttendanceUtil
             ->where('date', '>=', $in_date . ' 00:00:00')
             ->where('date', '<=', ($in_date . ' 23:59:59'))
             ->first();
-
-
 
 
         if ($leave_record) {

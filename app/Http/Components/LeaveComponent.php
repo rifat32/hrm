@@ -14,14 +14,16 @@ class LeaveComponent
     protected $departmentComponent;
     protected $workShiftHistoryComponent;
     protected $holidayComponent;
+    protected $attendanceComponent;
 
-    public function __construct(AuthorizationComponent $authorizationComponent, LeaveComponent $leaveComponent, DepartmentComponent $departmentComponent, WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent)
+    public function __construct(AuthorizationComponent $authorizationComponent, LeaveComponent $leaveComponent, DepartmentComponent $departmentComponent, WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, AttendanceComponent $attendanceComponent)
     {
         $this->authorizationComponent = $authorizationComponent;
         $this->leaveComponent = $leaveComponent;
         $this->departmentComponent = $departmentComponent;
         $this->workShiftHistoryComponent = $workShiftHistoryComponent;
         $this->holidayComponent = $holidayComponent;
+        $this->attendanceComponent = $attendanceComponent;
     }
     public function prepare_data_on_leave_create($raw_data, $user_id)
     {
@@ -61,22 +63,23 @@ class LeaveComponent
         $work_shift_details,
         $holiday,
         $previous_leave,
+        $previous_attendance,
         $date,
         $leave_duration,
         $day_type = "",
         $start_time="",
         $end_time=""
         ) {
-        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave)) {
+             // Check if it's feasible to take leave
+        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave && !$previous_attendance)) {
+              // Convert shift times to Carbon instances
         $leave_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
         $leave_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
 
         // Calculate capacity hours based on work shift details
         $capacity_hours = $leave_end_at->diffInHours($leave_start_at);
 
-
-
-// Adjust leave hours based on the type of leave
+      // Adjust leave hours based on the type of leave
         if($leave_duration == "half_day") {
             if ($day_type == "first_half") {
                 // For first half-day leave, adjust the end time
@@ -87,6 +90,7 @@ class LeaveComponent
             }
         }
         else if($leave_duration == "hours") {
+             // Use specified start and end times for leave
             $leave_start_at = Carbon::createFromFormat('H:i:s', $start_time);
             $leave_end_at = Carbon::createFromFormat('H:i:s', $end_time);
         }
@@ -102,29 +106,27 @@ class LeaveComponent
         $leave_record_data["date"] = $date;
         return $leave_record_data;
         }
+// Check for conditions preventing leave
+        if($leave_duration != "multiple_day") {
+            if($work_shift_details->is_weekend) {
+                 throw new Exception(("there is a weekend on date " . $date));
+            }
+            if($holiday && $holiday->is_active) {
+                throw new Exception(("there is a holiday on date " . $date));
+            }
+            if($previous_leave) {
+                throw new Exception(("there is a leave exists on date " . $date));
+            }
+            if($previous_attendance) {
+                throw new Exception(("there is an attendance exists on date " . $date));
+            }
+        }
+
         return [];
 
     }
 
-  // Function to handle processing of leave record data
-function processLeaveRecord($date, $work_shift_details, $holiday, $previous_leave, $leave_data, &$leave_record_data_list) {
 
-    $leave_record_data_list = [];
-
-    $leave_record_data_item = $this->getLeaveRecordDataItem(
-        $work_shift_details,
-        $holiday,
-        $previous_leave,
-        $date,
-        $leave_data["leave_duration"],
-        $leave_data["day_type"],
-        $leave_data["start_time"] ?? null,
-        $leave_data["end_time"] ?? null
-    );
-    if (!empty($leave_record_data_item)) {
-        array_push($leave_record_data_list, $leave_record_data_item);
-    }
-}
 
 public function validateLeaveTimes($workShiftDetails,$start_time,$end_time){
 
@@ -175,6 +177,8 @@ public function processLeave($leave_data,$leave_date,$all_parent_department_ids,
   $leave_data["user_id"],
   $leave_date);
 
+  $previous_attendance = $this->attendanceComponent->checkAttendanceExists(NULL,$leave_data["user_id"],$leave_date);
+
 
 if($leave_data["leave_duration"] == "hours") {
     $this->validateLeaveTimes($work_shift_details,$leave_data["start_time"],$leave_data["end_time"]);
@@ -184,6 +188,7 @@ if($leave_data["leave_duration"] == "hours") {
       $work_shift_details,
       $holiday,
       $previous_leave,
+      $previous_attendance,
       $leave_date,
       $leave_data["leave_duration"],
       $leave_data["day_type"],
@@ -202,11 +207,8 @@ public function processLeaveRequest($raw_data) {
 
     $leave_data =  !empty($raw_data["id"])?$raw_data:$this->prepare_data_on_leave_create($raw_data, $raw_data["user_id"]);
 
-
-
     $leave_record_data_list = [];
     $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user($leave_data["user_id"]);
-
 
     switch ($leave_data["leave_duration"]) {
         case "multiple_day":
