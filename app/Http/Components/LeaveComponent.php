@@ -10,21 +10,23 @@ class LeaveComponent
 {
 
     protected $authorizationComponent;
-    protected $leaveComponent;
+
     protected $departmentComponent;
     protected $workShiftHistoryComponent;
     protected $holidayComponent;
     protected $attendanceComponent;
 
-    public function __construct(AuthorizationComponent $authorizationComponent, LeaveComponent $leaveComponent, DepartmentComponent $departmentComponent, WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, AttendanceComponent $attendanceComponent)
+    public function __construct(AuthorizationComponent $authorizationComponent,  DepartmentComponent $departmentComponent, WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, AttendanceComponent $attendanceComponent)
     {
         $this->authorizationComponent = $authorizationComponent;
-        $this->leaveComponent = $leaveComponent;
         $this->departmentComponent = $departmentComponent;
         $this->workShiftHistoryComponent = $workShiftHistoryComponent;
         $this->holidayComponent = $holidayComponent;
         $this->attendanceComponent = $attendanceComponent;
     }
+
+
+
     public function prepare_data_on_leave_create($raw_data, $user_id)
     {
         $raw_data["user_id"] = $user_id;

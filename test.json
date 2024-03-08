@@ -1,0 +1,149 @@
+{
+    "NI_number": "IU09U90",
+    "first_Name": "Test",
+    "last_Name": "Test",
+    "email": "test.leave.e1@gmail.com",
+    "date_of_birth": "2010-03-08",
+    "password": "12345678#We",
+    "password_confirmation": "12345678#We",
+    "phone": "01920392039",
+    "address_line_1": "123 William St, New York, NY 10038, USA",
+    "country": "United States",
+    "city": "New York",
+    "lat": "40.7094756",
+    "long": "-74.0072955",
+    "role": "business_employee#35",
+    "gender": "male",
+    "user_id": "TLB-0001",
+    "postcode": "10038",
+    "work_shift_id": 1,
+    "is_in_employee": 1,
+    "designation_id": 7,
+    "employment_status_id": 1,
+    "salary_per_annum": "5000",
+    "work_location_id": 51,
+    "weekly_contractual_hours": "35",
+    "minimum_working_days_per_week": "5",
+    "overtime_rate": "5",
+    "recruitment_processes": [
+        {
+            "recruitment_process_id": 11,
+            "description": "qwqw",
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 10,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 9,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 8,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 7,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 6,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 5,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 4,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 3,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 2,
+            "description": null,
+            "attachments": []
+        },
+        {
+            "recruitment_process_id": 1,
+            "description": null,
+            "attachments": []
+        }
+    ],
+    "joining_date": "2024-03-08",
+    "address_line_2": null,
+    "departments": [
+        69
+    ],
+    "emergency_contact_details": [
+        {
+            "relationship_of_above_to_you": "Brother",
+            "first_Name": "test",
+            "last_Name": "test",
+            "address_line_1": "123 William St, New York, NY 10038, USA",
+            "city": "New York",
+            "country": "United States",
+            "postcode": "10038",
+            "lat": "40.7094756",
+            "long": "-74.0072955",
+            "mobile_tel_number": "01920390990"
+        },
+        []
+    ],
+    "immigration_status": "british_citizen",
+    "sponsorship_details": {
+        "date_assigned": null,
+        "expiry_date": null,
+        "status": null,
+        "note": null,
+        "certificate_number": null,
+        "current_certificate_status": null,
+        "is_sponsorship_withdrawn": 0
+    },
+    "is_active_visa_details": 0,
+    "is_active_right_to_works": 0,
+    "visa_details": {
+        "BRP_number": null,
+        "visa_issue_date": null,
+        "visa_expiry_date": null,
+        "place_of_issue": null,
+        "visa_docs": [
+            {
+                "id": 0,
+                "file_name": null,
+                "description": null
+            }
+        ]
+    },
+    "right_to_works": {
+        "right_to_work_code": null,
+        "right_to_work_check_date": null,
+        "right_to_work_expiry_date": null,
+        "right_to_work_docs": [
+            {
+                "id": 0,
+                "file_name": null,
+                "description": null
+            }
+        ]
+    },
+    "passport_details": {
+        "passport_number": null,
+        "passport_issue_date": null,
+        "passport_expiry_date": null,
+        "place_of_issue": null
+    },
+    "middle_Name": "Test"
+}

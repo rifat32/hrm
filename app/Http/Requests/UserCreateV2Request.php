@@ -506,7 +506,7 @@ class UserCreateV2Request extends BaseFormRequest
                $start_date = Carbon::parse(auth()->user()->business->start_date);
 
                if ($joining_date->lessThan($start_date)) {
-                   $fail("The $attribute must not be before the start date of the business.");
+                   $fail("The $attribute must not be after the start date of the business.");
                }
 
             },

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Components\AuthorizationComponent;
+use App\Http\Components\DepartmentComponent;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -17,7 +19,16 @@ use Illuminate\Http\Request;
 class DropdownOptionsController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
+    protected $authorizationComponent;
+    protected $departmentComponent;
 
+
+    public function __construct(AuthorizationComponent $authorizationComponent,   DepartmentComponent $departmentComponent, )
+    {
+        $this->authorizationComponent = $authorizationComponent;
+        $this->departmentComponent = $departmentComponent;
+
+    }
 
  private function get_work_locations($business_created_by) {
    $work_locations = WorkLocation::where(function($query) use($business_created_by) {
@@ -285,13 +296,7 @@ class DropdownOptionsController extends Controller
              $business_id =  $business->id;
              $business_created_by = $business->created_by;
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
 
 
              $data["work_locations"] = $this->get_work_locations($business_created_by);

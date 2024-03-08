@@ -48,8 +48,6 @@ class LeaveController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil, PayrunUtil, BasicNotificationUtil;
 
-
-
     protected $authorizationComponent;
     protected $leaveComponent;
     protected $departmentComponent;
@@ -1883,14 +1881,14 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *    *      *    * *  @OA\Parameter(
+     *   @OA\Parameter(
      * name="user_id",
      * in="query",
      * description="user_id",
      * required=true,
      * example="1"
      * ),
-     *  *       },
+     *  *
      *    *      *    * *  @OA\Parameter(
      * name="date",
      * in="query",

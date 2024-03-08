@@ -24,7 +24,6 @@ class WorkShift extends Model
         "is_active",
         "business_id",
         "created_by"
-
     ];
 
     protected $dates = ['start_date',

@@ -58,7 +58,7 @@ trait UserDetailsUtil
             ])
                 ->first();
             if (!$work_shift_history) {
-                throw new Exception("Now work shift history found");
+                throw new Exception("No work shift history found");
             }
 
             $work_shift_history->users()->attach($user->id, ['from_date' => auth()->user()->business->start_date, 'to_date' => NULL]);
@@ -96,7 +96,7 @@ trait UserDetailsUtil
             ])
                 ->first();
             if (!$work_shift_history) {
-                throw new Exception("Now work shift history found");
+                throw new Exception("No work shift history found");
             }
 
             $work_shift_history->users()->attach($user->id, ['from_date' => auth()->user()->business->start_date, 'to_date' => NULL]);
@@ -179,8 +179,13 @@ trait UserDetailsUtil
 
 
      public function store_recruitment_processes($request_data,$user) {
-        if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
-            $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
+        if (!empty($request_data["recruitment_processes"])) {
+            foreach($request_data["recruitment_processes"] as $recruitment_process){
+if(!empty($recruitment_process["description"])){
+    $user->recruitment_processes()->create($recruitment_process);
+}
+            }
+
         }
     }
 
@@ -211,6 +216,9 @@ trait UserDetailsUtil
             "is_default" => 1
           ])
           ->first();
+          if(!$project) {
+            throw new Exception("no project defined for this business");
+          }
           $employee_project_history_data = $project->toArray();
           $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
           $employee_project_history_data["user_id"] = $user->id;

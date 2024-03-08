@@ -15,15 +15,23 @@ class UserObserver
      */
     public function created(User $user)
     {
-        SalaryHistory::create([
-            'user_id' => $user->id,
-            'salary_per_annum' => $user->salary_per_annum,
-            'weekly_contractual_hours' => $user->weekly_contractual_hours,
-            'minimum_working_days_per_week' => $user->minimum_working_days_per_week,
-            'overtime_rate' => $user->overtime_rate,
-            'from_date' => auth()->user()->business->start_date,
-            'to_date' => NULL, // No end date initially
-        ]);
+        $authUser = auth()->user();
+        if($authUser) {
+            $business =   auth()->user()->business;
+            SalaryHistory::create([
+                'user_id' => $user->id,
+                'salary_per_annum' => $user->salary_per_annum,
+                'weekly_contractual_hours' => $user->weekly_contractual_hours,
+                'minimum_working_days_per_week' => $user->minimum_working_days_per_week,
+                'overtime_rate' => $user->overtime_rate,
+                'from_date' =>  $business?$business->start_date:now(),
+                'to_date' => NULL, // No end date initially
+            ]);
+        }
+
+
+
+
     }
 
     /**
