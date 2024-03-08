@@ -681,24 +681,29 @@ public function recalculate_payroll_values($payroll){
 
         if ($payroll->payroll_leave_records->isNotEmpty()) {
             $total_paid_leave_hours = 0;
-
+            $leave_hours_salary = 0;
             foreach ($payroll->payroll_leave_records as $payroll_leave_record) {
                 if ($payroll_leave_record->leave_record && $payroll_leave_record->leave_record->leave) {
-                    $total_paid_leave_hours += $payroll_leave_record->leave_record->whereHas(
-                        "leave.leave_type", function($query) {
-                                 $query->where("setting_leave_types.type","paid");
-                        }
-                    )->sum('leave_hours');
+
+                    // Loop through each leave record
+foreach ($payroll_leave_record->leave_record->whereHas("leave.leave_type", function($query) {
+    $query->where("setting_leave_types.type","paid");
+}) as $leave_record) {
+    // Add leave hours to $total_paid_leave_hours
+    $total_paid_leave_hours += $leave_record->leave_hours;
+    $leave_hours_salary += $leave_record->leave->hourly_rate;
+}
+
                 }
             }
             $payroll->total_paid_leave_hours = $total_paid_leave_hours;
+            $payroll->leave_hours_salary = $leave_hours_salary;
         } else {
             // Set total_paid_leave_hours to 0 if payroll_leave_records is empty
             $payroll->total_paid_leave_hours = 0;
+            $payroll->leave_hours_salary = 0;
         }
 
-
-        $payroll->leave_hours_salary = $payroll->total_paid_leave_hours * $payroll->hourly_salary;
 
 
 
@@ -730,7 +735,7 @@ public function recalculate_payroll_values($payroll){
         }
 
     $payroll->regular_hours =  $payroll->total_holiday_hours +  $payroll->total_paid_leave_hours +   $payroll->total_regular_attendance_hours;
-    $payroll->regular_hours_salary = ($payroll->total_holiday_hours * $payroll->hourly_salary) + ($payroll->total_paid_leave_hours * $payroll->hourly_salary) +  $total_attendance_salary;
+    $payroll->regular_hours_salary = ($payroll->total_holiday_hours * $payroll->hourly_salary) + $payroll->leave_hours_salary +  $total_attendance_salary;
     $payroll->regular_attendance_hours_salary = $regular_attendance_hours_salary;
     $payroll->overtime_attendance_hours_salary = $overtime_attendance_hours_salary;
     $payroll->overtime_hours_salary = $overtime_attendance_hours_salary;
@@ -739,6 +744,8 @@ public function recalculate_payroll_values($payroll){
 }
 
 
+
+// unused
 public function update_attendance_accordingly($attendance,$leave_record) {
 
     DB::transaction(function() use($attendance, $leave_record) {

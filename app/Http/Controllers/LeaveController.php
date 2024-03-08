@@ -1946,6 +1946,10 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
              }
 
          $salary_info = $this->get_salary_info((!empty($request->user_id)?$request->user_id:auth()->user()->id),(!empty($request->date)?$request->date:today()));
+         $salary_info["hourly_salary"] =  number_format($salary_info["hourly_salary"], 2);
+         $salary_info["overtime_salary_per_hour"] = number_format($salary_info["overtime_salary_per_hour"],2);
+         $salary_info["holiday_considered_hours"] = number_format($salary_info["holiday_considered_hours"],2);
+
 
              return response()->json($salary_info, 200);
          } catch (Exception $e) {
