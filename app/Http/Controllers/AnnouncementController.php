@@ -185,9 +185,10 @@ class AnnouncementController extends Controller
     public function updateAnnouncement(AnnouncementUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('announcement_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -206,13 +207,6 @@ class AnnouncementController extends Controller
                 $announcement_prev = Announcement::where($announcement_query_params)
                     ->first();
                 if (!$announcement_prev) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
                     return response()->json([
                         "message" => "no announcement found"
                     ], 404);
@@ -249,10 +243,12 @@ class AnnouncementController extends Controller
 
 
 
+                DB::commit();
 
                 return response($announcement, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack()
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -510,13 +506,6 @@ class AnnouncementController extends Controller
             ])
                 ->first();
             if (!$announcement) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -608,13 +597,7 @@ class AnnouncementController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+              
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

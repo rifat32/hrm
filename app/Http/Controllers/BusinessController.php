@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRegisterBusinessRequest;
 use App\Http\Requests\BusinessCreateRequest;
-
+use App\Http\Requests\BusinessUpdatePensionRequest;
 use App\Http\Requests\BusinessUpdateRequest;
 use App\Http\Requests\BusinessUpdateSeparateRequest;
 use App\Http\Requests\CheckScheduleConflictRequest;
@@ -1328,7 +1328,7 @@ class BusinessController extends Controller
      *      )
      *     )
      */
-    public function updateBusinessPensionInformation(BusinessUpdateRequest $request)
+    public function updateBusinessPensionInformation(BusinessUpdatePensionRequest $request)
     {
 
         try {

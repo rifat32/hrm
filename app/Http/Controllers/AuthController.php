@@ -221,10 +221,7 @@ class AuthController extends Controller
                 if ($diffInMinutes < 15) {
 
 
-                    $this->storeError('You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.',
-                     403,
-                     "front end error", "front end error"
-                    );
+
 
                     return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
                 } else {
@@ -247,10 +244,7 @@ class AuthController extends Controller
                         $diffInMinutes = $now->diffInMinutes($lastFailedAttempt);
 
                         if ($diffInMinutes < 15) {
-                            $this->storeError('You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.',
-                            403,
-                            "front end error", "front end error"
-                           );
+                         
                             return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
                         } else {
                             $user->login_attempts = 0;

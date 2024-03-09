@@ -46,8 +46,15 @@ class SetUpController extends Controller
 
     public function getErrorLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
-        $error_logs = ErrorLog::when(!empty($request->status), function ($query) use($request){
+        $error_logs = ErrorLog::
+        when(!empty($request->status), function ($query) use($request){
             $query->where("status_code",$request->status);
+        })
+        ->when(!empty($request->ip_address), function ($query) use($request){
+            $query->where("ip_address",$request->ip_address);
+        })
+        ->when(!empty($request->request_method), function ($query) use($request){
+            $query->where("request_method",$request->request_method);
         })
         ->orderbyDesc("id")->paginate(10);
         return view("error-log",compact("error_logs"));

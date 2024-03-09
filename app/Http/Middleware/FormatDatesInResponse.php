@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ErrorLog;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -20,6 +21,34 @@ class FormatDatesInResponse
             $content = $response->getContent();
             $convertedContent = $this->convertDatesInJson($content);
             $response->setContent($convertedContent);
+
+
+            if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 600) {
+
+
+                $errorLog = [
+                    "api_url" => $request->fullUrl(),
+                    "fields" => json_encode(request()->all()),
+                    "token" => request()->bearerToken(),
+                    "user" => auth()->user() ? json_encode(auth()->user()) : "",
+                    "user_id" => auth()->user()->id,
+                    "status_code" => $response->getStatusCode(),
+                    "ip_address" => request()->header('X-Forwarded-For'),
+                    "request_method" => $request->method(),
+                    "message" =>  $response->getContent(),
+                ];
+                ErrorLog::create($errorLog);
+
+
+                if (env("APP_DEBUG") === false) {
+                    $errorMessage = "something went wrong";
+                    $response->setContent(json_encode(['message' => $errorMessage]));
+                }
+
+
+
+
+            }
         }
 
         return $response;
