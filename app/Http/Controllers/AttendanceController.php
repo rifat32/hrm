@@ -234,11 +234,11 @@ class AttendanceController extends Controller
 
             $request_data = $request->validated();
             $setting_attendance = $this->get_attendance_setting();
+
+
+
             $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance) {
-                $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
-
-                Attendance::create($item);
-
+            $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
                 return  $item;
             });
             $employee = User::where([
@@ -253,10 +253,7 @@ class AttendanceController extends Controller
             }
 
 
-
             $created_attendances = $employee->attendances()->createMany($attendances_data);
-
-
 
             if (!empty($created_attendances)) {
                 $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
@@ -415,7 +412,7 @@ class AttendanceController extends Controller
 
 
             $observer = new AttendanceObserver();
-            $observer->update($attendance, 'update');
+            $observer->updated($attendance, 'update');
 
             $this->adjust_payroll_on_attendance_update($attendance,1);
 

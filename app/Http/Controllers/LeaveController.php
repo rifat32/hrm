@@ -36,6 +36,7 @@ use App\Models\SettingLeave;
 use App\Models\User;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
+use App\Observers\LeaveObserver;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -234,15 +235,20 @@ class LeaveController extends Controller
             $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 
             $leave =  Leave::create($processed_leave_data["leave_data"]);
-            $leave_records =   $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
+            $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
 
-            $leave_history_data = $leave->toArray();
-            $leave_history_data['leave_id'] = $leave->id;
-            $leave_history_data['actor_id'] = auth()->user()->id;
-            $leave_history_data['action'] = "create";
-            $leave_history_data['is_approved'] = NULL;
-            $leave_history_data['leave_created_at'] = $leave->created_at;
-            $leave_history_data['leave_updated_at'] = $leave->updated_at;
+            $leaveObserver = new LeaveObserver();
+            $leaveObserver->create($leave);
+
+            // $leave_history_data = $leave->toArray();
+            // $leave_history_data['leave_id'] = $leave->id;
+            // $leave_history_data['actor_id'] = auth()->user()->id;
+            // $leave_history_data['action'] = "create";
+            // $leave_history_data['is_approved'] = NULL;
+            // $leave_history_data['leave_created_at'] = $leave->created_at;
+            // $leave_history_data['leave_updated_at'] = $leave->updated_at;
+            // $leave_history = LeaveHistory::create($leave_history_data);
+            // $leave_history->records()->createMany($leave->records->toArray());
 
 
             $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
@@ -367,57 +373,6 @@ class LeaveController extends Controller
                 foreach ($leave->records as $leave_record) {
                     $this->adjust_payroll_on_leave_update($leave_record,1);
 
-                    // $attendance = Attendance::where([
-                    //     "leave_record_id" => $leave_record->id
-                    // ])
-
-                    //     ->first();
-
-                    // $other_attendance =   Attendance::where([
-                    //     "user_id" => $leave->user_id
-                    // ])
-                    //     ->where("in_date", "=", $leave_record->date)
-                    //     ->whereNotIn("leave_record_id", [$leave_record->id])
-                    //     ->first();
-                    // if (!$attendance && !$other_attendance) {
-                    //     continue;
-                    // }
-                    // if ($attendance) {
-                    //     if ($attendance->leave_record_id) {
-                    //         $leave_record_date = Carbon::parse($leave_record->date);
-                    //         $attendance_date = Carbon::parse($attendance->in_date);
-                    //         if ($leave_record_date->isSameDay($attendance_date)) {
-
-                    //             $this->update_attendance_accordingly($attendance, $leave_record);
-                    //         } else {
-                    //             $attendance->update([
-                    //                 "leave_start_time" => NULL,
-                    //                 "leave_end_time" => NULL,
-                    //                 "leave_record_id" => NULL,
-                    //                 "leave_hours" => 0
-                    //             ]);
-                    //         }
-                    //     }
-                    // }
-                    // if ($other_attendance) {
-                    //     $other_attendance = Attendance::find($other_attendance->id);
-                    //     $other_attendance->update([
-                    //         "leave_start_time" => $leave_record->start_time,
-                    //         "leave_end_time" => $leave_record->leave_end_time,
-                    //         "leave_record_id" => $leave_record->id,
-                    //         "leave_hours" => $leave_record->leave_hours,
-                    //     ]);
-
-                    //     $this->update_attendance_accordingly($other_attendance, $leave_record);
-                    // }
-                    // //   call generate payrun
-                    // if ($attendance) {
-                    //     $this->recalculate_payroll($attendance);
-                    // }
-
-                    // if ($other_attendance) {
-                    //     $this->recalculate_payroll($other_attendance);
-                    // }
 
                 }
 

@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Attendance;
+use App\Models\Leave;
 use App\Models\User;
 use App\Observers\AttendanceObserver;
+use App\Observers\LeaveObserver;
 use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Console\ClientCommand;
@@ -38,5 +40,9 @@ class AppServiceProvider extends ServiceProvider
         ]);
         User::observe(UserObserver::class);
         Attendance::observe(AttendanceObserver::class);
+
+        Leave::observe(LeaveObserver::class);
+
+
     }
 }
