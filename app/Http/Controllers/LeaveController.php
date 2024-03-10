@@ -982,6 +982,20 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
      *           {"bearerAuth": {}}
      *       },
 
+        *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -1195,6 +1209,19 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             $data["data_highlights"]["multiple_day_leaves"] = $leaves->filter(function ($leave) {
                 return $leave->leave_duration == "multiple_day";
             })->count();
+
+
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.leaves', ["leaves" => $leaves]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                    return Excel::download(new LeavesExport($leaves), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
+                }
+            } else {
+                return response()->json($leaves, 200);
+            }
 
 
             return response()->json($data, 200);

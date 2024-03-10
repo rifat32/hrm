@@ -2,16 +2,27 @@
 
 namespace App\Exports;
 
+use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
 
 class AttendancesExport implements FromCollection
 {
-    protected $users;
 
-    public function __construct($users)
+    protected $attendances;
+
+    public function __construct($attendances)
     {
-        $this->users = $users;
+        $this->attendances = $attendances;
     }
+
+    public function view(): View
+    {
+        return view('export.attendances', ["attendances" => $this->attendances]);
+    }
+
+
+
+
 
     public function role_string($inputString) {
         // Remove underscore

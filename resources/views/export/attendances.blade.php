@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Leave Request List</title>
+    <title>Attendance List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
@@ -123,7 +123,7 @@ return $formattedBreakTime;
             <td></td>
           </tr>
           <tr>
-            <td class="file_title">Leave Request List </td>
+            <td class="file_title">Attendance List </td>
           </tr>
           <tr>
             <td>
@@ -137,61 +137,65 @@ return $formattedBreakTime;
 
 
     <table>
-        <h3>Leaves</h3>
-        <thead>
-            <tr class="table_head_row">
-                <th class="index_col"></th>
-                @if (!empty($request->leave_date_time))
-                    <th>Date & Time</th>
-                @endif
-                @if (!empty($request->leave_type))
-                    <th>Type</th>
-                @endif
-                @if (!empty($request->leave_duration))
-                    <th>Duration</th>
-                @endif
-                @if (!empty($request->total_leave_hours))
-                    <th>Total Leave (hours)</th>
-                @endif
-                {{-- <th>Attachment</th> --}}
-            </tr>
-        </thead>
-        <tbody>
-            @if (count($leaves))
-                @foreach ($leaves as $index => $leave)
-                    <tr class="table_row">
-                        <td class="index_col">{{ $index + 1 }}</td>
-                        @if (!empty($request->leave_date_time))
-                            <td>{{ format_date($leave->start_date) }} - {{ format_date($leave->end_date) }}</td>
-                        @endif
-                        @if (!empty($request->leave_type))
-                            <td>{{ $leave->leave_type ? $leave->leave_type->name : "" }}</td>
-                        @endif
-                        @if (!empty($request->leave_duration))
-                            <td>{{ $leave->leave_duration }}</td>
-                        @endif
-                        @if (!empty($request->total_leave_hours))
-                            <td>
-                                @php
-                                    $leave->total_leave_hours = $leave->records->sum(function ($record) {
-                                        $startTime = \Carbon\Carbon::parse($record->start_time);
-                                        $endTime = \Carbon\Carbon::parse($record->end_time);
-                                        return $startTime->diffInHours($endTime);
-                                    });
-                                @endphp
-                                {{ time_format($leave->total_leave_hours) }}
-                            </td>
-                        @endif
-                        {{-- <td>{{ }}</td>
-                        <td>{{ $user->is_active ? 'Active' : 'De-active' }}</td> --}}
-                    </tr>
-                @endforeach
-            @else
-                <tr>
-                    <td colspan="8" style="text-align: center;">No Data Found</td>
+        <table>
+            <h3>Attendances</h3>
+            <thead>
+                <tr class="table_head_row">
+                    <th class="index_col"></th>
+                    @if (!empty($request->attendance_date))
+                        <th>Date</th>
+                    @endif
+                    @if (!empty($request->attendance_start_time))
+                        <th>Start Time</th>
+                    @endif
+                    @if (!empty($request->attendance_end_time))
+                        <th>End Time</th>
+                    @endif
+                    @if (!empty($request->attendance_break))
+                        <th>Break (hour)</th>
+                    @endif
+                    @if (!empty($request->attendance_schedule))
+                        <th>Schedule (hour)</th>
+                    @endif
+                    @if (!empty($request->attendance_overtime))
+                        <th>Overtime (hour)</th>
+                    @endif
                 </tr>
-            @endif
-        </tbody>
+            </thead>
+            <tbody>
+                @if (count($attendances))
+                    @foreach ($attendances as $index => $attendance)
+                        <tr class="table_row">
+                            <td class="index_col">{{ $index + 1 }}</td>
+
+                            @if (!empty($request->attendance_date))
+                            <td>{{ format_date($attendance->in_date) }}</td>
+                        @endif
+
+                            @if (!empty($request->attendance_start_time))
+                                <td>{{ $attendance->in_time }}</td>
+                            @endif
+                            @if (!empty($request->attendance_end_time))
+                                <td>{{ $attendance->out_time }}</td>
+                            @endif
+                            @if (!empty($request->attendance_break))
+                                <td>{{ $attendance->does_break_taken ? time_format($attendance->break_hours) : 0 }}</td>
+                            @endif
+                            @if (!empty($request->attendance_schedule))
+                                <td>{{ time_format($attendance->capacity_hours) }}</td>
+                            @endif
+                            @if (!empty($request->attendance_overtime))
+                                <td>{{ time_format($attendance->overtime_hours) }}</td>
+                            @endif
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="8" style="text-align: center;">No Data Found</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
     </table>
 
 </body>
