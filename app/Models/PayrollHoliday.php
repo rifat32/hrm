@@ -13,7 +13,8 @@ class PayrollHoliday extends Model
         'payroll_id',
         'holiday_id',
          "date",
-         "hours"
+         "hours",
+         "hourly_salary"
     ];
 
     public function payroll()
