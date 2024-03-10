@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\WorkShiftsExport;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\WorkShiftCreateRequest;
 use App\Http\Requests\WorkShiftUpdateRequest;
@@ -19,6 +20,8 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WorkShiftController extends Controller
 {
@@ -721,6 +724,20 @@ if(!$check_work_shift_details["ok"]) {
      *       security={
      *           {"bearerAuth": {}}
      *       },
+     *   *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
 
      *              @OA\Parameter(
      *         name="per_page",
@@ -920,6 +937,18 @@ if(!$check_work_shift_details["ok"]) {
                     return $query->get();
                 });
 
+
+                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                    if (strtoupper($request->response_type) == 'PDF') {
+                        $pdf = PDF::loadView('pdf.work_shifts', ["work_shifts" => $work_shifts]);
+                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                    } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                        return Excel::download(new WorkShiftsExport($work_shifts), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                    }
+                } else {
+                    return response()->json($work_shifts, 200);
+                }
 
 
             return response()->json($work_shifts, 200);

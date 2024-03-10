@@ -11,7 +11,6 @@ trait ErrorUtil
     // this function do all the task and returns transaction id or -1
     public function sendError(Exception $e, $statusCode, Request $request)
     {
-
         $errorData = [
             "message" => $e->getMessage(),
             "line" => $e->getLine(),
@@ -52,6 +51,6 @@ trait ErrorUtil
     }
     public function storeError($e, $statusCode,$line,$file)
     {
-       
+
     }
 }

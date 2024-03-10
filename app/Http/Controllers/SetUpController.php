@@ -56,6 +56,9 @@ class SetUpController extends Controller
         ->when(!empty($request->request_method), function ($query) use($request){
             $query->where("request_method",$request->request_method);
         })
+        ->when(!empty($request->id), function ($query) use($request){
+            $query->where("id",$request->id);
+        })
         ->orderbyDesc("id")->paginate(10);
         return view("error-log",compact("error_logs"));
     }

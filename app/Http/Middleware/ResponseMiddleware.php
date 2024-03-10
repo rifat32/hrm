@@ -9,9 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Session;
 
-class FormatDatesInResponse
+class ResponseMiddleware
 {
-
     public function handle($request, Closure $next)
     {
         $response = $next($request);
@@ -22,10 +21,7 @@ class FormatDatesInResponse
             $convertedContent = $this->convertDatesInJson($content);
             $response->setContent($convertedContent);
 
-
             if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 600) {
-
-
                 $errorLog = [
                     "api_url" => $request->fullUrl(),
                     "fields" => json_encode(request()->all()),
@@ -37,15 +33,12 @@ class FormatDatesInResponse
                     "request_method" => $request->method(),
                     "message" =>  $response->getContent(),
                 ];
-                ErrorLog::create($errorLog);
 
 
-                if (env("APP_DEBUG") === false) {
-                    $errorMessage = "something went wrong";
+
+                  $error =   ErrorLog::create($errorLog);
+                    $errorMessage = "Error ID: ".$error->id." - Status: ".$error->status_code." - Operation Failed, something is wrong! - Please call to the customer care.";
                     $response->setContent(json_encode(['message' => $errorMessage]));
-                }
-
-
 
 
             }
