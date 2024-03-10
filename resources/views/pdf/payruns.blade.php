@@ -18,6 +18,11 @@
 
             return $capitalizedString;
         }
+
+        function format_date($date) {
+    return \Carbon\Carbon::parse($date)->format('d-m-Y');
+}
+
     @endphp
 
     @php
@@ -153,10 +158,10 @@
                         {{ $payrun->period_type }}
                     </td>
                     <td class="start_date">
-                        {{ $payrun->start_date }}
+                        {{ format_date($payrun->start_date) }}
                     </td>
                     <td class="end_date">
-                        {{ $payrun->end_date }}
+                        {{ format_date($payrun->end_date) }}
                     </td>
                     <td class="generating_type">
                         {{ $payrun->generating_type }}

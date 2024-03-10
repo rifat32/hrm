@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Holiday List</title>
+    <title>Work Shift List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
@@ -18,10 +18,6 @@
 
             return $capitalizedString;
         }
-
-        function format_date($date) {
-    return \Carbon\Carbon::parse($date)->format('d-m-Y');
-}
     @endphp
 
     @php
@@ -115,45 +111,53 @@
           <tr>
             <td>
                 <span class="business_name">{{$business->name}}</span>
-                <address class="business_address">{{$business->address_line_1}}</address>
+
             </td>
 
+
+          </tr>
+          <tr>
+            <td>
+                <address class="business_address">{{$business->address_line_1}}</address>
+            </td>
           </tr>
         </tbody>
     </table>
 
 
+
     <table>
+        <h3>Assets</h3>
         <thead>
             <tr class="table_head_row">
-                <th></th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Start Date</th>
-                <th>End Date</th>
+
+                <th>Asset Name</th>
+                <th>Asset Code</th>
+                <th>Serial No</th>
+                <th>Is Working</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Note</th>
             </tr>
-
-
         </thead>
         <tbody>
-            @foreach($holidays as $index=>$holiday)
-                <tr class="table_row">
-                    <td class="employee_index" style="padding:0px 10px">{{ $index+1 }}</td>
-                    <td class="name">
-                        {{ $holiday->name }}
-                    </td>
-                    <td class="description">
-                        {{ $holiday->description }}
-                    </td>
-                    <td class="start_date">
-                        {{ format_date($holiday->start_date) }}
-                    </td>
-                    <td class="end_date">
-                        {{ format_date($holiday->end_date) }}
-                    </td>
 
-                </tr>
-            @endforeach
+                @foreach ($user->user_assets as $index => $asset)
+                    <tr class="table_row">
+
+                        <td>{{ $asset->name }}</td>
+                        <td>{{ $asset->code }}</td>
+                        <td>{{ $asset->serial_number }}</td>
+                        <td>{{ $asset->is_working }}</td>
+                        <td>{{ $asset->type }}</td>
+                        <td>{{ format_date($asset->date) }}</td>
+                        <td>{{ $asset->note }}</td>
+
+                    </tr>
+                @endforeach
+
+
+
         </tbody>
     </table>
 

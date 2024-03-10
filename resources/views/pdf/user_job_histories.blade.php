@@ -4,7 +4,11 @@
     <title>Job History List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
+
+
     @php
+
+
         // Define a function within the Blade file
         function processString($inputString) {
             // Remove underscore

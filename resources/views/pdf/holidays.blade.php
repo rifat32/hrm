@@ -18,6 +18,10 @@
 
             return $capitalizedString;
         }
+
+        function format_date($date) {
+    return \Carbon\Carbon::parse($date)->format('d-m-Y');
+}
     @endphp
 
     @php
@@ -142,10 +146,10 @@
                         {{ $holiday->description }}
                     </td>
                     <td class="start_date">
-                        {{ $holiday->start_date }}
+                        {{ format_date($holiday->start_date) }}
                     </td>
                     <td class="end_date">
-                        {{ $holiday->end_date }}
+                        {{ format_date($holiday->end_date) }}
                     </td>
 
                 </tr>
