@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Work Shift List</title>
+    <title>Holiday List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
@@ -125,21 +125,27 @@
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
             </tr>
+
+
         </thead>
         <tbody>
-            @foreach($work_shifts as $index=>$work_shift)
+            @foreach($holidays as $index=>$holiday)
                 <tr class="table_row">
                     <td class="employee_index" style="padding:0px 10px">{{ $index+1 }}</td>
                     <td class="name">
-                        {{ $work_shift->name }}
+                        {{ $holiday->name }}
                     </td>
                     <td class="description">
-                        {{ $work_shift->description }}
+                        {{ $holiday->description }}
                     </td>
-                    <td class="type">
-                        {{ $work_shift->type }}
+                    <td class="start_date">
+                        {{ $holiday->start_date }}
+                    </td>
+                    <td class="end_date">
+                        {{ $holiday->end_date }}
                     </td>
 
                 </tr>

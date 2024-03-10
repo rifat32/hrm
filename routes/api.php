@@ -888,6 +888,7 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // leaves  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 Route::post('/v1.0/leaves/multiple-file-upload', [LeaveController::class, "createLeaveFileMultiple"]);
 Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
 Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
@@ -900,6 +901,7 @@ Route::get('/v4.0/leaves', [LeaveController::class, "getLeavesV4"]);
 Route::get('/v1.0/leaves/{id}', [LeaveController::class, "getLeaveById"]);
 Route::get('/v1.0/leaves-get-current-hourly-rate', [LeaveController::class, "getLeaveCurrentHourlyRate"]);
 Route::delete('/v1.0/leaves/{ids}', [LeaveController::class, "deleteLeavesByIds"]);
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end leaves management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

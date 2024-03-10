@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Employee List</title>
+    <title>Work Shift List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
