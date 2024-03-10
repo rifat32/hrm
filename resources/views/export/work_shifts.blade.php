@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Work Shift List</title>
+    <title>Employee List</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
@@ -106,14 +106,20 @@
             <td></td>
           </tr>
           <tr>
-            <td class="file_title">Employee List </td>
+            <td class="file_title">Work Shift List </td>
           </tr>
           <tr>
             <td>
                 <span class="business_name">{{$business->name}}</span>
-                <address class="business_address">{{$business->address_line_1}}</address>
+
             </td>
 
+
+          </tr>
+          <tr>
+            <td>
+                <address class="business_address">{{$business->address_line_1}}</address>
+            </td>
           </tr>
         </tbody>
     </table>
