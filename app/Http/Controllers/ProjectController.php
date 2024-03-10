@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Exports\ProjectsExport;
 use App\Http\Requests\ProjectAssignToUserRequest;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
@@ -20,6 +20,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
+use PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
@@ -946,7 +949,25 @@ class ProjectController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-
+     *
+     *
+     *
+     *     @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *     @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
+     *
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -1129,6 +1150,17 @@ class ProjectController extends Controller
                 }, function ($query) {
                     return $query->get();
                 });
+
+                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                    if (strtoupper($request->response_type) == 'PDF') {
+                        $pdf = PDF::loadView('pdf.projects', ["projects" => $projects]);
+                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                    } elseif (strtoupper($request->response_type) === 'CSV') {
+                        return Excel::download(new ProjectsExport($projects), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                    }
+                } else {
+                    return response()->json($projects, 200);
+                }
 
 
 
