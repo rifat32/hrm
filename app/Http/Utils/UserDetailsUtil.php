@@ -73,12 +73,7 @@ trait UserDetailsUtil
             }
 
             if (!$default_work_shift->is_active) {
-                $this->storeError(
-                    ("Please activate the work shift named '" . $default_work_shift->name . "'"),
-                    400,
-                    "front end error",
-                    "front end error"
-                );
+
                 $error =  [
                     "message" => ("Please activate the work shift named '" . $default_work_shift->name . "'"),
 
@@ -310,24 +305,14 @@ if(!empty($recruitment_process["description"])){
                     ->orderByDesc("id")
                         ->first();
                     if (!$work_shift) {
-                        $this->storeError(
-                            "no work shift found",
-                            403,
-                            "front end error",
-                            "front end error"
-                        );
+
 
                         throw new Exception("no work shift found", 403);
 
                     }
 
                     if (!$work_shift->is_active) {
-                        $this->storeError(
-                            ("Please activate the work shift named '" . $work_shift->name . "'"),
-                            400,
-                            "front end error",
-                            "front end error"
-                        );
+                      
                         throw new Exception("Please activate the work shift named '" . $work_shift->name . "'", 400);
                     }
 
