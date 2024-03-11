@@ -995,10 +995,10 @@ Route::get('/v1.0/payruns', [PayrunController::class, "getPayruns"]);
 Route::get('/v1.0/payruns/{id}', [PayrunController::class, "getPayrunById"]);
 Route::delete('/v1.0/payruns/{ids}', [PayrunController::class, "deletePayrunsByIds"]);
 
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end payruns  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 Route::post('/v1.0/payrolls', [PayrollController::class, "createPayroll"]);
 Route::get('/v1.0/payrolls', [PayrollController::class, "getPayrolls"]);
 Route::get('/v1.0/payroll-list', [PayrollController::class, "getPayrollList"]);
