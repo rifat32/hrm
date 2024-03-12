@@ -248,8 +248,8 @@ class AnnouncementController extends Controller
                 return response($announcement, 201);
 
         } catch (Exception $e) {
-            DB::rollBack()
-            error_log($e->getMessage());
+            DB::rollBack();
+
             return $this->sendError($e, 500, $request);
         }
     }
@@ -597,7 +597,7 @@ class AnnouncementController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-              
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
