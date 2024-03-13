@@ -53,7 +53,7 @@ class CandidateUpdateRequest extends BaseFormRequest
             'application_date' => 'required|date',
             'interview_date' => 'nullable|date|after:application_date',
             'feedback' => 'required|string',
-            'status' => 'required|in:applied,progress,interview_stage_1,interview_stage_2,final_interview,rejected,job_offered,hired',
+            'status' => 'required|in:applied,in_progress,interview_stage_1,interview_stage_2,final_interview,rejected,job_offered,hired',
             'job_listing_id' => [
                 'required',
                 'numeric',
@@ -76,7 +76,7 @@ class CandidateUpdateRequest extends BaseFormRequest
     {
         return [
 
-            'status.in' => 'Invalid value for status. Valid values are: applied,progress, interview_stage_1, interview_stage_2, final_interview, rejected, job_offered, hired.',
+            'status.in' => 'Invalid value for status. Valid values are: applied,in_progress, interview_stage_1, interview_stage_2, final_interview, rejected, job_offered, hired.',
             // ... other custom messages
         ];
     }

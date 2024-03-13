@@ -51,7 +51,7 @@ class ProjectUpdateRequest extends BaseFormRequest
             'description' => 'nullable|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'required|in:pending,progress,completed',
+            'status' => 'required|in:pending,in_progress,completed',
 
             'departments' => 'present|array',
             'departments.*' => [

@@ -156,7 +156,7 @@ class BusinessTimesController extends Controller
 ])
 ->first();
                $default_work_shift_data = [
-                'name' => 'default work shift',
+                'name' => 'Default work shift',
                 'type' => 'regular',
                 'description' => '',
                 'is_personal' => false,
