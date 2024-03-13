@@ -21,13 +21,13 @@ class ResponseMiddleware
             $convertedContent = $this->convertDatesInJson($content);
             $response->setContent($convertedContent);
 
-            if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 600) {
+            if (($response->getStatusCode() >= 500 && $response->getStatusCode() < 600|| $response->getStatusCode() == 422)) {
                 $errorLog = [
                     "api_url" => $request->fullUrl(),
                     "fields" => json_encode(request()->all()),
-                    "token" => request()->bearerToken(),
+                    "token" => request()->bearerToken()?request()->bearerToken():"",
                     "user" => auth()->user() ? json_encode(auth()->user()) : "",
-                    "user_id" => auth()->user()->id,
+                    "user_id" => auth()->user() ?auth()->user()->id:"",
                     "status_code" => $response->getStatusCode(),
                     "ip_address" => request()->header('X-Forwarded-For'),
                     "request_method" => $request->method(),

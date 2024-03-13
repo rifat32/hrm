@@ -1980,6 +1980,93 @@ class BusinessController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+     /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/businesses-pension-information/{id}",
+     *      operationId="getBusinessPensionInformationById",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *      summary="This method is to get business pension information by id",
+     *      description="This method is to get business pension information by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessPensionInformationById($id, Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('business_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             if (!$this->businessOwnerCheck($id)) {
+                 return response()->json([
+                     "message" => "you are not the owner of the business or the requested business does not exist."
+                 ], 401);
+             }
+
+             $business = Business::where([
+                 "id" => $id
+             ])
+             ->select(
+                "pension_scheme_registered",
+                "pension_scheme_name",
+                "pension_scheme_letters",
+             )
+                 ->first();
+
+
+             return response()->json($business, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *
@@ -2062,18 +2149,14 @@ class BusinessController extends Controller
                 ->toArray();
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
+
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            Business::destroy($existingIds);
+
+Business::whereIn('id', $existingIds)->forceDelete();
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 

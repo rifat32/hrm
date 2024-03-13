@@ -43,8 +43,6 @@ class Business extends Model
 
 
 
-
-
         "owner_id",
         'created_by'
 
@@ -76,7 +74,7 @@ class Business extends Model
             }
         }
         return 1;
-        
+
     }
 
 

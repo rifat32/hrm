@@ -2062,7 +2062,7 @@ class UserManagementController extends Controller
         }
     }
 
-  
+
     /**
      *
      * @OA\Put(
@@ -6285,7 +6285,8 @@ class UserManagementController extends Controller
                     "message" => "You can not delete your self."
                 ], 401);
             }
-            User::destroy($existingIds);
+
+            User::whereIn('id', $existingIds)->forceDelete();
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 

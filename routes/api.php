@@ -561,6 +561,9 @@ Route::get('/v1.0/businesses', [BusinessController::class, "getBusinesses"]);
 Route::get('/v1.0/businesses/{id}', [BusinessController::class, "getBusinessById"]);
 Route::delete('/v1.0/businesses/{ids}', [BusinessController::class, "deleteBusinessesByIds"]);
 Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class, "getAllBusinessesByBusinessOwner"]);
+Route::get('/v1.0/businesses-pension-information/{id}', [BusinessController::class, "getBusinessPensionInformationById"]);
+
+
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end business management section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
