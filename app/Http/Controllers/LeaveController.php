@@ -1220,7 +1220,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                     return Excel::download(new LeavesExport($leaves), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
                 }
             } else {
-                return response()->json($leaves, 200);
+                return response()->json($data, 200);
             }
 
 
