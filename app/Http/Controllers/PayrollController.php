@@ -82,9 +82,10 @@ class PayrollController extends Controller
 
     public function createPayroll(PayrollCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('payrun_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -114,16 +115,18 @@ class PayrollController extends Controller
                         $q->where("payrolls.start_date", $payrun->start_date)
                             ->where("payrolls.end_date", $payrun->end_date);
                     })
-                    ->where(function ($query) use ($payrun) {
-                        $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
-                            $query->where("payrun_departments.payrun_id", $payrun->id);
-                        })
-                            ->orWhereHas("payrun_user", function ($query) use ($payrun) {
-                                $query->where("payrun_users.payrun_id", $payrun->id);
-                            });
-                    })
 
 
+
+
+                    // ->where(function ($query) use ($payrun) {
+                    //     $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
+                    //         $query->where("payrun_departments.payrun_id", $payrun->id);
+                    //     })
+                    //         ->orWhereHas("payrun_user", function ($query) use ($payrun) {
+                    //             $query->where("payrun_users.payrun_id", $payrun->id);
+                    //         });
+                    // })
 
 
 
@@ -137,9 +140,11 @@ class PayrollController extends Controller
 
                 $processed_employees =  $this->process_payrun($payrun, $employees, $request_data["start_date"], $request_data["end_date"], true, true);
 
+                DB::commit();
                 return response()->json($processed_employees, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -268,6 +273,7 @@ class PayrollController extends Controller
 
     public function getPayrolls(Request $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
@@ -292,19 +298,6 @@ class PayrollController extends Controller
                 throw new Exception(json_encode($error), 422);
             }
 
-            // if(!isset($request->start_date)) {
-            //     $error = [ "message" => "The given data was invalid.",
-            //     "errors" => ["start_date"=>["The start date field is required."]]
-            //     ];
-            //         throw new Exception(json_encode($error),422);
-            //  }
-
-            //  if(!isset($request->end_date)) {
-            //     $error = [ "message" => "The given data was invalid.",
-            //     "errors" => ["start_date"=>["The end date field is required."]]
-            //     ];
-            //         throw new Exception(json_encode($error),422);
-            //  }
 
 
 
@@ -336,7 +329,6 @@ class PayrollController extends Controller
 
 
 
-
             $employees = User::where([
                 "business_id" => $payrun->business_id,
                 "is_active" => 1
@@ -354,14 +346,14 @@ class PayrollController extends Controller
                     $user_ids = explode(',', $request->user_ids);
                     $query->whereIn("users.id", $user_ids);
                 })
-                ->where(function ($query) use ($payrun) {
-                    $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
-                        $query->where("payrun_departments.payrun_id", $payrun->id);
-                    })
-                        ->orWhereHas("payrun_user", function ($query) use ($payrun) {
-                            $query->where("payrun_users.payrun_id", $payrun->id);
-                        });
-                })
+                // ->where(function ($query) use ($payrun) {
+                //     $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
+                //         $query->where("payrun_departments.payrun_id", $payrun->id);
+                //     })
+                //         ->orWhereHas("payrun_user", function ($query) use ($payrun) {
+                //             $query->where("payrun_users.payrun_id", $payrun->id);
+                //         });
+                // })
 
 
                 ->get();
@@ -369,9 +361,12 @@ class PayrollController extends Controller
 
             $processed_employees =  $this->process_payrun($payrun, $employees, $request->start_date, $request->end_date, true, false);
 
+            DB::commit();
 
             return response()->json($processed_employees, 200);
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }

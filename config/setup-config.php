@@ -756,7 +756,6 @@ return [
                 "global_business_background_image_view",
 
 
-
                 "department_create",
                 "department_update",
                 "department_view",
@@ -870,15 +869,17 @@ return [
 
 
 
-                "setting_attendance_create",
-
                 "attendance_create",
                 "attendance_update",
                 "attendance_approve",
                 "attendance_view",
                 "attendance_delete",
 
+
+                "setting_attendance_create",
                 "setting_payroll_create",
+
+
 
 
             ],

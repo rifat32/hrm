@@ -46,14 +46,14 @@ class Payrun extends Model
                 $query->whereIn("departments.id", $all_manager_department_ids);
             })
 
-            ->where(function ($query)  {
-                $query->whereHas("departments.payrun_department", function ($query)  {
-                    $query->where("payrun_departments.payrun_id", $this->id);
-                })
-                    ->orWhereHas("payrun_user", function ($query)  {
-                        $query->where("payrun_users.payrun_id", $this->id);
-                    });
-            })
+            // ->where(function ($query)  {
+            //     $query->whereHas("departments.payrun_department", function ($query)  {
+            //         $query->where("payrun_departments.payrun_id", $this->id);
+            //     })
+            //         ->orWhereHas("payrun_user", function ($query)  {
+            //             $query->where("payrun_users.payrun_id", $this->id);
+            //         });
+            // })
 
 
             ->count();

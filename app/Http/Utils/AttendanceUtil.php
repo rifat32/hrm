@@ -258,7 +258,14 @@ trait AttendanceUtil
         $attendance_data = $this->prepare_data_on_attendance_create($raw_data, $user_id);
 
         // Automatically approve attendance if auto-approval is enabled in settings
-        if (isset($setting_attendance->auto_approval) && $setting_attendance->auto_approval) {
+        if (
+            (
+            isset($setting_attendance->auto_approval) && $setting_attendance->auto_approval
+            )
+            ||
+             auth()->user()->hasRole("business_owner")
+
+             ) {
             $attendance_data["status"] = "approved";
         }
 

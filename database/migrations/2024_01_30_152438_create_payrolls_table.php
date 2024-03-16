@@ -30,7 +30,7 @@ class CreatePayrollsTable extends Migration
             $table->double('total_overtime_attendance_hours')->nullable();
             $table->double('regular_hours')->nullable();
             $table->double('overtime_hours')->nullable();
-            $table->double('holiday_hours_salary')->nullable();
+            $table->double('total_holiday_hours_salary')->nullable();
             $table->double('leave_hours_salary')->nullable();
             $table->double('regular_attendance_hours_salary')->nullable();
             $table->double('overtime_attendance_hours_salary')->nullable();

@@ -69,14 +69,17 @@ class PayrollCreateRequest extends BaseFormRequest
                     ->whereHas("departments", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
-                     ->where(function($query)  {
-                        $query->whereHas("departments.payrun_department",function($query)  {
-                            $query->where("payrun_departments.payrun_id", $this->payrun_id);
-                        })
-                        ->orWhereHas("payrun_user", function($query)   {
-                            $query->where("payrun_users.payrun_id", $this->payrun_id);
-                        });
-                    })
+
+                    //  ->where(function($query)  {
+                    //     $query->whereHas("departments.payrun_department",function($query)  {
+                    //         $query->where("payrun_departments.payrun_id", $this->payrun_id);
+                    //     })
+                    //     ->orWhereHas("payrun_user", function($query)   {
+                    //         $query->where("payrun_users.payrun_id", $this->payrun_id);
+                    //     });
+                    // })
+
+
                      ->first();
 
             if (!$exists) {

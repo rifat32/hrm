@@ -40,7 +40,6 @@ class Department extends Model
     {
         $descendantIds = [];
         $this->getDescendantIdsRecursive($this, $descendantIds);
-
         return $descendantIds;
     }
 

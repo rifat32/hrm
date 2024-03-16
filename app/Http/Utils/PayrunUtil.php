@@ -17,7 +17,7 @@ use App\Models\User;
 use App\Models\WorkShift;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\DB;
+
 
 trait PayrunUtil
 {
@@ -301,7 +301,7 @@ trait PayrunUtil
         $temp_payroll = null;
         if ($generate_payroll) {
             try {
-                DB::transaction(function () use ($payroll_data, $payroll_holidays_data, $payroll_leave_records_data, $payroll_attendances_data, $attendance_arrears, $leave_arrears, &$temp_payroll) {
+
 
                     $payroll = Payroll::create($payroll_data);
 
@@ -328,7 +328,7 @@ trait PayrunUtil
                         throw new Exception("some thing went wrong");
                     }
                     $temp_payroll = clone $recalculate_payroll_values;
-                });
+
             } catch (Exception $e) {
                 $this->storeError($e, 422, $e->getLine(), $e->getFile());
                 return false;
@@ -338,7 +338,7 @@ trait PayrunUtil
             }
         } else {
             try {
-                DB::transaction(function () use ($payroll_data, $payroll_holidays_data, $payroll_leave_records_data, $payroll_attendances_data, &$temp_payroll) {
+
                     $payroll = Payroll::create($payroll_data);
                     $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
                     $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
@@ -354,7 +354,7 @@ trait PayrunUtil
 
                     $temp_payroll = clone $recalculate_payroll_values;
                     $payroll->delete();
-                });
+
             } catch (Exception $e) {
 
                 $this->storeError($e, 422, $e->getLine(), $e->getFile());
