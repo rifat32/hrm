@@ -249,11 +249,7 @@ class BusinessTimesController extends Controller
     public function getBusinessTimes(Request $request) {
         try{
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$request->user()->hasPermissionTo('business_times_view')){
-                return response()->json([
-                   "message" => "You can not perform this action"
-                ],401);
-           }
+
 
 
             $business_times = BusinessTime::where([

@@ -153,9 +153,25 @@ class WorkShiftController extends Controller
                     ], 401);
                 }
                 $request_data = $request->validated();
+
                 if(empty($request_data['departments'])) {
-                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+
+                    $request_data['departments'] = Department::where(
+                        [
+
+                        "business_id" => auth()->user()->business_id,
+                        "manager_id" => auth()->user()->id
+
+                        ]
+
+                        )
+                        ->pluck("id");
+
+
+
                 }
+
+
            $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
                 if(!$check_work_shift_details["ok"]) {
                     $this->storeError(
