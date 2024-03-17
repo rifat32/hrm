@@ -141,16 +141,16 @@ return $formattedBreakTime;
         <thead>
             <tr class="table_head_row">
                 <th class="index_col"></th>
-                @if (!empty($request->leave_date_time))
+                @if (!empty($request->leave_date_time) || 1)
                     <th>Date & Time</th>
                 @endif
-                @if (!empty($request->leave_type))
+                @if (!empty($request->leave_type) || 1)
                     <th>Type</th>
                 @endif
-                @if (!empty($request->leave_duration))
+                @if (!empty($request->leave_duration) || 1)
                     <th>Duration</th>
                 @endif
-                @if (!empty($request->total_leave_hours))
+                @if (!empty($request->total_leave_hours) || 1)
                     <th>Total Leave (hours)</th>
                 @endif
                 {{-- <th>Attachment</th> --}}
@@ -161,16 +161,16 @@ return $formattedBreakTime;
                 @foreach ($leaves as $index => $leave)
                     <tr class="table_row">
                         <td class="index_col">{{ $index + 1 }}</td>
-                        @if (!empty($request->leave_date_time))
+                        @if (!empty($request->leave_date_time) || 1)
                             <td>{{ format_date($leave->start_date) }} - {{ format_date($leave->end_date) }}</td>
                         @endif
-                        @if (!empty($request->leave_type))
+                        @if (!empty($request->leave_type) || 1)
                             <td>{{ $leave->leave_type ? $leave->leave_type->name : "" }}</td>
                         @endif
-                        @if (!empty($request->leave_duration))
+                        @if (!empty($request->leave_duration) || 1)
                             <td>{{ $leave->leave_duration }}</td>
                         @endif
-                        @if (!empty($request->total_leave_hours))
+                        @if (!empty($request->total_leave_hours) || 1)
                             <td>
                                 @php
                                     $leave->total_leave_hours = $leave->records->sum(function ($record) {

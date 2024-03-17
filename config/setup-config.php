@@ -234,6 +234,11 @@ return [
                 "user_view",
                 "user_delete",
 
+                "employee_create",
+                "employee_update",
+                "employee_view",
+                "employee_delete",
+
                 "employee_document_create",
                 "employee_document_update",
                 "employee_document_view",
@@ -463,6 +468,11 @@ return [
                 "user_update",
                 "user_view",
                 "user_delete",
+
+                "employee_create",
+                "employee_update",
+                "employee_view",
+                "employee_delete",
 
                 "employee_document_create",
                 "employee_document_update",
@@ -938,6 +948,12 @@ return [
         "user_view",
         "user_delete",
 
+
+        "employee_create",
+        "employee_update",
+        "employee_view",
+        "employee_delete",
+
         "employee_document_create",
         "employee_document_update",
         "employee_document_view",
@@ -1208,6 +1224,11 @@ return [
         "user_update" => "Can update user",
         "user_view" => "Can view user",
         "user_delete" => "Can delete user",
+
+        "employee_create" => "",
+        "employee_update" => "",
+        "employee_view" => "",
+        "employee_delete" => "",
 
         "employee_document_create" => "",
         "employee_document_update" => "",
@@ -1486,6 +1507,15 @@ return [
         "user_update" => "update",
         "user_view" => "view",
         "user_delete" => "delete",
+
+        "employee_create" => "create",
+        "employee_update" => "update",
+        "employee_view" => "view",
+        "employee_delete" => "delete",
+
+
+
+
 
 
 
@@ -1828,6 +1858,19 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "user",
+            "permissions" => [
+        "employee_create",
+        "employee_update",
+        "employee_view",
+        "employee_delete",
+
+            ],
+        ],
+
+
 
         [
             "header" => "employee_document",

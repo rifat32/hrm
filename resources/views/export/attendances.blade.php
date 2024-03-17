@@ -142,22 +142,22 @@ return $formattedBreakTime;
             <thead>
                 <tr class="table_head_row">
                     <th class="index_col"></th>
-                    @if (!empty($request->attendance_date))
+                    @if (!empty($request->attendance_date) || 1)
                         <th>Date</th>
                     @endif
-                    @if (!empty($request->attendance_start_time))
+                    @if (!empty($request->attendance_start_time)|| 1)
                         <th>Start Time</th>
                     @endif
-                    @if (!empty($request->attendance_end_time))
+                    @if (!empty($request->attendance_end_time) || 1)
                         <th>End Time</th>
                     @endif
-                    @if (!empty($request->attendance_break))
+                    @if (!empty($request->attendance_break) || 1)
                         <th>Break (hour)</th>
                     @endif
-                    @if (!empty($request->attendance_schedule))
+                    @if (!empty($request->attendance_schedule) || 1)
                         <th>Schedule (hour)</th>
                     @endif
-                    @if (!empty($request->attendance_overtime))
+                    @if (!empty($request->attendance_overtime) || 1)
                         <th>Overtime (hour)</th>
                     @endif
                 </tr>
@@ -168,23 +168,23 @@ return $formattedBreakTime;
                         <tr class="table_row">
                             <td class="index_col">{{ $index + 1 }}</td>
 
-                            @if (!empty($request->attendance_date))
+                            @if (!empty($request->attendance_date) || 1)
                             <td>{{ format_date($attendance->in_date) }}</td>
                         @endif
 
-                            @if (!empty($request->attendance_start_time))
+                            @if (!empty($request->attendance_start_time) || 1)
                                 <td>{{ $attendance->in_time }}</td>
                             @endif
-                            @if (!empty($request->attendance_end_time))
+                            @if (!empty($request->attendance_end_time) || 1)
                                 <td>{{ $attendance->out_time }}</td>
                             @endif
-                            @if (!empty($request->attendance_break))
+                            @if (!empty($request->attendance_break) || 1)
                                 <td>{{ $attendance->does_break_taken ? time_format($attendance->break_hours) : 0 }}</td>
                             @endif
-                            @if (!empty($request->attendance_schedule))
+                            @if (!empty($request->attendance_schedule) || 1)
                                 <td>{{ time_format($attendance->capacity_hours) }}</td>
                             @endif
-                            @if (!empty($request->attendance_overtime))
+                            @if (!empty($request->attendance_overtime) || 1)
                                 <td>{{ time_format($attendance->overtime_hours) }}</td>
                             @endif
                         </tr>

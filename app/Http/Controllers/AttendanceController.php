@@ -124,10 +124,8 @@ class AttendanceController extends Controller
             }
             $request_data = $request->validated();
 
-
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
-
             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
 
 
