@@ -13,6 +13,7 @@ use App\Http\Requests\MultipleImageUploadRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\DiscountUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\SendPassword;
 
@@ -33,7 +34,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BusinessController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil;
 
 
     /**
@@ -766,6 +767,7 @@ class BusinessController extends Controller
      *
      *  @OA\Property(property="business", type="string", format="array",example={
      * "service_plan_id" : 0,
+     * "service_plan_discount_code" : 0,
      *   "pension_scheme_registered" : 1,
      *   "pension_scheme_name" : "hh",
      *   "pension_scheme_letters" : {{"file" :"vv.jpg"}},
@@ -843,12 +845,13 @@ class BusinessController extends Controller
 
 
                 $request_data = $request->validated();
+
                 // user info starts ##############
 
                 $password = $request_data['user']['password'];
+
+
                 $request_data['user']['password'] = Hash::make($password);
-
-
                 //    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
                 //     $password = Str::random(10);
                 //     $request_data['user']['password'] = Hash::make($password);
@@ -881,7 +884,7 @@ class BusinessController extends Controller
                 $request_data['business']['is_active'] = true;
                 $request_data['business']['is_self_registered_businesses'] = true;
 
-
+                $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data);
 
                 $business =  Business::create($request_data['business']);
 

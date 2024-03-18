@@ -175,6 +175,9 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
         if(!auth()->user()) {
             $rules['business.service_plan_id'] = 'required|numeric|exists:service_plans,id';
+            $rules['business.service_plan_discount_code'] = 'nullable|string';
+
+
         }
 
 

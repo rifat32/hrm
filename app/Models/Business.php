@@ -34,7 +34,10 @@ class Business extends Model
         "status",
         "is_active",
         "is_self_registered_businesses",
+
         "service_plan_id",
+        "service_plan_discount_code",
+        "service_plan_discount_amount",
 
 
         "pension_scheme_registered",

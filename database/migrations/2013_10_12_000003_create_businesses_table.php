@@ -40,6 +40,10 @@ class CreateBusinessesTable extends Migration
             $table->unsignedBigInteger("service_plan_id")->nullable();
             $table->foreign('service_plan_id')->references('id')->on('service_plans')->onDelete('restrict');
 
+            $table->string("service_plan_discount_code")->nullable();
+            $table->double("service_plan_discount_amount")->nullable();
+
+
 
 
             $table->boolean('pension_scheme_registered')->default(false);
