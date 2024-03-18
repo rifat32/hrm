@@ -781,10 +781,15 @@ return "swagger generated";
     {
 
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+
+
+
    // ###############################
         // permissions
         // ###############################
         $permissions =  config("setup-config.permissions");
+
         // setup permissions
         foreach ($permissions as $permission) {
             if(!Permission::where([
@@ -820,14 +825,31 @@ return "swagger generated";
 
         }
 
-        // setup roles and permissions
-        $role_permissions = config("setup-config.roles_permission");
-        foreach ($role_permissions as $role_permission) {
-            $role = Role::where(["name" => $role_permission["role"]])->first();
-            error_log($role_permission["role"]);
-            $permissions = $role_permission["permissions"];
-            $role->syncPermissions($permissions);
+// setup roles and permissions
+// setup roles and permissions
+$role_permissions = config("setup-config.roles_permission");
+foreach ($role_permissions as $role_permission) {
+    $role = Role::where(["name" => $role_permission["role"]])->first();
+    error_log($role_permission["role"]);
+    $permissions = $role_permission["permissions"];
+
+    // Get current permissions associated with the role
+    $currentPermissions = $role->permissions()->pluck('name')->toArray();
+
+    // Determine permissions to remove
+    $permissionsToRemove = array_diff($currentPermissions, $permissions);
+
+    // Deassign permissions not included in the configuration
+    if (!empty($permissionsToRemove)) {
+        foreach ($permissionsToRemove as $permission) {
+            $role->revokePermissionTo($permission);
         }
+    }
+
+    // Assign permissions from the configuration
+    $role->syncPermissions($permissions);
+}
+
 
         return "You are done with setup";
     }

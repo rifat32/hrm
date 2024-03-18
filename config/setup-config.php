@@ -575,7 +575,7 @@ return [
                 "job_listing_delete",
 
                 // "job_platform_create",
-                "job_platform_update",
+                // "job_platform_update",
                 "job_platform_activate",
                 "job_platform_view",
                 // "job_platform_delete",
@@ -683,7 +683,6 @@ return [
             "role" => "business_manager",
             "permissions" => [
 
-
                 "user_create",
                 "user_update",
                 "user_view",
@@ -756,12 +755,12 @@ return [
                 "employee_social_site_view",
                 "employee_social_site_delete",
 
-                "role_create",
-                "role_update",
-                "role_view",
-                "role_delete",
+                // "role_create",
+                // "role_update",
+                // "role_view",
+                // "role_delete",
+                // "business_update",
 
-                "business_update",
                 "business_view",
                 "product_category_view",
                 "global_business_background_image_view",
@@ -772,20 +771,20 @@ return [
                 "department_view",
                 "department_delete",
 
-                "asset_type_create",
-                "asset_type_update",
-                "asset_type_view",
+                 "asset_type_create",
+                 "asset_type_update",
+                 "asset_type_view",
                 "asset_type_delete",
 
-                "job_listing_create",
+            "job_listing_create",
                 "job_listing_update",
                 "job_listing_view",
-                "job_listing_delete",
+            "job_listing_delete",
 
                 // "job_platform_create",
-                "job_platform_update",
-                "job_platform_activate",
-                "job_platform_view",
+                // "job_platform_update",
+                // "job_platform_activate",
+            "job_platform_view",
                 // "job_platform_delete",
 
                 "project_create",
@@ -804,21 +803,22 @@ return [
                 "comment_delete",
 
 
-                "holiday_create",
-                "holiday_update",
-                "holiday_view",
-                "holiday_delete",
+                // "holiday_create",
+                // "holiday_update",
+                // "holiday_view",
+                // "holiday_delete",
 
                 "work_shift_create",
                 "work_shift_update",
                 "work_shift_view",
                 "work_shift_delete",
 
+
+
                 "announcement_create",
                 "announcement_update",
                 "announcement_view",
                 "announcement_delete",
-
 
 
                 "designation_create",
@@ -827,44 +827,44 @@ return [
                 "designation_activate",
                 "designation_delete",
 
-                "bank_create",
-                "bank_update",
-                "bank_activate",
+
+                // "bank_create",
+                // "bank_update",
+                // "bank_activate",
                 "bank_view",
-                "bank_delete",
+                // "bank_delete",
 
 
-                "job_type_create",
-                "job_type_update",
-                "job_type_activate",
-                "job_type_view",
-                "job_type_delete",
+                // "job_type_create",
+                // "job_type_update",
+                // "job_type_activate",
+             "job_type_view",
+                // "job_type_delete",
 
-                "work_location_create",
-                "work_location_update",
-                "work_location_activate",
-                "work_location_view",
-                "work_location_delete",
+                // "work_location_create",
+                // "work_location_update",
+                // "work_location_activate",
+            "work_location_view",
+                // "work_location_delete",
 
-                "recruitment_process_create",
-                "recruitment_process_update",
-                "recruitment_process_activate",
-                "recruitment_process_view",
-                "recruitment_process_delete",
+                // "recruitment_process_create",
+                // "recruitment_process_update",
+                // "recruitment_process_activate",
+            "recruitment_process_view",
+                // "recruitment_process_delete",
 
-                "employment_status_create",
-                "employment_status_update",
-                "employment_status_activate",
-                "employment_status_view",
-                "employment_status_delete",
+                // "employment_status_create",
+                // "employment_status_update",
+                // "employment_status_activate",
+             "employment_status_view",
+                // "employment_status_delete",
 
-                "setting_leave_type_create",
-                "setting_leave_type_update",
-                "setting_leave_type_activate",
-                "setting_leave_type_view",
-                "setting_leave_type_delete",
-                "setting_leave_create",
-
+                // "setting_leave_type_create",
+                // "setting_leave_type_update",
+                // "setting_leave_type_activate",
+            "setting_leave_type_view",
+                // "setting_leave_type_delete",
+                // "setting_leave_create",
 
 
                 "leave_create",
@@ -879,7 +879,6 @@ return [
                 "candidate_delete",
 
 
-
                 "attendance_create",
                 "attendance_update",
                 "attendance_approve",
@@ -887,8 +886,9 @@ return [
                 "attendance_delete",
 
 
-                "setting_attendance_create",
-                "setting_payroll_create",
+
+                // "setting_attendance_create",
+                // "setting_payroll_create",
 
 
 

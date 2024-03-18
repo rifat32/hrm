@@ -26,43 +26,40 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Http\Utils\UserDetailsUtil;
+use App\Mail\SendOriginalPassword;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
-use App\Models\EmployeePassportDetail;
 
-use App\Models\EmployeeSponsorship;
-
-use App\Models\EmployeeVisaDetail;
 
 
 use App\Models\WorkShiftHistory;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
-use App\Models\RecruitmentProcess;
+
 use App\Models\Role;
 use App\Models\SettingLeaveType;
 use App\Models\User;
 use App\Models\UserRecruitmentProcess;
 use Carbon\Carbon;
-use DateTime;
-use Error;
+
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\File;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Permission;
+
+use App\Mail\SendPassword;
+use Illuminate\Support\Facades\Mail;
 
 // eeeeee
 class UserManagementController extends Controller
@@ -762,7 +759,14 @@ class UserManagementController extends Controller
                     throw new Exception(json_encode($error), 403);
                 }
 
-                $request_data['password'] = Hash::make($request['password']);
+                // $request_data['password'] = Hash::make($request['password']);
+
+                $password = Str::random(11);
+                $request_data['password'] = Hash::make($password);
+
+
+
+
                 $request_data['is_active'] = true;
                 $request_data['remember_token'] = Str::random(10);
 
@@ -775,6 +779,9 @@ class UserManagementController extends Controller
                 $user =  User::create($request_data);
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
+                $token = Str::random(30);
+                $user->resetPasswordToken = $token;
+                $user->resetPasswordExpires = Carbon::now()->subDays(-1);
                 $user->pension_eligible = 0;
                 $user->save();
                 $this->delete_old_histories();
@@ -797,8 +804,12 @@ class UserManagementController extends Controller
                 if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
                     $this->store_right_to_works($request_data, $user);
                 }
-
                 $user->roles = $user->roles->pluck('name');
+
+                if (env("SEND_EMAIL") == true) {
+                    Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
+                }
+
                 DB::commit();
                 return response($user, 201);
 
