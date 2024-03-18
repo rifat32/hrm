@@ -517,10 +517,10 @@ class UserManagementController extends Controller
                 $user->roles = $user->roles->pluck('name');
 
 
-                $this->loadDefaultSettingLeave($user->business_id);
-                $this->loadDefaultAttendanceSetting($user->business_id);
-                $this->loadDefaultPayrunSetting($user->business_id);
-                $this->loadDefaultPaymentDateSetting($user->business_id);
+                // $this->loadDefaultSettingLeave($user->business_id);
+                // $this->loadDefaultAttendanceSetting($user->business_id);
+                // $this->loadDefaultPayrunSetting($user->business_id);
+                // $this->loadDefaultPaymentDateSetting($user->business_id);
 
 
 
