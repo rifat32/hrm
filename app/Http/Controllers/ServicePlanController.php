@@ -89,14 +89,13 @@ class ServicePlanController extends Controller
                 $request_data = $request->validated();
 
 
-
-
                 $request_data["is_active"] = 1;
                 $request_data["created_by"] = $request->user()->id;
 
 
                 $service_plan =  ServicePlan::create($request_data);
 
+                $service_plan->discount_codes()->sync($request_data['discount_codes']);
 
                 return response($service_plan, 201);
             });
@@ -207,6 +206,7 @@ class ServicePlanController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+                $service_plan->discount_codes()->sync($request_data['discount_codes']);
 
                 return response($service_plan, 201);
             });

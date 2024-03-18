@@ -24,6 +24,96 @@ class ServicePlan extends Model
     }
 
 
+    public function discount_codes()
+    {
+        return $this->hasMany(ServicePlanDiscountCode::class,"service_plan_id","id");
+    }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 }
