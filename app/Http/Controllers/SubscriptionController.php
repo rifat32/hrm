@@ -73,10 +73,22 @@ else {
                     ],
                     'quantity' => 1,
                 ],
-
-
+                [
+                    'price_data' => [
+                        'currency' => 'GBP',
+                        'product_data' => [
+                            'name' => 'Your Service monthly amount',
+                        ],
+                        'unit_amount' => $service_plan->price * 100, // Amount in cents
+                        'recurring' => [
+                            'interval' => 'month', // Recur monthly
+                            'interval_count' => $service_plan->duration_months, // Adjusted duration
+                        ],
+                    ],
+                    'quantity' => 1,
+                ],
             ],
-            'customer' => $user->stripe_id,
+            'customer' => $stripe_customer_id ?? null,
             'mode' => 'subscription',
             'success_url' => route('subscription.success_payment'),
             'cancel_url' => route('subscription.failed_payment'),
