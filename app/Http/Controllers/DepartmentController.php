@@ -79,9 +79,10 @@ class DepartmentController extends Controller
 
     public function createDepartment(DepartmentCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('department_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -90,7 +91,16 @@ class DepartmentController extends Controller
 
                 $request_data = $request->validated();
 
+                $department_exists_with_name =   Department::where([
+                    "name" => $request_data["name"],
+                    "business_id" => auth()->user()->business_id
+                ])
+                ->whereNotIn("id", [$request_data["id"]])
+                ->exists();
 
+                if($department_exists_with_name) {
+                    throw new Exception("A department with the same name already exists for your business.", 409);
+                }
 
                 if (empty($request_data["parent_id"])) {
                     $parent_department = Department::whereNull('parent_id')
@@ -110,9 +120,11 @@ class DepartmentController extends Controller
                     $department->users()->attach($department->manager_id);
                 }
 
+                DB::commit();
                 return response($department, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -181,9 +193,10 @@ class DepartmentController extends Controller
     {
 
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('department_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -191,6 +204,18 @@ class DepartmentController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
+
+
+             $department_exists_with_name =   Department::where([
+                    "name" => $request_data["name"],
+                    "business_id" => auth()->user()->business_id
+                ])
+                ->whereNotIn("id", [$request_data["id"]])
+                ->exists();
+
+                if($department_exists_with_name) {
+                    throw new Exception("A department with the same name already exists for your business.", 409);
+                }
 
 
 
@@ -294,10 +319,11 @@ class DepartmentController extends Controller
 
 
 
-
+                DB::commit();
                 return response($department, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }

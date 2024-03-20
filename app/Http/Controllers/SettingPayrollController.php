@@ -86,7 +86,7 @@ class SettingPayrollController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-
+                $request_data = $request->validated();
                 $request_data["is_active"] = 1;
 
 
@@ -117,6 +117,7 @@ class SettingPayrollController extends Controller
                 }
 
                 $setting_payrun =     SettingPayrun::updateOrCreate($check_data, $request_data);
+
                 $setting_payrun->restricted_users()->sync($request_data['restricted_users']);
                 $setting_payrun->restricted_departments()->sync($request_data['restricted_departments']);
 

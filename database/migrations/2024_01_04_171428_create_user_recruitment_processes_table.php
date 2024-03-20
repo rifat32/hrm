@@ -17,10 +17,10 @@ class CreateUserRecruitmentProcessesTable extends Migration
             $table->id();
 
             $table->unsignedBigInteger('recruitment_process_id')->nullable();
-            $table->foreign('recruitment_process_id')->references('id')->on('recruitment_processes')->onDelete('restrict');
+            $table->foreign('recruitment_process_id')->references('id')->on('recruitment_processes')->onDelete('cascade');
 
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->text("description")->nullable();
             $table->json('attachments')->nullable();

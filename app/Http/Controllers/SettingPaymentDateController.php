@@ -85,7 +85,7 @@ class SettingPaymentDateController extends Controller
 
                 $request_data["is_active"] = 1;
 
-
+                $request_data = $request->validated();
 
 
 

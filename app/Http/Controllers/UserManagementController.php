@@ -6590,11 +6590,12 @@ class UserManagementController extends Controller
             //  }
 
             $user =     User::where(["id" => $request->user_id])
-                ->when(!auth()->user()->hasRole("superadmin"), function ($query) use ($all_manager_department_ids) {
+                ->when(( !auth()->user()->hasRole("superadmin") && auth()->user()->id != $request->user_id ) , function ($query) use ($all_manager_department_ids) {
                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
                     });
                 })
+
 
 
 
