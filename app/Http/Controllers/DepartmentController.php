@@ -95,7 +95,7 @@ class DepartmentController extends Controller
                     "name" => $request_data["name"],
                     "business_id" => auth()->user()->business_id
                 ])
-                ->whereNotIn("id", [$request_data["id"]])
+
                 ->exists();
 
                 if($department_exists_with_name) {
