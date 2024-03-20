@@ -91,16 +91,7 @@ class DepartmentController extends Controller
 
                 $request_data = $request->validated();
 
-                $department_exists_with_name =   Department::where([
-                    "name" => $request_data["name"],
-                    "business_id" => auth()->user()->business_id
-                ])
 
-                ->exists();
-
-                if($department_exists_with_name) {
-                    throw new Exception("A department with the same name already exists for your business.", 409);
-                }
 
                 if (empty($request_data["parent_id"])) {
                     $parent_department = Department::whereNull('parent_id')
@@ -206,16 +197,6 @@ class DepartmentController extends Controller
                 $request_data = $request->validated();
 
 
-             $department_exists_with_name =   Department::where([
-                    "name" => $request_data["name"],
-                    "business_id" => auth()->user()->business_id
-                ])
-                ->whereNotIn("id", [$request_data["id"]])
-                ->exists();
-
-                if($department_exists_with_name) {
-                    throw new Exception("A department with the same name already exists for your business.", 409);
-                }
 
 
 

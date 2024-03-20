@@ -17,7 +17,7 @@ trait ErrorUtil
             "file" => $e->getFile(),
         ];
 
-        return response()->json($errorData, 422);
+        return response()->json($errorData, $e->getCode());
 
 
 

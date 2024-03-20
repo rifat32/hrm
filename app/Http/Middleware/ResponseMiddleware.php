@@ -21,7 +21,7 @@ class ResponseMiddleware
             $convertedContent = $this->convertDatesInJson($content);
             $response->setContent($convertedContent);
 
-            if (($response->getStatusCode() >= 500 && $response->getStatusCode() < 600|| $response->getStatusCode() == 422)) {
+            if (($response->getStatusCode() >= 500 && $response->getStatusCode() < 600)) {
                 $errorLog = [
                     "api_url" => $request->fullUrl(),
                     "fields" => json_encode(request()->all()),
@@ -34,14 +34,33 @@ class ResponseMiddleware
                     "message" =>  $response->getContent(),
                 ];
 
-
-
                   $error =   ErrorLog::create($errorLog);
                     $errorMessage = "Error ID: ".$error->id." - Status: ".$error->status_code." - Operation Failed, something is wrong! - Please call to the customer care.";
                     $response->setContent(json_encode(['message' => $errorMessage]));
 
+            } else if(($response->getStatusCode() >= 300 && $response->getStatusCode() < 500)) {
+                $errorLog = [
+                    "api_url" => $request->fullUrl(),
+                    "fields" => json_encode(request()->all()),
+                    "token" => request()->bearerToken()?request()->bearerToken():"",
+                    "user" => auth()->user() ? json_encode(auth()->user()) : "",
+                    "user_id" => auth()->user() ?auth()->user()->id:"",
+                    "status_code" => $response->getStatusCode(),
+                    "ip_address" => request()->header('X-Forwarded-For'),
+                    "request_method" => $request->method(),
+                    "message" =>  $response->getContent(),
+                ];
+
+                  $error =   ErrorLog::create($errorLog);
+
+                  $responseData = json_decode($response->getContent(), true);
+                  if (isset($responseData['message'])) {
+                      $responseData['message'] = "Error ID: ".$error->id." - Status: ".$error->status_code." -  ". $responseData['message'];
+                  }
+                  $response->setContent(json_encode($responseData));
 
             }
+
         }
 
         return $response;
