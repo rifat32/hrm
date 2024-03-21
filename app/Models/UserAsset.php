@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserAsset extends Model
 {
     use HasFactory;
+    protected $appends = ['can_delete'];
     protected $fillable = [
         'user_id',
         'name',
@@ -23,6 +24,17 @@ class UserAsset extends Model
         "business_id",
         'created_by',
     ];
+
+    public function getCanDeleteAttribute($value) {
+        $request = request();
+        // You can now use $currentRequest as the request object
+
+        if(!auth()->user()->hasRole("business_owner") && auth()->user()->id != $this->created_by) {
+                return 0;
+        }
+        return 1;
+
+        }
 
     // Relationships
     public function user()
@@ -39,7 +51,7 @@ class UserAsset extends Model
 
 
 
-    
+
     // public function getCreatedAtAttribute($value)
     // {
     //     return (new Carbon($value))->format('d-m-Y');

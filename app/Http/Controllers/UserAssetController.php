@@ -979,7 +979,8 @@ class UserAssetController extends Controller
                   $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
               }
               $idsArray = explode(',', $ids);
-              $existingIds = UserAsset::whereIn('id', $idsArray)
+
+              $userAssets = UserAsset::whereIn('id', $idsArray)
               ->where(function($query) use($all_manager_department_ids) {
                 $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
@@ -992,10 +993,12 @@ class UserAssetController extends Controller
                 "business_id" => auth()->user()->business_id
               ])
                   ->select('id')
-                  ->get()
-                  ->pluck('id')
-                  ->toArray();
-              $nonExistingIds = array_diff($idsArray, $existingIds);
+                  ->get();
+
+            $canDeleteAssetIds = $userAssets->filter(function ($asset) {
+                    return $asset->can_delete;
+                })->pluck('id')->toArray();
+              $nonExistingIds = array_diff($idsArray, $canDeleteAssetIds);
 
               if (!empty($nonExistingIds)) {
                 $this->storeError(
@@ -1009,10 +1012,17 @@ class UserAssetController extends Controller
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);
               }
-              UserAsset::destroy($existingIds);
+              UserAsset::destroy($canDeleteAssetIds);
 
+            UserAssetHistory::where([
+                "to_date" => NULL
+            ])
+            ->whereIn("user_asset_id",$canDeleteAssetIds)
+            ->update([
+                "to_date" => now(),
+            ]);
 
-              return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+              return response()->json(["message" => "data deleted sussfully","deleted_ids" => $canDeleteAssetIds], 200);
           } catch (Exception $e) {
 
               return $this->sendError($e, 500, $request);

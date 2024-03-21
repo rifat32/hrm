@@ -7,6 +7,7 @@ use App\Http\Requests\ProjectAssignToUserRequest;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
 use App\Http\Requests\UserAssignToProjectRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
@@ -26,7 +27,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil,ModuleUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil,ModuleUtil, BasicUtil;
     /**
      *
      * @OA\Post(
@@ -89,8 +90,10 @@ class ProjectController extends Controller
 
     public function createProject(ProjectCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
 
             if(!$this->isModuleEnabled("project_and_task_management")) {
                 $this->storeError(
@@ -101,7 +104,7 @@ class ProjectController extends Controller
                    );
                 return response()->json(['error' => 'Module is not enabled'], 403);
              }
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('project_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -115,7 +118,7 @@ class ProjectController extends Controller
                 $request_data["is_active"] = true;
                 $request_data["is_default"] = false;
 
-                $request_data["created_by"] = $request->user()->id;
+                $request_data["created_by"] = auth()->user()->id;
 
                 $project =  Project::create($request_data);
 
@@ -125,9 +128,15 @@ class ProjectController extends Controller
 
 
                 $project->departments()->sync($request_data['departments']);
+
+
+
+
+                DB::commit();
                 return response($project, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
@@ -559,9 +568,6 @@ class ProjectController extends Controller
                  $business_id =  $request->user()->business_id;
                  $request_data = $request->validated();
 
-
-
-
                  $user_query_params = [
                      "id" => $request_data["id"],
                  ];
@@ -909,8 +915,6 @@ class ProjectController extends Controller
                         'start_date',
                         'end_date',
                         'status',
-
-
                         // "is_active",
                         // "business_id",
                         // "created_by"
@@ -1087,12 +1091,6 @@ class ProjectController extends Controller
             $business_id =  $request->user()->business_id;
 
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
 
 
             $projects = Project::with("departments","users")
@@ -1244,21 +1242,14 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::with("users")->where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
             $business_id =  $request->user()->business_id;
             $project =  Project::with("departments","users")
             ->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
-            ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-             })
+
             ->select('projects.*'
              )
                 ->first();
