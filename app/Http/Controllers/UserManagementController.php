@@ -6658,7 +6658,6 @@ class UserManagementController extends Controller
                     "updated_at",
                     "user",
                     "user_id",
-
                 )
 
                 ->when(!empty($request->per_page), function ($query) use ($request) {

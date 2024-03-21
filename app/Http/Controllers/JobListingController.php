@@ -719,11 +719,10 @@ class JobListingController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-             $business_id =  $request->user()->business_id;
+
              $job_listing =  JobListing::with("job_platforms","job_type","work_location","department")
              ->where([
                  "id" => $id,
-                 "business_id" => $business_id
              ])
              ->select('job_listings.*')
              ->first();

@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     use HasFactory;
-    protected $appends = ['can_update'];
+    protected $appends = ['can_update','can_delete'];
+
     protected $fillable = [
         'name',
         'description',
@@ -21,6 +22,18 @@ class Project extends Model
         "business_id",
         "created_by"
     ];
+
+
+    public function getCanDeleteAttribute($value) {
+        $request = request();
+        // You can now use $currentRequest as the request object
+
+        if(!auth()->user()->hasRole("business_owner") && auth()->user()->id != $this->created_by) {
+                return 0;
+        }
+        return 1;
+
+        }
 
     public function getCanUpdateAttribute($value) {
         $request = request();

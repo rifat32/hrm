@@ -1352,15 +1352,18 @@ class ProjectController extends Controller
             }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
-            $existingIds = Project::where([
+            $projects = Project::where([
                 "business_id" => $business_id
             ])
                 ->whereIn('id', $idsArray)
                 ->select('id')
-                ->get()
-                ->pluck('id')
-                ->toArray();
-            $nonExistingIds = array_diff($idsArray, $existingIds);
+                ->get();
+
+                $canDeleteProjectIds = $projects->filter(function ($asset) {
+                    return $asset->can_delete;
+                })->pluck('id')->toArray();
+              $nonExistingIds = array_diff($idsArray, $canDeleteProjectIds);
+
 
             if (!empty($nonExistingIds)) {
                 $this->storeError(
@@ -1374,10 +1377,10 @@ class ProjectController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            Project::destroy($existingIds);
+            Project::destroy($canDeleteProjectIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $canDeleteProjectIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
