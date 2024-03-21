@@ -88,7 +88,7 @@ else {
                     'quantity' => 1,
                 ],
             ],
-            'customer' => $stripe_customer_id ?? null,
+            'customer' => $user->stripe_id  ?? null,
             'mode' => 'subscription',
             'success_url' => route('subscription.success_payment'),
             'cancel_url' => route('subscription.failed_payment'),
