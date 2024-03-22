@@ -219,10 +219,6 @@ class AuthController extends Controller
                 $diffInMinutes = $now->diffInMinutes($lastFailedAttempt);
 
                 if ($diffInMinutes < 15) {
-
-
-
-
                     return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
                 } else {
                     $user->login_attempts = 0;
@@ -261,8 +257,6 @@ class AuthController extends Controller
 
             if(!$user->is_active) {
 
-
-
                 return response(['message' => 'User not active'], 403);
             }
 
@@ -279,6 +273,11 @@ class AuthController extends Controller
                  if(!$business->is_active) {
 
                     return response(['message' => 'Business not active'], 403);
+                }
+
+
+                if(!$user->manages_department) {
+                    return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
                 }
 
             }
@@ -1127,7 +1126,7 @@ try{
 
 
     if (!Hash::check($client_request["current_password"],$user->password)) {
-    
+
         return response()->json([
             "message" => "Invalid password"
         ], 400);

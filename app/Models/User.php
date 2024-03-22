@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-
+use App\Http\Utils\BasicUtil;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +14,7 @@ use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
-    use   Billable, HasApiTokens, HasFactory, Notifiable, HasRoles,HasPermissions,SoftDeletes;
+    use   Billable, HasApiTokens, HasFactory, Notifiable, HasRoles,HasPermissions,SoftDeletes, BasicUtil;
 
     /**
      * The attributes that are mass assignable.
@@ -25,7 +25,7 @@ class User extends Authenticatable
     protected $connection = 'mysql';
 
 
-    protected $appends = ['has_this_project'];
+    protected $appends = ['has_this_project',"manages_department"];
     protected $guard_name = "api";
     protected $fillable = [
         'first_Name',
@@ -64,7 +64,7 @@ class User extends Authenticatable
         'password',
         'is_sponsorship_offered',
         "date_of_birth",
-        
+
         "immigration_status",
 
         'work_location_id',
@@ -103,8 +103,18 @@ class User extends Authenticatable
       ->first();
 
       return $project?1:0;
-
     }
+
+
+    public function getManagesDepartmentAttribute($value) {
+
+$all_departments = $this->get_all_departments_of_manager();
+
+return count($all_departments) > 0;
+
+        }
+
+
 
     public function payrun_user()
     {
