@@ -464,6 +464,7 @@ return [
             "role" => "business_admin",
             "permissions" => [
 
+                "business_admin",
 
                 "user_create",
                 "user_update",
@@ -917,6 +918,7 @@ return [
         "handle_self_registered_businesses",
 
         "business_owner",
+        "business_admin",
 
         "reminder_create",
         "reminder_update",

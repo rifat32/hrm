@@ -18,6 +18,11 @@
 
             return $capitalizedString;
         }
+
+        function format_date($date) {
+    return \Carbon\Carbon::parse($date)->format('d-m-Y');
+}
+
     @endphp
 
     @php
@@ -142,7 +147,7 @@
         </thead>
         <tbody>
 
-                @foreach ($user->user_assets as $index => $asset)
+                @foreach ($user_assets as $index => $asset)
                     <tr class="table_row">
 
                         <td>{{ $asset->name }}</td>

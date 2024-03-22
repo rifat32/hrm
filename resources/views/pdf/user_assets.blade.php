@@ -147,7 +147,7 @@
         </thead>
         <tbody>
 
-                @foreach ($user->user_assets as $index => $asset)
+                @foreach ($user_assets as $index => $asset)
                     <tr class="table_row">
 
                         <td>{{ $asset->name }}</td>
