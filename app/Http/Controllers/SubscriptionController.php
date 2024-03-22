@@ -9,6 +9,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 
 class SubscriptionController extends Controller
@@ -27,7 +29,7 @@ else {
 }
         $business = Business::findOrFail($trimmed_id);
         $user = User::findOrFail($business->owner_id);
-
+        Auth::login($user);
 
         $service_plan = ServicePlan::where([
             "id" => $business->service_plan_id
@@ -90,8 +92,8 @@ else {
             ],
             'customer' => $user->stripe_id  ?? null,
             'mode' => 'subscription',
-            'success_url' => route('subscription.success_payment'),
-            'cancel_url' => route('subscription.failed_payment'),
+            'success_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business/" . auth()->user()->createToken('authToken')->accessToken,
+            'cancel_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business/" . auth()->user()->createToken('authToken')->accessToken,
         ];
 
         // Add discount line item only if discount amount is greater than 0 and not null
