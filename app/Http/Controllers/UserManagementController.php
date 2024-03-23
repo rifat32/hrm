@@ -6408,6 +6408,14 @@ class UserManagementController extends Controller
      *         required=true,
      *  example="1"
      *      ),
+     *    *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="1"
+     *      ),
+
 
      *      summary="This method is to validate employee id",
      *      description="This method is to validate employee id",
@@ -6456,7 +6464,13 @@ class UserManagementController extends Controller
                     'user_id' => $user_id,
                     "business_id" => $request->user()->business_id
                 ]
-            )->exists();
+            )
+            ->when(
+                !empty($request->id),
+                function($query) use($request){
+                    $query->whereNotIn("id",[$request->id]);
+                })
+            ->exists();
 
 
 
