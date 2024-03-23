@@ -151,9 +151,9 @@ return [
                 "designation_view",
                 // "designation_delete",
 
-                "bank_create",
-                "bank_update",
-                "bank_view",
+                // "bank_create",
+                // "bank_update",
+                 "bank_view",
                 // "bank_delete",
 
 
@@ -387,11 +387,11 @@ return [
                 "designation_activate",
                 "designation_delete",
 
-                "bank_create",
-                "bank_update",
+                // "bank_create",
+                // "bank_update",
                 "bank_activate",
                 "bank_view",
-                "bank_delete",
+                // "bank_delete",
 
                 "job_type_create",
                 "job_type_update",
@@ -620,11 +620,11 @@ return [
                 "designation_activate",
                 "designation_delete",
 
-                "bank_create",
-                "bank_update",
+                // "bank_create",
+                // "bank_update",
                 "bank_activate",
                 "bank_view",
-                "bank_delete",
+                // "bank_delete",
 
                 "job_type_create",
                 "job_type_update",
@@ -831,7 +831,7 @@ return [
 
                 // "bank_create",
                 // "bank_update",
-                // "bank_activate",
+                "bank_activate",
                 "bank_view",
                 // "bank_delete",
 
