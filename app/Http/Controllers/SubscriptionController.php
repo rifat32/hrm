@@ -92,8 +92,8 @@ else {
             ],
             'customer' => $user->stripe_id  ?? null,
             'mode' => 'subscription',
-            'success_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business/" . auth()->user()->createToken('authToken')->accessToken,
-            'cancel_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business/" . auth()->user()->createToken('authToken')->accessToken,
+            'success_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business",
+            'cancel_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business",
         ];
 
         // Add discount line item only if discount amount is greater than 0 and not null
