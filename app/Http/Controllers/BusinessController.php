@@ -2139,9 +2139,8 @@ class BusinessController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = Business::whereIn('id', $idsArray)
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
-
-                    return   $query->where(function ($query) {
-                        return  $query->where('id', auth()->user()->business_id)
+                       $query->where(function ($query) {
+                          $query->where('id', auth()->user()->business_id)
                             ->orWhere('created_by', auth()->user()->id)
                             ->orWhere('owner_id', auth()->user()->id);
                     });
@@ -2155,11 +2154,16 @@ class BusinessController extends Controller
 
             if (!empty($nonExistingIds)) {
                 return response()->json([
-                    "message" => "Some or all of the specified data do not exist."
+                    "message" => "Some or all of the specified data do not exist.",
+                    "non_existing_ids" => $nonExistingIds
                 ], 404);
             }
 
-Business::whereIn('id', $existingIds)->forceDelete();
+           // Disable foreign key checks
+DB::statement('SET FOREIGN_KEY_CHECKS=0');
+            Business::whereIn('id', $existingIds)->forceDelete();
+            // Re-enable foreign key checks
+DB::statement('SET FOREIGN_KEY_CHECKS=1');
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 

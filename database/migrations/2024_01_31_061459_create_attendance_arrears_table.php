@@ -16,7 +16,7 @@ class CreateAttendanceArrearsTable extends Migration
         Schema::create('attendance_arrears', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("attendance_id");
-            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('restrict');
+            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
             $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
             $table->timestamps();
         });

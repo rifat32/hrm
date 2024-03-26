@@ -56,8 +56,7 @@ class UserAssetAddExistingRequest extends BaseFormRequest
             }
 
 
-
-                },
+                 },
             ],
             'id' => [
                 'required',
@@ -65,9 +64,15 @@ class UserAssetAddExistingRequest extends BaseFormRequest
                 function ($attribute, $value, $fail) use ($all_manager_department_ids) {
                     $exists = UserAsset::where('id', $value)
                         ->where('user_assets.business_id', '=', auth()->user()->business_id)
-                        ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
-                            $query->whereIn("departments.id",$all_manager_department_ids);
-                         })
+                        ->where(function($query) use($all_manager_department_ids) {
+                            $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                                $query->whereIn("departments.id",$all_manager_department_ids);
+                             })
+                             ->orWhere('user_assets.user_id', NULL)
+                             ;
+
+                          })
+
                         ->exists();
 
                     if (!$exists) {
