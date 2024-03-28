@@ -10,6 +10,10 @@ return [
                 "global_business_background_image_create",
                 "global_business_background_image_view",
 
+        "system_setting_update",
+        "system_setting_view",
+
+
                 "module_update",
                 "module_view",
 
@@ -928,6 +932,13 @@ return [
         "global_business_background_image_create",
         "global_business_background_image_view",
 
+
+
+
+
+        "system_setting_update",
+        "system_setting_view",
+
         "module_update",
         "module_view",
 
@@ -1206,6 +1217,9 @@ return [
         "global_business_background_image_create" => "Can create global business background image",
         "global_business_background_image_view" => "Can view global business background image",
 
+
+        "system_setting_update" => "",
+        "system_setting_view" => "",
 
         "module_update" => "Can enable module",
         "module_view" => "Can view module",
@@ -1502,8 +1516,15 @@ return [
         "global_business_background_image_create" => "create",
         "global_business_background_image_view" => "view",
 
+
+
+        "system_setting_update" => "update",
+        "system_setting_view" => "view",
+
         "module_update" => "enable",
         "module_view" => "view",
+
+
 
 
         "user_create" => "create",
@@ -1812,15 +1833,23 @@ return [
             ],
         ],
 
+        [
+            "header" => "system_setting",
+            "permissions" => [
+                "system_setting_update",
+                "system_setting_view",
+            ],
+        ],
 
         [
             "header" => "module",
             "permissions" => [
                 "module_update",
                 "module_view",
-
             ],
         ],
+
+
 
         [
             "header" => "business_tier",

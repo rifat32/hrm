@@ -43,6 +43,7 @@ use App\Http\Controllers\SettingLeaveTypeController;
 use App\Http\Controllers\SettingPaymentDateController;
 use App\Http\Controllers\SettingPayrollController;
 use App\Http\Controllers\SocialSiteController;
+use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserAddressHistoryController;
 use App\Http\Controllers\UserAssetController;
@@ -199,10 +200,37 @@ Route::middleware(['auth:api',"business.subscription.check"])->group(function ()
 
 
 
-    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// modules  management section
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// system  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::put('/v1.0/system-settings', [SystemSettingController::class, "updateSystemSetting"]);
+Route::get('/v1.0/system-settings', [SystemSettingController::class, "getSystemSetting"]);
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end system management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// modules  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::put('/v1.0/modules/toggle-active', [ModuleController::class, "toggleActiveModule"]);
 Route::get('/v1.0/modules', [ModuleController::class, "getModules"]);
@@ -569,7 +597,7 @@ Route::get('/v1.0/businesses-pension-information/{id}', [BusinessController::cla
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// Garage Time Management
+// business Time Management
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::patch('/v1.0/business-times', [BusinessTimesController::class, "updateBusinessTimes"]);
@@ -1229,7 +1257,7 @@ Route::post('/v1.0/client/candidates', [CandidateController::class, "createCandi
 Route::post('/v1.0/client/auth/register-with-business', [BusinessController::class, "registerUserWithBusinessClient"]);
 Route::get('/v1.0/client/service-plans', [ServicePlanController::class, "getServicePlanClient"]);
 
-
+Route::get('/v1.0/client/system-settings', [SystemSettingController::class, "getSystemSettingSettingClient"]);
 
 
 

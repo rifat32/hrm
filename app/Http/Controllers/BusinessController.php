@@ -1051,6 +1051,7 @@ class BusinessController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
+
                 if (!$this->businessOwnerCheck($request["business"]["id"])) {
                     return response()->json([
                         "message" => "you are not the owner of the business or the requested business does not exist."
@@ -1169,10 +1170,6 @@ class BusinessController extends Controller
                         "status",
                         "background_image",
                         // "is_active",
-
-
-
-
                         "currency"
 
                     ])->toArray()
