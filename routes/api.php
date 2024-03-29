@@ -14,6 +14,7 @@ use App\Http\Controllers\BusinessTierController;
 use App\Http\Controllers\BusinessTimesController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\DropdownOptionsController;
@@ -1264,7 +1265,7 @@ Route::get('/v1.0/client/system-settings', [SystemSettingController::class, "get
 
 
 
-
+Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"])->name("stripe.webhook");
 
 
 

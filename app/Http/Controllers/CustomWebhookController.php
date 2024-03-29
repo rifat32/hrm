@@ -35,7 +35,7 @@ class CustomWebhookController extends WebhookController
         Log::info('Event Type: ' . $eventType);
 
         // Handle the event based on its type
-        if ($eventType === 'charge.succeeded') {
+        if ($eventType === 'checkout.session.completed') {
             $this->handleChargeSucceeded($payload['data']['object']);
         }
 
@@ -49,14 +49,20 @@ class CustomWebhookController extends WebhookController
      * @param  array  $paymentCharge
      * @return void
      */
-    protected function handleChargeSucceeded($paymentCharge)
+    protected function handleChargeSucceeded($data)
     {
+
+
+
         // Extract required data from payment charge
-        $amount = $paymentCharge['amount'] ?? null;
-        $currency = $paymentCharge['currency'] ?? null;
-        $customerID = $paymentCharge['customer'] ?? null;
+        $amount = $data['amount'] ?? null;
+        $customerID = $data['customer'] ?? null;
+        $metadata = $data->metadata ?? [];
         // Add more fields as needed
 
+        if(!empty($metadata["our_url"]) && $metadata["our_url"] != route('stripe.webhook')){
+               return;
+        }
 
         $user = User::where("stripe_id",$customerID)->first();
 
@@ -66,7 +72,7 @@ class CustomWebhookController extends WebhookController
             'service_plan_id' => $user->business->service_plan_id,
             'start_date' => now(),  // Start date of the subscription
             'end_date' => Carbon::now()->addDays($service_plan->duration_months),  // End date based on plan duration
-            'amount' => $paymentCharge['amount'],
+            'amount' => $amount,
             'paid_at' => now(),
 
         ]);

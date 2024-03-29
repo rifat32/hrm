@@ -11,7 +11,7 @@ use OpenApi\Annotations as OA;
 use OpenApi\Generator;
 use OpenApi\Processors\Concerns\DocblockTrait;
 
-class AugmentParameters
+class AugmentParameters implements ProcessorInterface
 {
     use DocblockTrait;
 
@@ -29,8 +29,6 @@ class AugmentParameters
 
     /**
      * If set to <code>true</code> try to find operation parameter descriptions in the operation docblock.
-     *
-     * @param bool $augmentOperationParameters
      */
     public function setAugmentOperationParameters(bool $augmentOperationParameters): void
     {
