@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateSystemSettingsTable extends Migration
@@ -19,9 +20,17 @@ class CreateSystemSettingsTable extends Migration
             $table->boolean('registration_enabled')->default(true);
             $table->text('STRIPE_KEY')->nullable();
             $table->text('STRIPE_SECRET')->nullable();
-
             $table->timestamps();
         });
+        DB::table('system_settings')
+        ->insert(array(
+           [
+            "registration_enabled" => 0,
+            "STRIPE_KEY" => NULL,
+            "STRIPE_SECRET" => NULL,
+           ],
+        ));
+
     }
 
     /**

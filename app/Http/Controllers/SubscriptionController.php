@@ -50,12 +50,13 @@ $webhookEndpoints = WebhookEndpoint::all();
 $existingEndpoint = collect($webhookEndpoints->data)->first(function ($endpoint) {
     return $endpoint->url === route('stripe.webhook'); // Replace with your actual endpoint URL
 });
-if ($existingEndpoint) {
+if (!$existingEndpoint) {
 // Create the webhook endpoint
 $webhookEndpoint = WebhookEndpoint::create([
     'url' => route('stripe.webhook'),
     'enabled_events' => ['checkout.session.completed'], // Specify the events you want to listen to
 ]);
+
 }
 
 
