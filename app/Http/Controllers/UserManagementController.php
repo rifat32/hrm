@@ -495,39 +495,8 @@ class UserManagementController extends Controller
                 $user->user_name = $username;
                 $user->email_verified_at = now();
                 $user->save();
-
-
                 $user->assignRole($request_data['role']);
-
-                // $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
-
-                // $default_work_shift = WorkShift::where([
-                //       "business_id" => auth()->user()->id,
-                //       "is_business_default" => 1
-                // ])
-                // ->first();
-                // if(!$default_work_shift) {
-                //     throw new Error("There is no default workshift for this business");
-                //  }
-                //   $default_work_shift->users()->attach($user->id);
-
                 $user->roles = $user->roles->pluck('name');
-
-
-                // $this->loadDefaultSettingLeave($user->business_id);
-                // $this->loadDefaultAttendanceSetting($user->business_id);
-                // $this->loadDefaultPayrunSetting($user->business_id);
-                // $this->loadDefaultPaymentDateSetting($user->business_id);
-
-
-
-
-                // $user->permissions  = $user->getAllPermissions()->pluck('name');
-                // error_log("cccccc");
-                // $data["user"] = $user;
-                // $data["permissions"]  = $user->getAllPermissions()->pluck('name');
-                // $data["roles"] = $user->roles->pluck('name');
-                // $data["token"] = $token;
                 return response($user, 201);
             });
         } catch (Exception $e) {
@@ -941,12 +910,6 @@ class UserManagementController extends Controller
             }
 
 
-
-
-
-
-
-
             if (!empty($request_data['password'])) {
                 $request_data['password'] = Hash::make($request_data['password']);
             } else {
@@ -1120,13 +1083,7 @@ class UserManagementController extends Controller
                 }
             }
 
-
-
-
-
-
             $roles = Role::whereIn('name', $request_data["roles"])->get();
-
 
             $user->syncRoles($roles);
 
@@ -1920,8 +1877,6 @@ class UserManagementController extends Controller
             ]);
 
 
-
-
             $user = tap($user_query)->update(
                 collect($request_data)->only([
                     'joining_date'
@@ -2296,79 +2251,15 @@ class UserManagementController extends Controller
 
                 ->first();
 
-
-
-
-
-
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
 
-
-
-
             // history section
-
-            $address_history_data = [
-                'user_id' => $user->id,
-                'from_date' => now(),
-                'created_by' => $request->user()->id,
-                'address_line_1' => $request_data["address_line_1"],
-                'address_line_2' => $request_data["address_line_2"],
-                'country' => $request_data["country"],
-                'city' => $request_data["city"],
-                'postcode' => $request_data["postcode"],
-                'lat' => $request_data["lat"],
-                'long' => $request_data["long"]
-            ];
-
-            $employee_address_history  =  EmployeeAddressHistory::where([
-                "user_id" =>   $updatableUser->id,
-                "to_date" => NULL
-            ])
-                ->latest('created_at')
-                ->first();
-
-            if ($employee_address_history) {
-                $fields_to_check = ["address_line_1", "address_line_2", "country", "city", "postcode"];
-
-
-                $fields_changed = false; // Initialize to false
-                foreach ($fields_to_check as $field) {
-                    $value1 = $employee_address_history->$field;
-                    $value2 = $request_data[$field];
-
-                    if ($value1 !== $value2) {
-                        $fields_changed = true;
-                        break;
-                    }
-                }
-
-
-
-
-
-
-                if (
-                    $fields_changed
-                ) {
-                    $employee_address_history->to_date = now();
-                    $employee_address_history->save();
-                    EmployeeAddressHistory::create($address_history_data);
-                }
-            } else {
-                EmployeeAddressHistory::create($address_history_data);
-            }
-
+                $this->update_address_history($request_data,$user);
             // end history section
 
 
@@ -2868,12 +2759,8 @@ class UserManagementController extends Controller
                 "is_active" => 1
             ])->count();
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
             $today = today();
 
             $users = User::with(
@@ -3438,12 +3325,8 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
             $users = User::with(
                 [
@@ -3667,12 +3550,8 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
 
             $users = User::with(
@@ -5004,12 +4883,8 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
             $user = User::with("roles")
                 ->where([
                     "id" => $id
@@ -5104,6 +4979,14 @@ class UserManagementController extends Controller
      *         required=true,
      *  example="6"
      *      ),
+     *      *     *              @OA\Parameter(
+     *         name="is_including_leaves",
+     *         in="path",
+     *         description="is_including_leaves",
+     *         required=true,
+     *  example="1"
+     *      ),
+
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
@@ -5145,9 +5028,9 @@ class UserManagementController extends Controller
 
     public function getAttendancesByUserId($id, Request $request)
     {
-        $logPath = storage_path('logs');
 
-        foreach (File::glob($logPath . '/*.log') as $file) {
+
+        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
             File::delete($file);
         }
         try {
@@ -5158,12 +5041,8 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
             $user = User::with("roles")
                 ->where([
@@ -5182,33 +5061,16 @@ class UserManagementController extends Controller
                 ->first();
 
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
 
 
-            $all_parent_department_ids = [];
-            $assigned_departments = Department::whereHas("users", function ($query) use ($id) {
-                $query->where("users.id", $id);
-            })->get();
 
 
-            foreach ($assigned_departments as $assigned_department) {
-                array_push($all_parent_department_ids, $assigned_department->id);
-                $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-            }
-
-
-            $today = Carbon::now()->startOfYear()->format('Y-m-d');
-            $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
-
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
 
 
@@ -5216,8 +5078,8 @@ class UserManagementController extends Controller
             $already_taken_attendances =  Attendance::where([
                 "user_id" => $user->id
             ])
-                ->where('attendances.in_date', '>=', $today)
-                ->where('attendances.in_date', '<=', $end_date_of_year . ' 23:59:59')
+                ->where('attendances.in_date', '>=', $start_date)
+                ->where('attendances.in_date', '<=', $end_date . ' 23:59:59')
                 ->get();
 
 
@@ -5226,14 +5088,38 @@ class UserManagementController extends Controller
             });
 
 
+            $already_taken_leaves =  Leave::where([
+                "user_id" => $user->id
+            ])
+                ->whereHas('records', function ($query) use ($start_date, $end_date) {
+                    $query->where('leave_records.date', '>=', $start_date)
+                        ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
+                })
+                ->get();
 
 
-            // Merge the collections and remove duplicates
-            $result_collection = $already_taken_attendance_dates->unique();
+            $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
+                return $leave->records->map(function ($record) {
+                    return Carbon::parse($record->date)->format('d-m-Y');
+                });
+            })->toArray();
 
 
-            // $result_collection now contains all unique dates from holidays and weekends
-            $result_array = $result_collection->values()->all();
+
+
+
+            $result_collection = $already_taken_attendance_dates;
+
+            if (isset($request->is_including_leaves)) {
+                if (intval($request->is_including_leaves) == 1) {
+                    $result_collection = $result_collection->merge($already_taken_leave_dates);
+                }
+            }
+
+
+            $unique_result_collection = $result_collection->unique();
+            $result_array = $unique_result_collection->values()->all();
+
 
 
 
@@ -5308,9 +5194,9 @@ class UserManagementController extends Controller
 
     public function getholidayDetailsByUserId($id, Request $request)
     {
-        $logPath = storage_path('logs');
 
-        foreach (File::glob($logPath . '/*.log') as $file) {
+
+        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
             File::delete($file);
         }
         try {
@@ -5321,12 +5207,8 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
             $user = User::with("roles")
                 ->where([
@@ -5357,26 +5239,17 @@ class UserManagementController extends Controller
             }
 
 
-            $all_parent_department_ids = [];
-            $assigned_departments = Department::whereHas("users", function ($query) use ($id) {
-                $query->where("users.id", $id);
-            })->get();
+            $all_parent_department_ids = $this->all_parent_departments_of_user($id);
 
 
-            foreach ($assigned_departments as $assigned_department) {
-                array_push($all_parent_department_ids, $assigned_department->id);
-                $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-            }
-
-
-            $start_of_year = Carbon::now()->startOfYear()->format('Y-m-d');
-            $end_date_of_year = Carbon::now()->endOfYear()->format('Y-m-d');
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
             $holidays = Holiday::where([
                 "business_id" => $user->business_id
             ])
-                ->where('holidays.start_date', ">=", $start_of_year)
-                ->where('holidays.end_date', "<=", $end_date_of_year . ' 23:59:59')
+                ->where('holidays.start_date', ">=", $start_date)
+                ->where('holidays.end_date', "<=", $end_date . ' 23:59:59')
                 ->where([
                     "is_active" => 1
                 ])
@@ -5400,22 +5273,15 @@ class UserManagementController extends Controller
                 ->get();
 
 
-
-
-
-
-
-
-
             $holiday_dates = $holidays->flatMap(function ($holiday) {
-                $start_date = Carbon::parse($holiday->start_date);
-                $end_date = Carbon::parse($holiday->end_date);
+                $start_holiday_date = Carbon::parse($holiday->start_date);
+                $end_holiday_date = Carbon::parse($holiday->end_date);
 
-                if ($start_date->eq($end_date)) {
-                    return [$start_date->format('d-m-Y')];
+                if ($start_holiday_date->eq($end_holiday_date)) {
+                    return [$start_holiday_date->format('d-m-Y')];
                 }
 
-                $date_range = $start_date->daysUntil($end_date->addDay());
+                $date_range = $start_holiday_date->daysUntil($end_holiday_date->addDay());
 
                 return $date_range->map(function ($date) {
                     return $date->format('d-m-Y');
@@ -5423,54 +5289,16 @@ class UserManagementController extends Controller
             });
 
 
-
-            // $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
-            //     $query->where('users.id', $user->id);
-            // })
-            //     ->first();
-            //     if (!$work_shift) {
-            //         $this->storeError(
-            //             "Please define workshift first"
-            //             ,
-            //             400,
-            //             "front end error",
-            //             "front end error"
-            //            );
-            //         return response()->json(["message" => "Please define workshift first"], 400);
-            //     }
-            // $weekends = $work_shift->details()->where([
-            //     "is_weekend" => 1
-            // ])
-            //     ->get();
-
-            // $weekend_dates = $weekends->flatMap(function ($weekend) use ($start_of_year, $end_date_of_year) {
-            //     $day_of_week = $weekend->day;
-
-            //     // Find the next occurrence of the specified day of the week
-            //     $next_day = Carbon::parse($start_of_year)->copy()->next($day_of_week);
-
-            //     $matching_days = [];
-
-            //     // Loop through the days between today and the end date
-            //     while ($next_day <= $end_date_of_year) {
-            //         $matching_days[] = $next_day->format('d-m-Y');
-            //         $next_day->addWeek(); // Move to the next week
-            //     }
-
-            //     return $matching_days;
-            // });
-
-
-            $work_shift_histories = WorkShiftHistory::where("from_date", "<", $end_date_of_year)
-                ->where(function ($query) use ($start_of_year) {
-                    $query->where("to_date", ">=", $start_of_year)
+            $work_shift_histories = WorkShiftHistory::where("from_date", "<", $end_date)
+                ->where(function ($query) use ($start_date) {
+                    $query->where("to_date", ">=", $start_date)
                         ->orWhereNull("to_date");
                 })
-                ->whereHas("users", function ($query) use ($start_of_year, $user, $end_date_of_year) {
+                ->whereHas("users", function ($query) use ($start_date, $user, $end_date) {
                     $query->where("users.id", $user->id)
-                        ->where("employee_user_work_shift_histories.from_date", "<", $end_date_of_year)
-                        ->where(function ($query) use ($start_of_year) {
-                            $query->where("employee_user_work_shift_histories.to_date", ">=", $start_of_year)
+                        ->where("employee_user_work_shift_histories.from_date", "<", $end_date)
+                        ->where(function ($query) use ($start_date) {
+                            $query->where("employee_user_work_shift_histories.to_date", ">=", $start_date)
                                 ->orWhereNull("employee_user_work_shift_histories.to_date");
                         });
                 })
@@ -5490,76 +5318,51 @@ class UserManagementController extends Controller
             $weekend_dates = collect(); // Initialize an empty collection to store weekend dates
 
             $user_id = $user->id;
-            $work_shift_histories->each(function ($work_shift) use ($start_of_year, $end_date_of_year, &$weekend_dates, $user_id) {
+            $work_shift_histories->each(function ($work_shift) use ($start_date, $end_date, &$weekend_dates, $user_id) {
                 $weekends = $work_shift->details()->where("is_weekend", 1)->get();
 
-                $weekends->each(function ($weekend) use ($start_of_year, $end_date_of_year, &$weekend_dates, $work_shift, $user_id) {
+                $weekends->each(function ($weekend) use ($start_date, $end_date, &$weekend_dates, $work_shift, $user_id) {
                     $day_of_week = $weekend->day;
 
-                    // Determine the end date for the loop
-                    // Determine the end date for the loop
-                    // $end_date = $work_shift->to_date ? ($work_shift->to_date->lt($end_date_of_year) ? $work_shift->to_date : $end_date_of_year) : $end_date_of_year;
 
-                    // // Determine the start date for the loop
-                    // $start_date = $work_shift->from_date->gt($start_of_year) ? $work_shift->from_date : $start_of_year;
-
-                    // Determine the end date for the loop
                     $user = $work_shift->users->first(function ($user) use ($user_id) {
                         return $user->id == $user_id;
                     });
                     $user_to_date = $user->pivot->to_date ?? null;
 
                     if ($user_to_date) {
-                        $end_date = $user_to_date;
+                        $end_work_shift_date = $user_to_date;
                     } elseif ($work_shift->to_date) {
-                        $end_date = $work_shift->to_date;
+                        $end_work_shift_date = $work_shift->to_date;
                     } else {
-                        $end_date = $end_date_of_year;
+                        $end_work_shift_date = $end_date;
                     }
 
                     $user_from_date = $user->pivot->from_date;
                     Log::alert(json_encode($user->pivot));
-                    $start_date = Carbon::parse($user_from_date)->gt($start_of_year) ? $user_from_date : $start_of_year;
+                    $start_work_shift_date = Carbon::parse($user_from_date)->gt($start_date) ? $user_from_date : $start_date;
 
 
                     // Find the next occurrence of the specified day of the week
-                    $next_day = Carbon::parse($start_date)->copy()->next($day_of_week);
+                    $next_day = Carbon::parse($start_work_shift_date)->copy()->next($day_of_week);
 
 
                     // Loop through the days until either the to_date or the end of the year
-                    while ($next_day <= $end_date) {
+                    while ($next_day <= $end_work_shift_date) {
                         $weekend_dates->push($next_day->format('d-m-Y'));
                         $next_day->addWeek(); // Move to the next week
                     }
                 });
             });
 
-            // $weekend_dates now contains all the weekend dates
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             $already_taken_leaves =  Leave::where([
                 "user_id" => $user->id
             ])
-                ->whereHas('records', function ($query) use ($start_of_year, $end_date_of_year) {
-                    $query->where('leave_records.date', '>=', $start_of_year)
-                        ->where('leave_records.date', '<=', $end_date_of_year . ' 23:59:59');
+                ->whereHas('records', function ($query) use ($start_date, $end_date) {
+                    $query->where('leave_records.date', '>=', $start_date)
+                        ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
                 })
                 ->get();
 
@@ -5571,26 +5374,17 @@ class UserManagementController extends Controller
             })->toArray();
 
 
-
-
-
-
-
             $already_taken_attendances =  Attendance::where([
                 "user_id" => $user->id
             ])
-                ->where('attendances.in_date', '>=', $start_of_year)
-                ->where('attendances.in_date', '<=', $end_date_of_year . ' 23:59:59')
+                ->where('attendances.in_date', '>=', $start_date)
+                ->where('attendances.in_date', '<=', $end_date . ' 23:59:59')
                 ->get();
 
 
             $already_taken_attendance_dates = $already_taken_attendances->map(function ($attendance) {
                 return Carbon::parse($attendance->in_date)->format('d-m-Y');
             })->toArray();
-
-
-
-
 
 
             $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates);
@@ -5687,10 +5481,7 @@ class UserManagementController extends Controller
 
     public function getScheduleInformationByUserId($id, Request $request)
     {
-        //  $logPath = storage_path('logs');
-        //  foreach (File::glob($logPath . '/*.log') as $file) {
-        //      File::delete($file);
-        //  }
+
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
@@ -5699,12 +5490,8 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
             $user = User::with("roles")
                 ->where([
@@ -5723,28 +5510,15 @@ class UserManagementController extends Controller
                 ->first();
 
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
 
 
-            $all_parent_department_ids = [];
-            $assigned_departments = Department::whereHas("users", function ($query) use ($id) {
-                $query->where("users.id", $id);
-            })->get();
+            $all_parent_department_ids = $this->all_parent_departments_of_user($id);
 
-
-            foreach ($assigned_departments as $assigned_department) {
-                array_push($all_parent_department_ids, $assigned_department->id);
-                $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
-            }
 
 
 
@@ -5753,33 +5527,6 @@ class UserManagementController extends Controller
             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
 
-
-            // $work_shift =  WorkShift::whereHas('users', function ($query) use ($user) {
-            //     $query->where('users.id', $user->id);
-            // })
-            //     ->first();
-
-            // if (!$work_shift) {
-            //     $this->storeError(
-            //         "Please define workshift first"
-            //         ,
-            //         400,
-            //         "front end error",
-            //         "front end error"
-            //        );
-            //     return response()->json(["message" => "Please define workshift first"], 400);
-            // }
-            // if (!$work_shift->is_active) {
-            //     $this->storeError(
-            //         ("Please activate the work shift named '" . $work_shift->name . "'")
-            //         ,
-            //         400,
-            //         "front end error",
-            //         "front end error"
-            //        );
-
-            //     return response()->json(["message" => ("Please activate the work shift named '" . $work_shift->name . "'")], 400);
-            // }
 
 
             $holidays = Holiday::where([
@@ -6127,12 +5874,9 @@ class UserManagementController extends Controller
                  ], 401);
              }
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
              $user = User::with("roles")
                  ->where([
@@ -6589,12 +6333,7 @@ class UserManagementController extends Controller
                 return response()->json(['messege' => 'Module is not enabled'], 403);
             }
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
             //  if (!$request->user()->hasPermissionTo('user_view')) {

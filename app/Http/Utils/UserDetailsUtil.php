@@ -254,13 +254,11 @@ if(!empty($recruitment_process["description"])){
 
         if ($employee_address_history) {
 
-
                    $fields_to_check = [
                     "address_line_1", "address_line_2", "country", "city", "postcode"
 
                     ];
                     $date_fields = [
-
                     ];
                     $fields_changed = $this->fieldsHaveChanged($fields_to_check, $employee_address_history, $request_data, $date_fields);
                     if (
@@ -312,7 +310,7 @@ if(!empty($recruitment_process["description"])){
                     }
 
                     if (!$work_shift->is_active) {
-                      
+
                         throw new Exception("Please activate the work shift named '" . $work_shift->name . "'", 400);
                     }
 

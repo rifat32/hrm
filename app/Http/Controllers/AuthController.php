@@ -1054,6 +1054,82 @@ public function getUser (Request $request) {
  }
 
 
+  /**
+        *
+     * @OA\Post(
+     *      path="/auth/check/business/email",
+     *      operationId="checkBusinessEmail",
+     *      tags={"auth"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to check user",
+     *      description="This method is to check user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"email"},
+     *
+     *             @OA\Property(property="email", type="string", format="string",example="test@g.c"),
+     *     *  *             @OA\Property(property="business_id", type="string", format="string",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request"
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found"
+     *   ),
+     *@OA\JsonContent()
+     *      )
+     *     )
+     */
+
+
+     public function checkBusinessEmail(Request $request) {
+        try{
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $user = Business::where([
+                "email" => $request->email
+               ])
+               ->when(
+                !empty($request->business_id),
+                function($query) use($request){
+                    $query->whereNotIn("id",[$request->business_id]);
+                })
+
+               ->first();
+               if($user) {
+       return response()->json(["data" => true],200);
+               }
+               return response()->json(["data" => false],200);
+        }catch(Exception $e) {
+            return $this->sendError($e, 500,$request);
+        }
+
+ }
 
 
 

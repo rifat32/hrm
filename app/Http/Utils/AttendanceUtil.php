@@ -153,7 +153,7 @@ trait AttendanceUtil
                     throw new Exception(("there is an hourly leave on date" . $in_date), 400);
                 }
             } else {
-                throw new Exception(("there is a leave on date" . $in_date), 400);
+                throw new Exception(("there is a leave on date " . $in_date), 400);
             }
         }
 

@@ -111,16 +111,16 @@ class LeaveComponent
 // Check for conditions preventing leave
         if($leave_duration != "multiple_day") {
             if($work_shift_details->is_weekend) {
-                 throw new Exception(("there is a weekend on date " . $date));
+                 throw new Exception(("there is a weekend on date " . $date),400);
             }
             if($holiday && $holiday->is_active) {
-                throw new Exception(("there is a holiday on date " . $date));
+                throw new Exception(("there is a holiday on date " . $date),400);
             }
             if($previous_leave) {
-                throw new Exception(("there is a leave exists on date " . $date));
+                throw new Exception(("there is a leave exists on date " . $date),400);
             }
             if($previous_attendance) {
-                throw new Exception(("there is an attendance exists on date " . $date));
+                throw new Exception(("there is an attendance exists on date " . $date),400);
             }
         }
 
