@@ -5130,6 +5130,151 @@ class UserManagementController extends Controller
         }
     }
 
+       /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/get-leaves/{id}",
+     *      operationId="getLeavesByUserId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLeavesByUserId($id, Request $request)
+     {
+
+
+         foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+             File::delete($file);
+         }
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+             $user = User::with("roles")
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+                 })
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                     return $query->where(function ($query) {
+                         return  $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id);
+                     });
+                 })
+                 ->first();
+
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+
+             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+
+
+
+
+             $already_taken_leaves =  Leave::where([
+                 "user_id" => $user->id
+             ])
+                 ->whereHas('records', function ($query) use ($start_date, $end_date) {
+                     $query->where('leave_records.date', '>=', $start_date)
+                         ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
+                 })
+                 ->get();
+
+
+
+             $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
+                 return $leave->records->map(function ($record) {
+                     return Carbon::parse($record->date)->format('d-m-Y');
+                 });
+             })->toArray();
+
+
+
+             $result_collection = $already_taken_leave_dates;
+
+
+
+
+             $unique_result_collection = $result_collection->unique();
+             $result_array = $unique_result_collection->values()->all();
+
+
+
+
+             return response()->json($result_array, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
     /**
      *
      * @OA\Get(
