@@ -2,13 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserAsset;
+use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserAssetUpdateRequest extends BaseFormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -26,39 +29,15 @@ class UserAssetUpdateRequest extends BaseFormRequest
      */
     public function rules()
     {
-        $all_manager_department_ids = [];
-        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-        foreach ($manager_departments as $manager_department) {
-            $all_manager_department_ids[] = $manager_department->id;
-            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-        }
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
+
         return [
             'user_id' => [
                 'nullable',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-
-                  $exists =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
-
-                    ])
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->first();
-
-            if (!$exists) {
-                $fail($attribute . " is invalid.");
-                return;
-            }
-
-
-
-                },
+                new ValidUserId($all_manager_department_ids),
             ],
+
             'id' => [
                 'required',
                 'numeric',
@@ -83,7 +62,9 @@ class UserAssetUpdateRequest extends BaseFormRequest
             'name' => "required|string",
             'code' => "required|string",
             "is_working" => "required|boolean",
-            "status" => "required|string|in:available,assigned,damaged,lost,reserved,repair_waiting",
+
+
+            "status" => "required|string|in:available,assigned,returned,damaged,lost,reserved,repair_waiting",
 
             'serial_number' => "required|string",
             'type' => "required|string",
@@ -96,7 +77,7 @@ class UserAssetUpdateRequest extends BaseFormRequest
     {
         return [
 
-            'status.in' => 'Invalid value for status. Valid values are: assigned, damaged, lost, reserved, repair_waiting.',
+            'status.in' => 'Invalid value for status. Valid values are: available, assigned, returned, damaged, lost, reserved, repair waiting.',
 
 
             // ... other custom messages

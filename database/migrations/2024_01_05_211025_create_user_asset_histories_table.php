@@ -30,7 +30,7 @@ class CreateUserAssetHistoriesTable extends Migration
             $table->string("code");
             $table->string("serial_number");
             $table->boolean("is_working");
-            $table->enum('status', ['available', 'assigned', 'damaged', 'lost', 'reserved', 'repair_waiting'])->default('available');
+            $table->enum('status', ['available', 'assigned', 'returned', 'damaged', 'lost', 'reserved', 'repair_waiting'])->default('available');
             $table->string("type");
             $table->string("image")->nullable();
             $table->date("date");

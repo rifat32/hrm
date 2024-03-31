@@ -212,7 +212,6 @@ class UserAssetController extends Controller
                     'user_id' => $user_asset->user_id,
                     "user_asset_id" => $user_asset->id,
 
-
         'name' => $user_asset->name,
         'code' => $user_asset->code,
         'serial_number' => $user_asset->serial_number,
@@ -223,8 +222,6 @@ class UserAssetController extends Controller
         'date' => $user_asset->date,
         'note' => $user_asset->note,
         "business_id" => $user_asset->business_id,
-
-
                     "from_date" => now(),
                     "to_date" => NULL,
                     'created_by' => $request_data["created_by"]
@@ -358,27 +355,31 @@ class UserAssetController extends Controller
                     ->update([
                         "to_date" => now(),
                     ]);
-                    $user_asset_history  =  UserAssetHistory::create([
-                        'user_id' => $user_asset->user_id,
-                        "user_asset_id" => $user_asset->id,
 
-                        'name' => $user_asset->name,
-                        'code' => $user_asset->code,
-                        'serial_number' => $user_asset->serial_number,
-                        'type' => $user_asset->type,
-                        "is_working" => $user_asset->is_working,
-                        "status" => $user_asset->status,
-                        'image' => $user_asset->image,
-                        'date' => $user_asset->date,
-                        'note' => $user_asset->note,
-                        "business_id" => $user_asset->business_id,
 
-                        "from_date" => now(),
-                        "to_date" => NULL,
-                        'created_by' => $user_asset->created_by
+                        $user_asset_history  =  UserAssetHistory::create([
+                            'user_id' => $user_asset->user_id,
+                            "user_asset_id" => $user_asset->id,
 
-                      ]
-                      );
+                            'name' => $user_asset->name,
+                            'code' => $user_asset->code,
+                            'serial_number' => $user_asset->serial_number,
+                            'type' => $user_asset->type,
+                            "is_working" => $user_asset->is_working,
+                            "status" => $user_asset->status,
+                            'image' => $user_asset->image,
+                            'date' => $user_asset->date,
+                            'note' => $user_asset->note,
+                            "business_id" => $user_asset->business_id,
+
+                            "from_date" => now(),
+                            "to_date" => NULL,
+                            'created_by' => $user_asset->created_by
+
+                          ]
+                          );
+
+
                    }
 
                    return response($user_asset, 201);
@@ -472,6 +473,10 @@ class UserAssetController extends Controller
                   $business_id =  $request->user()->business_id;
                   $request_data = $request->validated();
 
+                  if($request_data["status"] == "returned") {
+                    $request_data["user_id"] = NULL;
+                  }
+
 
 
 
@@ -481,15 +486,9 @@ class UserAssetController extends Controller
                   $user_asset_prev = UserAsset::where($user_asset_query_params)
                       ->first();
                   if (!$user_asset_prev) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                       return response()->json([
-                          "message" => "no user document found"
+                          "message" => "no user asset found"
                       ], 404);
                   }
 
@@ -526,27 +525,30 @@ class UserAssetController extends Controller
                     ->update([
                         "to_date" => now(),
                     ]);
-                    $user_asset_history  =  UserAssetHistory::create([
-                        'user_id' => $user_asset->user_id,
-                        "user_asset_id" => $user_asset->id,
 
-                        'name' => $user_asset->name,
-                        'code' => $user_asset->code,
-                        'serial_number' => $user_asset->serial_number,
-                        'type' => $user_asset->type,
-                        "is_working" => $user_asset->is_working,
-                        "status" => $user_asset->status,
-                        'image' => $user_asset->image,
-                        'date' => $user_asset->date,
-                        'note' => $user_asset->note,
-                        "business_id" => $user_asset->business_id,
 
-                        "from_date" => now(),
-                        "to_date" => NULL,
-                        'created_by' => $user_asset->created_by
+                        $user_asset_history  =  UserAssetHistory::create([
+                            'user_id' => $user_asset->user_id,
+                            "user_asset_id" => $user_asset->id,
 
-                      ]
-                      );
+                            'name' => $user_asset->name,
+                            'code' => $user_asset->code,
+                            'serial_number' => $user_asset->serial_number,
+                            'type' => $user_asset->type,
+                            "is_working" => $user_asset->is_working,
+                            "status" => $user_asset->status,
+                            'image' => $user_asset->image,
+                            'date' => $user_asset->date,
+                            'note' => $user_asset->note,
+                            "business_id" => $user_asset->business_id,
+
+                            "from_date" => now(),
+                            "to_date" => NULL,
+                            'created_by' => $user_asset->created_by
+
+                          ]
+                          );
+
                    }
 
                   return response($user_asset, 201);

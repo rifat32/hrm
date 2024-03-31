@@ -529,7 +529,7 @@ class AttendanceController extends Controller
 
             // Update observer with approval
             $observer = new AttendanceObserver();
-            $observer->update($attendance, 'approve');
+            $observer->updated($attendance, 'approve');
 
             // Adjust payroll based on attendance update
             $this->adjust_payroll_on_attendance_update($attendance,1);
@@ -1601,24 +1601,10 @@ class AttendanceController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *    @OA\Property(property="user_ids", type="string", format="array", example={1,2,3}),
-     *    @OA\Property(property="attendance_details", type="string", format="array", example={
-     * {
-     *    "note" : "note",
-     *    "in_geolocation":"in_geolocation",
-     *      *    "out_geolocation":"out_geolocation",
-     *    "in_time" : "08:44:00",
-     * "out_time" : "12:44:00",
-     * "in_date" : "2023-11-18",
-     * "does_break_taken" : 1,
-     * "work_location_id" : 1,
-     * "project_id" : 1
+     *    *    @OA\Property(property="start_date", type="string", format="string", example="date"),
+     *    *    *    @OA\Property(property="end_date", type="string", format="string", example="date"),
      *
      *
-     *
-     * }
-     *
-     * }),
-
      *
      *
      *

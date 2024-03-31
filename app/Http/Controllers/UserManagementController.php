@@ -5257,13 +5257,13 @@ class UserManagementController extends Controller
 
 
 
-             $result_collection = $already_taken_leave_dates;
+             $result_collection = $already_taken_leave_dates->unique();
 
 
 
 
-             $unique_result_collection = $result_collection->unique();
-             $result_array = $unique_result_collection->values()->all();
+
+             $result_array = $result_collection->values()->all();
 
 
 
