@@ -76,6 +76,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 
+Route::any('/health', function () {
+    return response()->json(['status' => 'Server is up and running'], 200);
+});
+
+
+
+
 Route::post('/v1.0/register', [AuthController::class, "register"]);
 Route::post('/v1.0/login', [AuthController::class, "login"]);
 
