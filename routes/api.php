@@ -75,11 +75,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-Route::any('/health', function () {
+// Define route for GET method
+Route::get('/health', function () {
     return response()->json(['status' => 'Server is up and running'], 200);
 });
 
+// Define route for POST method
+Route::post('/health', function () {
+    return response()->json(['status' => 'Server is up and running'], 200);
+});
+
+// Define route for PUT method
+Route::put('/health', function () {
+    return response()->json(['status' => 'Server is up and running'], 200);
+});
+
+// Define route for DELETE method
+Route::delete('/health', function () {
+    return response()->json(['status' => 'Server is up and running'], 200);
+});
+
+// Define route for PATCH method
+Route::patch('/health', function () {
+    return response()->json(['status' => 'Server is up and running'], 200);
+});
 
 
 
