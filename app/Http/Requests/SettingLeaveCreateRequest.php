@@ -58,9 +58,6 @@ class SettingLeaveCreateRequest extends BaseFormRequest
                 $fail($attribute . " is invalid.");
                 return;
             }
-
-
-
                 },
 
             ],

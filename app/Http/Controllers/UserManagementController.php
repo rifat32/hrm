@@ -4792,12 +4792,7 @@ class UserManagementController extends Controller
                 })
                 ->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4896,21 +4891,7 @@ class UserManagementController extends Controller
                 $created_by = auth()->user()->business->created_by;
             }
 
-            $leave_types =   SettingLeaveType::where(function ($query) use ($request, $created_by) {
-                $query->where('setting_leave_types.business_id', auth()->user()->business_id)
-                    ->where('setting_leave_types.is_default', 0)
-                    ->where('setting_leave_types.is_active', 1)
-                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                        $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
-                    })
 
-
-                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                        $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
-                    });
-
-            })
-                ->get();
 
                 $setting_leave = SettingLeave::
                 where('setting_leaves.business_id', auth()->user()->business_id)
@@ -4925,12 +4906,28 @@ class UserManagementController extends Controller
                 $setting_leave->start_month = 1;
                }
 
-
-               $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
-
+               $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
 
 
 
+               $leave_types =   SettingLeaveType::where(function ($query) use ($paid_leave_available, $created_by) {
+                $query->where('setting_leave_types.business_id', auth()->user()->business_id)
+                    ->where('setting_leave_types.is_default', 0)
+                    ->where('setting_leave_types.is_active', 1)
+                    ->when($paid_leave_available == 0, function($query) {
+                        $query->where('setting_leave_types.type', "unpaid");
+                    })
+                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
+                        $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
+                    })
+                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
+                        $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
+                    });
+
+            })
+                ->get();
+
+                $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
             foreach ($leave_types as $key => $leave_type) {
 
                 $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
