@@ -4929,7 +4929,6 @@ class UserManagementController extends Controller
 
                 $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
             foreach ($leave_types as $key => $leave_type) {
-
                 $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
                     $query->where([
                         "user_id" => $user->id,
@@ -4944,9 +4943,6 @@ class UserManagementController extends Controller
                     });
                 $leave_types[$key]->already_taken_hours = $total_recorded_hours;
             }
-
-
-
 
             return response()->json($leave_types, 200);
         } catch (Exception $e) {
