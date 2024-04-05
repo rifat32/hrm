@@ -34,7 +34,7 @@ class SettingLeaveCreateRequest extends BaseFormRequest
             $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
         }
         return [
-            'start_month' => 'required|integer|min:0|max:11',
+            'start_month' => 'required|integer|min:1|max:12',
             'approval_level' => 'required|string|in:single,multiple', // Adjust the valid values as needed
             'allow_bypass' => 'required|boolean',
             'special_users' => 'present|array',

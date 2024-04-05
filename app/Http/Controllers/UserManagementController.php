@@ -59,6 +59,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Permission;
 
 use App\Mail\SendPassword;
+use App\Models\SettingLeave;
 use Illuminate\Support\Facades\Mail;
 
 // eeeeee
@@ -4885,32 +4886,9 @@ class UserManagementController extends Controller
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $user = User::with("roles")
-                ->where([
-                    "id" => $id
-                ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
-                    });
-                })
-                ->first();
-            if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
+            // get appropriate use if auth user have access
+            $user = $this->getUserByIdUtil($id,$all_manager_department_ids);
+
 
 
             $created_by  = NULL;
@@ -4922,9 +4900,6 @@ class UserManagementController extends Controller
                 $query->where('setting_leave_types.business_id', auth()->user()->business_id)
                     ->where('setting_leave_types.is_default', 0)
                     ->where('setting_leave_types.is_active', 1)
-
-
-
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                         $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
                     })
@@ -4937,7 +4912,27 @@ class UserManagementController extends Controller
             })
                 ->get();
 
+                $setting_leave = SettingLeave::
+                where('setting_leaves.business_id', auth()->user()->business_id)
+               ->where('setting_leaves.is_default', 0)
+               ->first();
+               if(!$setting_leave) {
+                return response()->json(
+                   [ "message" => "No leave setting found."]
+                );
+               }
+               if(!$setting_leave->start_month) {
+                $setting_leave->start_month = 1;
+               }
+
+
+               $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
+
+
+
+
             foreach ($leave_types as $key => $leave_type) {
+
                 $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
                     $query->where([
                         "user_id" => $user->id,
@@ -4945,6 +4940,7 @@ class UserManagementController extends Controller
 
                     ]);
                 })
+                ->where("leave_records.date","<=",$startOfMonth)
                     ->get()
                     ->sum(function ($record) {
                         return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));

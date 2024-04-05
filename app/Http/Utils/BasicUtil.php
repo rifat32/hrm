@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\EmployeePensionHistory;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -133,6 +134,29 @@ trait BasicUtil
 
 public function log($data) {
    Log::info(json_encode($data));
+}
+
+public function getUserByIdUtil($id,$all_manager_department_ids) {
+  $user =  User::with("roles")
+    ->where([
+        "id" => $id
+    ])
+    ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $query->whereIn("departments.id", $all_manager_department_ids);
+    })
+    ->when(!auth()->user()->hasRole('superadmin'), function ($query)  {
+        return $query->where(function ($query) {
+            return  $query->where('created_by', auth()->user()->id)
+                ->orWhere('id', auth()->user()->id)
+                ->orWhere('business_id', auth()->user()->business_id);
+        });
+    })
+    ->first();
+    if (!$user) {
+        throw new Exception("no user found",404);
+
+    }
+    return $user;
 }
 
 
