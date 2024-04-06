@@ -2321,6 +2321,36 @@ class UserManagementController extends Controller
      * required=true,
      * example="2019-06-29"
      * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="full_name",
+     * in="query",
+     * description="full_name",
+     * required=true,
+     * example="full_name"
+     * ),
+     *
+     *    * @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *
+     *    * @OA\Parameter(
+     * name="email",
+     * in="query",
+     * description="email",
+     * required=true,
+     * example="email"
+     * ),
+     *
+     *
+     *
+     *
      * *  @OA\Parameter(
      * name="search_key",
      * in="query",
@@ -2813,6 +2843,48 @@ class UserManagementController extends Controller
                         return $q->whereIn("name", $rolesArray);
                     });
                 })
+
+
+
+
+
+                ->when(!empty($request->full_name), function ($query) use ($request) {
+                 // Replace spaces with commas and create an array
+$searchTerms = explode(',', str_replace(' ', ',', $request->full_name));
+
+$query->where(function ($query) use ($searchTerms) {
+    foreach ($searchTerms as $term) {
+        $query->orWhere(function ($subquery) use ($term) {
+            $subquery->where("first_Name", "like", "%" . $term . "%")
+                     ->orWhere("last_Name", "like", "%" . $term . "%")
+                     ->orWhere("middle_Name", "like", "%" . $term . "%");
+        });
+    }
+});
+
+                })
+                ->when(!empty($request->employee_id), function ($query) use ($request) {
+                    return   $query->where([
+                        "user_id" => $request->employee_id
+                    ]);
+                })
+
+                ->when(!empty($request->email), function ($query) use ($request) {
+                    return   $query->where([
+                        "email" => $request->email
+                    ]);
+                })
+
+               
+                ->when(!empty($request->designation_id), function ($query) use ($request) {
+                    $idsArray = explode(',', $request->designation_id);
+                    return $query->whereIn('designation_id',$idsArray );
+                })
+
+                ->when(!empty($request->employment_status_id), function ($query) use ($request) {
+                    return $query->where('employment_status_id', ($request->employment_status_id));
+                })
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     $term = $request->search_key;
                     return $query->where(function ($subquery) use ($term) {
@@ -2823,12 +2895,11 @@ class UserManagementController extends Controller
                     });
                 })
 
+
                 ->when(isset($request->is_in_employee), function ($query) use ($request) {
                     return $query->where('is_in_employee', intval($request->is_in_employee));
                 })
-                ->when(!empty($request->employment_status_id), function ($query) use ($request) {
-                    return $query->where('employment_status_id', ($request->employment_status_id));
-                })
+
                 ->when(isset($request->is_on_holiday), function ($query) use ($today, $total_departments, $request) {
                     if (intval($request->is_on_holiday) == 1) {
                         $query
@@ -2949,9 +3020,7 @@ class UserManagementController extends Controller
                     });
                 })
 
-                ->when(!empty($request->designation_id), function ($query) use ($request) {
-                    return $query->where('designation_id', ($request->designation_id));
-                })
+
                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
                     return $query->where('work_location_id', ($request->work_location_id));
                 })
