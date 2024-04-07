@@ -1692,7 +1692,7 @@ class AttendanceController extends Controller
 
                 $attendance_details = [];
                 // Map date range to create attendance details
-                return $date_range->map(function ($date) use ($user) {
+                 $date_range->map(function ($date) use ($user) {
                     $temp_data["in_date"] = $date;
                     $temp_data["does_break_taken"] = 1;
                     $temp_data["project_id"] = UserProject::where([

@@ -777,6 +777,31 @@ if(!$check_work_shift_details["ok"]) {
      * required=true,
      * example="2019-06-29"
      * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     * @OA\Parameter(
+     * name="description",
+     * in="query",
+     * description="description",
+     * required=true,
+     * example="description"
+     * ),
+     *    * @OA\Parameter(
+     * name="type",
+     * in="query",
+     * description="type",
+     * required=true,
+     * example="type"
+     * ),
+     *
+     *
      * *  @OA\Parameter(
      * name="search_key",
      * in="query",
@@ -919,6 +944,26 @@ if(!$check_work_shift_details["ok"]) {
                             ->orWhere("work_shifts.description", "like", "%" . $term . "%");
                     });
                 })
+
+
+
+
+
+                ->when(isset($request->name), function ($query) use ($request) {
+                    return $query->where('work_shifts.name', intval($request->name));
+                })
+                ->when(isset($request->description), function ($query) use ($request) {
+                    return $query->where('work_shifts.description', intval($request->description));
+                })
+                ->when(isset($request->type), function ($query) use ($request) {
+                    return $query->where('work_shifts.type', intval($request->type));
+                })
+
+
+
+
+
+
                 ->when(isset($request->is_personal), function ($query) use ($request) {
                     return $query->where('work_shifts.is_personal', intval($request->is_personal));
                 })
