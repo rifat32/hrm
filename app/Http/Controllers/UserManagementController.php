@@ -2875,7 +2875,7 @@ $query->where(function ($query) use ($searchTerms) {
                     ]);
                 })
 
-               
+
                 ->when(!empty($request->designation_id), function ($query) use ($request) {
                     $idsArray = explode(',', $request->designation_id);
                     return $query->whereIn('designation_id',$idsArray );
@@ -3091,36 +3091,36 @@ $query->where(function ($query) use ($searchTerms) {
 
                 ->when(!empty($request->start_pension_pension_enrollment_issue_date), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.pension_enrollment_issue_date", ">=", ($request->start_pension_pension_enrollment_issue_date));
+                        $query->where("employee_pension_histories.pension_enrollment_issue_date", ">=", ($request->start_pension_pension_enrollment_issue_date));
                     });
                 })
                 ->when(!empty($request->end_pension_pension_enrollment_issue_date), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.pension_enrollment_issue_date", "<=", ($request->end_pension_pension_enrollment_issue_date . ' 23:59:59'));
+                        $query->where("employee_pension_histories.pension_enrollment_issue_date", "<=", ($request->end_pension_pension_enrollment_issue_date . ' 23:59:59'));
                     });
                 })
 
 
                 ->when(!empty($request->start_pension_pension_re_enrollment_due_date), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.pension_re_enrollment_due_date", ">=", $request->start_pension_pension_re_enrollment_due_date);
+                        $query->where("employee_pension_histories.pension_re_enrollment_due_date", ">=", $request->start_pension_pension_re_enrollment_due_date);
                     });
                 })
                 ->when(!empty($request->end_pension_pension_re_enrollment_due_date), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.pension_re_enrollment_due_date", "<=", $request->end_pension_pension_re_enrollment_due_date . ' 23:59:59');
+                        $query->where("employee_pension_histories.pension_re_enrollment_due_date", "<=", $request->end_pension_pension_re_enrollment_due_date . ' 23:59:59');
                     });
                 })
                 ->when(!empty($request->pension_pension_re_enrollment_due_date_in_day), function ($query) use ($request, $today) {
                     return $query->whereHas("pension_details", function ($query) use ($request, $today) {
                         $query_day = Carbon::now()->addDays($request->pension_pension_re_enrollment_due_date_in_day);
-                        $query->whereBetween("employee_pensions.pension_re_enrollment_due_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                        $query->whereBetween("employee_pension_histories.pension_re_enrollment_due_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
                     });
                 })
 
                 ->when(!empty($request->pension_scheme_status), function ($query) use ($request) {
                     return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pensions.status", $request->pension_scheme_status);
+                        $query->where("employee_pension_histories.pension_scheme_status", $request->pension_scheme_status);
                     });
                 })
 

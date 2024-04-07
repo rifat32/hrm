@@ -363,34 +363,42 @@ return count($all_departments) > 0;
 
 
     public function pension_details() {
-        $issue_date_column = 'pension_enrollment_issue_date';
-        $expiry_date_column = 'pension_re_enrollment_due_date';
         $current_user_id = request()->id;
-
-        $user = User::where([
-            "id" => $current_user_id
-        ])
-        ->first();
-
-          $current_data = NULL;
-        if(!$user->pension_eligible) {
-            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            ->where("pension_eligible",0)
-            ->latest()->first();
-        } else {
-
-
-            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            ->where("pension_eligible", 1)
-            ->where($issue_date_column, '<', now())
-                ->orderByDesc("id")
-                ->first();
+        if(!$current_user_id){
+ return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id');
         }
 
+            $issue_date_column = 'pension_enrollment_issue_date';
+            $expiry_date_column = 'pension_re_enrollment_due_date';
 
 
-        return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            $user = User::where([
+                "id" => $current_user_id
+            ])
+            ->first();
+
+              $current_data = NULL;
+            if(!$user->pension_eligible) {
+                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+                ->where("pension_eligible",0)
+                ->latest()->first();
+            } else {
+
+
+                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+                ->where("pension_eligible", 1)
+                ->where($issue_date_column, '<', now())
+                    ->orderByDesc("id")
+                    ->first();
+            }
+
+
+
+            return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+            ->where("id",$current_data?$current_data->id:NULL);
+
+
+
     }
 
     public function pension_detail() {
