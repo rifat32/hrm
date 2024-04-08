@@ -781,7 +781,8 @@ class AttendanceController extends Controller
                     });
                 })
                 ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('attendances.user_id', $request->user_id);
+                    $idsArray = explode(',', $request->user_id);
+                    return $query->whereIn('attendances.user_id', $idsArray);
                 })
                 ->when(empty($request->user_id), function ($query) use ($request) {
                     return $query->whereHas("employee", function ($query) {
@@ -789,8 +790,24 @@ class AttendanceController extends Controller
                     });
                 })
 
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where('attendances.status', $request->status);
+                })
+                ->when(!empty($request->overtime), function ($query) use ($request) {
+                    return $query->where('attendances.overtime_hours', $request->overtime);
+                })
 
+                ->when(!empty($request->schedule_hour), function ($query) use ($request) {
+                    return $query->where('attendances.capacity_hours', $request->schedule_hour);
+                })
 
+                ->when(!empty($request->break_hour), function ($query) use ($request) {
+                    return $query->where('attendances.break_hours', $request->break_hours);
+                })
+
+                ->when(!empty($request->worked_hour), function ($query) use ($request) {
+                    return $query->where('attendances.total_paid_hours', $request->worked_hour);
+                })
 
                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
                     return $query->where('attendances.user_id', $request->work_location_id);
@@ -1191,7 +1208,8 @@ class AttendanceController extends Controller
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->whereHas("attendances", function ($q) use ($request) {
-                        $q->where('user_id', $request->user_id);
+                        $idsArray = explode(',', $request->user_id);
+                        $q->whereIn('attendances.user_id', $idsArray);
                     });
                 })
                 ->when(empty($request->user_id), function ($query) use ($request) {
@@ -1243,6 +1261,7 @@ class AttendanceController extends Controller
                     ->whereIn('attendances.user_id', $employee_ids)
                     ->where('attendances.in_date', '>=', $request->start_date . ' 00:00:00')
                     ->where('attendances.in_date', '<=', ($request->end_date . ' 23:59:59'))
+                    
                     ->get();
 
                 // Iterate over each employee

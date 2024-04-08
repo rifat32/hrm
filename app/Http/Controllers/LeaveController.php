@@ -1144,23 +1144,59 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('leaves.status', $request->status);
                 })
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('leaves.user_id', $request->user_id);
+
+                ->when(!empty($request->type), function ($query) use ($request) {
+                    return $query->where('leaves.day_type', $request->type);
                 })
+                ->when(!empty($request->duration), function ($query) use ($request) {
+                    return $query->where('leaves.leave_duration', $request->duration);
+                })
+
+                ->when(!empty($request->total_leave_hours), function ($query) use ($request) {
+                    return $query->where('leaves.total_leave_hours', $request->total_leave_hours);
+                })
+
+                ->when(!empty($request->date), function ($query) use ($request) {
+                    $query->whereHas("records", function($query) use($request){
+                        $query->where("leave_records.date",$request->date);
+                  });
+                })
+                ->when(!empty($request->total_leave_hours), function ($query) use ($request) {
+                    return $query->whereHas("records", function($query) use($request) {
+                        $query->selectRaw("SUM(leave_records.leave_hours) as total_leave_hours")
+                              ->groupBy('employee_id'); // Assuming you need to group by employee_id
+                    })
+                    ->having('total_leave_hours', $request->total_leave_hours);
+                })
+
+
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    $idsArray = explode(',', $request->user_id);
+                    return $query->whereIn('leaves.user_id', $idsArray);
+                })
+
                 ->when(empty($request->user_id), function ($query) use ($request) {
                     return $query->whereHas("employee", function ($query) {
                         $query->whereNotIn("users.id", [auth()->user()->id]);
                     });
                 })
 
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+
+
+
+
+
+
+
+
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     $query->where('leaves.start_date', '>=', $request->start_date . ' 00:00:00');
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-
                     $query->where('leaves.end_date', '<=', $request->end_date . ' 23:59:59');
                 })
 
