@@ -20,7 +20,7 @@ class CreatePayrollAttendancesTable extends Migration
             $table->foreign('payroll_id')->references('id')->on('payrolls')->onDelete('cascade');
 
             $table->unsignedBigInteger("attendance_id");
-            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('restrict');
+            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
 
 
             // $table->boolean('is_weekend');
@@ -31,7 +31,7 @@ class CreatePayrollAttendancesTable extends Migration
             // $table->double('overtime_end_time')->nullable();
             // $table->double('overtime_hours')->nullable();
 
-           
+
 
             $table->timestamps();
         });

@@ -20,7 +20,7 @@ class CreatePayrollLeaveRecordsTable extends Migration
             $table->foreign('payroll_id')->references('id')->on('payrolls')->onDelete('cascade');
 
             $table->unsignedBigInteger("leave_record_id");
-            $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('restrict');
+            $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('cascade');
 
             // $table->date("date");
             // $table->time("start_time");

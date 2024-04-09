@@ -138,7 +138,7 @@ class CandidateController extends Controller
  *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
  *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
  *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
- *  *  *     @OA\Property(property="job_platform", type="string", format="string", example="facebook"),
+ *     @OA\Property(property="job_platforms", type="string", format="array", example={1,2,3}),
  *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
  *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
  *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
@@ -209,7 +209,7 @@ class CandidateController extends Controller
 
                 $candidate =  Candidate::create($request_data);
 
-
+                $candidate->job_platforms()->sync($request_data['job_platforms']);
 
                 return response($candidate, 201);
             });
@@ -240,7 +240,7 @@ class CandidateController extends Controller
  *     @OA\Property(property="phone", type="string", format="string", example="123-456-7890"),
  *     @OA\Property(property="experience_years", type="integer", format="int", example=3),
  *     @OA\Property(property="education_level", type="string", format="string", example="Bachelor's Degree"),
- *  *  *     @OA\Property(property="job_platform", type="string", format="string", example="facebook"),
+ *     @OA\Property(property="job_platforms", type="string", format="array", example={1,2,3}),
  *     @OA\Property(property="cover_letter", type="string", format="string", example="Cover letter content..."),
  *     @OA\Property(property="application_date", type="string", format="date", example="2023-11-01"),
  *     @OA\Property(property="interview_date", type="string", format="date", example="2023-11-10"),
@@ -311,6 +311,7 @@ class CandidateController extends Controller
 
                  $candidate =  Candidate::create($request_data);
 
+                 $candidate->job_platforms()->sync($request_data['job_platforms']);
 
 
                  return response($candidate, 201);
@@ -425,7 +426,7 @@ class CandidateController extends Controller
                         'phone',
                         'experience_years',
                         'education_level',
-                        "job_platform",
+
                         'cover_letter',
                         'application_date',
                         'interview_date',
@@ -449,8 +450,15 @@ class CandidateController extends Controller
                     ], 500);
                 }
 
+
+                $candidate->job_platforms()->sync($request_data['job_platforms']);
+
                 return response($candidate, 201);
             });
+
+
+
+
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -504,6 +512,45 @@ class CandidateController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *
+     *     * *  @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     *
+
+     *
+     *  @OA\Parameter(
+     * name="job_platform_id",
+     * in="query",
+     * description="job_platform",
+     * required=true,
+     * example="job_platform_id"
+     * ),
+     *
+     *  *  @OA\Parameter(
+     * name="interview_date",
+     * in="query",
+     * description="interview_date",
+     * required=true,
+     * example="interview_date"
+     * ),
+     *     *  *  @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="status",
+     * required=true,
+     * example="status"
+     * ),
+     *
+     *
+     *
+     *
+     *
+     *
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -576,6 +623,16 @@ class CandidateController extends Controller
                         //     ->orWhere("candidates.description", "like", "%" . $term . "%");
                     });
                 })
+                ->when(!empty($request->name), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->name;
+                        $query->where("candidates.name", "like", "%" . $term . "%");
+                        //     ->orWhere("candidates.description", "like", "%" . $term . "%");
+                    });
+                })
+
+
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
@@ -585,9 +642,23 @@ class CandidateController extends Controller
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('candidates.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
+
+
                 ->when(!empty($request->job_listing_id), function ($query) use ($request) {
-                    return $query->where('candidates.job_listing_id',$request->job_listing_id);
+                    $idsArray = explode(',', $request->job_listing_id);
+                    return $query->whereIn('candidates.job_listing_id',$idsArray);
                 })
+
+
+                ->when(!empty($request->job_platform_id), function ($query) use ($request) {
+                    $job_platform_ids = explode(',', $request->job_platform_id);
+                    $query->whereHas("job_platforms",function($query) use($job_platform_ids){
+                        $query->whereIn("job_platforms.id", $job_platform_ids);
+                    });
+                })
+
+
+
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("candidates.id", $request->order_by);

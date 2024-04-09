@@ -16,7 +16,7 @@ class Candidate extends Model
         'phone',
         'experience_years',
         'education_level',
-        "job_platform",
+
         'cover_letter',
         'application_date',
         'interview_date',
@@ -40,8 +40,10 @@ class Candidate extends Model
         return $this->belongsTo(JobListing::class, "job_listing_id",'id');
     }
 
+    public function job_platforms() {
+        return $this->belongsToMany(JobPlatform::class, 'candidate_job_platforms', 'candidate_id', 'job_platform_id');
+    }
 
-   
 
 
 

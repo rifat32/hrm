@@ -408,8 +408,8 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -992,6 +992,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Models\\BusinessTier' => __DIR__ . '/../..' . '/app/Models/BusinessTier.php',
         'App\\Models\\BusinessTime' => __DIR__ . '/../..' . '/app/Models/BusinessTime.php',
         'App\\Models\\Candidate' => __DIR__ . '/../..' . '/app/Models/Candidate.php',
+        'App\\Models\\CandidateJobPlatform' => __DIR__ . '/../..' . '/app/Models/CandidateJobPlatform.php',
         'App\\Models\\Comment' => __DIR__ . '/../..' . '/app/Models/Comment.php',
         'App\\Models\\DashboardWidget' => __DIR__ . '/../..' . '/app/Models/DashboardWidget.php',
         'App\\Models\\Department' => __DIR__ . '/../..' . '/app/Models/Department.php',
@@ -1110,7 +1111,9 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Rules\\TimeOrderRule' => __DIR__ . '/../..' . '/app/Rules/TimeOrderRule.php',
         'App\\Rules\\TimeValidation' => __DIR__ . '/../..' . '/app/Rules/TimeValidation.php',
         'App\\Rules\\UniqueAttendanceDate' => __DIR__ . '/../..' . '/app/Rules/UniqueAttendanceDate.php',
+        'App\\Rules\\UniqueSettingLeaveTypeName' => __DIR__ . '/../..' . '/app/Rules/UniqueSettingLeaveTypeName.php',
         'App\\Rules\\ValidProjectId' => __DIR__ . '/../..' . '/app/Rules/ValidProjectId.php',
+        'App\\Rules\\ValidSettingLeaveType' => __DIR__ . '/../..' . '/app/Rules/ValidSettingLeaveType.php',
         'App\\Rules\\ValidUserId' => __DIR__ . '/../..' . '/app/Rules/ValidUserId.php',
         'App\\Rules\\ValidWorkLocationId' => __DIR__ . '/../..' . '/app/Rules/ValidWorkLocationId.php',
         'Asm89\\Stack\\Cors' => __DIR__ . '/..' . '/asm89/stack-cors/src/Cors.php',

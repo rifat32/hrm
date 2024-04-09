@@ -598,6 +598,47 @@ class UserAssetController extends Controller
        *         required=true,
        *  example="1"
        *      ),
+       *   *    @OA\Parameter(
+       *         name="name",
+       *         in="query",
+       *         description="name",
+       *         required=true,
+       *  example="name"
+       *      ),
+       *
+       *        *   *    @OA\Parameter(
+       *         name="asset_code",
+       *         in="query",
+       *         description="asset_code",
+       *         required=true,
+       *  example="asset_code"
+       *      ),
+       *       *        *   *    @OA\Parameter(
+       *         name="serial_no",
+       *         in="query",
+       *         description="serial_no",
+       *         required=true,
+       *  example="serial_no"
+       *      ),
+       *        *       *        *   *    @OA\Parameter(
+       *         name="is_working",
+       *         in="query",
+       *         description="is_working",
+       *         required=true,
+       *  example="is_working"
+       *      ),
+       *
+       *      @OA\Parameter(
+       *         name="date",
+       *         in="query",
+       *         description="date",
+       *         required=true,
+       *  example="date"
+       *      ),
+       *
+
+       *
+       *
        *    @OA\Parameter(
        *         name="status",
        *         in="query",
@@ -731,6 +772,45 @@ class UserAssetController extends Controller
                   //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                   //        return $query->where('product_category_id', $request->product_category_id);
                   //    })
+
+                  ->when(!empty($request->name), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->name;
+                        $query->where("user_assets.name", "like", "%" . $term . "%");
+
+                    });
+                })
+
+                ->when(!empty($request->asset_code), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->asset_code;
+                        $query->where("user_assets.code", "like", "%" . $term . "%");
+
+                    });
+                })
+                ->when(!empty($request->serial_number), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->serial_number;
+                        $query->where("user_assets.serial_no", "like", "%" . $term . "%");
+
+                    });
+                })
+
+
+
+
+
+                ->when(!isset($request->is_working), function ($query) use ($request) {
+                    return $query->where('user_assets.is_working', intval($request->is_working));
+                })
+
+
+                ->when(!empty($request->date), function ($query) use ($request) {
+                    return $query->where('user_assets.date', $request->date);
+                })
+
+
+
 
                   ->when(!empty($request->user_id), function ($query) use ($request) {
                       return $query->where('user_assets.user_id', $request->user_id);
