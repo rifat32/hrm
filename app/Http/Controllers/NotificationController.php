@@ -55,6 +55,14 @@ class NotificationController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     * * *  @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="status",
+     * required=true,
+     * example="status"
+     * ),
+     *
      *  * *  @OA\Parameter(
      * name="is_active",
      * in="query",
@@ -118,6 +126,10 @@ class NotificationController extends Controller
                 "receiver_id" => $request->user()->id
             ]
         )
+
+        ->when(!empty($request->status), function ($query) use ($request) {
+            return $query->where('notifications.status', $request->status);
+        })
         ->when(!empty($request->start_date), function ($query) use ($request) {
             return $query->where('notifications.created_at', ">=", $request->start_date);
         })

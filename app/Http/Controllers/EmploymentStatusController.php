@@ -469,6 +469,35 @@ class EmploymentStatusController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *
+     *
+     *    * * *  @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     *
+     *
+     *
+     *
+     * * *  @OA\Parameter(
+     * name="description",
+     * in="query",
+     * description="description",
+     * required=true,
+     * example="description"
+     * ),
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      * *      * *  @OA\Parameter(
      * name="is_active",
      * in="query",
@@ -638,6 +667,17 @@ class EmploymentStatusController extends Controller
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     return $query->where('employment_statuses.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
+
+
+                ->when(!empty($request->name), function ($query) use ($request) {
+                    return $query->where('employment_statuses.name', $request->name );
+                })
+                ->when(!empty($request->description), function ($query) use ($request) {
+                    return $query->where('employment_statuses.description', $request->description );
+                })
+
+
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("employment_statuses.id", $request->order_by);
                 }, function ($query) {

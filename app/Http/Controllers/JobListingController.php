@@ -290,6 +290,81 @@ class JobListingController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     * @OA\Parameter(
+     * name="title",
+     * in="query",
+     * description="title",
+     * required=true,
+     * example="title"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="description",
+     * in="query",
+     * description="description",
+     * required=true,
+     * example="description"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="work_location_id"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="experience_level",
+     * in="query",
+     * description="experience_level",
+     * required=true,
+     * example="experience_level"
+     * ),
+     *
+     *  * @OA\Parameter(
+     * name="salary",
+     * in="query",
+     * description="salary",
+     * required=true,
+     * example="salary"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="post_on",
+     * in="query",
+     * description="post_on",
+     * required=true,
+     * example="post_on"
+     * ),
+     *
+     *     *
+     * @OA\Parameter(
+     * name="deadline",
+     * in="query",
+     * description="deadline",
+     * required=true,
+     * example="deadline"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="job_platform_id",
+     * in="query",
+     * description="job_platform_id",
+     * required=true,
+     * example="job_platform_id"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="number_of_candidates",
+     * in="query",
+     * description="number_of_candidates",
+     * required=true,
+     * example="number_of_candidates"
+     * ),
+     *
+     *
+     *
      *     * *  @OA\Parameter(
      * name="is_open_roles",
      * in="query",
@@ -360,6 +435,7 @@ class JobListingController extends Controller
                     "business_id" => $business_id
                 ]
             )
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -369,6 +445,62 @@ class JobListingController extends Controller
 
                     });
                 })
+
+
+
+                ->when(!empty($request->title), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->title;
+                        $query->where("title", "like", "%" . $term . "%");
+                    });
+                })
+
+
+                ->when(!empty($request->description), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->description;
+                        $query->where("description", "like", "%" . $term . "%");
+                    });
+                })
+
+                ->when(!empty($request->work_location_id), function ($query) use ($request) {
+                    $work_location_ids = explode(',', $request->work_location_id);
+                    $query->whereIn("work_location_id", $work_location_ids);
+                })
+
+                ->when(!empty($request->experience_level), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->experience_level;
+                        $query->where("experience_level", "like", "%" . $term . "%");
+                    });
+                })
+                ->when(!empty($request->salary), function ($query) use ($request) {
+                    return $query->where('minimum_salary', "<=", $request->salary)
+                    ->where('maximum_salary', ">=", $request->salary);
+                })
+                ->when(!empty($request->post_on), function ($query) use ($request) {
+                    return $query->where('posted_on', $request->post_on);
+                })
+                ->when(!empty($request->deadline), function ($query) use ($request) {
+                    return $query->where('application_deadline', $request->deadline);
+                })
+
+                ->when(!empty($request->job_platform_id), function ($query) use ($request) {
+                    $job_platform_ids = explode(',', $request->job_platform_id);
+                    $query->whereHas("job_platforms",function($query) use($job_platform_ids){
+                        $query->whereIn("job_platforms.id", $job_platform_ids);
+                    });
+                })
+
+                ->when(!empty($request->number_of_candidates), function ($query) use ($request) {
+                    $query->whereHas("candidates", function ($query) use ($request) {
+                        $query->havingRaw('COUNT(*) = ?', [$request->number_of_candidates]);
+                    });
+                })
+
+
+
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
