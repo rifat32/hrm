@@ -1009,6 +1009,27 @@ class ProjectController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *
+     *  * *  @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="status",
+     * required=true,
+     * example="status"
+     * ),
+     *
+     *
+     *
+     *
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -1118,6 +1139,23 @@ class ProjectController extends Controller
                             ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })
+                ->when(!empty($request->name), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->name;
+                        $query->where("name", "like", "%" . $term . "%");
+                    });
+                })
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->status;
+                        $query->where("status",  $term);
+                    });
+                })
+
+
+
+
+
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })

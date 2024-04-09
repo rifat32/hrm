@@ -300,6 +300,39 @@ class HolidayController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *     * *  @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     *     *     * *  @OA\Parameter(
+     * name="repeat",
+     * in="query",
+     * description="repeat",
+     * required=true,
+     * example="repeat"
+     * ),
+     *   *     *     * *  @OA\Parameter(
+     * name="description",
+     * in="query",
+     * description="description",
+     * required=true,
+     * example="description"
+     * ),
+     *
+     *     *   *     *     * *  @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="department_id"
+     * ),
+     *
+     *
+     *
+     *
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -380,6 +413,26 @@ class HolidayController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+                ->when(!empty($request->name), function ($query) use ($request) {
+                    return $query->where("holidays.name", "like", "%" . $request->name . "%");
+                })
+
+                ->when(isset($request->repeat), function ($query) use ($request) {
+                    return $query->where('holidays.repeats_annually', intval($request->repeat));
+
+                })
+                ->when(!empty($request->description), function ($query) use ($request) {
+                    return $query->where("holidays.description", "like", "%" . $request->description . "%");
+                })
+
+                ->when(!empty($request->department_id), function ($query) use ($request) {
+                    $idsArray = explode(',', $request->department_id);
+                     $query->whereHas('departments', function ($query) use($idsArray) {
+                     $query->whereIn("departments.id",$idsArray);
+                    });
+                })
+
+
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('holidays.created_at', ">=", $request->start_date);
                 })

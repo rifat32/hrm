@@ -436,6 +436,31 @@ class PayrunController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *
+     * @OA\Parameter(
+     * name="period",
+     * in="query",
+     * description="period",
+     * required=true,
+     * example="search_key"
+     * ),
+     * * @OA\Parameter(
+     * name="type",
+     * in="query",
+     * description="type",
+     * required=true,
+     * example="type"
+     * ),
+     *    * * @OA\Parameter(
+     * name="is_considering_overtime",
+     * in="query",
+     * description="is_considering_overtime",
+     * required=true,
+     * example="is_considering_overtime"
+     * ),
+     *
+     *
+     *
      *  * *  @OA\Parameter(
      * name="is_active",
      * in="query",
@@ -520,6 +545,17 @@ class PayrunController extends Controller
                  ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
+            })
+
+            ->when(!empty($request->period), function ($query) use ($request) {
+                return $query->where('payruns.period_type', $request->period);
+            })
+
+            ->when(!empty($request->type), function ($query) use ($request) {
+                return $query->where('payruns.generating_type', $request->type);
+            })
+            ->when(isset($request->is_considering_overtime), function ($query) use ($request) {
+                return $query->where('payruns.consider_overtime', intval($request->is_considering_overtime));
             })
 
 

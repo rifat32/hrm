@@ -595,6 +595,18 @@ class DepartmentController extends Controller
                             ->orWhere("description", "like", "%" . $term . "%");
                     });
                 })
+                ->when(!empty($request->name), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->name;
+                        $query->where("name", "like", "%" . $term . "%");
+                    });
+                })
+                ->when(!empty($request->description), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->description;
+                        $query->where("description", "like", "%" . $term . "%");
+                    });
+                })
                 ->when(isset($request->is_active), function ($query) use ($request) {
                     return $query->where('departments.is_active', intval($request->is_active));
                 })
