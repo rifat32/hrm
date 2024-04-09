@@ -950,13 +950,16 @@ if(!$check_work_shift_details["ok"]) {
 
 
                 ->when(isset($request->name), function ($query) use ($request) {
-                    return $query->where('work_shifts.name', intval($request->name));
+                    $term = $request->name;
+                    return $query->where("work_shifts.name", "like", "%" . $term . "%");
                 })
                 ->when(isset($request->description), function ($query) use ($request) {
-                    return $query->where('work_shifts.description', intval($request->description));
+                    $term = $request->description;
+                    return $query->where("work_shifts.description", "like", "%" . $term . "%");
                 })
+
                 ->when(isset($request->type), function ($query) use ($request) {
-                    return $query->where('work_shifts.type', intval($request->type));
+                    return $query->where('work_shifts.type', ($request->type));
                 })
 
 
@@ -1335,7 +1338,7 @@ if(!$check_work_shift_details["ok"]) {
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = WorkShift::where([
                 "business_id" => $business_id,
@@ -1350,35 +1353,37 @@ if(!$check_work_shift_details["ok"]) {
 
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
 
-            $user_exists =  UserWorkShift::whereIn("user_id", $existingIds)->exists();
-            if ($user_exists) {
-                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
-                    'id', 'first_Name',
-                    'last_Name',
-                ]);
+            $user_exists =  User::
 
-                $this->storeError(
-                    "Some users are associated with the specified work shifts"
-                    ,
-                    409,
-                    "front end error",
-                    "front end error"
-                   );
+            whereHas("work_shifts", function($query) use($existingIds) {
+                $query->whereIn("work_shifts.id", $existingIds);
+            })
+            ->where("users.business_id",auth()->user()->id)
+           ->exists();
+
+            if ($user_exists) {
+                $conflictingUsers = User:: whereHas("work_shifts", function($query) use($existingIds) {
+                    $query->whereIn("work_shifts.id", $existingIds);
+                })
+                ->where("users.business_id",auth()->user()->id)
+                ->select([
+                    'users.id',
+                    'users.first_Name',
+                    'users.last_Name',
+                ])
+                ->get()
+                ;
+
                 return response()->json([
                     "message" => "Some users are associated with the specified work shifts",
-                    "conflicting_users" => $conflictingUsers
+                    "conflicting_users" => $conflictingUsers,
+                    "conflicting_users2" => $conflictingUsers
                 ], 409);
             }
 

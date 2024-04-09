@@ -474,10 +474,12 @@ class JobListingController extends Controller
                         $query->where("experience_level", "like", "%" . $term . "%");
                     });
                 })
+
                 ->when(!empty($request->salary), function ($query) use ($request) {
                     return $query->where('minimum_salary', "<=", $request->salary)
                     ->where('maximum_salary', ">=", $request->salary);
                 })
+
                 ->when(!empty($request->post_on), function ($query) use ($request) {
                     return $query->where('posted_on', $request->post_on);
                 })
@@ -493,9 +495,15 @@ class JobListingController extends Controller
                 })
 
                 ->when(!empty($request->number_of_candidates), function ($query) use ($request) {
-                    $query->whereHas("candidates", function ($query) use ($request) {
-                        $query->havingRaw('COUNT(*) = ?', [$request->number_of_candidates]);
+
+                    $number_query = explode(',', str_replace(' ', ',', $request->worked_hour));
+
+                    $query->whereHas("candidates", function ($query) use ($request, $number_query) {
+
+                        $query->havingRaw('COUNT(*) ' . $number_query[0] .' ?', [$number_query[1]]);
+
                     });
+
                 })
 
 

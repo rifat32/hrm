@@ -445,6 +445,14 @@ class PayrunController extends Controller
      * example="search_key"
      * ),
      * * @OA\Parameter(
+     * name="date",
+     * in="query",
+     * description="date",
+     * required=true,
+     * example="date"
+     * ),
+     *
+     * * @OA\Parameter(
      * name="type",
      * in="query",
      * description="type",
@@ -557,7 +565,10 @@ class PayrunController extends Controller
             ->when(isset($request->is_considering_overtime), function ($query) use ($request) {
                 return $query->where('payruns.consider_overtime', intval($request->is_considering_overtime));
             })
-
+            ->when(!empty($request->date), function ($query) use ($request) {
+                return $query->where('payruns.start_date', "<=", $request->date)
+                    ->where('payruns.end_date', ">=", $request->date);
+            })
 
 
                 // ->when(!empty($request->search_key), function ($query) use ($request) {

@@ -793,20 +793,26 @@ class AttendanceController extends Controller
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('attendances.status', $request->status);
                 })
+
                 ->when(!empty($request->overtime), function ($query) use ($request) {
-                    return $query->where('attendances.overtime_hours', $request->overtime);
+                    $number_query = explode(',', str_replace(' ', ',', $request->overtime));
+                    return $query->where('attendances.overtime_hours', $number_query);
                 })
 
+
                 ->when(!empty($request->schedule_hour), function ($query) use ($request) {
-                    return $query->where('attendances.capacity_hours', $request->schedule_hour);
+                    $number_query = explode(',', str_replace(' ', ',', $request->schedule_hour));
+                    return $query->where('attendances.capacity_hours', $number_query);
                 })
 
                 ->when(!empty($request->break_hour), function ($query) use ($request) {
-                    return $query->where('attendances.break_hours', $request->break_hours);
+                    $number_query = explode(',', str_replace(' ', ',', $request->break_hour));
+                    return $query->where('attendances.break_hours', $number_query);
                 })
 
                 ->when(!empty($request->worked_hour), function ($query) use ($request) {
-                    return $query->where('attendances.total_paid_hours', $request->worked_hour);
+                    $number_query = explode(',', str_replace(' ', ',', $request->worked_hour));
+                    return $query->where('attendances.total_paid_hours', $number_query[0], $number_query[1]);
                 })
 
                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
@@ -1261,7 +1267,7 @@ class AttendanceController extends Controller
                     ->whereIn('attendances.user_id', $employee_ids)
                     ->where('attendances.in_date', '>=', $request->start_date . ' 00:00:00')
                     ->where('attendances.in_date', '<=', ($request->end_date . ' 23:59:59'))
-                    
+
                     ->get();
 
                 // Iterate over each employee
