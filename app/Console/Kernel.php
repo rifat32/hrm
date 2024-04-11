@@ -23,7 +23,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('payrun:run')->everyMinute();
 
-     
+
+        $schedule->command('holiday:renew')->everyMinute();
 
     }
 
