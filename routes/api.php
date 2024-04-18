@@ -336,7 +336,11 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
 
+
+
+Route::post('/v1.0/users/create-recruitment-process', [UserManagementController::class, "createUserRecruitmentProcess"]);
 Route::put('/v1.0/users/update-recruitment-process', [UserManagementController::class, "updateUserRecruitmentProcess"]);
+Route::put('/v1.0/users/delete-recruitment-process/{ids}', [UserManagementController::class, "deleteUserRecruitmentProcess"]);
 
 
 Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);

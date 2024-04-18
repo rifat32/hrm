@@ -17,6 +17,7 @@ use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetailHistory;
 
 use App\Models\Project;
+use App\Models\UserRecruitmentProcess;
 use App\Models\UserWorkShift;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
@@ -282,6 +283,23 @@ if(!empty($recruitment_process["description"])){
             $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
         }
     }
+    public function update_recruitment_processes_v2($request_data,$user) {
+        if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
+
+
+         $userRecruitmentProcess =   UserRecruitmentProcess::where([
+                "id" => $request_data["recruitment_processes"]["id"]
+            ])
+            ->first();
+
+            $userRecruitmentProcess->fill($request_data["recruitment_processes"]);
+
+            $userRecruitmentProcess->save();
+
+        }
+    }
+
+
 
     public function update_work_shift($request_data,$user) {
           if (!empty($request_data["work_shift_id"])) {

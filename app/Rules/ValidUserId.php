@@ -28,7 +28,7 @@ class ValidUserId implements Rule
      */
     public function passes($attribute, $value)
     {
-        $exists = User::where([
+        $user = User::where([
             'users.id' => $value,
             'users.business_id' => auth()->user()->business_id,
         ])
@@ -38,7 +38,7 @@ class ValidUserId implements Rule
         ->whereNotIn('users.id', [auth()->user()->id])
         ->first();
 
-        return $exists !== null;
+        return $user?1:0;
     }
 
     public function message()
