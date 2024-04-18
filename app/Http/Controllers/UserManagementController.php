@@ -1468,7 +1468,7 @@ class UserManagementController extends Controller
      * @OA\Put(
      *      path="/v1.0/users/create-recruitment-process",
      *      operationId="createUserRecruitmentProcess",
-     *      tags={"user_management.employee"},
+     *      tags={"employee.recruitment_process"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -1589,7 +1589,7 @@ class UserManagementController extends Controller
      * @OA\Put(
      *      path="/v1.0/users/update-recruitment-process",
      *      operationId="updateUserRecruitmentProcess",
-     *      tags={"user_management.employee"},
+     *      tags={"employee.recruitment_process"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -1710,7 +1710,7 @@ class UserManagementController extends Controller
      * @OA\Delete(
      *      path="/v1.0/users/delete-recruitment-process/{ids}",
      *      operationId="deleteUserRecruitmentProcess",
-     *      tags={"user_management.employee"},
+     *      tags={"employee.recruitment_process"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
