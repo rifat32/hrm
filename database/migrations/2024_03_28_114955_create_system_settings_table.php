@@ -17,7 +17,7 @@ class CreateSystemSettingsTable extends Migration
         Schema::create('system_settings', function (Blueprint $table) {
             $table->id();
 
-            $table->boolean('registration_enabled')->default(true);
+            $table->boolean('self_registration_enabled')->default(true);
             $table->text('STRIPE_KEY')->nullable();
             $table->text('STRIPE_SECRET')->nullable();
             $table->timestamps();
@@ -25,7 +25,7 @@ class CreateSystemSettingsTable extends Migration
         DB::table('system_settings')
         ->insert(array(
            [
-            "registration_enabled" => 0,
+            "self_registration_enabled" => 0,
             "STRIPE_KEY" => NULL,
             "STRIPE_SECRET" => NULL,
            ],

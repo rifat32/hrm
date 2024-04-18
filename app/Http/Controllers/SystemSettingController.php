@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateSystemSettingRequest;
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
 use App\Models\SystemSetting;
 use Exception;
 use Illuminate\Http\Request;
 
 class SystemSettingController extends Controller
 {
+    use ErrorUtil,UserActivityUtil;
       /**
      *
      * @OA\Put(
@@ -118,7 +121,6 @@ class SystemSettingController extends Controller
      *      summary="This method is to get system_setting",
      *      description="This method is to get system_setting",
      *
-
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
