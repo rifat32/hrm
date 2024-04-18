@@ -37,6 +37,14 @@ class ServicePlanController extends Controller
  *  * @OA\Property(property="price", type="number", format="number", example="50"),
  * @OA\Property(property="business_tier_id", type="number", format="number", example="1"),
  *
+ * * @OA\Property(property="discount_codes", type="string", format="string", example={
+ *{"code" : "ddedddd",
+ * "discount_amount" : 50,
+ *},
+  *{"code" : "ddedddd",
+ * "discount_amount" : 50,
+ *}
+ * }),
  *
      *
      *         ),
@@ -95,7 +103,7 @@ class ServicePlanController extends Controller
 
                 $service_plan =  ServicePlan::create($request_data);
 
-                $service_plan->discount_codes()->sync($request_data['discount_codes']);
+                $service_plan->discount_codes()->createMany($request_data['discount_codes']);
 
                 return response($service_plan, 201);
             });
@@ -126,7 +134,19 @@ class ServicePlanController extends Controller
 * @OA\Property(property="set_up_amount", type="number", format="number", example="10"),
  * @OA\Property(property="duration_months", type="number", format="number", example="30"),
  *  *  * @OA\Property(property="price", type="number", format="number", example="50"),
- * @OA\Property(property="business_tier_id", type="number", format="number", example="1")
+ * @OA\Property(property="business_tier_id", type="number", format="number", example="1"),
+ *  * * @OA\Property(property="discount_codes", type="string", format="string", example={
+ *{
+ *   "id" :1,
+   * "code" : "ddedddd",
+ * "discount_amount" : 50,
+ *},
+  *{
+     *   "id" :1,
+  *  "code" : "ddedddd",
+ * "discount_amount" : 50,
+ *}
+ * }),
 
 
      *
@@ -206,7 +226,13 @@ class ServicePlanController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $service_plan->discount_codes()->sync($request_data['discount_codes']);
+
+                foreach ($request_data['discount_codes'] as $discountCode) {
+                    $service_plan->discount_codes()->updateOrCreate(
+                        ['id' => $discountCode['id']],
+                        $discountCode
+                    );
+                }
 
                 return response($service_plan, 201);
             });
@@ -561,7 +587,7 @@ class ServicePlanController extends Controller
                 ], 401);
             }
 
-            $service_plan =  ServicePlan::where([
+            $service_plan =  ServicePlan::with("discount_codes")->where([
                 "id" => $id,
             ])
             // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {

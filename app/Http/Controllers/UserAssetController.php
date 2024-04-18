@@ -7,6 +7,7 @@ use App\Http\Requests\SingleFileUploadRequest;
 use App\Http\Requests\UserAssetAddExistingRequest;
 use App\Http\Requests\UserAssetCreateRequest;
 use App\Http\Requests\UserAssetUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -22,7 +23,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserAssetController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
     /**
@@ -731,12 +732,7 @@ class UserAssetController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_assets = UserAsset::with([
                   "creator" => function ($query) {
                       $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -769,9 +765,6 @@ class UserAssetController extends Controller
                           //     ->orWhere("user_assets.description", "like", "%" . $term . "%");
                       });
                   })
-                  //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                  //        return $query->where('product_category_id', $request->product_category_id);
-                  //    })
 
                   ->when(!empty($request->name), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -796,11 +789,7 @@ class UserAssetController extends Controller
                     });
                 })
 
-
-
-
-
-                ->when(!isset($request->is_working), function ($query) use ($request) {
+                ->when(isset($request->is_working), function ($query) use ($request) {
                     return $query->where('user_assets.is_working', intval($request->is_working));
                 })
 
@@ -929,12 +918,7 @@ class UserAssetController extends Controller
                   ], 401);
               }
 
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_asset =  UserAsset::where([
                   "id" => $id,
                   "business_id" => auth()->user()->business_id
@@ -1054,12 +1038,7 @@ class UserAssetController extends Controller
                   ], 401);
               }
 
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
 
               $userAssets = UserAsset::whereIn('id', $idsArray)

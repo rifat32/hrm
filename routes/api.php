@@ -56,6 +56,7 @@ use App\Http\Controllers\UserNoteController;
 use App\Http\Controllers\UserPassportHistoryController;
 use App\Http\Controllers\UserPayslipController;
 use App\Http\Controllers\UserPensionHistoryController;
+use App\Http\Controllers\UserRecruitmentProcessController;
 use App\Http\Controllers\UserRightToWorkHistoryController;
 use App\Http\Controllers\UserSocialSiteController;
 use App\Http\Controllers\UserSponsorshipHistoryController;
@@ -338,9 +339,7 @@ Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
 
 
 
-Route::post('/v1.0/users/create-recruitment-process', [UserManagementController::class, "createUserRecruitmentProcess"]);
-Route::put('/v1.0/users/update-recruitment-process', [UserManagementController::class, "updateUserRecruitmentProcess"]);
-Route::put('/v1.0/users/delete-recruitment-process/{ids}', [UserManagementController::class, "deleteUserRecruitmentProcess"]);
+
 
 
 Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);
@@ -360,6 +359,8 @@ Route::get('/v1.0/users/get-attendances/{id}', [UserManagementController::class,
 Route::get('/v1.0/users/get-leaves/{id}', [UserManagementController::class, "getLeavesByUserId"]);
 Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
 Route::get('/v1.0/users/get-schedule-information/{id}', [UserManagementController::class, "getScheduleInformationByUserId"]);
+
+
 
 Route::get('/v1.0/users/get-recruitment-processes/{id}', [UserManagementController::class, "getRecruitmentProcessesByUserId"]);
 
@@ -395,6 +396,40 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user document management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user recruitment process  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Route::post('/v1.0/user-recruitment-processes', [UserRecruitmentProcessController::class, "createUserRecruitmentProcess"]);
+
+Route::put('/v1.0/user-recruitment-processes', [UserRecruitmentProcessController::class, "updateUserRecruitmentProcess"]);
+
+
+Route::get('/v1.0/user-recruitment-processes/{id}', [UserRecruitmentProcessController::class, "getUserRecruitmentProcessesById"]);
+
+
+
+
+
+Route::delete('/v1.0/user-recruitment-processes/{ids}', [UserRecruitmentProcessController::class, "deleteUserRecruitmentProcess"]);
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user recruitment process  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user job history  management section

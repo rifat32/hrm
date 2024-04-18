@@ -30,7 +30,7 @@ class UserUpdateRecruitmentProcessRequest extends FormRequest
     {
         $all_manager_department_ids = $this->get_all_departments_of_manager();
         return [
-            'id' => [
+            'user_id' => [
                 "required",
                 "numeric",
                 new ValidUserId($all_manager_department_ids),

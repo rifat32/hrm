@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidateDiscountCode;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ServicePlanCreateRequest extends BaseFormRequest
@@ -33,7 +34,14 @@ class ServicePlanCreateRequest extends BaseFormRequest
             'business_tier_id' => 'required|exists:business_tiers,id',
 
             "discount_codes" => "present|array",
-            "discount_codes.*.code" => "required|string|unique:service_plan_discount_codes,code",
+            "discount_codes.*.code" => [
+"required",
+new ValidateDiscountCode()
+            ],
+
+
+
+
             "discount_codes.*.discount_amount" => "required|numeric",
 
         ];

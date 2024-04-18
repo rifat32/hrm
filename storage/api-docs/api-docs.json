@@ -22628,6 +22628,20 @@
                                         "type": "number",
                                         "format": "number",
                                         "example": "1"
+                                    },
+                                    "discount_codes": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": [
+                                            {
+                                                "code": "ddedddd",
+                                                "discount_amount": 50
+                                            },
+                                            {
+                                                "code": "ddedddd",
+                                                "discount_amount": 50
+                                            }
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -31000,9 +31014,9 @@
             }
         },
         "/v1.0/users/create-recruitment-process": {
-            "put": {
+            "post": {
                 "tags": [
-                    "user_management.employee"
+                    "employee.recruitment_process"
                 ],
                 "summary": "This method is to update user recruitment process",
                 "description": "This method is to update user recruitment process",
@@ -31106,7 +31120,7 @@
         "/v1.0/users/update-recruitment-process": {
             "put": {
                 "tags": [
-                    "user_management.employee"
+                    "employee.recruitment_process"
                 ],
                 "summary": "This method is to update user address",
                 "description": "This method is to update user address",
@@ -31212,7 +31226,7 @@
         "/v1.0/users/delete-recruitment-process/{ids}": {
             "delete": {
                 "tags": [
-                    "user_management.employee"
+                    "employee.recruitment_process"
                 ],
                 "summary": "This method is to update user address",
                 "description": "This method is to update user address",
