@@ -19,6 +19,7 @@ use App\Http\Requests\UserUpdateBankDetailsRequest;
 use App\Http\Requests\UserUpdateEmergencyContactRequest;
 use App\Http\Requests\UserUpdateJoiningDateRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
+use App\Http\Requests\UserUpdateRecruitmentProcessRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
 use App\Http\Utils\BusinessUtil;
@@ -1415,12 +1416,7 @@ class UserManagementController extends Controller
                     $user->save();
                 }
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1462,6 +1458,133 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+      /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/update-recruitment-process",
+     *      operationId="updateUserRecruitmentProcess",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user address",
+     *      description="This method is to update user address",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+
+    *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
+     * {
+     * "recruitment_process_id":1,
+     * "description":"description",
+     * "attachments":{"/abcd.jpg","/efgh.jpg"}
+     * },
+     *      * {
+     * "recruitment_process_id":1,
+     * "description":"description",
+     * "attachments":{"/abcd.jpg","/efgh.jpg"}
+     * }
+     *
+     *
+     *
+     * }),
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserRecruitmentProcess(UserUpdateRecruitmentProcessRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+
+             $updatableUser = User::where([
+                "id" => $request_data["id"]
+            ])->first();
+
+            if (!$updatableUser) {
+
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
+
+
+             if ($updatableUser->hasRole("superadmin") && $request_data["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+             $this->update_recruitment_processes($request_data, $updatableUser);
+
+
+
+
+             return response($updatableUser, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
     /**
      *
      * @OA\Put(
@@ -1648,16 +1771,16 @@ class UserManagementController extends Controller
             // end history section
 
 
-
-
-
-
             return response($user, 201);
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
+
     /**
      *
      * @OA\Put(
