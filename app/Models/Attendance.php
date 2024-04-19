@@ -15,8 +15,6 @@ class Attendance extends Model
         "in_geolocation",
         "out_geolocation",
         'user_id',
-        'in_time',
-        'out_time',
         'in_date',
         'does_break_taken',
 
@@ -33,8 +31,7 @@ class Attendance extends Model
         "holiday_id",
         "leave_record_id",
         "is_weekend",
-        "overtime_start_time",
-        "overtime_end_time",
+
         "overtime_hours",
         "punch_in_time_tolerance",
         "status",
@@ -46,7 +43,18 @@ class Attendance extends Model
         "regular_hours_salary",
         "overtime_hours_salary",
 
+
+
+        "attendance_records"
+
     ];
+
+      protected $casts = [
+        'attendance_records' => 'array',
+
+    ];
+
+
 
     public function arrear(){
         return $this->hasOne(AttendanceArrear::class,'attendance_id', 'id');

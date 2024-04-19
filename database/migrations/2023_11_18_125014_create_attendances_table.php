@@ -36,8 +36,7 @@ class CreateAttendancesTable extends Migration
             $table->boolean("does_break_taken");
 
 
-            $table->time('in_time')->nullable();
-            $table->time('out_time')->nullable();
+
 
             $table->double('capacity_hours');
 
@@ -56,8 +55,7 @@ class CreateAttendancesTable extends Migration
             $table->unsignedBigInteger('holiday_id')->nullable();
             $table->unsignedBigInteger('leave_record_id')->nullable();
 
-            $table->time('overtime_start_time')->nullable();
-            $table->time('overtime_end_time')->nullable();
+
             $table->double('overtime_hours');
             $table->time('work_shift_start_at');
             $table->time('work_shift_end_at');
@@ -83,6 +81,9 @@ class CreateAttendancesTable extends Migration
 
             $table->double('regular_hours_salary');
             $table->double('overtime_hours_salary');
+
+
+            $table->json('attendance_records');
 
 
 

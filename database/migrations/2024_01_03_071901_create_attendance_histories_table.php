@@ -16,7 +16,7 @@ class CreateAttendanceHistoriesTable extends Migration
         Schema::create('attendance_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("attendance_id")->nullable();
-           
+
             $table->unsignedBigInteger("actor_id")->nullable();
             $table->foreign('actor_id')->references('id')->on('users')->onDelete('set null');
             $table->string('action');
@@ -50,8 +50,6 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->boolean("does_break_taken");
 
 
-            $table->time('in_time')->nullable();
-            $table->time('out_time')->nullable();
 
             $table->double('capacity_hours');
 
@@ -69,8 +67,8 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->unsignedBigInteger('holiday_id')->nullable();
             $table->unsignedBigInteger('leave_record_id')->nullable();
 
-            $table->time('overtime_start_time')->nullable();
-            $table->time('overtime_end_time')->nullable();
+
+
             $table->double('overtime_hours');
             $table->time('work_shift_start_at');
             $table->time('work_shift_end_at');
@@ -85,6 +83,12 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->double('regular_hours_salary');
             $table->double('overtime_hours_salary');
+
+
+            $table->json('attendance_records');
+
+
+
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
                 ->references('id')

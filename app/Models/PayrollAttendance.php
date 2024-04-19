@@ -17,8 +17,7 @@ class PayrollAttendance extends Model
         // 'holiday_id',
         // 'leave_record_id',
 
-        // 'overtime_start_time',
-        // 'overtime_end_time',
+      
         // 'overtime_hours',
 
 

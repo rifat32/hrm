@@ -29,9 +29,12 @@ class Leave extends Model
     ];
 
 
-    public function records(){
+    public function records() {
         return $this->hasMany(LeaveRecord::class,'leave_id', 'id');
     }
+
+
+
     public function employee() {
         return $this->belongsTo(User::class, "user_id","id");
     }

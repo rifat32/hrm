@@ -278,6 +278,7 @@ return array(
     'App\\Models\\Attendance' => $baseDir . '/app/Models/Attendance.php',
     'App\\Models\\AttendanceArrear' => $baseDir . '/app/Models/AttendanceArrear.php',
     'App\\Models\\AttendanceHistory' => $baseDir . '/app/Models/AttendanceHistory.php',
+    'App\\Models\\AttendanceHistoryRecord' => $baseDir . '/app/Models/AttendanceHistoryRecord.php',
     'App\\Models\\AttendanceRecord' => $baseDir . '/app/Models/AttendanceRecord.php',
     'App\\Models\\Bank' => $baseDir . '/app/Models/Bank.php',
     'App\\Models\\Business' => $baseDir . '/app/Models/Business.php',

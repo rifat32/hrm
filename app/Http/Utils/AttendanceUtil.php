@@ -129,39 +129,8 @@ trait AttendanceUtil
     }
 
 
-    public function get_leave_record_details($in_date, $user_id, $in_time = "", $out_time = "")
-    {
-        $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($in_date, $user_id) {
-            $query->whereIn("leaves.user_id",  [$user_id])
-                ->where("leaves.status", "approved");
-        })
-            ->where('date', '>=', $in_date . ' 00:00:00')
-            ->where('date', '<=', ($in_date . ' 23:59:59'))
-            ->first();
 
-
-        if ($leave_record) {
-            if (!in_array($leave_record->leave->leave_duration, ['single_day', 'multiple_day'])) {
-                $attendance_in_time = Carbon::parse($in_time);
-                $attendance_out_time = Carbon::parse($out_time);
-
-                $leave_start_time = Carbon::parse($leave_record->start_time);
-                $leave_end_time = Carbon::parse($leave_record->end_time);
-
-                $balance_start_time = $attendance_in_time->max($leave_start_time);
-                $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-                if ($balance_start_time < $balance_end_time) {
-                    throw new Exception(("there is an hourly leave on date" . $in_date), 400);
-                }
-            } else {
-                throw new Exception(("there is a leave on date " . $in_date), 400);
-            }
-        }
-
-        return $leave_record;
-    }
-    public function get_leave_record_details_v2($in_date, $user_id, $attendance_records)
+    public function get_leave_record_details($in_date, $user_id, $attendance_records)
     {
         $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($in_date, $user_id) {
             $query->whereIn("leaves.user_id",  [$user_id])
@@ -209,14 +178,9 @@ trait AttendanceUtil
         return $work_shift_end_at->diffInHours($work_shift_start_at);
     }
 
-    public function calculate_total_present_hours($in_time, $out_time)
-    {
-        $in_time = Carbon::createFromFormat('H:i:s', $in_time);
-        $out_time = Carbon::createFromFormat('H:i:s', $out_time);
-        return $out_time->diffInHours($in_time);
-    }
 
-    public function calculate_total_present_hours_v2($attendance_records)
+
+    public function calculate_total_present_hours($attendance_records)
     {
 
         $total_present_hours = 0;
@@ -263,73 +227,40 @@ trait AttendanceUtil
         return $total_present_hours;
     }
 
-    public function calculate_overtime($is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $in_time, $out_time)
+
+    public function calculate_overtime($is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $attendance_records)
     {
-        $overtime_start_time = NULL;
-        $overtime_end_time = NULL;
+
         $overtime_hours = 0;
 
         if ($is_weekend || $holiday) {
-            $overtime_start_time = $in_time;
-            $overtime_end_time = $out_time;
-            $overtime_hours = $total_paid_hours;
+            $overtime_hours += $total_paid_hours;
         } else if ($leave_record) {
-
-            $attendance_in_time = Carbon::parse($in_time);
-            $attendance_out_time = Carbon::parse($out_time);
 
             $leave_start_time = Carbon::parse($leave_record->start_time);
             $leave_end_time = Carbon::parse($leave_record->end_time);
 
-            $balance_start_time = $attendance_in_time->max($leave_start_time);
-            $balance_end_time = $attendance_out_time->min($leave_end_time);
+            foreach($attendance_records as $attendance_record){
+                $attendance_in_time = Carbon::parse($attendance_record["in_time"]);
+                $attendance_out_time = Carbon::parse($attendance_record["out_time"]);
 
-            if ($balance_start_time < $balance_end_time) {
-                $overtime_hours = $balance_start_time->diffInHours($balance_end_time);
-                $overtime_start_time = $balance_start_time;
-                $overtime_end_time = $balance_end_time;
+
+
+                $balance_start_time = $attendance_in_time->max($leave_start_time);
+                $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                if ($balance_start_time < $balance_end_time) {
+                    $overtime_hours += $balance_start_time->diffInHours($balance_end_time);
+                }
             }
+
+
+
+
         } else if ($work_hours_delta > 0) {
             $overtime_hours = $work_hours_delta;
         }
         return [
-            "overtime_start_time" => $overtime_start_time,
-            "overtime_end_time" => $overtime_end_time,
-            "overtime_hours" => $overtime_hours
-        ];
-    }
-    public function calculate_overtime_v2($is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $in_time, $out_time)
-    {
-        $overtime_start_time = NULL;
-        $overtime_end_time = NULL;
-        $overtime_hours = 0;
-
-        if ($is_weekend || $holiday) {
-            $overtime_start_time = $in_time;
-            $overtime_end_time = $out_time;
-            $overtime_hours = $total_paid_hours;
-        } else if ($leave_record) {
-
-            $attendance_in_time = Carbon::parse($in_time);
-            $attendance_out_time = Carbon::parse($out_time);
-
-            $leave_start_time = Carbon::parse($leave_record->start_time);
-            $leave_end_time = Carbon::parse($leave_record->end_time);
-
-            $balance_start_time = $attendance_in_time->max($leave_start_time);
-            $balance_end_time = $attendance_out_time->min($leave_end_time);
-
-            if ($balance_start_time < $balance_end_time) {
-                $overtime_hours = $balance_start_time->diffInHours($balance_end_time);
-                $overtime_start_time = $balance_start_time;
-                $overtime_end_time = $balance_end_time;
-            }
-        } else if ($work_hours_delta > 0) {
-            $overtime_hours = $work_hours_delta;
-        }
-        return [
-            "overtime_start_time" => $overtime_start_time,
-            "overtime_end_time" => $overtime_end_time,
             "overtime_hours" => $overtime_hours
         ];
     }
@@ -376,16 +307,19 @@ trait AttendanceUtil
         $holiday = $this->get_holiday_details($attendance_data["in_date"], $user_id, $all_parent_departments_of_user);
 
         // Retrieve leave record details for the user and date
-        $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user_id, $attendance_data["in_time"], $attendance_data["out_time"]);
+
+
+        $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user_id, $attendance_data["attendance_records"]);
+
 
         // Calculate capacity hours based on work shift details
         $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
 
         // Calculate total present hours based on in and out times
-        $total_present_hours = $this->calculate_total_present_hours($attendance_data["in_time"], $attendance_data["out_time"]);
+        $total_present_hours = $this->calculate_total_present_hours($attendance_data["attendance_records"]);
 
         // Calculate tolerance time based on in time and work shift details
-        $tolerance_time = $this->calculate_tolerance_time($attendance_data["in_time"], $work_shift_details);
+        $tolerance_time = $this->calculate_tolerance_time($attendance_data["attendance_records"][0]["in_time"], $work_shift_details);
 
         // Determine behavior based on tolerance time and attendance setting
         $behavior = $this->determine_behavior($tolerance_time, $setting_attendance);
@@ -397,7 +331,7 @@ trait AttendanceUtil
         $work_hours_delta = $total_present_hours - $capacity_hours;
 
         // Calculate overtime information
-        $overtime_information = $this->calculate_overtime($work_shift_details->is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $attendance_data["in_time"], $attendance_data["out_time"]);
+        $overtime_information = $this->calculate_overtime($work_shift_details->is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $attendance_data["attendance_records"]);
 
         // Calculate regular work hours
         $regular_work_hours = $this->calculate_regular_work_hours($total_paid_hours, $overtime_information["overtime_hours"]);
@@ -416,8 +350,7 @@ trait AttendanceUtil
         $attendance_data["holiday_id"] = $holiday ? $holiday->id : NULL;
         $attendance_data["leave_record_id"] = $leave_record ? $leave_record->id : NULL;
         $attendance_data["is_weekend"] = $work_shift_details->is_weekend;
-        $attendance_data["overtime_start_time"] = $overtime_information["overtime_start_time"];
-        $attendance_data["overtime_end_time"] = $overtime_information["overtime_end_time"];
+
         $attendance_data["overtime_hours"] = $overtime_information["overtime_hours"];
         $attendance_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
         $attendance_data["regular_hours_salary"] =   $regular_work_hours * $user_salary_info["hourly_salary"];

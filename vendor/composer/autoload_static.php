@@ -990,6 +990,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Models\\Attendance' => __DIR__ . '/../..' . '/app/Models/Attendance.php',
         'App\\Models\\AttendanceArrear' => __DIR__ . '/../..' . '/app/Models/AttendanceArrear.php',
         'App\\Models\\AttendanceHistory' => __DIR__ . '/../..' . '/app/Models/AttendanceHistory.php',
+        'App\\Models\\AttendanceHistoryRecord' => __DIR__ . '/../..' . '/app/Models/AttendanceHistoryRecord.php',
         'App\\Models\\AttendanceRecord' => __DIR__ . '/../..' . '/app/Models/AttendanceRecord.php',
         'App\\Models\\Bank' => __DIR__ . '/../..' . '/app/Models/Bank.php',
         'App\\Models\\Business' => __DIR__ . '/../..' . '/app/Models/Business.php',

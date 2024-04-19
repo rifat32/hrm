@@ -149,6 +149,9 @@ class AttendanceController extends Controller
             // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($attendance_data);
 
+
+
+
             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
 
             DB::commit();
@@ -424,8 +427,7 @@ class AttendanceController extends Controller
                     "holiday_id",
                     "leave_record_id",
                     "is_weekend",
-                    "overtime_start_time",
-                    "overtime_end_time",
+
                     "overtime_hours",
                     "punch_in_time_tolerance",
                     "status",
@@ -1778,8 +1780,10 @@ class AttendanceController extends Controller
                     // Retrieve work shift details based on work shift history and date
                     $work_shift_details =  $this->get_work_shift_details($work_shift_history, $item["in_date"]);
 
-                    $item["in_time"] = $work_shift_details->start_at;
-                    $item["out_time"] = $work_shift_details->end_at;
+                    // flexible error
+
+                    $item["attendance_record"][0]["in_time"] = $work_shift_details->start_at;
+                    $item["attendance_record"][0]["out_time"] = $work_shift_details->end_at;
 
                     // Prepare data for attendance creation
                     $attendance_data = $this->prepare_data_on_attendance_create($item, $user->id);
@@ -1795,7 +1799,7 @@ class AttendanceController extends Controller
                         return false;
                     }
                     // Retrieve leave record details for the user and date
-                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id);
+                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"]);
 
                     if ($leave_record) {
                         return false;
@@ -1804,9 +1808,8 @@ class AttendanceController extends Controller
                     // Calculate capacity hours based on work shift details
                     $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
 
-                    // Calculate total present hours based on in and out times
-                    // $total_present_hours = $this->calculate_total_present_hours($attendance_data["in_time"], $attendance_data["out_time"]);
-                    $total_present_hours = $this->calculate_total_present_hours_v2($attendance_data["attendance_records"]);
+
+                    $total_present_hours = $this->calculate_total_present_hours($attendance_data["attendance_records"]);
 
                     // Adjust paid hours based on break taken and work shift history
                     $total_paid_hours = $this->adjust_paid_hours($attendance_data["does_break_taken"], $total_present_hours, $work_shift_history);

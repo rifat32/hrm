@@ -52,13 +52,15 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
             'attendance_details.*.in_geolocation' => 'nullable|string',
             'attendance_details.*.out_geolocation' => 'nullable|string',
 
-            'attendance_details.*.in_time' => 'nullable|date_format:H:i:s',
-            'attendance_details.*.out_time' => [
+
+            'attendance_details.*.attendance_records' => 'required|array',
+            'attendance_details.*.attendance_records.*.in_time' => 'required|date_format:H:i:s',
+            'attendance_details.*.attendance_records.*.out_time' => [
                 'required',
                 'date_format:H:i:s',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
-                    $inTime = request('attendance_details')[$index]['in_time'] ?? false;
+                    $inTime = request('attendance_records')[$index]['in_time'] ?? false;
 
                     if ($value !== null && strtotime($value) < strtotime($inTime)) {
                         $fail($attribute . " must be after or equal to in_time.");
@@ -67,6 +69,9 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
 
                 },
             ],
+
+
+
 
             'attendance_details.*.in_date' => [
                  "required",

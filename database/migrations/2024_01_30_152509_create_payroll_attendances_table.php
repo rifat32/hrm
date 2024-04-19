@@ -27,8 +27,7 @@ class CreatePayrollAttendancesTable extends Migration
             // $table->unsignedBigInteger('holiday_id')->nullable();
             // $table->unsignedBigInteger('leave_record_id')->nullable();
 
-            // $table->double('overtime_start_time')->nullable();
-            // $table->double('overtime_end_time')->nullable();
+            
             // $table->double('overtime_hours')->nullable();
 
 
