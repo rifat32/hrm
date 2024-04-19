@@ -60,6 +60,7 @@ trait AttendanceUtil
                             });
                     });
             })
+            // @@@ confusion
             ->orWhere(function ($query) {
                 $query->where([
                     "business_id" => NULL,

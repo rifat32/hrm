@@ -61,6 +61,8 @@ class LeaveComponent
         return $leave;
     }
 
+
+
     public function getLeaveRecordDataItem(
         $work_shift_details,
         $holiday,
@@ -205,10 +207,7 @@ if($leave_data["leave_duration"] == "hours") {
 
 
 public function processLeaveRequest($raw_data) {
-
-
     $leave_data =  !empty($raw_data["id"])?$raw_data:$this->prepare_data_on_leave_create($raw_data, $raw_data["user_id"]);
-
     $leave_record_data_list = [];
     $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user($leave_data["user_id"]);
 
@@ -237,8 +236,37 @@ public function processLeaveRequest($raw_data) {
         "leave_data" => $leave_data,
         "leave_record_data_list" => $leave_record_data_list
     ];
+}
+
+
+
+public function get_already_taken_leave_dates($start_date,$end_date,$user_id) {
+
+
+  $already_taken_leaves =  Leave::where([
+        "user_id" => $user_id
+    ])
+        ->whereHas('records', function ($query) use ($start_date, $end_date) {
+            $query->where('leave_records.date', '>=', $start_date)
+                ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
+        })
+        ->get();
+
+      $already_taken_leave_dates =  $already_taken_leaves->flatMap(function ($leave) {
+            return $leave->records->map(function ($record) {
+                return Carbon::parse($record->date)->format('d-m-Y');
+            });
+        })->toArray();
+        return $already_taken_leave_dates;
+
+
 
 }
+
+
+
+
+
 
 
 }

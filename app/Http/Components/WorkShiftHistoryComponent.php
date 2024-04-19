@@ -27,6 +27,7 @@ class WorkShiftHistoryComponent
                   });
           });
             })
+            // @@@confusion
             ->orWhere(function($query) {
                $query->where([
                 "business_id" => NULL,
@@ -42,7 +43,41 @@ class WorkShiftHistoryComponent
         }
 
         return $work_shift_history;
+
+
     }
+    public function get_work_shift_histories($start_date,$end_date,$user_id)
+    {
+     $work_shift_histories =   WorkShiftHistory::
+            where("from_date", "<=", $end_date)
+            ->where(function ($query) use ($start_date) {
+                $query->where("to_date", ">", $start_date)
+                    ->orWhereNull("to_date");
+            })
+            ->whereHas("users", function ($query) use ($start_date, $user_id, $end_date) {
+                $query->where("users.id", $user_id)
+                    ->where("employee_user_work_shift_histories.from_date", "<", $end_date)
+                    ->where(function ($query) use ($start_date) {
+                        $query->where("employee_user_work_shift_histories.to_date", ">=", $start_date)
+                            ->orWhereNull("employee_user_work_shift_histories.to_date");
+                    });
+            })
+
+            ->get();
+
+        if ($work_shift_histories->isEmpty()) {
+            throw new Exception("Please define workshift first");
+
+        }
+
+        return $work_shift_histories;
+    }
+
+
+
+
+
+
 
     public function get_work_shift_details($work_shift_history,$in_date)
     {

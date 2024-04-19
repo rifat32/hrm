@@ -1193,6 +1193,11 @@ class AttendanceController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
+
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
             $employees = User::with(
                 ["departments"]
             )
@@ -1240,10 +1245,10 @@ class AttendanceController extends Controller
                 });
 
 
-            if ((!empty($request->start_date) && !empty($request->end_date))) {
+
                 // Parse start and end dates
-                $startDate = Carbon::parse(($request->start_date . ' 00:00:00'));
-                $endDate = Carbon::parse(($request->end_date . ' 23:59:59'));
+                $startDate = Carbon::parse(($start_date . ' 00:00:00'));
+                $endDate = Carbon::parse(($end_date . ' 23:59:59'));
 
                 // Create an array of dates within the given range
                 $dateArray = [];
@@ -1258,15 +1263,15 @@ class AttendanceController extends Controller
                     $query->whereIn("leaves.user_id",  $employee_ids)
                         ->where("leaves.status", "approved");
                 })
-                    ->where('date', '>=', $request->start_date . ' 00:00:00')
-                    ->where('date', '<=', ($request->end_date . ' 23:59:59'))
+                    ->where('date', '>=', $start_date . ' 00:00:00')
+                    ->where('date', '<=', ($end_date . ' 23:59:59'))
                     ->get();
 
                 // Retrieve attendance records within the specified date range
                 $attendances = Attendance::where("attendances.status", "approved")
                     ->whereIn('attendances.user_id', $employee_ids)
-                    ->where('attendances.in_date', '>=', $request->start_date . ' 00:00:00')
-                    ->where('attendances.in_date', '<=', ($request->end_date . ' 23:59:59'))
+                    ->where('attendances.in_date', '>=', $start_date . ' 00:00:00')
+                    ->where('attendances.in_date', '<=', ($end_date . ' 23:59:59'))
 
                     ->get();
 
@@ -1276,10 +1281,6 @@ class AttendanceController extends Controller
 
                     // Get all parent department IDs of the employee
                     $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
-
-
-
-
 
 
                     // Initialize total variables
@@ -1376,8 +1377,6 @@ class AttendanceController extends Controller
                     $employee->total_capacity_hours = $total_capacity_hours;
                     return $employee;
                 });
-            }
-
 
 
 

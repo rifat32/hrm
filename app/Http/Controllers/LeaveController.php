@@ -1161,8 +1161,6 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
 
-
-
                 ->when(!empty($request->total_leave_hours), function ($query) use ($request) {
                     $number_query = explode(',', str_replace(' ', ',', $request->total_leave_hours));
                     return $query->where('leaves.total_leave_hours', $number_query);
@@ -1200,20 +1198,12 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 //    })
 
 
-
-
-
-
-
-
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     $query->where('leaves.start_date', '>=', $request->start_date . ' 00:00:00');
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
                     $query->where('leaves.end_date', '<=', $request->end_date . ' 23:59:59');
                 })
-
-
 
 
 
@@ -1265,7 +1255,6 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                     $pdf = PDF::loadView('pdf.leaves', ["leaves" => $leaves]);
                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
                 } elseif (strtoupper($request->response_type) === 'CSV') {
-
                     return Excel::download(new LeavesExport($leaves), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
                 }
             } else {

@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Exports\UserExport;
 use App\Exports\UsersExport;
+use App\Http\Components\AttendanceComponent;
+use App\Http\Components\HolidayComponent;
+use App\Http\Components\LeaveComponent;
+use App\Http\Components\WorkShiftHistoryComponent;
 use App\Http\Requests\AssignPermissionRequest;
 use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\GuestUserRegisterRequest;
@@ -69,7 +73,19 @@ class UserManagementController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil;
 
+    protected $workShiftHistoryComponent;
+    protected $holidayComponent;
+    protected $leaveComponent;
+    protected $attendanceComponent;
 
+    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent,  LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent)
+    {
+
+        $this->workShiftHistoryComponent = $workShiftHistoryComponent;
+        $this->holidayComponent = $holidayComponent;
+        $this->leaveComponent = $leaveComponent;
+        $this->attendanceComponent = $attendanceComponent;
+    }
 
     /**
      *
@@ -709,82 +725,81 @@ class UserManagementController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('user_create')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
-                $business_id = $request->user()->business_id;
+            if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id = $request->user()->business_id;
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
-                if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
-                    $this->storeError(
-                        "You can not create superadmin.",
-                        403,
-                        "front end error",
-                        "front end error"
-                    );
-                    $error =  [
-                        "message" => "You can not create superadmin.",
-                    ];
-                    throw new Exception(json_encode($error), 403);
-                }
+            if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
+                $this->storeError(
+                    "You can not create superadmin.",
+                    403,
+                    "front end error",
+                    "front end error"
+                );
+                $error =  [
+                    "message" => "You can not create superadmin.",
+                ];
+                throw new Exception(json_encode($error), 403);
+            }
 
-                // $request_data['password'] = Hash::make($request['password']);
+            // $request_data['password'] = Hash::make($request['password']);
 
-                $password = Str::random(11);
-                $request_data['password'] = Hash::make($password);
-
-
+            $password = Str::random(11);
+            $request_data['password'] = Hash::make($password);
 
 
-                $request_data['is_active'] = true;
-                $request_data['remember_token'] = Str::random(10);
 
 
-                if (!empty($business_id)) {
-                    $request_data['business_id'] = $business_id;
-                }
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
 
 
-                $user =  User::create($request_data);
-                $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
-                $user->user_name = $username;
-                $token = Str::random(30);
-                $user->resetPasswordToken = $token;
-                $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-                $user->pension_eligible = 0;
-                $user->save();
-                $this->delete_old_histories();
-                $user->departments()->sync($request_data['departments']);
-                $user->assignRole($request_data['role']);
+            if (!empty($business_id)) {
+                $request_data['business_id'] = $business_id;
+            }
 
 
-                $this->store_work_shift($request_data, $user);
-                $this->store_project($request_data, $user);
-                $this->store_pension($request_data, $user);
-                $this->store_recruitment_processes($request_data, $user);
+            $user =  User::create($request_data);
+            $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+            $user->user_name = $username;
+            $token = Str::random(30);
+            $user->resetPasswordToken = $token;
+            $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+            $user->pension_eligible = 0;
+            $user->save();
+            $this->delete_old_histories();
+            $user->departments()->sync($request_data['departments']);
+            $user->assignRole($request_data['role']);
 
-                if (in_array($request["immigration_status"], ['sponsored'])) {
-                    $this->store_sponsorship_details($request_data, $user);
-                }
-                if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
-                    $this->store_passport_details($request_data, $user);
-                    $this->store_visa_details($request_data, $user);
-                }
-                if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
-                    $this->store_right_to_works($request_data, $user);
-                }
-                $user->roles = $user->roles->pluck('name');
 
-                if (env("SEND_EMAIL") == true) {
-                    Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
-                }
+            $this->store_work_shift($request_data, $user);
+            $this->store_project($request_data, $user);
+            $this->store_pension($request_data, $user);
+            $this->store_recruitment_processes($request_data, $user);
 
-                DB::commit();
-                return response($user, 201);
+            if (in_array($request["immigration_status"], ['sponsored'])) {
+                $this->store_sponsorship_details($request_data, $user);
+            }
+            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
+                $this->store_passport_details($request_data, $user);
+                $this->store_visa_details($request_data, $user);
+            }
+            if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
+                $this->store_right_to_works($request_data, $user);
+            }
+            $user->roles = $user->roles->pluck('name');
 
+            if (env("SEND_EMAIL") == true) {
+                Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
+            }
+
+            DB::commit();
+            return response($user, 201);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -1376,46 +1391,46 @@ class UserManagementController extends Controller
 
             $user = User::where($userQueryTerms)->first();
 
-                if ($user) {
-                    $user->fill(collect($request_data)->only([
-                        'first_Name',
-                        'last_Name',
-                        'middle_Name',
-                        "NI_number",
+            if ($user) {
+                $user->fill(collect($request_data)->only([
+                    'first_Name',
+                    'last_Name',
+                    'middle_Name',
+                    "NI_number",
 
-                        "email",
-                        "color_theme_name",
-                        'emergency_contact_details',
-                        'gender',
-                        'is_in_employee',
-                        'designation_id',
-                        'employment_status_id',
-                        'joining_date',
-                        "date_of_birth",
-                        'salary_per_annum',
-                        'weekly_contractual_hours',
-                        'minimum_working_days_per_week',
-                        'overtime_rate',
-                        'phone',
-                        'image',
-                        'address_line_1',
-                        'address_line_2',
-                        'country',
-                        'city',
-                        'postcode',
-                        "lat",
-                        "long",
-                        'is_active_visa_details',
-                        "is_active_right_to_works",
-                        'is_sponsorship_offered',
+                    "email",
+                    "color_theme_name",
+                    'emergency_contact_details',
+                    'gender',
+                    'is_in_employee',
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    "date_of_birth",
+                    'salary_per_annum',
+                    'weekly_contractual_hours',
+                    'minimum_working_days_per_week',
+                    'overtime_rate',
+                    'phone',
+                    'image',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long",
+                    'is_active_visa_details',
+                    "is_active_right_to_works",
+                    'is_sponsorship_offered',
 
-                        "immigration_status",
-                        'work_location_id',
+                    "immigration_status",
+                    'work_location_id',
 
-                    ])->toArray());
+                ])->toArray());
 
-                    $user->save();
-                }
+                $user->save();
+            }
             if (!$user) {
 
                 return response()->json([
@@ -2261,7 +2276,7 @@ class UserManagementController extends Controller
             }
 
             // history section
-                $this->update_address_history($request_data,$user);
+            $this->update_address_history($request_data, $user);
             // end history section
 
 
@@ -2850,19 +2865,18 @@ class UserManagementController extends Controller
 
 
                 ->when(!empty($request->full_name), function ($query) use ($request) {
-                 // Replace spaces with commas and create an array
-$searchTerms = explode(',', str_replace(' ', ',', $request->full_name));
+                    // Replace spaces with commas and create an array
+                    $searchTerms = explode(',', str_replace(' ', ',', $request->full_name));
 
-$query->where(function ($query) use ($searchTerms) {
-    foreach ($searchTerms as $term) {
-        $query->orWhere(function ($subquery) use ($term) {
-            $subquery->where("first_Name", "like", "%" . $term . "%")
-                     ->orWhere("last_Name", "like", "%" . $term . "%")
-                     ->orWhere("middle_Name", "like", "%" . $term . "%");
-        });
-    }
-});
-
+                    $query->where(function ($query) use ($searchTerms) {
+                        foreach ($searchTerms as $term) {
+                            $query->orWhere(function ($subquery) use ($term) {
+                                $subquery->where("first_Name", "like", "%" . $term . "%")
+                                    ->orWhere("last_Name", "like", "%" . $term . "%")
+                                    ->orWhere("middle_Name", "like", "%" . $term . "%");
+                            });
+                        }
+                    });
                 })
 
 
@@ -2882,7 +2896,7 @@ $query->where(function ($query) use ($searchTerms) {
 
                 ->when(!empty($request->designation_id), function ($query) use ($request) {
                     $idsArray = explode(',', $request->designation_id);
-                    return $query->whereIn('designation_id',$idsArray );
+                    return $query->whereIn('designation_id', $idsArray);
                 })
 
                 ->when(!empty($request->employment_status_id), function ($query) use ($request) {
@@ -4956,7 +4970,7 @@ $query->where(function ($query) use ($searchTerms) {
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             // get appropriate use if auth user have access
-            $user = $this->getUserByIdUtil($id,$all_manager_department_ids);
+            $user = $this->getUserByIdUtil($id, $all_manager_department_ids);
 
 
 
@@ -4967,28 +4981,27 @@ $query->where(function ($query) use ($searchTerms) {
 
 
 
-                $setting_leave = SettingLeave::
-                where('setting_leaves.business_id', auth()->user()->business_id)
-               ->where('setting_leaves.is_default', 0)
-               ->first();
-               if(!$setting_leave) {
+            $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
+                ->where('setting_leaves.is_default', 0)
+                ->first();
+            if (!$setting_leave) {
                 return response()->json(
-                   [ "message" => "No leave setting found."]
+                    ["message" => "No leave setting found."]
                 );
-               }
-               if(!$setting_leave->start_month) {
+            }
+            if (!$setting_leave->start_month) {
                 $setting_leave->start_month = 1;
-               }
+            }
 
-               $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
+            $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
 
 
 
-               $leave_types =   SettingLeaveType::where(function ($query) use ($paid_leave_available, $created_by) {
+            $leave_types =   SettingLeaveType::where(function ($query) use ($paid_leave_available, $created_by) {
                 $query->where('setting_leave_types.business_id', auth()->user()->business_id)
                     ->where('setting_leave_types.is_default', 0)
                     ->where('setting_leave_types.is_active', 1)
-                    ->when($paid_leave_available == 0, function($query) {
+                    ->when($paid_leave_available == 0, function ($query) {
                         $query->where('setting_leave_types.type', "unpaid");
                     })
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
@@ -4997,11 +5010,10 @@ $query->where(function ($query) use ($searchTerms) {
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                         $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
                     });
-
             })
                 ->get();
 
-                $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
+            $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
             foreach ($leave_types as $key => $leave_type) {
                 $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
                     $query->where([
@@ -5010,7 +5022,7 @@ $query->where(function ($query) use ($searchTerms) {
 
                     ]);
                 })
-                ->where("leave_records.date","<=",$startOfMonth)
+                    ->where("leave_records.date", "<=", $startOfMonth)
                     ->get()
                     ->sum(function ($record) {
                         return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
@@ -5138,37 +5150,17 @@ $query->where(function ($query) use ($searchTerms) {
 
 
 
-            $already_taken_attendances =  Attendance::where([
-                "user_id" => $user->id
-            ])
-                ->where('attendances.in_date', '>=', $start_date)
-                ->where('attendances.in_date', '<=', $end_date . ' 23:59:59')
-                ->get();
-
-
-            $already_taken_attendance_dates = $already_taken_attendances->map(function ($attendance) {
-                return Carbon::parse($attendance->in_date)->format('d-m-Y');
-            });
-
-
-            $already_taken_leaves =  Leave::where([
-                "user_id" => $user->id
-            ])
-                ->whereHas('records', function ($query) use ($start_date, $end_date) {
-                    $query->where('leave_records.date', '>=', $start_date)
-                        ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
-                })
-                ->get();
-
-
-            $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
-                return $leave->records->map(function ($record) {
-                    return Carbon::parse($record->date)->format('d-m-Y');
-                });
-            })->toArray();
 
 
 
+            $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
+
+
+
+
+
+
+            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id);
 
 
             $result_collection = $already_taken_attendance_dates;
@@ -5178,7 +5170,6 @@ $query->where(function ($query) use ($searchTerms) {
                     $result_collection = $result_collection->merge($already_taken_leave_dates);
                 }
             }
-
 
             $unique_result_collection = $result_collection->unique();
             $result_array = $unique_result_collection->values()->all();
@@ -5193,7 +5184,7 @@ $query->where(function ($query) use ($searchTerms) {
         }
     }
 
-       /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get-leaves/{id}",
@@ -5250,93 +5241,64 @@ $query->where(function ($query) use ($searchTerms) {
      *     )
      */
 
-     public function getLeavesByUserId($id, Request $request)
-     {
+    public function getLeavesByUserId($id, Request $request)
+    {
 
 
-         foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-             File::delete($file);
-         }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+            File::delete($file);
+        }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-             $user = User::with("roles")
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                     $query->whereIn("departments.id", $all_manager_department_ids);
-                 })
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id);
-                     });
-                 })
-                 ->first();
-
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
+            $user = User::with("roles")
+                ->where([
+                    "id" => $id
+                ])
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
-             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
-             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
 
+            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id);
+
+            $result_collection = $already_taken_leave_dates->unique();
+
+            $result_array = $result_collection->values()->all();
 
 
+            return response()->json($result_array, 200);
+        } catch (Exception $e) {
 
-
-             $already_taken_leaves =  Leave::where([
-                 "user_id" => $user->id
-             ])
-                 ->whereHas('records', function ($query) use ($start_date, $end_date) {
-                     $query->where('leave_records.date', '>=', $start_date)
-                         ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
-                 })
-                 ->get();
-
-
-
-             $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
-                 return $leave->records->map(function ($record) {
-                     return Carbon::parse($record->date)->format('d-m-Y');
-                 });
-             })->toArray();
-
-
-
-             $result_collection = $already_taken_leave_dates->unique();
-
-
-
-
-
-             $result_array = $result_collection->values()->all();
-
-
-
-
-             return response()->json($result_array, 200);
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -5409,15 +5371,18 @@ $query->where(function ($query) use ($searchTerms) {
         }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            // Check if the user has permission to view users
             if (!$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
+            // Get all department IDs managed by the current user
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-
+            // Retrieve the user based on the provided ID, ensuring it belongs to one of the managed departments
             $user = User::with("roles")
                 ->where([
                     "id" => $id
@@ -5425,7 +5390,7 @@ $query->where(function ($query) use ($searchTerms) {
                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
@@ -5434,165 +5399,48 @@ $query->where(function ($query) use ($searchTerms) {
                 })
                 ->first();
 
+            // If no user found, return 404 error
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
 
-
+            // Get all parent department IDs of the user
             $all_parent_department_ids = $this->all_parent_departments_of_user($id);
 
-
+            // Set start and end date for the holiday period
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
-            $holidays = Holiday::where([
-                "business_id" => $user->business_id
-            ])
-                ->where('holidays.start_date', ">=", $start_date)
-                ->where('holidays.end_date', "<=", $end_date . ' 23:59:59')
-                ->where([
-                    "is_active" => 1
-                ])
-                ->where(function ($query) use ($id, $all_parent_department_ids) {
-                    $query->whereHas("users", function ($query) use ($id) {
-                        $query->where([
-                            "users.id" => $id
-                        ]);
-                    })
-                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                            $query->whereIn("departments.id", $all_parent_department_ids);
-                        })
-
-                        ->orWhere(function ($query) {
-                            $query->whereDoesntHave("users")
-                                ->whereDoesntHave("departments");
-                        });
-                })
-
-
-                ->get();
-
-
-            $holiday_dates = $holidays->flatMap(function ($holiday) {
-                $start_holiday_date = Carbon::parse($holiday->start_date);
-                $end_holiday_date = Carbon::parse($holiday->end_date);
-
-                if ($start_holiday_date->eq($end_holiday_date)) {
-                    return [$start_holiday_date->format('d-m-Y')];
-                }
-
-                $date_range = $start_holiday_date->daysUntil($end_holiday_date->addDay());
-
-                return $date_range->map(function ($date) {
-                    return $date->format('d-m-Y');
-                });
-            });
-
-
-            $work_shift_histories = WorkShiftHistory::where("from_date", "<", $end_date)
-                ->where(function ($query) use ($start_date) {
-                    $query->where("to_date", ">=", $start_date)
-                        ->orWhereNull("to_date");
-                })
-                ->whereHas("users", function ($query) use ($start_date, $user, $end_date) {
-                    $query->where("users.id", $user->id)
-                        ->where("employee_user_work_shift_histories.from_date", "<", $end_date)
-                        ->where(function ($query) use ($start_date) {
-                            $query->where("employee_user_work_shift_histories.to_date", ">=", $start_date)
-                                ->orWhereNull("employee_user_work_shift_histories.to_date");
-                        });
-                })
-
-                ->get();
-
-            if ($work_shift_histories->isEmpty()) {
-                $this->storeError(
-                    "Please define workshift first",
-                    400,
-                    "front end error",
-                    "front end error"
-                );
-                return response()->json(["message" => "Please define workshift first"], 400);
-            }
-
-            $weekend_dates = collect(); // Initialize an empty collection to store weekend dates
-
-            $user_id = $user->id;
-            $work_shift_histories->each(function ($work_shift) use ($start_date, $end_date, &$weekend_dates, $user_id) {
-                $weekends = $work_shift->details()->where("is_weekend", 1)->get();
-
-                $weekends->each(function ($weekend) use ($start_date, $end_date, &$weekend_dates, $work_shift, $user_id) {
-                    $day_of_week = $weekend->day;
-
-
-                    $user = $work_shift->users->first(function ($user) use ($user_id) {
-                        return $user->id == $user_id;
-                    });
-                    $user_to_date = $user->pivot->to_date ?? null;
-
-                    if ($user_to_date) {
-                        $end_work_shift_date = $user_to_date;
-                    } elseif ($work_shift->to_date) {
-                        $end_work_shift_date = $work_shift->to_date;
-                    } else {
-                        $end_work_shift_date = $end_date;
-                    }
-
-                    $user_from_date = $user->pivot->from_date;
-                    Log::alert(json_encode($user->pivot));
-                    $start_work_shift_date = Carbon::parse($user_from_date)->gt($start_date) ? $user_from_date : $start_date;
-
-
-                    // Find the next occurrence of the specified day of the week
-                    $next_day = Carbon::parse($start_work_shift_date)->copy()->next($day_of_week);
-
-
-                    // Loop through the days until either the to_date or the end of the year
-                    while ($next_day <= $end_work_shift_date) {
-                        $weekend_dates->push($next_day->format('d-m-Y'));
-                        $next_day->addWeek(); // Move to the next week
-                    }
-                });
-            });
 
 
 
-            $already_taken_leaves =  Leave::where([
-                "user_id" => $user->id
-            ])
-                ->whereHas('records', function ($query) use ($start_date, $end_date) {
-                    $query->where('leave_records.date', '>=', $start_date)
-                        ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
-                })
-                ->get();
+            // Process holiday dates
+            $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user->id, $all_parent_department_ids);
 
 
-            $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
-                return $leave->records->map(function ($record) {
-                    return Carbon::parse($record->date)->format('d-m-Y');
-                });
-            })->toArray();
+            // Retrieve work shift histories for the user within the specified period
+            $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user->id);
+
+            // Initialize an empty collection to store weekend dates
+
+            $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $user->id, $work_shift_histories);
 
 
-            $already_taken_attendances =  Attendance::where([
-                "user_id" => $user->id
-            ])
-                ->where('attendances.in_date', '>=', $start_date)
-                ->where('attendances.in_date', '<=', $end_date . ' 23:59:59')
-                ->get();
 
 
-            $already_taken_attendance_dates = $already_taken_attendances->map(function ($attendance) {
-                return Carbon::parse($attendance->in_date)->format('d-m-Y');
-            })->toArray();
+
+
+
+            // Process already taken leave dates
+            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id);
+
+
+
+
+            // Process already taken attendance dates
+            $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
 
 
             $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates);
@@ -5617,22 +5465,21 @@ $query->where(function ($query) use ($searchTerms) {
         }
     }
 
+
+
+
+
+
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/users/get-schedule-information/{id}",
-     *      operationId="getScheduleInformationByUserId",
+     *      path="/v1.0/users/get-schedule-information/by-user",
+     *      operationId="getScheduleInformation",
      *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *              @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="id",
-     *         required=true,
-     *  example="6"
-     *      ),
+
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
@@ -5687,7 +5534,7 @@ $query->where(function ($query) use ($searchTerms) {
      *     )
      */
 
-    public function getScheduleInformationByUserId($id, Request $request)
+    public function getScheduleInformation(Request $request)
     {
 
         try {
@@ -5697,300 +5544,121 @@ $query->where(function ($query) use ($searchTerms) {
                     "message" => "You can not perform this action"
                 ], 401);
             }
-
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-            $user = User::with("roles")
-                ->where([
-                    "id" => $id
-                ])
+            $employees = User::with(
+                ["departments"]
+            )
                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
+
+                ->where(["users.business_id" => auth()->user()->business_id])
+
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
                     });
                 })
-                ->first();
 
-            if (!$user) {
-
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
-
-
-            $all_parent_department_ids = $this->all_parent_departments_of_user($id);
-
-
-
-
-
-            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
-            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
-
-
-
-
-            $holidays = Holiday::where([
-                "business_id" => $user->business_id
-            ])
-                ->where('holidays.start_date', ">=", $start_date)
-                ->where('holidays.end_date', "<=", $end_date . ' 23:59:59')
-                ->where([
-                    "is_active" => 1
-                ])
-                ->where(function ($query) use ($id, $all_parent_department_ids) {
-                    $query->whereHas("users", function ($query) use ($id) {
-                        $query->where([
-                            "users.id" => $id
-                        ]);
-                    })
-                        ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                            $query->whereIn("departments.id", $all_parent_department_ids);
-                        })
-
-                        ->orWhere(function ($query) {
-                            $query->whereDoesntHave("users")
-                                ->whereDoesntHave("departments");
-                        });
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    $idsArray = explode(',', $request->user_id);
+                    return $query->whereIn('users.id', $idsArray);
+                })
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    $query->whereNotIn("users.id", [auth()->user()->id]);
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("users.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("users.id", "DESC");
                 })
 
-
-                ->get();
-
-
-
-
-
-
-
-
-
-            $holiday_dates = $holidays->flatMap(function ($holiday) {
-                $start_date = Carbon::parse($holiday->start_date);
-                $end_date = Carbon::parse($holiday->end_date);
-
-                if ($start_date->eq($end_date)) {
-                    return [$start_date->format('Y-m-d')];
-                }
-
-                $date_range = $start_date->daysUntil($end_date->addDay());
-
-                return $date_range->map(function ($date) {
-                    return $date->format('Y-m-d');
+                ->select(
+                    "users.id",
+                    "users.first_Name",
+                    "users.middle_Name",
+                    "users.last_Name",
+                    "users.image",
+                )
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
                 });
-            });
+
+            $employees->each(function ($employee) use ($start_date, $end_date) {
+                $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
+
+                // Process holiday dates
+                $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $employee->id, $all_parent_department_ids);
+
+                $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $employee->id);
+                $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $employee->id, $work_shift_histories);
+
+                $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $employee->id);
+
+                // Merge the collections and remove duplicates
+                $all_leaves_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
+
+
+                // $result_collection now contains all unique dates from holidays and weekends
+                $all_leaves_array = $all_leaves_collection->values()->all();
 
 
 
 
-
-
-            // $weekends = $work_shift->details()->where([
-            //     "is_weekend" => 1
-            // ])
-            //     ->get();
-
-
-
-
-
-            // $weekend_dates = $weekends->flatMap(function ($weekend) use ($start_date, $end_date) {
-            //     $day_of_week = $weekend->day;
-
-            //     // Find the next occurrence of the specified day of the week
-            //     $next_day = Carbon::parse($start_date)->copy()->next($day_of_week);
-
-            //     $matching_days = [];
-
-            //     // Loop through the days between today and the end date
-            //     while ($next_day <= $end_date) {
-            //         $matching_days[] = $next_day->format('Y-m-d');
-            //         $next_day->addWeek(); // Move to the next week
-            //     }
-
-            //     return $matching_days;
-            // });
-            $work_shift_histories = WorkShiftHistory::where("from_date", "<", $end_date)
-                ->where(function ($query) use ($start_date) {
-                    $query->where("to_date", ">=", $start_date)
-                        ->orWhereNull("to_date");
-                })
-                ->whereHas("users", function ($query) use ($start_date, $user, $end_date) {
-                    $query->where("users.id", $user->id)
-                        ->where("employee_user_work_shift_histories.from_date", "<", $end_date)
-                        ->where(function ($query) use ($start_date) {
-                            $query->where("employee_user_work_shift_histories.to_date", ">=", $start_date)
-                                ->orWhereNull("employee_user_work_shift_histories.to_date");
-                        });
-                })
-                ->get();
-
-
-
-
-            if ($work_shift_histories->isEmpty()) {
-                $this->storeError(
-                    "Please define workshift first",
-                    400,
-                    "front end error",
-                    "front end error"
-                );
-                return response()->json(["message" => "Please define workshift first"], 400);
-            }
-
-            $weekend_dates = collect(); // Initialize an empty collection to store weekend dates
-            $user_id = $user->id;
-
-            $work_shift_histories->each(function ($work_shift) use ($start_date, $end_date, &$weekend_dates, $user_id) {
-                $weekends = $work_shift->details()->where("is_weekend", 1)->get();
-
-                $weekends->each(function ($weekend) use ($start_date, $end_date, &$weekend_dates, $work_shift, $user_id) {
-                    $day_of_week = $weekend->day;
-
-                    // Determine the end date for the loop
-                    // Determine the end date for the loop
-
-
-                    $userShift = $work_shift->users->first(function ($user) use ($user_id) {
-                        return $user->id == $user_id;
+                $all_dates = collect(range(strtotime($start_date), strtotime($end_date), 86400)) // 86400 seconds in a day
+                    ->map(function ($timestamp) {
+                        return date('Y-m-d', $timestamp);
                     });
-                    $user_to_date = $userShift->pivot->to_date ?? null;
-
-                    if ($user_to_date) {
-                        $end_date_loop = $user_to_date;
-                    } elseif ($work_shift->to_date) {
-                        $end_date_loop = $work_shift->to_date;
-                    } else {
-                        $end_date_loop = $end_date;
-                    }
-
-                    $user_from_date = $userShift->pivot->from_date;
-                    $start_date_loop = $user_from_date->gt($start_date) ? $user_from_date : $start_date;
 
 
-                    // Find the next occurrence of the specified day of the week
-                    $next_day = Carbon::parse($start_date_loop)->copy()->next($day_of_week);
+
+                $all_scheduled_dates = $all_dates->reject(fn ($date) => in_array($date, $all_leaves_array));
 
 
-                    // Loop through the days until either the to_date or the end of the year
-                    while ($next_day <= $end_date_loop) {
-                        $weekend_dates->push($next_day->format('d-m-Y'));
-                        $next_day->addWeek(); // Move to the next week
+
+                $schedule_data = [];
+                $total_capacity_hours = 0;
+
+
+                $all_scheduled_dates->each(function ($date) use (&$schedule_data, &$total_capacity_hours, $employee) {
+
+                    $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($date, $employee->id);
+                    $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $date);
+
+                    if ($work_shift_details) {
+                        $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+                        $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+                        $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+
+
+                        $schedule_data[] = [
+                            "date" => Carbon::createFromFormat('Y-m-d', $date)->format('d-m-Y'),
+                            "capacity_hours" => $capacity_hours,
+                            "break_type" => $work_shift_history->break_type,
+                            "break_hours" => $work_shift_history->break_hours,
+                            "start_at" => $work_shift_details->start_at,
+                            'end_at' => $work_shift_details->end_at,
+                            'is_weekend' => $work_shift_details->is_weekend,
+                        ];
+                        $total_capacity_hours += $capacity_hours;
                     }
                 });
+
+                $employee->schedule_data = $schedule_data;
+                $employee->total_capacity_hours = $total_capacity_hours;
+
+                return $employee;
             });
 
 
 
-
-            $already_taken_leaves =  Leave::where([
-                "user_id" => $user->id
-            ])
-                ->whereHas('records', function ($query) use ($start_date, $end_date) {
-                    $query->where('leave_records.date', '>=', $start_date)
-                        ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
-                })
-                ->get();
-
-
-            $already_taken_leave_dates = $already_taken_leaves->flatMap(function ($leave) {
-                return $leave->records->map(function ($record) {
-                    return Carbon::parse($record->date)->format('Y-m-d');
-                });
-            })->toArray();
-
-
-
-            // Merge the collections and remove duplicates
-            $all_leaves_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
-
-
-            // $result_collection now contains all unique dates from holidays and weekends
-            $all_leaves_array = $all_leaves_collection->values()->all();
-
-
-
-
-
-
-
-
-
-
-
-
-            $all_dates = collect(range(strtotime($start_date), strtotime($end_date), 86400)) // 86400 seconds in a day
-                ->map(function ($timestamp) {
-                    return date('Y-m-d', $timestamp);
-                });
-
-
-
-            $all_scheduled_dates = $all_dates->reject(fn ($date) => in_array($date, $all_leaves_array));
-
-
-
-            $schedule_data = [];
-            $total_capacity_hours = 0;
-
-            // Fetch all work shift details outside the loop
-            // $work_shift_details = $work_shift->details()->where([
-            //     "is_weekend" => 0
-            // ])
-            //     ->get()
-            //     ->keyBy('day');
-
-            $all_scheduled_dates->each(function ($date) use (&$schedule_data, &$total_capacity_hours, $user) {
-                $day_number = Carbon::parse($date)->dayOfWeek;
-
-                $work_shift_history =  WorkShiftHistory::where("from_date", "<", $date)
-                    ->where(function ($query) use ($date) {
-                        $query->where("to_date", ">=", $date)
-                            ->orWhereNull("to_date");
-                    })
-                    ->whereHas("users", function ($query) use ($date, $user) {
-                        $query->where("users.id", $user->id)
-                            ->where("employee_user_work_shift_histories.from_date", "<", $date)
-                            ->where(function ($query) use ($date) {
-                                $query->where("employee_user_work_shift_histories.to_date", ">=", $date)
-                                    ->orWhereNull("employee_user_work_shift_histories.to_date");
-                            });
-                    })
-                    ->first();
-
-
-                $work_shift_details =  $work_shift_history->details()->where([
-                    "day" => $day_number
-                ])
-                    ->first();
-
-                if ($work_shift_details) {
-                    $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
-                    $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
-                    $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-
-                    $schedule_data[] = [
-                        "date" => Carbon::createFromFormat('Y-m-d', $date)->format('d-m-Y'),
-                        "capacity_hours" => $capacity_hours,
-                    ];
-                    $total_capacity_hours += $capacity_hours;
-                }
-            });
-
-
-
-            return response()->json([
-                "schedule_data" => $schedule_data,
-                "total_capacity_hours" => $total_capacity_hours
-
-            ], 200);
+            return response()->json($employees, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -5998,7 +5666,9 @@ $query->where(function ($query) use ($searchTerms) {
     }
 
 
- /**
+
+
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get-recruitment-processes/{id}",
@@ -6068,68 +5738,67 @@ $query->where(function ($query) use ($searchTerms) {
      *     )
      */
 
-     public function getRecruitmentProcessesByUserId($id, Request $request)
-     {
-         //  $logPath = storage_path('logs');
-         //  foreach (File::glob($logPath . '/*.log') as $file) {
-         //      File::delete($file);
-         //  }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getRecruitmentProcessesByUserId($id, Request $request)
+    {
+        //  $logPath = storage_path('logs');
+        //  foreach (File::glob($logPath . '/*.log') as $file) {
+        //      File::delete($file);
+        //  }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-             $user = User::with("roles")
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                     $query->whereIn("departments.id", $all_manager_department_ids);
-                 })
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id);
-                     });
-                 })
-                 ->first();
+            $user = User::with("roles")
+                ->where([
+                    "id" => $id
+                ])
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
 
-             if (!$user) {
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-
-
-
-      $user_recruitment_processes = UserRecruitmentProcess::
-      with("recruitment_process")
-      ->where([
-        "user_id" =>$user->id
-      ])
-      ->whereNotNull("description")
-      ->get();
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
+
+            $user_recruitment_processes = UserRecruitmentProcess::with("recruitment_process")
+                ->where([
+                    "user_id" => $user->id
+                ])
+                ->whereNotNull("description")
+                ->get();
 
 
 
 
-             return response()->json($user_recruitment_processes, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            return response()->json($user_recruitment_processes, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -6204,7 +5873,7 @@ $query->where(function ($query) use ($searchTerms) {
 
             $idsArray = explode(',', $ids);
             $existingIds = User::whereIn('id', $idsArray)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query)  {
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) {
                     return $query->where(function ($query) {
                         return  $query->where('created_by', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id);
@@ -6241,10 +5910,6 @@ $query->where(function ($query) use ($searchTerms) {
 
             User::whereIn('id', $existingIds)->forceDelete();
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
-
-
-
-
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -6411,12 +6076,13 @@ $query->where(function ($query) use ($searchTerms) {
                     "business_id" => $request->user()->business_id
                 ]
             )
-            ->when(
-                !empty($request->id),
-                function($query) use($request){
-                    $query->whereNotIn("id",[$request->id]);
-                })
-            ->exists();
+                ->when(
+                    !empty($request->id),
+                    function ($query) use ($request) {
+                        $query->whereNotIn("id", [$request->id]);
+                    }
+                )
+                ->exists();
 
 
 
@@ -6545,7 +6211,7 @@ $query->where(function ($query) use ($searchTerms) {
             //  }
 
             $user =     User::where(["id" => $request->user_id])
-                ->when(( !auth()->user()->hasRole("superadmin") && auth()->user()->id != $request->user_id ) , function ($query) use ($all_manager_department_ids) {
+                ->when((!auth()->user()->hasRole("superadmin") && auth()->user()->id != $request->user_id), function ($query) use ($all_manager_department_ids) {
                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
                     });
