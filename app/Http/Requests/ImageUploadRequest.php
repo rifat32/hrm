@@ -25,7 +25,7 @@ class ImageUploadRequest extends BaseFormRequest
     {
 
             return [
-                'image' => 'required|image|max:2048',
+                'image' => 'required|image|max:5120',
             ];
 
     }

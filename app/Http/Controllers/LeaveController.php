@@ -1148,8 +1148,8 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
 
-                ->when(!empty($request->type), function ($query) use ($request) {
-                    return $query->where('leaves.day_type', $request->type);
+                ->when(!empty($request->leave_type_id), function ($query) use ($request) {
+                    return $query->where('leaves.leave_type_id', $request->leave_type_id);
                 })
 
 
@@ -1163,7 +1163,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
                 ->when(!empty($request->total_leave_hours), function ($query) use ($request) {
                     $number_query = explode(',', str_replace(' ', ',', $request->total_leave_hours));
-                    return $query->where('leaves.total_leave_hours', $number_query);
+                    return $query->where('leaves.total_leave_hours', $number_query[0],$number_query[1]);
                 })
 
 

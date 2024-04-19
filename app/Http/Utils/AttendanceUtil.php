@@ -128,6 +128,7 @@ trait AttendanceUtil
         return $holiday;
     }
 
+
     public function get_leave_record_details($in_date, $user_id, $in_time = "", $out_time = "")
     {
         $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($in_date, $user_id) {
@@ -140,7 +141,7 @@ trait AttendanceUtil
 
 
         if ($leave_record) {
-            if ($leave_record->leave->leave_duration == "hours") {
+            if (!in_array($leave_record->leave->leave_duration, ['single_day', 'multiple_day'])) {
                 $attendance_in_time = Carbon::parse($in_time);
                 $attendance_out_time = Carbon::parse($out_time);
 
@@ -160,6 +161,46 @@ trait AttendanceUtil
 
         return $leave_record;
     }
+    public function get_leave_record_details_v2($in_date, $user_id, $attendance_records)
+    {
+        $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($in_date, $user_id) {
+            $query->whereIn("leaves.user_id",  [$user_id])
+                ->where("leaves.status", "approved");
+        })
+            ->where('date', '>=', $in_date . ' 00:00:00')
+            ->where('date', '<=', ($in_date . ' 23:59:59'))
+            ->first();
+
+
+        if ($leave_record) {
+            if (!in_array($leave_record->leave->leave_duration, ['single_day', 'multiple_day'])) {
+
+                $leave_start_time = Carbon::parse($leave_record->start_time);
+                $leave_end_time = Carbon::parse($leave_record->end_time);
+
+                foreach($attendance_records as $attendance_record){
+                    $attendance_in_time = Carbon::parse($attendance_record["in_time"]);
+                    $attendance_out_time = Carbon::parse($attendance_record["out_time"]);
+
+
+
+                    $balance_start_time = $attendance_in_time->max($leave_start_time);
+                    $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+                    if ($balance_start_time < $balance_end_time) {
+                        throw new Exception(("there is an hourly leave on date" . $in_date), 400);
+                    }
+                }
+
+
+            } else {
+                throw new Exception(("there is a leave on date " . $in_date), 400);
+            }
+        }
+
+        return $leave_record;
+    }
+
 
     public function calculate_capacity_hours($work_shift_details)
     {
@@ -173,6 +214,22 @@ trait AttendanceUtil
         $in_time = Carbon::createFromFormat('H:i:s', $in_time);
         $out_time = Carbon::createFromFormat('H:i:s', $out_time);
         return $out_time->diffInHours($in_time);
+    }
+
+    public function calculate_total_present_hours_v2($attendance_records)
+    {
+
+        $total_present_hours = 0;
+
+        collect($attendance_records)->each(function($attendance_record) use(&$total_present_hours) {
+            $in_time = Carbon::createFromFormat('H:i:s', $attendance_record["in_time"]);
+            $out_time = Carbon::createFromFormat('H:i:s', $attendance_record["out_time"]);
+            $total_present_hours += $out_time->diffInHours($in_time);
+        });
+
+        return $total_present_hours;
+
+
     }
 
     function calculate_tolerance_time($in_time, $work_shift_details)
@@ -241,7 +298,41 @@ trait AttendanceUtil
             "overtime_hours" => $overtime_hours
         ];
     }
+    public function calculate_overtime_v2($is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $in_time, $out_time)
+    {
+        $overtime_start_time = NULL;
+        $overtime_end_time = NULL;
+        $overtime_hours = 0;
 
+        if ($is_weekend || $holiday) {
+            $overtime_start_time = $in_time;
+            $overtime_end_time = $out_time;
+            $overtime_hours = $total_paid_hours;
+        } else if ($leave_record) {
+
+            $attendance_in_time = Carbon::parse($in_time);
+            $attendance_out_time = Carbon::parse($out_time);
+
+            $leave_start_time = Carbon::parse($leave_record->start_time);
+            $leave_end_time = Carbon::parse($leave_record->end_time);
+
+            $balance_start_time = $attendance_in_time->max($leave_start_time);
+            $balance_end_time = $attendance_out_time->min($leave_end_time);
+
+            if ($balance_start_time < $balance_end_time) {
+                $overtime_hours = $balance_start_time->diffInHours($balance_end_time);
+                $overtime_start_time = $balance_start_time;
+                $overtime_end_time = $balance_end_time;
+            }
+        } else if ($work_hours_delta > 0) {
+            $overtime_hours = $work_hours_delta;
+        }
+        return [
+            "overtime_start_time" => $overtime_start_time,
+            "overtime_end_time" => $overtime_end_time,
+            "overtime_hours" => $overtime_hours
+        ];
+    }
     function calculate_regular_work_hours($total_paid_hours, $result_balance_hours)
     {
         return $total_paid_hours - $result_balance_hours;

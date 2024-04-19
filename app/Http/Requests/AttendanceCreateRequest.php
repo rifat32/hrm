@@ -52,9 +52,27 @@ class AttendanceCreateRequest extends BaseFormRequest
             'in_geolocation' => 'nullable|string',
             'out_geolocation' => 'nullable|string',
 
+            'attendance_records' => 'required|array',
+            'attendance_records.*.in_time' => 'required|date_format:H:i:s',
+            'attendance_records.*.out_time' => [
+                'required',
+                'date_format:H:i:s',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+                    $inTime = request('attendance_records')[$index]['in_time'] ?? false;
 
-            'in_time' => 'nullable|date_format:H:i:s',
-            'out_time' => 'nullable|date_format:H:i:s|after_or_equal:in_time',
+                    if ($value !== null && strtotime($value) < strtotime($inTime)) {
+                        $fail($attribute . " must be after or equal to in_time.");
+                    }
+
+
+                },
+            ],
+
+
+
+
+
 
 
 

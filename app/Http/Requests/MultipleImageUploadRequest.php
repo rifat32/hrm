@@ -25,7 +25,7 @@ class MultipleImageUploadRequest extends BaseFormRequest
     {
         return [
             'images' => 'required|array',
-            'images.*' => 'required|image|max:2048',
+            'images.*' => 'required|image|max:5120',
         ];
     }
 }

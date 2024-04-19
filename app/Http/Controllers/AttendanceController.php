@@ -64,8 +64,25 @@ class AttendanceController extends Controller
      *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
      *
      *     @OA\Property(property="user_id", type="number", format="number", example="1"),
-     *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
-     *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
+     *
+     * *     @OA\Property(property="attendance_records", type="string", format="array", example={
+     * {
+     * "in_time":"00:44:00",
+     * "out_time":"00:45:00"
+     * },
+     * * {
+     * "in_time":"00:48:00",
+     *  "out_time":"00:50:00"
+     * }
+     *
+     * }),
+     *
+
+     *
+     *
+     *
+     *
+     *
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
      *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
@@ -294,7 +311,24 @@ class AttendanceController extends Controller
      *    *   *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
      *
      *     @OA\Property(property="user_id", type="number", format="number", example="1"),
-     *     @OA\Property(property="in_time", type="string", format="string", example="00:44:00"),
+     *
+     *
+     *
+      * *     @OA\Property(property="attendance_records", type="string", format="array", example={
+     * {
+     * "in_time":"00:44:00",
+     * "out_time":"00:45:00"
+     * },
+     * * {
+     * "in_time":"00:48:00",
+     *  "out_time":"00:50:00"
+     * }
+     *
+     * }),
+     *
+     *
+     *
+     *
      *     @OA\Property(property="out_time", type="string", format="string", example="12:44:00"),
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
@@ -374,8 +408,6 @@ class AttendanceController extends Controller
                     "in_geolocation",
                     "out_geolocation",
                     'user_id',
-                    'in_time',
-                    'out_time',
                     'in_date',
                     'does_break_taken',
 
@@ -1773,8 +1805,8 @@ class AttendanceController extends Controller
                     $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
 
                     // Calculate total present hours based on in and out times
-                    $total_present_hours = $this->calculate_total_present_hours($attendance_data["in_time"], $attendance_data["out_time"]);
-
+                    // $total_present_hours = $this->calculate_total_present_hours($attendance_data["in_time"], $attendance_data["out_time"]);
+                    $total_present_hours = $this->calculate_total_present_hours_v2($attendance_data["attendance_records"]);
 
                     // Adjust paid hours based on break taken and work shift history
                     $total_paid_hours = $this->adjust_paid_hours($attendance_data["does_break_taken"], $total_present_hours, $work_shift_history);

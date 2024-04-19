@@ -24,7 +24,7 @@ class SingleFileUploadRequest extends BaseFormRequest
     public function rules()
     {
         return [
-            'file' => 'required|file|max:2048',
+            'file' => 'required|file|max:5120',
         ];
     }
 }
