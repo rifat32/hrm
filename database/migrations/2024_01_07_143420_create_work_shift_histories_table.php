@@ -24,7 +24,7 @@ class CreateWorkShiftHistoriesTable extends Migration
 
 
             $table->unsignedInteger('attendances_count')->default(0);
-          
+
 
             $table->date("from_date");
             $table->date("to_date")->nullable();
@@ -46,6 +46,9 @@ class CreateWorkShiftHistoriesTable extends Migration
 
 
             $table->unsignedBigInteger('work_shift_id')->nullable();
+
+
+            $table->boolean('is_flexible');
 
 
             $table->unsignedBigInteger("created_by")->nullable();

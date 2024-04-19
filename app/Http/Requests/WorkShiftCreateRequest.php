@@ -124,6 +124,8 @@ class WorkShiftCreateRequest extends BaseFormRequest
                 },
             ],
 
+            "is_flexible"=> "required|boolean"
+
 
         ];
     }

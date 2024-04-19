@@ -143,7 +143,7 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                     }
                 },
             ],
-
+            "is_flexible"=> "required|boolean"
         ];
     }
     public function messages()

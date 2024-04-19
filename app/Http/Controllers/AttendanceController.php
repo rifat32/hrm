@@ -1770,7 +1770,7 @@ class AttendanceController extends Controller
                 $all_parent_department_ids = $this->all_parent_departments_of_user($user->id);
 
                 // Map attendance details to create attendances data
-                collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
+               $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
 
                     // Retrieve work shift history for the user and date
                     $user_salary_info = $this->get_salary_info($user->user_id, $item["in_date"]);
@@ -1779,6 +1779,12 @@ class AttendanceController extends Controller
                     $work_shift_history =  $this->get_work_shift_history($item["in_date"], $user->id);
                     // Retrieve work shift details based on work shift history and date
                     $work_shift_details =  $this->get_work_shift_details($work_shift_history, $item["in_date"]);
+
+                    if($work_shift_history->is_flexible) {
+                         return false;
+                    }
+
+
 
                     // flexible error
 
@@ -1834,14 +1840,21 @@ class AttendanceController extends Controller
                     $attendance_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
                     $attendance_data["regular_hours_salary"] =   $total_paid_hours * $user_salary_info["hourly_salary"];
                     $attendance_data["overtime_hours_salary"] =   0;
+
+                    return $attendance_data;
+
                 });
 
+
+                $created_attendances = $user->attendances()->createMany($attendances_data);
 
                 if (!empty($created_attendances)) {
                     $this->send_notification($created_attendances, $user, "Attendance Taken", "create", "attendance");
                 }
-                DB::commit();
+
+
             }
+            DB::commit();
             return response(["ok" => true], 201);
         } catch (Exception $e) {
             DB::rollBack();
