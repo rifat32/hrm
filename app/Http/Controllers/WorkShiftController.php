@@ -380,7 +380,6 @@ class WorkShiftController extends Controller
         'type',
         "description",
         'attendances_count',
-        "is_flexible",
         'is_personal',
         'break_type',
         'break_hours',
@@ -421,7 +420,6 @@ class WorkShiftController extends Controller
                 'type',
                 "description",
                 'attendances_count',
-                "is_flexible",
                 'is_personal',
                 'break_type',
                 'break_hours'

@@ -28,13 +28,10 @@ class ValidateDiscountCode implements Rule
     {
         $codes = collect(request()->input('discount_codes'))->pluck('code');
         $duplicates = $codes->duplicates()->all();
-
         if (in_array($value, $duplicates)) {
-            return false;
+            return true;
         }
-
-        return;
-
+        return true;
     }
 
     /**

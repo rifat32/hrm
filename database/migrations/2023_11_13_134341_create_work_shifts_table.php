@@ -18,7 +18,7 @@ class CreateWorkShiftsTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
 
-            $table->enum('type', ['regular', 'scheduled'])->default("regular");
+            $table->enum('type', ['regular', 'scheduled', 'flexible'])->default("regular");
 
 
             $table->unsignedInteger('attendances_count')->default(0);
@@ -36,7 +36,7 @@ class CreateWorkShiftsTable extends Migration
             $table->double("break_hours")->default(0.0);
 
 
-            $table->boolean('is_flexible');
+
 
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

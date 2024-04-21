@@ -163,7 +163,6 @@ class BusinessTimesController extends Controller
                 'break_type' => 'unpaid',
                 'break_hours' => 1,
                 "attendances_count" => 0,
-                "is_flexible" => 0,
                 'details' => $business->times->toArray(),
                 "is_business_default" => 1,
                 "is_active",

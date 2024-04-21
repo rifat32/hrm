@@ -20,7 +20,7 @@ class CreateWorkShiftHistoriesTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
 
-            $table->enum('type', ['regular', 'scheduled'])->default("regular");
+            $table->enum('type', ['regular', 'scheduled', 'flexible'])->default("regular");
 
 
             $table->unsignedInteger('attendances_count')->default(0);
@@ -48,7 +48,7 @@ class CreateWorkShiftHistoriesTable extends Migration
             $table->unsignedBigInteger('work_shift_id')->nullable();
 
 
-            $table->boolean('is_flexible');
+
 
 
             $table->unsignedBigInteger("created_by")->nullable();

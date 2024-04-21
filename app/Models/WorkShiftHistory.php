@@ -20,7 +20,7 @@ class WorkShiftHistory extends Model
         'is_business_default',
         'is_personal',
 
-"is_flexible",
+
 
         "is_default",
         "is_active",

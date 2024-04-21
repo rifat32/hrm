@@ -66,6 +66,7 @@ use Spatie\Permission\Models\Permission;
 
 use App\Mail\SendPassword;
 use App\Models\SettingLeave;
+use App\Models\UserAssetHistory;
 use Illuminate\Support\Facades\Mail;
 
 // eeeeee
@@ -1870,28 +1871,70 @@ class UserManagementController extends Controller
             }
             $request_data = $request->validated();
 
-
-
             $userQuery = User::where([
                 "id" => $request["id"]
             ]);
+
             $updatableUser = $userQuery->first();
             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
                 return response()->json([
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
+
             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
             }
 
-
-
             $user_query  = User::where([
                 "id" => $request_data["id"],
             ]);
+
+
+
+
+
+    $attendance_exists = Attendance::where(
+  "in_date" , "<" ,$request_data["joining_date"],
+)
+->where([
+    "user_id" => $request_data["id"]
+])->exists();
+
+           if($attendance_exists) {
+             return response()->json([
+               "message" => "Attendance exists before " . $request_data["joining_date"]
+             ],401);
+        }
+
+        $leave_exists = Leave::where(
+            "start_date" , "<" ,$request_data["joining_date"],
+          )
+          ->where([
+              "user_id" => $request_data["id"]
+          ])->exists();
+
+         if($leave_exists) {
+          return response()->json([
+                         "message" => "Leave exists before " . $request_data["joining_date"]
+                       ],401);
+                  }
+
+                  $asset_assigned = UserAssetHistory::where(
+                    "from_date" , "<" ,$request_data["joining_date"],
+                  )
+                  ->where([
+                      "user_id" => $request_data["id"]
+                  ])->exists();
+
+                 if($asset_assigned) {
+                               return response()->json([
+                                 "message" => "Asset assigned before " . $request_data["joining_date"]
+                               ],401);
+                }
+
 
 
             $user = tap($user_query)->update(
@@ -1902,13 +1945,8 @@ class UserManagementController extends Controller
                 // ->with("somthing")
                 ->first();
 
+
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -5022,7 +5060,8 @@ class UserManagementController extends Controller
 
                     ]);
                 })
-                    ->where("leave_records.date", "<=", $startOfMonth)
+
+                    ->where("leave_records.date", ">=", $startOfMonth)
                     ->get()
                     ->sum(function ($record) {
                         return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
@@ -5649,6 +5688,14 @@ class UserManagementController extends Controller
      *         required=true,
      *         example="end_date"
      *      ),
+     *    *     @OA\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         description="user_id",
+     *         required=true,
+     *         example="1"
+     *      ),
+     *
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",

@@ -1774,7 +1774,7 @@ class AttendanceController extends Controller
                     // Retrieve work shift details based on work shift history and date
                     $work_shift_details =  $this->get_work_shift_details($work_shift_history, $item["in_date"]);
 
-                    if($work_shift_history->is_flexible) {
+                    if($work_shift_history->type == "flexible") {
                          return false;
                     }
 

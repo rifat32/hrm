@@ -17,7 +17,6 @@ class WorkShift extends Model
         'type',
         "description",
         'attendances_count',
-        "is_flexible",
         'is_business_default',
         'is_personal',
 

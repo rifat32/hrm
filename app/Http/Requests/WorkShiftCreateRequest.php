@@ -42,7 +42,7 @@ class WorkShiftCreateRequest extends BaseFormRequest
 
 
 
-            'type' => 'required|string|in:regular,scheduled',
+            'type' => 'required|string|in:regular,scheduled,flexible',
 
 
             'start_date' => 'nullable|date',
@@ -124,7 +124,7 @@ class WorkShiftCreateRequest extends BaseFormRequest
                 },
             ],
 
-            "is_flexible"=> "required|boolean"
+
 
 
         ];

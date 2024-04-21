@@ -38,15 +38,20 @@ class HolidayRepeatScheduler extends Command
      */
     public function handle()
     {
+
+
+
         $holidays = Holiday::where("repeats_annually", 1)->get()->each(function($item) {
             $item->start_date = \Carbon\Carbon::parse($item->start_date)->addYear(); // add +1 year
             $item->end_date = \Carbon\Carbon::parse($item->end_date)->addYear(); // add +1 year
 
             $item->save();
         });
-
-
-
         return 0;
+
+
+
+
+
     }
 }

@@ -68,7 +68,7 @@ trait AttendanceUtil
                     "is_default" => 1
                 ]);
             })
-
+            ->orderByDesc("work_shift_histories.id")
 
             ->first();
         if (!$work_shift_history) {

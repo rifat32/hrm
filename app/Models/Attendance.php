@@ -17,7 +17,6 @@ class Attendance extends Model
         'user_id',
         'in_date',
         'does_break_taken',
-
         "behavior",
         "capacity_hours",
         "work_hours_delta",
@@ -31,7 +30,6 @@ class Attendance extends Model
         "holiday_id",
         "leave_record_id",
         "is_weekend",
-
         "overtime_hours",
         "punch_in_time_tolerance",
         "status",
@@ -42,9 +40,6 @@ class Attendance extends Model
         "created_by",
         "regular_hours_salary",
         "overtime_hours_salary",
-
-
-
         "attendance_records"
 
     ];

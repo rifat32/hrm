@@ -339,11 +339,9 @@ Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
 
 
 
-
-
-
 Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);
 Route::put('/v1.0/users/update-bank-details', [UserManagementController::class, "updateUserBankDetails"]);
+
 Route::put('/v1.0/users/update-joining-date', [UserManagementController::class, "updateUserJoiningDate"]);
 
 

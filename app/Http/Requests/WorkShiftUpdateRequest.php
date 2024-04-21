@@ -67,7 +67,7 @@ class WorkShiftUpdateRequest extends BaseFormRequest
             'break_hours' => 'required|numeric',
 
 
-            'type' => 'required|string|in:regular,scheduled',
+            'type' => 'required|string|in:regular,scheduled,flexible',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'departments' => 'present|array',
@@ -143,7 +143,7 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                     }
                 },
             ],
-            "is_flexible"=> "required|boolean"
+
         ];
     }
     public function messages()
