@@ -355,6 +355,11 @@ Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class,
 Route::get('/v1.0/users/validate/employee-id/{user_id}', [UserManagementController::class, "validateEmployeeId"]);
 
 Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
+
+
+
+Route::get('/v1.0/users/get-disable-days-for-attendances/{id}', [UserManagementController::class, "getDisableDaysForAttendanceByUserId"]);
+
 Route::get('/v1.0/users/get-attendances/{id}', [UserManagementController::class, "getAttendancesByUserId"]);
 Route::get('/v1.0/users/get-leaves/{id}', [UserManagementController::class, "getLeavesByUserId"]);
 
@@ -1335,6 +1340,8 @@ Route::get('/v1.0/client/job-listings/{id}', [JobListingController::class, "getJ
 Route::post('/v1.0/client/candidates', [CandidateController::class, "createCandidateClient"]);
 Route::post('/v1.0/client/auth/register-with-business', [BusinessController::class, "registerUserWithBusinessClient"]);
 Route::get('/v1.0/client/service-plans', [ServicePlanController::class, "getServicePlanClient"]);
+
+Route::post('/v1.0/client/check-discount', [ServicePlanController::class, "checkDiscountClient"]);
 
 Route::get('/v1.0/client/system-settings', [SystemSettingController::class, "getSystemSettingSettingClient"]);
 

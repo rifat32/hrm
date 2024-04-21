@@ -105,8 +105,8 @@ class LeaveComponent
         // Prepare leave record data
         $leave_record_data["leave_hours"] =  $leave_hours;
         $leave_record_data["capacity_hours"] =  $capacity_hours;
-        $leave_record_data["start_time"] = $work_shift_details->start_at;
-        $leave_record_data["end_time"] = $work_shift_details->end_at;
+        $leave_record_data["start_time"] = $leave_start_at;
+        $leave_record_data["end_time"] = $leave_end_at;
         $leave_record_data["date"] = $date;
         return $leave_record_data;
         }
@@ -239,29 +239,54 @@ public function processLeaveRequest($raw_data) {
 }
 
 
+public function get_already_taken_leaves($start_date,$end_date,$user_id,$is_full_day_leave=NULL) {
 
-public function get_already_taken_leave_dates($start_date,$end_date,$user_id) {
+
+    $already_taken_leaves =  Leave::where([
+          "user_id" => $user_id
+      ])
+
+      ->when(($is_full_day_leave !== NULL), function($query) use($is_full_day_leave) {
+          if($is_full_day_leave) {
+              $query->whereIn("leaves.leave_duration",['single_day', 'multiple_day']);
+          } else {
+              $query->whereNotIn("leaves.leave_duration",['single_day', 'multiple_day']);
+          }})
 
 
-  $already_taken_leaves =  Leave::where([
-        "user_id" => $user_id
-    ])
-        ->whereHas('records', function ($query) use ($start_date, $end_date) {
-            $query->where('leave_records.date', '>=', $start_date)
-                ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
-        })
-        ->get();
+          ->whereHas('records', function ($query) use ($start_date, $end_date) {
+              $query->where('leave_records.date', '>=', $start_date)
+                  ->where('leave_records.date', '<=', $end_date . ' 23:59:59');
+          })
+          ->get();
 
+
+          return $already_taken_leaves;
+  }
+
+
+
+public function get_already_taken_leave_dates($start_date,$end_date,$user_id,$is_full_day_leave=NULL) {
+
+  $already_taken_leaves =  $this->get_already_taken_leaves($start_date,$end_date,$user_id,$is_full_day_leave);
       $already_taken_leave_dates =  $already_taken_leaves->flatMap(function ($leave) {
             return $leave->records->map(function ($record) {
                 return Carbon::parse($record->date)->format('d-m-Y');
             });
         })->toArray();
         return $already_taken_leave_dates;
-
-
-
 }
+
+public function get_already_taken_half_day_leaves($start_date, $end_date, $user_id) {
+    $already_taken_leaves = $this->get_already_taken_leaves($start_date, $end_date, $user_id, false);
+
+    $already_taken_leave_dates = $already_taken_leaves->map(function ($leave) {
+        return  $leave->records[0];
+    })->toArray();
+
+    return $already_taken_leave_dates;
+}
+
 
 
 

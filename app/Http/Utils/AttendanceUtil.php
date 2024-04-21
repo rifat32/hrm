@@ -254,9 +254,6 @@ trait AttendanceUtil
                 }
             }
 
-
-
-
         } else if ($work_hours_delta > 0) {
             $overtime_hours = $work_hours_delta;
         }

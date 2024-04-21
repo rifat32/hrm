@@ -5037,6 +5037,151 @@ class UserManagementController extends Controller
         }
     }
 
+       /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/get-disable-days-for-attendances/{id}",
+     *      operationId="getDisableDaysForAttendanceByUserId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getDisableDaysForAttendanceByUserId($id, Request $request)
+     {
+
+
+         foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+             File::delete($file);
+         }
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+             $user = User::with("roles")
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+                 })
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                     return $query->where(function ($query) {
+                         return  $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id);
+                     });
+                 })
+                 ->first();
+
+             if (!$user) {
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+
+             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+
+
+
+
+
+             $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
+
+
+             $already_taken_full_day_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id,TRUE);
+
+
+             $disable_days_collection = collect($already_taken_attendance_dates);
+
+
+            $disable_days_collection = $disable_days_collection->merge($already_taken_full_day_leave_dates);
+
+
+
+             $unique_disable_days_collection = $disable_days_collection->unique();
+             $disable_days_array = $unique_disable_days_collection->values()->all();
+
+
+
+
+             $already_taken_hourly_leave_dates = $this->leaveComponent->get_already_taken_half_day_leaves($start_date, $end_date, $user->id);
+
+
+             $result_array = [
+                "disable_days" => $disable_days_array,
+                "enable_days_with_condition" => $already_taken_hourly_leave_dates,
+             ];
+
+             return response()->json($result_array, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
 
     /**
      *
@@ -5058,6 +5203,13 @@ class UserManagementController extends Controller
      *         name="is_including_leaves",
      *         in="path",
      *         description="is_including_leaves",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *    @OA\Parameter(
+     *         name="is_full_day_leave",
+     *         in="path",
+     *         description="is_full_day_leave",
      *         required=true,
      *  example="1"
      *      ),
@@ -5160,10 +5312,11 @@ class UserManagementController extends Controller
 
 
 
-            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id);
+
+            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id,(isset($is_full_day_leave)?$is_full_day_leave:NULL));
 
 
-            $result_collection = $already_taken_attendance_dates;
+            $result_collection = collect($already_taken_attendance_dates);
 
             if (isset($request->is_including_leaves)) {
                 if (intval($request->is_including_leaves) == 1) {
@@ -5287,6 +5440,7 @@ class UserManagementController extends Controller
 
 
             $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id);
+
 
             $result_collection = $already_taken_leave_dates->unique();
 
@@ -5599,7 +5753,8 @@ class UserManagementController extends Controller
                 $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $employee->id);
                 $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $employee->id, $work_shift_histories);
 
-                $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $employee->id);
+                 // Process already taken leave hourly dates
+                $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $employee->id,false);
 
                 // Merge the collections and remove duplicates
                 $all_leaves_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();

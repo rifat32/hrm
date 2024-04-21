@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckDiscountRequest;
 use App\Http\Requests\ServicePlanCreateRequest;
 use App\Http\Requests\ServicePlanUpdateRequest;
 use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\DiscountUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ServicePlan;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class ServicePlanController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, DiscountUtil;
     /**
      *
      * @OA\Post(
@@ -623,7 +625,7 @@ class ServicePlanController extends Controller
      *
      *     @OA\Delete(
      *      path="/v1.0/service-plans/{ids}",
-     *      operationId="deleteServicePlanByIds",
+     *      operationId="deleteServicePlansByIds",
      *      tags={"service_plans"},
      *       security={
      *           {"bearerAuth": {}}
@@ -673,7 +675,7 @@ class ServicePlanController extends Controller
      *     )
      */
 
-    public function deleteServicePlanByIds(Request $request, $ids)
+    public function deleteServicePlansByIds(Request $request, $ids)
     {
 
         try {
@@ -724,4 +726,79 @@ class ServicePlanController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+       /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/client/check-discount",
+     *      operationId="checkDiscountClient",
+     *      tags={"service_plans"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to check discount",
+     *      description="This method is to check discount",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     * * @OA\Property(property="service_plan_discount_code", type="string", format="string", example="tttttt"),
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function checkDiscountClient(CheckDiscountRequest $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             return DB::transaction(function () use ($request) {
+
+
+                 $request_data = $request->validated();
+
+                 $response_data['service_plan_discount_amount'] = $this->getDiscountAmount($request_data);
+
+
+                 return response($response_data, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 }

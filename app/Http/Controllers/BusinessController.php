@@ -843,7 +843,6 @@ class BusinessController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-
                 $request_data = $request->validated();
 
                 // user info starts ##############
@@ -884,7 +883,7 @@ class BusinessController extends Controller
                 $request_data['business']['is_active'] = true;
                 $request_data['business']['is_self_registered_businesses'] = true;
 
-                $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data);
+                $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
 
                 $business =  Business::create($request_data['business']);
 

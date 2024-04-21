@@ -18,8 +18,7 @@ class Leave extends Model
         'note',
         'start_date',
         'end_date',
-        'start_time',
-        'end_time',
+       
         'attachments',
         "hourly_rate",
         "status",

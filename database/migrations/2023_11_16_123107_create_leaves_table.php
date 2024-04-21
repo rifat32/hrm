@@ -25,8 +25,6 @@ class CreateLeavesTable extends Migration
             $table->string('note');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
 
             $table->enum('status', ['pending_approval','in_progress', 'approved','rejected'])->default("pending_approval");
             $table->double('hourly_rate');

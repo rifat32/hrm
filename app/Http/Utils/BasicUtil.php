@@ -45,10 +45,7 @@ trait BasicUtil
         if(!$user) {
             return NULL;
           }
-
-
           $current_data = NULL;
-
         if(!$user->pension_eligible) {
             $current_data = $model::where('user_id', $current_user_id)
             ->where("pension_eligible",0)

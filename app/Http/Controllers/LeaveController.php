@@ -624,8 +624,7 @@ class LeaveController extends Controller
                         'note',
                         'start_date',
                         'end_date',
-                        'start_time',
-                        'end_time',
+
                         'attachments',
                         "hourly_rate"
                         // "is_active",
@@ -906,7 +905,6 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
-
                 ->when(!empty($request->user_id), function ($query) use ($request) {
                     return $query->where('leaves.user_id', $request->user_id);
                 })
@@ -921,16 +919,11 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('leaves.status', $request->status);
                 })
-
-
                 ->when(!empty($request->department_id), function ($query) use ($request) {
                     return $query->whereHas("employee.departments", function ($query) use ($request) {
                         $query->where("departments.id", $request->department_id);
                     });
                 })
-
-
-
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     $query->where('leaves.start_date', '>=', $request->start_date . ' 00:00:00');
                 })
@@ -947,6 +940,9 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 }, function ($query) {
                     return $query->get();
                 });
+
+
+
 
             foreach ($leaves as $leave) {
                 $leave->total_leave_hours = $leave->records->sum(function ($record) {
@@ -972,6 +968,8 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             return $this->sendError($e, 500, $request);
         }
     }
+
+
     /**
      *
      * @OA\Get(

@@ -15,18 +15,13 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Jobs\SendNotificationJob;
 use App\Models\Attendance;
 
-use App\Models\AttendanceHistory;
-use App\Models\Department;
-use App\Models\WorkShiftHistory;
-use App\Models\Holiday;
+
 use App\Models\LeaveRecord;
 use App\Models\Payroll;
 use App\Models\PayrollAttendance;
-use App\Models\Role;
-use App\Models\SettingAttendance;
+
 use App\Models\User;
 use App\Models\UserProject;
 use App\Observers\AttendanceObserver;
@@ -34,7 +29,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 

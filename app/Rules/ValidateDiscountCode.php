@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Models\ServicePlanDiscountCode;
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidateDiscountCode implements Rule
@@ -32,8 +33,7 @@ class ValidateDiscountCode implements Rule
             return false;
         }
 
-
-
+        return;
 
     }
 
