@@ -5597,7 +5597,7 @@ class UserManagementController extends Controller
             $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
 
 
-            $result_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates);
+            $result_collection = collect($holiday_dates)->merge($weekend_dates)->merge($already_taken_leave_dates);
 
             if (isset($request->is_including_attendance)) {
                 if (intval($request->is_including_attendance) == 1) {
@@ -5757,7 +5757,7 @@ class UserManagementController extends Controller
                 $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $employee->id,false);
 
                 // Merge the collections and remove duplicates
-                $all_leaves_collection = $holiday_dates->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
+                $all_leaves_collection = collect($holiday_dates)->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
 
 
                 // $result_collection now contains all unique dates from holidays and weekends
