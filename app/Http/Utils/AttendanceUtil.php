@@ -130,7 +130,7 @@ trait AttendanceUtil
 
 
 
-    public function get_leave_record_details($in_date, $user_id, $attendance_records)
+    public function get_leave_record_details($in_date, $user_id, $attendance_records,$return_leave=false)
     {
         $leave_record = LeaveRecord::whereHas('leave',    function ($query) use ($in_date, $user_id) {
             $query->whereIn("leaves.user_id",  [$user_id])
@@ -139,6 +139,10 @@ trait AttendanceUtil
             ->where('date', '>=', $in_date . ' 00:00:00')
             ->where('date', '<=', ($in_date . ' 23:59:59'))
             ->first();
+
+            if($return_leave){
+                return $leave_record;
+            }
 
 
         if ($leave_record) {

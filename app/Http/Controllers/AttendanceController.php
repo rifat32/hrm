@@ -1744,7 +1744,7 @@ class AttendanceController extends Controller
 
                 $attendance_details = [];
                 // Map date range to create attendance details
-                 $date_range->map(function ($date) use ($user) {
+                foreach($date_range as $date){
                     $temp_data["in_date"] = $date;
                     $temp_data["does_break_taken"] = 1;
                     $temp_data["project_id"] = UserProject::where([
@@ -1754,8 +1754,11 @@ class AttendanceController extends Controller
                     $temp_data["work_location_id"] = $user->work_location_id;
 
 
-                    $attendance_details[] = $temp_data;
-                });
+                    array_push($attendance_details,$temp_data);
+
+
+                }
+
 
 
 
@@ -1767,7 +1770,7 @@ class AttendanceController extends Controller
                $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
 
                     // Retrieve work shift history for the user and date
-                    $user_salary_info = $this->get_salary_info($user->user_id, $item["in_date"]);
+                    $user_salary_info = $this->get_salary_info($user->id, $item["in_date"]);
 
                     // Retrieve work shift history for the user and date
                     $work_shift_history =  $this->get_work_shift_history($item["in_date"], $user->id);
@@ -1778,19 +1781,24 @@ class AttendanceController extends Controller
                          return false;
                     }
 
+                    if(!$work_shift_details->start_at || !$work_shift_details->end_at) {
+                        return false;
+                    }
 
 
                     // flexible error
 
-                    $item["attendance_record"][0]["in_time"] = $work_shift_details->start_at;
-                    $item["attendance_record"][0]["out_time"] = $work_shift_details->end_at;
+                    $item["attendance_records"][0]["in_time"] = $work_shift_details->start_at;
+                    $item["attendance_records"][0]["out_time"] = $work_shift_details->end_at;
 
                     // Prepare data for attendance creation
                     $attendance_data = $this->prepare_data_on_attendance_create($item, $user->id);
                     $attendance_data["status"] = "approved";
 
+
                     // Retrieve salary information for the user and date
                     $user_salary_info = $this->get_salary_info($user->id, $attendance_data["in_date"]);
+
 
                     // Retrieve holiday details for the user and date
                     $holiday = $this->get_holiday_details($item["in_date"], $user->id, $all_parent_department_ids);
@@ -1799,7 +1807,7 @@ class AttendanceController extends Controller
                         return false;
                     }
                     // Retrieve leave record details for the user and date
-                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"]);
+                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"],true);
 
                     if ($leave_record) {
                         return false;
@@ -1837,7 +1845,7 @@ class AttendanceController extends Controller
 
                     return $attendance_data;
 
-                });
+                })->filter()->values();
 
 
                 $created_attendances = $user->attendances()->createMany($attendances_data);
@@ -1849,7 +1857,7 @@ class AttendanceController extends Controller
 
             }
             DB::commit();
-            return response(["ok" => true], 201);
+
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());

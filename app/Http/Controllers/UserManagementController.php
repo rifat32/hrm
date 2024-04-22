@@ -5791,6 +5791,12 @@ class UserManagementController extends Controller
                     return $query->get();
                 });
 
+
+
+
+
+
+
             $employees->each(function ($employee) use ($start_date, $end_date) {
                 $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
 
@@ -5834,13 +5840,17 @@ class UserManagementController extends Controller
                     $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $date);
 
                     if ($work_shift_details) {
+                        if(!$work_shift_details->start_at || !$work_shift_details->end_at) {
+                            return false;
+                        }
                         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
                         $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                         $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
 
 
+
                         $schedule_data[] = [
-                            "date" => Carbon::createFromFormat('Y-m-d', $date)->format('d-m-Y'),
+                            "date" => $date,
                             "capacity_hours" => $capacity_hours,
                             "break_type" => $work_shift_history->break_type,
                             "break_hours" => $work_shift_history->break_hours,

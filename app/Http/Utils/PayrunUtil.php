@@ -38,7 +38,7 @@ trait PayrunUtil
             ->first();
 
         if (!$salary_history) {
-            throw new Exception("No Salary History found", 400);
+            throw new Exception("No Salary History found on date " . $date , 400);
         }
 
         $salary_per_annum = $salary_history->salary_per_annum; // in euros
