@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EmployeeSchedulesExport;
 use App\Exports\UserExport;
 use App\Exports\UsersExport;
 use App\Http\Components\AttendanceComponent;
@@ -3329,6 +3330,10 @@ class UserManagementController extends Controller
             } else {
                 return response()->json($users, 200);
             }
+
+
+
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -5662,6 +5667,7 @@ class UserManagementController extends Controller
 
 
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
     /**
      *
@@ -5672,6 +5678,20 @@ class UserManagementController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
+     *   *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
 
      *     @OA\Parameter(
      *         name="start_date",
@@ -5868,9 +5888,18 @@ class UserManagementController extends Controller
                 return $employee;
             });
 
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.employee-schedule', ["employees" => $employees]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'schedule') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
+                    return Excel::download(new EmployeeSchedulesExport($employees), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                }
+            } else {
 
+                return response()->json($employees, 200);
+            }
 
-            return response()->json($employees, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
