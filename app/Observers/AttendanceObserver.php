@@ -36,7 +36,7 @@ class AttendanceObserver
      * @return void
      */
 
-    public function updated(Attendance $attendance,$action)
+    public function updated_action(Attendance $attendance,$action)
     {
         if (!empty($action)) {
             $attendance_history_data = $attendance->toArray();

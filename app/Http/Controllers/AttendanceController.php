@@ -438,7 +438,7 @@ class AttendanceController extends Controller
 
 
             $observer = new AttendanceObserver();
-            $observer->updated($attendance, 'update');
+            $observer->updated_action($attendance, 'update');
 
             $this->adjust_payroll_on_attendance_update($attendance,1);
 
@@ -557,7 +557,7 @@ class AttendanceController extends Controller
 
             // Update observer with approval
             $observer = new AttendanceObserver();
-            $observer->updated($attendance, 'approve');
+            $observer->updated_action($attendance, 'approve');
 
             // Adjust payroll based on attendance update
             $this->adjust_payroll_on_attendance_update($attendance,1);
@@ -1414,6 +1414,343 @@ class AttendanceController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/attendance-arrears",
+     *      operationId="getAttendanceArrears",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     *   * *  @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="1"
+     * ),
+     *  *   * *  @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
+     * @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="1"
+     * ),
+     *  * @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     *  *   * *  @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="status",
+     * required=true,
+     * example="pending_approval"
+     * ),
+     *
+     *
+     *
+     *
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+     *
+     ** @OA\Parameter(
+     *     name="attendance_date",
+     *     in="query",
+     *     description="Attendance Date",
+     *     required=true,
+     *     example="2024-02-13"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_start_time",
+     *     in="query",
+     *     description="Attendance Start Time",
+     *     required=true,
+     *     example="08:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_end_time",
+     *     in="query",
+     *     description="Attendance End Time",
+     *     required=true,
+     *     example="17:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_break",
+     *     in="query",
+     *     description="Attendance Break Time",
+     *     required=true,
+     *     example="01:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_schedule",
+     *     in="query",
+     *     description="Attendance Schedule",
+     *     required=true,
+     *     example="Regular"
+     * ),
+     * @OA\Parameter(
+     *     name="attendance_overtime",
+     *     in="query",
+     *     description="Attendance Overtime",
+     *     required=true,
+     *     example="02:00:00"
+     * ),
+
+     *      summary="This method is to get attendances  ",
+     *      description="This method is to get attendances ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getAttendanceArrears(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('attendance_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $business_id =  $request->user()->business_id;
+             $attendances = Attendance::with([
+                 "employee" => function ($query) {
+                     $query->select(
+                         'users.id',
+                         'users.first_Name',
+                         'users.middle_Name',
+                         'users.last_Name'
+                     );
+                 },
+                 "employee.departments" => function ($query) {
+                     $query->select('departments.id', 'departments.name');
+                 },
+                 "work_location",
+                 "project"
+             ])
+
+
+                 ->where(
+                     [
+                         "attendances.business_id" => $business_id
+                     ]
+                 )
+
+
+
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         // $query->where("attendances.name", "like", "%" . $term . "%")
+                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
+                     });
+                 })
+                 ->when(!empty($request->user_id), function ($query) use ($request) {
+                     $idsArray = explode(',', $request->user_id);
+                     return $query->whereIn('attendances.user_id', $idsArray);
+                 })
+                 ->when(empty($request->user_id), function ($query) use ($request) {
+                     return $query->whereHas("employee", function ($query) {
+                         $query->whereNotIn("users.id", [auth()->user()->id]);
+                     });
+                 })
+
+                 ->when(!empty($request->status), function ($query) use ($request) {
+                     return $query->where('attendances.status', $request->status);
+                 })
+
+                 ->when(!empty($request->overtime), function ($query) use ($request) {
+                     $number_query = explode(',', str_replace(' ', ',', $request->overtime));
+                     return $query->where('attendances.overtime_hours', $number_query);
+                 })
+
+
+                 ->when(!empty($request->schedule_hour), function ($query) use ($request) {
+                     $number_query = explode(',', str_replace(' ', ',', $request->schedule_hour));
+                     return $query->where('attendances.capacity_hours', $number_query);
+                 })
+
+                 ->when(!empty($request->break_hour), function ($query) use ($request) {
+                     $number_query = explode(',', str_replace(' ', ',', $request->break_hour));
+                     return $query->where('attendances.break_hours', $number_query);
+                 })
+
+                 ->when(!empty($request->worked_hour), function ($query) use ($request) {
+                     $number_query = explode(',', str_replace(' ', ',', $request->worked_hour));
+                     return $query->where('attendances.total_paid_hours', $number_query[0], $number_query[1]);
+                 })
+
+                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
+                     return $query->where('attendances.user_id', $request->work_location_id);
+                 })
+
+                 ->when(!empty($request->project_id), function ($query) use ($request) {
+                     return $query->where('attendances.project_id', $request->project_id);
+                 })
+                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
+                     return $query->where('attendances.work_location_id', $request->work_location_id);
+                 })
+
+                 ->when(!empty($request->status), function ($query) use ($request) {
+                     return $query->where('attendances.status', $request->status);
+                 })
+                 ->when(!empty($request->department_id), function ($query) use ($request) {
+                     return $query->whereHas("employee.departments", function ($query) use ($request) {
+                         $query->where("departments.id", $request->department_id);
+                     });
+                 })
+                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+                 })
+
+
+
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('attendances.in_date', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('attendances.in_date', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("attendances.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("attendances.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });;
+
+             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                 if (strtoupper($request->response_type) == 'PDF') {
+                     $pdf = PDF::loadView('pdf.attendances', ["attendances" => $attendances]);
+                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'attendance') . '.pdf'));
+                 } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                     return Excel::download(new AttendancesExport($attendances), ((!empty($request->file_name) ? $request->file_name : 'attendance') . '.csv'));
+                 }
+             } else {
+                 return response()->json($attendances, 200);
+             }
+
+             return response()->json($attendances, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+
+
+
+
+
 
 
     /**

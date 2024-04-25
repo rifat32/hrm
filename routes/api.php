@@ -408,8 +408,6 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 
 
 
-
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user recruitment process  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1049,6 +1047,11 @@ Route::put('/v1.0/attendances/approve', [AttendanceController::class, "approveAt
 Route::get('/v1.0/attendances', [AttendanceController::class, "getAttendances"]);
 Route::get('/v2.0/attendances', [AttendanceController::class, "getAttendancesV2"]);
 Route::get('/v3.0/attendances', [AttendanceController::class, "getAttendancesV3"]);
+
+
+Route::get('/v1.0/attendance-arrears', [AttendanceController::class, "getAttendanceArrears"]);
+
+
 Route::get('/v1.0/attendances/{id}', [AttendanceController::class, "getAttendanceById"]);
 Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAttendancesByIds"]);
 
