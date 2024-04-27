@@ -5767,7 +5767,7 @@ class UserManagementController extends Controller
 
 
 
-            $employees->each(function ($employee) use ($start_date, $end_date) {
+     $employees =    $employees->map(function ($employee) use ($start_date, $end_date) {
                 $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
 
                 // Process holiday dates
@@ -5837,6 +5837,7 @@ class UserManagementController extends Controller
 
                 return $employee;
             });
+
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 if (strtoupper($request->response_type) == 'PDF') {
@@ -6409,7 +6410,7 @@ class UserManagementController extends Controller
 
                 ->first();
             if (!$user) {
-           
+
                 return response()->json([
                     "message" => "User not found"
                 ], 404);

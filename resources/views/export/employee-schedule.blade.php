@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Employee List</title>
+    <title>Employee Schedules</title>
 
     <!--ALL CUSTOM FUNCTIONS -->
     @php
@@ -143,17 +143,19 @@
             @foreach($employee->schedule_data as $index=>$schedule_data)
                 <tr class="table_row">
                     <td  style="padding:0px 10px">{{ $index+1 }}</td>
+
                     <td>
 
-                        {{ format_date($schedule_data->date) }}
+                        {{ format_date($schedule_data["date"]) }}
 
                     </td>
-                    <td > {{ $schedule_data->start_at }} </td>
-                    <td > {{ $schedule_data->end_at }} </td>
-                    <td > {{ $schedule_data->capacity_hours }} </td>
-                    <td > {{ $schedule_data->break_type }} </td>
-                    <td > {{ $schedule_data->break_hours }} </td>
-                    <td > {{ $schedule_data->is_weekend }} </td>
+                    <td > {{ $schedule_data["start_at"] }} </td>
+                    <td > {{ $schedule_data["end_at"] }} </td>
+                    <td > {{ $schedule_data["capacity_hours"] }} </td>
+                    <td > {{ $schedule_data["break_type"] }} </td>
+                    <td > {{ $schedule_data["break_hours"] }} </td>
+                    <td > {{ $schedule_data["is_weekend"] }} </td>
+
                 </tr>
             @endforeach
         </tbody>
