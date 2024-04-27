@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserEducationHistoryCreateRequest;
 use App\Http\Requests\UserEducationHistoryUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserEducationHistoryController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
 
@@ -361,12 +362,11 @@ class UserEducationHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
             $user_education_histories = UserEducationHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -485,12 +485,7 @@ class UserEducationHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_education_history =  UserEducationHistory::where([
                 "id" => $id,
             ])
@@ -585,12 +580,7 @@ class UserEducationHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = UserEducationHistory::whereIn('id', $idsArray)
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {

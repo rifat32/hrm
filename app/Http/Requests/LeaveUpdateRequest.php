@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Leave;
 use App\Models\SettingLeaveType;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveUpdateRequest extends BaseFormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -28,12 +30,7 @@ class LeaveUpdateRequest extends BaseFormRequest
      */
     public function rules()
     {
-        $all_manager_department_ids = [];
-        $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-        foreach ($manager_departments as $manager_department) {
-            $all_manager_department_ids[] = $manager_department->id;
-            $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-        }
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
         return [
             'id' => [
                 'required',

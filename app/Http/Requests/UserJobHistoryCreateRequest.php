@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserJobHistoryCreateRequest extends BaseFormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -25,17 +27,13 @@ class UserJobHistoryCreateRequest extends BaseFormRequest
      */
     public function rules()
     {
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
         return [
             'user_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $all_manager_department_ids = [];
-                    $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                    foreach ($manager_departments as $manager_department) {
-                        $all_manager_department_ids[] = $manager_department->id;
-                        $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                    }
+                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+
 
                   $exists =  User::where(
                     [

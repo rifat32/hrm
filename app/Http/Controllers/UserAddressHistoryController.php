@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserAddressHistoryCreateRequest;
 use App\Http\Requests\UserAddressHistoryUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserAddressHistoryController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
 
@@ -347,12 +348,10 @@ class UserAddressHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
             $user_address_histories = EmployeeAddressHistory::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -472,12 +471,9 @@ class UserAddressHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
             $user_address_history =  EmployeeAddressHistory::where([
                 "id" => $id,
                 "is_manual" => 1
@@ -574,12 +570,11 @@ class UserAddressHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+
+           $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeAddressHistory::whereIn('id', $idsArray)
             ->where(["is_manual" => 1])

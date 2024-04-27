@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Utils\BasicUtil;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Payrun extends Model
 {
-    use HasFactory;
+    use HasFactory, BasicUtil;
 
     protected $fillable = [
         "period_type",
@@ -25,12 +26,7 @@ class Payrun extends Model
     ];
     protected $appends = ['available_users_for_payroll'];
     public function getAvailableUsersForPayrollAttribute($value) {
-          $all_manager_department_ids = [];
-          $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-          foreach ($manager_departments as $manager_department) {
-              $all_manager_department_ids[] = $manager_department->id;
-              $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-          };
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
 
           $employee_count = User::where([
             "business_id" => $this->business_id,

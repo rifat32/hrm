@@ -6,6 +6,7 @@ use App\Exports\PayrunsExport;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\PayrunCreateRequest;
 use App\Http\Requests\PayrunUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -22,7 +23,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PayrunController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
     /**
      *
@@ -313,12 +314,7 @@ class PayrunController extends Controller
              }
              $request_data = $request->validated();
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $payrun = Payrun::where([
                 "id" => $request_data["id"],
@@ -533,12 +529,7 @@ class PayrunController extends Controller
             }
             $business_id =  $request->user()->business_id;
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $payruns = Payrun::withCount("payrolls")
             ->where(
@@ -683,12 +674,7 @@ class PayrunController extends Controller
             }
 
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
            $payrun = Payrun::with("users","departments")
            ->where([
@@ -817,12 +803,8 @@ class PayrunController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
 

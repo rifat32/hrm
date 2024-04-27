@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DepartmentCreateRequest;
 use App\Http\Requests\DepartmentUpdateRequest;
 use App\Http\Requests\GetIdRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class DepartmentController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
     /**
      *
      * @OA\Post(
@@ -378,12 +379,7 @@ class DepartmentController extends Controller
              $request_data = $request->validated();
 
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $department = Department::where([
                 "id" => $request_data["id"],
@@ -552,12 +548,7 @@ class DepartmentController extends Controller
             }
             $business_id =  $request->user()->business_id;
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $departments = Department::with("work_location")
             ->where(
@@ -899,14 +890,8 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::
-            with("work_location")
-            ->where("manager_id", auth()->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $department =  Department::where([
                 "id" => $id,
@@ -1019,12 +1004,9 @@ class DepartmentController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $idsArray = explode(',', $ids);
             $existingIds = Department::where([

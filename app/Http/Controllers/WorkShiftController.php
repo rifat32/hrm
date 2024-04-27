@@ -6,6 +6,7 @@ use App\Exports\WorkShiftsExport;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\WorkShiftCreateRequest;
 use App\Http\Requests\WorkShiftUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -25,7 +26,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class WorkShiftController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
     /**
      *
      * @OA\Post(
@@ -600,12 +601,7 @@ if(!$fields_changed){
              $request_data = $request->validated();
 
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $work_shift = WorkShift::where([
                 "id" => $request_data["id"],
@@ -879,12 +875,7 @@ if(!$check_work_shift_details["ok"]) {
                 "business_id" => auth()->user()->business_id,
             ])->get();
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $work_shifts = WorkShift::with("details","departments","users")
 
@@ -1088,12 +1079,7 @@ if(!$check_work_shift_details["ok"]) {
             }
             $business_id =  $request->user()->business_id;
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $work_shift =  WorkShift::with("details")
             ->where([

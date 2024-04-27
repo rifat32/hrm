@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserJobHistoryCreateRequest;
 use App\Http\Requests\UserJobHistoryUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -18,7 +19,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserJobHistoryController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
 
@@ -417,12 +418,7 @@ class UserJobHistoryController extends Controller
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_job_histories = UserJobHistory::with([
                   "creator" => function ($query) {
                       $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -552,12 +548,7 @@ class UserJobHistoryController extends Controller
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_job_history =  UserJobHistory::where([
                   "id" => $id,
               ])
@@ -652,12 +643,7 @@ class UserJobHistoryController extends Controller
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
               $existingIds = UserJobHistory::whereIn('id', $idsArray)
               ->whereHas("user.departments", function($query) use($all_manager_department_ids) {

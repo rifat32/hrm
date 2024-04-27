@@ -2557,12 +2557,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             // $data["dashboard_widgets"] = $dashboard_widgets;
 
 
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            
             $user_ids =  User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
             })

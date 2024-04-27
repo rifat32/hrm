@@ -202,12 +202,7 @@ class UserVisaHistoryController extends Controller
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
-                $all_manager_department_ids = [];
-                $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
-                foreach ($manager_departments as $manager_department) {
-                    $all_manager_department_ids[] = $manager_department->id;
-                    $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-                }
+                $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
                 $current_user_id =  $request_data["user_id"];
@@ -240,7 +235,7 @@ class UserVisaHistoryController extends Controller
                             'user_id',
                             "from_date",
                             "to_date",
-                    
+
 
                         ])->toArray()
                     )
@@ -374,12 +369,7 @@ class UserVisaHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
             $current_user_id = request()->user_id;
@@ -508,12 +498,7 @@ class UserVisaHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_visa_history =  EmployeeVisaDetailHistory::where([
                 "id" => $id,
                 "is_manual" => 1
@@ -610,12 +595,7 @@ class UserVisaHistoryController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $all_manager_department_ids = [];
-            $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-            foreach ($manager_departments as $manager_department) {
-                $all_manager_department_ids[] = $manager_department->id;
-                $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeVisaDetailHistory::whereIn('id', $idsArray)
             // ->where(["is_manual" => 1])

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -30,7 +31,7 @@ use Illuminate\Http\Request;
 
 class HistoryDetailsController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
     /**
      *
@@ -142,12 +143,7 @@ class HistoryDetailsController extends Controller
                  ], 401);
              }
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $user_asset_history = UserAssetHistory::when(!empty($request->user_id), function ($query) use ($request) {
                 return $query->where('user_asset_histories.user_id', $request->user_id);
@@ -310,12 +306,7 @@ class HistoryDetailsController extends Controller
                  ], 401);
              }
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_passport_details_history = EmployeePassportDetailHistory::where(["is_manual" => 0])
 
@@ -464,12 +455,7 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
              $employee_visa_details_history = EmployeeVisaDetailHistory::where(["is_manual" => 0])
@@ -620,12 +606,7 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
              $employee_right_to_work_histories = EmployeeRightToWorkHistory::where(["is_manual" => 0])
@@ -774,12 +755,10 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
              $employee_sponsorship_details_history = EmployeeSponsorshipHistory::where(["is_manual" => 0])
 
              ->when(!empty($request->user_id), function ($query) use ($request) {
@@ -924,12 +903,12 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+
+
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
              $employee_pension_details_history = EmployeePensionHistory::where(["is_manual" => 0])
 
              ->when(!empty($request->user_id), function ($query) use ($request) {
@@ -1074,12 +1053,10 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
              $employee_address_details_history = EmployeeAddressHistory::where(["is_manual" => 0])
              ->when(!empty($request->user_id), function ($query) use ($request) {
                 return $query->where('employee_address_histories.user_id', $request->user_id);
@@ -1236,12 +1213,7 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_attendance_details_history = AttendanceHistory::
              when(!empty($request->attendance_id), function ($query) use ($request) {
@@ -1402,12 +1374,7 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_leave_details_history = LeaveHistory::with("records")
              ->when(!empty($request->attendance_id), function ($query) use ($request) {
@@ -1570,12 +1537,7 @@ class HistoryDetailsController extends Controller
                  ], 401);
              }
 
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_work_shift_history = WorkShiftHistory::
                 with([
@@ -1755,12 +1717,8 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_work_shift_history = EmployeeUserWorkShiftHistory::
                 with([
@@ -1934,12 +1892,7 @@ class HistoryDetailsController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $all_manager_department_ids = [];
-             $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-             foreach ($manager_departments as $manager_department) {
-                 $all_manager_department_ids[] = $manager_department->id;
-                 $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_project_history = EmployeeProjectHistory::when(!empty($request->user_id), function ($query) use ($request) {
                 $query->where('employee_project_histories.user_id', $request->user_id);

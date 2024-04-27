@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserSocialSiteCreateRequest;
 use App\Http\Requests\UserSocialSiteUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserSocialSiteController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
 
@@ -339,12 +340,7 @@ UserSocialSite::where([
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
               $user_social_sites = SocialSite::where('is_active', 1)
               ->with(['user_social_site' => function ($query) use ($request, $all_manager_department_ids) {
@@ -464,12 +460,7 @@ UserSocialSite::where([
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_social_site =  UserSocialSite::where([
                   "id" => $id,
               ])
@@ -568,12 +559,7 @@ UserSocialSite::where([
                   ], 401);
               }
               $business_id =  $request->user()->business_id;
-              $all_manager_department_ids = [];
-              $manager_departments = Department::where("manager_id", $request->user()->id)->get();
-              foreach ($manager_departments as $manager_department) {
-                  $all_manager_department_ids[] = $manager_department->id;
-                  $all_manager_department_ids = array_merge($all_manager_department_ids, $manager_department->getAllDescendantIds());
-              }
+              $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
               $existingIds = UserSocialSite::where([
                   "business_id" => $business_id
