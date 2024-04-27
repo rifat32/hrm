@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     use HasFactory;
+    protected $appends = ['is_in_arrears'];
 
     protected $fillable = [
         'note',
@@ -49,6 +50,13 @@ class Attendance extends Model
 
     ];
 
+
+    public function getIsInArrearsAttribute($value) {
+      return  AttendanceArrear::where([
+            "attendance_id" => $this->id
+        ])
+        ->exists();
+        }
 
 
     public function arrear(){

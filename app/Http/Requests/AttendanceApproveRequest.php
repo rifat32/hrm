@@ -54,7 +54,9 @@ class AttendanceApproveRequest extends BaseFormRequest
                 },
             ],
 
-            "is_approved" => "required|boolean"
+            "is_approved" => "required|boolean",
+
+            "add_in_next_payroll" => "required|boolean"
         ];
     }
 }

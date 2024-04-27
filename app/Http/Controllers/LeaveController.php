@@ -28,6 +28,7 @@ use App\Models\Leave;
 use App\Models\LeaveApproval;
 use App\Models\LeaveHistory;
 use App\Models\LeaveRecord;
+use App\Models\LeaveRecordArrear;
 use App\Models\Payroll;
 use App\Models\PayrollAttendance;
 use App\Models\PayrollLeaveRecord;
@@ -376,6 +377,16 @@ class LeaveController extends Controller
 
                 }
 
+                if(!empty($request_data["add_in_next_payroll"]) && ($leave->status ==
+                "approved")) {
+                    LeaveRecordArrear::
+                    whereHas("leave_record",function($query) use ($leave) {
+                      $query
+                      ->whereIn("leave_records.id",$leave->records()->pluck("leave_records.id"));
+                    })
+                    ->update([ "status" => "approved"]);
+
+                }
 
 
                 if ($request_data["is_approved"]) {
@@ -968,6 +979,262 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             return $this->sendError($e, 500, $request);
         }
     }
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/leave-arrears",
+     *      operationId="getLeaveArrears",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *    * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="1"
+     * ),
+     * @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="leave_type_id",
+     * in="query",
+     * description="leave_type_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+     * * @OA\Parameter(
+     *     name="leave_date_time",
+     *     in="query",
+     *     description="Leave Date and Time",
+     *     required=true,
+     *     example="2024-02-14 08:00:00"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_type",
+     *     in="query",
+     *     description="Leave Type",
+     *     required=true,
+     *     example="Sick Leave"
+     * ),
+     * @OA\Parameter(
+     *     name="leave_duration",
+     *     in="query",
+     *     description="Leave Duration",
+     *     required=true,
+     *     example="8"
+     * ),
+     *  * @OA\Parameter(
+     *     name="status",
+     *     in="query",
+     *     description="status",
+     *     required=true,
+     *     example="status"
+     * ),
+     * @OA\Parameter(
+     *     name="total_leave_hours",
+     *     in="query",
+     *     description="Total Leave Hours",
+     *     required=true,
+     *     example="8"
+     * ),
+
+     *      summary="This method is to get leaves  ",
+     *      description="This method is to get leaves ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLeaveArrears(Request $request)
+     {
+         try {
+
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('leave_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
+
+
+
+             $business_id =  $request->user()->business_id;
+             $leaves = Leave::where(
+                 [
+                     "leaves.business_id" => $business_id
+                 ]
+             )
+                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+                 })
+                 ->whereHas("records.arrear", function ($query) {
+                    $query->where("leave_record_arrears.status", "pending_approval");
+                })
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         // $query->where("leaves.name", "like", "%" . $term . "%")
+                         //     ->orWhere("leaves.description", "like", "%" . $term . "%");
+                     });
+                 })
+                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                 //        return $query->where('product_category_id', $request->product_category_id);
+                 //    })
+                 ->when(!empty($request->user_id), function ($query) use ($request) {
+                     return $query->where('leaves.user_id', $request->user_id);
+                 })
+                 ->when(empty($request->user_id), function ($query) use ($request) {
+                     return $query->whereHas("employee", function ($query) {
+                         $query->whereNotIn("users.id", [auth()->user()->id]);
+                     });
+                 })
+                 ->when(!empty($request->leave_type_id), function ($query) use ($request) {
+                     return $query->where('leaves.leave_type_id', $request->leave_type_id);
+                 })
+                 ->when(!empty($request->status), function ($query) use ($request) {
+                     return $query->where('leaves.status', $request->status);
+                 })
+                 ->when(!empty($request->department_id), function ($query) use ($request) {
+                     return $query->whereHas("employee.departments", function ($query) use ($request) {
+                         $query->where("departments.id", $request->department_id);
+                     });
+                 })
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     $query->where('leaves.start_date', '>=', $request->start_date . ' 00:00:00');
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     $query->where('leaves.end_date', '<=', $request->end_date . ' 23:59:59');
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("leaves.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("leaves.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });
+
+
+
+
+             foreach ($leaves as $leave) {
+                 $leave->total_leave_hours = $leave->records->sum(function ($record) {
+                     $startTime = Carbon::parse($record->start_time);
+                     $endTime = Carbon::parse($record->end_time);
+                     return $startTime->diffInHours($endTime);
+                 });
+             }
+
+             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                 if (strtoupper($request->response_type) == 'PDF') {
+                     $pdf = PDF::loadView('pdf.leaves', ["leaves" => $leaves]);
+                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                 } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                     return Excel::download(new LeavesExport($leaves), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
+                 }
+             } else {
+                 return response()->json($leaves, 200);
+             }
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**

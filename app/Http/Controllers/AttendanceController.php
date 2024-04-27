@@ -16,8 +16,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
-
-
+use App\Models\AttendanceArrear;
 use App\Models\LeaveRecord;
 use App\Models\Payroll;
 use App\Models\PayrollAttendance;
@@ -561,6 +560,15 @@ class AttendanceController extends Controller
 
             // Adjust payroll based on attendance update
             $this->adjust_payroll_on_attendance_update($attendance,1);
+
+
+            if(!empty($request_data["add_in_next_payroll"]) && !empty($request_data["is_approved"])) {
+                AttendanceArrear::
+                where([
+                    "attendance_id" => $attendance->id
+                ])
+                ->update([ "status" => "approved"]);
+            }
 
             // Determine notification message based on attendance status
             $message = $attendance->status == "approved" ? "Attendance approved" : "Attendance rejected";
@@ -1637,6 +1645,9 @@ class AttendanceController extends Controller
                          "attendances.business_id" => $business_id
                      ]
                  )
+                 ->whereHas("arrear", function ($query) {
+                    $query->where("attendance_arrears.status", "pending_approval");
+                })
 
 
 

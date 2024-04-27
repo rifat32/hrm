@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Leave extends Model
 {
     use HasFactory;
+    protected $appends = ['is_in_arrears'];
     protected $fillable = [
         'leave_duration',
         'day_type',
@@ -18,7 +19,7 @@ class Leave extends Model
         'note',
         'start_date',
         'end_date',
-       
+
         'attachments',
         "hourly_rate",
         "status",
@@ -26,13 +27,15 @@ class Leave extends Model
         "business_id",
         "created_by",
     ];
+    public function getIsInArrearsAttribute($value) {
+        return  LeaveRecordArrear::whereIn("leave_records.id",$this->records()->pluck("leave_records.id"))
+          ->exists();
+          }
 
 
     public function records() {
         return $this->hasMany(LeaveRecord::class,'leave_id', 'id');
     }
-
-
 
     public function employee() {
         return $this->belongsTo(User::class, "user_id","id");
