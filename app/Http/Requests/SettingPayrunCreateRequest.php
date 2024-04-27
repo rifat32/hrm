@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
+use App\Rules\ValidateDepartment;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingPayrunCreateRequest extends BaseFormRequest
@@ -65,20 +66,7 @@ class SettingPayrunCreateRequest extends BaseFormRequest
             'restricted_departments' => 'present|array',
             'restricted_departments.*' => [
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-                    $department = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->first();
-
-                        if (!$department) {
-                            $fail($attribute . " is invalid.");
-                            return;
-                        }
-                        if(!in_array($department->id,$all_manager_department_ids)){
-                            $fail($attribute . " is invalid. You don't have access to this department.");
-                            return;
-                        }
-                },
+                new ValidateDepartment($all_manager_department_ids)
             ]
 
         ];

@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
+use App\Rules\ValidateDepartment;
 use App\Rules\ValidWorkLocationId;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
@@ -181,21 +182,7 @@ class UserCreateV2Request extends BaseFormRequest
         'departments' => 'required|array|size:1',
         'departments.*' =>  [
             'numeric',
-            function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-                $department = Department::where('id', $value)
-                    ->where('departments.business_id', '=', auth()->user()->business_id)
-                    ->first();
-
-                    if (!$department) {
-                        $fail($attribute . " is invalid.");
-                        return;
-                    }
-                    if(!in_array($department->id,$all_manager_department_ids)){
-                        $fail($attribute . " is invalid. You don't have access to this department.");
-                        return;
-                    }
-            },
+            new ValidateDepartment($all_manager_department_ids)
         ],
 
 

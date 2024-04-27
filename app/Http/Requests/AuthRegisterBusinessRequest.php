@@ -238,8 +238,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
             'work_shift.end_date.date' => 'The work shift end date must be a valid date.',
             'work_shift.end_date.after_or_equal' => 'The work shift end date must be equal to or after the start date.',
             'work_shift.departments.present' => 'The work shift departments must be present and in array format.',
-            'work_shift.departments.*.numeric' => 'Each department ID must be a numeric value.',
-            'work_shift.departments.*' => 'The selected department is invalid.',
+           
             'work_shift.users.array' => 'The work shift users must be in array format.',
             'work_shift.users.*.numeric' => 'Each user ID must be a numeric value.',
             'work_shift.details.required' => 'The work shift details field is required.',

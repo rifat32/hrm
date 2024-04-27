@@ -8,6 +8,7 @@ use App\Models\Payrun;
 use App\Models\PayrunDepartment;
 use App\Models\PayrunUser;
 use App\Models\User;
+use App\Rules\ValidateDepartment;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PayrunUpdateRequest extends BaseFormRequest
@@ -63,23 +64,11 @@ class PayrunUpdateRequest extends BaseFormRequest
             'departments' => 'present|array|size:0',
             'departments.*' => [
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+                new ValidateDepartment($all_manager_department_ids),
+                function ($attribute, $value, $fail)  {
 
-                    $department = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-
-                        ->first();
-
-                        if (!$department) {
-                            $fail($attribute . " is invalid.");
-                            return;
-                        }
-                        if(!in_array($department->id,$all_manager_department_ids)){
-                            $fail($attribute . " is invalid. You don't have access to this department.");
-                            return;
-                        }
                        $payrun_department = PayrunDepartment::where([
-                            "department_id" => $department->id
+                            "department_id" => $value
                         ])
                         ->whereNotIn("payrun_id",[$this->id])
                         ->first();
