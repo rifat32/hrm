@@ -494,13 +494,6 @@ class PayrollController extends Controller
 
    $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             if (!$request->payrun_id) {
-                 $error = [
-                     "message" => "The given data was invalid.",
-                     "errors" => ["payrun_id" => ["The payrun_id field is required."]]
-                 ];
-                 throw new Exception(json_encode($error), 422);
-             }
 
 
 
@@ -508,38 +501,19 @@ class PayrollController extends Controller
 
 
 
-             $payrun = Payrun::where([
-                 "id" => $request->payrun_id,
-                 "business_id" => auth()->user()->business_id
-             ])
-                 ->where(function ($query) use ($all_manager_department_ids) {
-                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                         $query->whereIn("departments.id", $all_manager_department_ids);
-                     })
-                         ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids) {
-                             $query->whereIn("departments.id", $all_manager_department_ids);
-                         });
-                 })
-                 ->first();
 
-             if (!$payrun) {
-                 $error = [
-                     "message" => "The given data was invalid.",
-                     "errors" => ["payrun_id" => ["The payrun_id field is invalid."]]
-                 ];
-                 throw new Exception(json_encode($error), 422);
-             }
+
 
 
 
 
              $employees = User::where([
-                 "business_id" => $payrun->business_id,
+                 "business_id" => auth()->user()->business_id,
                  "is_active" => 1
              ])
-                 ->whereDoesntHave("payrolls", function ($q) use ($payrun) {
-                     $q->where("payrolls.start_date", $payrun->start_date)
-                         ->where("payrolls.end_date", $payrun->end_date);
+                 ->whereDoesntHave("payrolls", function ($q) use ($request) {
+                     $q->where("payrolls.start_date", $request->start_date)
+                         ->where("payrolls.end_date", $request->end_date);
                  })
 
                  ->whereNotIn("id", [auth()->user()->id])
@@ -550,20 +524,13 @@ class PayrollController extends Controller
                      $user_ids = explode(',', $request->user_ids);
                      $query->whereIn("users.id", $user_ids);
                  })
-                 // ->where(function ($query) use ($payrun) {
-                 //     $query->whereHas("departments.payrun_department", function ($query) use ($payrun) {
-                 //         $query->where("payrun_departments.payrun_id", $payrun->id);
-                 //     })
-                 //         ->orWhereHas("payrun_user", function ($query) use ($payrun) {
-                 //             $query->where("payrun_users.payrun_id", $payrun->id);
-                 //         });
-                 // })
+
 
 
                  ->get();
 
 
-             $processed_employees =  $this->process_payrun($payrun, $employees, $request->start_date, $request->end_date, true, false);
+             $processed_employees =  $this->estimate_payrun_data( $employees, $request->start_date, $request->end_date, false);
 
              DB::commit();
 
