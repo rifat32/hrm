@@ -293,13 +293,7 @@ class BankController extends Controller
             ])
                 ->first();
             if (!$bank) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -310,12 +304,7 @@ class BankController extends Controller
 
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($bank->business_id != NULL || $bank->is_default != 1)) {
-                        $this->storeError(
-                        "You do not have permission to update this bank due to role restrictions.",
-                        403,
-                        "front end error",
-                        "front end error"
-                       );
+
                         return response()->json([
                             "message" => "You do not have permission to update this bank due to role restrictions."
                         ], 403);
@@ -324,24 +313,14 @@ class BankController extends Controller
                     }
                 } else {
                     if ($bank->business_id != NULL) {
-                        $this->storeError(
-                            "You do not have permission to update this bank due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this bank due to role restrictions."
                         ], 403);
                     } else if ($bank->is_default == 0) {
 
                         if($bank->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this bank due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this bank due to role restrictions."
                             ], 403);
@@ -361,12 +340,7 @@ class BankController extends Controller
             } else {
                 if ($bank->business_id != NULL) {
                     if (($bank->business_id != auth()->user()->business_id)) {
-                        $this->storeError(
-                            "You do not have permission to update this bank due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this bank due to role restrictions."
                         ], 403);
@@ -376,12 +350,7 @@ class BankController extends Controller
                 } else {
                     if ($bank->is_default == 0) {
                         if ($bank->created_by != auth()->user()->created_by) {
-                            $this->storeError(
-                                "You do not have permission to update this bank due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this bank due to role restrictions."
                             ], 403);
@@ -727,13 +696,7 @@ class BankController extends Controller
                 ->first();
 
                 if (!$bank) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -743,34 +706,19 @@ class BankController extends Controller
 
                     if (auth()->user()->hasRole('superadmin')) {
                         if (($bank->business_id != NULL || $bank->is_default != 1)) {
-                            $this->storeError(
-                                "You do not have permission to update this bank due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this bank due to role restrictions."
                             ], 403);
                         }
                     } else {
                         if ($bank->business_id != NULL) {
-                            $this->storeError(
-                                "You do not have permission to update this bank due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this bank due to role restrictions."
                             ], 403);
                         } else if ($bank->is_default == 0 && $bank->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this bank due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this bank due to role restrictions."
                                 ], 403);
@@ -780,12 +728,7 @@ class BankController extends Controller
                 } else {
                     if ($bank->business_id != NULL) {
                         if (($bank->business_id != auth()->user()->business_id)) {
-                            $this->storeError(
-                                "You do not have permission to update this bank due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this bank due to role restrictions."
                             ], 403);
@@ -793,12 +736,7 @@ class BankController extends Controller
                     } else {
                         if ($bank->is_default == 0) {
                             if ($bank->created_by != auth()->user()->created_by) {
-                                $this->storeError(
-                                    "You do not have permission to update this bank due to role restrictions.",
-                                    403,
-                                    "front end error",
-                                    "front end error"
-                                   );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this bank due to role restrictions."
                                 ], 403);
@@ -905,13 +843,7 @@ class BankController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -924,13 +856,7 @@ class BankController extends Controller
                     'last_Name',
                 ]);
 
-                $this->storeError(
-                    "Some users are associated with the specified banks"
-                    ,
-                    409,
-                    "front end error",
-                    "front end error"
-                   );
+             
                 return response()->json([
                     "message" => "Some users are associated with the specified banks",
                     "conflicting_users" => $conflictingUsers

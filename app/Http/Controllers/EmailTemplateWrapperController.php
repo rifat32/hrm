@@ -98,13 +98,7 @@ class EmailTemplateWrapperController extends Controller
 
                     ->first();
                     if(!$template) {
-                        $this->storeError(
-                            "no data found"
-                            ,
-                            404,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "no template wrapper found"
                             ],404);
@@ -312,13 +306,7 @@ class EmailTemplateWrapperController extends Controller
             ])
             ->first();
             if(!$template){
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+              
                 return response()->json([
                      "message" => "no data found"
                 ], 404);

@@ -298,13 +298,7 @@ class ProductController extends Controller
         )
         ->first();
         if(!$product_prev) {
-            $this->storeError(
-                "no data found"
-                ,
-                404,
-                "front end error",
-                "front end error"
-               );
+
             return response()->json([
                 "message" => "no product found"
             ],404);
@@ -340,13 +334,7 @@ class ProductController extends Controller
 
                     ->first();
                     if(!$product) {
-                        $this->storeError(
-                            "no data found"
-                            ,
-                            404,
-                            "front end error",
-                            "front end error"
-                           );
+
                        return response()->json([
                            "message" => "no product found"
                        ],404);
@@ -805,13 +793,7 @@ class ProductController extends Controller
         ->first()
         ;
         if(!$product) {
-            $this->storeError(
-                "no data found"
-                ,
-                404,
-                "front end error",
-                "front end error"
-               );
+        
 return response()->json([
    "message" => "no product found"
 ],404);

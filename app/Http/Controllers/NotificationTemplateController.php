@@ -102,13 +102,7 @@ class NotificationTemplateController extends Controller
 
                     ->first();
                     if(!$template) {
-                        $this->storeError(
-                            "no data found"
-                            ,
-                            404,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "no template found"
                             ],404);
@@ -318,13 +312,7 @@ class NotificationTemplateController extends Controller
             ])
             ->first();
             if(!$template){
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+          
                 return response()->json([
                      "message" => "no data found"
                 ], 404);

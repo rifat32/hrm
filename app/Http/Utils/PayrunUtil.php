@@ -23,6 +23,74 @@ trait PayrunUtil
 {
     use BasicUtil;
 
+    public function getLeaveRecordData($approved_leave_records) {
+        $payroll_leave_records_data = collect();
+        $approved_leave_records->each(function ($approved_leave_record) use (&$payroll_leave_records_data) {
+            if ($approved_leave_record->leave->leave_type->type == "paid") {
+                // $total_paid_leave_hours += $approved_leave_record->leave_hours;
+                $payroll_leave_records_data->push([
+                    "leave_record_id" => $approved_leave_record->id,
+
+                ]);
+            }
+        });
+        return   $payroll_leave_records_data;
+    }
+
+
+
+
+
+
+
+    public function getHolidaysData($holidays, $end_date, $employee) {
+        $payroll_holidays_data = collect();
+        $date_range = collect();
+        $holidays->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee) {
+            $holiday_start_date = Carbon::parse($holiday->start_date);
+            $holiday_end_date = Carbon::parse($holiday->end_date);
+            while ($holiday_start_date->lte($holiday_end_date)) {
+                $current_date = $holiday_start_date->format("Y-m-d");
+                // Check if the date is not already in the collection before adding
+                if (!$date_range->contains($current_date)) {
+                    $date_range->push($current_date);
+                    if (Carbon::parse($current_date)->between(Carbon::parse($end_date), $holiday_start_date)) {
+                        $user_salary_info = $this->get_salary_info($employee->id, $current_date);
+                        $payroll_holidays_data->push([
+                            "holiday_id" => $holiday->id,
+                            "date" => $current_date,
+                            "hours" => $user_salary_info["holiday_considered_hours"],
+                            "hourly_salary" => $user_salary_info["hourly_salary"],
+                        ]);
+                    }
+                }
+                $holiday_start_date->addDay();
+            }
+        });
+
+        return $payroll_holidays_data;
+    }
+
+    public function getAttendanceData($approved_attendances) {
+        $payroll_attendances_data = collect();
+        $approved_attendances->each(function ($approved_attendance) use (&$payroll_attendances_data) {
+            if ($approved_attendance->total_paid_hours > 0) {
+
+                $payroll_attendances_data->push([
+                    "attendance_id" => $approved_attendance->id
+                ]);
+            }
+        });
+
+        return $payroll_attendances_data;
+    }
+
+
+
+
+
+
+
     public function getHolidays($all_parent_department_ids,$employee,$start_date, $end_date) {
         $holidays = Holiday::whereDoesntHave("payroll_holiday.payroll", function ($query) use ($employee) {
             $query->where([
@@ -56,6 +124,7 @@ trait PayrunUtil
         ->get();
         return $holidays;
     }
+
 
     public function getAttendanceArrears($start_date,$end_date,$employee) {
         $attendance_arrears = Attendance::whereDoesntHave("payroll_attendance")
@@ -247,13 +316,13 @@ trait PayrunUtil
     }
 
    // this function do all the task and returns transaction id or -1
-   public function estimate_payrun_data($employees, $start_date, $end_date, $generate_payroll = false)
+   public function estimate_payrun_data($employees, $start_date, $end_date)
    {
 
        // Convert end_date to Carbon instance
        $end_date = Carbon::parse($end_date);
 
-       $employees->each(function ($employee) use ($generate_payroll, $start_date, $end_date) {
+       $employees->each(function ($employee) use ( $start_date, $end_date) {
 
            $employee->payroll = $this->estimate_payroll($employee, $start_date, $end_date);
            return $employee;
@@ -276,53 +345,11 @@ trait PayrunUtil
 
         $holidays = $this->getHolidays($all_parent_department_ids,$employee,$start_date, $end_date);
 
-        $payroll_attendances_data = collect();
-        $payroll_leave_records_data = collect();
-        $payroll_holidays_data = collect();
+        $payroll_attendances_data = collect($this->getAttendanceData($approved_attendances));
+        $payroll_leave_records_data = collect($this->getLeaveRecordData($approved_leave_records));
+        $payroll_holidays_data = collect($this->getHolidaysData($holidays, $end_date, $employee));
 
-        $approved_leave_records->each(function ($approved_leave_record) use (&$payroll_leave_records_data) {
-            if ($approved_leave_record->leave->leave_type->type == "paid") {
-                // $total_paid_leave_hours += $approved_leave_record->leave_hours;
-                $payroll_leave_records_data->push([
-                    "leave_record_id" => $approved_leave_record->id,
 
-                ]);
-            }
-        });
-
-        $date_range = collect();
-        $holidays->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee) {
-
-            $holiday_start_date = Carbon::parse($holiday->start_date);
-            $holiday_end_date = Carbon::parse($holiday->end_date);
-
-            while ($holiday_start_date->lte($holiday_end_date)) {
-                $current_date = $holiday_start_date->format("Y-m-d");
-                // Check if the date is not already in the collection before adding
-                if (!$date_range->contains($current_date)) {
-                    $date_range->push($current_date);
-                    if (Carbon::parse($current_date)->between(Carbon::parse($end_date), $holiday_start_date)) {
-                        $user_salary_info = $this->get_salary_info($employee->id, $current_date);
-                        $payroll_holidays_data->push([
-                            "holiday_id" => $holiday->id,
-                            "date" => $current_date,
-                            "hours" => $user_salary_info["holiday_considered_hours"],
-                            "hourly_salary" => $user_salary_info["hourly_salary"],
-                        ]);
-                    }
-                }
-                $holiday_start_date->addDay();
-            }
-        });
-
-        $approved_attendances->each(function ($approved_attendance) use (&$payroll_attendances_data) {
-            if ($approved_attendance->total_paid_hours > 0) {
-
-                $payroll_attendances_data->push([
-                    "attendance_id" => $approved_attendance->id
-                ]);
-            }
-        });
 
         $payroll_data =  [
             'user_id' => $employee->id,
@@ -335,7 +362,7 @@ trait PayrunUtil
         ];
 
 
-            try {
+
                     $payroll = Payroll::create($payroll_data);
                     $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
                     $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
@@ -349,14 +376,7 @@ trait PayrunUtil
                     $temp_payroll = clone $recalculate_payroll_values;
                     $payroll->delete();
 
-            } catch (Exception $e) {
 
-                $this->storeError($e, 422, $e->getLine(), $e->getFile());
-
-                return [
-                    "message" => $e->getMessage(),
-                ];
-            }
         return $temp_payroll;
     }
 
@@ -381,53 +401,14 @@ trait PayrunUtil
 
             $holidays = $this->getHolidays($all_parent_department_ids,$employee,$start_date, $end_date);
 
-        $payroll_attendances_data = collect();
-        $payroll_leave_records_data = collect();
-        $payroll_holidays_data = collect();
+        $payroll_attendances_data = collect($this->getAttendanceData($approved_attendances));
+        $payroll_leave_records_data = collect($this->getLeaveRecordData($approved_leave_records));
+        $payroll_holidays_data = collect($this->getHolidaysData($holidays, $end_date, $employee));
 
-        $approved_leave_records->each(function ($approved_leave_record) use (&$payroll_leave_records_data) {
-            if ($approved_leave_record->leave->leave_type->type == "paid") {
-                // $total_paid_leave_hours += $approved_leave_record->leave_hours;
-                $payroll_leave_records_data->push([
-                    "leave_record_id" => $approved_leave_record->id,
 
-                ]);
-            }
-        });
 
-        $date_range = collect();
-        $holidays->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee) {
 
-            $holiday_start_date = Carbon::parse($holiday->start_date);
-            $holiday_end_date = Carbon::parse($holiday->end_date);
 
-            while ($holiday_start_date->lte($holiday_end_date)) {
-                $current_date = $holiday_start_date->format("Y-m-d");
-                // Check if the date is not already in the collection before adding
-                if (!$date_range->contains($current_date)) {
-                    $date_range->push($current_date);
-                    if (Carbon::parse($current_date)->between(Carbon::parse($end_date), $holiday_start_date)) {
-                        $user_salary_info = $this->get_salary_info($employee->id, $current_date);
-                        $payroll_holidays_data->push([
-                            "holiday_id" => $holiday->id,
-                            "date" => $current_date,
-                            "hours" => $user_salary_info["holiday_considered_hours"],
-                            "hourly_salary" => $user_salary_info["hourly_salary"],
-                        ]);
-                    }
-                }
-                $holiday_start_date->addDay();
-            }
-        });
-
-        $approved_attendances->each(function ($approved_attendance) use (&$payroll_attendances_data) {
-            if ($approved_attendance->total_paid_hours > 0) {
-
-                $payroll_attendances_data->push([
-                    "attendance_id" => $approved_attendance->id
-                ]);
-            }
-        });
 
         $payroll_data =  [
             'user_id' => $employee->id,
@@ -443,11 +424,8 @@ trait PayrunUtil
 
         $temp_payroll = null;
         if ($generate_payroll) {
-            try {
-
 
                     $payroll = Payroll::create($payroll_data);
-
                     $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
                     $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
                     $payroll->payroll_attendances()->createMany($payroll_attendances_data->toArray());
@@ -472,20 +450,13 @@ trait PayrunUtil
                     }
                     $temp_payroll = clone $recalculate_payroll_values;
 
-            } catch (Exception $e) {
-                $this->storeError($e, 422, $e->getLine(), $e->getFile());
-                return false;
-                return [
-                    "message" => "something went wrong creating payroll",
-                ];
-            }
+
         } else {
-            try {
+
 
                     $payroll = Payroll::create($payroll_data);
                     $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
                     $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
-
                     $payroll->payroll_attendances()->createMany($payroll_attendances_data->toArray());
 
 
@@ -498,14 +469,7 @@ trait PayrunUtil
                     $temp_payroll = clone $recalculate_payroll_values;
                     $payroll->delete();
 
-            } catch (Exception $e) {
 
-                $this->storeError($e, 422, $e->getLine(), $e->getFile());
-
-                return [
-                    "message" => $e->getMessage(),
-                ];
-            }
         }
         return $temp_payroll;
     }

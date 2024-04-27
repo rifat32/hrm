@@ -488,12 +488,7 @@ class UserManagementController extends Controller
 
             return      DB::transaction(function () use ($request_data) {
                 if (!auth()->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
-                    $this->storeError(
-                        "You can not create superadmin.",
-                        403,
-                        "front end error",
-                        "front end error"
-                    );
+
                     $error =  [
                         "message" => "You can not create superadmin.",
                     ];
@@ -737,12 +732,7 @@ class UserManagementController extends Controller
             $request_data = $request->validated();
 
             if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
-                $this->storeError(
-                    "You can not create superadmin.",
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 $error =  [
                     "message" => "You can not create superadmin.",
                 ];
@@ -977,12 +967,7 @@ class UserManagementController extends Controller
                 $user->save();
             }
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1078,12 +1063,7 @@ class UserManagementController extends Controller
             $user = $userQuery->first();
 
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1201,12 +1181,7 @@ class UserManagementController extends Controller
             $user = $userQuery->first();
 
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1600,12 +1575,7 @@ class UserManagementController extends Controller
                 // ->with("somthing")
                 ->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -1782,12 +1752,7 @@ class UserManagementController extends Controller
                 // ->with("somthing")
                 ->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2064,12 +2029,7 @@ class UserManagementController extends Controller
 
                 ->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -2162,12 +2122,7 @@ class UserManagementController extends Controller
 
             $user =  $userQuery->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -4790,12 +4745,7 @@ class UserManagementController extends Controller
                 })
                 ->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
@@ -6433,12 +6383,7 @@ class UserManagementController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$this->isModuleEnabled("user_activity")) {
-                $this->storeError(
-                    'Module is not enabled',
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json(['messege' => 'Module is not enabled'], 403);
             }
 
@@ -6464,12 +6409,7 @@ class UserManagementController extends Controller
 
                 ->first();
             if (!$user) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+           
                 return response()->json([
                     "message" => "User not found"
                 ], 404);

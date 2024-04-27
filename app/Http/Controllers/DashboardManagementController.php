@@ -2558,7 +2558,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            
+
             $user_ids =  User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
             })
@@ -3192,13 +3192,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
              $nonExistingIds = array_diff($idsArray, $existingIds);
 
              if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+            
                  return response()->json([
                      "message" => "Some or all of the specified data do not exist."
                  ], 404);

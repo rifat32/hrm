@@ -9,11 +9,13 @@ use App\Http\Requests\PayrunUpdateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Payrun;
 use App\Models\PayrunDepartment;
 use App\Models\PayrunUser;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +25,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PayrunController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, PayrunUtil;
 
     /**
      *
@@ -116,8 +118,31 @@ class PayrunController extends Controller
 
 
                 $payrun->departments()->sync($request_data['departments']);
+
+
+                if(!empty($request_data['users'])){
+                    $employees = User::whereIn("id", $request_data["users"])
+                    ->whereDoesntHave("payrolls", function ($q) use ($payrun) {
+                        $q->where("payrolls.start_date", $payrun->start_date)
+                            ->where("payrolls.end_date", $payrun->end_date);
+                    })
+                    ->get();
+
+                $processed_employees =  $this->process_payrun($payrun, $employees, $request_data["start_date"], $request_data["end_date"], true, true);
+                }
+
+
+
+
+
+
                 // $payrun->departments()->sync($request_data['departments'], []);
                 // $payrun->users()->sync($request_data['users'], []);
+
+                // $payrun->load([
+                //   "payrolls"
+                // ]);
+
 
                 return response($payrun, 201);
             });
@@ -322,13 +347,7 @@ class PayrunController extends Controller
             ])
                 ->first();
             if (!$payrun) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no payrun found"
                 ], 404);
@@ -354,12 +373,7 @@ class PayrunController extends Controller
 
 
             if((!$payrun_department_exists) && !$payrun_user_exists){
-                $this->storeError(
-                    "You don't have access to this payrun",
-                    403,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "You don't have access to this payrun"
                 ], 403);
@@ -683,13 +697,7 @@ class PayrunController extends Controller
            ])
                ->first();
            if (!$payrun) {
-            $this->storeError(
-                "no data found"
-                ,
-                404,
-                "front end error",
-                "front end error"
-               );
+
                return response()->json([
                    "message" => "no payrun found"
                ], 404);
@@ -715,12 +723,7 @@ class PayrunController extends Controller
 
 
         if((!$payrun_department_exists) && !$payrun_user_exists){
-            $this->storeError(
-                "You don't have access to this payrun",
-                403,
-                "front end error",
-                "front end error"
-               );
+
             return response()->json([
                 "message" => "You don't have access to this payrun"
             ], 403);
@@ -829,13 +832,7 @@ class PayrunController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist. or something else"
                 ], 404);

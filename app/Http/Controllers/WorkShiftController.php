@@ -175,12 +175,7 @@ class WorkShiftController extends Controller
 
            $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
                 if(!$check_work_shift_details["ok"]) {
-                    $this->storeError(
-                        json_encode($check_work_shift_details["error"]),
-                        $check_work_shift_details["status"],
-                        "front end error",
-                        "front end error"
-                       );
+
                     throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
                 }
 
@@ -355,12 +350,7 @@ class WorkShiftController extends Controller
 
                 $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
                 if(!$check_work_shift_details["ok"]) {
-                    $this->storeError(
-                        json_encode($check_work_shift_details["error"]),
-                        $check_work_shift_details["status"],
-                        "front end error",
-                        "front end error"
-                       );
+
                     throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
                 }
 
@@ -613,13 +603,7 @@ if(!$fields_changed){
 
                 ->first();
             if (!$work_shift) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no department found"
                 ], 404);
@@ -639,12 +623,8 @@ $details = $work_shift->details->map(function ($detail) {
 });
 $check_work_shift_details =  $this->checkWorkShiftDetails($details);
 if(!$check_work_shift_details["ok"]) {
-    $this->storeError(
-        json_encode($check_work_shift_details["error"]),
-        $check_work_shift_details["status"],
-        "front end error",
-        "front end error"
-       );
+
+
     throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
 }
 
@@ -1106,13 +1086,7 @@ if(!$check_work_shift_details["ok"]) {
             })
                 ->first();
             if (!$work_shift) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no work shift found"
                 ], 404);
@@ -1241,13 +1215,7 @@ if(!$check_work_shift_details["ok"]) {
 
 
              if (!$work_shift) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+              
                  return response()->json([
                      "message" => "no work shift found for the user"
                  ], 404);

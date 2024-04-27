@@ -294,13 +294,7 @@ class JobTypeController extends Controller
             ])
                 ->first();
             if (!$job_type) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -310,12 +304,7 @@ class JobTypeController extends Controller
             if (empty(auth()->user()->business_id)) {
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($job_type->business_id != NULL || $job_type->is_default != 1)) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this job type due to role restrictions."
                         ], 403);
@@ -324,24 +313,14 @@ class JobTypeController extends Controller
                     }
                 } else {
                     if ($job_type->business_id != NULL) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this job type due to role restrictions."
                         ], 403);
                     } else if ($job_type->is_default == 0) {
 
                         if($job_type->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this job type due to role restrictions."
                             ], 403);
@@ -361,12 +340,7 @@ class JobTypeController extends Controller
             } else {
                 if ($job_type->business_id != NULL) {
                     if (($job_type->business_id != auth()->user()->business_id)) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this job type due to role restrictions."
                         ], 403);
@@ -376,12 +350,7 @@ class JobTypeController extends Controller
                 } else {
                     if ($job_type->is_default == 0) {
                         if ($job_type->created_by != auth()->user()->created_by) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this job type due to role restrictions."
                             ], 403);
@@ -727,13 +696,7 @@ class JobTypeController extends Controller
                 ->first();
 
                 if (!$job_type) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -743,34 +706,19 @@ class JobTypeController extends Controller
 
                     if (auth()->user()->hasRole('superadmin')) {
                         if (($job_type->business_id != NULL || $job_type->is_default != 1)) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this job type due to role restrictions."
                             ], 403);
                         }
                     } else {
                         if ($job_type->business_id != NULL) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this job type due to role restrictions."
                             ], 403);
                         } else if ($job_type->is_default == 0 && $job_type->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this job type due to role restrictions."
                                 ], 403);
@@ -780,12 +728,7 @@ class JobTypeController extends Controller
                 } else {
                     if ($job_type->business_id != NULL) {
                         if (($job_type->business_id != auth()->user()->business_id)) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this job type due to role restrictions."
                             ], 403);
@@ -793,12 +736,7 @@ class JobTypeController extends Controller
                     } else {
                         if ($job_type->is_default == 0) {
                             if ($job_type->created_by != auth()->user()->created_by) {
-                                $this->storeError(
-                                    "You do not have permission to update this due to role restrictions.",
-                                    403,
-                                    "front end error",
-                                    "front end error"
-                                   );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this job type due to role restrictions."
                                 ], 403);
@@ -905,13 +843,7 @@ class JobTypeController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -920,13 +852,7 @@ class JobTypeController extends Controller
             $job_listing_exists =  JobListing::whereIn("job_type_id", $existingIds)->exists();
             if ($job_listing_exists) {
 
-                $this->storeError(
-                    "Some users are associated with the specified job_types"
-                    ,
-                    409,
-                    "front end error",
-                    "front end error"
-                   );
+            
                 return response()->json([
                     "message" => "Some users are associated with the specified job_types",
 

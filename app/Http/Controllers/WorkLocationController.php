@@ -292,13 +292,7 @@ class WorkLocationController extends Controller
             ])
                 ->first();
             if (!$work_location) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -309,12 +303,7 @@ class WorkLocationController extends Controller
 
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($work_location->business_id != NULL || $work_location->is_default != 1)) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this work location due to role restrictions."
                         ], 403);
@@ -323,24 +312,14 @@ class WorkLocationController extends Controller
                     }
                 } else {
                     if ($work_location->business_id != NULL) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this work location due to role restrictions."
                         ], 403);
                     } else if ($work_location->is_default == 0) {
 
                         if($work_location->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this work location due to role restrictions."
                             ], 403);
@@ -360,12 +339,7 @@ class WorkLocationController extends Controller
             } else {
                 if ($work_location->business_id != NULL) {
                     if (($work_location->business_id != auth()->user()->business_id)) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this work location due to role restrictions."
                         ], 403);
@@ -375,12 +349,7 @@ class WorkLocationController extends Controller
                 } else {
                     if ($work_location->is_default == 0) {
                         if ($work_location->created_by != auth()->user()->created_by) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this work location due to role restrictions."
                             ], 403);
@@ -726,13 +695,7 @@ class WorkLocationController extends Controller
                 ->first();
 
                 if (!$work_location) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -742,34 +705,19 @@ class WorkLocationController extends Controller
 
                     if (auth()->user()->hasRole('superadmin')) {
                         if (($work_location->business_id != NULL || $work_location->is_default != 1)) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this work location due to role restrictions."
                             ], 403);
                         }
                     } else {
                         if ($work_location->business_id != NULL) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this work location due to role restrictions."
                             ], 403);
                         } else if ($work_location->is_default == 0 && $work_location->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this work location due to role restrictions."
                                 ], 403);
@@ -779,12 +727,7 @@ class WorkLocationController extends Controller
                 } else {
                     if ($work_location->business_id != NULL) {
                         if (($work_location->business_id != auth()->user()->business_id)) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this work location due to role restrictions."
                             ], 403);
@@ -792,12 +735,7 @@ class WorkLocationController extends Controller
                     } else {
                         if ($work_location->is_default == 0) {
                             if ($work_location->created_by != auth()->user()->created_by) {
-                                $this->storeError(
-                                    "You do not have permission to update this due to role restrictions.",
-                                    403,
-                                    "front end error",
-                                    "front end error"
-                                   );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this work location due to role restrictions."
                                 ], 403);
@@ -904,13 +842,7 @@ class WorkLocationController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -922,13 +854,7 @@ class WorkLocationController extends Controller
                     'id', 'first_Name',
                     'last_Name',
                 ]);
-                $this->storeError(
-                    "Some users are associated with the specified work_locations"
-                    ,
-                    409,
-                    "front end error",
-                    "front end error"
-                   );
+             
 
                 return response()->json([
                     "message" => "Some users are associated with the specified work_locations",

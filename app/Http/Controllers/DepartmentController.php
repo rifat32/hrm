@@ -210,13 +210,7 @@ class DepartmentController extends Controller
                 $department_prev = Department::where($department_query_params)
                     ->first();
                 if (!$department_prev) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "no department found"
                     ], 404);
@@ -226,13 +220,7 @@ class DepartmentController extends Controller
                 ->first();
 
                 if (!$main_parent_department) {
-                    $this->storeError(
-                        "main parent not found."
-                        ,
-                        409,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "main parent not found."
                     ], 409);
@@ -387,25 +375,13 @@ class DepartmentController extends Controller
             ])
                 ->first();
             if (!$department) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no department found"
                 ], 404);
             }
             if (!$department->parent_id) {
-                $this->storeError(
-                    "You can not change the status of main parent department."
-                    ,
-                    409,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "You can not change the status of main parent department."
                 ], 409);
@@ -716,13 +692,7 @@ class DepartmentController extends Controller
                 ->first();
 
                 if (!$department) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "no department found"
                     ], 404);
@@ -907,24 +877,13 @@ class DepartmentController extends Controller
              )
                 ->first();
             if (!$department) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no department found"
                 ], 404);
             }
             if(!in_array($department->id,$all_manager_department_ids)){
-                $this->storeError(
-                    "You don't have access to this department",
-                    403,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "You don't have access to this department"
                 ], 403);
@@ -1022,13 +981,7 @@ class DepartmentController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+              
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist. or something else"
                 ], 404);

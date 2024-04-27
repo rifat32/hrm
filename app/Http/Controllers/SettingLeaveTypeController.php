@@ -307,13 +307,7 @@ class SettingLeaveTypeController extends Controller
             ])
                 ->first();
             if (!$setting_leave_type) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -324,12 +318,7 @@ class SettingLeaveTypeController extends Controller
 
                 if (auth()->user()->hasRole('superadmin')) {
                     if (($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this leave type due to role restrictions."
                         ], 403);
@@ -338,24 +327,14 @@ class SettingLeaveTypeController extends Controller
                     }
                 } else {
                     if ($setting_leave_type->business_id != NULL) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this leave type due to role restrictions."
                         ], 403);
                     } else if ($setting_leave_type->is_default == 0) {
 
                         if($setting_leave_type->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this leave type due to role restrictions."
                             ], 403);
@@ -375,12 +354,7 @@ class SettingLeaveTypeController extends Controller
             } else {
                 if ($setting_leave_type->business_id != NULL) {
                     if (($setting_leave_type->business_id != auth()->user()->business_id)) {
-                        $this->storeError(
-                            "You do not have permission to update this due to role restrictions.",
-                            403,
-                            "front end error",
-                            "front end error"
-                           );
+
                         return response()->json([
                             "message" => "You do not have permission to update this leave type due to role restrictions."
                         ], 403);
@@ -390,12 +364,7 @@ class SettingLeaveTypeController extends Controller
                 } else {
                     if ($setting_leave_type->is_default == 0) {
                         if ($setting_leave_type->created_by != auth()->user()->created_by) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this leave type status due to role restrictions."
                             ], 403);
@@ -519,13 +488,7 @@ class SettingLeaveTypeController extends Controller
             })
                 ->first();
             if (!$setting_leave_type) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "no data found"
                 ] , 404);
@@ -858,13 +821,7 @@ class SettingLeaveTypeController extends Controller
             ])
                 ->first();
                 if (!$setting_leave_type) {
-                    $this->storeError(
-                        "no data found"
-                        ,
-                        404,
-                        "front end error",
-                        "front end error"
-                       );
+
                     return response()->json([
                         "message" => "no data found"
                     ], 404);
@@ -873,34 +830,19 @@ class SettingLeaveTypeController extends Controller
 
                     if (auth()->user()->hasRole('superadmin')) {
                         if (($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this leave type due to role restrictions."
                             ], 403);
                         }
                     } else {
                         if ($setting_leave_type->business_id != NULL) {
-                            $this->storeError(
-                                "You do not have permission to update this  due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this leave type due to role restrictions."
                             ], 403);
                         } else if ($setting_leave_type->is_default == 0 && $setting_leave_type->created_by != auth()->user()->id) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this leave type due to role restrictions."
                                 ], 403);
@@ -910,12 +852,7 @@ class SettingLeaveTypeController extends Controller
                 } else {
                     if ($setting_leave_type->business_id != NULL) {
                         if (($setting_leave_type->business_id != auth()->user()->business_id)) {
-                            $this->storeError(
-                                "You do not have permission to update this due to role restrictions.",
-                                403,
-                                "front end error",
-                                "front end error"
-                               );
+
                             return response()->json([
                                 "message" => "You do not have permission to update this leave type due to role restrictions."
                             ], 403);
@@ -923,12 +860,7 @@ class SettingLeaveTypeController extends Controller
                     } else {
                         if ($setting_leave_type->is_default == 0) {
                             if ($setting_leave_type->created_by != auth()->user()->created_by) {
-                                $this->storeError(
-                                    "You do not have permission to update this due to role restrictions.",
-                                    403,
-                                    "front end error",
-                                    "front end error"
-                                   );
+
                                 return response()->json([
                                     "message" => "You do not have permission to update this leave type due to role restrictions."
                                 ], 403);
@@ -1036,13 +968,7 @@ class SettingLeaveTypeController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
@@ -1052,13 +978,7 @@ class SettingLeaveTypeController extends Controller
             if($leave_exists) {
                 $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
 
-                $this->storeError(
-                    "Some leaves are associated with the specified setting_leave_types"
-                    ,
-                    409,
-                    "front end error",
-                    "front end error"
-                   );
+             
                 return response()->json([
                     "message" => "Some leaves are associated with the specified setting_leave_types",
                     "conflicting_leaves" => $conflictingLeaves

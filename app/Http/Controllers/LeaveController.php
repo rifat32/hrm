@@ -346,12 +346,7 @@ class LeaveController extends Controller
 
                 $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"], $request_data["is_approved"]);
                 if (!$process_leave_approval["success"]) {
-                    $this->storeError(
-                        $process_leave_approval["message"],
-                        $process_leave_approval["status"],
-                        "front end error",
-                        "front end error"
-                    );
+
                     return response([
                         "message" => $process_leave_approval["message"]
                     ], $process_leave_approval["status"]);
@@ -480,12 +475,7 @@ class LeaveController extends Controller
                 ])->first();
 
                 if (!$setting_leave->allow_bypass) {
-                    $this->storeError(
-                        "bypass not allowed",
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
+
                     return response([
                         "message" => "bypass not allowed"
                     ], 400);
@@ -498,12 +488,7 @@ class LeaveController extends Controller
                     ->first();
 
                 if (!$leave) {
-                    $this->storeError(
-                        "no leave found",
-                        400,
-                        "front end error",
-                        "front end error"
-                    );
+
                     return response([
                         "message" => "no leave found"
                     ], 400);
@@ -2139,12 +2124,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 })
                 ->first();
             if (!$leave) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -2330,12 +2310,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+           
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

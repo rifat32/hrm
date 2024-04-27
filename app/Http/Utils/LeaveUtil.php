@@ -27,12 +27,6 @@ trait LeaveUtil
             ->first();
         if (!$leave) {
 
-            $this->storeError(
-                "No leave request found",
-                400,
-                "front end error",
-                "front end error"
-               );
 
             return [
                 "success" => false,
@@ -42,13 +36,7 @@ trait LeaveUtil
         }
 
         if (!$leave->employee) {
-            $this->storeError(
-                "No Employee for the leave found"
-                ,
-                400,
-                "front end error",
-                "front end error"
-               );
+
             return [
                 "success" => false,
                 "message" =>   "No Employee for the leave found",
@@ -120,13 +108,6 @@ trait LeaveUtil
                     $query->where('users.id', $leave->employee->id);
                 })->first();
 
-                $this->storeError(
-                    "Hey please specify department for the employee first!"
-                    ,
-                    400,
-                    "front end error",
-                    "front end error"
-                   );
 
                 if (!$department) {
                     return [
@@ -177,13 +158,7 @@ trait LeaveUtil
                 $query->where('departments.id', $leave->employee->departments[0]->id);
             })->first();
 
-            $this->storeError(
-                "Hey please specify department for the employee first!"
-                ,
-                400,
-                "front end error",
-                "front end error"
-               );
+          
 
             if (!$department) {
                 return [

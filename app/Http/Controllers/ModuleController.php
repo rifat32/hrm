@@ -84,13 +84,7 @@ class ModuleController extends Controller
             ])
                 ->first();
             if (!$module) {
-                $this->storeError(
-                    "no data found"
-                    ,
-                    404,
-                    "front end error",
-                    "front end error"
-                   );
+             
                 return response()->json([
                     "message" => "no module found"
                 ], 404);

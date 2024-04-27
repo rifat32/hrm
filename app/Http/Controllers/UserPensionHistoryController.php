@@ -540,12 +540,7 @@ DB::beginTransaction();
                 })
                 ->first();
             if (!$user_pension_history) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no data found"
                 ], 404);
@@ -631,7 +626,7 @@ DB::beginTransaction();
 
 
             $business_id =  auth()->user()->business_id;
-            
+
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $idsArray = explode(',', $ids);
@@ -647,12 +642,7 @@ DB::beginTransaction();
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+          
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

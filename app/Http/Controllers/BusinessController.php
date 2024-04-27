@@ -1070,12 +1070,7 @@ class BusinessController extends Controller
                 }
                 $userPrev = $userPrev->first();
                 if (!$userPrev) {
-                    $this->storeError(
-                        "no data found",
-                        404,
-                        "front end error",
-                        "front end error"
-                    );
+
                     return response()->json([
                         "message" => "no user found with this id"
                     ], 404);
@@ -1472,12 +1467,7 @@ class BusinessController extends Controller
 
 
             if (!$business) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no business found"
                 ], 404);
@@ -1637,12 +1627,7 @@ class BusinessController extends Controller
 
                     ->first();
                 if (!$business) {
-                    $this->storeError(
-                        "no data found",
-                        404,
-                        "front end error",
-                        "front end error"
-                    );
+                  
                     return response()->json([
                         "massage" => "no business found"
                     ], 404);

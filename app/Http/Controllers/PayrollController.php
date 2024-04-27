@@ -287,7 +287,7 @@ class PayrollController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            if (!$request->payrun_id) {
+            if (empty($request->payrun_id)) {
                 $error = [
                     "message" => "The given data was invalid.",
                     "errors" => ["payrun_id" => ["The payrun_id field is required."]]
@@ -494,15 +494,20 @@ class PayrollController extends Controller
 
    $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-
-
-
-
-
-
-
-
-
+   if (empty($request->start_date)) {
+    $error = [
+        "message" => "The given data was invalid.",
+        "errors" => ["start_date" => ["The start_date field is required."]]
+    ];
+    throw new Exception(json_encode($error), 422);
+}
+if (empty($request->end_date)) {
+    $error = [
+        "message" => "The given data was invalid.",
+        "errors" => ["end_date" => ["The end_date field is required."]]
+    ];
+    throw new Exception(json_encode($error), 422);
+}
 
 
 
@@ -511,15 +516,36 @@ class PayrollController extends Controller
                  "business_id" => auth()->user()->business_id,
                  "is_active" => 1
              ])
+
+
                  ->whereDoesntHave("payrolls", function ($q) use ($request) {
                      $q->where("payrolls.start_date", $request->start_date)
                          ->where("payrolls.end_date", $request->end_date);
                  })
 
+
+
                  ->whereNotIn("id", [auth()->user()->id])
+
+
+
                  ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                      $query->whereIn("departments.id", $all_manager_department_ids);
                  })
+
+
+
+
+                 ->when(!empty($request->departments), function ($query) use ($request) {
+                    $department_ids = explode(',', $request->departments);
+                    $query->whereHas("departments", function ($query) use($department_ids) {
+                        $query->whereIn("departments.id", $department_ids);
+                    });
+                 })
+
+
+
+
                  ->when(!empty($request->user_ids), function ($query) use ($request, $all_manager_department_ids) {
                      $user_ids = explode(',', $request->user_ids);
                      $query->whereIn("users.id", $user_ids);
@@ -527,10 +553,10 @@ class PayrollController extends Controller
 
 
 
+
                  ->get();
 
-
-             $processed_employees =  $this->estimate_payrun_data( $employees, $request->start_date, $request->end_date, false);
+             $processed_employees =  $this->estimate_payrun_data( $employees, $request->start_date, $request->end_date);
 
              DB::commit();
 

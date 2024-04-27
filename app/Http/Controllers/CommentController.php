@@ -91,12 +91,7 @@ class CommentController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$this->isModuleEnabled("project_and_comment_management")) {
-                $this->storeError(
-                    'Module is not enabled',
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json(['error' => 'Module is not enabled'], 403);
             }
 
@@ -220,12 +215,7 @@ class CommentController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$this->isModuleEnabled("project_and_comment_management")) {
-                $this->storeError(
-                    'Module is not enabled',
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json(['error' => 'Module is not enabled'], 403);
             }
             return DB::transaction(function () use ($request) {
@@ -394,12 +384,7 @@ class CommentController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$this->isModuleEnabled("project_and_comment_management")) {
-                $this->storeError(
-                    'Module is not enabled',
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json(['error' => 'Module is not enabled'], 403);
             }
             if (!$request->user()->hasPermissionTo('comment_view')) {
@@ -524,12 +509,7 @@ class CommentController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$this->isModuleEnabled("project_and_comment_management")) {
-                $this->storeError(
-                    'Module is not enabled',
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json(['error' => 'Module is not enabled'], 403);
             }
             if (!$request->user()->hasPermissionTo('comment_view')) {
@@ -548,12 +528,7 @@ class CommentController extends Controller
                 )
                 ->first();
             if (!$comment) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json([
                     "message" => "no comment listing found"
                 ], 404);
@@ -628,12 +603,7 @@ class CommentController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$this->isModuleEnabled("project_and_comment_management")) {
-                $this->storeError(
-                    'Module is not enabled',
-                    403,
-                    "front end error",
-                    "front end error"
-                );
+
                 return response()->json(['error' => 'Module is not enabled'], 403);
             }
             if (!$request->user()->hasPermissionTo('comment_delete')) {
@@ -656,12 +626,7 @@ class CommentController extends Controller
 
 
             if (!empty($nonExistingIds)) {
-                $this->storeError(
-                    "no data found",
-                    404,
-                    "front end error",
-                    "front end error"
-                );
+             
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
