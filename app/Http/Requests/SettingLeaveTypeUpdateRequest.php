@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\SettingLeaveType;
 use App\Rules\UniqueSettingLeaveTypeName;
+use App\Rules\ValidEmploymentStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingLeaveTypeUpdateRequest extends BaseFormRequest
@@ -77,7 +78,14 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
                 new UniqueSettingLeaveTypeName($this->id),
             ],
             'type' => 'required|string|in:paid,unpaid',
-            'amount' => 'required|numeric'
+            'amount' => 'required|numeric',
+
+            "employment_status" => "present|array",
+            'employment_status.*' => [
+                'numeric',
+                new ValidEmploymentStatus()
+            ],
+
         ];
 
         // if (!empty(auth()->user()->business_id)) {

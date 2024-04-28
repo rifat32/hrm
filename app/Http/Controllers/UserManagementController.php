@@ -4986,16 +4986,22 @@ class UserManagementController extends Controller
                 $setting_leave->start_month = 1;
             }
 
-            $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
+            // $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
 
 
 
-            $leave_types =   SettingLeaveType::where(function ($query) use ($paid_leave_available, $created_by) {
+            $leave_types =   SettingLeaveType::where(function ($query) use ( $user,$created_by) {
                 $query->where('setting_leave_types.business_id', auth()->user()->business_id)
                     ->where('setting_leave_types.is_default', 0)
                     ->where('setting_leave_types.is_active', 1)
-                    ->when($paid_leave_available == 0, function ($query) {
-                        $query->where('setting_leave_types.type', "unpaid");
+                    // ->when($paid_leave_available == 0, function ($query) {
+                    //     $query->where('setting_leave_types.type', "unpaid");
+                    // })
+                    ->where(function($query) use($user){
+                       $query->whereHas("employment_statuses", function($query) use($user){
+                        $query->whereIn("employment_statuses.id", [$user->employment_status]);
+                       })
+                       ->orWhereDoesntHave("employment_statuses");
                     })
                     ->whereDoesntHave("disabled", function ($q) use ($created_by) {
                         $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
@@ -5015,7 +5021,6 @@ class UserManagementController extends Controller
 
                     ]);
                 })
-
                     ->where("leave_records.date", ">=", $startOfMonth)
                     ->get()
                     ->sum(function ($record) {

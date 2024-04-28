@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\SettingLeaveType;
 use App\Rules\UniqueSettingLeaveTypeName;
+use App\Rules\ValidEmploymentStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingLeaveTypeCreateRequest extends BaseFormRequest
@@ -37,6 +38,18 @@ class SettingLeaveTypeCreateRequest extends BaseFormRequest
             'amount' => 'required|numeric',
             'is_active' => 'required|boolean',
             'is_earning_enabled' => 'required|boolean',
+
+
+
+
+            "employment_status" => "present|array",
+            'employment_status.*' => [
+                'numeric',
+                new ValidEmploymentStatus()
+            ],
+
+
+
         ];
 
         // if (!empty(auth()->user()->business_id)) {
@@ -45,8 +58,7 @@ class SettingLeaveTypeCreateRequest extends BaseFormRequest
         //     $rules['name'] .= '|unique:setting_leave_types,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
         // }
 
-
-return $rules;
+           return $rules;
 
 
     }

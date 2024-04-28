@@ -374,7 +374,7 @@ class PayrollController extends Controller
      *
      * @OA\Get(
      *      path="/v1.0/pending-payroll-users",
-     *      operationId="getPayrolls",
+     *      operationId="getPendingPayrollUsers",
      *      tags={"administrator.payrolls"},
      *       security={
      *           {"bearerAuth": {}}

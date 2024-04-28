@@ -92,11 +92,6 @@ class SettingLeaveTypeController extends Controller
                 $request_data = $request->validated();
 
 
-
-
-
-
-
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
@@ -110,8 +105,14 @@ class SettingLeaveTypeController extends Controller
                 }
 
 
+
+
+
                 $setting_leave_type =  SettingLeaveType::create($request_data);
 
+
+
+                $setting_leave_type->employment_statuses()->sync($request_data["employment_status"]);
 
 
 
@@ -227,7 +228,7 @@ class SettingLeaveTypeController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-
+                $setting_leave_type->employment_statuses()->sync($request_data["employment_status"]);
                 return response($setting_leave_type, 201);
             });
         } catch (Exception $e) {
@@ -978,7 +979,7 @@ class SettingLeaveTypeController extends Controller
             if($leave_exists) {
                 $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
 
-             
+
                 return response()->json([
                     "message" => "Some leaves are associated with the specified setting_leave_types",
                     "conflicting_leaves" => $conflictingLeaves

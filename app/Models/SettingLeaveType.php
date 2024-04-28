@@ -89,7 +89,9 @@ class SettingLeaveType extends Model
 
 
 
-
+    public function employment_statuses() {
+        return $this->belongsToMany(EmploymentStatus::class, 'leave_type_employment_statuses', 'setting_leave_type_id', 'employment_status_id');
+    }
 
 
     // public function getCreatedAtAttribute($value)

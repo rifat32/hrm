@@ -6,7 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\Designation;
-use App\Models\EmploymentStatus;
+
 use App\Models\RecruitmentProcess;
 use App\Models\Role;
 use App\Models\User;
