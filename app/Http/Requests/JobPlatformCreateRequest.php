@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\JobPlatform;
+use App\Rules\ValidateJobPlatformName;
 use Illuminate\Foundation\Http\FormRequest;
 
 class JobPlatformCreateRequest extends BaseFormRequest
@@ -28,6 +29,7 @@ class JobPlatformCreateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
+                new ValidateJobPlatformName(NULL)
                 function ($attribute, $value, $fail) {
 
                         $created_by  = NULL;

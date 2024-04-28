@@ -6,6 +6,9 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\WorkLocation;
+use App\Rules\ValidateDepartmentName;
+use App\Rules\ValidateParentDepartmentId;
+use App\Rules\ValidUserId;
 use App\Rules\ValidWorkLocationId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -61,20 +64,8 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 "string",
-                function ($attribute, $value, $fail) use($all_manager_department_ids){
-                    $department_exists_with_name =   Department::where([
-                        "name" => $value,
-                        "business_id" => auth()->user()->business_id
-                    ])
-                    ->whereNotIn("id", [$this->id])
-                    ->exists();
-                    if($department_exists_with_name) {
-                        $fail($attribute . " is invalid. A department with the same name already exists for your business." );
-                        return;
+                new ValidateDepartmentName(NULL)
 
-                    }
-
-                  },
 
             ],
             'work_location_id' => [
@@ -87,50 +78,13 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'manager_id' => [
                 'nullable',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-                  $exists =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
-
-                    ])
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->first();
-
-            if (!$exists) {
-                $fail($attribute . " is invalid.");
-                return;
-            }
-
-                },
+                new ValidUserId($all_manager_department_ids)
             ],
             'parent_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
+                new ValidateParentDepartmentId($all_manager_department_ids)
 
-
-                    if(!empty($value)){
-
-                        $parent_department = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->first();
-
-                    if (!$parent_department) {
-                        $fail($attribute . " is invalid.");
-                        return;
-                    }
-                    if(!in_array($parent_department->id,$all_manager_department_ids)){
-                        $fail($attribute . " is invalid. You don't have access to this department.");
-                        return;
-                    }
-
-                    }
-
-                },
             ],
 
         ];
