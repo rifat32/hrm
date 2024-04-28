@@ -394,6 +394,14 @@ class PayrollController extends Controller
      * required=true,
      * example="1,2,3"
      * ),
+     *    * @OA\Parameter(
+     * name="departments",
+     * in="query",
+     * description="departments",
+     * required=true,
+     * example="1,2,3"
+     * ),
+     *
      *
      *
      *

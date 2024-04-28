@@ -6,6 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\WorkLocation;
+use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDepartmentName;
 use App\Rules\ValidateParentDepartmentId;
 use App\Rules\ValidUserId;
@@ -39,27 +40,8 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail)use($all_manager_department_ids){
+            new   ValidateDepartment($all_manager_department_ids)
 
-
-                    if(!empty($value)){
-
-                        $department = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->first();
-
-                    if (!$department) {
-                        $fail($attribute . " is invalid.");
-                        return;
-                    }
-                    if(!in_array($department->id,$all_manager_department_ids)){
-                        $fail($attribute . " is invalid. You don't have access to this department.");
-                        return;
-                    }
-
-                    }
-
-                },
             ],
             'name' => [
                 "required",

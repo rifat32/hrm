@@ -354,15 +354,13 @@ Route::get('/v1.0/users/validate/employee-id/{user_id}', [UserManagementControll
 
 Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
 
-
-
 Route::get('/v1.0/users/get-disable-days-for-attendances/{id}', [UserManagementController::class, "getDisableDaysForAttendanceByUserId"]);
 
 Route::get('/v1.0/users/get-attendances/{id}', [UserManagementController::class, "getAttendancesByUserId"]);
+
 Route::get('/v1.0/users/get-leaves/{id}', [UserManagementController::class, "getLeavesByUserId"]);
 
 Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
-
 
 
 Route::get('/v1.0/users/get-schedule-information/by-user', [UserManagementController::class, "getScheduleInformation"]);
@@ -1126,7 +1124,7 @@ Route::delete('/v1.0/payruns/{ids}', [PayrunController::class, "deletePayrunsByI
 Route::post('/v1.0/payrolls', [PayrollController::class, "createPayroll"]);
 Route::get('/v1.0/payrolls', [PayrollController::class, "getPayrolls"]);
 
-Route::get('/v1.0/pending-payroll-users', [PayrollController::class, "getPendingstorPayrollUsers"]);
+Route::get('/v1.0/pending-payroll-users', [PayrollController::class, "getPendingPayrollUsers"]);
 
 Route::get('/v1.0/payroll-list', [PayrollController::class, "getPayrollList"]);
 
