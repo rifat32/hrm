@@ -46,6 +46,7 @@ class AssetTypeUpdateRequest extends BaseFormRequest
                         if(($asset_type->business_id != auth()->user()->business_id)) {
                                // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this designation due to role restrictions.");
+                            return 0;
                         }
 
 
@@ -68,4 +69,6 @@ class AssetTypeUpdateRequest extends BaseFormRequest
 
 return $rules;
     }
+
+
 }

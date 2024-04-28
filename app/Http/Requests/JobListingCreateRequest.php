@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\JobPlatform;
 use App\Models\JobType;
 use App\Models\WorkLocation;
+use App\Rules\ValidateDepartment;
 use App\Rules\ValidWorkLocationId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
@@ -123,21 +124,7 @@ class JobListingCreateRequest extends BaseFormRequest
             'department_id' => [
                 'nullable',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-                    $department = Department::where('id', $value)
-                    ->where('departments.business_id', '=', auth()->user()->business_id)
-                    ->first();
-
-                    if (!$department) {
-                        $fail($attribute . " is invalid.");
-                        return;
-                    }
-                    if(!in_array($department->id,$all_manager_department_ids)){
-                        $fail($attribute . " is invalid. You don't have access to this department.");
-                        return;
-                    }
-                },
+                new ValidateDepartment($all_manager_department_ids)
             ],
 
 

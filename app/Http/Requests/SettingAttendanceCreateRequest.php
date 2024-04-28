@@ -6,6 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
+use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingAttendanceCreateRequest extends BaseFormRequest
@@ -43,28 +44,7 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
             'special_users' => 'present|array',
             'special_users.*' => [
                 "numeric",
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-
-                  $exists =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
-
-                    ])
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->first();
-
-            if (!$exists) {
-                $fail($attribute . " is invalid.");
-                return;
-            }
-
-
-
-                },
+                new ValidUserId($all_manager_department_ids)
 
             ],
 

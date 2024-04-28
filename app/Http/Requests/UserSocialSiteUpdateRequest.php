@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\SocialSite;
 use App\Models\User;
 use App\Models\UserSocialSite;
+use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserSocialSiteUpdateRequest extends BaseFormRequest
@@ -65,28 +66,7 @@ class UserSocialSiteUpdateRequest extends BaseFormRequest
             'user_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-
-                  $exists =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
-
-                    ])
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->first();
-
-            if (!$exists) {
-                $fail($attribute . " is invalid.");
-                return;
-            }
-
-
-
-                },
+                new ValidUserId($all_manager_department_ids)
             ],
 
 

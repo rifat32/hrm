@@ -9,6 +9,7 @@ use App\Models\PayrunDepartment;
 use App\Models\PayrunUser;
 use App\Models\User;
 use App\Rules\ValidateDepartment;
+use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PayrunUpdateRequest extends BaseFormRequest
@@ -81,6 +82,7 @@ class PayrunUpdateRequest extends BaseFormRequest
             'users' => 'present|array|size:0',
             'users.*' => [
                 "numeric",
+             
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
 
 
