@@ -12,9 +12,11 @@ class ValidateDesignationName implements Rule
      *
      * @return void
      */
-    public function __construct()
+
+     protected $id;
+    public function __construct($id)
     {
-        //
+        $this->id = $id;
     }
 
     /**
@@ -32,7 +34,9 @@ class ValidateDesignationName implements Rule
         }
 
         $exists = Designation::where("designations.name",$value)
-
+        ->when(!empty($this->id),function($query) {
+            $query->whereNotIn("id",[$this->id]);
+        })
         ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
             if (auth()->user()->hasRole('superadmin')) {
                 return $query->where('designations.business_id', NULL)

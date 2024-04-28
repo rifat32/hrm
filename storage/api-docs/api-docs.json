@@ -18176,6 +18176,13 @@
                         "example": "1,2,3"
                     },
                     {
+                        "name": "departments",
+                        "in": "query",
+                        "description": "departments",
+                        "required": true,
+                        "example": "1,2,3"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",

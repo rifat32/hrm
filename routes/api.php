@@ -1079,7 +1079,9 @@ Route::get('/v1.0/histories/user-right-to-works', [HistoryDetailsController::cla
 Route::get('/v1.0/histories/user-sponsorship-details', [HistoryDetailsController::class, "getUserSponsorshipDetailsHistory"]);
 Route::get('/v1.0/histories/user-pension-details', [HistoryDetailsController::class, "getUserPensionDetailsHistory"]);
 Route::get('/v1.0/histories/user-address-details', [HistoryDetailsController::class, "getUserAddressDetailsHistory"]);
+
 Route::get('/v1.0/histories/user-attendance-details', [HistoryDetailsController::class, "getUserAttendanceDetailsHistory"]);
+
 Route::get('/v1.0/histories/user-leave-details', [HistoryDetailsController::class, "getUserLeaveDetailsHistory"]);
 
 Route::get('/v1.0/histories/user-work-shift', [HistoryDetailsController::class, "getUserWorkShiftHistory"]);

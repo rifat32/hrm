@@ -55,7 +55,7 @@ class PayrunCreateRequest extends BaseFormRequest
                         }
                 },
             ],
-            'users' => 'present|array|size:0',
+            'users' => 'present|array',
             'users.*' => [
                 "numeric",
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {

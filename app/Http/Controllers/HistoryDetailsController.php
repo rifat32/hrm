@@ -1216,7 +1216,25 @@ class HistoryDetailsController extends Controller
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $employee_attendance_details_history = AttendanceHistory::
-             when(!empty($request->attendance_id), function ($query) use ($request) {
+             with([
+                "employee" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "actor" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+             ])
+             ->when(!empty($request->attendance_id), function ($query) use ($request) {
                 return $query->where('attendance_histories.attendance_id', $request->attendance_id);
             })
              ->when(!empty($request->user_id), function ($query) use ($request) {

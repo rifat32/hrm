@@ -31,7 +31,7 @@ class DesignationCreateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-             new   ValidateDesignationName()
+             new   ValidateDesignationName(NULL)
             ],
         ];
 

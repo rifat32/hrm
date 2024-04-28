@@ -82,7 +82,7 @@ class DesignationUpdateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-                new   ValidateDesignationName()
+                new   ValidateDesignationName($this->id)
             ],
         ];
 

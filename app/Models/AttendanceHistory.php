@@ -63,6 +63,10 @@ class AttendanceHistory extends Model
         return $this->hasOne(User::class,'id', 'user_id');
     }
 
+    public function actor(){
+        return $this->hasOne(User::class,'id', 'actor_id');
+    }
+
 
 
 

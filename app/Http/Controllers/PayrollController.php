@@ -44,7 +44,6 @@ class PayrollController extends Controller
      *   @OA\Property(property="end_date", type="number", format="number", example="25-02-2024"),
      *
      *
-     *
      *         ),
      *      ),
      *      @OA\Response(
@@ -531,11 +530,7 @@ if (empty($request->end_date)) {
                          ->where("payrolls.end_date", $request->end_date);
                  })
 
-
-
                  ->whereNotIn("id", [auth()->user()->id])
-
-
 
                  ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                      $query->whereIn("departments.id", $all_manager_department_ids);

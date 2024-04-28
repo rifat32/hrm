@@ -129,6 +129,7 @@ class PayrunController extends Controller
                     ->get();
 
                 $processed_employees =  $this->process_payrun($payrun, $employees, $request_data["start_date"], $request_data["end_date"], true, true);
+                $payrun->users()->sync($request_data['users'], []);
                 }
 
 
@@ -137,7 +138,7 @@ class PayrunController extends Controller
 
 
                 // $payrun->departments()->sync($request_data['departments'], []);
-                // $payrun->users()->sync($request_data['users'], []);
+
 
                 // $payrun->load([
                 //   "payrolls"
@@ -690,19 +691,20 @@ class PayrunController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-           $payrun = Payrun::with("users","departments")
+           $payrun = Payrun::with("departments")
            ->where([
                "id" => $id,
                "business_id" => auth()->user()->business_id
            ])
                ->first();
+
            if (!$payrun) {
 
                return response()->json([
                    "message" => "no payrun found"
                ], 404);
            }
-
+           $payrun->user_ids = $payrun->users->pluck("users.id");
 
            $payrun_department_exists = PayrunDepartment::where([
             "payrun_id" => $payrun->id
