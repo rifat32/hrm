@@ -46,6 +46,7 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
                 "numeric",
                 new ValidUserId($all_manager_department_ids)
 
+
             ],
 
 

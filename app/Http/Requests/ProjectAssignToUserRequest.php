@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
+use App\Rules\ValidateProjectId;
+use App\Rules\ValidProjectId;
 use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
@@ -41,17 +43,8 @@ class ProjectAssignToUserRequest extends BaseFormRequest
             'projects' => 'present|array',
             'projects.*' => [
                 "numeric",
-                function ($attribute, $value, $fail) {
-                    $exists = DB::table('projects')
-                    ->where('id', $value)
-                    ->where('projects.business_id', '=', auth()->user()->business_id)
-                    ->exists();
+                new ValidProjectId()
 
-                if (!$exists) {
-                    $fail($attribute . " is invalid.");
-                }
-
-                },
 
             ],
         ];

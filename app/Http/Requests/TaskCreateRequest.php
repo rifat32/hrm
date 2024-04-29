@@ -2,12 +2,17 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Task;
+use App\Rules\ValidateTaskId;
+use App\Rules\ValidProjectId;
+use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
 class TaskCreateRequest extends BaseFormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -25,6 +30,7 @@ class TaskCreateRequest extends BaseFormRequest
      */
     public function rules()
     {
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
         return [
             'name' => 'required|string',
             'description' => 'nullable|string',
@@ -35,43 +41,17 @@ class TaskCreateRequest extends BaseFormRequest
             'project_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = DB::table('projects')
-                        ->where('id', $value)
-                        ->where('projects.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
+                new ValidProjectId()
             ],
             'parent_task_id' => [
                 'nullable',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Task::
-                          where('id', $value)
-                        ->where('tasks.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
+                new ValidateTaskId(),
             ],
             "assignees" => "required|array",
             "assignees.*" => [
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = DB::table('users')
-                        ->where('id', $value)
-                        ->where('users.business_id', '=', auth()->user()->business_id)
-                        ->exists();
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
+              new ValidUserId($all_manager_department_ids)
             ]
 
 
