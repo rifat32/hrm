@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Leave;
 use App\Models\SettingLeaveType;
 use App\Models\User;
+use App\Rules\ValidateLeaveId;
 use App\Rules\ValidSettingLeaveType;
 use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
@@ -36,14 +37,7 @@ class LeaveUpdateRequest extends BaseFormRequest
             'id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Leave::where('id', $value)
-                    ->where("user_id",$this->user_id)
-                        ->exists();
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
+                new ValidateLeaveId($all_manager_department_ids),
             ],
 
             'leave_duration' => 'required|in:single_day,multiple_day,half_day,hours',

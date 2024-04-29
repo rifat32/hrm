@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Leave;
+use App\Rules\ValidateLeaveId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveBypassRequest extends BaseFormRequest
@@ -32,25 +33,7 @@ class LeaveBypassRequest extends BaseFormRequest
             'leave_id' => [
                 'required',
                 'numeric',
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-
-                    $exists = Leave::where('leaves.id', $value)
-                        ->where('leaves.business_id', '=', auth()->user()->business_id)
-                        ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
-                            $query->whereIn("departments.id",$all_manager_department_ids);
-                         })
-
-                         ->whereHas("employee", function ($query){
-                                $query->whereNotIn("users.id",[auth()->user()->id]);
-                            })
-
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
+                new ValidateLeaveId($all_manager_department_ids),
             ],
 
 
