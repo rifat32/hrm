@@ -29,13 +29,14 @@ class UniqueAttendanceDate implements Rule
      */
     public function passes($attribute, $value)
     {
-        return !Attendance::when(!empty($this->id), function($query) {
+     $exists =   Attendance::when(!empty($this->id), function($query) {
             $query->whereNotIn('id', [$this->id]);
         })
             ->where('attendances.user_id', $this->user_id)
             ->where('attendances.in_date', $value)
             ->where('attendances.business_id', auth()->user()->business_id)
             ->exists();
+        return !$exists;
     }
 
     public function message()

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+    protected $appends = ['total_users_count'];
     protected $fillable = [
         "name",
         "work_location_id",
@@ -98,7 +99,7 @@ class Department extends Model
 
     public function recursiveChildren()
     {
-        return $this->children()->with('recursiveChildren');
+        return $this->children()->with('recursiveChildren','manager');
     }
 
     public function getTotalUsersCountAttribute()

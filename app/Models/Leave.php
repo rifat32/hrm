@@ -28,8 +28,10 @@ class Leave extends Model
         "created_by",
     ];
     public function getIsInArrearsAttribute($value) {
-        return  LeaveRecordArrear::whereIn("leave_records.id",$this->records()->pluck("leave_records.id"))
+
+        return  LeaveRecordArrear::whereIn("leave_record_arrears.id",$this->records()->pluck("leave_records.id"))
           ->exists();
+
           }
 
 
@@ -75,6 +77,7 @@ class Leave extends Model
     // {
     //     return (new Carbon($value))->format('d-m-Y');
     // }
+
 
 
 

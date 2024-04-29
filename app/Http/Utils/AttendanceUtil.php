@@ -177,6 +177,9 @@ trait AttendanceUtil
 
     public function calculate_capacity_hours($work_shift_details)
     {
+        if(!$work_shift_details->start_at || !$work_shift_details->end_at) {
+            return 0;
+        }
         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
         $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
         return $work_shift_end_at->diffInHours($work_shift_start_at);
@@ -202,6 +205,9 @@ trait AttendanceUtil
 
     function calculate_tolerance_time($in_time, $work_shift_details)
     {
+        if(!$work_shift_details->start_at ) {
+             return 0;
+        }
         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
         $in_time = Carbon::createFromFormat('H:i:s', $in_time);
         return $in_time->diffInHours($work_shift_start_at);

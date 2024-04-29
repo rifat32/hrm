@@ -774,8 +774,7 @@ class DepartmentController extends Controller
 
              $departments = Department::with([
                 'manager',
-                'recursiveChildren.manager',
-                'recursiveChildren.recursiveChildren',
+                'recursiveChildren',
             ])
             ->where([
                 'business_id' => $business_id,
@@ -981,7 +980,7 @@ class DepartmentController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-              
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist. or something else"
                 ], 404);

@@ -112,6 +112,10 @@ trait UserDetailsUtil
             $ten_years_ago = Carbon::now()->subYears(10);
             EmployeeSponsorshipHistory::where('expiry_date', '<=', $ten_years_ago)->delete();
 
+
+            $three_years_ago = Carbon::now()->subYears(3);
+            EmployeeAddressHistory::where('to_date', '<=', $three_years_ago)->delete();
+
     }
 
     public function store_right_to_works($request_data,$user) {
@@ -231,8 +235,7 @@ if(!empty($recruitment_process["description"])){
     public function update_address_history($request_data, $user)
     {
 
-        $three_years_ago = Carbon::now()->subYears(3);
-        EmployeeSponsorshipHistory::where('to_date', '<=', $three_years_ago)->delete();
+
         $address_history_data = [
             'user_id' => $user->id,
             'from_date' => now(),
@@ -416,7 +419,7 @@ if(!empty($recruitment_process["description"])){
 
     public function update_right_to_works($request_data,$user) {
         if (!empty($request_data["right_to_works"]) && $request_data["is_active_right_to_works"]) {
-
+       
             $request_data["right_to_works"]["business_id"] = auth()->user()->business_id;
             $request_data["right_to_works"]["user_id"] = $user->id;
             $request_data["right_to_works"]["from_date"] = now();

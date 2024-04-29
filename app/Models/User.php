@@ -214,6 +214,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -250,6 +251,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -286,6 +288,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -318,6 +321,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -350,6 +354,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -389,6 +394,7 @@ return count($all_departments) > 0;
                 ->where("pension_eligible", 1)
                 ->where($issue_date_column, '<', now())
                     ->orderByDesc("id")
+
                     ->first();
             }
 
@@ -427,6 +433,7 @@ return count($all_departments) > 0;
             ->where("pension_eligible", 1)
             ->where($issue_date_column, '<', now())
                 ->orderByDesc("id")
+
                 ->first();
         }
 
@@ -462,6 +469,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -498,6 +506,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 
@@ -530,6 +539,7 @@ return count($all_departments) > 0;
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->orderByDesc($issue_date_column)
+                ->orderByDesc('id')
                 ->first();
             }
 

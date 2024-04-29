@@ -615,7 +615,8 @@ class SettingLeaveTypeController extends Controller
             }
 
 
-            $setting_leave_types = SettingLeaveType::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $setting_leave_types = SettingLeaveType::with("employment_statuses")
+            ->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('setting_leave_types.business_id', NULL)
                         ->where('setting_leave_types.is_default', 1)
@@ -817,10 +818,12 @@ class SettingLeaveTypeController extends Controller
                 ], 401);
             }
 
-            $setting_leave_type =  SettingLeaveType::where([
+            $setting_leave_type =  SettingLeaveType::with("employment_statuses")->where([
                 "id" => $id,
             ])
                 ->first();
+
+
                 if (!$setting_leave_type) {
 
                     return response()->json([
