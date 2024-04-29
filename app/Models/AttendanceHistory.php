@@ -17,9 +17,6 @@ class AttendanceHistory extends Model
         "attendance_created_at",
         "attendance_updated_at",
 
-
-
-
         'note',
         "in_geolocation",
         "out_geolocation",
@@ -52,7 +49,9 @@ class AttendanceHistory extends Model
         "created_by",
         "regular_hours_salary",
         "overtime_hours_salary",
-        "attendance_records"
+        "attendance_records",
+
+        
     ];
     protected $casts = [
         'attendance_records' => 'array',

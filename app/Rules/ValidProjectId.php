@@ -17,12 +17,15 @@ class ValidProjectId implements Rule
         //
     }
 
- 
+
     public function passes($attribute, $value)
     {
-        return Project::where('id', $value)
+             $project = Project::where('id', $value)
             ->where('projects.business_id', '=', auth()->user()->business_id)
-            ->exists();
+            ->first();
+
+
+            return $project?1:0;
     }
 
     public function message()

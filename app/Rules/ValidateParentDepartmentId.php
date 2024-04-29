@@ -34,7 +34,7 @@ class ValidateParentDepartmentId implements Rule
                     if (!$parent_department || !in_array($parent_department->id,$this->all_manager_department_ids)) {
                         return false;
                     }
-
+return true;
 
     }
 
