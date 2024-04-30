@@ -380,10 +380,30 @@ if(!empty($recruitment_process["description"])){
     public function update_sponsorship($request_data,$user) {
         if (!empty($request_data["sponsorship_details"])) {
 
-            $request_data["sponsorship_details"]["business_id"] = auth()->user()->business_id;
-            $request_data["sponsorship_details"]["user_id"] = $user->id;
-            $request_data["sponsorship_details"]["from_date"] = now();
-            EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
+            $fields_to_check = [
+                'date_assigned',
+                'expiry_date',
+                // 'status',
+                'note',
+                "certificate_number",
+                "current_certificate_status",
+                "is_sponsorship_withdrawn",
+                ];
+
+                $date_fields = [
+                    'date_assigned',
+                    'expiry_date',
+                ];
+                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->sponsorship_details, $request_data["sponsorship_details"], $date_fields);
+                if ( $fields_changed ) {
+                    $request_data["sponsorship_details"]["business_id"] = auth()->user()->business_id;
+                    $request_data["sponsorship_details"]["user_id"] = $user->id;
+                    $request_data["sponsorship_details"]["from_date"] = now();
+                    EmployeeSponsorshipHistory::create($request_data["sponsorship_details"]);
+
+                }
+
+
 
 
 
@@ -392,12 +412,26 @@ if(!empty($recruitment_process["description"])){
     }
     public function update_passport_details($request_data,$user) {
         if (!empty($request_data["passport_details"])) {
-            $request_data["passport_details"]["business_id"] = auth()->user()->business_id;
-            $request_data["passport_details"]["user_id"] = $user->id;
-            $request_data["passport_details"]["from_date"] = now();
-            EmployeePassportDetailHistory::create($request_data["passport_details"]);
 
+            $fields_to_check = [
+                'passport_number',
+                "passport_issue_date",
+                "passport_expiry_date",
+                "place_of_issue",
+                ];
 
+                $date_fields = [
+                    "passport_issue_date",
+                    "passport_expiry_date",
+                ];
+                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->passport_details, $request_data["passport_details"], $date_fields);
+                if ( $fields_changed ) {
+                    $request_data["passport_details"]["business_id"] = auth()->user()->business_id;
+                    $request_data["passport_details"]["user_id"] = $user->id;
+                    $request_data["passport_details"]["from_date"] = now();
+                    EmployeePassportDetailHistory::create($request_data["passport_details"]);
+
+                }
 
         }
 
@@ -405,10 +439,30 @@ if(!empty($recruitment_process["description"])){
 
     public function update_visa_details($request_data,$user) {
         if (!empty($request_data["visa_details"]) && $request_data["is_active_visa_details"]) {
-            $request_data["visa_details"]["business_id"] = auth()->user()->business_id;
-            $request_data["visa_details"]["user_id"] = $user->id;
-            $request_data["visa_details"]["from_date"] = now();
-            EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+
+
+            $fields_to_check = [
+                'BRP_number',
+                "visa_issue_date",
+                "visa_expiry_date",
+                "place_of_issue",
+                "visa_docs",
+
+                ];
+                $date_fields = [
+                    "visa_issue_date",
+                    "visa_expiry_date",
+                ];
+                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->visa_details, $request_data["visa_details"], $date_fields);
+                if (
+                    $fields_changed
+                ) {
+                    $request_data["visa_details"]["business_id"] = auth()->user()->business_id;
+                    $request_data["visa_details"]["user_id"] = $user->id;
+                    $request_data["visa_details"]["from_date"] = now();
+                    EmployeeVisaDetailHistory::create($request_data["visa_details"]);
+
+                }
 
         }
 
@@ -418,17 +472,37 @@ if(!empty($recruitment_process["description"])){
     }
 
     public function update_right_to_works($request_data,$user) {
-        if (!empty($request_data["right_to_works"]) && $request_data["is_active_right_to_works"]) {
-       
-            $request_data["right_to_works"]["business_id"] = auth()->user()->business_id;
-            $request_data["right_to_works"]["user_id"] = $user->id;
-            $request_data["right_to_works"]["from_date"] = now();
-            EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
 
+
+        if (!empty($request_data["right_to_works"]) && $request_data["is_active_right_to_works"]) {
+
+            $fields_to_check = [
+                'right_to_work_code',
+                'right_to_work_check_date',
+                'right_to_work_expiry_date',
+                'right_to_work_docs',
+
+                ];
+                $date_fields = [
+                    'right_to_work_check_date',
+                    'right_to_work_expiry_date',
+                ];
+                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->right_to_works, $request_data["right_to_works"], $date_fields);
+                if (
+                    $fields_changed
+                ) {
+                    $request_data["right_to_works"]["business_id"] = auth()->user()->business_id;
+                    $request_data["right_to_works"]["user_id"] = $user->id;
+                    $request_data["right_to_works"]["from_date"] = now();
+                    EmployeeRightToWorkHistory::create($request_data["right_to_works"]);
+
+                }
 
 
 
         }
+
+
 
     }
 

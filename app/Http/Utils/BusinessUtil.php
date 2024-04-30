@@ -955,6 +955,7 @@ trait BusinessUtil
     public function checkWorkShiftDetails($details)
     {
 
+
         foreach ($details as $index => $detail) {
             $business_time =   BusinessTime::where([
                 "business_id" => auth()->user()->business_id,
@@ -1071,6 +1072,8 @@ trait BusinessUtil
                         "error" => $error
                     ];
                 }
+
+
             }
         }
 

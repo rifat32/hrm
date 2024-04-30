@@ -172,12 +172,14 @@ class WorkShiftController extends Controller
 
                 }
 
+if($request_data["type"] !== "flexible") {
+    $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
+    if(!$check_work_shift_details["ok"]) {
 
-           $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
-                if(!$check_work_shift_details["ok"]) {
+        throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+    }
 
-                    throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
-                }
+}
 
 
 
@@ -348,10 +350,14 @@ class WorkShiftController extends Controller
 
 
 
-                $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
-                if(!$check_work_shift_details["ok"]) {
 
-                    throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+                if($request_data["type"] !== "flexible") {
+                    $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
+                    if(!$check_work_shift_details["ok"]) {
+
+                        throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+                    }
+
                 }
 
 
@@ -621,12 +627,20 @@ $details = $work_shift->details->map(function ($detail) {
         'end_at' => $detail->end_at,
     ];
 });
-$check_work_shift_details =  $this->checkWorkShiftDetails($details);
-if(!$check_work_shift_details["ok"]) {
 
 
-    throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+
+if($work_shift->type !== "flexible") {
+    $check_work_shift_details =  $this->checkWorkShiftDetails($details);
+    if(!$check_work_shift_details["ok"]) {
+    
+        throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+    }
 }
+
+
+
+
 
 }
 
@@ -1215,7 +1229,7 @@ if(!$check_work_shift_details["ok"]) {
 
 
              if (!$work_shift) {
-              
+
                  return response()->json([
                      "message" => "no work shift found for the user"
                  ], 404);
