@@ -112,7 +112,7 @@ class SettingLeaveTypeController extends Controller
 
 
 
-                $setting_leave_type->employment_statuses()->sync($request_data["employment_status"]);
+                $setting_leave_type->employment_statuses()->sync($request_data["employment_statuses"]);
 
 
 
@@ -228,7 +228,7 @@ class SettingLeaveTypeController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-                $setting_leave_type->employment_statuses()->sync($request_data["employment_status"]);
+                $setting_leave_type->employment_statuses()->sync($request_data["employment_statuses"]);
                 return response($setting_leave_type, 201);
             });
         } catch (Exception $e) {

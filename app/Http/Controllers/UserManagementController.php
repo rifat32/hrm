@@ -4999,7 +4999,7 @@ class UserManagementController extends Controller
                     // })
                     ->where(function($query) use($user){
                        $query->whereHas("employment_statuses", function($query) use($user){
-                        $query->whereIn("employment_statuses.id", [$user->employment_status]);
+                        $query->whereIn("employment_statuses.id", [$user->employment_status->id]);
                        })
                        ->orWhereDoesntHave("employment_statuses");
                     })
@@ -5012,7 +5012,7 @@ class UserManagementController extends Controller
             })
                 ->get();
 
-            $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0);
+                $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0)->subYear();
             foreach ($leave_types as $key => $leave_type) {
                 $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
                     $query->where([

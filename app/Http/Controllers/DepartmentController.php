@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DepartmentController extends Controller
 {
@@ -722,7 +724,22 @@ class DepartmentController extends Controller
      *           {"bearerAuth": {}}
      *       },
 
-
+   *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
+     *
      *      summary="This method is to get departments  ",
      *      description="This method is to get departments ",
      *
@@ -789,6 +806,23 @@ class DepartmentController extends Controller
             }
 
             return response()->json($departments, 200);
+
+
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.org_structure', ["departments" => $departments]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                }
+                // elseif (strtoupper($request->response_type) === 'CSV') {
+
+                //     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                // }
+            } else {
+                return response()->json($departments, 200);
+            }
+
+
+
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);

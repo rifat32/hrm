@@ -80,8 +80,8 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
             'type' => 'required|string|in:paid,unpaid',
             'amount' => 'required|numeric',
 
-            "employment_status" => "present|array",
-            'employment_status.*' => [
+            "employment_statuses" => "present|array",
+            'employment_statuses.*' => [
                 'numeric',
                 new ValidEmploymentStatus()
             ],

@@ -72,7 +72,8 @@ class LeaveComponent
         $leave_duration,
         $day_type = "",
         $start_time="",
-        $end_time=""
+        $end_time="",
+        $leave_data
         ) {
              // Check if it's feasible to take leave
         if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave && !$previous_attendance)) {
@@ -108,6 +109,10 @@ class LeaveComponent
         $leave_record_data["start_time"] = $leave_start_at;
         $leave_record_data["end_time"] = $leave_end_at;
         $leave_record_data["date"] = $date;
+        $leave_record_data["id"] = !empty($leave_data["id"])?$leave_data["id"]:NULL;
+
+
+
         return $leave_record_data;
         }
 // Check for conditions preventing leave
@@ -196,8 +201,9 @@ if($leave_data["leave_duration"] == "hours") {
       $leave_date,
       $leave_data["leave_duration"],
       $leave_data["day_type"],
-      $leave_data["start_time"],
-      $leave_data["end_time"]
+      !empty($leave_data["start_time"])?$leave_data["start_time"]:$work_shift_details->start_at,
+      !empty($leave_data["end_time"])?$leave_data["end_time"]:$work_shift_details->end_at,
+      $leave_data
   );
   if (!empty($leave_record_data_item)) {
       array_push($leave_record_data_list, $leave_record_data_item);

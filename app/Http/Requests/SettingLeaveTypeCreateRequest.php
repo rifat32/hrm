@@ -42,8 +42,8 @@ class SettingLeaveTypeCreateRequest extends BaseFormRequest
 
 
 
-            "employment_status" => "present|array",
-            'employment_status.*' => [
+            "employment_statuses" => "present|array",
+            'employment_statuses.*' => [
                 'numeric',
                 new ValidEmploymentStatus()
             ],

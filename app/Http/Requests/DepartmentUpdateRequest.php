@@ -46,7 +46,7 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 "string",
-                new ValidateDepartmentName(NULL)
+                new ValidateDepartmentName($this->id)
 
 
             ],
