@@ -137,7 +137,7 @@ class AttendanceController extends Controller
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
 
-     
+
             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
 
 
@@ -251,9 +251,19 @@ class AttendanceController extends Controller
 
 
             $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance) {
+
+
             $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
+
+
                 return  $item;
+
+
             });
+
+
+
+
             $employee = User::where([
                 "id" => $request_data["user_id"]
             ])

@@ -81,6 +81,9 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
             ],
 
 
+            'attendance_details.*.is_present' => "required|boolean",
+
+
 
             'attendance_details.*.does_break_taken' => "required|boolean",
 

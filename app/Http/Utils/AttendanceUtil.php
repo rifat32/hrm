@@ -284,6 +284,15 @@ trait AttendanceUtil
 
     public function process_attendance_data($raw_data, $setting_attendance, $user_id)
     {
+        if(isset($raw_data["is_present"])) {
+            if(!$raw_data["is_present"]) {
+                $raw_data["in_time"] = "";
+                $raw_data["out_time"] = "";
+            }
+
+        }
+
+
         // Prepare data for attendance creation
         $attendance_data = $this->prepare_data_on_attendance_create($raw_data, $user_id);
 

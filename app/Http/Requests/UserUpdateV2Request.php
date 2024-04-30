@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
+use App\Rules\ValidateDesignationId;
+use App\Rules\ValidateRecruitmentProcessId;
 use App\Rules\ValidEmploymentStatus;
 use App\Rules\ValidUserId;
 use App\Rules\ValidWorkLocationId;
@@ -196,73 +198,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'recruitment_processes.*.recruitment_process_id' => [
                 "required",
                 'numeric',
-                function ($attribute, $value, $fail) {
-
-                    $created_by  = NULL;
-                    if(auth()->user()->business) {
-                        $created_by = auth()->user()->business->created_by;
-                    }
-
-                    $exists = RecruitmentProcess::where("recruitment_processes.id",$value)
-                    ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
-                        if (auth()->user()->hasRole('superadmin')) {
-                            return $query->where('recruitment_processes.business_id', NULL)
-                                ->where('recruitment_processes.is_default', 1)
-                                ->where('recruitment_processes.is_active', 1);
-
-                        } else {
-                            return $query->where('recruitment_processes.business_id', NULL)
-                                ->where('recruitment_processes.is_default', 1)
-                                ->where('recruitment_processes.is_active', 1)
-                                ->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_recruitment_processes.created_by", [auth()->user()->id]);
-                                })
-
-                                ->orWhere(function ($query) use($value)  {
-                                    $query->where("recruitment_processes.id",$value)->where('recruitment_processes.business_id', NULL)
-                                        ->where('recruitment_processes.is_default', 0)
-                                        ->where('recruitment_processes.created_by', auth()->user()->id)
-                                        ->where('recruitment_processes.is_active', 1);
-
-
-                                });
-                        }
-                    })
-                        ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
-                            return $query->where('recruitment_processes.business_id', NULL)
-                                ->where('recruitment_processes.is_default', 1)
-                                ->where('recruitment_processes.is_active', 1)
-                                ->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
-                                })
-                                ->whereDoesntHave("disabled", function($q)  {
-                                    $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
-                                })
-
-                                ->orWhere(function ($query) use( $created_by, $value){
-                                    $query->where("recruitment_processes.id",$value)->where('recruitment_processes.business_id', NULL)
-                                        ->where('recruitment_processes.is_default', 0)
-                                        ->where('recruitment_processes.created_by', $created_by)
-                                        ->where('recruitment_processes.is_active', 1)
-                                        ->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
-                                        });
-                                })
-                                ->orWhere(function ($query) use($value)  {
-                                    $query->where("recruitment_processes.id",$value)->where('recruitment_processes.business_id', auth()->user()->business_id)
-                                        ->where('recruitment_processes.is_default', 0)
-                                        ->where('recruitment_processes.is_active', 1);
-
-                                });
-                        })
-                    ->exists();
-
-                if (!$exists) {
-                    $fail($attribute . " is invalid.");
-                }
-
-
-                },
+                new ValidateRecruitmentProcessId()
             ],
             'recruitment_processes.*.description' => "nullable|string",
             'recruitment_processes.*.attachments' => "present|array",
@@ -280,73 +216,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'designation_id' => [
                 "required",
                 'numeric',
-                function ($attribute, $value, $fail) {
-
-                        $created_by  = NULL;
-                        if(auth()->user()->business) {
-                            $created_by = auth()->user()->business->created_by;
-                        }
-
-                        $exists = Designation::where("designations.id",$value)
-                        ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
-                            if (auth()->user()->hasRole('superadmin')) {
-                                return $query->where('designations.business_id', NULL)
-                                    ->where('designations.is_default', 1)
-                                    ->where('designations.is_active', 1);
-
-                            } else {
-                                return $query->where('designations.business_id', NULL)
-                                    ->where('designations.is_default', 1)
-                                    ->where('designations.is_active', 1)
-                                    ->whereDoesntHave("disabled", function($q) {
-                                        $q->whereIn("disabled_designations.created_by", [auth()->user()->id]);
-                                    })
-
-                                    ->orWhere(function ($query) use($value)  {
-                                        $query->where("designations.id",$value)->where('designations.business_id', NULL)
-                                            ->where('designations.is_default', 0)
-                                            ->where('designations.created_by', auth()->user()->id)
-                                            ->where('designations.is_active', 1);
-
-
-                                    });
-                            }
-                        })
-                            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
-                                return $query->where('designations.business_id', NULL)
-                                    ->where('designations.is_default', 1)
-                                    ->where('designations.is_active', 1)
-                                    ->whereDoesntHave("disabled", function($q) use($created_by) {
-                                        $q->whereIn("disabled_designations.created_by", [$created_by]);
-                                    })
-                                    ->whereDoesntHave("disabled", function($q)  {
-                                        $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
-                                    })
-
-                                    ->orWhere(function ($query) use( $created_by, $value){
-                                        $query->where("designations.id",$value)->where('designations.business_id', NULL)
-                                            ->where('designations.is_default', 0)
-                                            ->where('designations.created_by', $created_by)
-                                            ->where('designations.is_active', 1)
-                                            ->whereDoesntHave("disabled", function($q) {
-                                                $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
-                                            });
-                                    })
-                                    ->orWhere(function ($query) use($value)  {
-                                        $query->where("designations.id",$value)->where('designations.business_id', auth()->user()->business_id)
-                                            ->where('designations.is_default', 0)
-                                            ->where('designations.is_active', 1);
-
-                                    });
-                            })
-                        ->exists();
-
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-
-
-                },
+                new ValidateDesignationId()
             ],
             'employment_status_id' => [
                 "required",

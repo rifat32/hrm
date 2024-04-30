@@ -30,7 +30,7 @@ class ValidateJobListing implements Rule
                         ->where('job_listings.business_id', '=', auth()->user()->business_id)
                         ->exists();
 
-return !$exists;
+return $exists;
     }
 
     /**
@@ -40,6 +40,6 @@ return !$exists;
      */
     public function message()
     {
-        return 'The :attribute is already taken.';
+        return 'The :attribute is invalid.';
     }
 }
