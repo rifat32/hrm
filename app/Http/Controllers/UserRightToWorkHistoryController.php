@@ -366,6 +366,7 @@ class UserRightToWorkHistoryController extends Controller
             $current_user_id = request()->user_id;
             $issue_date_column = 'right_to_work_check_date';
             $expiry_date_column = 'right_to_work_expiry_date';
+
             $current_visa = $this->getCurrentHistory(EmployeeRightToWorkHistory::class, 'current_right_to_work_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
@@ -593,7 +594,7 @@ class UserRightToWorkHistoryController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-           
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
