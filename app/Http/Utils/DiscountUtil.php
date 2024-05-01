@@ -21,7 +21,7 @@ trait DiscountUtil
 
                 ->first();
                 if(!$discount){
-                    throw new Exception("Invalid discount code",401);
+                    throw new Exception("Invalid discount code",403);
 
                 }
 

@@ -238,6 +238,10 @@ class LeaveController extends Controller
             $leave =  Leave::create($processed_leave_data["leave_data"]);
             $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
 
+            $this->leaveComponent->validateLeaveAvailability($leave);
+
+
+
             $leaveObserver = new LeaveObserver();
             $leaveObserver->create($leave);
 
@@ -660,7 +664,7 @@ foreach ($processed_leave_data["leave_record_data_list"] as $recordData) {
 
 
 
-
+$this->leaveComponent->validateLeaveAvailability($leave);
 
 
 $payrolls = Payroll::whereHas("payroll_leave_records", function ($query) use ($recordsToDelete) {
@@ -2310,7 +2314,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-           
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

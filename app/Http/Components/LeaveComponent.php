@@ -3,6 +3,9 @@
 namespace App\Http\Components;
 
 use App\Models\Leave;
+use App\Models\LeaveRecord;
+use App\Models\SettingLeave;
+use App\Models\SettingLeaveType;
 use Carbon\Carbon;
 use Exception;
 
@@ -295,7 +298,57 @@ public function get_already_taken_half_day_leaves($start_date, $end_date, $user_
 
 
 
+public function validateLeaveAvailability($leave) {
 
+    $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
+    ->where('setting_leaves.is_default', 0)
+    ->first();
+if (!$setting_leave) {
+    return response()->json(
+        ["message" => "No leave setting found."]
+    );
+}
+if (!$setting_leave->start_month) {
+    $setting_leave->start_month = 1;
+}
+
+// $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
+
+
+
+$leave_type =   SettingLeaveType::
+where([
+    "id"=> $leave->leave_type_id
+])
+
+    ->first();
+
+    if(!$leave_type){
+        return false;
+    }
+
+    $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0)->subYear();
+
+    $already_taken_hours = LeaveRecord::whereHas('leave', function ($query) use ($leave, $leave_type) {
+        $query->where([
+            "user_id" => $leave->user_id,
+            "leave_type_id" => $leave_type->id
+
+        ]);
+    })
+        ->where("leave_records.date", ">=", $startOfMonth)
+        ->get()
+        ->sum(function ($record) {
+            return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
+        });
+
+        if($already_taken_hours > $leave_type->amount) {
+   throw new Exception(("You can not take leave hours mor than available. Currently ".$leave_type->amount." hours available"),403);
+        }
+
+
+
+}
 
 
 
