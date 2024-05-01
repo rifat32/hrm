@@ -264,7 +264,16 @@ if(!empty($recruitment_process["description"])){
                     ];
                     $date_fields = [
                     ];
+
+
+
+
+
                     $fields_changed = $this->fieldsHaveChanged($fields_to_check, $employee_address_history, $request_data, $date_fields);
+
+
+
+
                     if (
                         $fields_changed
                     ) {
@@ -394,7 +403,13 @@ if(!empty($recruitment_process["description"])){
                     'date_assigned',
                     'expiry_date',
                 ];
-                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->sponsorship_details, $request_data["sponsorship_details"], $date_fields);
+
+                $fields_changed = true;
+
+                if($user->sponsorship_details) {
+                    $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->sponsorship_details, $request_data["sponsorship_details"], $date_fields);
+                }
+
                 if ( $fields_changed ) {
                     $request_data["sponsorship_details"]["business_id"] = auth()->user()->business_id;
                     $request_data["sponsorship_details"]["user_id"] = $user->id;
@@ -424,14 +439,28 @@ if(!empty($recruitment_process["description"])){
                     "passport_issue_date",
                     "passport_expiry_date",
                 ];
-                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->passport_details, $request_data["passport_details"], $date_fields);
-                if ( $fields_changed ) {
+
+                $fields_changed = true;
+
+if($user->passport_details) {
+    $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->passport_details, $request_data["passport_details"], $date_fields);
+}
+
+
+                if ( $fields_changed  ) {
+
+
                     $request_data["passport_details"]["business_id"] = auth()->user()->business_id;
                     $request_data["passport_details"]["user_id"] = $user->id;
                     $request_data["passport_details"]["from_date"] = now();
                     EmployeePassportDetailHistory::create($request_data["passport_details"]);
 
+
                 }
+
+
+
+
 
         }
 
@@ -453,7 +482,14 @@ if(!empty($recruitment_process["description"])){
                     "visa_issue_date",
                     "visa_expiry_date",
                 ];
-                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->visa_details, $request_data["visa_details"], $date_fields);
+
+                $fields_changed = true;
+
+                if($user->visa_details) {
+                    $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->visa_details, $request_data["visa_details"], $date_fields);
+                }
+
+
                 if (
                     $fields_changed
                 ) {
@@ -487,7 +523,19 @@ if(!empty($recruitment_process["description"])){
                     'right_to_work_check_date',
                     'right_to_work_expiry_date',
                 ];
-                $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->right_to_works, $request_data["right_to_works"], $date_fields);
+
+
+                $fields_changed = true;
+
+                if($user->right_to_works) {
+                    $fields_changed = $this->fieldsHaveChanged($fields_to_check,  $user->right_to_works, $request_data["right_to_works"], $date_fields);
+                }
+
+
+
+
+
+
                 if (
                     $fields_changed
                 ) {

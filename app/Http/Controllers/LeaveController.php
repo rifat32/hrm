@@ -241,6 +241,10 @@ class LeaveController extends Controller
             $this->leaveComponent->validateLeaveAvailability($leave);
 
 
+            foreach ($leave->records as $leave_record) {
+                $this->adjust_payroll_on_leave_update($leave_record,0);
+            }
+
 
             $leaveObserver = new LeaveObserver();
             $leaveObserver->create($leave);
@@ -371,9 +375,7 @@ class LeaveController extends Controller
 
 
                 foreach ($leave->records as $leave_record) {
-                    $this->adjust_payroll_on_leave_update($leave_record,1);
-
-
+                    $this->adjust_payroll_on_leave_update($leave_record,$request_data["add_in_next_payroll"]);
                 }
 
                 if(!empty($request_data["add_in_next_payroll"]) && ($leave->status ==
@@ -419,7 +421,8 @@ class LeaveController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *      @OA\Property(property="leave_id", type="number", format="number", example="Updated Christmas")
+     *      @OA\Property(property="leave_id", type="number", format="number", example="Updated Christmas"),
+     *    @OA\Property(property="add_in_next_payroll", type="number", format="number", example="1")
      *
      *         ),
      *      ),
@@ -502,7 +505,7 @@ class LeaveController extends Controller
 
 
                 foreach ($leave->records as $leave_record) {
-                    $this->adjust_payroll_on_leave_update($leave_record,1);
+                    $this->adjust_payroll_on_leave_update($leave_record,$request_data["add_in_next_payroll"]);
                 }
 
                 $leave_history_data = $leave->toArray();
@@ -684,7 +687,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
                 foreach ($leave->records as $leave_record) {
-                    $this->adjust_payroll_on_leave_update($leave_record,1);
+                    $this->adjust_payroll_on_leave_update($leave_record,0);
                 }
 
 

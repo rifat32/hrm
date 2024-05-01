@@ -146,6 +146,8 @@ class AttendanceController extends Controller
 
 
 
+                $this->adjust_payroll_on_attendance_update($attendance,0);
+
 
             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
 
@@ -279,6 +281,9 @@ class AttendanceController extends Controller
             $created_attendances = $employee->attendances()->createMany($attendances_data);
 
             if (!empty($created_attendances)) {
+                foreach($created_attendances as $created_attendance) {
+                    $this->adjust_payroll_on_attendance_update($created_attendance,0);
+                }
                 $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
             }
 
@@ -451,7 +456,7 @@ class AttendanceController extends Controller
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'update');
 
-            $this->adjust_payroll_on_attendance_update($attendance,1);
+            $this->adjust_payroll_on_attendance_update($attendance,0);
 
 
 
@@ -484,7 +489,9 @@ class AttendanceController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *      @OA\Property(property="attendance_id", type="number", format="number", example="1"),
-     *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1")
+     *   @OA\Property(property="is_approved", type="boolean", format="boolean", example="1"),
+     *      *   @OA\Property(property="add_in_next_payroll", type="boolean", format="boolean", example="1"),
+     *
      *
      *         ),
      *      ),
@@ -568,10 +575,10 @@ class AttendanceController extends Controller
 
             // Update observer with approval
             $observer = new AttendanceObserver();
-            $observer->updated_action($attendance, 'approve');
+            $observer->updated_action($attendance, $request_data["is_approved"] ? "approve" : "reject");
 
             // Adjust payroll based on attendance update
-            $this->adjust_payroll_on_attendance_update($attendance,1);
+            $this->adjust_payroll_on_attendance_update($attendance,$request_data["add_in_next_payroll"]);
 
 
             if(!empty($request_data["add_in_next_payroll"]) && !empty($request_data["is_approved"])) {
@@ -2211,6 +2218,9 @@ class AttendanceController extends Controller
                 $created_attendances = $user->attendances()->createMany($attendances_data);
 
                 if (!empty($created_attendances)) {
+                    foreach($created_attendances as $created_attendance) {
+                        $this->adjust_payroll_on_attendance_update($created_attendance,0);
+                    }
                     $this->send_notification($created_attendances, $user, "Attendance Taken", "create", "attendance");
                 }
 

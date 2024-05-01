@@ -36,7 +36,7 @@ class LeaveBypassRequest extends BaseFormRequest
                 new ValidateLeaveId($all_manager_department_ids),
             ],
 
-
+            "add_in_next_payroll" => "required|boolean"
 
         ];
     }

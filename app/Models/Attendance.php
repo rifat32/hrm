@@ -52,10 +52,47 @@ class Attendance extends Model
 
 
     public function getIsInArrearsAttribute($value) {
-      return  AttendanceArrear::where([
-            "attendance_id" => $this->id
+        if($this->status == "approved" || $this->total_paid_hours > 0){
+            $attendance_arrear =   AttendanceArrear::where(["attendance_id" => $this->id])->first();
+            $payroll = Payroll::whereHas("payroll_attendances", function ($query)  {
+                $query->where("payroll_attendances.attendance_id", $this->id);
+            })->first();
+
+
+            if (!$payroll) {
+                if (!$attendance_arrear) {
+
+                        $last_payroll_exists = Payroll::where([
+                            "user_id" => $this->user_id,
+                        ])
+                            ->where("end_date", ">", $this->in_date)
+                            ->exists();
+
+                        if ($last_payroll_exists) {
+                            AttendanceArrear::create([
+                                "attendance_id" => $this->id,
+                                "status" =>  "pending_approval",
+
+                            ]);
+                            return true;
+                        }
+
+                }else if($attendance_arrear->status == "pending_approval") {
+                return true;
+                }
+
+            }
+            return false;
+        }
+
+        AttendanceArrear::where([
+            "attendance_id" => $this->id,
         ])
-        ->exists();
+        ->delete();
+
+        return false;
+
+
         }
 
 
