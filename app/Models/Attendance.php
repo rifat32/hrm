@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     use HasFactory;
+
     protected $appends = ['is_in_arrears'];
 
     protected $fillable = [
@@ -49,6 +50,12 @@ class Attendance extends Model
         'attendance_records' => 'array',
 
     ];
+
+
+
+
+
+
 
 
     public function getIsInArrearsAttribute($value) {
@@ -110,6 +117,19 @@ class Attendance extends Model
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function work_location()
     {
         return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
@@ -120,6 +140,18 @@ class Attendance extends Model
     {
         return $this->belongsTo(Project::class, "project_id" ,'id');
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -97,9 +97,12 @@ class SystemSettingController extends Controller
                 ])->toArray());
                 $systemSetting->save();
 
+                $systemSettingArray = $systemSetting->toArray();
 
+                $systemSettingArray["STRIPE_KEY"] = $systemSetting->STRIPE_KEY;
+                $systemSettingArray["STRIPE_SECRET"] = $systemSetting->STRIPE_SECRET;
 
-             return response()->json($systemSetting, 200);
+             return response()->json($systemSettingArray, 200);
          } catch (Exception $e) {
              error_log($e->getMessage());
              return $this->sendError($e, 500, $request);
@@ -168,11 +171,13 @@ class SystemSettingController extends Controller
 
              $systemSetting = SystemSetting::first();
 
-             $systemSetting->STRIPE_KEY = $systemSetting->STRIPE_KEY;
-             $systemSetting->system_setting_view = $systemSetting->system_setting_view;
+             $systemSettingArray = $systemSetting->toArray();
+
+             $systemSettingArray["STRIPE_KEY"] = $systemSetting->STRIPE_KEY;
+             $systemSettingArray["STRIPE_SECRET"] = $systemSetting->STRIPE_SECRET;
 
 
-             return response()->json($systemSetting, 200);
+             return response()->json($systemSettingArray, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);

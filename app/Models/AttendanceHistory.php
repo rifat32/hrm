@@ -51,7 +51,7 @@ class AttendanceHistory extends Model
         "overtime_hours_salary",
         "attendance_records",
 
-        
+
     ];
     protected $casts = [
         'attendance_records' => 'array',
@@ -66,6 +66,30 @@ class AttendanceHistory extends Model
         return $this->hasOne(User::class,'id', 'actor_id');
     }
 
+    public function work_location()
+    {
+        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
+    }
+
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, "project_id" ,'id');
+    }
+
+
+    public function approved_by_users(){
+        return $this->hasMany(AttendanceHistory::class,'attendance_id', 'attendance_id')
+        ->where([
+            "action" => "approve"
+        ]);
+    }
+    public function rejected_by_users(){
+        return $this->hasMany(AttendanceHistory::class,'attendance_id', 'attendance_id')
+        ->where([
+            "action" => "reject"
+        ]);
+    }
 
 
 

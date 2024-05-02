@@ -17,11 +17,14 @@ class CreateSettingPaymentDatesTable extends Migration
             $table->id();
 
             $table->enum('payment_type', ['weekly', 'monthly', 'custom']);
+            
             $table->unsignedTinyInteger('day_of_week')->nullable();
             $table->unsignedTinyInteger('day_of_month')->nullable();
+            $table->date('custom_date')->nullable();
+
             $table->unsignedInteger('custom_frequency_interval')->nullable();
             $table->enum('custom_frequency_unit', ['days', 'weeks', 'months'])->nullable();
-          
+
 
 
 

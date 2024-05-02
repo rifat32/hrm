@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,18 +30,21 @@ class Leave extends Model
     ];
     public function getIsInArrearsAttribute($value)
     {
+
+
         // Retrieve IDs of related leave records
-        $leave_record_ids = $this->records()->pluck("leave_records.id");
+        $leave_records = $this->records();
+        $leave_record_ids = $leave_records->pluck("leave_records.id");
 
         // Check if leave status is approved or it's a paid leave type
         if ($this->status == "approved" || $this->leave_type->type == "paid") {
             // Loop through each leave record ID
-            foreach ($leave_record_ids as $leave_record_id) {
+            foreach ($leave_records as $leave_record) {
                 // Check if there's any arrear for the leave record
-                $leave_record_arrear =   LeaveRecordArrear::where(["leave_record_id" => $leave_record_id])->first();
+                $leave_record_arrear =   LeaveRecordArrear::where(["leave_record_id" => $leave_record->id])->first();
                 // Check if there's any payroll associated with the leave record
-                $payroll = Payroll::whereHas("payroll_leave_records", function ($query) use ($leave_record_id) {
-                    $query->where("payroll_leave_records.leave_record_id", $leave_record_id);
+                $payroll = Payroll::whereHas("payroll_leave_records", function ($query) use ($leave_record) {
+                    $query->where("payroll_leave_records.leave_record_id", $leave_record->id);
                 })->first();
                 // If no payroll associated with leave record
                 if (!$payroll) {
@@ -51,12 +55,12 @@ class Leave extends Model
                         $last_payroll_exists = Payroll::where([
                             "user_id" => $this->user_id,
                         ])
-                            ->where("end_date", ">", $this->in_date)
+                            ->where("end_date", ">", $leave_record->date)
                             ->exists();
                         // If previous payroll exists, create a pending approval arrear
                         if ($last_payroll_exists) {
                             LeaveRecordArrear::create([
-                                "leave_record_id" => $leave_record_id,
+                                "leave_record_id" => $leave_record->id,
                                 "status" => "pending_approval",
                             ]);
                             return true;

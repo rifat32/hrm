@@ -1233,6 +1233,27 @@ class HistoryDetailsController extends Controller
                         'users.last_Name'
                     );
                 },
+                "approved_by_users.actor" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "rejected_by_users.actor" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+
+                "work_location",
+                "project",
+
+
              ])
              ->when(!empty($request->attendance_id), function ($query) use ($request) {
                 return $query->where('attendance_histories.attendance_id', $request->attendance_id);

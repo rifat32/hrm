@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Leave;
 use App\Models\LeaveHistory;
+use Exception;
 
 class LeaveObserver
 {
@@ -19,6 +20,7 @@ class LeaveObserver
     }
     public function create(Leave $leave)
     {
+
         $leaveHistoryData = $leave->toArray();
         $leaveHistoryData["leave_id"] = $leave->id;
         $leaveHistoryData["actor_id"] = auth()->user()->id;

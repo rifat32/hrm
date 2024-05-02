@@ -12,9 +12,10 @@ class SettingPaymentDate extends Model
         'payment_type',
         'day_of_week',
         'day_of_month',
+        'custom_date',
         'custom_frequency_interval',
         'custom_frequency_unit',
- 
+
         'is_active',
         'is_default',
         'business_id',

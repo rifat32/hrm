@@ -519,6 +519,7 @@ class UserAssetController extends Controller
                     ])
                     ->update([
                         "to_date" => now(),
+                        "status" => "returned",
                     ]);
 
 
@@ -1050,7 +1051,7 @@ class UserAssetController extends Controller
               $nonExistingIds = array_diff($idsArray, $canDeleteAssetIds);
 
               if (!empty($nonExistingIds)) {
-             
+
                   return response()->json([
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);

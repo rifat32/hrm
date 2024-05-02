@@ -330,7 +330,7 @@ class UserRecruitmentProcessController extends Controller
      *     )
      */
 
-    public function getRecruitmentProcessesByUserId($id, Request $request)
+    public function getUserRecruitmentProcessesById($id, Request $request)
     {
         //  $logPath = storage_path('logs');
         //  foreach (File::glob($logPath . '/*.log') as $file) {
@@ -353,7 +353,9 @@ class UserRecruitmentProcessController extends Controller
 
 
             $user_recruitment_process = UserRecruitmentProcess::with("recruitment_process")
-
+               ->where([
+                "id" => $id
+               ])
                 ->whereHas("user.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })

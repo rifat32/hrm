@@ -32,8 +32,11 @@ class SettingPaymentDateController extends Controller
     *     @OA\Property(property="payment_type", type="string", format="string"),
  *     @OA\Property(property="day_of_week", type="integer", format="string"),
  *     @OA\Property(property="day_of_month", type="integer", format="string"),
+ *  *     @OA\Property(property="custom_date", type="string", format="string"),
+ *
  *     @OA\Property(property="custom_frequency_interval", type="integer", format="string"),
  *     @OA\Property(property="custom_frequency_unit", type="string", format="string"),
+ *
      *
      *
      *         ),
