@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Models\UserRecruitmentProcess;
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidUserRecruitmentProcessesId implements Rule
@@ -16,6 +17,7 @@ class ValidUserRecruitmentProcessesId implements Rule
 
     public function __construct($user_id)
     {
+
         $this->user_id = $user_id;
     }
 
@@ -28,11 +30,16 @@ class ValidUserRecruitmentProcessesId implements Rule
      */
     public function passes($attribute, $value)
     {
+        $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
+        $recruitment_process_id = request('recruitment_processes')[$index]['recruitment_process_id'] ?? false;
+
         $userRecruitmentProcess = UserRecruitmentProcess::where([
-            'user_recruitment_process.user_id' => $this->user_id,
-            'user_recruitment_process.recruitment_process_id' => $value,
+            'user_recruitment_processes.user_id' => $this->user_id,
+            'user_recruitment_processes.recruitment_process_id' => $recruitment_process_id,
+            'user_recruitment_processes.id' => $value,
         ])
         ->first();
+
 
         return $userRecruitmentProcess?1:0;
     }

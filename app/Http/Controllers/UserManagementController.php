@@ -3260,12 +3260,14 @@ class UserManagementController extends Controller
                 })
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.id", $request->order_by);
+                    return $query->orderBy("users.first_Name", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("users.id", "DESC");
+                    return $query->orderBy("users.first_Name", "DESC");
                 })
 
                 ->withCount('all_users as user_count')
+
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -3494,12 +3496,13 @@ class UserManagementController extends Controller
                 })
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.id", $request->order_by);
+                    return $query->orderBy("users.first_Name", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("users.id", "DESC");
+                    return $query->orderBy("users.first_Name", "DESC");
                 })
 
                 ->withCount('all_users as user_count')
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -3720,12 +3723,13 @@ class UserManagementController extends Controller
                 })
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.id", $request->order_by);
+                    return $query->orderBy("users.first_Name", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("users.id", "DESC");
+                    return $query->orderBy("users.first_Name", "DESC");
                 })
 
                 ->withCount('all_users as user_count')
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -3910,9 +3914,9 @@ class UserManagementController extends Controller
                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.id", $request->order_by);
+                    return $query->orderBy("users.first_Name", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("users.id", "DESC");
+                    return $query->orderBy("users.first_Name", "DESC");
                 })
 
                 ->select(
@@ -3932,6 +3936,7 @@ class UserManagementController extends Controller
                     "lat",
                     "long"
                 )
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -5748,9 +5753,9 @@ class UserManagementController extends Controller
                     $query->whereNotIn("users.id", [auth()->user()->id]);
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.id", $request->order_by);
+                    return $query->orderBy("users.first_Name", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("users.id", "DESC");
+                    return $query->orderBy("users.first_Name", "DESC");
                 })
 
                 ->select(
@@ -5760,6 +5765,7 @@ class UserManagementController extends Controller
                     "users.last_Name",
                     "users.image",
                 )
+
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -6467,6 +6473,7 @@ class UserManagementController extends Controller
                     "user",
                     "user_id",
                 )
+
 
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);

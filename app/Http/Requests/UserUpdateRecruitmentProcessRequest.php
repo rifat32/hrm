@@ -40,7 +40,7 @@ class UserUpdateRecruitmentProcessRequest extends FormRequest
             'recruitment_processes.*.id' => [
                 "required",
                 "numeric",
-                new ValidUserRecruitmentProcessesId($this->id),
+                new ValidUserRecruitmentProcessesId($this->user_id),
             ],
             'recruitment_processes.*.recruitment_process_id' => [
                 "required",

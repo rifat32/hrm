@@ -254,13 +254,14 @@ class DepartmentController extends Controller
 
                 $department  =  tap(Department::where($department_query_params))->update(
                     collect($request_data)->only([
+
+
                         "name",
-                        "work_location",
+                        "work_location_id",
                         "description",
                         // "is_active",
                         "manager_id",
-                      "parent_id",
-                        // "business_id",
+                        "parent_id",
 
                     ])->toArray()
                 )
@@ -896,7 +897,7 @@ class DepartmentController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $department =  Department::where([
+            $department =  Department::with("work_shifts")->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

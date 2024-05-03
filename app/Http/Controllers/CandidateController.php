@@ -608,7 +608,7 @@ class CandidateController extends Controller
             }
             $business_id =  $request->user()->business_id;
             $candidates = Candidate::
-            with("job_listing")
+            with("job_listing","job_platforms")
 
             ->where(
                 [
@@ -745,7 +745,7 @@ class CandidateController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $candidate =  Candidate:: with("job_listing")
+            $candidate =  Candidate:: with("job_listing","job_platforms")
             ->where([
                 "id" => $id,
                 "business_id" => $business_id
@@ -844,7 +844,7 @@ class CandidateController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

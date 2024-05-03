@@ -295,10 +295,15 @@ if(!empty($recruitment_process["description"])){
             $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
         }
     }
+
+
+
+
+
+
+
     public function update_recruitment_processes_v2($request_data,$user) {
         if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
-
-
          $userRecruitmentProcess =   UserRecruitmentProcess::where([
                 "id" => $request_data["recruitment_processes"]["id"]
             ])
