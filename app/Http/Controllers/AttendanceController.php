@@ -1330,8 +1330,9 @@ class AttendanceController extends Controller
 
                     ->get();
 
+
                 // Iterate over each employee
-                $employees->each(function ($employee) use ($dateArray, $attendances, $leave_records) {
+           $employees =   $employees->map(function ($employee) use ($dateArray, $attendances, $leave_records) {
 
 
                     // Get all parent department IDs of the employee
