@@ -1538,7 +1538,13 @@ class AttendanceController extends Controller
      * example="pending_approval"
      * ),
      *
-     *
+     *     *      *      * *  @OA\Parameter(
+     * name="arrear_status",
+     * in="query",
+     * description="arrear_status",
+     * required=true,
+     * example="arrear_status"
+     * ),
      *
      *
      * *  @OA\Parameter(
@@ -1665,10 +1671,57 @@ class AttendanceController extends Controller
                          "attendances.business_id" => $business_id
                      ]
                  )
-                 ->whereHas("arrear", function ($query) {
-                    $query->where("attendance_arrears.status", "pending_approval");
-                })
 
+                ->when(!empty($request->arrear_status),
+
+
+
+
+
+
+
+
+
+
+
+
+                function($query) use($request) {
+                    $query->whereHas("arrear", function ($query) use ($request) {
+                        $query
+                        ->where(
+                        "attendance_arrears.status",
+                        $request->arrear_status
+                        );
+                    });
+                 },
+                 function($query) use($request) {
+                    $query->whereHas("arrear", function ($query) use ($request) {
+                        $query
+                        ->whereNotNull(
+                        "attendance_arrears.status"
+                        );
+                    });
+                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                 )
 
 
                  ->when(!empty($request->search_key), function ($query) use ($request) {

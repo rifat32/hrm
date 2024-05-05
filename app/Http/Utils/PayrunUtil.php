@@ -437,12 +437,31 @@ trait PayrunUtil
                         ]);
                     });
 
+
                     $leave_arrears->each(function ($leave_arrear) {
                         LeaveRecordArrear::create([
                             "status" => "pending_approval",
                             "leave_record_id" => $leave_arrear->id
                         ]);
                     });
+
+
+                    AttendanceArrear::where([
+                        "status" => "pending_approval",
+
+                    ])
+                    ->whereIn("attendance_id",$payroll_attendances_data->pluck("id"))
+                    ->update([
+                        "status" => "completed",
+                    ]);
+                    LeaveRecordArrear::create([
+                        "status" => "pending_approval",
+
+                    ])
+                    ->whereIn("leave_record_id",$payroll_leave_records_data->pluck("id"))
+                    ->update([
+                        "status" => "completed",
+                    ]);
 
                     $recalculate_payroll_values = $this->recalculate_payroll_values($payroll);
                     if (!$recalculate_payroll_values) {

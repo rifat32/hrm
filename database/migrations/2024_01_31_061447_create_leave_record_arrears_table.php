@@ -17,7 +17,7 @@ class CreateLeaveRecordArrearsTable extends Migration
             $table->id();
             $table->unsignedBigInteger("leave_record_id");
             $table->foreign('leave_record_id')->references('id')->on('leave_records')->onDelete('cascade');
-            $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
+            $table->enum('status', ['pending_approval', 'approved','rejected','completed'])->default("pending_approval");
 
             $table->timestamps();
         });

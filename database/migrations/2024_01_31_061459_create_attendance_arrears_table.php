@@ -17,7 +17,7 @@ class CreateAttendanceArrearsTable extends Migration
             $table->id();
             $table->unsignedBigInteger("attendance_id");
             $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
-            $table->enum('status', ['pending_approval', 'approved','rejected'])->default("pending_approval");
+            $table->enum('status', ['pending_approval', 'approved','rejected','completed'])->default("pending_approval");
             $table->timestamps();
         });
     }

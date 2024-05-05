@@ -1001,6 +1001,13 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
      *         required=true,
      *  example="6"
      *      ),
+     *      *      * *  @OA\Parameter(
+     * name="arrear_status",
+     * in="query",
+     * description="arrear_status",
+     * required=true,
+     * example="arrear_status"
+     * ),
 
      *      * *  @OA\Parameter(
      * name="start_date",
@@ -1151,9 +1158,28 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                  ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                      $query->whereIn("departments.id", $all_manager_department_ids);
                  })
-                 ->whereHas("records.arrear", function ($query) {
-                    $query->where("leave_record_arrears.status", "pending_approval");
-                })
+
+                 ->when(!empty($request->arrear_status),function($query) use($request) {
+                    $query->whereHas("records.arrear", function ($query) use ($request) {
+                        $query
+                        ->where(
+                        "leave_record_arrears.status",
+                        $request->arrear_status
+                        );
+                    });
+                 },
+                 function($query) use($request) {
+                    $query->whereHas("records.arrear", function ($query) use ($request) {
+                        $query
+                        ->whereNotNull(
+                        "leave_record_arrears.status"
+                        );
+                    });
+                 }
+
+
+                 )
+
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;
