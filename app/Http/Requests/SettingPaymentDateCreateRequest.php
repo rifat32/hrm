@@ -25,9 +25,9 @@ class SettingPaymentDateCreateRequest extends BaseFormRequest
     {
         return [
             'payment_type' => 'required|in:weekly,monthly,custom',
-            'custom_date' => 'required_if:payment_type,custom|date',
-            'day_of_week' => 'required_if:payment_type,weekly|integer|min:0|max:6',
-            'day_of_month' => 'required_if:payment_type,monthly|integer|min:1|max:31',
+            'custom_date' => 'nullable|required_if:payment_type,custom|date',
+            'day_of_week' => 'nullable|required_if:payment_type,weekly|integer|min:0|max:6',
+            'day_of_month' => 'nullable|required_if:payment_type,monthly|integer|min:1|max:31',
             'custom_frequency_interval' => 'required_if:payment_type,custom|integer|min:1',
             'custom_frequency_unit' => 'required_if:payment_type,custom|in:days,weeks,months',
             'role_specific_settings' => 'nullable|array',
