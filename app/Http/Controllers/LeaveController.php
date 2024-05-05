@@ -1008,7 +1008,6 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
      * required=true,
      * example="arrear_status"
      * ),
-
      *      * *  @OA\Parameter(
      * name="start_date",
      * in="query",

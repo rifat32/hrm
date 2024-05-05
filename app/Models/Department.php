@@ -57,21 +57,32 @@ class Department extends Model
     public function getAllParentIds()
     {
         $parentIds = [];
-        $this->getParentIdsRecursive($this, $parentIds);
+        $this->getParentIdsRecursive($this, $parentIds,Department::where([
+            "business_id" => auth()->user()->business_id
+        ])
+    ->count()
+
+
+    );
 
         return $parentIds;
     }
 
 
 
-    protected function getParentIdsRecursive($department, &$parentIds)
+    protected function getParentIdsRecursive($department, &$parentIds, $depth = 0)
     {
+        // Check if we've reached the depth limit
+        if ($depth >= 10) {
+            return;
+        }
+
         if ($department->parent) {
             // Include the parent ID
             $parentIds[] = $department->parent->id;
 
             // Recursively get the parent IDs of the current parent
-            $this->getParentIdsRecursive($department->parent, $parentIds);
+            $this->getParentIdsRecursive($department->parent, $parentIds, $depth + 1);
         }
     }
 

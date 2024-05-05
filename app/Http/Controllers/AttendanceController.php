@@ -1509,7 +1509,8 @@ class AttendanceController extends Controller
      * required=true,
      * example="1"
      * ),
-     *  *   * *  @OA\Parameter(
+     *
+     * @OA\Parameter(
      * name="department_id",
      * in="query",
      * description="department_id",
