@@ -253,6 +253,9 @@ class UserRecruitmentProcessController extends Controller
 
             $this->update_recruitment_processes_v2($request_data, $updatableUser);
 
+
+
+
             return response($updatableUser, 201);
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -330,7 +333,7 @@ class UserRecruitmentProcessController extends Controller
      *     )
      */
 
-    public function getRecruitmentProcessesByUserId($id, Request $request)
+    public function getUserRecruitmentProcessesById($id, Request $request)
     {
         //  $logPath = storage_path('logs');
         //  foreach (File::glob($logPath . '/*.log') as $file) {
@@ -349,7 +352,9 @@ class UserRecruitmentProcessController extends Controller
 
 
             $user_recruitment_process = UserRecruitmentProcess::with("recruitment_process")
-
+                ->where([
+                    "id" =>$id
+                ])
                 ->whereHas("user.departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })

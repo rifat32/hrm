@@ -765,7 +765,21 @@ class UserManagementController extends Controller
             $user->pension_eligible = 0;
             $user->save();
             $this->delete_old_histories();
-            $user->departments()->sync($request_data['departments']);
+
+
+        // Get the user's departments
+$departments = $user->departments->pluck("id");
+
+// Remove the first department from the collection
+$removedDepartment = $departments->shift();
+
+// Insert the department from $request_data at the beginning of the collection
+$departments->prepend($request_data['departments'][0]);
+
+// Update the user's departments
+$user->departments()->sync($departments);
+
+
             $user->assignRole($request_data['role']);
 
 
@@ -1418,7 +1432,20 @@ class UserManagementController extends Controller
             $this->delete_old_histories();
 
 
-            $user->departments()->sync($request_data['departments']);
+           // Get the user's departments
+$departments = $user->departments->pluck("id");
+
+// Remove the first department from the collection
+$removedDepartment = $departments->shift();
+
+// Insert the department from $request_data at the beginning of the collection
+$departments->prepend($request_data['departments'][0]);
+
+// Update the user's departments
+$user->departments()->sync($departments);
+
+
+
             $user->syncRoles([$request_data['role']]);
 
             $this->update_work_shift($request_data, $user);
@@ -4888,7 +4915,7 @@ class UserManagementController extends Controller
             // });
             $user->work_shift = $user->work_shifts()->first();
 
-            $user->department_ids = $user->departments->pluck("id");
+            $user->department_ids = [$user->departments->pluck("id")[0]];
 
 
 

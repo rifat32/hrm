@@ -119,7 +119,7 @@ trait BasicUtil
         $all_parent_department_ids = [];
         $assigned_departments = Department::whereHas("users", function ($query) use ($user_id) {
             $query->where("users.id", $user_id);
-        })->get();
+        })->limit(1)->get();
 
 
         foreach ($assigned_departments as $assigned_department) {

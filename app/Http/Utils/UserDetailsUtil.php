@@ -289,10 +289,23 @@ if(!empty($recruitment_process["description"])){
         }
     }
 
+
+
+
+
+
+
+
+
     public function update_recruitment_processes($request_data,$user) {
-        if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
+        if (!empty($request_data["recruitment_processes"])) {
             $user->recruitment_processes()->delete();
-            $user->recruitment_processes()->createMany($request_data["recruitment_processes"]);
+            foreach($request_data["recruitment_processes"] as $recruitment_process){
+if(!empty($recruitment_process["description"])){
+    $user->recruitment_processes()->create($recruitment_process);
+}
+            }
+
         }
     }
 
@@ -300,18 +313,42 @@ if(!empty($recruitment_process["description"])){
 
 
 
-
-
     public function update_recruitment_processes_v2($request_data,$user) {
-        if (!empty($request_data["recruitment_processes"]) && !empty($request_data["recruitment_processes"]["description"])) {
-         $userRecruitmentProcess =   UserRecruitmentProcess::where([
-                "id" => $request_data["recruitment_processes"]["id"]
-            ])
-            ->first();
+        if (!empty($request_data["recruitment_processes"]) ) {
 
-            $userRecruitmentProcess->fill($request_data["recruitment_processes"]);
 
-            $userRecruitmentProcess->save();
+
+            foreach($request_data["recruitment_processes"] as $recruitment_process){
+                if(!empty($recruitment_process["description"])){
+                    $userRecruitmentProcess =   UserRecruitmentProcess::where([
+                        "id" => $recruitment_process["id"]
+                    ])
+                    ->first();
+
+                    $userRecruitmentProcess->fill($recruitment_process);
+
+                    $userRecruitmentProcess->save();
+
+                }
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         }
     }
