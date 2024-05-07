@@ -78,8 +78,6 @@ $webhookEndpoint = WebhookEndpoint::create([
 
 
 
-
-
         if (empty($user->stripe_id)) {
             $stripe_customer = \Stripe\Customer::create([
                 'email' => $user->email,
@@ -88,6 +86,7 @@ $webhookEndpoint = WebhookEndpoint::create([
             $user->stripe_id = $stripe_customer->id;
             $user->save();
         }
+
 
 
         $session_data = [
@@ -122,29 +121,51 @@ $webhookEndpoint = WebhookEndpoint::create([
                     'quantity' => 1,
                 ],
             ],
+
             'customer' => $user->stripe_id  ?? null,
+
             'mode' => 'subscription',
             'success_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business",
             'cancel_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business",
         ];
 
+
+
+
+
         // Add discount line item only if discount amount is greater than 0 and not null
 if (!empty($business->service_plan_discount_amount) && $business->service_plan_discount_amount > 0) {
-    $session_data['line_items'][] =   [
-        'price_data' => [
-            'currency' => 'GBP',
-            'product_data' => [
-                'name' => 'Discount', // Name of the discount
-            ],
-            'unit_amount' => -$business->service_plan_discount_amount, // Negative value to represent discount
-            'quantity' => 1,
-        ],
-    ];
+
+    // try {
+    //     $coupon = \Stripe\Coupon::retrieve($business->service_plan_discount_code, []);
+    //     $coupon->amount_off = $business->service_plan_discount_amount * 100;
+    //     $coupon->save();
+    // } catch (\Stripe\Exception\InvalidRequestException $e) {
+    //    return $e->getMessage();
+    //     $coupon = \Stripe\Coupon::create([
+    //         'amount_off' => $business->service_plan_discount_amount * 100, // Amount in cents
+    //         'currency' => 'GBP', // The currency
+    //         'duration' => 'once', // Can be once, forever, or repeating
+    //         'name' => $business->service_plan_discount_code, // Coupon name
+    //         'id' => $business->service_plan_discount_code, // Coupon code
+    //     ]);
+    // }
+
+    $coupon = \Stripe\Coupon::create([
+        'amount_off' => $business->service_plan_discount_amount * 100, // Amount in cents
+        'currency' => 'GBP', // The currency
+        'duration' => 'once', // Can be once, forever, or repeating
+        'name' => $business->service_plan_discount_code, // Coupon name
+    ]);
+
+$session_data["discounts"] =  [ // Add the discount information here
+    [
+        'coupon' => $coupon, // Use coupon ID if created
+    ],
+];
 }
 
         $session = Session::create($session_data);
-
-
 
         return redirect()->to($session->url);
     }
@@ -154,6 +175,8 @@ if (!empty($business->service_plan_discount_amount) && $business->service_plan_d
     public function stripePaymentSuccess (Request $request) {
         return redirect()->away(env("FRONT_END_URL") . '/auth/login');
     }
+
+
     public function stripePaymentFailed (Request $request) {
         return redirect()->away(env("FRONT_END_URL") . '/auth/login');
     }

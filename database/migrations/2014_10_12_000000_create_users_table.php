@@ -33,7 +33,7 @@ class CreateUsersTable extends Migration
             $table->string('color_theme_name')->default("default");
 
             $table->string('user_id')->nullable();
-
+            $table->string('stripe_id')->nullable();
 
 
             $table->enum('gender', ['male', 'female', 'other'])->nullable();

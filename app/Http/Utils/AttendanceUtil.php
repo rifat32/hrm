@@ -72,7 +72,7 @@ trait AttendanceUtil
 
             ->first();
         if (!$work_shift_history) {
-            throw new Exception("Please define workshift first");
+            throw new Exception("Please define workshift first",401);
         }
 
         return $work_shift_history;

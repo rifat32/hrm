@@ -40,7 +40,7 @@ class WorkShiftHistoryComponent
 
             ->first();
         if (!$work_shift_history) {
-            throw new Exception("Please define workshift first");
+            throw new Exception("Please define workshift first",401);
         }
 
         return $work_shift_history;
@@ -67,7 +67,7 @@ class WorkShiftHistoryComponent
             ->get();
 
         if ($work_shift_histories->isEmpty()) {
-            throw new Exception("Please define workshift first");
+            throw new Exception("Please define workshift first",401);
 
         }
 

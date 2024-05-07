@@ -454,11 +454,7 @@ trait PayrunUtil
                     ->update([
                         "status" => "completed",
                     ]);
-                    LeaveRecordArrear::create([
-                        "status" => "pending_approval",
-
-                    ])
-                    ->whereIn("leave_record_id",$payroll_leave_records_data->pluck("id"))
+                    LeaveRecordArrear::whereIn("leave_record_id",$payroll_leave_records_data->pluck("id"))
                     ->update([
                         "status" => "completed",
                     ]);

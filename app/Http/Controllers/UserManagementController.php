@@ -1187,8 +1187,6 @@ $user->departments()->sync($departments);
 
             $request_data = $request->validated();
 
-
-
             $userQuery = User::where([
                 "id" => $request["id"]
             ]);

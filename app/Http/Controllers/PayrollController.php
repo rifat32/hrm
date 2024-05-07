@@ -526,8 +526,8 @@ if (empty($request->end_date)) {
 
 
                  ->whereDoesntHave("payrolls", function ($q) use ($request) {
-                     $q->where("payrolls.start_date", $request->start_date)
-                         ->where("payrolls.end_date", $request->end_date);
+                     $q->where("payrolls.start_date",">=", $request->start_date)
+                         ->where("payrolls.end_date","<=", $request->end_date);
                  })
 
                  ->whereNotIn("id", [auth()->user()->id])

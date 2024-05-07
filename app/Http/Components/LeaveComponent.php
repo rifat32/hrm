@@ -179,6 +179,13 @@ public function generateLeaveDates ($start_date,$end_date) {
 public function processLeave($leave_data,$leave_date,$all_parent_department_ids,&$leave_record_data_list) {
   // Retrieve work shift history for the user and date
   $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_date, $leave_data["user_id"]);
+
+  if($work_shift_history->type == "flexible") {
+throw new Exception("Leave request can not be created for flexible rota.");
+  }
+
+
+
   // Retrieve work shift details based on work shift history and date
   $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $leave_date);
   // Retrieve holiday based on date and user id

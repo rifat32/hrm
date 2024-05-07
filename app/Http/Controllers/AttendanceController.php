@@ -250,16 +250,45 @@ class AttendanceController extends Controller
             $request_data = $request->validated();
             $setting_attendance = $this->get_attendance_setting();
 
+            $user = User::where([
+             "id" =>   $request_data["user_id"]
+            ])
+            ->first();
+
+            if(!$user) {
+           throw new Exception("Some thing went wrong getting user.");
+            }
 
 
-            $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance) {
+
+            $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance,$user) {
+
+                // @@@@@
+
+                if(empty($item["project_id"])) {
+                    $item["project_id"] = UserProject::where([
+                        "user_id" => $user->id
+                    ])
+                    ->first()->project_id;
+                }
+                if(empty($item["work_location_id"])) {
+                    $item["work_location_id"] = $user->work_location_id;
+                }
+
+                if(empty($item["is_present"])) {
+                    $item["attendance_records"] = [
+                        [
+                               "in_time" => "00:00:00",
+                               "out_time" => "00:00:00",
+                        ]
+                    ];
+                }
+
 
 
             $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
 
-
                 return  $item;
-
 
             });
 
@@ -806,7 +835,9 @@ class AttendanceController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $business_id =  $request->user()->business_id;
-            $attendances = Attendance::with([
+            $attendances = Attendance::
+            leftJoin('table2', 'table1.id', '=', 'table2.table1_id')
+            ->with([
                 "employee" => function ($query) {
                     $query->select(
                         'users.id',

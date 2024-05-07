@@ -145,7 +145,14 @@ class HistoryDetailsController extends Controller
 
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $user_asset_history = UserAssetHistory::when(!empty($request->user_id), function ($query) use ($request) {
+             $user_asset_history = UserAssetHistory::
+             with([
+                "user" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+             ])
+             ->when(!empty($request->user_id), function ($query) use ($request) {
                 return $query->where('user_asset_histories.user_id', $request->user_id);
             })
             ->when(!empty($request->user_asset_id), function ($query) use ($request) {
