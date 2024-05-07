@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\AttendancesExport;
 use App\Http\Requests\AttendanceApproveRequest;
+use App\Http\Requests\AttendanceArrearApproveRequest;
 use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
 use App\Http\Requests\AttendanceCreateRequest;
 use App\Http\Requests\AttendanceMultipleCreateRequest;
@@ -634,6 +635,105 @@ class AttendanceController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+   /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/attendances/approve/arrears",
+     *      operationId="approveAttendanceArrear",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to approve attendances ",
+     *      description="This method is to approve attendances",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *      @OA\Property(property="attendance_id", type="number", format="number", example="1"),
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function approveAttendanceArrear(AttendanceArrearApproveRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             // Check permission to approve attendance
+             if (!$request->user()->hasPermissionTo("attendance_approve")) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             // Extract data
+             $request_data = $request->validated();
+
+
+         $attendance_arrear = AttendanceArrear::where([
+            "attendance_id" => $request_data["attendance_id"]
+         ])
+         ->first();
+
+         if($attendance_arrear) {
+            if( $attendance_arrear->status == "pending_approval") {
+                $attendance_arrear->status = "approved";
+                $attendance_arrear->save();
+            }
+
+         }
+
+
+
+             DB::commit();
+             return response($attendance_arrear, 200);
+         } catch (Exception $e) {
+             DB::rollBack();
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
     /**
      *

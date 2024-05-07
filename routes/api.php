@@ -998,11 +998,17 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 Route::post('/v1.0/leaves/multiple-file-upload', [LeaveController::class, "createLeaveFileMultiple"]);
 Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
 Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
+
+Route::put('/v1.0/leaves/approve/arrears', [LeaveController::class, "approveLeaveRecordArrear"]);
+
+
+
 Route::put('/v1.0/leaves/bypass', [LeaveController::class, "bypassLeave"]);
 Route::put('/v1.0/leaves', [LeaveController::class, "updateLeave"]);
 
 
 Route::get('/v1.0/leaves', [LeaveController::class, "getLeaves"]);
+
 Route::get('/v1.0/leave-arrears', [LeaveController::class, "getLeaveArrears"]);
 
 
@@ -1050,7 +1056,11 @@ Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "cr
 Route::post('/v1.0/attendances', [AttendanceController::class, "createAttendance"]);
 Route::post('/v1.0/attendances/multiple', [AttendanceController::class, "createMultipleAttendance"]);
 Route::put('/v1.0/attendances', [AttendanceController::class, "updateAttendance"]);
+
 Route::put('/v1.0/attendances/approve', [AttendanceController::class, "approveAttendance"]);
+
+Route::put('/v1.0/attendances/approve/arrears', [AttendanceController::class, "approveAttendanceArrear"]);
+
 Route::get('/v1.0/attendances', [AttendanceController::class, "getAttendances"]);
 Route::get('/v2.0/attendances', [AttendanceController::class, "getAttendancesV2"]);
 Route::get('/v3.0/attendances', [AttendanceController::class, "getAttendancesV3"]);

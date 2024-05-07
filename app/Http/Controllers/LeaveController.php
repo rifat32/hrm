@@ -9,6 +9,7 @@ use App\Http\Components\HolidayComponent;
 use App\Http\Components\LeaveComponent;
 use App\Http\Components\WorkShiftHistoryComponent;
 use App\Http\Requests\LeaveApproveRequest;
+use App\Http\Requests\LeaveArrearApproveRequest;
 use App\Http\Requests\LeaveBypassRequest;
 use App\Http\Requests\LeaveCreateRequest;
 use App\Http\Requests\LeaveUpdateRequest;
@@ -351,7 +352,6 @@ class LeaveController extends Controller
                 }
 
 
-
                 $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"], $request_data["is_approved"]);
                 if (!$process_leave_approval["success"]) {
 
@@ -406,6 +406,8 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
     /**
      *
      * @OA\Put(
@@ -528,6 +530,107 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
+   /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/leaves/approve/arrears",
+     *      operationId="approveLeaveRecordArrear",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to approve attendances ",
+     *      description="This method is to approve attendances",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *      @OA\Property(property="leave_record_id", type="number", format="number", example="1"),
+
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function approveLeaveRecordArrear(LeaveArrearApproveRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             // Check permission to approve attendance
+             if (!$request->user()->hasPermissionTo("leave_approve")) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             // Extract data
+             $request_data = $request->validated();
+
+         $leave_record_arrear = LeaveRecordArrear::where([
+            "leave_record_id" => $request_data["leave_record_id"]
+         ])
+         ->first();
+
+         if($leave_record_arrear) {
+            if( $leave_record_arrear->status == "pending_approval") {
+                $leave_record_arrear->status = "approved";
+                $leave_record_arrear->save();
+            }
+
+         }
+
+
+
+             DB::commit();
+             return response($leave_record_arrear, 200);
+         } catch (Exception $e) {
+             DB::rollBack();
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
 
     /**
      *
