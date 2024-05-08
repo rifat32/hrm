@@ -181,7 +181,7 @@ public function processLeave($leave_data,$leave_date,$all_parent_department_ids,
   $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_date, $leave_data["user_id"]);
 
   if($work_shift_history->type == "flexible") {
-throw new Exception("Leave request can not be created for flexible rota.");
+throw new Exception("Leave request can not be created for flexible rota.",401);
   }
 
 

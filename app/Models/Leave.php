@@ -30,14 +30,18 @@ class Leave extends Model
     ];
     public function getIsInArrearsAttribute($value)
     {
-
+$is_in_arrears = false;
 
         // Retrieve IDs of related leave records
-        $leave_records = $this->records();
+     // Retrieve IDs of related leave records
+     $leave_records =LeaveRecord::where([
+        "leave_id" => $this->id
+    ])->get();
         $leave_record_ids = $leave_records->pluck("leave_records.id");
 
         // Check if leave status is approved or it's a paid leave type
         if ($this->status == "approved" || $this->leave_type->type == "paid") {
+
             // Loop through each leave record ID
             foreach ($leave_records as $leave_record) {
                 // Check if there's any arrear for the leave record
@@ -47,32 +51,38 @@ class Leave extends Model
                     $query->where("payroll_leave_records.leave_record_id", $leave_record->id);
                 })->first();
                 // If no payroll associated with leave record
-                if (!$payroll) {
+
+                if (empty($payroll)) {
+
                     // If no arrear exists for the leave record
-                    if (!$leave_record_arrear) {
+                    if (empty($leave_record_arrear)) {
 
                         // Check if there's a previous payroll for the user
                         $last_payroll_exists = Payroll::where([
                             "user_id" => $this->user_id,
                         ])
-                            ->where("end_date", ">", $leave_record->date)
+                            ->where("end_date", ">=", $leave_record->date)
                             ->exists();
                         // If previous payroll exists, create a pending approval arrear
-                        if ($last_payroll_exists) {
+                        if (!empty($last_payroll_exists)) {
                             LeaveRecordArrear::create([
                                 "leave_record_id" => $leave_record->id,
                                 "status" => "pending_approval",
                             ]);
-                            return true;
+                            $is_in_arrears = true;
+                            break;
                         }
                     } else if ($leave_record_arrear->status == "pending_approval") {
                         // If arrear status is pending approval, return true
-                        return true;
+                        $is_in_arrears = true;
+                        break;
                     }
+
                 }
+
             }
 
-            return false;
+
         }
         // If leave status is not approved or it's not a paid leave type, delete arrears if any
 
@@ -80,7 +90,7 @@ class Leave extends Model
 
             ->delete();
 
-        return false;
+        return  $is_in_arrears;
     }
 
 

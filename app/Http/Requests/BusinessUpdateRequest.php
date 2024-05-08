@@ -113,7 +113,7 @@ class BusinessUpdateRequest extends BaseFormRequest
 
 
         if(auth()->user()->hasRole("superadmin")) {
-            $rules['business.flexible_rota_enabled'] = 'required|string';
+            $rules['business.flexible_rota_enabled'] = 'required|boolean';
         }
 
         return $rules;

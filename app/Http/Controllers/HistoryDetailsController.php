@@ -1422,7 +1422,28 @@ class HistoryDetailsController extends Controller
              }
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $employee_leave_details_history = LeaveHistory::with("records")
+             $employee_leave_details_history = LeaveHistory::with(
+                [
+                "records",
+                "employee" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "actor" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                }
+                ]
+
+                )
              ->when(!empty($request->attendance_id), function ($query) use ($request) {
                 return $query->where('leave_histories.leave_id', $request->leave_id);
             })

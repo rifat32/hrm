@@ -42,19 +42,14 @@ class Attendance extends Model
         "created_by",
         "regular_hours_salary",
         "overtime_hours_salary",
-        "attendance_records"
+        "attendance_records",
 
     ];
+
 
       protected $casts = [
         'attendance_records' => 'array',
-
     ];
-
-
-
-
-
 
 
 
@@ -68,11 +63,10 @@ class Attendance extends Model
 
             if (!$payroll) {
                 if (!$attendance_arrear) {
-
                         $last_payroll_exists = Payroll::where([
                             "user_id" => $this->user_id,
                         ])
-                            ->where("end_date", ">", $this->in_date)
+                            ->where("end_date", ">=", $this->in_date)
                             ->exists();
 
                         if ($last_payroll_exists) {
@@ -126,10 +120,6 @@ class Attendance extends Model
 
 
 
-
-
-
-
     public function work_location()
     {
         return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
@@ -140,6 +130,11 @@ class Attendance extends Model
     {
         return $this->belongsTo(Project::class, "project_id" ,'id');
     }
+
+
+
+
+
 
 
 

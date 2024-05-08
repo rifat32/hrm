@@ -50,6 +50,13 @@ class LeaveHistory extends Model
     public function employee() {
         return $this->belongsTo(User::class, "user_id","id");
     }
+
+
+    public function actor() {
+        return $this->belongsTo(User::class, "actor_id","id");
+    }
+
+
     public function leave_type() {
         return $this->belongsTo(SettingLeaveType::class, "leave_type_id","id");
     }

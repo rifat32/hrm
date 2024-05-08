@@ -515,7 +515,7 @@ trait PayrunUtil
         $last_payroll_exists = Payroll::where([
             "user_id" => $attendance->user_id,
         ])
-            ->where("end_date", ">", $attendance["in_date"])
+            ->where("end_date", ">=", $attendance["in_date"])
             ->exists();
 
         if ($last_payroll_exists) {
@@ -590,7 +590,7 @@ trait PayrunUtil
         $last_payroll_exists = Payroll::where([
             "user_id" => $leave_record->leave->user_id,
         ])
-            ->where("end_date", ">", $leave_record["date"])
+            ->where("end_date", ">=", $leave_record["date"])
             ->exists();
 
         if ($last_payroll_exists) {

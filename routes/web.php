@@ -4,6 +4,8 @@ use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\SetUpController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SwaggerLoginController;
+use App\Models\Attendance;
+use App\Models\AttendanceHistory;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
 use App\Models\User;
@@ -113,12 +115,33 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 });
 
 Route::get("/test",function() {
-    $html_content = EmailTemplate::where([
-        "type" => "email_verification_mail",
-        "is_active" => 1
 
-    ])->first()->template;
-    return view('email.dynamic_mail',["contactEmail"=>"rest@gmail.com","user"=>[],"html_content"=>$html_content]);
+    $attendances = Attendance::get();
+    foreach($attendances as $attendance) {
+        if($attendance->in_time) {
+            $attendance->attendance_records = [
+                [
+                       "in_time" => $attendance->in_time,
+                       "out_time" => $attendance->out_time,
+                ]
+                ];
+        }
+        $attendance->save();
+    }
+
+    $attendance_histories = AttendanceHistory::get();
+    foreach($attendance_histories as $attendance_history) {
+        if($attendance_history->in_time) {
+            $attendance_history->attendance_records = [
+                [
+                       "in_time" => $attendance->in_time,
+                       "out_time" => $attendance->out_time,
+                ]
+                ];
+        }
+$attendance_history->save();
+    }
+    return "ok";
 });
 
 
