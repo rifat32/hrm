@@ -324,7 +324,223 @@ $datediff = $now - $user_created_date;
             Auth::login($user);
             $this->storeActivity($request, "logged in", "User successfully logged into the system.");
 
+
+
+
             return response()->json(['data' => $user,   "ok" => true], 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500,$request);
+        }
+    }
+
+     /**
+     *
+     * @OA\Post(
+     *      path="/v2.0/login",
+     *      operationId="loginV2",
+     *      tags={"auth"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to login user",
+     *      description="This method is to login user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"email","password"},
+     *            @OA\Property(property="email", type="string", format="string",example="admin@gmail.com"),
+
+     * *  @OA\Property(property="password", type="string", format="string",example="12345678"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function loginV2(Request $request)
+    {
+
+
+        try {
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+
+
+
+
+            $loginData = $request->validate([
+                'email' => 'email|required',
+                'password' => 'required'
+            ]);
+            $user = User::where('email', $loginData['email'])->first();
+
+            if ($user && $user->login_attempts >= 5) {
+                $now = Carbon::now();
+                $lastFailedAttempt = Carbon::parse($user->last_failed_login_attempt_at);
+                $diffInMinutes = $now->diffInMinutes($lastFailedAttempt);
+
+                if ($diffInMinutes < 15) {
+                    return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
+                } else {
+                    $user->login_attempts = 0;
+                    $user->last_failed_login_attempt_at = null;
+                    $user->save();
+                }
+            }
+
+
+            if (!auth()->attempt($loginData)) {
+                if ($user) {
+                    $user->login_attempts++;
+                    $user->last_failed_login_attempt_at = Carbon::now();
+                    $user->save();
+
+                    if ($user->login_attempts >= 5) {
+                        $now = Carbon::now();
+                        $lastFailedAttempt = Carbon::parse($user->last_failed_login_attempt_at);
+                        $diffInMinutes = $now->diffInMinutes($lastFailedAttempt);
+
+                        if ($diffInMinutes < 15) {
+
+                            return response(['message' => 'You have 5 failed attempts. Reset your password or wait for 15 minutes to access your account.'], 403);
+                        } else {
+                            $user->login_attempts = 0;
+                            $user->last_failed_login_attempt_at = null;
+                            $user->save();
+                        }
+                    }
+                }
+
+                return response(['message' => 'Invalid Credentials'], 401);
+            }
+
+
+
+            if(!$user->is_active) {
+
+                return response(['message' => 'User not active'], 403);
+            }
+
+            if($user->business_id) {
+                 $business = Business::where([
+                    "id" =>$user->business_id
+                 ])
+                 ->first();
+                 if(!$business) {
+
+
+                    return response(['message' => 'Your business not found'], 403);
+                 }
+                 if(!$business->is_active) {
+
+                    return response(['message' => 'Business not active'], 403);
+                }
+
+
+                if(!$user->manages_department) {
+                    return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
+                }
+
+            }
+
+
+
+
+
+
+            $now = time(); // or your date as well
+$user_created_date = strtotime($user->created_at);
+$datediff = $now - $user_created_date;
+
+            if(!$user->email_verified_at && (($datediff / (60 * 60 * 24))>1)){
+                $email_token = Str::random(30);
+                $user->email_verify_token = $email_token;
+                $user->email_verify_token_expires = Carbon::now()->subDays(-1);
+                if(env("SEND_EMAIL") == true) {
+                    Mail::to($user->email)->send(new VerifyMail($user));
+                }
+                $user->save();
+
+                return response(['message' => 'please activate your email first'], 409);
+            }
+
+
+            $user->login_attempts = 0;
+            $user->last_failed_login_attempt_at = null;
+
+
+            $site_redirect_token = Str::random(30);
+            $site_redirect_token_data["created_at"] = $now;
+            $site_redirect_token_data["token"] = $site_redirect_token;
+            $user->site_redirect_token = json_encode($site_redirect_token_data);
+            $user->save();
+
+
+
+
+
+
+
+
+
+// Extracting only the required data
+$responseData = [
+    'id' => $user->id,
+    "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
+    'business_id' => $user->business_id,
+    'first_Name' => $user->first_Name,
+    'middle_Name' => $user->middle_Name,
+    'last_Name' => $user->last_Name,
+    'image' => $user->image,
+    'roles' => $user->roles->pluck('name'),
+    'business' => [
+        'is_subscribed' => $user->business ? $user->business->is_subscribed : null,
+        'name' => $user->business ? $user->business->name : null,
+        'logo' => $user->business ? $user->business->logo : null,
+        'start_date' => $user->business ? $user->business->start_date : null,
+        'currency' => $user->business ? $user->business->currency : null,
+    ]
+];
+
+            Auth::login($user);
+            $this->storeActivity($request, "logged in", "User successfully logged into the system.");
+
+
+
+
+            return response()->json(['data' => $responseData,   "ok" => true], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500,$request);

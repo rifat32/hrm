@@ -105,6 +105,7 @@ Route::patch('/health', function () {
 
 Route::post('/v1.0/register', [AuthController::class, "register"]);
 Route::post('/v1.0/login', [AuthController::class, "login"]);
+Route::post('/v2.0/login', [AuthController::class, "loginV2"]);
 
 Route::post('/v1.0/token-regenerate', [AuthController::class, "regenerateToken"]);
 
