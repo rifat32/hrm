@@ -380,6 +380,11 @@ return [
                 "work_shift_view",
                 "work_shift_delete",
 
+                "employee_rota_create",
+                "employee_rota_update",
+                "employee_rota_view",
+                "employee_rota_delete",
+
                 "announcement_create",
                 "announcement_update",
                 "announcement_view",
@@ -611,6 +616,11 @@ return [
                 "work_shift_view",
                 "work_shift_delete",
 
+                "employee_rota_create",
+                "employee_rota_update",
+                "employee_rota_view",
+                "employee_rota_delete",
+
                 "announcement_create",
                 "announcement_update",
                 "announcement_view",
@@ -818,7 +828,10 @@ return [
                 "work_shift_view",
                 "work_shift_delete",
 
-
+                "employee_rota_create",
+                "employee_rota_update",
+                "employee_rota_view",
+                "employee_rota_delete",
 
                 "announcement_create",
                 "announcement_update",
@@ -1124,6 +1137,11 @@ return [
         "work_shift_view",
         "work_shift_delete",
 
+        "employee_rota_create",
+        "employee_rota_update",
+        "employee_rota_view",
+        "employee_rota_delete",
+
 
         "announcement_create",
         "announcement_update",
@@ -1400,6 +1418,11 @@ return [
         "work_shift_update" => "Can update work shift",
         "work_shift_view" => "Can view work shift",
         "work_shift_delete" => "Can delete work shift",
+
+        "employee_rota_create" => "",
+        "employee_rota_update" => "",
+        "employee_rota_view" => "",
+        "employee_rota_delete" => "",
 
         "announcement_create" => "Can create announcement",
         "announcement_update" => "Can update announcement",
@@ -1714,6 +1737,12 @@ return [
         "work_shift_update" => "update",
         "work_shift_view" => "view",
         "work_shift_delete" => "delete",
+
+        "employee_rota_create" => "create",
+        "employee_rota_update" => "update",
+        "employee_rota_view" => "view",
+        "employee_rota_delete" => "delete",
+
 
         "announcement_create" => "create",
         "announcement_update" => "update",
@@ -2262,6 +2291,22 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "employee_rota",
+            "permissions" => [
+        "employee_rota_create",
+        "employee_rota_update",
+        "employee_rota_view",
+        "employee_rota_delete",
+
+
+
+            ],
+        ],
+
+
+
 
 
 

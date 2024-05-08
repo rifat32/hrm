@@ -18,6 +18,7 @@ use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\DropdownOptionsController;
+use App\Http\Controllers\EmployeeRotaController;
 use App\Http\Controllers\EmploymentStatusController;
 use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
@@ -821,6 +822,25 @@ Route::get('/v1.0/work-shifts/{id}', [WorkShiftController::class, "getWorkShiftB
 Route::get('/v1.0/work-shifts/get-by-user-id/{user_id}', [WorkShiftController::class, "getWorkShiftByUserId"]);
 
 Route::delete('/v1.0/work-shifts/{ids}', [WorkShiftController::class, "deleteWorkShiftsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end work shift  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// work shift  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/employee-rotas', [EmployeeRotaController::class, "createEmployeeRota"]);
+Route::put('/v1.0/employee-rotas', [EmployeeRotaController::class, "updateEmployeeRota"]);
+Route::put('/v1.0/employee-rotas/toggle-active', [EmployeeRotaController::class, "toggleActiveEmployeeRota"]);
+
+Route::get('/v1.0/employee-rotas', [EmployeeRotaController::class, "getEmployeeRotas"]);
+Route::get('/v1.0/employee-rotas/{id}', [EmployeeRotaController::class, "getEmployeeRotaById"]);
+
+Route::get('/v1.0/employee-rotas/get-by-user-id/{user_id}', [EmployeeRotaController::class, "getEmployeeRotaByUserId"]);
+
+Route::delete('/v1.0/employee-rotas/{ids}', [EmployeeRotaController::class, "deleteEmployeeRotasByIds"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end work shift  management section
