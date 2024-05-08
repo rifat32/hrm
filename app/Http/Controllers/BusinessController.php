@@ -995,7 +995,8 @@ class BusinessController extends Controller
      *  "logo":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      *  "images":{"/a","/b","/c"},
-     *  "currency":"BDT"
+     *  "currency":"BDT",
+     * "flexible_rota_enabled":1
      *
      * }),
      *
@@ -1164,7 +1165,9 @@ class BusinessController extends Controller
                         "status",
                         "background_image",
                         // "is_active",
-                        "currency"
+                        "currency",
+
+                        "flexible_rota_enabled"
 
                     ])->toArray()
                 )
@@ -1627,7 +1630,7 @@ class BusinessController extends Controller
 
                     ->first();
                 if (!$business) {
-                  
+
                     return response()->json([
                         "massage" => "no business found"
                     ], 404);

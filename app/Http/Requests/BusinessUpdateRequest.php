@@ -22,9 +22,11 @@ class BusinessUpdateRequest extends BaseFormRequest
      *
      * @return array
      */
+
+
     public function rules()
     {
-        return [
+        $rules = [
             'user.id' => 'required|numeric|exists:users,id',
             'user.first_Name' => 'required|string|max:255',
             'user.middle_Name' => 'nullable|string|max:255',
@@ -77,9 +79,6 @@ class BusinessUpdateRequest extends BaseFormRequest
 
 
 
-
-
-
             "times" => "present|array",
             "times.*.day" => 'required|numeric',
             "times.*.is_weekend" => ['required',"boolean"],
@@ -109,11 +108,16 @@ class BusinessUpdateRequest extends BaseFormRequest
                },
            ],
 
-
-
-
-
         ];
+
+
+
+        if(auth()->user()->hasRole("superadmin")) {
+            $rules['business.flexible_rota_enabled'] = 'required|string';
+        }
+
+        return $rules;
+
 
 
     }

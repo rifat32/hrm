@@ -59,10 +59,15 @@ class CreateBusinessesTable extends Migration
 
 
 
+            $table->boolean("flexible_rota_enabled")->nullable()->default(false);
+
+
 
             $table->unsignedBigInteger("owner_id");
             $table->unsignedBigInteger("created_by");
             $table->softDeletes();
+
+
             $table->timestamps();
         });
     }

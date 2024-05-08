@@ -533,6 +533,7 @@ $responseData = [
         'logo' => $user->business ? $user->business->logo : null,
         'start_date' => $user->business ? $user->business->start_date : null,
         'currency' => $user->business ? $user->business->currency : null,
+        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null
     ]
 ];
 
@@ -1282,6 +1283,7 @@ $responseData = [
         'logo' => $user->business ? $user->business->logo : null,
         'start_date' => $user->business ? $user->business->start_date : null,
         'currency' => $user->business ? $user->business->currency : null,
+        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null 
     ]
 ];
 
