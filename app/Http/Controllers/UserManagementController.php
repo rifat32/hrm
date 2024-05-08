@@ -8,6 +8,7 @@ use App\Exports\UsersExport;
 use App\Http\Components\AttendanceComponent;
 use App\Http\Components\HolidayComponent;
 use App\Http\Components\LeaveComponent;
+use App\Http\Components\UserManagementComponent;
 use App\Http\Components\WorkShiftHistoryComponent;
 use App\Http\Requests\AssignPermissionRequest;
 use App\Http\Requests\AssignRoleRequest;
@@ -79,14 +80,18 @@ class UserManagementController extends Controller
     protected $holidayComponent;
     protected $leaveComponent;
     protected $attendanceComponent;
+    protected $userManagementComponent;
 
-    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent,  LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent)
+    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent,  LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent, UserManagementComponent $userManagementComponent)
     {
 
         $this->workShiftHistoryComponent = $workShiftHistoryComponent;
         $this->holidayComponent = $holidayComponent;
         $this->leaveComponent = $leaveComponent;
         $this->attendanceComponent = $attendanceComponent;
+        $this->userManagementComponent = $userManagementComponent;
+
+
     }
 
     /**
@@ -2820,16 +2825,11 @@ $user->departments()->sync($departments);
                 ], 401);
             }
 
-            $total_departments = Department::where([
-                "business_id" => auth()->user()->business_id,
-                "is_active" => 1
-            ])->count();
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $today = today();
 
-            $users = User::with(
+            $usersQuery = User::with(
                 [
                     "designation" => function ($query) {
                         $query->select(
@@ -2840,466 +2840,22 @@ $user->departments()->sync($departments);
                     "roles",
                     "work_location"
                 ]
-            )
+                );
 
-                ->whereNotIn('id', [$request->user()->id])
 
+             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
 
-                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
-                    if (auth()->user()->hasRole("superadmin")) {
-                        return  $query->where(function ($query) {
-                            return   $query->where('business_id', NULL)
-                                ->orWhere(function ($query) {
-                                    return $query
-                                        ->whereNotNull("business_id")
-                                        ->whereHas("roles", function ($query) {
-                                            return $query->where("roles.name", "business_owner");
-                                        });
-                                });
-                        });
-                    } else {
-                        return  $query->where(function ($query) {
-                            return   $query->where('created_by', auth()->user()->id);
-                        });
-                    }
-                })
-
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $all_manager_department_ids) {
-                    return $query->where(function ($query) use ($all_manager_department_ids) {
-                        return  $query->where('business_id', auth()->user()->business_id)
-                            ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                                $query->whereIn("departments.id", $all_manager_department_ids);
-                            });
-                    });
-                })
-                ->when(!empty($request->role), function ($query) use ($request) {
-                    $rolesArray = explode(',', $request->role);
-                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
-                        return $q->whereIn("name", $rolesArray);
-                    });
-                })
-
-
-
-
-
-                ->when(!empty($request->full_name), function ($query) use ($request) {
-                    // Replace spaces with commas and create an array
-                    $searchTerms = explode(',', str_replace(' ', ',', $request->full_name));
-
-                    $query->where(function ($query) use ($searchTerms) {
-                        foreach ($searchTerms as $term) {
-                            $query->orWhere(function ($subquery) use ($term) {
-                                $subquery->where("first_Name", "like", "%" . $term . "%")
-                                    ->orWhere("last_Name", "like", "%" . $term . "%")
-                                    ->orWhere("middle_Name", "like", "%" . $term . "%");
-                            });
-                        }
-                    });
-                })
-
-
-
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return   $query->where([
-                        "user_id" => $request->user_id
-                    ]);
-                })
-
-                ->when(!empty($request->email), function ($query) use ($request) {
-                    return   $query->where([
-                        "email" => $request->email
-                    ]);
-                })
-
-
-                ->when(!empty($request->designation_id), function ($query) use ($request) {
-                    $idsArray = explode(',', $request->designation_id);
-                    return $query->whereIn('designation_id', $idsArray);
-                })
-
-                ->when(!empty($request->employment_status_id), function ($query) use ($request) {
-                    $idsArray = explode(',', $request->employment_status_id);
-                    return $query->whereIn('employment_status_id', ($idsArray));
-                })
-
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    $term = $request->search_key;
-                    return $query->where(function ($subquery) use ($term) {
-                        $subquery->where("first_Name", "like", "%" . $term . "%")
-                            ->orWhere("last_Name", "like", "%" . $term . "%")
-                            ->orWhere("email", "like", "%" . $term . "%")
-                            ->orWhere("phone", "like", "%" . $term . "%");
-                    });
-                })
-
-
-                ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                    return $query->where('is_in_employee', intval($request->is_in_employee));
-                })
-
-                ->when(isset($request->is_on_holiday), function ($query) use ($today, $total_departments, $request) {
-                    if (intval($request->is_on_holiday) == 1) {
-                        $query
-                            ->where("business_id", auth()->user()->business_id)
-
-                            ->where(function ($query) use ($today, $total_departments) {
-                                $query->where(function ($query) use ($today, $total_departments) {
-                                    $query->where(function ($query) use ($today, $total_departments) {
-                                        $query->whereHas('holidays', function ($query) use ($today) {
-                                            $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
-                                                ->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
-                                        })
-                                            ->orWhere(function ($query) use ($today, $total_departments) {
-                                                $query->whereHasRecursiveHolidays($today, $total_departments);
-                                            });
-                                    })
-                                        ->where(function ($query) use ($today) {
-                                            $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                                                $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay())
-                                                    ->where('holidays.end_date', ">=",  $today->copy()->endOfDay())
-                                                    ->orWhere(function ($query) {
-                                                        $query->whereDoesntHave("users")
-                                                            ->whereDoesntHave("departments");
-                                                    });
-                                            });
-                                        });
-                                })
-                                    ->orWhere(
-                                        function ($query) use ($today) {
-                                            $query->orWhereDoesntHave('holidays', function ($query) use ($today) {
-                                                $query->where('holidays.start_date', "<=",  $today->copy()->startOfDay());
-                                                $query->where('holidays.end_date', ">=",  $today->copy()->endOfDay());
-                                                $query->doesntHave('users');
-                                            });
-                                        }
-                                    );
-                            });
-                    } else {
-                        // Inverted logic for when employees are not on holiday
-                        $query->where(function ($query) use ($today, $total_departments) {
-                            $query->whereDoesntHave('holidays')
-                                ->orWhere(function ($query) use ($today, $total_departments) {
-                                    $query->whereDoesntHave('departments')
-                                        ->orWhereHas('departments', function ($subQuery) use ($today, $total_departments) {
-                                            $subQuery->whereDoesntHave('holidays');
-                                        });
-                                });
-                        });
-                    }
-                })
-
-
-                ->when(!empty($request->upcoming_expiries), function ($query) use ($request) {
-
-                    if ($request->upcoming_expiries == "passport") {
-                        $query->whereHas("passport_detail", function ($query) {
-                            $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", today());
-                        });
-                    } else if ($request->upcoming_expiries == "visa") {
-                        $query->whereHas("visa_detail", function ($query) {
-                            $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", today());
-                        });
-                    } else if ($request->upcoming_expiries == "right_to_work") {
-                        $query->whereHas("right_to_work", function ($query) {
-                            $query->where("employee_right_to_work_histories.right_to_work_expiry_date", ">=", today());
-                        });
-                    } else if ($request->upcoming_expiries == "sponsorship") {
-                        $query->whereHas("sponsorship_details", function ($query) {
-                            $query->where("employee_sponsorship_histories.expiry_date", ">=", today());
-                        });
-                    } else if ($request->upcoming_expiries == "pension") {
-                        $query->whereHas("pension_details", function ($query) {
-                            $query->where("employee_pensions.pension_re_enrollment_due_date", ">=", today());
-                        });
-                    }
-                })
-
-
-                ->when(!empty($request->immigration_status), function ($query) use ($request) {
-                    return $query->where('immigration_status', ($request->immigration_status));
-                })
-                ->when(!empty($request->sponsorship_status), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.status", $request->sponsorship_status);
-                    });
-                })
-
-
-                ->when(!empty($request->sponsorship_note), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.note", $request->sponsorship_note);
-                    });
-                })
-                ->when(!empty($request->sponsorship_certificate_number), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.certificate_number", $request->sponsorship_certificate_number);
-                    });
-                })
-                ->when(!empty($request->sponsorship_current_certificate_status), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.current_certificate_status", $request->sponsorship_current_certificate_status);
-                    });
-                })
-                ->when(isset($request->sponsorship_is_sponsorship_withdrawn), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.is_sponsorship_withdrawn", intval($request->sponsorship_is_sponsorship_withdrawn));
-                    });
-                })
-
-                ->when(!empty($request->project_id), function ($query) use ($request) {
-                    return $query->whereHas("projects", function ($query) use ($request) {
-                        $query->where("projects.id", $request->project_id);
-                    });
-                })
-                ->when(!empty($request->department_id), function ($query) use ($request) {
-                    return $query->whereHas("departments", function ($query) use ($request) {
-                        $query->where("departments.id", $request->department_id);
-                    });
-                })
-
-
-                ->when(!empty($request->work_location_id), function ($query) use ($request) {
-                    return $query->where('work_location_id', ($request->work_location_id));
-                })
-                ->when(!empty($request->holiday_id), function ($query) use ($request) {
-                    return $query->whereHas("holidays", function ($query) use ($request) {
-                        $query->where("holidays.id", $request->holiday_id);
-                    });
-                })
-                ->when(isset($request->is_active), function ($query) use ($request) {
-                    return $query->where('is_active', intval($request->is_active));
-                })
-
-                ->when(!empty($request->start_joining_date), function ($query) use ($request) {
-                    return $query->where('joining_date', ">=", $request->start_joining_date);
-                })
-                ->when(!empty($request->end_joining_date), function ($query) use ($request) {
-                    return $query->where('joining_date', "<=", ($request->end_joining_date .  ' 23:59:59'));
-                })
-                ->when(!empty($request->start_sponsorship_date_assigned), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.date_assigned", ">=", ($request->start_sponsorship_date_assigned));
-                    });
-                })
-                ->when(!empty($request->end_sponsorship_date_assigned), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.date_assigned", "<=", ($request->end_sponsorship_date_assigned . ' 23:59:59'));
-                    });
-                })
-
-
-                ->when(!empty($request->start_sponsorship_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.expiry_date", ">=", $request->start_sponsorship_expiry_date);
-                    });
-                })
-                ->when(!empty($request->end_sponsorship_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request) {
-                        $query->where("employee_sponsorship_histories.expiry_date", "<=", $request->end_sponsorship_expiry_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->sponsorship_expires_in_day), function ($query) use ($request, $today) {
-                    return $query->whereHas("sponsorship_details", function ($query) use ($request, $today) {
-                        $query_day = Carbon::now()->addDays($request->sponsorship_expires_in_day);
-                        $query->whereBetween("employee_sponsorship_histories.expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
-                    });
-                })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                ->when(!empty($request->start_pension_pension_enrollment_issue_date), function ($query) use ($request) {
-                    return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pension_histories.pension_enrollment_issue_date", ">=", ($request->start_pension_pension_enrollment_issue_date));
-                    });
-                })
-                ->when(!empty($request->end_pension_pension_enrollment_issue_date), function ($query) use ($request) {
-                    return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pension_histories.pension_enrollment_issue_date", "<=", ($request->end_pension_pension_enrollment_issue_date . ' 23:59:59'));
-                    });
-                })
-
-
-                ->when(!empty($request->start_pension_pension_re_enrollment_due_date), function ($query) use ($request) {
-                    return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pension_histories.pension_re_enrollment_due_date", ">=", $request->start_pension_pension_re_enrollment_due_date);
-                    });
-                })
-                ->when(!empty($request->end_pension_pension_re_enrollment_due_date), function ($query) use ($request) {
-                    return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pension_histories.pension_re_enrollment_due_date", "<=", $request->end_pension_pension_re_enrollment_due_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->pension_pension_re_enrollment_due_date_in_day), function ($query) use ($request, $today) {
-                    return $query->whereHas("pension_details", function ($query) use ($request, $today) {
-                        $query_day = Carbon::now()->addDays($request->pension_pension_re_enrollment_due_date_in_day);
-                        $query->whereBetween("employee_pension_histories.pension_re_enrollment_due_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
-                    });
-                })
-
-                ->when(!empty($request->pension_scheme_status), function ($query) use ($request) {
-                    return $query->whereHas("pension_details", function ($query) use ($request) {
-                        $query->where("employee_pension_histories.pension_scheme_status", $request->pension_scheme_status);
-                    });
-                })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                ->when(!empty($request->start_passport_issue_date), function ($query) use ($request) {
-                    return $query->whereHas("passport_details", function ($query) use ($request) {
-                        $query->where("employee_passport_detail_histories.passport_issue_date", ">=", $request->start_passport_issue_date);
-                    });
-                })
-                ->when(!empty($request->end_passport_issue_date), function ($query) use ($request) {
-                    return $query->whereHas("passport_details", function ($query) use ($request) {
-                        $query->where("employee_passport_detail_histories.passport_issue_date", "<=", $request->end_passport_issue_date . ' 23:59:59');
-                    });
-                })
-
-
-                ->when(!empty($request->start_passport_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("passport_details", function ($query) use ($request) {
-                        $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", $request->start_passport_expiry_date);
-                    });
-                })
-                ->when(!empty($request->end_passport_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("passport_details", function ($query) use ($request) {
-                        $query->where("employee_passport_detail_histories.passport_expiry_date", "<=", $request->end_passport_expiry_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->passport_expires_in_day), function ($query) use ($request, $today) {
-                    return $query->whereHas("passport_details", function ($query) use ($request, $today) {
-                        $query_day = Carbon::now()->addDays($request->passport_expires_in_day);
-                        $query->whereBetween("employee_passport_detail_histories.passport_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
-                    });
-                })
-                ->when(!empty($request->start_visa_issue_date), function ($query) use ($request) {
-                    return $query->whereHas("visa_details", function ($query) use ($request) {
-                        $query->where("employee_visa_detail_histories.visa_issue_date", ">=", $request->start_visa_issue_date);
-                    });
-                })
-                ->when(!empty($request->end_visa_issue_date), function ($query) use ($request) {
-                    return $query->whereHas("visa_details", function ($query) use ($request) {
-                        $query->where("employee_visa_detail_histories.visa_issue_date", "<=", $request->end_visa_issue_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->start_visa_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("visa_details", function ($query) use ($request) {
-                        $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", $request->start_visa_expiry_date);
-                    });
-                })
-                ->when(!empty($request->end_visa_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("visa_details", function ($query) use ($request) {
-                        $query->where("employee_visa_detail_histories.visa_expiry_date", "<=", $request->end_visa_expiry_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->visa_expires_in_day), function ($query) use ($request, $today) {
-                    return $query->whereHas("visa_details", function ($query) use ($request, $today) {
-                        $query_day = Carbon::now()->addDays($request->visa_expires_in_day);
-                        $query->whereBetween("employee_visa_detail_histories.visa_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
-                    });
-                })
-
-
-
-
-
-
-
-
-                ->when(!empty($request->start_right_to_work_check_date), function ($query) use ($request) {
-                    return $query->whereHas("right_to_works", function ($query) use ($request) {
-                        $query->where("employee_right_to_work_histories.right_to_work_check_date", ">=", $request->start_right_to_work_check_date);
-                    });
-                })
-                ->when(!empty($request->end_right_to_work_check_date), function ($query) use ($request) {
-                    return $query->whereHas("right_to_works", function ($query) use ($request) {
-                        $query->where("employee_right_to_work_histories.right_to_work_check_date", "<=", $request->end_right_to_work_check_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->start_right_to_work_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("right_to_works", function ($query) use ($request) {
-                        $query->where("employee_right_to_work_histories.right_to_work_expiry_date", ">=", $request->start_right_to_work_expiry_date);
-                    });
-                })
-                ->when(!empty($request->end_right_to_work_expiry_date), function ($query) use ($request) {
-                    return $query->whereHas("right_to_works", function ($query) use ($request) {
-                        $query->where("employee_right_to_work_histories.right_to_work_expiry_date", "<=", $request->end_right_to_work_expiry_date . ' 23:59:59');
-                    });
-                })
-                ->when(!empty($request->right_to_work_expires_in_day), function ($query) use ($request, $today) {
-                    return $query->whereHas("right_to_works", function ($query) use ($request, $today) {
-                        $query_day = Carbon::now()->addDays($request->right_to_work_expires_in_day);
-                        $query->whereBetween("employee_right_to_work_histories.right_to_work_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
-                    });
-                })
-
-
-
-                ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
-                    if (intval($request->doesnt_have_payrun)) {
-                        return $query->whereDoesntHave("payrun_users");
-                    } else {
-                        return $query;
-                    }
-                })
-
-
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
-
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("users.first_Name", $request->order_by);
                 }, function ($query) {
                     return $query->orderBy("users.first_Name", "DESC");
                 })
-
                 ->withCount('all_users as user_count')
-
-
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
                 });
-
-
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 if (strtoupper($request->response_type) == 'PDF') {
@@ -3312,9 +2868,6 @@ $user->departments()->sync($departments);
             } else {
                 return response()->json($users, 200);
             }
-
-
-
 
         } catch (Exception $e) {
 
@@ -3777,15 +3330,29 @@ $user->departments()->sync($departments);
     }
 
 
-    /**
+     /**
      *
      * @OA\Get(
      *      path="/v4.0/users",
      *      operationId="getUsersV4",
-     *      tags={"user_management.employee"},
+     *      tags={"user_management"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -3807,6 +3374,36 @@ $user->departments()->sync($departments);
      * required=true,
      * example="2019-06-29"
      * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="full_name",
+     * in="query",
+     * description="full_name",
+     * required=true,
+     * example="full_name"
+     * ),
+     *
+     *    * @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *
+     *    * @OA\Parameter(
+     * name="email",
+     * in="query",
+     * description="email",
+     * required=true,
+     * example="email"
+     * ),
+     *
+     *
+     *
+     *
      * *  @OA\Parameter(
      * name="search_key",
      * in="query",
@@ -3822,6 +3419,43 @@ $user->departments()->sync($departments);
      * example="1"
      * ),
      *
+     * @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *  * @OA\Parameter(
+     * name="designation_id",
+     * in="query",
+     * description="designation_id",
+     * required=true,
+     * example="1"
+     * ),
+     *    *  * @OA\Parameter(
+     * name="work_location_id",
+     * in="query",
+     * description="work_location_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     *    *  * @OA\Parameter(
+     * name="holiday_id",
+     * in="query",
+     * description="holiday_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="has_this_project",
+     * in="query",
+     * description="has_this_project",
+     * required=true,
+     * example="1"
+     * ),
+     *
      *      *     @OA\Parameter(
      * name="business_id",
      * in="query",
@@ -3830,6 +3464,295 @@ $user->departments()->sync($departments);
      * example="1"
      * ),
      *
+     *  *      *     @OA\Parameter(
+     * name="employment_status_id",
+     * in="query",
+     * description="employment_status_id",
+     * required=true,
+     * example="1"
+     * ),
+     *      *  *      *     @OA\Parameter(
+     * name="immigration_status",
+     * in="query",
+     * description="immigration_status",
+     * required=true,
+     * example="immigration_status"
+     * ),
+     *      *  @OA\Parameter(
+     * name="pension_scheme_status",
+     * in="query",
+     * description="pension_scheme_status",
+     * required=true,
+     * example="pension_scheme_status"
+     * ),
+     *  @OA\Parameter(
+     * name="sponsorship_status",
+     * in="query",
+     * description="sponsorship_status",
+     * required=true,
+     * example="sponsorship_status"
+     * ),
+
+     * *  @OA\Parameter(
+     * name="sponsorship_note",
+     * in="query",
+     * description="sponsorship_note",
+     * required=true,
+     * example="sponsorship_note"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_certificate_number",
+     * in="query",
+     * description="sponsorship_certificate_number",
+     * required=true,
+     * example="sponsorship_certificate_number"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_current_certificate_status",
+     * in="query",
+     * description="sponsorship_current_certificate_status",
+     * required=true,
+     * example="sponsorship_current_certificate_status"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_is_sponsorship_withdrawn",
+     * in="query",
+     * description="sponsorship_is_sponsorship_withdrawn",
+     * required=true,
+     * example="0"
+     * ),
+     *  * *  @OA\Parameter(
+     * name="start_joining_date",
+     * in="query",
+     * description="start_joining_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *  *  * *  @OA\Parameter(
+     * name="end_joining_date",
+     * in="query",
+     * description="end_joining_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *
+     *    *    *  *   @OA\Parameter(
+     * name="start_pension_pension_enrollment_issue_date",
+     * in="query",
+     * description="start_pension_pension_enrollment_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_pension_pension_enrollment_issue_date",
+     * in="query",
+     * description="end_pension_pension_enrollment_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *    *  *   @OA\Parameter(
+     * name="start_pension_re_enrollment_due_date_date",
+     * in="query",
+     * description="start_pension_re_enrollment_due_date_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_pension_re_enrollment_due_date_date",
+     * in="query",
+     * description="end_pension_re_enrollment_due_date_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *   @OA\Parameter(
+     * name="pension_re_enrollment_due_date_in_day",
+     * in="query",
+     * description="pension_re_enrollment_due_date_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="start_sponsorship_date_assigned",
+     * in="query",
+     * description="start_sponsorship_date_assigned",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_sponsorship_date_assigned",
+     * in="query",
+     * description="end_sponsorship_date_assigned",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *    *  *   @OA\Parameter(
+     * name="start_sponsorship_expiry_date",
+     * in="query",
+     * description="start_sponsorship_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_sponsorship_expiry_date",
+     * in="query",
+     * description="end_sponsorship_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *   @OA\Parameter(
+     * name="sponsorship_expires_in_day",
+     * in="query",
+     * description="sponsorship_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *
+     *
+     *      *    *  *   @OA\Parameter(
+     * name="start_passport_issue_date",
+     * in="query",
+     * description="start_passport_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_passport_issue_date",
+     * in="query",
+     * description="end_passport_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="start_passport_expiry_date",
+     * in="query",
+     * description="start_passport_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_passport_expiry_date",
+     * in="query",
+     * description="end_passport_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *   *    *   @OA\Parameter(
+     * name="passport_expires_in_day",
+     * in="query",
+     * description="passport_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *     * @OA\Parameter(
+     * name="start_visa_issue_date",
+     * in="query",
+     * description="start_visa_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_visa_issue_date",
+     * in="query",
+     * description="end_visa_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *      *     * @OA\Parameter(
+     * name="start_visa_expiry_date",
+     * in="query",
+     * description="start_visa_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_visa_expiry_date",
+     * in="query",
+     * description="end_visa_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *     @OA\Parameter(
+     * name="visa_expires_in_day",
+     * in="query",
+     * description="visa_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     * * @OA\Parameter(
+     * name="start_right_to_work_check_date",
+     * in="query",
+     * description="start_right_to_work_check_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="end_right_to_work_check_date",
+     * in="query",
+     * description="end_right_to_work_check_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="start_right_to_work_expiry_date",
+     * in="query",
+     * description="start_right_to_work_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="end_right_to_work_expiry_date",
+     * in="query",
+     * description="end_right_to_work_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="right_to_work_expires_in_day",
+     * in="query",
+     * description="right_to_work_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+
+     *
+     *
+     *  *      *     @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     * @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * *      *   * *  @OA\Parameter(
+     * name="doesnt_have_payrun",
+     * in="query",
+     * description="doesnt_have_payrun",
+     * required=true,
+     * example="1"
+     * ),
      *
      *      *   * *  @OA\Parameter(
      * name="is_active",
@@ -3846,6 +3769,26 @@ $user->departments()->sync($departments);
      * required=true,
      * example="admin,manager"
      * ),
+     *
+     *  @OA\Parameter(
+     * name="is_on_holiday",
+     * in="query",
+     * description="is_on_holiday",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *  @OA\Parameter(
+     * name="upcoming_expiries",
+     * in="query",
+     * description="upcoming_expiries",
+     * required=true,
+     * example="passport"
+     * ),
+     *
+     *
+     *
+     *
      *      summary="This method is to get user",
      *      description="This method is to get user",
      *
@@ -3884,96 +3827,80 @@ $user->departments()->sync($departments);
      *     )
      */
 
-    public function getUsersV4(Request $request)
-    {
-        try {
-            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('user_view')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
-            }
+     public function getUsersV4(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            $users = User::whereNotIn('id', [$request->user()->id])
-                ->when(!empty($request->role), function ($query) use ($request) {
-                    $rolesArray = explode(',', $request->role);
-                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
-                        return $q->whereIn("name", $rolesArray);
-                    });
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
 
-                            ->orWhere('business_id', auth()->user()->business_id);
-                    });
-                })
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    $term = $request->search_key;
-                    return $query->where(function ($subquery) use ($term) {
-                        $subquery->where("first_Name", "like", "%" . $term . "%")
-                            ->orWhere("last_Name", "like", "%" . $term . "%")
-                            ->orWhere("email", "like", "%" . $term . "%")
-                            ->orWhere("phone", "like", "%" . $term . "%");
-                    });
-                })
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                    if (empty($request->business_id)) {
-                        return $query->where('business_id', NULL);
-                    }
-                    return $query->where('business_id', intval($request->business_id));
-                })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('business_id', $request->user()->business_id);
-                })
-                ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                    return $query->where('is_in_employee', intval($request->is_in_employee));
-                })
-                ->when(isset($request->is_active), function ($query) use ($request) {
-                    return $query->where('is_active', intval($request->is_active));
-                })
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.first_Name", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("users.first_Name", "DESC");
-                })
 
-                ->select(
-                    'user_name',
-                    'first_Name',
-                    'last_Name',
-                    'middle_Name',
-                    "NI_number",
-                    'gender',
-                    'phone',
-                    'image',
-                    'address_line_1',
-                    'address_line_2',
-                    'country',
-                    'city',
-                    'postcode',
-                    "lat",
-                    "long"
-                )
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
+             $usersQuery = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles"
+                ]
+                );
 
-            return response()->json($users, 200);
-        } catch (Exception $e) {
 
-            return $this->sendError($e, 500, $request);
-        }
-    }
+             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
+
+             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("users.first_Name", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("users.first_Name", "DESC");
+                 })
+                 ->select(
+                     "users.id",
+                     "users.first_Name",
+                     "users.middle_Name",
+                     "users.last_Name",
+                     "users.user_id",
+                     "users.email",
+                     "users.status",
+                 )
+                //  ->withCount('all_users as user_count')
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });
+
+             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                //  if (strtoupper($request->response_type) == 'PDF') {
+                //      $pdf = PDF::loadView('pdf.users', ["users" => $users]);
+                //      return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                //  } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                //      return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                //  }
+             } else {
+                 return response()->json($users, 200);
+             }
+
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+
+
+
 
     /**
      *
