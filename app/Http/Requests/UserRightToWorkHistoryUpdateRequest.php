@@ -38,7 +38,7 @@ class UserRightToWorkHistoryUpdateRequest extends BaseFormRequest
                 function ($attribute, $value, $fail) {
                     $exists = EmployeeRightToWorkHistory::where('id', $value)
                         ->where('employee_right_to_work_histories.user_id', '=', $this->user_id)
-                        ->where('employee_right_to_work_histories.is_manual', '=', 1)
+                        // ->where('employee_right_to_work_histories.is_manual', '=', 1)
                         ->exists();
 
                     if (!$exists) {

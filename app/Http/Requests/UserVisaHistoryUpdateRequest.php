@@ -37,7 +37,7 @@ class UserVisaHistoryUpdateRequest extends BaseFormRequest
                 function ($attribute, $value, $fail) {
                     $exists = EmployeeVisaDetailHistory::where('id', $value)
                         ->where('employee_visa_detail_histories.user_id', '=', $this->user_id)
-                        ->where('employee_visa_detail_histories.is_manual', '=', 1)
+                        // ->where('employee_visa_detail_histories.is_manual', '=', 1)
                         ->exists();
 
                     if (!$exists) {

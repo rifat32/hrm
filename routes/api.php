@@ -149,6 +149,8 @@ Route::post('/v1.0/business-image-multiple', [BusinessController::class, "create
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
+
+    Route::get('/v2.0/user', [AuthController::class, "getUserV2"]);
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // notification management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

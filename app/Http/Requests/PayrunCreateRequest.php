@@ -8,6 +8,7 @@ use App\Models\PayrunDepartment;
 use App\Models\PayrunUser;
 use App\Models\User;
 use App\Rules\ValidateDepartment;
+use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PayrunCreateRequest extends BaseFormRequest
@@ -44,54 +45,12 @@ class PayrunCreateRequest extends BaseFormRequest
             'departments.*' => [
                 'numeric',
                 new ValidateDepartment($all_manager_department_ids),
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-                        $payrun_department = PayrunDepartment::where([
-                            "department_id" => $value
-                        ])
-                        ->first();
-                        if($payrun_department) {
-                            $fail($attribute . " is invalid. Payrun already created for this department.");
-                            return;
-                        }
-                },
+               
             ],
             'users' => 'present|array',
             'users.*' => [
                 "numeric",
-                function ($attribute, $value, $fail) use($all_manager_department_ids) {
-
-
-                  $user =  User::where(
-                    [
-                        "users.id" => $value,
-                        "users.business_id" => auth()->user()->business_id
-                    ])
-
-                    ->whereHas("departments", function($query) use($all_manager_department_ids) {
-                        $query->whereIn("departments.id",$all_manager_department_ids);
-                     })
-                     ->first();
-
-            if (!$user) {
-                $fail($attribute . " is invalid.");
-                return;
-            }
-
-
-
-            $payrun_user = PayrunUser::where([
-                "user_id" => $user->id
-            ])
-            ->first();
-            if($payrun_user) {
-                $fail($attribute . " is invalid. Payrun already created for this user.");
-                return;
-            }
-
-
-
-
-                },
+                new ValidUserId($all_manager_department_ids)
 
             ],
         ];

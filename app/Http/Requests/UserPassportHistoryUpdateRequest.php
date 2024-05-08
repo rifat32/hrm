@@ -37,7 +37,7 @@ class UserPassportHistoryUpdateRequest extends BaseFormRequest
                 function ($attribute, $value, $fail) {
                     $exists = EmployeePassportDetailHistory::where('id', $value)
                         ->where('employee_passport_detail_histories.user_id', '=', $this->user_id)
-                        ->where('employee_passport_detail_histories.is_manual', '=', 1)
+                        // ->where('employee_passport_detail_histories.is_manual', '=', 1)
                         ->exists();
 
                     if (!$exists) {

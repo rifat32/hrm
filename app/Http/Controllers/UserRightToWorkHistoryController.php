@@ -483,7 +483,8 @@ class UserRightToWorkHistoryController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('employee_right_to work_history_view')) {
+
+            if (!$request->user()->hasPermissionTo('employee_right_to_work_history_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -492,7 +493,7 @@ class UserRightToWorkHistoryController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_right_to_work_history =  EmployeeRightToWorkHistory::where([
                 "id" => $id,
-                "is_manual" => 1
+                // "is_manual" => 1
             ])
 
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {

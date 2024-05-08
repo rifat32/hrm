@@ -936,8 +936,7 @@ class AttendanceController extends Controller
 
             $business_id =  $request->user()->business_id;
             $attendances = Attendance::
-            leftJoin('table2', 'table1.id', '=', 'table2.table1_id')
-            ->with([
+            with([
                 "employee" => function ($query) {
                     $query->select(
                         'users.id',

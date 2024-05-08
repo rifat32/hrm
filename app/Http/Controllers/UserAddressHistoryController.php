@@ -204,7 +204,7 @@ class UserAddressHistoryController extends Controller
 
                 $user_address_history_query_params = [
                     "id" => $request_data["id"],
-                    "is_manual" => 1
+                    // "is_manual" => 1
                 ];
                 // $user_address_history_prev = UserAddressHistory::where($user_address_history_query_params)
                 //     ->first();
@@ -359,7 +359,7 @@ class UserAddressHistoryController extends Controller
                 },
 
             ])
-            ->where(["is_manual" => 1])
+            // ->where(["is_manual" => 1])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
@@ -476,7 +476,7 @@ class UserAddressHistoryController extends Controller
 
             $user_address_history =  EmployeeAddressHistory::where([
                 "id" => $id,
-                "is_manual" => 1
+                // "is_manual" => 1
             ])
 
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
@@ -571,7 +571,7 @@ class UserAddressHistoryController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeAddressHistory::whereIn('id', $idsArray)
-            ->where(["is_manual" => 1])
+            // ->where(["is_manual" => 1])
             ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
@@ -582,7 +582,7 @@ class UserAddressHistoryController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

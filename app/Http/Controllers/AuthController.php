@@ -508,11 +508,12 @@ $datediff = $now - $user_created_date;
             $user->save();
 
 
-
-
-
-
-
+            $user->roles = $user->roles->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name'),
+                ];
+            });
 
 
 // Extracting only the required data
@@ -524,7 +525,8 @@ $responseData = [
     'middle_Name' => $user->middle_Name,
     'last_Name' => $user->last_Name,
     'image' => $user->image,
-    'roles' => $user->roles->pluck('name'),
+    'roles' => $user->roles,
+    'manages_department' => $user->manages_department,
     'business' => [
         'is_subscribed' => $user->business ? $user->business->is_subscribed : null,
         'name' => $user->business ? $user->business->name : null,
@@ -546,6 +548,12 @@ $responseData = [
             return $this->sendError($e, 500,$request);
         }
     }
+
+
+
+
+
+
  /**
      *
      * @OA\Post(
@@ -1189,6 +1197,106 @@ public function getUser (Request $request) {
     }
 
 }
+
+
+ /**
+        *
+     * @OA\Get(
+     *      path="/v2.0/user",
+     *      operationId="getUserV2",
+     *      tags={"auth"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="This method is to get  user ",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getUserV2 (Request $request) {
+        try{
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+
+            $user = $request->user();
+            $user->token = auth()->user()->createToken('authToken')->accessToken;
+
+
+            $user->roles = $user->roles->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name'),
+                ];
+            });
+
+            // Extracting only the required data
+$responseData = [
+    'id' => $user->id,
+    "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
+    'business_id' => $user->business_id,
+    'first_Name' => $user->first_Name,
+    'middle_Name' => $user->middle_Name,
+    'last_Name' => $user->last_Name,
+    'image' => $user->image,
+    'roles' => $user->roles,
+    'manages_department' => $user->manages_department,
+    'business' => [
+        'is_subscribed' => $user->business ? $user->business->is_subscribed : null,
+        'name' => $user->business ? $user->business->name : null,
+        'logo' => $user->business ? $user->business->logo : null,
+        'start_date' => $user->business ? $user->business->start_date : null,
+        'currency' => $user->business ? $user->business->currency : null,
+    ]
+];
+
+
+
+            return response()->json(
+                $responseData,
+                200
+            );
+        }catch(Exception $e) {
+            return $this->sendError($e, 500,$request);
+        }
+
+    }
+
 
 
 

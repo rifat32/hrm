@@ -501,7 +501,7 @@ class UserVisaHistoryController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_visa_history =  EmployeeVisaDetailHistory::where([
                 "id" => $id,
-                "is_manual" => 1
+                // "is_manual" => 1
             ])
 
             ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
@@ -603,7 +603,7 @@ class UserVisaHistoryController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

@@ -37,7 +37,7 @@ class UserAddressHistoryUpdateRequest extends BaseFormRequest
                 function ($attribute, $value, $fail) {
                     $exists = EmployeeAddressHistory::where('id', $value)
                         ->where('employee_address_histories.user_id', '=', $this->user_id)
-                        ->where('employee_address_histories.is_manual', '=', 1)
+                        // ->where('employee_address_histories.is_manual', '=', 1)
                         ->exists();
 
                     if (!$exists) {
