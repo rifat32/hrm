@@ -330,6 +330,7 @@ Route::put('/v1.0/users/assign-permissions', [UserManagementController::class, "
 
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
+
 Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);
 Route::get('/v2.0/users', [UserManagementController::class, "getUsersV2"]);
 Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
@@ -343,7 +344,7 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
-
+Route::put('/v3.0/users', [UserManagementController::class, "updateUserV3"]);
 
 
 Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);
@@ -825,7 +826,6 @@ Route::get('/v1.0/work-shifts', [WorkShiftController::class, "getWorkShifts"]);
 Route::get('/v2.0/work-shifts', [WorkShiftController::class, "getWorkShiftsV2"]);
 
 
-
 Route::get('/v1.0/work-shifts/{id}', [WorkShiftController::class, "getWorkShiftById"]);
 
 Route::get('/v1.0/work-shifts/get-by-user-id/{user_id}', [WorkShiftController::class, "getWorkShiftByUserId"]);
@@ -835,6 +835,8 @@ Route::delete('/v1.0/work-shifts/{ids}', [WorkShiftController::class, "deleteWor
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end work shift  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // work shift  management section

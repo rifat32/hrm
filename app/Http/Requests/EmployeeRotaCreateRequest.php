@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmployeeRotaCreateRequest extends FormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -51,7 +53,7 @@ class EmployeeRotaCreateRequest extends FormRequest
                 new ValidUserId($all_manager_department_ids)
 
             ],
-            'details' => 'required|array|min:7|max:7',
+            'details' => 'required|array',
             'details.*.day' => 'required|numeric|between:0,6',
             'details.*.is_weekend' => 'required|boolean',
             'details.*.start_at' => [
@@ -88,7 +90,7 @@ class EmployeeRotaCreateRequest extends FormRequest
 {
     return [
         'type.in' => 'The :attribute field must be either "regular" or "scheduled".',
-   
+
     ];
 }
 }

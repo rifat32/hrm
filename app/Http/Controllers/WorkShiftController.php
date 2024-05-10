@@ -686,7 +686,7 @@ if($work_shift->type !== "flexible") {
                     $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
                     $employee_work_shift_history_data["to_date"] = NULL;
                     $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                    $employee_work_shift_history->details()->createMany($request_data['details']);
+                    $employee_work_shift_history->details()->createMany($work_shift->details->toArray());
                     $user_ids = $work_shift->users()->pluck('users.id')->toArray();
                     $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
                     return [$user_id => ['from_date' => now(), 'to_date' => null]];

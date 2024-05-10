@@ -46,10 +46,11 @@ class ReminderScheduler extends Command
      * @return int
      */
 
-     // Define a helper function to resolve class name dynamically
-function resolveClassName($className) {
-    return "App\\Models\\" . $className; // Assuming your models are stored in the "App\Models" namespace
-}
+    // Define a helper function to resolve class name dynamically
+    function resolveClassName($className)
+    {
+        return "App\\Models\\" . $className; // Assuming your models are stored in the "App\Models" namespace
+    }
 
     public function sendNotification($reminder, $data, $business)
     {
@@ -117,40 +118,47 @@ function resolveClassName($className) {
     }
     public function handle()
     {
-        // File::put(storage_path('logs/laravel.log'), '');
 
+        // Log that the reminder process has started
         Log::info('reminder is sending...');
+
+        // Retrieve distinct business IDs for reminders
         $businesses =  Reminder::groupBy("business_id")->select("business_id")->get();
 
 
-
+        // Iterate over each business
         foreach ($businesses as $business) {
             $business = Business::where([
                 "id" => $business->business_id,
                 "is_active" => 1
             ])
                 ->first();
+
+            // Skip iteration if business not found or inactive
             if (!$business) {
+                // Log that the business is not found or inactive
+                Log::warning('Business not found or inactive, skipping...');
                 continue;
             }
 
+            // Retrieve reminders for the current business
             $reminders = Reminder::where([
                 "business_id" => $business->id
             ])
                 ->get();
 
 
-
+            // Iterate over each reminder
             foreach ($reminders as $reminder) {
 
-
+                // Adjust reminder duration if necessary
                 if ($reminder->duration_unit == "weeks") {
                     $reminder->duration =  $reminder->duration * 7;
                 } else if ($reminder->duration_unit == "months") {
                     $reminder->duration =  $reminder->duration * 30;
                 }
 
-
+                // Get current timestamp
                 $now = Carbon::now();
                 $model_name = $reminder->model_name;
                 $user_relationship = $reminder->user_relationship;
@@ -161,44 +169,44 @@ function resolveClassName($className) {
 
 
 
-
-                if($model_name == "EmployeePensionHistory") {
-
+                // Handle different model types differently
+                if ($model_name == "EmployeePensionHistory") {
+                    // Handle reminders for EmployeePensionHistory model
                     $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
-                    ->where([
-                        "business_id" => $business->id
-                    ])
-                    ->whereHas($user_relationship, function ($query) use ($user_eligible_field)  {
-                        $query->where(("users." . $user_eligible_field),">",0)
-                        ->where("is_active",1);
-                    })
-                    ->where($issue_date_column, '<', now())
-                    ->whereNotNull($expiry_date_column)
-                    ->groupBy('user_id')
-                    ->get()
-                    ->map(function ($record) use ($model_name,$issue_date_column, $user_eligible_field)  {
+                        ->where([
+                            "business_id" => $business->id
+                        ])
+                        ->whereHas($user_relationship, function ($query) use ($user_eligible_field) {
+                            $query->where(("users." . $user_eligible_field), ">", 0)
+                                ->where("is_active", 1);
+                        })
+                        ->where($issue_date_column, '<', now())
+                        ->whereNotNull($expiry_date_column)
+                        ->groupBy('user_id')
+                        ->get()
+                        ->map(function ($record) use ($model_name, $issue_date_column, $user_eligible_field) {
 
 
 
-            $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
-            ->where($user_eligible_field, 1)
-            ->where($issue_date_column, '<', now())
-                ->orderByDesc("id")
-                ->first();
 
-                if($current_data)
-                {
-                    return NULL;
-                }
+                            $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                                ->where($user_eligible_field, 1)
+                                ->where($issue_date_column, '<', now())
+                                ->orderByDesc("id")
+                                ->first();
+
+                            if ($current_data) {
+                                return NULL;
+                            }
 
 
                             return $current_data->id;
-                    }) ->filter()->values();
+                        })->filter()->values();
 
 
 
-                    $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id",$all_current_data_ids)
-                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+                    $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id", $all_current_data_ids)
+                        ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
                             return $query->where([
                                 ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
                             ]);
@@ -212,43 +220,42 @@ function resolveClassName($className) {
                             );
                         })
                         ->get();
-                }
-                else {
-
+                } else {
+                    // Handle reminders for other models
                     $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
-                    ->where([
-                        "business_id" => $business->id
-                    ])
-                    ->whereHas($user_relationship, function ($query) use ($user_eligible_field)  {
-                        $query->where(("users." . $user_eligible_field),">",0)
-                        ->where("is_active",1);
-                    })
-                    ->where($issue_date_column, '<', now())
-                    ->groupBy('user_id')
-                    ->get()
-                    ->map(function ($record) use ($issue_date_column, $expiry_date_column, $model_name) {
-
-                        $latest_expired_record = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                        ->where([
+                            "business_id" => $business->id
+                        ])
+                        ->whereHas($user_relationship, function ($query) use ($user_eligible_field) {
+                            $query->where(("users." . $user_eligible_field), ">", 0)
+                                ->where("is_active", 1);
+                        })
                         ->where($issue_date_column, '<', now())
-                        ->orderByDesc($expiry_date_column)
-                        // ->latest()
-                        ->first();
+                        ->groupBy('user_id')
+                        ->get()
+                        ->map(function ($record) use ($issue_date_column, $expiry_date_column, $model_name) {
 
-                        if($latest_expired_record) {
-                             $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
-                            ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                            ->where($issue_date_column, '<', now())
-                            ->orderByDesc($issue_date_column)
-                            ->first();
-                        } else {
-                           return NULL;
-                        }
-                            return $current_data?$current_data->id:NULL;
-                    })
-                    ->filter()->values();
+                            $latest_expired_record = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                                ->where($issue_date_column, '<', now())
+                                ->orderByDesc($expiry_date_column)
+                                // ->latest()
+                                ->first();
 
-                    $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id",$all_current_data_ids)
-                    ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
+                            if ($latest_expired_record) {
+                                $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
+                                    ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                                    ->where($issue_date_column, '<', now())
+                                    ->orderByDesc($issue_date_column)
+                                    ->first();
+                            } else {
+                                return NULL;
+                            }
+                            return $current_data ? $current_data->id : NULL;
+                        })
+                        ->filter()->values();
+
+                    $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id", $all_current_data_ids)
+                        ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
                             return $query->where([
                                 ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
                             ]);
@@ -266,9 +273,9 @@ function resolveClassName($className) {
 
 
 
-
+                // Iterate over all reminder data
                 foreach ($all_reminder_data as $data) {
-
+                    // Check if reminder should be sent after expiry
                     if ($reminder->send_time == "after_expiry") {
 
                         $reminder_date =   $now->copy()->subDays($reminder->duration);
@@ -296,6 +303,9 @@ function resolveClassName($className) {
                 }
             }
         }
+
+        // Log that the reminder process has finished
+        Log::info('Reminder process finished.');
         return 0;
     }
 }

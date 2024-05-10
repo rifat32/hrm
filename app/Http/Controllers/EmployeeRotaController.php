@@ -140,7 +140,9 @@ class EmployeeRotaController extends Controller
 
         try {
 
+
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
 
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('employee_rota_create')) {
@@ -162,6 +164,8 @@ class EmployeeRotaController extends Controller
 
                         )
                         ->pluck("id");
+
+
                 }
 
 
@@ -178,9 +182,6 @@ class EmployeeRotaController extends Controller
                 $employee_rota->departments()->sync($request_data['departments']);
                 // $employee_rota->users()->sync($request_data['users'], []);
                 $employee_rota->details()->createMany($request_data['details']);
-
-
-
 
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Utils;
 
 use App\Models\ActivityLog;
+use App\Models\Attendance;
 use App\Models\EmployeeAddressHistory;
 
 use App\Models\EmployeePassportDetailHistory;
@@ -15,8 +16,9 @@ use App\Models\EmployeeRightToWorkHistory;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetailHistory;
-
+use App\Models\Leave;
 use App\Models\Project;
+use App\Models\UserAssetHistory;
 use App\Models\UserRecruitmentProcess;
 use App\Models\UserWorkShift;
 use App\Models\WorkShift;
@@ -595,6 +597,49 @@ if($user->passport_details) {
 
 
     }
+
+public function validateJoiningDate($joining_date,$user_id) {
+
+if(!empty($joining_date)) {
+    $attendance_exists = Attendance::where(
+        "in_date" , "<" ,$joining_date,
+      )
+      ->where([
+          "user_id" => $user_id
+      ])->exists();
+
+                 if($attendance_exists) {
+                    throw new Exception(("Attendance exists before " . $joining_date),401);
+
+              }
+
+              $leave_exists = Leave::where(
+                  "start_date" , "<" ,$joining_date,
+                )
+                ->where([
+                    "user_id" => $user_id
+                ])->exists();
+
+               if($leave_exists) {
+                throw new Exception(("Leave exists before " . $joining_date),401);
+
+
+                        $asset_assigned = UserAssetHistory::where(
+                          "from_date" , "<" ,$joining_date,
+                        )
+                        ->where([
+                            "user_id" => $user_id
+                        ])->exists();
+
+                       if($asset_assigned) {
+                        throw new Exception(("Asset assigned before " . $joining_date),401);
+
+                      }
+}
+
+}
+
+
 
 
 

@@ -1790,6 +1790,93 @@
                                         "type": "boolean",
                                         "format": "boolean",
                                         "example": "1"
+                                    },
+                                    "add_in_next_payroll": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/attendances/approve/arrears": {
+            "put": {
+                "tags": [
+                    "attendances"
+                ],
+                "summary": "This method is to approve attendances ",
+                "description": "This method is to approve attendances",
+                "operationId": "approveAttendanceArrear",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "attendance_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -2164,6 +2251,13 @@
                         "description": "status",
                         "required": true,
                         "example": "pending_approval"
+                    },
+                    {
+                        "name": "arrear_status",
+                        "in": "query",
+                        "description": "arrear_status",
+                        "required": true,
+                        "example": "arrear_status"
                     },
                     {
                         "name": "order_by",
@@ -2762,6 +2856,97 @@
                 ]
             }
         },
+        "/v2.0/login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "This method is to login user",
+                "description": "This method is to login user",
+                "operationId": "loginV2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "admin@gmail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "12345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/logout": {
             "post": {
                 "tags": [
@@ -3209,6 +3394,71 @@
                 "summary": "This method is to get  user ",
                 "description": "This method is to get user",
                 "operationId": "getUser",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/user": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "This method is to get  user ",
+                "description": "This method is to get user",
+                "operationId": "getUserV2",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -4773,7 +5023,8 @@
                                                 "/b",
                                                 "/c"
                                             ],
-                                            "currency": "BDT"
+                                            "currency": "BDT",
+                                            "flexible_rota_enabled": 1
                                         }
                                     }
                                 },
@@ -9351,6 +9602,22 @@
                 "summary": "This method is to get departments  ",
                 "description": "This method is to get departments ",
                 "operationId": "getDepartmentsV3",
+                "parameters": [
+                    {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -10078,6 +10345,108 @@
                 "summary": "This method is to get reminders  ",
                 "description": "This method is to get reminders ",
                 "operationId": "getEmployeeFormDropdownData",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/dropdown-options/employee-form": {
+            "get": {
+                "tags": [
+                    "dropdowns"
+                ],
+                "summary": "This method is to get reminders  ",
+                "description": "This method is to get reminders ",
+                "operationId": "getEmployeeFormDropdownDataV2",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -10902,6 +11271,837 @@
                         "description": "id",
                         "required": true,
                         "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/employee-rotas": {
+            "get": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to get employee rotas  ",
+                "description": "This method is to get employee rotas ",
+                "operationId": "getEmployeeRotas",
+                "parameters": [
+                    {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "name",
+                        "required": true,
+                        "example": "name"
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "description",
+                        "required": true,
+                        "example": "description"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "type",
+                        "required": true,
+                        "example": "type"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "is_personal",
+                        "in": "query",
+                        "description": "is_personal",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to update employee rota ",
+                "description": "This method is to update employee_rota",
+                "operationId": "updateEmployeeRota",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "regular"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "description"
+                                    },
+                                    "is_personal": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "0"
+                                    },
+                                    "break_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "paid"
+                                    },
+                                    "break_hours": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "0"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3,
+                                            4
+                                        ]
+                                    },
+                                    "users": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "details": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "day": "0",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "1",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "2",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "3",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "4",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "5",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "6",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            }
+                                        ]
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-16"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to store employee rota",
+                "description": "This method is to store employee rota",
+                "operationId": "createEmployeeRota",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "regular"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "description"
+                                    },
+                                    "is_personal": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "0"
+                                    },
+                                    "break_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "paid"
+                                    },
+                                    "break_hours": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "0"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "users": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "details": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "day": "0",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "1",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "2",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "3",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "4",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "5",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            },
+                                            {
+                                                "day": "6",
+                                                "start_at": "",
+                                                "end_at": "",
+                                                "is_weekend": 0
+                                            }
+                                        ]
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-16"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-16"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/employee-rotas/toggle-active": {
+            "put": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to toggle employee rota activity",
+                "description": "This method is to toggle employee rota activity",
+                "operationId": "toggleActiveEmployeeRota",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "first_Name",
+                                    "last_Name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "address_line_1",
+                                    "address_line_2",
+                                    "country",
+                                    "city",
+                                    "postcode",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/employee-rotas/{id}": {
+            "get": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to get employee rota by id",
+                "description": "This method is to get employee rota by id",
+                "operationId": "getEmployeeRotaById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/employee-rotas/get-by-user-id/{user_id}": {
+            "get": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to get employee rota by user id",
+                "description": "This method is to get employee rota by user id",
+                "operationId": "getEmployeeRotaByUserId",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "user_id",
+                        "required": true,
+                        "example": "6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/employee-rotas/{ids}": {
+            "delete": {
+                "tags": [
+                    "administrator.employee_rota"
+                ],
+                "summary": "This method is to delete employee rota by id",
+                "description": "This method is to delete employee rota by id",
+                "operationId": "deleteEmployeeRotasByIds",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ids",
+                        "required": true,
+                        "example": "1,2,3"
                     }
                 ],
                 "responses": {
@@ -15840,6 +17040,93 @@
                                         "type": "number",
                                         "format": "number",
                                         "example": "Updated Christmas"
+                                    },
+                                    "add_in_next_payroll": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/leaves/approve/arrears": {
+            "put": {
+                "tags": [
+                    "leaves"
+                ],
+                "summary": "This method is to approve attendances ",
+                "description": "This method is to approve attendances",
+                "operationId": "approveLeaveRecordArrear",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "leave_record_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
@@ -15933,6 +17220,13 @@
                         "description": "per_page",
                         "required": true,
                         "example": "6"
+                    },
+                    {
+                        "name": "arrear_status",
+                        "in": "query",
+                        "description": "arrear_status",
+                        "required": true,
+                        "example": "arrear_status"
                     },
                     {
                         "name": "start_date",
@@ -24773,6 +26067,10 @@
                                         "type": "integer",
                                         "format": "string"
                                     },
+                                    "custom_date": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
                                     "custom_frequency_interval": {
                                         "type": "integer",
                                         "format": "string"
@@ -31626,6 +32924,313 @@
                 ]
             }
         },
+        "/v3.0/users": {
+            "get": {
+                "tags": [
+                    "user_management"
+                ],
+                "summary": "This method is to get user",
+                "description": "This method is to get user",
+                "operationId": "getUsersV3",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "is_in_employee",
+                        "in": "query",
+                        "description": "is_in_employee",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "business_id",
+                        "in": "query",
+                        "description": "business_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "description": "role",
+                        "required": true,
+                        "example": "admin,manager"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to update user",
+                "description": "This method is to update user",
+                "operationId": "updateUserV3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "first_Name",
+                                    "last_Name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "address_line_1",
+                                    "address_line_2",
+                                    "country",
+                                    "city",
+                                    "postcode",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "first_Name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Rifat"
+                                    },
+                                    "middle_Name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "How was this?"
+                                    },
+                                    "NI_number": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "drtjdjdj"
+                                    },
+                                    "last_Name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "How was this?"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "How was this?"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "male"
+                                    },
+                                    "designation_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "employment_status_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "salary_per_annum": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "10"
+                                    },
+                                    "weekly_contractual_hours": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "10"
+                                    },
+                                    "minimum_working_days_per_week": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
+                                    "overtime_rate": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "5"
+                                    },
+                                    "joining_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-16"
+                                    },
+                                    "phone": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    },
+                                    "work_shift_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "work_location_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": "1"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/users/update-address": {
             "put": {
                 "tags": [
@@ -32288,139 +33893,30 @@
                 ]
             }
         },
-        "/v3.0/users": {
+        "/v4.0/users": {
             "get": {
                 "tags": [
                     "user_management"
                 ],
                 "summary": "This method is to get user",
                 "description": "This method is to get user",
-                "operationId": "getUsersV3",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "per_page",
-                        "required": true,
-                        "example": "6"
-                    },
-                    {
-                        "name": "start_date",
-                        "in": "query",
-                        "description": "start_date",
-                        "required": true,
-                        "example": "2019-06-29"
-                    },
-                    {
-                        "name": "end_date",
-                        "in": "query",
-                        "description": "end_date",
-                        "required": true,
-                        "example": "2019-06-29"
-                    },
-                    {
-                        "name": "search_key",
-                        "in": "query",
-                        "description": "search_key",
-                        "required": true,
-                        "example": "search_key"
-                    },
-                    {
-                        "name": "is_in_employee",
-                        "in": "query",
-                        "description": "is_in_employee",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "business_id",
-                        "in": "query",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "is_active",
-                        "in": "query",
-                        "description": "is_active",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "description": "role",
-                        "required": true,
-                        "example": "admin,manager"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v4.0/users": {
-            "get": {
-                "tags": [
-                    "user_management.employee"
-                ],
-                "summary": "This method is to get user",
-                "description": "This method is to get user",
                 "operationId": "getUsersV4",
                 "parameters": [
                     {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
@@ -32442,6 +33938,27 @@
                         "example": "2019-06-29"
                     },
                     {
+                        "name": "full_name",
+                        "in": "query",
+                        "description": "full_name",
+                        "required": true,
+                        "example": "full_name"
+                    },
+                    {
+                        "name": "employee_id",
+                        "in": "query",
+                        "description": "employee_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "email",
+                        "required": true,
+                        "example": "email"
+                    },
+                    {
                         "name": "search_key",
                         "in": "query",
                         "description": "search_key",
@@ -32456,9 +33973,310 @@
                         "example": "1"
                     },
                     {
+                        "name": "is_in_employee",
+                        "in": "query",
+                        "description": "is_in_employee",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "designation_id",
+                        "in": "query",
+                        "description": "designation_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "work_location_id",
+                        "in": "query",
+                        "description": "work_location_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "holiday_id",
+                        "in": "query",
+                        "description": "holiday_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "has_this_project",
+                        "in": "query",
+                        "description": "has_this_project",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "business_id",
                         "in": "query",
                         "description": "business_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "employment_status_id",
+                        "in": "query",
+                        "description": "employment_status_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "immigration_status",
+                        "in": "query",
+                        "description": "immigration_status",
+                        "required": true,
+                        "example": "immigration_status"
+                    },
+                    {
+                        "name": "pension_scheme_status",
+                        "in": "query",
+                        "description": "pension_scheme_status",
+                        "required": true,
+                        "example": "pension_scheme_status"
+                    },
+                    {
+                        "name": "sponsorship_status",
+                        "in": "query",
+                        "description": "sponsorship_status",
+                        "required": true,
+                        "example": "sponsorship_status"
+                    },
+                    {
+                        "name": "sponsorship_note",
+                        "in": "query",
+                        "description": "sponsorship_note",
+                        "required": true,
+                        "example": "sponsorship_note"
+                    },
+                    {
+                        "name": "sponsorship_certificate_number",
+                        "in": "query",
+                        "description": "sponsorship_certificate_number",
+                        "required": true,
+                        "example": "sponsorship_certificate_number"
+                    },
+                    {
+                        "name": "sponsorship_current_certificate_status",
+                        "in": "query",
+                        "description": "sponsorship_current_certificate_status",
+                        "required": true,
+                        "example": "sponsorship_current_certificate_status"
+                    },
+                    {
+                        "name": "sponsorship_is_sponsorship_withdrawn",
+                        "in": "query",
+                        "description": "sponsorship_is_sponsorship_withdrawn",
+                        "required": true,
+                        "example": "0"
+                    },
+                    {
+                        "name": "start_joining_date",
+                        "in": "query",
+                        "description": "start_joining_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_joining_date",
+                        "in": "query",
+                        "description": "end_joining_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_pension_pension_enrollment_issue_date",
+                        "in": "query",
+                        "description": "start_pension_pension_enrollment_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_pension_pension_enrollment_issue_date",
+                        "in": "query",
+                        "description": "end_pension_pension_enrollment_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_pension_re_enrollment_due_date_date",
+                        "in": "query",
+                        "description": "start_pension_re_enrollment_due_date_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_pension_re_enrollment_due_date_date",
+                        "in": "query",
+                        "description": "end_pension_re_enrollment_due_date_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "pension_re_enrollment_due_date_in_day",
+                        "in": "query",
+                        "description": "pension_re_enrollment_due_date_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "start_sponsorship_date_assigned",
+                        "in": "query",
+                        "description": "start_sponsorship_date_assigned",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_sponsorship_date_assigned",
+                        "in": "query",
+                        "description": "end_sponsorship_date_assigned",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_sponsorship_expiry_date",
+                        "in": "query",
+                        "description": "start_sponsorship_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_sponsorship_expiry_date",
+                        "in": "query",
+                        "description": "end_sponsorship_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "sponsorship_expires_in_day",
+                        "in": "query",
+                        "description": "sponsorship_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "start_passport_issue_date",
+                        "in": "query",
+                        "description": "start_passport_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_passport_issue_date",
+                        "in": "query",
+                        "description": "end_passport_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_passport_expiry_date",
+                        "in": "query",
+                        "description": "start_passport_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_passport_expiry_date",
+                        "in": "query",
+                        "description": "end_passport_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "passport_expires_in_day",
+                        "in": "query",
+                        "description": "passport_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "start_visa_issue_date",
+                        "in": "query",
+                        "description": "start_visa_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_visa_issue_date",
+                        "in": "query",
+                        "description": "end_visa_issue_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_visa_expiry_date",
+                        "in": "query",
+                        "description": "start_visa_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_visa_expiry_date",
+                        "in": "query",
+                        "description": "end_visa_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "visa_expires_in_day",
+                        "in": "query",
+                        "description": "visa_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "start_right_to_work_check_date",
+                        "in": "query",
+                        "description": "start_right_to_work_check_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_right_to_work_check_date",
+                        "in": "query",
+                        "description": "end_right_to_work_check_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "start_right_to_work_expiry_date",
+                        "in": "query",
+                        "description": "start_right_to_work_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "end_right_to_work_expiry_date",
+                        "in": "query",
+                        "description": "end_right_to_work_expiry_date",
+                        "required": true,
+                        "example": "2024-01-21"
+                    },
+                    {
+                        "name": "right_to_work_expires_in_day",
+                        "in": "query",
+                        "description": "right_to_work_expires_in_day",
+                        "required": true,
+                        "example": "50"
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "description": "project_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "department_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "doesnt_have_payrun",
+                        "in": "query",
+                        "description": "doesnt_have_payrun",
                         "required": true,
                         "example": "1"
                     },
@@ -32475,6 +34293,20 @@
                         "description": "role",
                         "required": true,
                         "example": "admin,manager"
+                    },
+                    {
+                        "name": "is_on_holiday",
+                        "in": "query",
+                        "description": "is_on_holiday",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "upcoming_expiries",
+                        "in": "query",
+                        "description": "upcoming_expiries",
+                        "required": true,
+                        "example": "passport"
                     }
                 ],
                 "responses": {
@@ -39821,6 +41653,150 @@
                         }
                     }
                 },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/work-shifts": {
+            "get": {
+                "tags": [
+                    "administrator.work_shift"
+                ],
+                "summary": "This method is to get work shifts  ",
+                "description": "This method is to get work shifts ",
+                "operationId": "getWorkShiftsV2",
+                "parameters": [
+                    {
+                        "name": "response_type",
+                        "in": "query",
+                        "description": "response_type: in pdf,csv,json",
+                        "required": true,
+                        "example": "json"
+                    },
+                    {
+                        "name": "file_name",
+                        "in": "query",
+                        "description": "file_name",
+                        "required": true,
+                        "example": "employee"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "name",
+                        "required": true,
+                        "example": "name"
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "description",
+                        "required": true,
+                        "example": "description"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "type",
+                        "required": true,
+                        "example": "type"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "is_personal",
+                        "in": "query",
+                        "description": "is_personal",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",

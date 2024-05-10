@@ -29,6 +29,7 @@ use App\Http\Requests\UserUpdateProfileRequest;
 use App\Http\Requests\UserUpdateRecruitmentProcessRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
+use App\Http\Requests\UserUpdateV3Request;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
@@ -950,7 +951,7 @@ $user->departments()->sync($departments);
                 "id" => $request_data["id"],
             ];
 
-
+            $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             $user = User::where($userQueryTerms)->first();
 
             if ($user) {
@@ -1382,6 +1383,7 @@ $user->departments()->sync($departments);
                 "id" => $request_data["id"],
             ];
 
+            $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
             $user = User::where($userQueryTerms)->first();
 
@@ -1481,6 +1483,195 @@ $user->departments()->sync($departments);
             return $this->sendError($e, 500, $request);
         }
     }
+
+    /**
+     *
+     * @OA\Put(
+     *      path="/v3.0/users",
+     *      operationId="updateUserV3",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user",
+     *      description="This method is to update user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
+     *   *            @OA\Property(property="middle_Name", type="string", format="string",example="How was this?"),
+     *     *      *      *            @OA\Property(property="NI_number", type="string", format="string",example="drtjdjdj"),
+     *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
+     *
+     *
+
+     *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
+
+     *                @OA\Property(property="gender", type="string", format="string",example="male"),
+
+     *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
+     *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
+     *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+     *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *      *           @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *   *     @OA\Property(property="overtime_rate", type="string", format="string",example="5"),
+     *
+     *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+
+
+     *  * *  @OA\Property(property="phone", type="boolean", format="boolean",example="1"),
+
+     *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserV3(UserUpdateV3Request $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+             if (!empty($request_data['password'])) {
+                 $request_data['password'] = Hash::make($request_data['password']);
+             } else {
+                 unset($request_data['password']);
+             }
+             $request_data['is_active'] = true;
+             $request_data['remember_token'] = Str::random(10);
+
+
+
+
+
+             $userQueryTerms = [
+                 "id" => $request_data["id"],
+             ];
+
+             $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
+             $user = User::where($userQueryTerms)->first();
+
+             if ($user) {
+                 $user->fill(collect($request_data)->only([
+                     'first_Name',
+                     'last_Name',
+                     'middle_Name',
+                     "NI_number",
+                     "email",
+                     'gender',
+
+                     'designation_id',
+                     'employment_status_id',
+                     'joining_date',
+                     "date_of_birth",
+                     'salary_per_annum',
+                     'weekly_contractual_hours',
+                     'minimum_working_days_per_week',
+                     'overtime_rate',
+                     'phone',
+
+                     'work_location_id',
+
+                 ])->toArray());
+
+                 $user->save();
+             }
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+            // Get the user's departments
+ $departments = $user->departments->pluck("id");
+
+ // Remove the first department from the collection
+ $removedDepartment = $departments->shift();
+
+ // Insert the department from $request_data at the beginning of the collection
+ $departments->prepend($request_data['departments'][0]);
+
+ // Update the user's departments
+ $user->departments()->sync($departments);
+
+
+             $this->update_work_shift($request_data, $user);
+
+
+
+             DB::commit();
+             return response($user, 201);
+         } catch (Exception $e) {
+             DB::rollBack();
+
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 
@@ -1890,46 +2081,7 @@ $user->departments()->sync($departments);
 
 
 
-
-
-    $attendance_exists = Attendance::where(
-  "in_date" , "<" ,$request_data["joining_date"],
-)
-->where([
-    "user_id" => $request_data["id"]
-])->exists();
-
-           if($attendance_exists) {
-             return response()->json([
-               "message" => "Attendance exists before " . $request_data["joining_date"]
-             ],401);
-        }
-
-        $leave_exists = Leave::where(
-            "start_date" , "<" ,$request_data["joining_date"],
-          )
-          ->where([
-              "user_id" => $request_data["id"]
-          ])->exists();
-
-         if($leave_exists) {
-          return response()->json([
-                         "message" => "Leave exists before " . $request_data["joining_date"]
-                       ],401);
-                  }
-
-                  $asset_assigned = UserAssetHistory::where(
-                    "from_date" , "<" ,$request_data["joining_date"],
-                  )
-                  ->where([
-                      "user_id" => $request_data["id"]
-                  ])->exists();
-
-                 if($asset_assigned) {
-                               return response()->json([
-                                 "message" => "Asset assigned before " . $request_data["joining_date"]
-                               ],401);
-                }
+$this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
 
 
