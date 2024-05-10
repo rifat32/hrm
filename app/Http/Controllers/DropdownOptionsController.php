@@ -338,7 +338,7 @@ class DropdownOptionsController extends Controller
      *
      * @OA\Get(
      *      path="/v2.0/dropdown-options/employee-form",
-     *      operationId="getEmployeeFormDropdownData",
+     *      operationId="getEmployeeFormDropdownDataV2",
      *      tags={"dropdowns"},
      *       security={
      *           {"bearerAuth": {}}

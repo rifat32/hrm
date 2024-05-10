@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\WorkShiftsExport;
+use App\Http\Components\WorkShiftHistoryComponent;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\WorkShiftCreateRequest;
 use App\Http\Requests\WorkShiftUpdateRequest;
@@ -27,6 +28,18 @@ use Maatwebsite\Excel\Facades\Excel;
 class WorkShiftController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+
+
+    protected $workShiftHistoryComponent;
+
+
+    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, )
+    {
+        $this->workShiftHistoryComponent = $workShiftHistoryComponent;
+
+    }
+
+
     /**
      *
      * @OA\Post(
@@ -633,7 +646,7 @@ $details = $work_shift->details->map(function ($detail) {
 if($work_shift->type !== "flexible") {
     $check_work_shift_details =  $this->checkWorkShiftDetails($details);
     if(!$check_work_shift_details["ok"]) {
-    
+
         throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
     }
 }
@@ -871,110 +884,10 @@ if($work_shift->type !== "flexible") {
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $work_shifts = WorkShift::with("details","departments","users")
+            $work_shifts_query = WorkShift::with("details","departments","users");
 
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($business_times, $all_manager_department_ids) {
-                return $query
-                ->where(function($query) use($all_manager_department_ids) {
-                    $query
-                    ->where([
-                        "work_shifts.business_id" => auth()->user()->business_id
-                    ])
-                    ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                        $query->whereIn("departments.id", $all_manager_department_ids);
-                    });
+            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($request,$all_manager_department_ids,$work_shifts_query)
 
-                })
-
-                ->orWhere(function($query) use($business_times) {
-                    $query->where([
-                        "is_active" => 1,
-                        "business_id" => NULL,
-                        "is_default" => 1
-                    ])
-                //     ->whereHas('details', function($query) use($business_times) {
-
-                //     foreach($business_times as $business_time) {
-                //         $query->where([
-                //             "day" => $business_time->day,
-                //         ]);
-                //         if($business_time["is_weekend"]) {
-                //             $query->where([
-                //                 "is_weekend" => 1,
-                //             ]);
-                //         } else {
-                //             $query->where(function($query) use($business_time) {
-                //                 $query->whereTime("start_at", ">=", $business_time->start_at);
-                //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
-                //             });
-                //         }
-
-                //     }
-                // })
-                ;
-
-                });
-            })
-
-            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
-                return $query->where([
-                    "work_shifts.is_default" => 1,
-                    "work_shifts.business_id" => NULL
-                ]);
-            })
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        $query->where("work_shifts.name", "like", "%" . $term . "%")
-                            ->orWhere("work_shifts.description", "like", "%" . $term . "%");
-                    });
-                })
-
-
-
-
-
-                ->when(isset($request->name), function ($query) use ($request) {
-                    $term = $request->name;
-                    return $query->where("work_shifts.name", "like", "%" . $term . "%");
-                })
-                ->when(isset($request->description), function ($query) use ($request) {
-                    $term = $request->description;
-                    return $query->where("work_shifts.description", "like", "%" . $term . "%");
-                })
-
-                ->when(isset($request->type), function ($query) use ($request) {
-                    return $query->where('work_shifts.type', ($request->type));
-                })
-
-
-
-
-
-
-                ->when(isset($request->is_personal), function ($query) use ($request) {
-                    return $query->where('work_shifts.is_personal', intval($request->is_personal));
-                })
-                ->when(!isset($request->is_personal), function ($query) use ($request) {
-                    return $query->where('work_shifts.is_personal', 0);
-                })
-
-
-                ->when(isset($request->is_default), function ($query) use ($request) {
-                    return $query->where('work_shifts.is_default', intval($request->is_personal));
-                })
-
-
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('work_shifts.created_at', ">=", $request->start_date);
-                })
-
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('work_shifts.created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("work_shifts.id", $request->order_by);
                 }, function ($query) {
@@ -1006,7 +919,217 @@ if($work_shift->type !== "flexible") {
             return $this->sendError($e, 500, $request);
         }
     }
+    /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/work-shifts",
+     *      operationId="getWorkShiftsV2",
+     *      tags={"administrator.work_shift"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *   *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
 
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     * @OA\Parameter(
+     * name="description",
+     * in="query",
+     * description="description",
+     * required=true,
+     * example="description"
+     * ),
+     *    * @OA\Parameter(
+     * name="type",
+     * in="query",
+     * description="type",
+     * required=true,
+     * example="type"
+     * ),
+     *
+     *
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *      * *  @OA\Parameter(
+     * name="is_personal",
+     * in="query",
+     * description="is_personal",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+     *
+
+     *      summary="This method is to get work shifts  ",
+     *      description="This method is to get work shifts ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getWorkShiftsV2(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('work_shift_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $work_shifts_query = WorkShift::with(
+
+              [
+                "departments" => function ($query) {
+                    $query->select(
+                        'departments.id',
+                        'departments.name',
+                    );
+                },
+
+                ]
+            );
+
+            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($request,$all_manager_department_ids,$work_shifts_query)
+
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("work_shifts.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("work_shifts.id", "DESC");
+                })
+                ->select(
+
+
+         "work_shifts.id",
+"work_shifts.name",
+"work_shifts.type",
+"work_shifts.break_type",
+"work_shifts.business_id",
+
+"work_shifts.description",
+"work_shifts.is_active",
+"work_shifts.is_business_default",
+"work_shifts.is_default",
+"work_shifts.is_personal",
+
+                )
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
+
+
+                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                    // if (strtoupper($request->response_type) == 'PDF') {
+                    //     $pdf = PDF::loadView('pdf.work_shifts', ["work_shifts" => $work_shifts]);
+                    //     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                    // } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                    //     return Excel::download(new WorkShiftsExport($work_shifts), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                    // }
+                } else {
+                    return response()->json($work_shifts, 200);
+                }
+
+
+
+
+             return response()->json($work_shifts, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(

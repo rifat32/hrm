@@ -3849,7 +3849,13 @@ $user->departments()->sync($departments);
                             'designations.name',
                         );
                     },
-                    "roles"
+                    "roles" => function ($query) {
+                        $query->select(
+                            'roles.id',
+                            'roles.name',
+                        );
+                    },
+
                 ]
                 );
 
@@ -3868,6 +3874,7 @@ $user->departments()->sync($departments);
                      "users.last_Name",
                      "users.user_id",
                      "users.email",
+                     "users.image",
                      "users.status",
                  )
                 //  ->withCount('all_users as user_count')
