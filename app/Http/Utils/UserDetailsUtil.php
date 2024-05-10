@@ -636,7 +636,7 @@ if(!empty($joining_date)) {
 
                       }
 }
-
+}
 }
 
 
