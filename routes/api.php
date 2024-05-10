@@ -1364,7 +1364,7 @@ Route::delete('/v1.0/reminders/{ids}', [ReminderController::class, "deleteRemind
 
 
 Route::get('/v1.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownData"]);
-
+Route::get('/v2.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownDataV2"]);
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
