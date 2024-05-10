@@ -1440,7 +1440,23 @@ class HistoryDetailsController extends Controller
                         'users.middle_Name',
                         'users.last_Name'
                     );
-                }
+                },
+                "approved_by_users.actor" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "rejected_by_users.actor" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
                 ]
 
                 )

@@ -533,7 +533,9 @@ $responseData = [
         'logo' => $user->business ? $user->business->logo : null,
         'start_date' => $user->business ? $user->business->start_date : null,
         'currency' => $user->business ? $user->business->currency : null,
-        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null
+        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null,
+        'color_theme_name' => $user->business ? $user->business->color_theme_name : null
+
     ]
 ];
 
@@ -1283,7 +1285,8 @@ $responseData = [
         'logo' => $user->business ? $user->business->logo : null,
         'start_date' => $user->business ? $user->business->start_date : null,
         'currency' => $user->business ? $user->business->currency : null,
-        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null 
+        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null,
+        'color_theme_name' => $user->business ? $user->business->color_theme_name : null
     ]
 ];
 

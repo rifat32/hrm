@@ -367,7 +367,10 @@ class LeaveController extends Controller
                 $leave_history_data = $leave->toArray();
                 $leave_history_data['leave_id'] = $leave->id;
                 $leave_history_data['actor_id'] = auth()->user()->id;
-                $leave_history_data['action'] = "approve";
+
+                $leave_history_data['action'] = $request_data["is_approved"] ? "approve" : "reject";
+
+
                 $leave_history_data['is_approved'] =  $request_data['is_approved'];
                 $leave_history_data['leave_created_at'] = $leave->created_at;
                 $leave_history_data['leave_updated_at'] = $leave->updated_at;
@@ -606,18 +609,22 @@ class LeaveController extends Controller
              // Extract data
              $request_data = $request->validated();
 
-         $leave_record_arrear = LeaveRecordArrear::where([
-            "leave_record_id" => $request_data["leave_record_id"]
-         ])
-         ->first();
+             foreach($request_data["leave_record_ids"] as $leave_record_id ) {
+                $leave_record_arrear = LeaveRecordArrear::where([
+                    "leave_record_id" => $leave_record_id
+                 ])
+                 ->first();
 
-         if($leave_record_arrear) {
-            if( $leave_record_arrear->status == "pending_approval") {
-                $leave_record_arrear->status = "approved";
-                $leave_record_arrear->save();
-            }
+                 if($leave_record_arrear) {
+                    if( $leave_record_arrear->status == "pending_approval") {
+                        $leave_record_arrear->status = "approved";
+                        $leave_record_arrear->save();
+                    }
 
-         }
+                 }
+
+             }
+
 
 
 
@@ -1069,6 +1076,8 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             } else {
                 return response()->json($leaves, 200);
             }
+
+            
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

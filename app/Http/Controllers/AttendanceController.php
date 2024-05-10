@@ -709,19 +709,23 @@ class AttendanceController extends Controller
              // Extract data
              $request_data = $request->validated();
 
+             foreach($request_data["attendance_ids"] as $attendance_id){
+                
+                $attendance_arrear = AttendanceArrear::where([
+                    "attendance_id" => $attendance_id
+                 ])
+                 ->first();
 
-         $attendance_arrear = AttendanceArrear::where([
-            "attendance_id" => $request_data["attendance_id"]
-         ])
-         ->first();
+                 if($attendance_arrear) {
+                    if( $attendance_arrear->status == "pending_approval") {
+                        $attendance_arrear->status = "approved";
+                        $attendance_arrear->save();
+                    }
 
-         if($attendance_arrear) {
-            if( $attendance_arrear->status == "pending_approval") {
-                $attendance_arrear->status = "approved";
-                $attendance_arrear->save();
-            }
+                 }
+             }
 
-         }
+
 
 
 

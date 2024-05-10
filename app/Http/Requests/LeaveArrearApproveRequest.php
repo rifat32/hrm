@@ -26,7 +26,8 @@ class LeaveArrearApproveRequest extends FormRequest
     {
         $all_manager_department_ids = $this->get_all_departments_of_manager();
         return [
-            'leave_record_id' => [
+            'leave_record_ids' => "present|array",
+            'leave_record_ids.*' => [
                 'required',
                 'numeric',
                 new ValidateLeaveRecordId($all_manager_department_ids),

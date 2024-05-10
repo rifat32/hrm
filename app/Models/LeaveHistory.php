@@ -55,7 +55,18 @@ class LeaveHistory extends Model
     public function actor() {
         return $this->belongsTo(User::class, "actor_id","id");
     }
-
+    public function approved_by_users(){
+        return $this->hasMany(LeaveHistory::class,'leave_id', 'leave_id')
+        ->where([
+            "action" => "approve"
+        ]);
+    }
+    public function rejected_by_users(){
+        return $this->hasMany(LeaveHistory::class,'leave_id', 'leave_id')
+        ->where([
+            "action" => "reject"
+        ]);
+    }
 
     public function leave_type() {
         return $this->belongsTo(SettingLeaveType::class, "leave_type_id","id");

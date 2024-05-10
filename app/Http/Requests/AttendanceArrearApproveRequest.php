@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Attendance;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceArrearApproveRequest extends FormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -36,7 +38,8 @@ class AttendanceArrearApproveRequest extends FormRequest
 
 
         return [
-            'attendance_id' => [
+            'attendance_ids' => "present|array",
+            'attendance_ids.*' => [
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {

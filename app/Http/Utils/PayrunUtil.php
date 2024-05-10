@@ -543,7 +543,12 @@ trait PayrunUtil
                 if($attendance->status == "approved" || $attendance->total_paid_hours > 0){
                     $this->create_attendance_arrear($attendance, $add_to_next_payroll);
                 }
+            } else {
+                if ($attendance->status == "rejected") {
+                    $attendance_arrear->delete();
             }
+            }
+
             return true;
         }
 
@@ -614,6 +619,9 @@ trait PayrunUtil
                 if ($leave_record->leave->status == "approved" || $leave_record->leave->leave_type->type == "paid") {
                 $this->create_leave_arrear($leave_record, $add_to_next_payroll);
 
+            } else {
+                if ($leave_record->leave->status == "rejected") {
+                    $leave_record_arrear->delete();
             }
 
             }
