@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\Notification;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\File;
 
 class ReminderScheduler extends Command
 {
+    use BasicUtil;
     /**
      * The name and signature of the console command.
      *
@@ -90,17 +92,16 @@ class ReminderScheduler extends Command
         Log::info(($notification_description));
         Log::info(($notification_link));
 
-        $dapartments = Department::whereHas("users", function ($query) use ($user) {
-            $query->where("users.id", $user->id);
-        })
-            ->get();
-        $all_parent_department_manager_ids = [];
-        foreach ($dapartments as $dapartment) {
-            $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $dapartment->getAllParentManagerIds());
-        }
-        $unique_all_parent_department_manager_ids = array_unique($all_parent_department_manager_ids);
 
-        foreach ($unique_all_parent_department_manager_ids as $manager_id) {
+
+    // Get all parent department IDs of the employee
+    $all_parent_departments_manager_ids = $this->all_parent_departments_manager_of_user($user->id,$user->business_id);
+
+
+        Log::warning((json_encode($all_parent_departments_manager_ids)));
+
+
+        foreach ($all_parent_departments_manager_ids as $manager_id) {
             Notification::create([
                 "entity_id" => $data->id,
                 "entity_name" => $reminder->entity_name,
@@ -128,6 +129,7 @@ class ReminderScheduler extends Command
 
         // Iterate over each business
         foreach ($businesses as $business) {
+            Log::info(('reminder is sending for business id: ' . $business->id));
             $business = Business::where([
                 "id" => $business->business_id,
                 "is_active" => 1
@@ -151,6 +153,7 @@ class ReminderScheduler extends Command
             // Iterate over each reminder
             foreach ($reminders as $reminder) {
 
+                Log::info(('reminder is sending for reminder id: ' . $reminder->id));
                 // Adjust reminder duration if necessary
                 if ($reminder->duration_unit == "weeks") {
                     $reminder->duration =  $reminder->duration * 7;

@@ -127,8 +127,28 @@ trait BasicUtil
             $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
         }
 
-        return $all_parent_department_ids;
+        return array_unique($all_parent_department_ids);
     }
+
+    public function all_parent_departments_manager_of_user($user_id,$business_id) {
+        $all_parent_department_manager_ids = [];
+        $assigned_departments = Department::whereHas("users", function ($query) use ($user_id) {
+            $query->where("users.id", $user_id);
+        })->limit(1)->get();
+
+
+        foreach ($assigned_departments as $assigned_department) {
+            array_push($all_parent_department_manager_ids, $assigned_department->manager_id);
+            $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $assigned_department->getAllParentDepartmentManagerIds($business_id));
+        }
+
+        return array_unique($all_parent_department_manager_ids);
+    }
+
+
+
+
+
 
 public function log($data) {
    Log::info(json_encode($data));

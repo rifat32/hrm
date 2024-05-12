@@ -18,7 +18,9 @@ class DepartmentComponent {
             $all_parent_department_ids = array_merge($all_parent_department_ids, $assigned_department->getAllParentIds());
         }
 
-        return $all_parent_department_ids;
+
+        
+        return array_unique($all_parent_department_ids);
     }
 
     public function get_all_departments_of_manager() {

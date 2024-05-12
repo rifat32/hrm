@@ -67,7 +67,21 @@ class Department extends Model
 
         return $parentIds;
     }
+    public function getAllParentDepartmentManagerIds($business_id)
+    {
+        $parentDepartmentManagerIds = [];
+        $this->getParentDepartmentManagerIdsRecursive($this, $parentDepartmentManagerIds,
+        Department::where([
+            "business_id" => $business_id
+        ]
+        )
+    ->count()
 
+
+    );
+
+        return $parentDepartmentManagerIds;
+    }
 
 
     protected function getParentIdsRecursive($department, &$parentIds, $depth = 0)
@@ -86,6 +100,21 @@ class Department extends Model
         }
     }
 
+    protected function getParentDepartmentManagerIdsRecursive($department, &$parentDepartmentManagerIds, $depth = 0)
+    {
+        // Check if we've reached the depth limit
+        if ($depth >= 10) {
+            return;
+        }
+
+        if ($department->parent) {
+            // Include the parent ID
+            $parentDepartmentManagerIds[] = $department->parent->manager_id;
+
+            // Recursively get the parent IDs of the current parent
+            $this->getParentDepartmentManagerIdsRecursive($department->parent, $parentDepartmentManagerIds, $depth + 1);
+        }
+    }
 
     public function getAllParentManagerIds()
     {
