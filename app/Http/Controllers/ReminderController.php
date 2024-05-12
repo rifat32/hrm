@@ -41,6 +41,7 @@ class ReminderController extends Controller
  *     @OA\Property(property="duration_unit", type="string", format="string", example="days", enum={"days", "weeks", "months"}),
  *     @OA\Property(property="send_time", type="string", format="string", example="before_expiry", enum={"before_expiry", "after_expiry"}),
  *     @OA\Property(property="frequency_after_first_reminder", type="integer", format="int", example=2),
+ *  * *     @OA\Property(property="reminder_limit", type="integer", format="int", example=2),
  *     @OA\Property(property="keep_sending_until_update", type="boolean", format="boolean", example=true)
  *
  *
@@ -159,6 +160,8 @@ class ReminderController extends Controller
  *     @OA\Property(property="duration_unit", type="string", format="string", example="days", enum={"days", "weeks", "months"}),
  *     @OA\Property(property="send_time", type="string", format="string", example="before_expiry", enum={"before_expiry", "after_expiry"}),
  *     @OA\Property(property="frequency_after_first_reminder", type="integer", format="int", example=2),
+ * *     @OA\Property(property="reminder_limit", type="integer", format="int", example=2),
+ *
  *     @OA\Property(property="keep_sending_until_update", type="boolean", format="boolean", example=true)
 
      *
@@ -259,6 +262,7 @@ class ReminderController extends Controller
                         'duration_unit',
                         'send_time',
                         'frequency_after_first_reminder',
+                        'reminder_limit',
                         'keep_sending_until_update',
                         'entity_name',
                     ])->toArray()
@@ -688,7 +692,7 @@ class ReminderController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

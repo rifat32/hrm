@@ -19,6 +19,7 @@ class Reminder extends Model
         'duration_unit',
         'send_time',
         'frequency_after_first_reminder',
+        'reminder_limit',
         'keep_sending_until_update',
         'entity_name',
         "business_id",

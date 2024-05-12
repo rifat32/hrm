@@ -33,7 +33,11 @@ class CreateRemindersTable extends Migration
             $table->integer('duration');
             $table->enum('duration_unit', ['days', 'weeks', 'months']);
             $table->enum('send_time', ['before_expiry', 'after_expiry']);
+
             $table->integer('frequency_after_first_reminder')->nullable();
+            $table->integer('reminder_limit')->nullable();
+
+
             $table->boolean('keep_sending_until_update');
 
             $table->unsignedBigInteger("business_id");

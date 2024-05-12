@@ -142,7 +142,12 @@ trait BasicUtil
             $all_parent_department_manager_ids = array_merge($all_parent_department_manager_ids, $assigned_department->getAllParentDepartmentManagerIds($business_id));
         }
 
-        return array_unique($all_parent_department_manager_ids);
+        // Remove null values and then remove duplicates
+    $all_parent_department_manager_ids = array_unique(array_filter($all_parent_department_manager_ids, function($value) {
+        return !is_null($value);
+    }));
+
+    return $all_parent_department_manager_ids;
     }
 
 

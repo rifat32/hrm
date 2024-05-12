@@ -86,7 +86,7 @@ class ReminderScheduler extends Command
 
 
 
-
+        Log::warning((json_encode($data)));
 
 
         Log::info(($notification_description));
@@ -94,8 +94,8 @@ class ReminderScheduler extends Command
 
 
 
-    // Get all parent department IDs of the employee
-    $all_parent_departments_manager_ids = $this->all_parent_departments_manager_of_user($user->id,$user->business_id);
+        // Get all parent department IDs of the employee
+        $all_parent_departments_manager_ids = $this->all_parent_departments_manager_of_user($user->id, $user->business_id);
 
 
         Log::warning((json_encode($all_parent_departments_manager_ids)));
@@ -210,9 +210,14 @@ class ReminderScheduler extends Command
 
                     $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id", $all_current_data_ids)
                         ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
-                            return $query->where([
-                                ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
-                            ]);
+
+                            return $query->where(
+                                ($expiry_date_column),
+                                "<=",
+                                $now->copy()->addDays($reminder->duration)
+                            );
+
+
                         })
                         ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
 
@@ -259,9 +264,11 @@ class ReminderScheduler extends Command
 
                     $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id", $all_current_data_ids)
                         ->when(($reminder->send_time == "before_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
-                            return $query->where([
-                                ($expiry_date_column) => $now->copy()->addDays($reminder->duration)
-                            ]);
+                            return $query->where(
+                                ($expiry_date_column),
+                                "<=",
+                                $now->copy()->addDays($reminder->duration)
+                            );
                         })
                         ->when(($reminder->send_time == "after_expiry"), function ($query) use ($reminder, $expiry_date_column, $now) {
 
@@ -281,27 +288,81 @@ class ReminderScheduler extends Command
                     // Check if reminder should be sent after expiry
                     if ($reminder->send_time == "after_expiry") {
 
+                        // Calculate the reminder date based on the duration set
                         $reminder_date =   $now->copy()->subDays($reminder->duration);
 
-
+                        // Check if the reminder date matches the expiry date
                         if ($reminder_date->eq($data->$expiry_date_column)) {
-
-                            // send notification or email based on setting
                             // send notification or email based on setting
                             $this->sendNotification($reminder, $data, $business);
                         } else if ($reminder_date->gt($data->$expiry_date_column)) {
-                            if ($reminder->keep_sending_until_update == 1 && !empty($reminder->frequency_after_first_reminder)) {
+
+                            // Check if the reminder should keep sending until updated and if a frequency is set
+                            if (!empty($reminder->frequency_after_first_reminder)) {
+
+                                // Calculate the difference in days between reminder date and expiry date
                                 $days_difference = $reminder_date->diffInDays($data->$expiry_date_column);
-                                if ((($days_difference % $reminder->frequency_after_first_reminder) == 0)) {
-                                    // send notification or email based on setting
-                                    // send notification or email based on setting
-                                    $this->sendNotification($reminder, $data, $business);
+
+                                // Calculate the modulo once
+                                $is_frequency_met = ($days_difference % $reminder->frequency_after_first_reminder) == 0;
+
+                                if ($reminder->keep_sending_until_update) {
+                                    // Check if the difference in days is a multiple of the set frequency
+                                    if ($is_frequency_met) {
+                                        // send notification or email based on setting
+                                        $this->sendNotification($reminder, $data, $business);
+                                    }
+                                } else {
+
+                                    if ($is_frequency_met && (($days_difference / $reminder->frequency_after_first_reminder) <= $reminder->reminder_limit)) {
+                                        // send notification or email based on setting
+                                        $this->sendNotification($reminder, $data, $business);
+                                    }
                                 }
                             }
                         }
                     } else if ($reminder->send_time == "before_expiry") {
-                        // send notification or email based on setting
-                        $this->sendNotification($reminder, $data, $business);
+
+
+                            // Calculate the reminder date based on the duration set
+                            // $reminder_date =   $now->copy()->addDays($reminder->duration);
+                            $reminder_date =   Carbon::parse($data->$expiry_date_column)->subDays($reminder->duration);
+
+
+                            // Check if the reminder date matches the expiry date
+                            if ($reminder_date->eq($now)) {
+                                // send notification or email based on setting
+                                $this->sendNotification($reminder, $data, $business);
+                            } else if ($reminder_date->gt($now)) {
+
+                                // Check if the reminder should keep sending until updated and if a frequency is set
+                                if (!empty($reminder->frequency_after_first_reminder)) {
+
+                                    // Calculate the difference in days between reminder date and expiry date
+                                    $days_difference = $reminder_date->diffInDays($now);
+
+                                    // Calculate the modulo once
+                                    $is_frequency_met = ($days_difference % $reminder->frequency_after_first_reminder) == 0;
+
+                                    if ($reminder->keep_sending_until_update) {
+                                        // Check if the difference in days is a multiple of the set frequency
+                                        if ($is_frequency_met) {
+                                            // send notification or email based on setting
+                                            $this->sendNotification($reminder, $data, $business);
+                                        }
+                                    } else {
+
+                                        if ($is_frequency_met && (($days_difference / $reminder->frequency_after_first_reminder) <= $reminder->reminder_limit)) {
+                                            // send notification or email based on setting
+                                            $this->sendNotification($reminder, $data, $business);
+                                        }
+                                    }
+                                }
+                            }
+
+
+
+
                     }
                 }
             }
