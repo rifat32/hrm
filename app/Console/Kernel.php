@@ -21,6 +21,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('reminder:send')->everyMinute();
 
+        $schedule->command('salary_reminder:send')->everyMinute();
+
         $schedule->command('payrun:run')->everyMinute();
 
 

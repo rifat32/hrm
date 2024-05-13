@@ -117,6 +117,8 @@ class ReminderScheduler extends Command
             ]);
         }
     }
+
+
     public function handle()
     {
 
@@ -174,8 +176,9 @@ class ReminderScheduler extends Command
 
                 // Handle different model types differently
                 if ($model_name == "EmployeePensionHistory") {
+                    Log::info(('pension reminder.. '));
                     // Handle reminders for EmployeePensionHistory model
-                    $all_current_data_ids = $this->resolveClassName($model_name)::select('user_id')
+                    $all_current_data_ids = $this->resolveClassName($model_name)::select('id','user_id')
                         ->where([
                             "business_id" => $business->id
                         ])
@@ -189,23 +192,20 @@ class ReminderScheduler extends Command
                         ->get()
                         ->map(function ($record) use ($model_name, $issue_date_column, $user_eligible_field) {
 
-
-
-
                             $current_data = $this->resolveClassName($model_name)::where('user_id', $record->user_id)
                                 ->where($user_eligible_field, 1)
                                 ->where($issue_date_column, '<', now())
                                 ->orderByDesc("id")
                                 ->first();
 
-                            if ($current_data) {
+                            if (!$current_data) {
                                 return NULL;
                             }
 
 
                             return $current_data->id;
                         })->filter()->values();
-
+                        Log::info(json_encode($all_current_data_ids));
 
 
                     $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id", $all_current_data_ids)
@@ -285,6 +285,12 @@ class ReminderScheduler extends Command
 
                 // Iterate over all reminder data
                 foreach ($all_reminder_data as $data) {
+
+
+    Log::info(('reminder data....            ' . json_encode($data)));
+
+
+
                     // Check if reminder should be sent after expiry
                     if ($reminder->send_time == "after_expiry") {
 
@@ -323,17 +329,18 @@ class ReminderScheduler extends Command
                         }
                     } else if ($reminder->send_time == "before_expiry") {
 
+                        Log::info(('before expiry reminder....            ' ));
 
                             // Calculate the reminder date based on the duration set
                             // $reminder_date =   $now->copy()->addDays($reminder->duration);
                             $reminder_date =   Carbon::parse($data->$expiry_date_column)->subDays($reminder->duration);
-
+                            Log::info(('before expiry reminder date....            ' . $reminder_date ));
 
                             // Check if the reminder date matches the expiry date
                             if ($reminder_date->eq($now)) {
                                 // send notification or email based on setting
                                 $this->sendNotification($reminder, $data, $business);
-                            } else if ($reminder_date->gt($now)) {
+                            } else if ($reminder_date->lt($now)) {
 
                                 // Check if the reminder should keep sending until updated and if a frequency is set
                                 if (!empty($reminder->frequency_after_first_reminder)) {

@@ -1077,7 +1077,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 return response()->json($leaves, 200);
             }
 
-            
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -1261,36 +1261,68 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
              $business_id =  $request->user()->business_id;
-             $leaves = Leave::where(
-                 [
-                     "leaves.business_id" => $business_id
-                 ]
+
+
+
+             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
+             $business_id =  $request->user()->business_id;
+             $leaves = Leave::with([
+                 "employee" => function ($query) {
+                     $query->select(
+                         'users.id',
+                         'users.first_Name',
+                         'users.middle_Name',
+                         'users.last_Name',
+                         'users.image'
+                     );
+                 },
+                 "employee.departments" => function ($query) {
+                     // You can select specific fields from the departments table if needed
+                     $query->select(
+                         'departments.id',
+                         'departments.name',
+                         "departments.description"
+                     );
+                 },
+                 "leave_type" => function ($query) {
+                     $query->select(
+                         'setting_leave_types.id',
+                         'setting_leave_types.name',
+                         'setting_leave_types.type',
+                         'setting_leave_types.amount',
+
+                     );
+                 },
+
+             ])
+             ->when(!empty($request->arrear_status),function($query) use($request) {
+                $query->whereHas("records.arrear", function ($query) use ($request) {
+                    $query
+                    ->where(
+                    "leave_record_arrears.status",
+                    $request->arrear_status
+                    );
+                });
+             },
+             function($query) use($request) {
+                $query->whereHas("records.arrear", function ($query) use ($request) {
+                    $query
+                    ->whereNotNull(
+                    "leave_record_arrears.status"
+                    );
+                });
+             }
+
+
              )
+                 ->where(
+                     [
+                         "leaves.business_id" => $business_id
+                     ]
+                 )
                  ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                      $query->whereIn("departments.id", $all_manager_department_ids);
                  })
-
-                 ->when(!empty($request->arrear_status),function($query) use($request) {
-                    $query->whereHas("records.arrear", function ($query) use ($request) {
-                        $query
-                        ->where(
-                        "leave_record_arrears.status",
-                        $request->arrear_status
-                        );
-                    });
-                 },
-                 function($query) use($request) {
-                    $query->whereHas("records.arrear", function ($query) use ($request) {
-                        $query
-                        ->whereNotNull(
-                        "leave_record_arrears.status"
-                        );
-                    });
-                 }
-
-
-                 )
-
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;
@@ -1298,34 +1330,72 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                          //     ->orWhere("leaves.description", "like", "%" . $term . "%");
                      });
                  })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->user_id), function ($query) use ($request) {
-                     return $query->where('leaves.user_id', $request->user_id);
+                 ->when(!empty($request->status), function ($query) use ($request) {
+                     return $query->where('leaves.status', $request->status);
                  })
+
+
+
+
+                 ->when(!empty($request->leave_type_id), function ($query) use ($request) {
+                     return $query->where('leaves.leave_type_id', $request->leave_type_id);
+                 })
+
+
+
+                 ->when(!empty($request->duration), function ($query) use ($request) {
+                     $number_query = explode(',', str_replace(' ', ',', $request->duration));
+                     return $query->where('leaves.leave_duration', $number_query);
+                 })
+
+
+
+                 ->when(!empty($request->total_leave_hours), function ($query) use ($request) {
+                     $number_query = explode(',', str_replace(' ', ',', $request->total_leave_hours));
+                     return $query->where('leaves.total_leave_hours', $number_query[0],$number_query[1]);
+                 })
+
+
+                 ->when(!empty($request->date), function ($query) use ($request) {
+                     $query->whereHas("records", function($query) use($request){
+                         $query->where("leave_records.date",$request->date);
+                   });
+                 })
+                 ->when(!empty($request->total_leave_hours), function ($query) use ($request) {
+                     return $query->whereHas("records", function($query) use($request) {
+                         $query->selectRaw("SUM(leave_records.leave_hours) as total_leave_hours")
+                               ->groupBy('employee_id'); // Assuming you need to group by employee_id
+                     })
+                     ->having('total_leave_hours', $request->total_leave_hours);
+                 })
+
+
+                 ->when(!empty($request->user_id), function ($query) use ($request) {
+                     $idsArray = explode(',', $request->user_id);
+                     return $query->whereIn('leaves.user_id', $idsArray);
+                 })
+
                  ->when(empty($request->user_id), function ($query) use ($request) {
                      return $query->whereHas("employee", function ($query) {
                          $query->whereNotIn("users.id", [auth()->user()->id]);
                      });
                  })
-                 ->when(!empty($request->leave_type_id), function ($query) use ($request) {
-                     return $query->where('leaves.leave_type_id', $request->leave_type_id);
-                 })
-                 ->when(!empty($request->status), function ($query) use ($request) {
-                     return $query->where('leaves.status', $request->status);
-                 })
-                 ->when(!empty($request->department_id), function ($query) use ($request) {
-                     return $query->whereHas("employee.departments", function ($query) use ($request) {
-                         $query->where("departments.id", $request->department_id);
-                     });
-                 })
+
+
+                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                 //        return $query->where('product_category_id', $request->product_category_id);
+                 //    })
+
+
                  ->when(!empty($request->start_date), function ($query) use ($request) {
                      $query->where('leaves.start_date', '>=', $request->start_date . ' 00:00:00');
                  })
                  ->when(!empty($request->end_date), function ($query) use ($request) {
                      $query->where('leaves.end_date', '<=', $request->end_date . ' 23:59:59');
                  })
+
+
+
                  ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                      return $query->orderBy("leaves.id", $request->order_by);
                  }, function ($query) {
@@ -1337,9 +1407,6 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                      return $query->get();
                  });
 
-
-
-
              foreach ($leaves as $leave) {
                  $leave->total_leave_hours = $leave->records->sum(function ($record) {
                      $startTime = Carbon::parse($record->start_time);
@@ -1347,18 +1414,44 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                      return $startTime->diffInHours($endTime);
                  });
              }
+             $data["data"] = $leaves;
+
+
+             $data["data_highlights"] = [];
+
+             $data["data_highlights"]["employees_on_leave"] = $leaves->count();
+
+             $data["data_highlights"]["total_leave_hours"] = $leaves->reduce(function ($carry, $leave) {
+                 return $carry + $leave->records->sum(function ($record) {
+                     $startTime = \Carbon\Carbon::parse($record->start_time);
+                     $endTime = \Carbon\Carbon::parse($record->end_time);
+
+                     return $startTime->diffInHours($endTime);
+                 });
+             }, 0);
+
+             $data["data_highlights"]["single_day_leaves"] = $leaves->filter(function ($leave) {
+                 return $leave->leave_duration == "single_day";
+             })->count();
+
+             $data["data_highlights"]["multiple_day_leaves"] = $leaves->filter(function ($leave) {
+                 return $leave->leave_duration == "multiple_day";
+             })->count();
+
 
              if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                  if (strtoupper($request->response_type) == 'PDF') {
                      $pdf = PDF::loadView('pdf.leaves', ["leaves" => $leaves]);
                      return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
                  } elseif (strtoupper($request->response_type) === 'CSV') {
-
                      return Excel::download(new LeavesExport($leaves), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
                  }
              } else {
-                 return response()->json($leaves, 200);
+                 return response()->json($data, 200);
              }
+
+
+             return response()->json($data, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);
