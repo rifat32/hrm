@@ -760,7 +760,7 @@ trait PayrunUtil
         }
 
         $payroll->regular_hours =  $payroll->total_holiday_hours +  $payroll->total_paid_leave_hours +   $payroll->total_regular_attendance_hours;
-        $payroll->regular_hours_salary = $payroll->total_holiday_hours_salary  + $payroll->leave_hours_salary +  $total_attendance_salary;
+        $payroll->regular_hours_salary = $payroll->total_holiday_hours_salary  + $payroll->leave_hours_salary +  $regular_attendance_hours_salary;
         $payroll->overtime_hours_salary = $overtime_attendance_hours_salary;
         $payroll->regular_attendance_hours_salary = $regular_attendance_hours_salary;
         $payroll->overtime_attendance_hours_salary = $overtime_attendance_hours_salary;

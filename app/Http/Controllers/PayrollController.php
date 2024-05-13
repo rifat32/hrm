@@ -12,6 +12,7 @@ use App\Models\Department;
 use App\Models\Payroll;
 use App\Models\Payrun;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -368,6 +369,202 @@ class PayrollController extends Controller
         }
     }
 
+
+
+
+
+
+
+
+
+
+ /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/payrolls/report",
+     *      operationId="getPayrollsReport",
+     *      tags={"administrator.payrolls"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      * *  @OA\Parameter(
+     * name="payrun_id",
+     * in="query",
+     * description="payrun_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="user_ids",
+     * in="query",
+     * description="user_ids",
+     * required=true,
+     * example="1,2,3"
+     * ),
+     *
+     *
+     *
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *  * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="months",
+     * in="query",
+     * description="months",
+     * required=true,
+     * example="12"
+     * ),
+
+     *      summary="This method is to get payrolls  report ",
+     *      description="This method is to get payrolls report ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getPayrollsReport(Request $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             if (!$request->user()->hasPermissionTo('payrun_create')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+    $numberOfMonths = !empty($request->months)?$request->months:12;
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $departments = Department::whereIn("id",$all_manager_department_ids)->get();
+
+ // Initialize an array to store the report data
+ $reportData = [];
+
+   // Get the current date
+   $currentDate = Carbon::now();
+
+   // Loop through the specified number of months
+   for ($i = 0; $i < $numberOfMonths; $i++) {
+    // Calculate the start and end dates for each month
+    $startDate = $currentDate->copy()->startOfMonth()->subMonths($i);
+    $endDate = $currentDate->copy()->endOfMonth()->subMonths($i);
+
+    $data = [];
+    foreach($departments as  $department) {
+        $departmentData = [];
+
+        $departmentData["department"] = $department;
+        $departmentData["dates"] = [$startDate, $endDate];
+
+      $payrolls =    Payroll::
+    whereBetween('payrolls.end_date', [$startDate, $endDate])
+    ->whereHas("user.departments",function($query) use($department) {
+          $query->whereIn("departments.id",[$department->id]);
+    })
+
+    ->get();
+
+    $total_salary = $payrolls->sum(function ($payroll) {
+        return $payroll->regular_hours_salary + $payroll->overtime_hours_salary; // Add more columns if needed
+    });
+
+    $departmentData["total_salary"] = $total_salary;
+       // Push the department data into the $data array
+       $data[] = $departmentData;
+
+    }
+
+
+
+    // Store the data for the current month in the report array
+    $reportData[$startDate->format('F Y')] = $data;
+}
+
+             DB::commit();
+
+             return response()->json($reportData, 200);
+
+         } catch (Exception $e) {
+             DB::rollBack();
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
       /**
      *

@@ -9,6 +9,7 @@ use App\Models\AttendanceHistory;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -143,6 +144,43 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 //         }
 // $attendance_history->save();
 //     }
+//     return "ok";
+// });
+
+
+
+// Route::get("/test",function() {
+
+//     $attendances = Attendance::get();
+//     foreach($attendances as $attendance) {
+//         if($attendance->in_time) {
+//             $attendance->attendance_records = [
+//                 [
+//                        "in_time" => $attendance->in_time,
+//                        "out_time" => $attendance->out_time,
+//                 ]
+//                 ];
+//         }
+
+//         $total_present_hours = 0;
+
+// collect($attendance->attendance_records)->each(function($attendance_record) use(&$total_present_hours) {
+//     $in_time = Carbon::createFromFormat('H:i:s', $attendance_record["in_time"]);
+//     $out_time = Carbon::createFromFormat('H:i:s', $attendance_record["out_time"]);
+//     $total_present_hours += $out_time->diffInHours($in_time);
+// });
+
+// if($total_present_hours > 0){
+//     $attendance->is_present=1;
+//     $attendance->save();
+// } else {
+//     $attendance->is_present=0;
+//     $attendance->save();
+// }
+
+//     }
+
+
 //     return "ok";
 // });
 

@@ -16,6 +16,7 @@ use App\Models\EmployeePensionHistory;
 use App\Models\EmployeeRightToWorkHistory;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeVisaDetailHistory;
+use App\Models\EmploymentStatus;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
 use App\Models\User;
@@ -1154,7 +1155,8 @@ class DashboardManagementController extends Controller
 
             ->where('is_in_employee', 1)
             ->where('is_active', 1);
-            $data["total_data"] = $data_query->get();
+
+        $data["total_data"] = $data_query->get();
 
         $data["total_data_count"] = $data_query->count();
 
@@ -1627,6 +1629,79 @@ class DashboardManagementController extends Controller
             "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
+        return $data;
+    }
+
+    public function employees_by_employment_status(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $employment_status_id
+    ) {
+
+        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+            ->whereNotIn('id', [auth()->user()->id])
+            ->where([
+                 "employment_status_id" => $employment_status_id
+            ])
+            // ->where('is_in_employee', 1)
+            // ->where('is_active', 1)
+            ;
+            $data["total_data"] = $data_query->get();
+
+            $data["total_data_count"] = $data_query->count();
+
+            $data["today_data_count"] = clone $data_query;
+            $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+
+            $data["yesterday_data_count"] = clone $data_query;
+            $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('users.created_at', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
+
+
+            $data["this_week_data_count"] = clone $data_query;
+            $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+
+            $data["previous_week_data_count"] = clone $data_query;
+            $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('created_at', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+
+            $data["this_month_data_count"] = clone $data_query;
+            $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+            $data["previous_month_data_count"] = clone $data_query;
+            $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('created_at', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+
+            $data["date_ranges"] = [
+                "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+                "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+                "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+                "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+                "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+                "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+                "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+                "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
+              ];
+
         return $data;
     }
 
@@ -2218,6 +2293,116 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
+    public function absent_today(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+
+    ) {
+
+        $day_number = Carbon::parse(today())->dayOfWeek;
+
+        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+            ->whereNotIn('id', [auth()->user()->id])
+           ->whereHas("employee_rotas.details", function($query) use($day_number) {
+            $query->where([
+                "employee_rota_details.is_weekend" => 0,
+                "employee_rota_details.day" => $day_number,
+
+            ]);
+           })
+           ->whereDoesntHave("attendances", function($query) {
+            $query->where("attendances.in_date",today())
+            ->where([
+                "is_present" => 1
+            ]);
+           });
+
+           $data["total_data_count"] = $data_query->count();
+
+        // $data["date_ranges"] = [
+        //     "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+        //     "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+        //     "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+        //     "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+        //     "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+        //     "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+        //     "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+        //     "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
+        //   ];
+
+        return $data;
+    }
+
+    public function present_today(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+
+    ) {
+
+        $day_number = Carbon::parse(today())->dayOfWeek;
+
+        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+            ->whereNotIn('id', [auth()->user()->id])
+        //    ->whereHas("employee_rotas.details", function($query) use($day_number) {
+        //     $query->where([
+        //         "employee_rota_details.is_weekend" => 0,
+        //         "employee_rota_details.day" => $day_number,
+
+        //     ]);
+        //    })
+           ->whereHas("attendances", function($query) {
+            $query->where("attendances.in_date",today())
+            ->where([
+                "is_present" => 1
+            ]);
+           });
+
+           $data["total_data_count"] = $data_query->count();
+
+        // $data["date_ranges"] = [
+        //     "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+        //     "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+        //     "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+        //     "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+        //     "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+        //     "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+        //     "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+        //     "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
+        //   ];
+
+        return $data;
+    }
+
 
 
     public function sponsorships(
@@ -2559,15 +2744,15 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $user_ids =  User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                $query->whereIn("departments.id", $all_manager_department_ids);
-            })
-                ->whereNotIn('id', [auth()->user()->id])
+            // $user_ids =  User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+            //     $query->whereIn("departments.id", $all_manager_department_ids);
+            // })
+            //     ->whereNotIn('id', [auth()->user()->id])
 
 
-                ->where('is_in_employee', 1)
-                ->where('is_active', 1)
-                ->pluck("id");
+            //     ->where('is_in_employee', 1)
+            //     ->where('is_active', 1)
+            //     ->pluck("id");
 
 
             $data["employees"] = $this->employees(
@@ -2951,7 +3136,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $widget = $dashboard_widgets->get("upcoming_pension_expiries");
 
 
-
             $data["upcoming_pension_expiries"]["id"] = $start_id++;
             if($widget) {
                 $data["upcoming_pension_expiries"]["widget_id"] = $widget->id;
@@ -3010,7 +3194,139 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             }
 
 
+            $employment_statuses = $this->getEmploymentStatuses();
 
+            foreach ($employment_statuses as $employment_status) {
+                $data[($employment_status->name . "_employees")] = $this->employees_by_employment_status(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    $employment_status->id
+                );
+                $widget = $dashboard_widgets->get(($employment_status->name . "_employees"));
+
+
+
+
+                $data[($employment_status->name . "_employees")]["id"] = $start_id++;
+                if($widget) {
+                    $data[($employment_status->name . "_employees")]["widget_id"] = $widget->id;
+                    $data[($employment_status->name . "_employees")]["widget_order"] = $widget->widget_order;
+                }
+                else {
+                    $data[($employment_status->name . "_employees")]["widget_id"] = 0;
+                    $data[($employment_status->name . "_employees")]["widget_order"] = 0;
+                }
+
+
+                $data[($employment_status->name . "_employees")]["widget_name"] = ($employment_status->name . "_employees");
+
+                $data[($employment_status->name . "_employees")]["route"] = ('/leave/leaves?status=' . $employment_status->name . "&");
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+            $data["absent_today"] = $this->absent_today(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+
+            $widget = $dashboard_widgets->get("absent_today");
+
+
+            $data["absent_today"]["id"] = $start_id++;
+            if($widget) {
+                $data["absent_today"]["widget_id"] = $widget->id;
+                $data["absent_today"]["widget_order"] = $widget->widget_order;
+            }
+            else {
+                $data["absent_today"]["widget_id"] = 0;
+                $data["absent_today"]["widget_order"] = 0;
+            }
+
+
+
+            $data["absent_today"]["widget_name"] = "absent_today";
+            $data["absent_today"]["route"] = "/employee/all-employees?absent_today=1&";
+
+
+
+
+
+
+
+
+            $data["present_today"] = $this->present_today(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+
+            $widget = $dashboard_widgets->get("present_today");
+
+
+            $data["present_today"]["id"] = $start_id++;
+            if($widget) {
+                $data["present_today"]["widget_id"] = $widget->id;
+                $data["present_today"]["widget_order"] = $widget->widget_order;
+            }
+            else {
+                $data["present_today"]["widget_id"] = 0;
+                $data["present_today"]["widget_order"] = 0;
+            }
+
+
+
+            $data["present_today"]["widget_name"] = "absent_today";
+            $data["present_today"]["route"] = "/employee/all-employees?present_today=1&";
 
 
             return response()->json($data, 200);
@@ -3634,7 +3950,66 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         return $data;
     }
 
+public function getEmploymentStatuses () {
+    $created_by  = NULL;
+    if(auth()->user()->business) {
+        $created_by = auth()->user()->business->created_by;
+    }
+    $employmentStatuses = EmploymentStatus::
+    when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+        if (auth()->user()->hasRole('superadmin')) {
+            return $query->where('employment_statuses.business_id', NULL)
+                ->where('employment_statuses.is_default', 1)
+                ->where('employment_statuses.is_active', 1);
 
+        } else {
+            return $query->where('employment_statuses.business_id', NULL)
+                ->where('employment_statuses.is_default', 1)
+                ->where('employment_statuses.is_active', 1)
+                ->whereDoesntHave("disabled", function($q) {
+                    $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
+                })
+
+                ->orWhere(function ($query)   {
+                    $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 0)
+                        ->where('employment_statuses.created_by', auth()->user()->id)
+                        ->where('employment_statuses.is_active', 1);
+
+
+                });
+        }
+    })
+        ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by) {
+            return $query->where('employment_statuses.business_id', NULL)
+                ->where('employment_statuses.is_default', 1)
+                ->where('employment_statuses.is_active', 1)
+                ->whereDoesntHave("disabled", function($q) use($created_by) {
+                    $q->whereIn("disabled_employment_statuses.created_by", [$created_by]);
+                })
+                ->whereDoesntHave("disabled", function($q)  {
+                    $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
+                })
+
+                ->orWhere(function ($query) use( $created_by){
+                    $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 0)
+                        ->where('employment_statuses.created_by', $created_by)
+                        ->where('employment_statuses.is_active', 1)
+                        ->whereDoesntHave("disabled", function($q) {
+                            $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
+                        });
+                })
+                ->orWhere(function ($query)   {
+                    $query->where('employment_statuses.business_id', auth()->user()->business_id)
+                        ->where('employment_statuses.is_default', 0)
+                        ->where('employment_statuses.is_active', 1);
+
+                });
+        })->get();
+
+        return $employmentStatuses;
+}
 
     public function overall_services()
     {

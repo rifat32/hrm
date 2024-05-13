@@ -43,6 +43,7 @@ class Attendance extends Model
         "regular_hours_salary",
         "overtime_hours_salary",
         "attendance_records",
+        "is_present"
 
     ];
 

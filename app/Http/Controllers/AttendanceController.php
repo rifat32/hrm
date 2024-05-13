@@ -134,6 +134,7 @@ class AttendanceController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
+            $request_data["is_present"] = 1;
 
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
@@ -431,6 +432,8 @@ class AttendanceController extends Controller
 
 
             $request_data = $request->validated();
+            $request_data["is_present"] = 1;
+
 
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
@@ -473,7 +476,9 @@ class AttendanceController extends Controller
                     "status",
                     'work_location_id',
                     'project_id',
+                    "is_present",
                     "is_active",
+
                     // "business_id",
                     // "created_by",
                     "regular_hours_salary",
@@ -710,7 +715,7 @@ class AttendanceController extends Controller
              $request_data = $request->validated();
 
              foreach($request_data["attendance_ids"] as $attendance_id){
-                
+
                 $attendance_arrear = AttendanceArrear::where([
                     "attendance_id" => $attendance_id
                  ])
@@ -2303,6 +2308,9 @@ class AttendanceController extends Controller
                 foreach($date_range as $date){
                     $temp_data["in_date"] = $date;
                     $temp_data["does_break_taken"] = 1;
+
+                    $temp_data["is_present"] = 1;
+
                     $temp_data["project_id"] = UserProject::where([
                         "user_id" => $user->id
                     ])

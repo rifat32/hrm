@@ -200,7 +200,6 @@ trait AttendanceUtil
 
         return $total_present_hours;
 
-
     }
 
     function calculate_tolerance_time($in_time, $work_shift_details)
