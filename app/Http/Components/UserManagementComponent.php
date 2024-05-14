@@ -2,14 +2,20 @@
 
 namespace App\Http\Components;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Department;
+use App\Models\LeaveRecord;
+use App\Models\SettingLeave;
+use App\Models\SettingLeaveType;
 use App\Models\User;
+use App\Models\UserRecruitmentProcess;
 use Carbon\Carbon;
+use Exception;
 
 class UserManagementComponent
 {
 
-
+use BasicUtil;
 
     public function updateUsersQuery($request, $all_manager_department_ids,$usersQuery)
     {
@@ -416,4 +422,88 @@ class UserManagementComponent
 
         return $usersQuery;
     }
+
+    public function getLeaveDetailsByUserIdfunc($id,$all_manager_department_ids) {
+         // get appropriate use if auth user have access
+         $user = $this->getUserByIdUtil($id, $all_manager_department_ids);
+
+
+
+         $created_by  = NULL;
+         if (auth()->user()->business) {
+             $created_by = auth()->user()->business->created_by;
+         }
+
+         $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
+             ->where('setting_leaves.is_default', 0)
+             ->first();
+         if (!$setting_leave) {
+            throw new Exception("No leave setting found.",409);
+         }
+
+         if (!$setting_leave->start_month) {
+             $setting_leave->start_month = 1;
+         }
+
+         // $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
+
+
+
+         $leave_types =   SettingLeaveType::where(function ($query) use ( $user,$created_by) {
+             $query->where('setting_leave_types.business_id', auth()->user()->business_id)
+                 ->where('setting_leave_types.is_default', 0)
+                 ->where('setting_leave_types.is_active', 1)
+                 // ->when($paid_leave_available == 0, function ($query) {
+                 //     $query->where('setting_leave_types.type', "unpaid");
+                 // })
+                 ->where(function($query) use($user){
+                    $query->whereHas("employment_statuses", function($query) use($user){
+                     $query->whereIn("employment_statuses.id", [$user->employment_status->id]);
+                    })
+                    ->orWhereDoesntHave("employment_statuses");
+                 })
+                 ->whereDoesntHave("disabled", function ($q) use ($created_by) {
+                     $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
+                 })
+                 ->whereDoesntHave("disabled", function ($q) use ($created_by) {
+                     $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
+                 });
+         })
+             ->get();
+
+             $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0)->subYear();
+         foreach ($leave_types as $key => $leave_type) {
+             $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
+                 $query->where([
+                     "user_id" => $user->id,
+                     "leave_type_id" => $leave_type->id
+
+                 ]);
+             })
+                 ->where("leave_records.date", ">=", $startOfMonth)
+                 ->get()
+                 ->sum(function ($record) {
+                     return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
+                 });
+             $leave_types[$key]->already_taken_hours = $total_recorded_hours;
+         }
+         return $leave_types;
+    }
+
+    public function getRecruitmentProcessesByUserIdFunc($id,$all_manager_department_ids) {
+        $user = $this->getUserByIdUtil($id,$all_manager_department_ids);
+
+        $user_recruitment_processes = UserRecruitmentProcess::with("recruitment_process")
+            ->where([
+                "user_id" => $user->id
+            ])
+            ->whereNotNull("description")
+            ->get();
+
+            return $user_recruitment_processes;
+    }
+
+
+
+
 }

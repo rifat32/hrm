@@ -91,8 +91,6 @@ class UserManagementController extends Controller
         $this->leaveComponent = $leaveComponent;
         $this->attendanceComponent = $attendanceComponent;
         $this->userManagementComponent = $userManagementComponent;
-
-
     }
 
     /**
@@ -3146,8 +3144,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-
-            $users = User::with(
+            $usersQuery = User::with(
                 [
                     "designation" => function ($query) {
                         $query->select(
@@ -3159,85 +3156,32 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     "recruitment_processes",
                     "work_location"
                 ]
-            )
-
-                ->whereNotIn('id', [$request->user()->id])
-
-                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
-                    if (auth()->user()->hasRole("superadmin")) {
-                        return  $query->where(function ($query) {
-                            return   $query->where('business_id', NULL)
-                                ->orWhere(function ($query) {
-                                    return $query
-                                        ->whereNotNull("business_id")
-                                        ->whereHas("roles", function ($query) {
-                                            return $query->where("roles.name", "business_owner");
-                                        });
-                                });
-                        });
-                    } else {
-                        return  $query->where(function ($query) {
-                            return   $query->where('created_by', auth()->user()->id);
-                        });
-                    }
-                })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $all_manager_department_ids) {
-                    return $query->where(function ($query) use ($all_manager_department_ids) {
-                        return  $query->where('business_id', auth()->user()->business_id)
-                            ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                                $query->whereIn("departments.id", $all_manager_department_ids);
-                            });;
-                    });
-                })
+            );
 
 
-                ->when(!empty($request->role), function ($query) use ($request) {
-                    $rolesArray = explode(',', $request->role);
-                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
-                        return $q->whereIn("name", $rolesArray);
-                    });
-                })
+             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
+
+             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("users.first_Name", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("users.first_Name", "DESC");
+            })
+
+            ->withCount('all_users as user_count')
+
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
 
 
 
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    $term = $request->search_key;
-                    return $query->where(function ($subquery) use ($term) {
-                        $subquery->where("first_Name", "like", "%" . $term . "%")
-                            ->orWhere("last_Name", "like", "%" . $term . "%")
-                            ->orWhere("email", "like", "%" . $term . "%")
-                            ->orWhere("phone", "like", "%" . $term . "%");
-                    });
-                })
-
-                ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                    return $query->where('is_in_employee', intval($request->is_in_employee));
-                })
-                ->when(isset($request->is_active), function ($query) use ($request) {
-                    return $query->where('is_active', intval($request->is_active));
-                })
 
 
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
 
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.first_Name", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("users.first_Name", "DESC");
-                })
 
-                ->withCount('all_users as user_count')
 
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
 
             $data["data"] = $users;
             $data["data_highlights"] = [];
@@ -3372,9 +3316,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-
-
-            $users = User::with(
+            $usersQuery = User::with(
                 [
                     "designation" => function ($query) {
                         $query->select(
@@ -3386,85 +3328,26 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     "recruitment_processes",
                     "work_location"
                 ]
-            )
+                );
 
-                ->whereNotIn('id', [$request->user()->id])
+             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
 
-                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
-                    if (auth()->user()->hasRole("superadmin")) {
-                        return  $query->where(function ($query) {
-                            return   $query->where('business_id', NULL)
-                                ->orWhere(function ($query) {
-                                    return $query
-                                        ->whereNotNull("business_id")
-                                        ->whereHas("roles", function ($query) {
-                                            return $query->where("roles.name", "business_owner");
-                                        });
-                                });
-                        });
-                    } else {
-                        return  $query->where(function ($query) {
-                            return   $query->where('created_by', auth()->user()->id);
-                        });
-                    }
-                })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $all_manager_department_ids) {
-                    return $query->where(function ($query) use ($all_manager_department_ids) {
-                        return  $query->where('business_id', auth()->user()->business_id)
-                            ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                                $query->whereIn("departments.id", $all_manager_department_ids);
-                            });;
-                    });
-                })
+             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("users.first_Name", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("users.first_Name", "DESC");
+            })
 
+            ->withCount('all_users as user_count')
 
-                ->when(!empty($request->role), function ($query) use ($request) {
-                    $rolesArray = explode(',', $request->role);
-                    return   $query->whereHas("roles", function ($q) use ($rolesArray) {
-                        return $q->whereIn("name", $rolesArray);
-                    });
-                })
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
 
 
 
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    $term = $request->search_key;
-                    return $query->where(function ($subquery) use ($term) {
-                        $subquery->where("first_Name", "like", "%" . $term . "%")
-                            ->orWhere("last_Name", "like", "%" . $term . "%")
-                            ->orWhere("email", "like", "%" . $term . "%")
-                            ->orWhere("phone", "like", "%" . $term . "%");
-                    });
-                })
-
-                ->when(isset($request->is_in_employee), function ($query) use ($request) {
-                    return $query->where('is_in_employee', intval($request->is_in_employee));
-                })
-                ->when(isset($request->is_active), function ($query) use ($request) {
-                    return $query->where('is_active', intval($request->is_active));
-                })
-
-
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
-
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.first_Name", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("users.first_Name", "DESC");
-                })
-
-                ->withCount('all_users as user_count')
-
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
 
             $data["data"] = $users;
             $data["data_highlights"] = [];
@@ -4954,7 +4837,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     "message" => "You can not perform this action"
                 ], 401);
             }
-
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user = User::with(
                 [
                     "designation" => function ($query) {
@@ -4980,11 +4863,14 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                 ->where([
                     "id" => $id
                 ])
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where(function ($query) use($all_manager_department_ids) {
                         return  $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
+                            ->orWhere('business_id', auth()->user()->business_id)
+                            ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });
                     });
                 })
                 ->first();
@@ -5012,6 +4898,151 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v3.0/users/{id}",
+     *      operationId="getUserByIdV3",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserByIdV3($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+             $user = User::with(
+                 [
+                     "designation" => function ($query) {
+                         $query->select(
+                             'designations.id',
+                             'designations.name',
+                         );
+                     },
+                     "roles",
+                     "departments",
+                     "employment_status",
+                     "sponsorship_details",
+                     "passport_details",
+                     "visa_details",
+                     "right_to_works",
+                     "work_shifts",
+                     "recruitment_processes",
+                     "work_location"
+                 ]
+
+             )
+
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                     return $query->where(function ($query) use($all_manager_department_ids) {
+                         return  $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id)
+                             ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                 $query->whereIn("departments.id", $all_manager_department_ids);
+                             });
+                     });
+                 })
+                 ->first();
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+             // ->whereHas('roles', function ($query) {
+             //     // return $query->where('name','!=', 'customer');
+             // });
+             $user->work_shift = $user->work_shifts()->first();
+
+             $user->department_ids = [$user->departments->pluck("id")[0]];
+
+
+
+
+             $data = [];
+             $data["user_data"] = $user;
+
+
+             $leave_types = $this->userManagementComponent->getLeaveDetailsByUserIdfunc($id,$all_manager_department_ids);
+
+             $data["leave_allowance_data"] = $leave_types;
+
+             $user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id,$all_manager_department_ids);
+
+             $data["user_recruitment_processes_data"] = $user_recruitment_processes;
+// @@@@@@@@@@
+
+
+
+             return response()->json($user, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
     /**
      *
      * @OA\Get(
@@ -5078,72 +5109,8 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            // get appropriate use if auth user have access
-            $user = $this->getUserByIdUtil($id, $all_manager_department_ids);
+           $leave_types = $this->userManagementComponent->getLeaveDetailsByUserIdfunc($id,$all_manager_department_ids);
 
-
-
-            $created_by  = NULL;
-            if (auth()->user()->business) {
-                $created_by = auth()->user()->business->created_by;
-            }
-
-
-
-            $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
-                ->where('setting_leaves.is_default', 0)
-                ->first();
-            if (!$setting_leave) {
-                return response()->json(
-                    ["message" => "No leave setting found."]
-                );
-            }
-            if (!$setting_leave->start_month) {
-                $setting_leave->start_month = 1;
-            }
-
-            // $paid_leave_available = in_array($user->employment_status_id, $setting_leave->paid_leave_employment_statuses()->pluck("employment_statuses.id")->toArray());
-
-
-
-            $leave_types =   SettingLeaveType::where(function ($query) use ( $user,$created_by) {
-                $query->where('setting_leave_types.business_id', auth()->user()->business_id)
-                    ->where('setting_leave_types.is_default', 0)
-                    ->where('setting_leave_types.is_active', 1)
-                    // ->when($paid_leave_available == 0, function ($query) {
-                    //     $query->where('setting_leave_types.type', "unpaid");
-                    // })
-                    ->where(function($query) use($user){
-                       $query->whereHas("employment_statuses", function($query) use($user){
-                        $query->whereIn("employment_statuses.id", [$user->employment_status->id]);
-                       })
-                       ->orWhereDoesntHave("employment_statuses");
-                    })
-                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                        $q->whereIn("disabled_setting_leave_types.created_by", [$created_by]);
-                    })
-                    ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                        $q->whereIn("disabled_setting_leave_types.business_id", [auth()->user()->business_id]);
-                    });
-            })
-                ->get();
-
-                $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0)->subYear();
-            foreach ($leave_types as $key => $leave_type) {
-                $total_recorded_hours = LeaveRecord::whereHas('leave', function ($query) use ($user, $leave_type) {
-                    $query->where([
-                        "user_id" => $user->id,
-                        "leave_type_id" => $leave_type->id
-
-                    ]);
-                })
-                    ->where("leave_records.date", ">=", $startOfMonth)
-                    ->get()
-                    ->sum(function ($record) {
-                        return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
-                    });
-                $leave_types[$key]->already_taken_hours = $total_recorded_hours;
-            }
 
             return response()->json($leave_types, 200);
         } catch (Exception $e) {
@@ -5738,7 +5705,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
 
 
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
     /**
      *
@@ -5841,47 +5808,33 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-            $employees = User::with(
+
+            $usersQuery = User::with(
                 ["departments"]
+                );
+
+             $employees = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
+
+             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                return $query->orderBy("users.first_Name", $request->order_by);
+            }, function ($query) {
+                return $query->orderBy("users.first_Name", "DESC");
+            })
+
+            ->select(
+                "users.id",
+                "users.first_Name",
+                "users.middle_Name",
+                "users.last_Name",
+                "users.image",
             )
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
 
-                ->where(["users.business_id" => auth()->user()->business_id])
+            ->when(!empty($request->per_page), function ($query) use ($request) {
+                return $query->paginate($request->per_page);
+            }, function ($query) {
+                return $query->get();
+            });
 
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                    });
-                })
-
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    $idsArray = explode(',', $request->user_id);
-                    return $query->whereIn('users.id', $idsArray);
-                })
-                ->when(empty($request->user_id), function ($query) use ($request) {
-                    $query->whereNotIn("users.id", [auth()->user()->id]);
-                })
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.first_Name", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("users.first_Name", "DESC");
-                })
-
-                ->select(
-                    "users.id",
-                    "users.first_Name",
-                    "users.middle_Name",
-                    "users.last_Name",
-                    "users.image",
-                )
-
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
 
 
 
@@ -6070,39 +6023,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-            $user = User::with("roles")
-                ->where([
-                    "id" => $id
-                ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
-                    });
-                })
-                ->first();
-
-            if (!$user) {
-
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
-
-
-
-            $user_recruitment_processes = UserRecruitmentProcess::with("recruitment_process")
-                ->where([
-                    "user_id" => $user->id
-                ])
-                ->whereNotNull("description")
-                ->get();
-
-
+$user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id,$all_manager_department_ids);
 
 
 

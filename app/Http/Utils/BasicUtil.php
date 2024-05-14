@@ -164,14 +164,15 @@ public function getUserByIdUtil($id,$all_manager_department_ids) {
     ->where([
         "id" => $id
     ])
-    ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-        $query->whereIn("departments.id", $all_manager_department_ids);
-    })
-    ->when(!auth()->user()->hasRole('superadmin'), function ($query)  {
-        return $query->where(function ($query) {
+
+    ->when(!auth()->user()->hasRole('superadmin'), function ($query) use($all_manager_department_ids)  {
+        return $query->where(function ($query) use($all_manager_department_ids){
             return  $query->where('created_by', auth()->user()->id)
                 ->orWhere('id', auth()->user()->id)
-                ->orWhere('business_id', auth()->user()->business_id);
+                ->orWhere('business_id', auth()->user()->business_id)
+                ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                });
         });
     })
     ->first();

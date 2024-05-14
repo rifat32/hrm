@@ -356,7 +356,16 @@ Route::put('/v1.0/users/update-joining-date', [UserManagementController::class, 
 Route::put('/v1.0/users/update-emergency-contact', [UserManagementController::class, "updateEmergencyContact"]);
 
 Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
+
 Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"]);
+
+Route::get('/v3.0/users/{id}', [UserManagementController::class, "getUserByIdV3"]);
+
+
+
+
+
+
 Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class, "generateEmployeeId"]);
 Route::get('/v1.0/users/validate/employee-id/{user_id}', [UserManagementController::class, "validateEmployeeId"]);
 
