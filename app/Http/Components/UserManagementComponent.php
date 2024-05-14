@@ -118,7 +118,7 @@ use BasicUtil;
                 return $query->where('is_in_employee', intval(request()->is_in_employee));
             })
 
-            ->when(isset(request()->is_on_holiday), function ($query) use ($today, $total_departments, request()) {
+            ->when(isset(request()->is_on_holiday), function ($query) use ($today, $total_departments) {
                 if (intval(request()->is_on_holiday) == 1) {
                     $query
                         ->where("business_id", auth()->user()->business_id)
