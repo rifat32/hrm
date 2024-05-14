@@ -771,17 +771,17 @@ class UserManagementController extends Controller
             $this->delete_old_histories();
 
 
-        // Get the user's departments
-$departments = $user->departments->pluck("id");
+            // Get the user's departments
+            $departments = $user->departments->pluck("id");
 
-// Remove the first department from the collection
-$removedDepartment = $departments->shift();
+            // Remove the first department from the collection
+            $removedDepartment = $departments->shift();
 
-// Insert the department from $request_data at the beginning of the collection
-$departments->prepend($request_data['departments'][0]);
+            // Insert the department from $request_data at the beginning of the collection
+            $departments->prepend($request_data['departments'][0]);
 
-// Update the user's departments
-$user->departments()->sync($departments);
+            // Update the user's departments
+            $user->departments()->sync($departments);
 
 
             $user->assignRole($request_data['role']);
@@ -949,7 +949,7 @@ $user->departments()->sync($departments);
                 "id" => $request_data["id"],
             ];
 
-            $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
+            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
             $user = User::where($userQueryTerms)->first();
 
             if ($user) {
@@ -1381,7 +1381,7 @@ $user->departments()->sync($departments);
                 "id" => $request_data["id"],
             ];
 
-            $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
+            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
 
             $user = User::where($userQueryTerms)->first();
 
@@ -1435,17 +1435,17 @@ $user->departments()->sync($departments);
             $this->delete_old_histories();
 
 
-           // Get the user's departments
-$departments = $user->departments->pluck("id");
+            // Get the user's departments
+            $departments = $user->departments->pluck("id");
 
-// Remove the first department from the collection
-$removedDepartment = $departments->shift();
+            // Remove the first department from the collection
+            $removedDepartment = $departments->shift();
 
-// Insert the department from $request_data at the beginning of the collection
-$departments->prepend($request_data['departments'][0]);
+            // Insert the department from $request_data at the beginning of the collection
+            $departments->prepend($request_data['departments'][0]);
 
-// Update the user's departments
-$user->departments()->sync($departments);
+            // Update the user's departments
+            $user->departments()->sync($departments);
 
 
 
@@ -1564,112 +1564,112 @@ $user->departments()->sync($departments);
      *     )
      */
 
-     public function updateUserV3(UserUpdateV3Request $request)
-     {
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function updateUserV3(UserUpdateV3Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
 
-             if (!empty($request_data['password'])) {
-                 $request_data['password'] = Hash::make($request_data['password']);
-             } else {
-                 unset($request_data['password']);
-             }
-             $request_data['is_active'] = true;
-             $request_data['remember_token'] = Str::random(10);
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
+            } else {
+                unset($request_data['password']);
+            }
+            $request_data['is_active'] = true;
+            $request_data['remember_token'] = Str::random(10);
 
 
 
 
 
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
 
-             $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
-             $user = User::where($userQueryTerms)->first();
+            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            $user = User::where($userQueryTerms)->first();
 
-             if ($user) {
-                 $user->fill(collect($request_data)->only([
-                     'first_Name',
-                     'last_Name',
-                     'middle_Name',
-                     "NI_number",
-                     "email",
-                     'gender',
+            if ($user) {
+                $user->fill(collect($request_data)->only([
+                    'first_Name',
+                    'last_Name',
+                    'middle_Name',
+                    "NI_number",
+                    "email",
+                    'gender',
 
-                     'designation_id',
-                     'employment_status_id',
-                     'joining_date',
-                     "date_of_birth",
-                     'salary_per_annum',
-                     'weekly_contractual_hours',
-                     'minimum_working_days_per_week',
-                     'overtime_rate',
-                     'phone',
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    "date_of_birth",
+                    'salary_per_annum',
+                    'weekly_contractual_hours',
+                    'minimum_working_days_per_week',
+                    'overtime_rate',
+                    'phone',
 
-                     'work_location_id',
+                    'work_location_id',
 
-                 ])->toArray());
+                ])->toArray());
 
-                 $user->save();
-             }
-             if (!$user) {
+                $user->save();
+            }
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
             // Get the user's departments
- $departments = $user->departments->pluck("id");
+            $departments = $user->departments->pluck("id");
 
- // Remove the first department from the collection
- $removedDepartment = $departments->shift();
+            // Remove the first department from the collection
+            $removedDepartment = $departments->shift();
 
- // Insert the department from $request_data at the beginning of the collection
- $departments->prepend($request_data['departments'][0]);
+            // Insert the department from $request_data at the beginning of the collection
+            $departments->prepend($request_data['departments'][0]);
 
- // Update the user's departments
- $user->departments()->sync($departments);
-
-
-             $this->update_work_shift($request_data, $user);
+            // Update the user's departments
+            $user->departments()->sync($departments);
 
 
-
-             DB::commit();
-             return response($user, 201);
-         } catch (Exception $e) {
-             DB::rollBack();
+            $this->update_work_shift($request_data, $user);
 
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            DB::commit();
+            return response($user, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -2079,7 +2079,7 @@ $user->departments()->sync($departments);
 
 
 
-$this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
+            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
 
 
 
@@ -2990,22 +2990,12 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     "roles",
                     "work_location"
                 ]
-                );
+            );
+
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
 
-             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
-
-            ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("users.first_Name", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("users.first_Name", "DESC");
-                })
-                ->withCount('all_users as user_count')
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 if (strtoupper($request->response_type) == 'PDF') {
@@ -3018,7 +3008,6 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             } else {
                 return response()->json($users, 200);
             }
-
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -3158,22 +3147,13 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                 ]
             );
 
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->withCount('all_users as user_count');
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
-             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
 
-             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("users.first_Name", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("users.first_Name", "DESC");
-            })
 
-            ->withCount('all_users as user_count')
 
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
 
 
 
@@ -3328,24 +3308,11 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     "recruitment_processes",
                     "work_location"
                 ]
-                );
+            );
 
-             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
-
-             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("users.first_Name", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("users.first_Name", "DESC");
-            })
-
-            ->withCount('all_users as user_count')
-
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
-
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->withCount('all_users as user_count');
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
 
 
@@ -3365,7 +3332,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
     }
 
 
-     /**
+    /**
      *
      * @OA\Get(
      *      path="/v4.0/users",
@@ -3862,21 +3829,21 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
      *     )
      */
 
-     public function getUsersV4(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function getUsersV4(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $usersQuery = User::with(
+            $usersQuery = User::with(
                 [
                     "designation" => function ($query) {
                         $query->select(
@@ -3892,34 +3859,25 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     },
 
                 ]
-                );
+            );
+
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->select(
+                "users.id",
+                "users.first_Name",
+                "users.middle_Name",
+                "users.last_Name",
+                "users.user_id",
+                "users.email",
+                "users.image",
+                "users.status",
+            );
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
 
-             $users = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
 
-             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("users.first_Name", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("users.first_Name", "DESC");
-                 })
-                 ->select(
-                     "users.id",
-                     "users.first_Name",
-                     "users.middle_Name",
-                     "users.last_Name",
-                     "users.user_id",
-                     "users.email",
-                     "users.image",
-                     "users.status",
-                 )
-                //  ->withCount('all_users as user_count')
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });
 
-             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 //  if (strtoupper($request->response_type) == 'PDF') {
                 //      $pdf = PDF::loadView('pdf.users', ["users" => $users]);
                 //      return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
@@ -3927,15 +3885,14 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
                 //      return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
                 //  }
-             } else {
-                 return response()->json($users, 200);
-             }
+            } else {
+                return response()->json($users, 200);
+            }
+        } catch (Exception $e) {
 
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -4864,7 +4821,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     "id" => $id
                 ])
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
-                    return $query->where(function ($query) use($all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
                         return  $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id)
@@ -4955,91 +4912,91 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
      *     )
      */
 
-     public function getUserByIdV3($id, Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+    public function getUserByIdV3($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-             $user = User::with(
-                 [
-                     "designation" => function ($query) {
-                         $query->select(
-                             'designations.id',
-                             'designations.name',
-                         );
-                     },
-                     "roles",
-                     "departments",
-                     "employment_status",
-                     "sponsorship_details",
-                     "passport_details",
-                     "visa_details",
-                     "right_to_works",
-                     "work_shifts",
-                     "recruitment_processes",
-                     "work_location"
-                 ]
+            $user = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                    "departments",
+                    "employment_status",
+                    "sponsorship_details",
+                    "passport_details",
+                    "visa_details",
+                    "right_to_works",
+                    "work_shifts",
+                    "recruitment_processes",
+                    "work_location"
+                ]
 
-             )
+            )
 
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
-                     return $query->where(function ($query) use($all_manager_department_ids) {
-                         return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id)
-                             ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
-                                 $query->whereIn("departments.id", $all_manager_department_ids);
-                             });
-                     });
-                 })
-                 ->first();
-             if (!$user) {
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id)
+                            ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });
+                    });
+                })
+                ->first();
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-             // ->whereHas('roles', function ($query) {
-             //     // return $query->where('name','!=', 'customer');
-             // });
-             $user->work_shift = $user->work_shifts()->first();
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
+            // ->whereHas('roles', function ($query) {
+            //     // return $query->where('name','!=', 'customer');
+            // });
+            $user->work_shift = $user->work_shifts()->first();
 
-             $user->department_ids = [$user->departments->pluck("id")[0]];
-
-
-
-
-             $data = [];
-             $data["user_data"] = $user;
-
-
-             $leave_types = $this->userManagementComponent->getLeaveDetailsByUserIdfunc($id,$all_manager_department_ids);
-
-             $data["leave_allowance_data"] = $leave_types;
-
-             $user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id,$all_manager_department_ids);
-
-             $data["user_recruitment_processes_data"] = $user_recruitment_processes;
-// @@@@@@@@@@
+            $user->department_ids = [$user->departments->pluck("id")[0]];
 
 
 
-             return response()->json($user, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            $data = [];
+            $data["user_data"] = $user;
+
+
+            $leave_types = $this->userManagementComponent->getLeaveDetailsByUserIdfunc($id, $all_manager_department_ids);
+
+            $data["leave_allowance_data"] = $leave_types;
+
+            $user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id, $all_manager_department_ids);
+
+            $data["user_recruitment_processes_data"] = $user_recruitment_processes;
+            // @@@@@@@@@@
+
+
+
+            return response()->json($user, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -5109,7 +5066,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-           $leave_types = $this->userManagementComponent->getLeaveDetailsByUserIdfunc($id,$all_manager_department_ids);
+            $leave_types = $this->userManagementComponent->getLeaveDetailsByUserIdfunc($id, $all_manager_department_ids);
 
 
             return response()->json($leave_types, 200);
@@ -5119,7 +5076,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
         }
     }
 
-       /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/get-disable-days-for-attendances/{id}",
@@ -5175,91 +5132,91 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
      *     )
      */
 
-     public function getDisableDaysForAttendanceByUserId($id, Request $request)
-     {
+    public function getDisableDaysForAttendanceByUserId($id, Request $request)
+    {
 
 
-         foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-             File::delete($file);
-         }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+            File::delete($file);
+        }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-             $user = User::with("roles")
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                     $query->whereIn("departments.id", $all_manager_department_ids);
-                 })
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                     return $query->where(function ($query) {
-                         return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id);
-                     });
-                 })
-                 ->first();
-
-             if (!$user) {
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
+            $user = User::with("roles")
+                ->where([
+                    "id" => $id
+                ])
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id);
+                    });
+                })
+                ->first();
 
-
-             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
-             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
 
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
 
 
-             $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
 
 
-             $already_taken_full_day_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id,TRUE);
 
 
-             $disable_days_collection = collect($already_taken_attendance_dates);
+            $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
+
+
+            $already_taken_full_day_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id, TRUE);
+
+
+            $disable_days_collection = collect($already_taken_attendance_dates);
 
 
             $disable_days_collection = $disable_days_collection->merge($already_taken_full_day_leave_dates);
 
 
 
-             $unique_disable_days_collection = $disable_days_collection->unique();
-             $disable_days_array = $unique_disable_days_collection->values()->all();
+            $unique_disable_days_collection = $disable_days_collection->unique();
+            $disable_days_array = $unique_disable_days_collection->values()->all();
 
 
 
 
-             $already_taken_hourly_leave_dates = $this->leaveComponent->get_already_taken_half_day_leaves($start_date, $end_date, $user->id);
+            $already_taken_hourly_leave_dates = $this->leaveComponent->get_already_taken_half_day_leaves($start_date, $end_date, $user->id);
 
 
-             $result_array = [
+            $result_array = [
                 "disable_days" => $disable_days_array,
                 "enable_days_with_condition" => $already_taken_hourly_leave_dates,
-             ];
+            ];
 
-             return response()->json($result_array, 200);
-         } catch (Exception $e) {
+            return response()->json($result_array, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -5395,7 +5352,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
 
 
-            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id,(isset($is_full_day_leave)?$is_full_day_leave:NULL));
+            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id, (isset($is_full_day_leave) ? $is_full_day_leave : NULL));
 
 
             $result_collection = collect($already_taken_attendance_dates);
@@ -5811,38 +5768,21 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
             $usersQuery = User::with(
                 ["departments"]
-                );
+            );
 
-             $employees = $this->userManagementComponent->updateUsersQuery($request,$all_manager_department_ids,$usersQuery)
-
-             ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                return $query->orderBy("users.first_Name", $request->order_by);
-            }, function ($query) {
-                return $query->orderBy("users.first_Name", "DESC");
-            })
-
-            ->select(
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->select(
                 "users.id",
                 "users.first_Name",
                 "users.middle_Name",
                 "users.last_Name",
                 "users.image",
-            )
-
-            ->when(!empty($request->per_page), function ($query) use ($request) {
-                return $query->paginate($request->per_page);
-            }, function ($query) {
-                return $query->get();
-            });
+            );
+            $employees = $this->retrieveData($usersQuery, "users.first_Name");
 
 
 
-
-
-
-
-
-     $employees =    $employees->map(function ($employee) use ($start_date, $end_date) {
+            $employees =    $employees->map(function ($employee) use ($start_date, $end_date) {
                 $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
 
                 // Process holiday dates
@@ -5851,8 +5791,8 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                 $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $employee->id);
                 $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $employee->id, $work_shift_histories);
 
-                 // Process already taken leave hourly dates
-                $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $employee->id,false);
+                // Process already taken leave hourly dates
+                $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $employee->id, false);
 
                 // Merge the collections and remove duplicates
                 $all_leaves_collection = collect($holiday_dates)->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
@@ -5885,7 +5825,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
                     $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $date);
 
                     if ($work_shift_details) {
-                        if(!$work_shift_details->start_at || !$work_shift_details->end_at) {
+                        if (!$work_shift_details->start_at || !$work_shift_details->end_at) {
                             return false;
                         }
                         $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
@@ -5925,7 +5865,6 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
 
                 return response()->json($employees, 200);
             }
-
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -6023,7 +5962,7 @@ $this->validateJoiningDate($request_data["joining_date"],$request_data["id"]);
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-$user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id,$all_manager_department_ids);
+            $user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id, $all_manager_department_ids);
 
 
 

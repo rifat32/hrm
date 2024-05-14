@@ -184,7 +184,19 @@ public function getUserByIdUtil($id,$all_manager_department_ids) {
 }
 
 
-
+public function retrieveData($query,$orderByField){
+  $data =  $query->when(!empty(request()->order_by) && in_array(strtoupper(request()->order_by), ['ASC', 'DESC']), function ($query) use ($orderByField)  {
+        return $query->orderBy($orderByField, request()->order_by);
+    }, function ($query) use ($orderByField) {
+        return $query->orderBy($orderByField, "DESC");
+    })
+    ->when(!empty(request()->per_page), function ($query)  {
+        return $query->paginate(request()->per_page);
+    }, function ($query) {
+        return $query->get();
+    });
+    return $data;
+}
 
 
 }

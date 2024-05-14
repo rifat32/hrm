@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\AttendancesExport;
+use App\Http\Components\AttendanceComponent;
 use App\Http\Requests\AttendanceApproveRequest;
 use App\Http\Requests\AttendanceArrearApproveRequest;
 use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
@@ -36,6 +37,13 @@ class AttendanceController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, PayrunUtil, BasicNotificationUtil, AttendanceUtil, BasicUtil;
 
+
+    protected $attendanceComponent;
+
+    public function __construct(AttendanceComponent $attendanceComponent)
+    {
+        $this->attendanceComponent = $attendanceComponent;
+    }
 
 
     /**
@@ -150,7 +158,7 @@ class AttendanceController extends Controller
 
 
 
-                $this->adjust_payroll_on_attendance_update($attendance,0);
+            $this->adjust_payroll_on_attendance_update($attendance, 0);
 
 
             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
@@ -255,45 +263,44 @@ class AttendanceController extends Controller
             $setting_attendance = $this->get_attendance_setting();
 
             $user = User::where([
-             "id" =>   $request_data["user_id"]
+                "id" =>   $request_data["user_id"]
             ])
-            ->first();
+                ->first();
 
-            if(!$user) {
-           throw new Exception("Some thing went wrong getting user.");
+            if (!$user) {
+                throw new Exception("Some thing went wrong getting user.");
             }
 
 
 
-            $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance,$user) {
+            $attendances_data = collect($request_data["attendance_details"])->map(function ($item) use ($request_data, $setting_attendance, $user) {
 
                 // @@@@@
 
-                if(empty($item["project_id"])) {
+                if (empty($item["project_id"])) {
                     $item["project_id"] = UserProject::where([
                         "user_id" => $user->id
                     ])
-                    ->first()->project_id;
+                        ->first()->project_id;
                 }
-                if(empty($item["work_location_id"])) {
+                if (empty($item["work_location_id"])) {
                     $item["work_location_id"] = $user->work_location_id;
                 }
 
-                if(empty($item["is_present"])) {
+                if (empty($item["is_present"])) {
                     $item["attendance_records"] = [
                         [
-                               "in_time" => "00:00:00",
-                               "out_time" => "00:00:00",
+                            "in_time" => "00:00:00",
+                            "out_time" => "00:00:00",
                         ]
                     ];
                 }
 
 
 
-            $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
+                $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
 
                 return  $item;
-
             });
 
 
@@ -314,8 +321,8 @@ class AttendanceController extends Controller
             $created_attendances = $employee->attendances()->createMany($attendances_data);
 
             if (!empty($created_attendances)) {
-                foreach($created_attendances as $created_attendance) {
-                    $this->adjust_payroll_on_attendance_update($created_attendance,0);
+                foreach ($created_attendances as $created_attendance) {
+                    $this->adjust_payroll_on_attendance_update($created_attendance, 0);
                 }
                 $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
             }
@@ -360,7 +367,7 @@ class AttendanceController extends Controller
      *
      *
      *
-      * *     @OA\Property(property="attendance_records", type="string", format="array", example={
+     * *     @OA\Property(property="attendance_records", type="string", format="array", example={
      * {
      * "in_time":"00:44:00",
      * "out_time":"00:45:00"
@@ -434,7 +441,7 @@ class AttendanceController extends Controller
 
 
             $request_data = $request->validated();
-                $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
+            $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
 
 
             // Retrieve attendance setting
@@ -493,7 +500,7 @@ class AttendanceController extends Controller
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'update');
 
-            $this->adjust_payroll_on_attendance_update($attendance,0);
+            $this->adjust_payroll_on_attendance_update($attendance, 0);
 
 
 
@@ -615,15 +622,14 @@ class AttendanceController extends Controller
             $observer->updated_action($attendance, $request_data["is_approved"] ? "approve" : "reject");
 
             // Adjust payroll based on attendance update
-            $this->adjust_payroll_on_attendance_update($attendance,$request_data["add_in_next_payroll"]);
+            $this->adjust_payroll_on_attendance_update($attendance, $request_data["add_in_next_payroll"]);
 
 
-            if(!empty($request_data["add_in_next_payroll"]) && !empty($request_data["is_approved"])) {
-                AttendanceArrear::
-                where([
-                    "attendance_id" => $attendance->id
-                ])
-                ->update([ "status" => "approved"]);
+            if (!empty($request_data["add_in_next_payroll"]) && !empty($request_data["is_approved"])) {
+                AttendanceArrear::where([
+                        "attendance_id" => $attendance->id
+                    ])
+                    ->update(["status" => "approved"]);
             }
 
             // Determine notification message based on attendance status
@@ -644,7 +650,7 @@ class AttendanceController extends Controller
     }
 
 
-   /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/attendances/approve/arrears",
@@ -698,52 +704,51 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function approveAttendanceArrear(AttendanceArrearApproveRequest $request)
-     {
+    public function approveAttendanceArrear(AttendanceArrearApproveRequest $request)
+    {
 
-         DB::beginTransaction();
-         try {
+        DB::beginTransaction();
+        try {
 
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             // Check permission to approve attendance
-             if (!$request->user()->hasPermissionTo("attendance_approve")) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            // Check permission to approve attendance
+            if (!$request->user()->hasPermissionTo("attendance_approve")) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             // Extract data
-             $request_data = $request->validated();
+            // Extract data
+            $request_data = $request->validated();
 
-             foreach($request_data["attendance_ids"] as $attendance_id){
+            foreach ($request_data["attendance_ids"] as $attendance_id) {
 
                 $attendance_arrear = AttendanceArrear::where([
                     "attendance_id" => $attendance_id
-                 ])
-                 ->first();
+                ])
+                    ->first();
 
-                 if($attendance_arrear) {
-                    if( $attendance_arrear->status == "pending_approval") {
+                if ($attendance_arrear) {
+                    if ($attendance_arrear->status == "pending_approval") {
                         $attendance_arrear->status = "approved";
                         $attendance_arrear->save();
                     }
-
-                 }
-             }
-
+                }
+            }
 
 
 
 
-             DB::commit();
-             return response($attendance_arrear, 200);
-         } catch (Exception $e) {
-             DB::rollBack();
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            DB::commit();
+            return response($attendance_arrear, 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -945,113 +950,27 @@ class AttendanceController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $business_id =  $request->user()->business_id;
-            $attendances = Attendance::
-            with([
-                "employee" => function ($query) {
-                    $query->select(
-                        'users.id',
-                        'users.first_Name',
-                        'users.middle_Name',
-                        'users.last_Name'
-                    );
-                },
-                "employee.departments" => function ($query) {
-                    $query->select('departments.id', 'departments.name');
-                },
-                "work_location",
-                "project"
-            ])
 
 
-                ->where(
-                    [
-                        "attendances.business_id" => $business_id
-                    ]
-                )
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        // $query->where("attendances.name", "like", "%" . $term . "%")
-                        //     ->orWhere("attendances.description", "like", "%" . $term . "%");
-                    });
-                })
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    $idsArray = explode(',', $request->user_id);
-                    return $query->whereIn('attendances.user_id', $idsArray);
-                })
-                ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->whereHas("employee", function ($query) {
-                        $query->whereNotIn("users.id", [auth()->user()->id]);
-                    });
-                })
+            $attendancesQuery = Attendance::with([
+                    "employee" => function ($query) {
+                        $query->select(
+                            'users.id',
+                            'users.first_Name',
+                            'users.middle_Name',
+                            'users.last_Name'
+                        );
+                    },
+                    "employee.departments" => function ($query) {
+                        $query->select('departments.id', 'departments.name');
+                    },
+                    "work_location",
+                    "project"
+                ]);
 
-                ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where('attendances.status', $request->status);
-                })
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($request, $all_manager_department_ids, $attendancesQuery);
 
-                ->when(!empty($request->overtime), function ($query) use ($request) {
-                    $number_query = explode(',', str_replace(' ', ',', $request->overtime));
-                    return $query->where('attendances.overtime_hours', $number_query);
-                })
-
-
-                ->when(!empty($request->schedule_hour), function ($query) use ($request) {
-                    $number_query = explode(',', str_replace(' ', ',', $request->schedule_hour));
-                    return $query->where('attendances.capacity_hours', $number_query);
-                })
-
-                ->when(!empty($request->break_hour), function ($query) use ($request) {
-                    $number_query = explode(',', str_replace(' ', ',', $request->break_hour));
-                    return $query->where('attendances.break_hours', $number_query);
-                })
-
-                ->when(!empty($request->worked_hour), function ($query) use ($request) {
-                    $number_query = explode(',', str_replace(' ', ',', $request->worked_hour));
-                    return $query->where('attendances.total_paid_hours', $number_query[0], $number_query[1]);
-                })
-
-                ->when(!empty($request->work_location_id), function ($query) use ($request) {
-                    return $query->where('attendances.user_id', $request->work_location_id);
-                })
-
-                ->when(!empty($request->project_id), function ($query) use ($request) {
-                    return $query->where('attendances.project_id', $request->project_id);
-                })
-                ->when(!empty($request->work_location_id), function ($query) use ($request) {
-                    return $query->where('attendances.work_location_id', $request->work_location_id);
-                })
-
-                ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where('attendances.status', $request->status);
-                })
-                ->when(!empty($request->department_id), function ($query) use ($request) {
-                    return $query->whereHas("employee.departments", function ($query) use ($request) {
-                        $query->where("departments.id", $request->department_id);
-                    });
-                })
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-
-
-
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('attendances.in_date', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('attendances.in_date', "<=", ($request->end_date . ' 23:59:59'));
-                })
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("attendances.id", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("attendances.id", "DESC");
-                })
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });;
+            $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 if (strtoupper($request->response_type) == 'PDF') {
@@ -1174,10 +1093,10 @@ class AttendanceController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+
             $setting_attendance = $this->get_attendance_setting();
 
-            $attendances = Attendance::with([
+            $attendancesQuery = Attendance::with([
                 "employee" => function ($query) {
                     $query->select(
                         'users.id',
@@ -1191,47 +1110,13 @@ class AttendanceController extends Controller
                 },
                 "work_location",
                 "project"
-            ])
+            ]);
 
-                ->where(
-                    [
-                        "attendances.business_id" => $business_id
-                    ]
-                )
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('attendances.user_id', $request->user_id);
-                })
-                ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->whereHas("employee", function ($query) {
-                        $query->whereNotIn("users.id", [auth()->user()->id]);
-                    });
-                })
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        // $query->where("attendances.name", "like", "%" . $term . "%")
-                        //     ->orWhere("attendances.description", "like", "%" . $term . "%");
-                    });
-                })
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('attendances.created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('attendances.created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("attendances.id", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("attendances.id", "DESC");
-                })
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
+
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($request, $all_manager_department_ids, $attendancesQuery);
+
+            $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
+
 
 
 
@@ -1442,138 +1327,138 @@ class AttendanceController extends Controller
 
 
 
-                // Parse start and end dates
-                $startDate = Carbon::parse(($start_date . ' 00:00:00'));
-                $endDate = Carbon::parse(($end_date . ' 23:59:59'));
+            // Parse start and end dates
+            $startDate = Carbon::parse(($start_date . ' 00:00:00'));
+            $endDate = Carbon::parse(($end_date . ' 23:59:59'));
 
-                // Create an array of dates within the given range
-                $dateArray = [];
-                for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-                    $dateArray[] = $date->format('Y-m-d');
-                }
+            // Create an array of dates within the given range
+            $dateArray = [];
+            for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+                $dateArray[] = $date->format('Y-m-d');
+            }
 
-                // Get employee IDs
-                $employee_ids = $employees->pluck("id");
-                // Retrieve leave records within the specified date range
-                $leave_records = LeaveRecord::whereHas('leave',    function ($query) use ($employee_ids) {
-                    $query->whereIn("leaves.user_id",  $employee_ids)
-                        ->where("leaves.status", "approved");
-                })
-                    ->where('date', '>=', $start_date . ' 00:00:00')
-                    ->where('date', '<=', ($end_date . ' 23:59:59'))
-                    ->get();
+            // Get employee IDs
+            $employee_ids = $employees->pluck("id");
+            // Retrieve leave records within the specified date range
+            $leave_records = LeaveRecord::whereHas('leave',    function ($query) use ($employee_ids) {
+                $query->whereIn("leaves.user_id",  $employee_ids)
+                    ->where("leaves.status", "approved");
+            })
+                ->where('date', '>=', $start_date . ' 00:00:00')
+                ->where('date', '<=', ($end_date . ' 23:59:59'))
+                ->get();
 
-                // Retrieve attendance records within the specified date range
-                $attendances = Attendance::where("attendances.status", "approved")
-                    ->whereIn('attendances.user_id', $employee_ids)
-                    ->where('attendances.in_date', '>=', $start_date . ' 00:00:00')
-                    ->where('attendances.in_date', '<=', ($end_date . ' 23:59:59'))
+            // Retrieve attendance records within the specified date range
+            $attendances = Attendance::where("attendances.status", "approved")
+                ->whereIn('attendances.user_id', $employee_ids)
+                ->where('attendances.in_date', '>=', $start_date . ' 00:00:00')
+                ->where('attendances.in_date', '<=', ($end_date . ' 23:59:59'))
 
-                    ->get();
-
-
-                // Iterate over each employee
-           $employees =   $employees->map(function ($employee) use ($dateArray, $attendances, $leave_records) {
+                ->get();
 
 
-                    // Get all parent department IDs of the employee
-                    $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
+            // Iterate over each employee
+            $employees =   $employees->map(function ($employee) use ($dateArray, $attendances, $leave_records) {
 
 
-                    // Initialize total variables
-                    $total_paid_hours = 0;
-                    $total_paid_leave_hours = 0;
-                    $total_paid_holiday_hours = 0;
-                    $total_leave_hours = 0;
-                    $total_capacity_hours = 0;
-                    $total_balance_hours = 0;
+                // Get all parent department IDs of the employee
+                $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
 
-                    // Map date-wise attendance for the employee
-                    $employee->datewise_attendanes = collect($dateArray)->map(
-                        function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours, &$total_paid_leave_hours, &$total_paid_holiday_hours, $employee, $all_parent_department_ids) {
-                            // Get holiday details
-                            $holiday = $this->get_holiday_details($date, $employee->id, $all_parent_department_ids);
 
-                            // Find attendance record for the given date and employee
-                            $attendance = $attendances->first(function ($attendance) use ($date, $employee) {
-                                $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
-                                return (($in_date == $date) && ($attendance->user_id == $employee->id));
-                            });
-                            // Find leave record for the given date and employee, also calculate total leave hours
-                            $leave_record = $leave_records->first(function ($leave_record) use ($date, $employee, &$total_leave_hours) {
-                                $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
-                                if (($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
-                                    return false;
-                                }
-                                $total_leave_hours += $leave_record->leave_hours;
-                                return true;
-                            });
-                            // Initialize result variables
-                            $result_is_present = 0;
-                            $result_paid_hours = 0;
-                            $result_balance_hours = 0;
+                // Initialize total variables
+                $total_paid_hours = 0;
+                $total_paid_leave_hours = 0;
+                $total_paid_holiday_hours = 0;
+                $total_leave_hours = 0;
+                $total_capacity_hours = 0;
+                $total_balance_hours = 0;
 
-                            // Calculate paid leave hours if leave record exists and it's a paid leave
-                            if ($leave_record) {
-                                if ($leave_record->leave->leave_type->type == "paid") {
-                                    $paid_leave_hours =  $leave_record->leave_hours;
-                                    $total_paid_leave_hours += $paid_leave_hours;
-                                    $result_paid_hours += $paid_leave_hours;
-                                    $total_paid_hours +=  $paid_leave_hours;
-                                }
+                // Map date-wise attendance for the employee
+                $employee->datewise_attendanes = collect($dateArray)->map(
+                    function ($date) use ($attendances, $leave_records, &$total_balance_hours, &$total_paid_hours, &$total_capacity_hours, &$total_leave_hours, &$total_paid_leave_hours, &$total_paid_holiday_hours, $employee, $all_parent_department_ids) {
+                        // Get holiday details
+                        $holiday = $this->get_holiday_details($date, $employee->id, $all_parent_department_ids);
+
+                        // Find attendance record for the given date and employee
+                        $attendance = $attendances->first(function ($attendance) use ($date, $employee) {
+                            $in_date = Carbon::parse($attendance->in_date)->format("Y-m-d");
+                            return (($in_date == $date) && ($attendance->user_id == $employee->id));
+                        });
+                        // Find leave record for the given date and employee, also calculate total leave hours
+                        $leave_record = $leave_records->first(function ($leave_record) use ($date, $employee, &$total_leave_hours) {
+                            $leave_date = Carbon::parse($leave_record->date)->format("Y-m-d");
+                            if (($leave_record->user_id != $employee->id) || ($date != $leave_date)) {
+                                return false;
                             }
-                            // Calculate holiday hours if holiday exists
-                            if ($holiday) {
-                                if (!$employee->weekly_contractual_hours || !$employee->minimum_working_days_per_week) {
-                                    $holiday_hours = 0;
-                                } else {
-                                    $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
-                                }
+                            $total_leave_hours += $leave_record->leave_hours;
+                            return true;
+                        });
+                        // Initialize result variables
+                        $result_is_present = 0;
+                        $result_paid_hours = 0;
+                        $result_balance_hours = 0;
 
-                                $total_paid_holiday_hours += $holiday_hours;
-                                $result_paid_hours += $holiday_hours;
-                                $total_paid_hours += $holiday_hours;
+                        // Calculate paid leave hours if leave record exists and it's a paid leave
+                        if ($leave_record) {
+                            if ($leave_record->leave->leave_type->type == "paid") {
+                                $paid_leave_hours =  $leave_record->leave_hours;
+                                $total_paid_leave_hours += $paid_leave_hours;
+                                $result_paid_hours += $paid_leave_hours;
+                                $total_paid_hours +=  $paid_leave_hours;
                             }
-
-                            // Update result variables based on attendance
-                            if ($attendance) {
-                                $total_capacity_hours += $attendance->capacity_hours;
-                                if ($attendance->total_paid_hours > 0) {
-                                    $result_is_present = 1;
-
-                                    $result_balance_hours = $attendance->overtime_hours;
-                                    $total_paid_hours += $attendance->total_paid_hours;
-                                    $total_balance_hours += $attendance->overtime_hours;
-                                    $result_paid_hours += $attendance->total_paid_hours;
-                                }
-                            }
-                            // Prepare and return the result array
-                            if ($leave_record || $attendance || $holiday) {
-                                return [
-                                    'date' => Carbon::parse($date)->format("d-m-Y"),
-                                    'is_present' => $result_is_present,
-                                    'paid_hours' => $result_paid_hours,
-                                    "result_balance_hours" => $result_balance_hours,
-                                    'capacity_hours' => $attendance ? $attendance->capacity_hours : 0,
-                                    "paid_leave_hours"   => $leave_record ? (($leave_record->leave->leave_type->type == "paid") ? $leave_record->leave_hours : 0) : 0
-                                ];
-                            }
-                            // If no relevant record found, return null
-                            return  null;
                         }
-                    )
-                        ->filter()
-                        ->values();
+                        // Calculate holiday hours if holiday exists
+                        if ($holiday) {
+                            if (!$employee->weekly_contractual_hours || !$employee->minimum_working_days_per_week) {
+                                $holiday_hours = 0;
+                            } else {
+                                $holiday_hours = $employee->weekly_contractual_hours / $employee->minimum_working_days_per_week;
+                            }
 
-                    // Assign total variables to employee object
-                    $employee->total_balance_hours = $total_balance_hours;
-                    $employee->total_leave_hours = $total_leave_hours;
-                    $employee->total_paid_leave_hours = $total_paid_leave_hours;
-                    $employee->total_paid_holiday_hours = $total_paid_holiday_hours;
-                    $employee->total_paid_hours = $total_paid_hours;
-                    $employee->total_capacity_hours = $total_capacity_hours;
-                    return $employee;
-                });
+                            $total_paid_holiday_hours += $holiday_hours;
+                            $result_paid_hours += $holiday_hours;
+                            $total_paid_hours += $holiday_hours;
+                        }
+
+                        // Update result variables based on attendance
+                        if ($attendance) {
+                            $total_capacity_hours += $attendance->capacity_hours;
+                            if ($attendance->total_paid_hours > 0) {
+                                $result_is_present = 1;
+
+                                $result_balance_hours = $attendance->overtime_hours;
+                                $total_paid_hours += $attendance->total_paid_hours;
+                                $total_balance_hours += $attendance->overtime_hours;
+                                $result_paid_hours += $attendance->total_paid_hours;
+                            }
+                        }
+                        // Prepare and return the result array
+                        if ($leave_record || $attendance || $holiday) {
+                            return [
+                                'date' => Carbon::parse($date)->format("d-m-Y"),
+                                'is_present' => $result_is_present,
+                                'paid_hours' => $result_paid_hours,
+                                "result_balance_hours" => $result_balance_hours,
+                                'capacity_hours' => $attendance ? $attendance->capacity_hours : 0,
+                                "paid_leave_hours"   => $leave_record ? (($leave_record->leave->leave_type->type == "paid") ? $leave_record->leave_hours : 0) : 0
+                            ];
+                        }
+                        // If no relevant record found, return null
+                        return  null;
+                    }
+                )
+                    ->filter()
+                    ->values();
+
+                // Assign total variables to employee object
+                $employee->total_balance_hours = $total_balance_hours;
+                $employee->total_leave_hours = $total_leave_hours;
+                $employee->total_paid_leave_hours = $total_paid_leave_hours;
+                $employee->total_paid_holiday_hours = $total_paid_holiday_hours;
+                $employee->total_paid_hours = $total_paid_hours;
+                $employee->total_capacity_hours = $total_capacity_hours;
+                return $employee;
+            });
 
 
 
@@ -1584,7 +1469,7 @@ class AttendanceController extends Controller
         }
     }
 
-  /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/attendance-arrears",
@@ -1778,196 +1663,92 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function getAttendanceArrears(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('attendance_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getAttendanceArrears(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('attendance_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $business_id =  $request->user()->business_id;
-             $attendances = Attendance::with([
-                 "employee" => function ($query) {
-                     $query->select(
-                         'users.id',
-                         'users.first_Name',
-                         'users.middle_Name',
-                         'users.last_Name'
-                     );
-                 },
-                 "employee.departments" => function ($query) {
-                     $query->select('departments.id', 'departments.name');
-                 },
-                 "work_location",
-                 "project"
-             ])
+            $business_id =  $request->user()->business_id;
 
-
-                 ->where(
-                     [
-                         "attendances.business_id" => $business_id
-                     ]
-                 )
-
-                ->when(!empty($request->arrear_status),
+            $attendancesQuery = Attendance::with([
+                "employee" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "employee.departments" => function ($query) {
+                    $query->select('departments.id', 'departments.name');
+                },
+                "work_location",
+                "project"
+            ])
 
 
+                ->where(
+                    [
+                        "attendances.business_id" => $business_id
+                    ]
+                )
 
+                ->when(
+                    !empty($request->arrear_status),
+                    function ($query) use ($request) {
+                        $query->whereHas("arrear", function ($query) use ($request) {
+                            $query
+                                ->where(
+                                    "attendance_arrears.status",
+                                    $request->arrear_status
+                                );
+                        });
+                    },
+                    function ($query) use ($request) {
+                        $query->whereHas("arrear", function ($query) use ($request) {
+                            $query
+                                ->whereNotNull(
+                                    "attendance_arrears.status"
+                                );
+                        });
+                    }
 
+                );
 
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($request, $all_manager_department_ids, $attendancesQuery);
 
-
-
-
-
-
-
-                function($query) use($request) {
-                    $query->whereHas("arrear", function ($query) use ($request) {
-                        $query
-                        ->where(
-                        "attendance_arrears.status",
-                        $request->arrear_status
-                        );
-                    });
-                 },
-                 function($query) use($request) {
-                    $query->whereHas("arrear", function ($query) use ($request) {
-                        $query
-                        ->whereNotNull(
-                        "attendance_arrears.status"
-                        );
-                    });
-                 }
+            $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
 
 
 
 
 
 
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.attendances', ["attendances" => $attendances]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'attendance') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
 
+                    return Excel::download(new AttendancesExport($attendances), ((!empty($request->file_name) ? $request->file_name : 'attendance') . '.csv'));
+                }
+            } else {
+                return response()->json($attendances, 200);
+            }
 
+            return response()->json($attendances, 200);
+        } catch (Exception $e) {
 
-
-
-
-
-
-
-
-
-
-
-                 )
-
-
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
-                         // $query->where("attendances.name", "like", "%" . $term . "%")
-                         //     ->orWhere("attendances.description", "like", "%" . $term . "%");
-                     });
-                 })
-                 ->when(!empty($request->user_id), function ($query) use ($request) {
-                     $idsArray = explode(',', $request->user_id);
-                     return $query->whereIn('attendances.user_id', $idsArray);
-                 })
-                 ->when(empty($request->user_id), function ($query) use ($request) {
-                     return $query->whereHas("employee", function ($query) {
-                         $query->whereNotIn("users.id", [auth()->user()->id]);
-                     });
-                 })
-
-                 ->when(!empty($request->status), function ($query) use ($request) {
-                     return $query->where('attendances.status', $request->status);
-                 })
-
-                 ->when(!empty($request->overtime), function ($query) use ($request) {
-                     $number_query = explode(',', str_replace(' ', ',', $request->overtime));
-                     return $query->where('attendances.overtime_hours', $number_query);
-                 })
-
-
-                 ->when(!empty($request->schedule_hour), function ($query) use ($request) {
-                     $number_query = explode(',', str_replace(' ', ',', $request->schedule_hour));
-                     return $query->where('attendances.capacity_hours', $number_query);
-                 })
-
-                 ->when(!empty($request->break_hour), function ($query) use ($request) {
-                     $number_query = explode(',', str_replace(' ', ',', $request->break_hour));
-                     return $query->where('attendances.break_hours', $number_query);
-                 })
-
-                 ->when(!empty($request->worked_hour), function ($query) use ($request) {
-                     $number_query = explode(',', str_replace(' ', ',', $request->worked_hour));
-                     return $query->where('attendances.total_paid_hours', $number_query[0], $number_query[1]);
-                 })
-
-                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
-                     return $query->where('attendances.user_id', $request->work_location_id);
-                 })
-
-                 ->when(!empty($request->project_id), function ($query) use ($request) {
-                     return $query->where('attendances.project_id', $request->project_id);
-                 })
-                 ->when(!empty($request->work_location_id), function ($query) use ($request) {
-                     return $query->where('attendances.work_location_id', $request->work_location_id);
-                 })
-
-                 ->when(!empty($request->status), function ($query) use ($request) {
-                     return $query->where('attendances.status', $request->status);
-                 })
-                 ->when(!empty($request->department_id), function ($query) use ($request) {
-                     return $query->whereHas("employee.departments", function ($query) use ($request) {
-                         $query->where("departments.id", $request->department_id);
-                     });
-                 })
-                 ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-                     $query->whereIn("departments.id", $all_manager_department_ids);
-                 })
-
-
-
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('attendances.in_date', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('attendances.in_date', "<=", ($request->end_date . ' 23:59:59'));
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("attendances.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("attendances.id", "DESC");
-                 })
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });;
-
-             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                 if (strtoupper($request->response_type) == 'PDF') {
-                     $pdf = PDF::loadView('pdf.attendances', ["attendances" => $attendances]);
-                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'attendance') . '.pdf'));
-                 } elseif (strtoupper($request->response_type) === 'CSV') {
-
-                     return Excel::download(new AttendancesExport($attendances), ((!empty($request->file_name) ? $request->file_name : 'attendance') . '.csv'));
-                 }
-             } else {
-                 return response()->json($attendances, 200);
-             }
-
-             return response()->json($attendances, 200);
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -2307,7 +2088,7 @@ class AttendanceController extends Controller
 
                 $attendance_details = [];
                 // Map date range to create attendance details
-                foreach($date_range as $date){
+                foreach ($date_range as $date) {
                     $temp_data["in_date"] = $date;
                     $temp_data["does_break_taken"] = 1;
 
@@ -2320,9 +2101,7 @@ class AttendanceController extends Controller
                     $temp_data["work_location_id"] = $user->work_location_id;
 
 
-                    array_push($attendance_details,$temp_data);
-
-
+                    array_push($attendance_details, $temp_data);
                 }
 
 
@@ -2333,7 +2112,7 @@ class AttendanceController extends Controller
                 $all_parent_department_ids = $this->all_parent_departments_of_user($user->id);
 
                 // Map attendance details to create attendances data
-               $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
+                $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
 
                     // Retrieve work shift history for the user and date
                     $user_salary_info = $this->get_salary_info($user->id, $item["in_date"]);
@@ -2343,11 +2122,11 @@ class AttendanceController extends Controller
                     // Retrieve work shift details based on work shift history and date
                     $work_shift_details =  $this->get_work_shift_details($work_shift_history, $item["in_date"]);
 
-                    if($work_shift_history->type == "flexible") {
-                         return false;
+                    if ($work_shift_history->type == "flexible") {
+                        return false;
                     }
 
-                    if(!$work_shift_details->start_at || !$work_shift_details->end_at) {
+                    if (!$work_shift_details->start_at || !$work_shift_details->end_at) {
                         return false;
                     }
 
@@ -2373,7 +2152,7 @@ class AttendanceController extends Controller
                         return false;
                     }
                     // Retrieve leave record details for the user and date
-                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"],true);
+                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"], true);
 
                     if ($leave_record) {
                         return false;
@@ -2410,23 +2189,19 @@ class AttendanceController extends Controller
                     $attendance_data["overtime_hours_salary"] =   0;
 
                     return $attendance_data;
-
                 })->filter()->values();
 
 
                 $created_attendances = $user->attendances()->createMany($attendances_data);
 
                 if (!empty($created_attendances)) {
-                    foreach($created_attendances as $created_attendance) {
-                        $this->adjust_payroll_on_attendance_update($created_attendance,0);
+                    foreach ($created_attendances as $created_attendance) {
+                        $this->adjust_payroll_on_attendance_update($created_attendance, 0);
                     }
                     $this->send_notification($created_attendances, $user, "Attendance Taken", "create", "attendance");
                 }
-
-
             }
             DB::commit();
-
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());
