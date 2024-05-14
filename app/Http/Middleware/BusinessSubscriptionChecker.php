@@ -34,17 +34,17 @@ class BusinessSubscriptionChecker
 
 // Check if there's no subscription
 if (!$latest_subscription) {
-    return response()->json(["message" => "Please subscribe to use the software."], 500);
+    return response()->json(["message" => "Please subscribe to use the software."], 401);
 }
 
 // Check if the subscription has expired
 if (Carbon::parse($latest_subscription->end_date)->isPast()) {
-    return response()->json(["message" => "Your subscription has expired."], 500);
+    return response()->json(["message" => "Your subscription has expired."], 401);
 }
 
 // Check if the subscription has not yet started
 if (Carbon::parse($latest_subscription->start_date)->isFuture()) {
-    return response()->json(["message" => "Your subscription will start soon."], 500);
+    return response()->json(["message" => "Your subscription will start soon."], 401);
 }
             }
         }

@@ -3215,7 +3215,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $employment_statuses = $this->getEmploymentStatuses();
 
             foreach ($employment_statuses as $employment_status) {
-                $data["emplooyment_status_wise"][($employment_status->name . "_employees")] = $this->employees_by_employment_status(
+                $data["emplooyment_status_wise"]["data"][($employment_status->name . "_employees")] = $this->employees_by_employment_status(
                     $today,
                     $start_date_of_next_month,
                     $end_date_of_next_month,
@@ -3232,7 +3232,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                     $all_manager_department_ids,
                     $employment_status->id
                 );
-                $widget = $dashboard_widgets->get(($employment_status->name . "_employees"));
+                $widget = $dashboard_widgets->get(("employment_status_wise_employee"));
 
 
 
