@@ -134,7 +134,9 @@ class AttendanceController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
-            $request_data["is_present"] = 1;
+
+            $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
+
 
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
@@ -432,7 +434,7 @@ class AttendanceController extends Controller
 
 
             $request_data = $request->validated();
-            $request_data["is_present"] = 1;
+                $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
 
 
             // Retrieve attendance setting

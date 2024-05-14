@@ -2785,6 +2785,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             }
 
             $data["employees"]["widget_name"] = "employees";
+            $data["employees"]["widget_type"] = "default";
             $data["employees"]["route"] =  '/employee/all-employees?';
 
             //     $data["approved_leaves"] = $this->approved_leaves(
@@ -2831,6 +2832,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             }
 
             $data["employee_on_holiday"]["widget_name"] = "employee_on_holiday";
+            $data["employee_on_holiday"]["widget_type"] = "default";
             $data["employee_on_holiday"]["route"] =  '/employee/all-employees?is_on_holiday=1&';
 
             $start_id = 3;
@@ -2870,6 +2872,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
                 $data[($leave_status . "_leaves")]["widget_name"] = ($leave_status . "_leaves");
 
+                $data[($leave_status . "_leaves")]["widget_type"] = "default";
+
+
                 $data[($leave_status . "_leaves")]["route"] = ('/leave/leaves?status=' . $leave_status . "&");
             }
 
@@ -2906,6 +2911,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["open_roles"]["widget_name"] = "open_roles";
+
+              $data["open_roles"]["widget_type"] = "default";
+
             $data["open_roles"]["route"] = "/job-desk/job-list?is_open_roles=1&";
 
 
@@ -2943,6 +2951,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["upcoming_passport_expiries"]["widget_name"] = "upcoming_passport_expiries";
+            $data["upcoming_passport_expiries"]["widget_type"] = "multiple_upcoming_days";
             $data["upcoming_passport_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=passport&";
 
             $data["upcoming_visa_expiries"] = $this->upcoming_visa_expiries(
@@ -2976,6 +2985,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["upcoming_visa_expiries"]["widget_name"] = "upcoming_visa_expiries";
+            $data["upcoming_visa_expiries"]["widget_type"] = "multiple_upcoming_days";
 
 
             $data["upcoming_visa_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=visa&";
@@ -3018,6 +3028,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["upcoming_right_to_work_expiries"]["widget_name"] = "upcoming_right_to_work_expiries";
+            $data["upcoming_right_to_work_expiries"]["widget_type"] = "multiple_upcoming_days";
             $data["upcoming_right_to_work_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=right_to_work&";
 
 
@@ -3062,6 +3073,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["upcoming_sponsorship_expiries"]["widget_name"] = "upcoming_sponsorship_expiries";
+            $data["upcoming_sponsorship_expiries"]["widget_type"] = "multiple_upcoming_days";
             $data["upcoming_sponsorship_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=sponsorship&";
 
 
@@ -3102,6 +3114,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
                 $data[($sponsorship_status . "_sponsorships")]["widget_name"] = ($sponsorship_status . "_sponsorships");
+
+                $data[($sponsorship_status . "_sponsorships")]["widget_type"] = "default";
                 $data[($sponsorship_status . "_sponsorships")]["route"] = '/employee/all-employees?sponsorship_status=' . $sponsorship_status . "&";
 
             }
@@ -3149,6 +3163,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["upcoming_pension_expiries"]["widget_name"] = "upcoming_pension_expiries";
+
+            $data["upcoming_pension_expiries"]["widget_type"] = "multiple_upcoming_days";
+
             $data["upcoming_pension_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
 
 
@@ -3190,6 +3207,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
                 $data[($pension_status . "_pensions")]["widget_name"] = ($pension_status . "_pensions");
+                $data[($pension_status . "_pensions")]["widget_type"] = "default";
                 $data[($pension_status . "_pensions")]["route"] = '/employee/all-employees?pension_scheme_status=' . $pension_status . "&";
             }
 
@@ -3197,7 +3215,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $employment_statuses = $this->getEmploymentStatuses();
 
             foreach ($employment_statuses as $employment_status) {
-                $data[($employment_status->name . "_employees")] = $this->employees_by_employment_status(
+                $data["emplooyment_status_wise"][($employment_status->name . "_employees")] = $this->employees_by_employment_status(
                     $today,
                     $start_date_of_next_month,
                     $end_date_of_next_month,
@@ -3219,20 +3237,21 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-                $data[($employment_status->name . "_employees")]["id"] = $start_id++;
+                $data["emplooyment_status_wise"]["id"] = $start_id++;
                 if($widget) {
-                    $data[($employment_status->name . "_employees")]["widget_id"] = $widget->id;
-                    $data[($employment_status->name . "_employees")]["widget_order"] = $widget->widget_order;
+                    $data["emplooyment_status_wise"]["widget_id"] = $widget->id;
+                    $data["emplooyment_status_wise"]["widget_order"] = $widget->widget_order;
                 }
                 else {
-                    $data[($employment_status->name . "_employees")]["widget_id"] = 0;
-                    $data[($employment_status->name . "_employees")]["widget_order"] = 0;
+                    $data["emplooyment_status_wise"]["widget_id"] = 0;
+                    $data["emplooyment_status_wise"]["widget_order"] = 0;
                 }
 
 
-                $data[($employment_status->name . "_employees")]["widget_name"] = ($employment_status->name . "_employees");
+                $data["emplooyment_status_wise"]["widget_name"] = "employment_status_wise_employee";
+                $data["emplooyment_status_wise"]["widget_type"] = "graph";
 
-                $data[($employment_status->name . "_employees")]["route"] = ('/leave/leaves?status=' . $employment_status->name . "&");
+                $data["emplooyment_status_wise"]["route"] = ('/employee/?status=' . $employment_status->name . "&");
             }
 
 
@@ -3282,6 +3301,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["absent_today"]["widget_name"] = "absent_today";
+            $data["absent_today"]["widget_type"] = "default";
             $data["absent_today"]["route"] = "/employee/all-employees?absent_today=1&";
 
 
@@ -3325,7 +3345,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            $data["present_today"]["widget_name"] = "absent_today";
+            $data["present_today"]["widget_name"] = "present_today";
+            $data["present_today"]["widget_type"] = "default";
             $data["present_today"]["route"] = "/employee/all-employees?present_today=1&";
 
 
