@@ -45,7 +45,6 @@ class Business extends Model
         "pension_scheme_letters",
 
 
-
         "owner_id",
         'created_by'
 

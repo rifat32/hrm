@@ -84,7 +84,7 @@ class ModuleController extends Controller
             ])
                 ->first();
             if (!$module) {
-             
+
                 return response()->json([
                     "message" => "no module found"
                 ], 404);
@@ -92,7 +92,7 @@ class ModuleController extends Controller
 
 
              $module->update([
-                 'is_active' => !$module->is_active
+                 'is_enabled' => !$module->is_enabled
              ]);
 
              return response()->json(['message' => 'Module status updated successfully'], 200);

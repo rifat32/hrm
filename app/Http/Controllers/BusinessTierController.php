@@ -8,6 +8,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessTier;
+use App\Models\BusinessTierModule;
 use App\Models\Module;
 use Carbon\Carbon;
 use Exception;
@@ -96,24 +97,27 @@ class BusinessTierController extends Controller
                 $business_tier =  BusinessTier::create($request_data);
 
                 $default_modules = Module::where([
-                     "is_default" => 1,
-                     "is_active" => 1,
+
+                     "is_enabled" => 1,
                 ])
                 ->get();
+
                 if ($default_modules->isNotEmpty()) {
                     // Transform the collection to an array for createMany
-                    $module_data = $default_modules->map(function ($module) use ($business_tier, $request) {
-                        return [
-                            "name" => $module->name,
-                            "is_active" => 1,
-                            "is_default" => 0,
-                            "business_tier_id" => $business_tier->id,
-                            'created_by' => $request->user()->id,
-                        ];
+                    $default_modules->map(function ($module) use ($business_tier, $request) {
+
+                       BusinessTierModule::create([
+                        "name" => $module->name,
+                        "is_enabled" => 1,
+                        "business_tier_id" => $business_tier->id,
+                        "module_id" => $module->id,
+                        'created_by' => $request->user()->id,
+                    ]);
+                    return 0;
+
                     })->toArray();
 
-                    // Use createMany to insert multiple records in one query
-                    Module::createMany($module_data);
+
                 }
 
                 return response($business_tier, 201);
@@ -543,7 +547,7 @@ class BusinessTierController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-             
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

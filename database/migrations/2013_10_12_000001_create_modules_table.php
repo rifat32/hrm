@@ -18,15 +18,17 @@ class CreateModulesTable extends Migration
             $table->id();
             $table->string("name");
             $table->boolean('is_enabled')->default(false);
-            $table->boolean('is_default')->default(false);
 
 
 
-            $table->unsignedBigInteger("business_tier_id")->nullable();
-            $table->foreign('business_tier_id')->references('id')->on('business_tiers')->onDelete('cascade');
+
+
 
 
             $table->unsignedBigInteger("created_by")->nullable();
+
+
+
             $table->timestamps();
         });
 
@@ -36,34 +38,18 @@ class CreateModulesTable extends Migration
            [
             "name" => "project_and_task_management",
             "is_enabled" => 1,
-            "is_default" => 1,
-            "business_tier_id" => NULL,
+
+
            ],
 
            [
             "name" => "user_activity",
             "is_enabled" => 1,
-            "is_default" => 1,
-            "business_tier_id" => NULL,
+
            ],
         ));
 
-        DB::table('modules')
-        ->insert(array(
-           [
-            "name" => "project_and_task_management",
-            "is_enabled" => 1,
-            "is_default" => 0,
-            "business_tier_id" => 1,
-           ],
 
-           [
-            "name" => "user_activity",
-            "is_enabled" => 1,
-            "is_default" => 0,
-            "business_tier_id" => 1,
-           ],
-        ));
 
     }
 

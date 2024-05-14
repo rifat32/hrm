@@ -12,16 +12,16 @@ class Module extends Model
 
     protected $fillable = [
         "name",
-        "is_enabled",
-        "is_default",
-        "business_tier_id",
+        "is_active",
         'created_by'
     ];
 
 
-    public function business_tier(){
-        return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
-    }
+
+
+
+
+
     // public function getCreatedAtAttribute($value)
     // {
     //     return (new Carbon($value))->format('d-m-Y');
