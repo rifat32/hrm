@@ -65,7 +65,13 @@ class TaskUpdateRequest extends BaseFormRequest
                 'numeric',
                 new ValidUserId($all_manager_department_ids)
 
-            ]
+            ],
+
+
+            'assets' => 'present|array',
+            'assets.*' => 'string',
+            'labels' => "present|array",
+            'cover' => "nullable|string",
 
 
         ];

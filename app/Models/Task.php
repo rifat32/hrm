@@ -13,6 +13,13 @@ class Task extends Model
         "unique_identifier",
         'name',
         'description',
+
+        'assets',
+        'labels',
+        'cover',
+
+
+
         'start_date',
         'due_date',
         'end_date',
@@ -26,6 +33,14 @@ class Task extends Model
         "business_id",
         "created_by"
     ];
+
+
+
+    protected $casts = [
+        'assets' => 'array',
+        'labels' => 'array',
+    ];
+
 
     public function project()
     {

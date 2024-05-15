@@ -43,8 +43,11 @@ class TaskController extends Controller
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
  *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
- *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3})
-
+ *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3}),
+ *
+ *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
+ *      @OA\Property(property="labels", type="string", format="array", example={1,2,3}),
+ *      @OA\Property(property="assets", type="string", format="array", example={1,2,3}),
  *
  *
      *
@@ -155,6 +158,10 @@ class TaskController extends Controller
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
  * *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
  *
+ * *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
+ *      @OA\Property(property="labels", type="string", format="array", example={1,2,3}),
+ *      @OA\Property(property="assets", type="string", format="array", example={1,2,3}),
+ *
  *
 
      *
@@ -229,6 +236,13 @@ class TaskController extends Controller
                     collect($request_data)->only([
                         'name',
                         'description',
+
+
+                      'assets',
+                      'labels',
+                      'cover',
+
+
                         'start_date',
                         'due_date',
                         'end_date',
