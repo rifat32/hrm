@@ -2,6 +2,7 @@
 
 namespace App\Http\Components;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeave;
@@ -12,6 +13,7 @@ use Exception;
 class LeaveComponent
 {
 
+    use BasicUtil;
     protected $authorizationComponent;
 
     protected $departmentComponent;
@@ -410,6 +412,93 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
     });
 
     return $query;
+}
+
+
+public function getLeaveV4Func() {
+    $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
+
+
+
+    $leavesQuery =  Leave::with([
+        "employee" => function ($query) {
+            $query->select(
+                'users.id',
+                'users.first_Name',
+                'users.middle_Name',
+                'users.last_Name',
+                'users.image'
+            );
+        },
+        "employee.departments" => function ($query) {
+            // You can select specific fields from the departments table if needed
+            $query->select(
+                'departments.id',
+                'departments.name',
+                //  "departments.location",
+                "departments.description"
+            );
+        },
+        "leave_type" => function ($query) {
+            $query->select(
+                'setting_leave_types.id',
+                'setting_leave_types.name',
+                'setting_leave_types.type',
+                'setting_leave_types.amount',
+
+            );
+        },
+
+    ]);
+    $leavesQuery =   $this->updateLeavesQuery($all_manager_department_ids,$leavesQuery);
+    $leaves = $this->retrieveData($leavesQuery, "leaves.id");
+
+
+
+
+    foreach ($leaves as $leave) {
+        $leave->total_leave_hours = $leave->records->sum(function ($record) {
+            $startTime = Carbon::parse($record->start_time);
+            $endTime = Carbon::parse($record->end_time);
+            return $startTime->diffInHours($endTime);
+        });
+    }
+    $data["data"] = $leaves;
+
+    $data["data_highlights"] = [];
+
+
+
+    $data["data_highlights"]["leave_approved_hours"] = $leaves->filter(function ($leave) {
+        return ($leave->status == "approved");
+    })->sum('total_leave_hours');
+
+    $data["data_highlights"]["leave_approved_total_individual_days"] = $leaves->filter(function ($leave) {
+
+        return ($leave->status == "approved");
+    })->sum(function ($leave) {
+        return $leave->records->count();
+    });
+
+    $data["data_highlights"]["upcoming_leaves_hours"] = $leaves->filter(function ($leave) {
+
+        return Carbon::parse($leave->start_date)->isFuture();
+    })->sum(function ($leave) {
+        return $leave->records->count();
+    });
+
+    $data["data_highlights"]["upcoming_leaves_total_individual_days"] = $leaves->filter(function ($leave) {
+
+        return Carbon::parse($leave->start_date)->isFuture();
+    })->sum('total_leave_hours');
+
+
+
+    $data["data_highlights"]["pending_leaves"] = $leaves->filter(function ($leave) {
+
+        return ($leave->status != "approved");
+    })->count();
+    return $data;
 }
 
 

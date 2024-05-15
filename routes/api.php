@@ -1068,13 +1068,12 @@ Route::get('/v1.0/leave-arrears', [LeaveController::class, "getLeaveArrears"]);
 
 
 
-
-
-
-
 Route::get('/v2.0/leaves', [LeaveController::class, "getLeavesV2"]);
 Route::get('/v3.0/leaves', [LeaveController::class, "getLeavesV3"]);
 Route::get('/v4.0/leaves', [LeaveController::class, "getLeavesV4"]);
+
+
+
 Route::get('/v1.0/leaves/{id}', [LeaveController::class, "getLeaveById"]);
 Route::get('/v1.0/leaves-get-current-hourly-rate', [LeaveController::class, "getLeaveCurrentHourlyRate"]);
 Route::delete('/v1.0/leaves/{ids}', [LeaveController::class, "deleteLeavesByIds"]);

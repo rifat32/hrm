@@ -4991,11 +4991,20 @@ class UserManagementController extends Controller
 
 
             $data["attendances_data"] = $this->attendanceComponent->getAttendanceV2Data();
+
+            $data["leaves_data"] = $this->leaveComponent->getLeaveV4Func();
+
+
+
+
+
+
+
             // @@@@@@@@@@
 
 
 
-            return response()->json($user, 200);
+            return response()->json($data, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
