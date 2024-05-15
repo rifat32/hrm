@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\BusinessModule;
 use App\Models\BusinessTierModule;
 use App\Models\Module;
+use Exception;
 
 trait ModuleUtil
 {
@@ -23,15 +24,17 @@ trait ModuleUtil
             'name' => $module_name,
         ];
         $module = Module::where($query_params)->first();
-        if(!$module) {
+        if(empty($module)) {
             return false;
         }
-        if(!$module->is_enabled) {
+        if(empty($module->is_enabled)) {
+
             return false;
         }
-        
+
             $business = Business::find($user->business_id);
-            if(!$business) {
+            if(empty($business)) {
+
                 return false;
             }
 
@@ -39,11 +42,7 @@ trait ModuleUtil
 
 
 
-
-
-
-
-           $is_enabled = false;
+           $is_enabled = true;
 
 
 
@@ -53,7 +52,7 @@ trait ModuleUtil
            ])
            ->first();
 
-           if($businessTierModule){
+           if(!empty($businessTierModule)){
             $is_enabled = $businessTierModule->is_enabled;
            }
 
@@ -66,7 +65,7 @@ trait ModuleUtil
            ->first();
 
 
-           if($businessModule){
+           if(!empty($businessModule)){
             $is_enabled = $businessModule->is_enabled;
            }
 

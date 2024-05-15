@@ -4984,9 +4984,13 @@ class UserManagementController extends Controller
 
             $data["leave_allowance_data"] = $leave_types;
 
+
             $user_recruitment_processes = $this->userManagementComponent->getRecruitmentProcessesByUserIdFunc($id, $all_manager_department_ids);
 
             $data["user_recruitment_processes_data"] = $user_recruitment_processes;
+
+
+            $data["attendances_data"] = $this->attendanceComponent->getAttendanceV2Data();
             // @@@@@@@@@@
 
 

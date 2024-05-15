@@ -968,7 +968,7 @@ class AttendanceController extends Controller
                     "project"
                 ]);
 
-            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($request, $all_manager_department_ids, $attendancesQuery);
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery( $all_manager_department_ids, $attendancesQuery);
 
             $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
 
@@ -1092,77 +1092,10 @@ class AttendanceController extends Controller
                 ], 401);
             }
 
-            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $setting_attendance = $this->get_attendance_setting();
-
-            $attendancesQuery = Attendance::with([
-                "employee" => function ($query) {
-                    $query->select(
-                        'users.id',
-                        'users.first_Name',
-                        'users.middle_Name',
-                        'users.last_Name'
-                    );
-                },
-                "employee.departments" => function ($query) {
-                    $query->select('departments.id', 'departments.name');
-                },
-                "work_location",
-                "project"
-            ]);
+       $data = $this->attendanceComponent->getAttendanceV2Data();
 
 
-            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($request, $all_manager_department_ids, $attendancesQuery);
-
-            $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
-
-
-
-
-
-
-
-            $data['data'] = $attendances;
-
-            $behavior_counts = [
-                'absent' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'absent')->count(),
-                'regular' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'regular')->count(),
-                'early' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'early')->count(),
-                'late' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'late')->count(),
-            ];
-
-            $max_behavior = max($behavior_counts);
-            $data['data_highlights']['behavior'] = $behavior_counts;
-            $data['data_highlights']['average_behavior'] = array_search($max_behavior, $behavior_counts);
-            $data['data_highlights']['total_schedule_hours'] = $attendances->sum('capacity_hours');
-
-            // $data['data_highlights']['total_leave_hours'] =  $attendances->sum('leave_hours');
-
-            $data['data_highlights']['total_leave_hours'] =  0;
-
-            $total_available_hours = $data['data_highlights']['total_schedule_hours'] - $data['data_highlights']['total_leave_hours'];
-
-            if ($total_available_hours == 0 || $data['data_highlights']['total_schedule_hours'] == 0) {
-                $data['data_highlights']['total_work_availability_per_centum'] = 0;
-            } else {
-                $data['data_highlights']['total_work_availability_per_centum'] = ($total_available_hours / $data['data_highlights']['total_schedule_hours']) * 100;
-            }
-
-            if (!empty($setting_attendance->work_availability_definition)) {
-                if ($attendances->isEmpty()) {
-                    $data['data_highlights']['work_availability'] = 'no data';
-                } elseif ($data['data_highlights']['total_work_availability_per_centum'] >= $setting_attendance->work_availability_definition) {
-                    $data['data_highlights']['work_availability'] = 'good';
-                } else {
-                    $data['data_highlights']['work_availability'] = 'bad';
-                }
-            } else {
-                $data['data_highlights']['work_availability'] = 'good';
-            }
-
-            $data['data_highlights']['total_active_hours'] = $attendances->sum('total_paid_hours');
-            $data['data_highlights']['total_extra_hours'] = $attendances->sum('overtime_hours');
 
             return response()->json($data, 200);
         } catch (Exception $e) {
@@ -1722,7 +1655,7 @@ class AttendanceController extends Controller
 
                 );
 
-            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($request, $all_manager_department_ids, $attendancesQuery);
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery( $all_manager_department_ids, $attendancesQuery);
 
             $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
 

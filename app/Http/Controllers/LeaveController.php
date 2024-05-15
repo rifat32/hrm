@@ -21,23 +21,19 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\LeaveUtil;
 use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Jobs\SendNotificationJob;
-use App\Models\Attendance;
-use App\Models\Department;
-use App\Models\Holiday;
+
 use App\Models\Leave;
 use App\Models\LeaveApproval;
 use App\Models\LeaveHistory;
 use App\Models\LeaveRecord;
 use App\Models\LeaveRecordArrear;
 use App\Models\Payroll;
-use App\Models\PayrollAttendance;
+
 use App\Models\PayrollLeaveRecord;
-use App\Models\Role;
+
 use App\Models\SettingLeave;
 use App\Models\User;
-use App\Models\WorkShift;
-use App\Models\WorkShiftHistory;
+
 use App\Observers\LeaveObserver;
 use Carbon\Carbon;
 use Exception;
@@ -1000,62 +996,22 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
             $business_id =  $request->user()->business_id;
-            $leaves = Leave::where(
+
+
+            $leavesQuery = Leave::where(
                 [
                     "leaves.business_id" => $business_id
                 ]
-            )
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        // $query->where("leaves.name", "like", "%" . $term . "%")
-                        //     ->orWhere("leaves.description", "like", "%" . $term . "%");
-                    });
-                })
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
-                ->when(!empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('leaves.user_id', $request->user_id);
-                })
-                ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->whereHas("employee", function ($query) {
-                        $query->whereNotIn("users.id", [auth()->user()->id]);
-                    });
-                })
-                ->when(!empty($request->leave_type_id), function ($query) use ($request) {
-                    return $query->where('leaves.leave_type_id', $request->leave_type_id);
-                })
-                ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where('leaves.status', $request->status);
-                })
-                ->when(!empty($request->department_id), function ($query) use ($request) {
-                    return $query->whereHas("employee.departments", function ($query) use ($request) {
-                        $query->where("departments.id", $request->department_id);
-                    });
-                })
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    $query->where('leaves.start_date', '>=', $request->start_date . ' 00:00:00');
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    $query->where('leaves.end_date', '<=', $request->end_date . ' 23:59:59');
-                })
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("leaves.id", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("leaves.id", "DESC");
-                })
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
+                );
 
 
 
+
+            $leavesQuery =   $this->leaveComponent->updateLeavesQuery($all_manager_department_ids,$leavesQuery);
+
+            $leaves = $this->retrieveData($leavesQuery, "leaves.id");
+
+           
 
             foreach ($leaves as $leave) {
                 $leave->total_leave_hours = $leave->records->sum(function ($record) {
