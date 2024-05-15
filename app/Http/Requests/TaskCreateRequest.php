@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
 use App\Models\Task;
+use App\Rules\ValidateTaskCategory;
 use App\Rules\ValidateTaskId;
 use App\Rules\ValidProjectId;
 use App\Rules\ValidUserId;
@@ -38,16 +39,25 @@ class TaskCreateRequest extends BaseFormRequest
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'end_date' => 'nullable|date|after_or_equal:due_date',
             'status' => 'required|in:pending, in_progress, done, in_review, approved, cancelled, rejected, draft',
+
             'project_id' => [
                 'required',
                 'numeric',
                 new ValidProjectId()
             ],
+
             'parent_task_id' => [
                 'nullable',
                 'numeric',
                 new ValidateTaskId(),
             ],
+
+            'task_category_id' => [
+                'required',
+                'numeric',
+                new ValidateTaskCategory(),
+            ],
+
             "assignees" => "required|array",
             "assignees.*" => [
                 'numeric',

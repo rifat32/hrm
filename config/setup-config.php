@@ -77,6 +77,12 @@ return [
                 "job_platform_view",
                 // "job_platform_delete",
 
+                "task_category_create",
+                "task_category_update",
+                // "task_category_activate",
+                "task_category_view",
+                // "task_category_delete",
+
                 "social_site_create",
                 "social_site_update",
                 "social_site_view",
@@ -186,6 +192,11 @@ return [
                 "job_platform_update",
                 "job_platform_view",
                 // "job_platform_delete",
+
+                "task_category_create",
+                "task_category_update",
+                "task_category_view",
+                // "task_category_delete",
 
 
                 "social_site_create",
@@ -352,6 +363,12 @@ return [
                 "job_platform_activate",
                 "job_platform_view",
                 // "job_platform_delete",
+
+                // "task_category_create",
+                "task_category_update",
+                "task_category_activate",
+                "task_category_view",
+                // "task_category_delete",
 
                 "project_create",
                 "project_update",
@@ -590,6 +607,12 @@ return [
                 "job_platform_view",
                 // "job_platform_delete",
 
+                  // "task_category_create",
+                //   "task_category_update",
+                  "task_category_activate",
+                  "task_category_view",
+                  // "task_category_delete",
+
                 "project_create",
                 "project_update",
                 "project_view",
@@ -801,6 +824,12 @@ return [
                 // "job_platform_activate",
             "job_platform_view",
                 // "job_platform_delete",
+
+                     // "task_category_create",
+                //   "task_category_update",
+                // "task_category_activate",
+                "task_category_view",
+                // "task_category_delete",
 
                 "project_create",
                 "project_update",
@@ -1109,6 +1138,12 @@ return [
         "job_platform_activate",
         "job_platform_view",
         "job_platform_delete",
+
+            "task_category_create",
+            "task_category_update",
+            "task_category_activate",
+            "task_category_view",
+            "task_category_delete",
 
 
         "project_create",
@@ -1438,6 +1473,13 @@ return [
         "job_platform_view" => "Can view job platform",
         "job_platform_delete" => "Can delete job platform",
 
+
+              "task_category_create" => "",
+              "task_category_update" => "",
+              "task_category_activate" => "",
+              "task_category_view" => "",
+              "task_category_delete" => "",
+
         "social_site_create" => "Can create social site",
         "social_site_update"  => "Can update social site",
         "social_site_view" => "Can view social site",
@@ -1757,6 +1799,12 @@ return [
         "job_platform_activate" => "activate",
         "job_platform_view" => "view",
         "job_platform_delete" => "delete",
+
+        "task_category_create" => "create",
+        "task_category_update" => "update",
+        "task_category_activate" => "activate",
+        "task_category_view" => "view",
+        "task_category_delete" => "delete",
 
         "social_site_create" => "create",
         "social_site_update" => "update",
@@ -2338,12 +2386,23 @@ return [
                 "job_platform_activate",
                 "job_platform_view",
                 "job_platform_delete",
-
-
-
-
             ],
         ],
+
+        [
+            "header" => "task_category",
+            "permissions" => [
+
+                "task_category_create",
+                "task_category_update",
+                "task_category_activate",
+                "task_category_view",
+                "task_category_delete",
+            ],
+        ],
+
+
+
 
         [
             "header" => "social_site",
@@ -2583,7 +2642,6 @@ return [
             "issue_date_column" => "pension_enrollment_issue_date",
             'expiry_date_column' => "pension_re_enrollment_due_date",
             "user_eligible_field" => "pension_eligible"
-
         ],
 
 

@@ -18,6 +18,7 @@ class Task extends Model
         'status',
         'project_id',
         'parent_task_id',
+        "task_category_id",
         'assigned_by',
 
         "is_active",
@@ -28,6 +29,10 @@ class Task extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+    public function task_category()
+    {
+        return $this->belongsTo(TaskCategory::class);
     }
 
     public function parent_task()

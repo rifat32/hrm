@@ -26,8 +26,11 @@ use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\JobPlatformController;
 use App\Http\Controllers\JobTypeController;
 use App\Http\Controllers\LeaveController;
+
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NotificationController;
+
+
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\PayrollController;
@@ -46,6 +49,7 @@ use App\Http\Controllers\SettingPaymentDateController;
 use App\Http\Controllers\SettingPayrollController;
 use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\SystemSettingController;
+use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserAddressHistoryController;
 use App\Http\Controllers\UserAssetController;
@@ -267,6 +271,15 @@ Route::get('/v1.0/system-settings', [SystemSettingController::class, "getSystemS
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::put('/v1.0/modules/toggle-active', [ModuleController::class, "toggleActiveModule"]);
+
+Route::put('/v1.0/business-modules/enable', [ModuleController::class, "enableBusinessModule"]);
+
+
+
+
+
+
+
 Route::get('/v1.0/modules', [ModuleController::class, "getModules"]);
 
 
@@ -1281,6 +1294,35 @@ Route::delete('/v1.0/projects/{ids}', [ProjectController::class, "deleteProjects
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end project  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/task-categories', [TaskCategoryController::class, "createTaskCategory"]);
+Route::put('/v1.0/task-categories', [TaskCategoryController::class, "updateTaskCategory"]);
+Route::get('/v1.0/task-categories', [TaskCategoryController::class, "getTaskCategories"]);
+Route::get('/v1.0/task-categories/{id}', [TaskCategoryController::class, "getTaskCategoryById"]);
+Route::delete('/v1.0/task-categories/{ids}', [TaskCategoryController::class, "deleteTaskCategoriesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
 
 
 

@@ -41,6 +41,7 @@ class TaskController extends Controller
  *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
+ *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
  *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3})
 
  *
@@ -139,7 +140,8 @@ class TaskController extends Controller
  *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
  *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
- *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2")
+ *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
+ * *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
  *
  *
 
@@ -223,6 +225,7 @@ class TaskController extends Controller
                         'status',
                         'project_id',
                         'parent_task_id',
+                        "task_category_id",
                         'assigned_by',
 
                         // "is_active",
@@ -593,7 +596,7 @@ class TaskController extends Controller
 
 
             if (!empty($nonExistingIds)) {
-             
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

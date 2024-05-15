@@ -38,6 +38,10 @@ class CreateTasksTable extends Migration
             $table->unsignedBigInteger("parent_task_id")->nullable();
             $table->foreign('parent_task_id')->references('id')->on('tasks')->onDelete('cascade');
 
+            $table->unsignedBigInteger("task_category_id")->nullable();
+            $table->foreign('task_category_id')->references('id')->on('task_categories')->onDelete('cascade');
+
+
 
 
             $table->unsignedBigInteger("assigned_by")->nullable();

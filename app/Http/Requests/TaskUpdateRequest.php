@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
 use App\Models\Task;
+use App\Rules\ValidateTaskCategory;
 use App\Rules\ValidateTaskId;
 use App\Rules\ValidProjectId;
 use App\Rules\ValidUserId;
@@ -53,6 +54,11 @@ class TaskUpdateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateTaskId(),
 
+            ],
+            'task_category_id' => [
+                'required',
+                'numeric',
+                new ValidateTaskCategory(),
             ],
             "assignees" => "required|array",
             "assignees.*" => [
