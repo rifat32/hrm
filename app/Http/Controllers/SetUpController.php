@@ -25,6 +25,7 @@ use App\Models\SettingLeaveType;
 use App\Models\SettingPaymentDate;
 use App\Models\SettingPayrun;
 use App\Models\SocialSite;
+use App\Models\TaskCategory;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
@@ -432,6 +433,107 @@ return "swagger generated";
                 "created_by" => $admin->id
             ]);
         }
+
+
+        $default_task_categories = [
+            [
+                'name' => "To Do",
+                'description' => "Tasks that are yet to be started."
+            ],
+            [
+                'name' => "In Progress",
+                'description' => "Tasks that are currently being worked on."
+            ],
+            [
+                'name' => "Done",
+                'description' => "Tasks that have been completed."
+            ],
+            [
+                'name' => "Backlog",
+                'description' => "Tasks that are pending and not scheduled for immediate action."
+            ],
+            [
+                'name' => "Ready for Review",
+                'description' => "Tasks that are completed and ready for review by stakeholders or team members."
+            ],
+            [
+                'name' => "Blocked",
+                'description' => "Tasks that cannot progress due to some external dependencies or issues."
+            ],
+            [
+                'name' => "Testing/QA",
+                'description' => "Tasks that are undergoing testing or quality assurance processes."
+            ],
+            [
+                'name' => "Waiting for Approval",
+                'description' => "Tasks that are completed and awaiting approval from stakeholders."
+            ],
+            [
+                'name' => "On Hold",
+                'description' => "Tasks that are temporarily suspended or put on hold."
+            ],
+            [
+                'name' => "Urgent",
+                'description' => "Tasks that require immediate attention or action."
+            ],
+            [
+                'name' => "Priority",
+                'description' => "Tasks that are of high priority and need to be addressed before others."
+            ],
+            [
+                'name' => "Needs Clarification",
+                'description' => "Tasks that lack clarity and require further clarification before proceeding."
+            ],
+            [
+                'name' => "Rejected",
+                'description' => "Tasks that have been rejected or deemed unnecessary."
+            ],
+            [
+                'name' => "Deferred",
+                'description' => "Tasks that are postponed to a later time or date."
+            ],
+            [
+                'name' => "Feedback Received",
+                'description' => "Tasks for which feedback has been received and need to be updated accordingly."
+            ],
+            [
+                'name' => "In Review",
+                'description' => "Tasks that are under review by stakeholders or team members."
+            ],
+            [
+                'name' => "Pending",
+                'description' => "Tasks that are pending action or awaiting further instructions."
+            ],
+            [
+                'name' => "Scheduled",
+                'description' => "Tasks that are scheduled for future action or completion."
+            ],
+            [
+                'name' => "In Maintenance",
+                'description' => "Tasks that are part of ongoing maintenance activities."
+            ],
+            [
+                'name' => "Closed",
+                'description' => "Tasks that have been completed and formally closed."
+            ],
+            [
+                'name' => "Archived",
+                'description' => "Tasks that are no longer active but are retained for reference or historical purposes."
+            ],
+        ];
+
+         // Iterate through the array and create records
+         foreach ($default_task_categories as $data) {
+            TaskCategory::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => $admin->id
+            ]);
+        }
+
 
 
         $default_recruitment_process = [
