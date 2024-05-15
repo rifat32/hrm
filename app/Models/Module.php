@@ -12,7 +12,7 @@ class Module extends Model
 
     protected $fillable = [
         "name",
-        "is_active",
+        "is_enabled",
         'created_by'
     ];
 

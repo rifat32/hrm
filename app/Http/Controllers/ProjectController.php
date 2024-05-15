@@ -94,11 +94,8 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
+            $this->isModuleEnabled("project_and_task_management");
 
-            if(!$this->isModuleEnabled("project_and_task_management")) {
-
-                return response()->json(['error' => 'Module is not enabled'], 403);
-             }
 
                 if (!$request->user()->hasPermissionTo('project_create')) {
                     return response()->json([
@@ -197,13 +194,12 @@ class ProjectController extends Controller
      public function assignUser(UserAssignToProjectRequest $request)
      {
 
+        DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if(!$this->isModuleEnabled("project_and_task_management")) {
+             $this->isModuleEnabled("project_and_task_management");
 
-                 return response()->json(['error' => 'Module is not enabled'], 403);
-              }
-             return DB::transaction(function () use ($request) {
+
                  if (!$request->user()->hasPermissionTo('project_update')) {
                      return response()->json([
                          "message" => "You can not perform this action"
@@ -309,11 +305,12 @@ class ProjectController extends Controller
 
                  $project->users()->attach($request_data['users']);
 
+                 DB::commit();
                  return response($project, 201);
 
-             });
+
          } catch (Exception $e) {
-             error_log($e->getMessage());
+            DB::rollBack();
              return $this->sendError($e, 500, $request);
          }
      }
@@ -378,13 +375,12 @@ class ProjectController extends Controller
      public function dischargeUser(UserAssignToProjectRequest $request)
      {
 
+        DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if(!$this->isModuleEnabled("project_and_task_management")) {
+             $this->isModuleEnabled("project_and_task_management");
 
-                 return response()->json(['error' => 'Module is not enabled'], 403);
-              }
-             return DB::transaction(function () use ($request) {
+
                  if (!$request->user()->hasPermissionTo('project_update')) {
                      return response()->json([
                          "message" => "You can not perform this action"
@@ -455,20 +451,17 @@ class ProjectController extends Controller
 
 
 
-
-
-
-
                  }
 
 
                  $project->users()->detach($request_data['users']);
 
+                 DB::commit();
                  return response($project, 201);
 
-             });
+
          } catch (Exception $e) {
-             error_log($e->getMessage());
+          DB::rollBack();
              return $this->sendError($e, 500, $request);
          }
      }
@@ -533,13 +526,11 @@ class ProjectController extends Controller
      public function assignProject(ProjectAssignToUserRequest $request)
      {
 
+        DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if(!$this->isModuleEnabled("project_and_task_management")) {
+             $this->isModuleEnabled("project_and_task_management");
 
-                 return response()->json(['error' => 'Module is not enabled'], 403);
-              }
-             return DB::transaction(function () use ($request) {
                  if (!$request->user()->hasPermissionTo('project_update')) {
                      return response()->json([
                          "message" => "You can not perform this action"
@@ -634,11 +625,16 @@ class ProjectController extends Controller
 
 
 
+                 DB::commit();
+
                  return response($user, 201);
 
-             });
+
          } catch (Exception $e) {
-             error_log($e->getMessage());
+
+
+            DB::rollBack();
+
              return $this->sendError($e, 500, $request);
          }
      }
@@ -702,13 +698,12 @@ class ProjectController extends Controller
      public function dischargeProject(ProjectAssignToUserRequest $request)
      {
 
+        DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if(!$this->isModuleEnabled("project_and_task_management")) {
+             $this->isModuleEnabled("project_and_task_management");
 
-                 return response()->json(['error' => 'Module is not enabled'], 403);
-              }
-             return DB::transaction(function () use ($request) {
+
                  if (!$request->user()->hasPermissionTo('project_update')) {
                      return response()->json([
                          "message" => "You can not perform this action"
@@ -759,25 +754,19 @@ class ProjectController extends Controller
                             ];
                                 throw new Exception(json_encode($error),422);
 
-
                     }
-
-
 
                  }
 
 
-
-
-                 $user->projects()->detach($request_data['projects']);
-
-
+      $user->projects()->detach($request_data['projects']);
+       DB::commit();
 
                  return response($user, 201);
 
-             });
+
          } catch (Exception $e) {
-             error_log($e->getMessage());
+             DB::rollBack();
              return $this->sendError($e, 500, $request);
          }
      }
@@ -848,14 +837,12 @@ class ProjectController extends Controller
     public function updateProject(ProjectUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_task_management")) {
+            $this->isModuleEnabled("project_and_task_management");
 
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-             }
-            return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('project_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -906,10 +893,12 @@ class ProjectController extends Controller
                 }
                 $project->departments()->sync($request_data['departments']);
 
+                DB::commit();
+
                 return response($project, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+          DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -1066,11 +1055,8 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_task_management")) {
+            $this->isModuleEnabled("project_and_task_management");
 
-
-                return response()->json(['error' => 'Module is not enabled'], 403);
-             }
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1233,11 +1219,9 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_task_management")) {
+               $this->isModuleEnabled("project_and_task_management");
 
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-             }
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1331,11 +1315,7 @@ class ProjectController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if(!$this->isModuleEnabled("project_and_task_management")) {
-
-
-                return response()->json(['error' => 'Module is not enabled'], 403);
-             }
+            $this->isModuleEnabled("project_and_task_management");
 
             if (!$request->user()->hasPermissionTo('project_delete')) {
                 return response()->json([
@@ -1359,7 +1339,7 @@ class ProjectController extends Controller
 
             if (!empty($nonExistingIds)) {
 
-                
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

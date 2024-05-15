@@ -33,21 +33,22 @@ class CreateModulesTable extends Migration
         });
 
 
+
+        
         DB::table('modules')
         ->insert(array(
            [
             "name" => "project_and_task_management",
             "is_enabled" => 1,
-
-
            ],
 
            [
             "name" => "user_activity",
             "is_enabled" => 1,
-
            ],
         ));
+
+
 
 
 

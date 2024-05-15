@@ -15,71 +15,65 @@ trait ModuleUtil
     {
         $user = auth()->user();
         if (empty($user->business_id)) {
-                 return true;
+            return true;
         }
-
 
 
         $query_params = [
             'name' => $module_name,
         ];
         $module = Module::where($query_params)->first();
-        if(empty($module)) {
+        if (empty($module)) {
             return false;
         }
-        if(empty($module->is_enabled)) {
+        if (empty($module->is_enabled)) {
 
             return false;
         }
 
-            $business = Business::find($user->business_id);
-            if(empty($business)) {
+        $business = Business::find($user->business_id);
+        if (empty($business)) {
 
-                return false;
-            }
+            return false;
+        }
 
-                $business_tier_id = $business->service_plan?$business->service_plan->business_tier->id:1;
-
-
-
-           $is_enabled = true;
+        $business_tier_id = $business->service_plan ? $business->service_plan->business_tier->id : 1;
 
 
 
-           $businessTierModule =    BusinessTierModule::where([
+        $is_enabled = false;
+
+
+
+        $businessTierModule =    BusinessTierModule::where([
             "business_tier_id" => $business_tier_id,
             "module_id" => $module->id
-           ])
-           ->first();
+        ])
+            ->first();
 
-           if(!empty($businessTierModule)){
+        if (!empty($businessTierModule)) {
             $is_enabled = $businessTierModule->is_enabled;
-           }
+        }
 
 
 
-           $businessModule =    BusinessModule::where([
+        $businessModule =    BusinessModule::where([
             "business_id" => $business->id,
             "module_id" => $module->id
-           ])
-           ->first();
+        ])
+            ->first();
 
 
-           if(!empty($businessModule)){
+        if (!empty($businessModule)) {
             $is_enabled = $businessModule->is_enabled;
-           }
+        }
 
 
-
-
+        if (!$is_enabled) {
+            throw new Exception('Module is not enabled', 401);
+        }
 
 
         return $is_enabled;
-
     }
-
-
-
-
-
 }

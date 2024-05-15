@@ -88,14 +88,13 @@ class CommentController extends Controller
 
     public function createComment(CommentCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$this->isModuleEnabled("project_and_comment_management")) {
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-            }
+            $this->isModuleEnabled("project_and_comment_management");
 
-            return DB::transaction(function () use ($request) {
+
 
                 if (!$request->user()->hasPermissionTo('comment_create')) {
                     return response()->json([
@@ -134,10 +133,12 @@ class CommentController extends Controller
 
                 $comment->mentions()->createMany($mentions_data);
 
+                DB::commit();
+
                 return response($comment, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+           DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -212,13 +213,13 @@ class CommentController extends Controller
     public function updateComment(CommentUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->isModuleEnabled("project_and_comment_management");
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-            }
-            return DB::transaction(function () use ($request) {
+
+
                 if (!$request->user()->hasPermissionTo('comment_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -270,11 +271,11 @@ class CommentController extends Controller
                     $comment->hidden_note = $request_data["hidden_note"];
                     $comment->save();
                 }
-
+DB::commit();
                 return response($comment, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -383,10 +384,9 @@ class CommentController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$this->isModuleEnabled("project_and_comment_management")) {
+             $this->isModuleEnabled("project_and_comment_management");
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-            }
+
             if (!$request->user()->hasPermissionTo('comment_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -508,10 +508,9 @@ class CommentController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$this->isModuleEnabled("project_and_comment_management")) {
+            $this->isModuleEnabled("project_and_comment_management");
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-            }
+
             if (!$request->user()->hasPermissionTo('comment_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -602,10 +601,8 @@ class CommentController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$this->isModuleEnabled("project_and_comment_management")) {
+             $this->isModuleEnabled("project_and_comment_management");
 
-                return response()->json(['error' => 'Module is not enabled'], 403);
-            }
             if (!$request->user()->hasPermissionTo('comment_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -626,7 +623,7 @@ class CommentController extends Controller
 
 
             if (!empty($nonExistingIds)) {
-             
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

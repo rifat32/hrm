@@ -2,6 +2,7 @@
 
 namespace App\Http\Utils;
 
+use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeePensionHistory;
 use App\Models\User;
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Session;
 
 trait BasicUtil
 {
+      // Define a helper function to resolve class name dynamically
+      function resolveClassName($className)
+      {
+          return "App\\Models\\" . $className; // Assuming your models are stored in the "App\Models" namespace
+      }
+
     // this function do all the task and returns transaction id or -1
 
     public function fieldsHaveChanged($fields_to_check, $entity1, $entity2, $date_fields) {
@@ -196,6 +203,41 @@ public function retrieveData($query,$orderByField){
         return $query->get();
     });
     return $data;
+}
+
+
+
+public function generateUniqueId($relationModel,$relationModelId,$mainModel){
+
+    $relation = $this->resolveClassName($relationModel)::where(["id" => $relationModelId])->first();
+
+
+    $prefix = "";
+    if ($relation) {
+        preg_match_all('/\b\w/', $relation->name, $matches);
+
+        $prefix = implode('', array_map(function ($match) {
+            return strtoupper($match[0]);
+        }, $matches[0]));
+
+        // If you want to get only the first two letters from each word:
+        $prefix = substr($prefix, 0, 2 * count($matches[0]));
+    }
+
+    $current_number = 1; // Start from 0001
+
+    do {
+        $unique_identifier = $prefix . "-" . str_pad($current_number, 4, '0', STR_PAD_LEFT);
+        $current_number++; // Increment the current number for the next iteration
+    } while (
+        $this->resolveClassName($mainModel)::where([
+            'unique_identifier' => $unique_identifier,
+            "business_id" => auth()->user()->business_id
+        ])->exists()
+    );
+
+return $unique_identifier;
+
 }
 
 

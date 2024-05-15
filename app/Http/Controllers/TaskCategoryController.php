@@ -7,8 +7,7 @@ use App\Http\Requests\TaskCategoryCreateRequest;
 use App\Http\Requests\TaskCategoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
-
-
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledTaskCategory;
 use App\Models\Task;
@@ -20,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class TaskCategoryController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil;
     /**
      *
      * @OA\Post(
@@ -80,9 +79,11 @@ class TaskCategoryController extends Controller
 
     public function createTaskCategory(TaskCategoryCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+            $this->isModuleEnabled("project_and_task_management");
+
                 if (!$request->user()->hasPermissionTo('task_category_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -103,39 +104,15 @@ class TaskCategoryController extends Controller
                 }
 
 
-
-
-                // $request_data["business_id"] = NULL;
-                // $request_data["is_active"] = 1;
-                // $request_data["is_default"] = 1;
-
-                // $request_data["created_by"] = $request->user()->id;
-
-                // if ($request->user()->hasRole('superadmin')) {
-                //     $request_data["business_id"] = NULL;
-                // $request_data["is_active"] = 1;
-                // $request_data["is_default"] = 1;
-                // $request_data["created_by"] = $request->user()->id;
-                // }
-                // else {
-                //     $request_data["business_id"] = $request->user()->business_id;
-                //     $request_data["is_active"] = 1;
-                //     $request_data["is_default"] = 0;
-                //     // $request_data["created_by"] = $request->user()->id;
-                // }
-
-
-
-
                 $task_category =  TaskCategory::create($request_data);
 
 
-
-
+                DB::commit();
                 return response($task_category, 201);
-            });
+
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+          DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -201,9 +178,11 @@ class TaskCategoryController extends Controller
     public function updateTaskCategory(TaskCategoryUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+            $this->isModuleEnabled("project_and_task_management");
+
                 if (!$request->user()->hasPermissionTo('task_category_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -255,10 +234,11 @@ class TaskCategoryController extends Controller
                     ], 500);
                 }
 
+                DB::commit();
                 return response($task_category, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -320,8 +300,10 @@ class TaskCategoryController extends Controller
      public function toggleActiveTaskCategory(GetIdRequest $request)
      {
 
+        DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             $this->isModuleEnabled("project_and_task_management");
              if (!$request->user()->hasPermissionTo('task_category_activate')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -429,10 +411,10 @@ class TaskCategoryController extends Controller
                  }
              }
 
-
+   DB::commit();
              return response()->json(['message' => 'Task Category status updated successfully'], 200);
          } catch (Exception $e) {
-             error_log($e->getMessage());
+             DB::rollBack();
              return $this->sendError($e, 500, $request);
          }
      }
@@ -533,6 +515,7 @@ class TaskCategoryController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("project_and_task_management");
             if (!$request->user()->hasPermissionTo('task_category_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -739,6 +722,8 @@ class TaskCategoryController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("project_and_task_management");
+
             if (!$request->user()->hasPermissionTo('task_category_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -873,6 +858,7 @@ class TaskCategoryController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("project_and_task_management");
             if (!$request->user()->hasPermissionTo('task_category_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

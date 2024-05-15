@@ -6,6 +6,7 @@ use App\Http\Requests\EnableBusinessModuleRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\BusinessModule;
 use App\Models\Module;
 use Carbon\Carbon;
 use Exception;
@@ -72,6 +73,7 @@ class ModuleController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
              if (!$request->user()->hasPermissionTo('module_update')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -118,7 +120,13 @@ class ModuleController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *
+     *
+     *
+     *           @OA\Property(property="business_id", type="string", format="number",example="1"),
+     *           @OA\Property(property="active_module_ids", type="string", format="array",example="{1,2,3}"),
+     *
+     *
      *
      *         ),
      *      ),
@@ -169,21 +177,23 @@ class ModuleController extends Controller
              $request_data = $request->validated();
 
 
-            $module = Module::where([
-                "id" => $request_data["id"]
-            ])
-                ->first();
-            if (!$module) {
 
-                return response()->json([
-                    "message" => "no module found"
-                ], 404);
-            }
+             BusinessModule::where([
+                "business_id" => $request_data["business_id"]
+             ])
+             ->delete();
 
 
-             $module->update([
-                 'is_enabled' => !$module->is_enabled
-             ]);
+
+        foreach($request_data["active_module_ids"] as $active_module_id){
+           BusinessModule::create([
+            "is_enabled" => 1,
+            "business_id" => $request_data["business_id"],
+            "module_id" => $active_module_id,
+            'created_by' => auth()->user()->id
+           ]);
+        }
+
 
 
              return response()->json(['message' => 'Module status updated successfully'], 200);

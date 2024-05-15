@@ -10,6 +10,7 @@ class Task extends Model
 {
     use HasFactory;
     protected $fillable = [
+        "unique_identifier",
         'name',
         'description',
         'start_date',

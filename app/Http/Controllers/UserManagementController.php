@@ -6184,7 +6184,7 @@ class UserManagementController extends Controller
             ])->exists()
         );
 
-        error_log($user_id);
+
         return response()->json(["user_id" => $user_id], 200);
     }
 
@@ -6378,10 +6378,8 @@ class UserManagementController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$this->isModuleEnabled("user_activity")) {
 
-                return response()->json(['messege' => 'Module is not enabled'], 403);
-            }
+            $this->isModuleEnabled("user_activity");
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 

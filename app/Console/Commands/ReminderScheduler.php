@@ -48,11 +48,6 @@ class ReminderScheduler extends Command
      * @return int
      */
 
-    // Define a helper function to resolve class name dynamically
-    function resolveClassName($className)
-    {
-        return "App\\Models\\" . $className; // Assuming your models are stored in the "App\Models" namespace
-    }
 
     public function sendNotification($reminder, $data, $business)
     {
