@@ -1839,8 +1839,8 @@ class BusinessController extends Controller
 
             $businesses = Business::with("owner")
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return   $query->where(function ($query) {
-                        return   $query
+                       $query->where(function ($query) {
+                           $query
                            ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
                             $query->where('id', auth()->user()->business_id)
                             ->orWhere('created_by', auth()->user()->id)
@@ -2185,6 +2185,124 @@ class BusinessController extends Controller
          }
      }
 
+
+      /**
+     *
+     * @OA\Delete(
+     *      path="/v1.0/businesses-pension-information-history/{ids}",
+     *      operationId="deleteBusinessPensionInformationHistoryByIds",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="ids",
+     *         in="path",
+     *         description="ids",
+     *         required=true,
+     *  example="6,7,8"
+     *      ),
+     *      summary="This method is to delete business pension history by id",
+     *      description="This method is to delete business pension history by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function deleteBusinessPensionInformationHistoryByIds(Request $request, $ids)
+    {
+
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('business_delete')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            $idsArray = explode(',', $ids);
+            $existingIds = BusinessPensionHistory::whereIn('business_pension_histories.id', $idsArray)
+
+            ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+
+
+                $query->whereHas("business",function ($query) {
+                    $query
+                    ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
+                     $query->where('businesses.id', auth()->user()->business_id)
+                     ->orWhere('businesses.created_by', auth()->user()->id)
+                     ->orWhere('businesses.owner_id', auth()->user()->id);
+                    },
+                    function($query) {
+                     $query->where('businesses.is_self_registered_businesses', 1)
+                     ->orWhere('businesses.created_by', auth()->user()->id);
+                    }
+
+                 );
+
+             });
+
+
+
+
+
+         })
+
+                ->select('business_pension_histories.id')
+                ->get()
+                ->pluck('business_pension_histories.id')
+                ->toArray();
+            $nonExistingIds = array_diff($idsArray, $existingIds);
+
+
+            if (!empty($nonExistingIds)) {
+                return response()->json([
+                    "message" => "Some or all of the specified data do not exist.",
+                    "non_existing_ids" => $nonExistingIds
+                ], 404);
+            }
+
+
+            BusinessPensionHistory::whereIn('id', $existingIds)->forceDelete();
+
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
     /**
      *
      * @OA\Delete(
@@ -2252,13 +2370,24 @@ class BusinessController extends Controller
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Business::whereIn('id', $idsArray)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($business_id) {
-                       $query->where(function ($query) {
-                          $query->where('id', auth()->user()->business_id)
-                            ->orWhere('created_by', auth()->user()->id)
-                            ->orWhere('owner_id', auth()->user()->id);
-                    });
-                })
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                $query->where(function ($query) {
+                    $query
+                    ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
+                     $query->where('id', auth()->user()->business_id)
+                     ->orWhere('created_by', auth()->user()->id)
+                     ->orWhere('owner_id', auth()->user()->id);
+                    },
+                    function($query) {
+                     $query->where('is_self_registered_businesses', 1)
+                     ->orWhere('created_by', auth()->user()->id);
+                    }
+
+                 );
+
+             });
+         },
+         )
                 ->select('id')
                 ->get()
                 ->pluck('id')
