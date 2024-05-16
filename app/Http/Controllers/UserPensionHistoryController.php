@@ -110,6 +110,11 @@ class UserPensionHistoryController extends Controller
 
                 $user_pension_history =  EmployeePensionHistory::create($request_data);
 
+                $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
+
+
+
+
 
 
                 return response($user_pension_history, 201);
@@ -265,6 +270,7 @@ DB::beginTransaction();
 
 
 
+                $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
 
                 DB::commit();
                 return response($user_pension_history, 201);

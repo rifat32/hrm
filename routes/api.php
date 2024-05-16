@@ -20,6 +20,7 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\DropdownOptionsController;
 use App\Http\Controllers\EmployeeRotaController;
 use App\Http\Controllers\EmploymentStatusController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobListingController;
@@ -105,6 +106,23 @@ Route::delete('/health', function () {
 Route::patch('/health', function () {
     return response()->json(['status' => 'Server is up and running'], 200);
 });
+
+
+
+
+
+
+
+
+
+Route::post('/v1.0/files/single-file-upload', [FileUploadController::class, "createFileSingle"]);
+
+
+
+
+
+
+
 
 
 

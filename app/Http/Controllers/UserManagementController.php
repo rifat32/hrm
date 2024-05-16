@@ -30,6 +30,7 @@ use App\Http\Requests\UserUpdateRecruitmentProcessRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
 use App\Http\Requests\UserUpdateV3Request;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
@@ -44,15 +45,11 @@ use App\Models\EmployeeAddressHistory;
 
 
 
-use App\Models\WorkShiftHistory;
-use App\Models\Holiday;
-use App\Models\Leave;
-use App\Models\LeaveRecord;
 
 use App\Models\Role;
-use App\Models\SettingLeaveType;
+
 use App\Models\User;
-use App\Models\UserRecruitmentProcess;
+
 use Carbon\Carbon;
 
 use Exception;
@@ -67,15 +64,13 @@ use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Permission;
 
-use App\Mail\SendPassword;
-use App\Models\SettingLeave;
-use App\Models\UserAssetHistory;
+
 use Illuminate\Support\Facades\Mail;
 
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil,BasicUtil;
 
     protected $workShiftHistoryComponent;
     protected $holidayComponent;
@@ -808,6 +803,14 @@ class UserManagementController extends Controller
                 Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
             }
 
+
+            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+
+            $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+
+            $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_docs");
+
+
             DB::commit();
             return response($user, 201);
         } catch (Exception $e) {
@@ -1472,6 +1475,33 @@ class UserManagementController extends Controller
             }
 
             $user->roles = $user->roles->pluck('name');
+
+
+
+
+
+
+
+
+
+            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+
+            $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
+
+            $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
+
+
+
+
+
+
+
+
+
+
+
+
+
             DB::commit();
             return response($user, 201);
         } catch (Exception $e) {
@@ -6157,33 +6187,8 @@ class UserManagementController extends Controller
      */
     public function generateEmployeeId(Request $request)
     {
-        $business = Business::where(["id" => $request->user()->business_id])->first();
 
-
-        $prefix = "";
-        if ($business) {
-            preg_match_all('/\b\w/', $business->name, $matches);
-
-            $prefix = implode('', array_map(function ($match) {
-                return strtoupper($match[0]);
-            }, $matches[0]));
-
-            // If you want to get only the first two letters from each word:
-            $prefix = substr($prefix, 0, 2 * count($matches[0]));
-        }
-
-        $current_number = 1; // Start from 0001
-
-        do {
-            $user_id = $prefix . "-" . str_pad($current_number, 4, '0', STR_PAD_LEFT);
-            $current_number++; // Increment the current number for the next iteration
-        } while (
-            DB::table('users')->where([
-                'user_id' => $user_id,
-                "business_id" => $request->user()->business_id
-            ])->exists()
-        );
-
+     $user_id =   $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
 
         return response()->json(["user_id" => $user_id], 200);
     }

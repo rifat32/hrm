@@ -116,6 +116,7 @@ class UserEducationHistoryController extends Controller
                 $user_education_history =  UserEducationHistory::create($request_data);
 
 
+                $this->moveUploadedFiles($request_data["attachments"],"education_docs");
 
                 return response($user_education_history, 201);
             });
@@ -251,7 +252,7 @@ class UserEducationHistoryController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
-
+                $this->moveUploadedFiles($request_data["attachments"],"education_docs");
                 return response($user_education_history, 201);
             });
         } catch (Exception $e) {
@@ -587,7 +588,7 @@ class UserEducationHistoryController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

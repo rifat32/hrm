@@ -14,7 +14,8 @@ class EmployeeRotaDetail extends Model
         'day',
         "start_at",
         'end_at',
-        'is_weekend',
+        'break_type',
+        'break_hours',
     ];
 
 }

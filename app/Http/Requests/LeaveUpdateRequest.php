@@ -61,7 +61,13 @@ class LeaveUpdateRequest extends BaseFormRequest
             'start_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s',
             'end_time' => 'nullable|required_if:leave_duration,hours|date_format:H:i:s|after_or_equal:start_time',
 
+
             'attachments' => 'present|array',
+            'attachments.*' => 'string',
+
+
+
+
             "hourly_rate" => "required|numeric"
         ];
     }

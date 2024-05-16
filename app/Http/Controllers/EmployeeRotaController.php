@@ -12,6 +12,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\EmployeeRota;
 use App\Models\User;
+use App\Models\UserEmployeeRota;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,8 +43,7 @@ class EmployeeRotaController extends Controller
      *  *     @OA\Property(property="description", type="string", format="string", example="description"),
      *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
      *
-     *     @OA\Property(property="break_type", type="string", format="string", example="paid"),
-     *  *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="0"),
+
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
 
@@ -53,43 +53,50 @@ class EmployeeRotaController extends Controller
      *             "day": "0",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "1",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+      *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "2",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "3",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "4",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "5",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+      *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "6",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         }
      *     }),
 
@@ -140,7 +147,6 @@ class EmployeeRotaController extends Controller
 
         try {
 
-
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
 
@@ -153,7 +159,6 @@ class EmployeeRotaController extends Controller
                 $request_data = $request->validated();
 
                 if(empty($request_data['departments'])) {
-
                     $request_data['departments'] = Department::where(
                         [
 
@@ -164,9 +169,12 @@ class EmployeeRotaController extends Controller
 
                         )
                         ->pluck("id");
-
-
                 }
+                // @@@remove_field
+                $request_data["type"] = "flexible";
+                $request_data["is_personal"] = 0;
+               // @@@remove_field
+
 
 
 
@@ -181,9 +189,14 @@ class EmployeeRotaController extends Controller
 
                 $employee_rota->departments()->sync($request_data['departments']);
                 // $employee_rota->users()->sync($request_data['users'], []);
+
+             UserEmployeeRota::whereIn("user_id",$request_data['users'])->delete();
+             $employee_rota->users()->sync($request_data['users'], []);
+
+
+
+
                 $employee_rota->details()->createMany($request_data['details']);
-
-
 
                 return response($employee_rota, 201);
             });
@@ -213,8 +226,6 @@ class EmployeeRotaController extends Controller
      *     @OA\Property(property="type", type="string", format="string", example="regular"),
      *     @OA\Property(property="description", type="string", format="string", example="description"),
      *    *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
-     *   *     @OA\Property(property="break_type", type="string", format="string", example="paid"),
-     *  *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="0"),
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
 
@@ -224,43 +235,50 @@ class EmployeeRotaController extends Controller
      *             "day": "0",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+       *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "1",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "2",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "3",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "4",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "5",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+       *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         },
      *         {
      *             "day": "6",
      *             "start_at": "",
      *             "end_at": "",
-     *             "is_weekend": 0
+     *             "break_type": "paid",
+     *             "break_hours" : 0.25
      *         }
      *     }),
 
@@ -346,8 +364,8 @@ class EmployeeRotaController extends Controller
         "description",
         'attendances_count',
         'is_personal',
-        'break_type',
-        'break_hours',
+
+
 
         'start_date',
         'end_date',

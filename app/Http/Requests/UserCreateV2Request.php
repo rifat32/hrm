@@ -247,14 +247,9 @@ class UserCreateV2Request extends BaseFormRequest
         'emergency_contact_details' => "present|array",
 
 
-
         "immigration_status" => "required|in:british_citizen,ilr,immigrant,sponsored",
 
         'is_sponsorship_offered' => "nullable|boolean",
-
-
-
-
 
 
         'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
@@ -269,8 +264,6 @@ class UserCreateV2Request extends BaseFormRequest
         "sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
         "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal',
         "sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
-
-
 
 
 

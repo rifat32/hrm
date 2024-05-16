@@ -109,7 +109,7 @@ class UserVisaHistoryController extends Controller
 
                 $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
 
-
+                $this->moveUploadedFiles(collect($request_data["visa_docs"])->pluck("file_name"),"visa_docs");
 
                 return response($user_visa_history, 201);
             });
@@ -251,6 +251,10 @@ class UserVisaHistoryController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+
+
+                $this->moveUploadedFiles(collect($request_data["visa_docs"])->pluck("file_name"),"visa_docs");
 
                 return response($user_visa_history, 201);
 

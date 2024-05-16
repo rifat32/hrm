@@ -189,15 +189,12 @@ class UserDocumentController extends Controller
 
 
 
-
-
-
-
                 $request_data["created_by"] = $request->user()->id;
 
                 $user_document =  UserDocument::create($request_data);
 
 
+                $this->moveUploadedFiles($request_data["file_name"],"documents");
 
                 return response($user_document, 201);
             });
@@ -310,6 +307,8 @@ class UserDocumentController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+                $this->moveUploadedFiles($request_data["file_name"],"documents");
 
                 return response($user_document, 201);
             });
@@ -655,7 +654,7 @@ class UserDocumentController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-             
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

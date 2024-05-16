@@ -31,6 +31,7 @@ class CreateEmployeeRotasTable extends Migration
             $table->boolean("is_business_default")->default(false);
             $table->boolean("is_personal")->default(false);
 
+          
 
 
 

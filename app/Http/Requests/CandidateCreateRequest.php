@@ -57,7 +57,8 @@ class CandidateCreateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateJobListing()
             ],
-            'attachments' => 'nullable|array',
+            'attachments' => 'present|array',
+            'attachments.*' => 'string',
         ];
     }
 

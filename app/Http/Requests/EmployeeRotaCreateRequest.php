@@ -32,9 +32,13 @@ class EmployeeRotaCreateRequest extends FormRequest
         return [
             'name' => 'required|string',
             'description' => 'nullable|string',
-            'is_personal' => 'required|boolean',
 
-            'type' => 'required|string|in:regular,scheduled,flexible',
+
+
+
+
+
+
 
 
             'start_date' => 'nullable|date',
@@ -55,7 +59,12 @@ class EmployeeRotaCreateRequest extends FormRequest
             ],
             'details' => 'required|array',
             'details.*.day' => 'required|numeric|between:0,6',
-            'details.*.is_weekend' => 'required|boolean',
+
+
+            'details.*.break_type' => 'required|string|in:paid,unpaid',
+            'details.*.break_hours' => 'required|numeric',
+
+
             'details.*.start_at' => [
                 'nullable',
                 'date_format:H:i:s',
@@ -68,6 +77,8 @@ class EmployeeRotaCreateRequest extends FormRequest
                     }
                 },
             ],
+
+            
             'details.*.end_at' => [
                 'nullable',
                 'date_format:H:i:s',

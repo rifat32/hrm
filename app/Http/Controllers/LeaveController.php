@@ -45,7 +45,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LeaveController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil, PayrunUtil, BasicNotificationUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil, PayrunUtil, BasicNotificationUtil, BasicUtil;
 
     protected $authorizationComponent;
     protected $leaveComponent;
@@ -258,6 +258,19 @@ class LeaveController extends Controller
 
 
             $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
+
+
+
+
+
+            $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
+
+
+
+
+
+
+
 
             DB::commit();
 
@@ -814,6 +827,9 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
                 $this->send_notification($leave, $leave->employee, "Leave Request Updated", "update", "leave");
+
+
+                $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
 
                 DB::commit();
                 return response($leave, 201);

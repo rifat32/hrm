@@ -12,9 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
 
 trait BasicUtil
 {
+
       // Define a helper function to resolve class name dynamically
       function resolveClassName($className)
       {
@@ -207,7 +209,7 @@ public function retrieveData($query,$orderByField){
 
 
 
-public function generateUniqueId($relationModel,$relationModelId,$mainModel){
+public function generateUniqueId($relationModel,$relationModelId,$mainModel,$unique_identifier_column = ""){
 
     $relation = $this->resolveClassName($relationModel)::where(["id" => $relationModelId])->first();
 
@@ -231,14 +233,39 @@ public function generateUniqueId($relationModel,$relationModelId,$mainModel){
         $current_number++; // Increment the current number for the next iteration
     } while (
         $this->resolveClassName($mainModel)::where([
-            'unique_identifier' => $unique_identifier,
+            ($unique_identifier_column?$unique_identifier_column:"unique_identifier") => $unique_identifier,
             "business_id" => auth()->user()->business_id
         ])->exists()
     );
-
 return $unique_identifier;
 
+
 }
+
+
+
+
+
+
+public function moveUploadedFiles($files,$location) {
+    $temporary_files_location =  config("setup-config.temporary_files_location");
+
+    foreach($files as $temp_file_path) {
+        if (File::exists(public_path($temp_file_path))) {
+
+            // Move the file from the temporary location to the permanent location
+            File::move(public_path($temp_file_path), public_path(str_replace($temporary_files_location, $location, $temp_file_path)));
+        } else {
+
+            // throw new Exception(("no file exists"));
+            // Handle the case where the file does not exist (e.g., log an error or take appropriate action)
+        }
+    }
+
+}
+
+
+
 
 
 }

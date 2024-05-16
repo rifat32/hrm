@@ -3,10 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
-use App\Models\Department;
-use App\Models\User;
 use App\Rules\ValidUserId;
-use Illuminate\Foundation\Http\FormRequest;
+
 
 class UserEducationHistoryCreateRequest extends BaseFormRequest
 {
@@ -47,7 +45,11 @@ class UserEducationHistoryCreateRequest extends BaseFormRequest
             'city' => 'nullable|string',
             'postcode' => 'nullable|string',
             'is_current' => 'required|boolean',
+
+
+
             'attachments' => 'present|array',
+            'attachments.*' => 'string',
         ];
     }
 }

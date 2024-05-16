@@ -56,11 +56,13 @@ class EmployeeRotaUpdateRequest extends FormRequest
 
             'name' => 'required|string',
             'description' => 'nullable|string',
-            'is_personal' => 'required|boolean',
+
+            // 'is_personal' => 'required|boolean',
+
+            // 'type' => 'required|string|in:regular,scheduled,flexible',
 
 
 
-            'type' => 'required|string|in:regular,scheduled,flexible',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'departments' => 'present|array',
@@ -76,7 +78,8 @@ class EmployeeRotaUpdateRequest extends FormRequest
             ],
             'details' => 'required|array',
             'details.*.day' => 'required|numeric|between:0,6',
-            'details.*.is_weekend' => 'required|boolean',
+            'details.*.break_type' => 'required|string|in:paid,unpaid',
+            'details.*.break_hours' => 'required|numeric',
             'details.*.start_at' => [
                 'nullable',
                 'date_format:H:i:s',

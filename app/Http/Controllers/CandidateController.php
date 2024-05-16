@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CandidateCreateRequest;
 use App\Http\Requests\CandidateUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class CandidateController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
     /**
         *
@@ -206,10 +207,17 @@ class CandidateController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-
                 $candidate =  Candidate::create($request_data);
 
+
+
+
                 $candidate->job_platforms()->sync($request_data['job_platforms']);
+
+
+
+
+                $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
 
                 return response($candidate, 201);
             });
@@ -313,7 +321,7 @@ class CandidateController extends Controller
 
                  $candidate->job_platforms()->sync($request_data['job_platforms']);
 
-
+                 $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
                  return response($candidate, 201);
              });
          } catch (Exception $e) {
@@ -452,7 +460,7 @@ class CandidateController extends Controller
 
 
                 $candidate->job_platforms()->sync($request_data['job_platforms']);
-
+                $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
                 return response($candidate, 201);
             });
 

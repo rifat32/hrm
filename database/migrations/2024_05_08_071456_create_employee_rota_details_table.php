@@ -19,7 +19,8 @@ class CreateEmployeeRotaDetailsTable extends Migration
             $table->unsignedBigInteger('employee_rota_id');
             $table->foreign('employee_rota_id')->references('id')->on('employee_rotas')->onDelete('cascade');
             $table->unsignedTinyInteger('day');
-            $table->boolean('is_weekend');
+            $table->enum('break_type', ['paid', 'unpaid']);
+            $table->double("break_hours")->default(0.0);
             $table->time('start_at')->nullable();
             $table->time('end_at')->nullable();
 

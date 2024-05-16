@@ -310,7 +310,6 @@ class ModuleController extends Controller
                  ], 401);
              }
 
-
              $modules = Module::when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
                 return $query->where('modules.is_active', 1);
             })
@@ -344,8 +343,7 @@ class ModuleController extends Controller
                      return $query->paginate($request->per_page);
                  }, function ($query) {
                      return $query->get();
-                 });;
-
+                 });
 
 
              return response()->json($modules, 200);

@@ -129,6 +129,11 @@ class UserRecruitmentProcessController extends Controller
 
             $this->store_recruitment_processes($request_data, $updatableUser);
 
+
+            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+
+
+
             return response($updatableUser, 201);
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -254,7 +259,7 @@ class UserRecruitmentProcessController extends Controller
             $this->update_recruitment_processes_v2($request_data, $updatableUser);
 
 
-
+            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
 
             return response($updatableUser, 201);
         } catch (Exception $e) {

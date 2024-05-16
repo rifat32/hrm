@@ -33,6 +33,14 @@ class UserPensionHistoryCreateRequest extends BaseFormRequest
         return [
             'pension_eligible' => 'required|boolean',
             'pension_letters' => 'present|array',
+
+
+            'pension_letters.*.file_name' => 'nullable|string',
+            'pension_letters.*.description' => 'nullable|string',
+
+
+
+
             'pension_scheme_status' => 'required_if:pension_eligible,1|string|in:opt_in,opt_out',
             'pension_enrollment_issue_date' => 'required_if:pension_scheme_status,opt_in|date',
             'pension_scheme_opt_out_date' => 'required_if:pension_scheme_status,opt_out|date',

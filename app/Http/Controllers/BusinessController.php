@@ -11,6 +11,7 @@ use App\Http\Requests\CheckScheduleConflictRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\MultipleImageUploadRequest;
 use App\Http\Requests\GetIdRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\DiscountUtil;
@@ -34,7 +35,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BusinessController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil,BasicUtil;
 
 
     /**
@@ -1368,6 +1369,7 @@ class BusinessController extends Controller
 
 
 
+                $this->moveUploadedFiles(collect($request_data["business"]["pension_scheme_letters"])->pluck("file"),"pension_scheme_letters");
 
                 return response([
 

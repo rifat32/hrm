@@ -73,7 +73,8 @@ class CandidateUpdateRequest extends BaseFormRequest
                 new ValidateJobListing()
 
             ],
-            'attachments' => 'nullable|array',
+            'attachments' => 'present|array',
+            'attachments.*' => 'string',
         ];
     }
 

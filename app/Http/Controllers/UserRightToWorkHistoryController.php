@@ -110,6 +110,13 @@ class UserRightToWorkHistoryController extends Controller
 
 
 
+
+                $this->moveUploadedFiles(collect($request_data["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+
+
+
+
+
                 return response($user_right_to_work_history, 201);
             });
         } catch (Exception $e) {
@@ -247,6 +254,9 @@ class UserRightToWorkHistoryController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+
+                $this->moveUploadedFiles(collect($request_data["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
 
                 return response($user_right_to_work_history, 201);
 
