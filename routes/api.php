@@ -716,6 +716,7 @@ Route::delete('/v1.0/businesses/{ids}', [BusinessController::class, "deleteBusin
 Route::get('/v1.0/businesses/by-business-owner/all', [BusinessController::class, "getAllBusinessesByBusinessOwner"]);
 Route::get('/v1.0/businesses-pension-information/{id}', [BusinessController::class, "getBusinessPensionInformationById"]);
 
+Route::get('/v1.0/businesses-pension-information-history/{id}', [BusinessController::class, "getBusinessPensionInformationHistoryByBusinessId"]);
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end business management section

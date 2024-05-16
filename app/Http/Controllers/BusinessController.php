@@ -2097,6 +2097,94 @@ class BusinessController extends Controller
          }
      }
 
+         /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/businesses-pension-information-history/{id}",
+     *      operationId="getBusinessPensionInformationHistoryByBusinessId",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *      summary="This method is to get business pension information history by business id",
+     *      description="This method is to get business pension information history by business id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessPensionInformationHistoryByBusinessId($id, Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('business_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             if (!$this->businessOwnerCheck($id)) {
+                 return response()->json([
+                     "message" => "you are not the owner of the business or the requested business does not exist."
+                 ], 401);
+             }
+
+        $businessPensionHistoriesQuery =  BusinessPensionHistory::where([
+            "business_id" => $id
+        ]);
+
+
+    $businessPensionHistories = $this->retrieveData($businessPensionHistoriesQuery,"business_pension_histories.id");
+
+
+
+
+
+             return response()->json($businessPensionHistories, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
     /**
      *
      * @OA\Delete(
