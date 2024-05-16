@@ -183,10 +183,13 @@ trait UserDetailsUtil
      public function store_recruitment_processes($request_data,$user) {
         if (!empty($request_data["recruitment_processes"])) {
             foreach($request_data["recruitment_processes"] as $recruitment_process){
-if(!empty($recruitment_process["description"])){
+
+
+                if(!empty($recruitment_process["description"])){
     $user->recruitment_processes()->create($recruitment_process);
+                }
+
 }
-            }
 
         }
     }
@@ -268,13 +271,7 @@ if(!empty($recruitment_process["description"])){
                     ];
 
 
-
-
-
                     $fields_changed = $this->fieldsHaveChanged($fields_to_check, $employee_address_history, $request_data, $date_fields);
-
-
-
 
                     if (
                         $fields_changed

@@ -100,8 +100,19 @@ class Business extends Model
         return $this->hasOne(WorkShift::class, 'business_id', 'id')->where('is_business_default', 1);
     }
 
+
+
+
     public function times()
     {
         return $this->hasMany(BusinessTime::class, 'business_id', 'id');
     }
+
+
+    public function active_modules()
+    {
+        return $this->hasMany(BusinessModule::class, 'business_id', 'id');
+    }
+
+
 }

@@ -194,7 +194,7 @@ class UserPensionHistoryController extends Controller
 
     public function updateUserPensionHistory(UserPensionHistoryUpdateRequest $request)
     {
-DB::beginTransaction();
+            DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 

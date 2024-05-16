@@ -339,6 +339,7 @@ class ModuleController extends Controller
                  }, function ($query) {
                      return $query->orderBy("modules.id", "DESC");
                  })
+                 ->select("id","name")
                  ->when(!empty($request->per_page), function ($query) use ($request) {
                      return $query->paginate($request->per_page);
                  }, function ($query) {

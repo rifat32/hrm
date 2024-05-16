@@ -19,6 +19,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Mail\SendPassword;
 
 use App\Models\Business;
+use App\Models\BusinessPensionHistory;
 use App\Models\BusinessTime;
 use App\Models\User;
 use App\Models\WorkShift;
@@ -1346,19 +1347,54 @@ class BusinessController extends Controller
 
                 $request_data = $request->validated();
 
+                $business = Business::where([
+                     "id" =>$request_data['business']["id"]
+                ])
+                ->first();
+
+                if(!$business) {
+                     throw new Exception("something went wrong!");
+                }
+                $pension_scheme_data =  collect($request_data['business'])->only([
+                    "pension_scheme_registered",
+                    "pension_scheme_name",
+                    "pension_scheme_letters",
+
+                ])->toArray();
+
+
+                $fields_to_check = [
+                    "pension_scheme_registered",
+                    "pension_scheme_name",
+                    "pension_scheme_letters",
+                    ];
+                    $date_fields = [
+                    ];
+
+
+                    $fields_changed = $this->fieldsHaveChanged($fields_to_check, $business, $pension_scheme_data, $date_fields);
+
+                    if (
+                        $fields_changed
+                    ) {
+
+
+                        BusinessPensionHistory::create(array_merge(["created_by" => auth()->user()->id,"business_id" =>$request_data['business']["id"] ],$pension_scheme_data));
+
+                    }
+
+
+
                 $business  =  tap(Business::where([
                     "id" => $request_data['business']["id"]
                 ]))->update(
-                    collect($request_data['business'])->only([
-                        "pension_scheme_registered",
-                        "pension_scheme_name",
-                        "pension_scheme_letters",
-
-                    ])->toArray()
+                    $pension_scheme_data
                 )
-                    // ->with("somthing")
-
                     ->first();
+
+
+
+
                 if (!$business) {
                     return response()->json([
                         "massage" => "something went wrong"
@@ -1370,6 +1406,7 @@ class BusinessController extends Controller
 
 
                 $this->moveUploadedFiles(collect($request_data["business"]["pension_scheme_letters"])->pluck("file"),"pension_scheme_letters");
+
 
                 return response([
 
@@ -1951,12 +1988,15 @@ class BusinessController extends Controller
             }
 
             $business = Business::with(
+                [
                 "owner",
-                "times"
-                // "default_work_shift.details"
+                "times",
+                "active_modules"
+                ]
+                //] "default_work_shift.details"
 
             )->where([
-                "id" => $id
+                "businesses.id" => $id
             ])
                 ->first();
 
