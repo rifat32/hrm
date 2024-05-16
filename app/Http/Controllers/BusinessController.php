@@ -2169,7 +2169,32 @@ class BusinessController extends Controller
 
         $businessPensionHistoriesQuery =  BusinessPensionHistory::where([
             "business_id" => $id
-        ]);
+        ])
+        ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+
+
+            $query->whereHas("business",function ($query) {
+                $query
+                ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
+                 $query->where('businesses.id', auth()->user()->business_id)
+                 ->orWhere('businesses.created_by', auth()->user()->id)
+                 ->orWhere('businesses.owner_id', auth()->user()->id);
+                },
+                function($query) {
+                 $query->where('businesses.is_self_registered_businesses', 1)
+                 ->orWhere('businesses.created_by', auth()->user()->id);
+                }
+
+             );
+
+         });
+
+
+
+
+
+     })
+        ;
 
 
     $businessPensionHistories = $this->retrieveData($businessPensionHistoriesQuery,"business_pension_histories.id");
