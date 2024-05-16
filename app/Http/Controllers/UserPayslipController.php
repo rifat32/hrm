@@ -233,6 +233,7 @@ class UserPayslipController extends Controller
                    throw new Exception ("User not found");
                 }
 
+
                 // Check if payment_method is bank_transfer and payment_notes is empty
                 if ($request_data["payment_method"] === 'bank_transfer' && empty($request_data["payment_notes"])) {
                     // Build the payment notes with the user's bank details
@@ -241,7 +242,21 @@ class UserPayslipController extends Controller
                 }
 
 
+
+
+
                 $user_payslip =  Payslip::create($request_data);
+
+
+
+
+
+
+                $this->moveUploadedFiles([$request_data["payment_record_file"]],"payment_record_file");
+
+
+
+
 
                 return response($user_payslip, 201);
             });
@@ -416,11 +431,18 @@ class UserPayslipController extends Controller
                     // ->with("somthing")
 
                     ->first();
+
+
                 if (!$user_payslip) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+
+
+                $this->moveUploadedFiles([$request_data["payment_record_file"]],"payment_record_file");
+
 
                 return response($user_payslip, 201);
             });
@@ -754,7 +776,7 @@ class UserPayslipController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-              
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

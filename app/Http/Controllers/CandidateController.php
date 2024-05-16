@@ -217,7 +217,7 @@ class CandidateController extends Controller
 
 
 
-                $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
+                $this->moveUploadedFiles([$request_data["attachments"]],"candidate_files");
 
                 return response($candidate, 201);
             });
@@ -321,7 +321,7 @@ class CandidateController extends Controller
 
                  $candidate->job_platforms()->sync($request_data['job_platforms']);
 
-                 $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
+                 $this->moveUploadedFiles([$request_data["attachments"]],"candidate_files");
                  return response($candidate, 201);
              });
          } catch (Exception $e) {
@@ -460,7 +460,7 @@ class CandidateController extends Controller
 
 
                 $candidate->job_platforms()->sync($request_data['job_platforms']);
-                $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
+                $this->moveUploadedFiles([$request_data["attachments"]],"candidate_files");
                 return response($candidate, 201);
             });
 

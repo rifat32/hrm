@@ -51,9 +51,6 @@ class UserAssetController extends Controller
   *         )
   *     )
   * )
-
-
-
        *      ),
        *      @OA\Response(
        *          response=200,
@@ -231,8 +228,14 @@ class UserAssetController extends Controller
                   );
 
 
+
+                  $this->moveUploadedFiles([$request_data["image"]],"assets");
+
                   return response($user_asset, 201);
+
               });
+
+
           } catch (Exception $e) {
               error_log($e->getMessage());
               return $this->sendError($e, 500, $request);
@@ -257,7 +260,6 @@ class UserAssetController extends Controller
   *      @OA\Property(property="id", type="number", format="number", example="1"),
 *     @OA\Property(property="user_id", type="integer", format="int", example=1)
  *
-
        *
        *         ),
        *      ),
@@ -546,7 +548,7 @@ class UserAssetController extends Controller
                           );
 
                    }
-
+                   $this->moveUploadedFiles([$request_data["image"]],"assets");
                   return response($user_asset, 201);
               });
           } catch (Exception $e) {

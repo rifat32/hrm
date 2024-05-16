@@ -72,7 +72,9 @@ class UserPayslipCreateRequest extends BaseFormRequest
             'payment_notes' => 'nullable|string',
             'payment_date' => 'required|date',
             'payslip_file' => 'nullable|string',
+
             'payment_record_file' => 'present|array',
+            'payment_record_file.*' => 'string',
 
             'gross_pay' => 'required|numeric|min:0',
             'tax' => 'required|numeric|min:0',
