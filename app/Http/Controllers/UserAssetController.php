@@ -229,7 +229,7 @@ class UserAssetController extends Controller
 
 
 
-                  $this->moveUploadedFiles([$request_data["image"]],"assets");
+                  $this->moveUploadedFiles($request_data["image"],"assets");
 
                   return response($user_asset, 201);
 
@@ -548,7 +548,7 @@ class UserAssetController extends Controller
                           );
 
                    }
-                   $this->moveUploadedFiles([$request_data["image"]],"assets");
+                   $this->moveUploadedFiles($request_data["image"],"assets");
                   return response($user_asset, 201);
               });
           } catch (Exception $e) {

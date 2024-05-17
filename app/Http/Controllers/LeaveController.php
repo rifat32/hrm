@@ -263,7 +263,7 @@ class LeaveController extends Controller
 
 
 
-            $this->moveUploadedFiles([$request_data["attachments"]],"leave_request_docs");
+            $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
 
 
 
@@ -829,7 +829,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 $this->send_notification($leave, $leave->employee, "Leave Request Updated", "update", "leave");
 
 
-                $this->moveUploadedFiles([$request_data["attachments"]],"leave_request_docs");
+                $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
 
                 DB::commit();
                 return response($leave, 201);

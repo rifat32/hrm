@@ -730,6 +730,26 @@ class UserManagementController extends Controller
 
             $request_data = $request->validated();
 
+            $temporary_files_location = config("setup-config.temporary_files_location");
+
+
+            // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+
+
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
+
+
+
+
+            $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+
+            $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_docs");
+
+
+
+
+
+
             if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
 
                 $error =  [
@@ -804,11 +824,7 @@ class UserManagementController extends Controller
             }
 
 
-            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
 
-            $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
-
-            $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_docs");
 
 
             DB::commit();

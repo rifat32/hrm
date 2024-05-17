@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SingleFileUploadRequest;
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
 use Exception;
 use Illuminate\Http\Request;
 
 class FileUploadController extends Controller
 {
+    use UserActivityUtil,ErrorUtil;
   /**
      *
      * @OA\Post(
@@ -89,7 +92,7 @@ class FileUploadController extends Controller
 
 
              return response()->json([
-                
+
             "file" => $new_file_name,
             "location" => $location,
              "full_location" => ("/" . $location . "/" . $new_file_name)

@@ -247,23 +247,90 @@ return $unique_identifier;
 
 
 
-public function moveUploadedFiles($files,$location) {
-    $temporary_files_location =  config("setup-config.temporary_files_location");
+// public function moveUploadedFiles($files,$location) {
+//     $temporary_files_location =  config("setup-config.temporary_files_location");
 
-    foreach($files as $temp_file_path) {
-        if (File::exists(public_path($temp_file_path))) {
+//     foreach($files as $temp_file_path) {
+//         if (File::exists(public_path($temp_file_path))) {
 
-            // Move the file from the temporary location to the permanent location
-            File::move(public_path($temp_file_path), public_path(str_replace($temporary_files_location, $location, $temp_file_path)));
+//             // Move the file from the temporary location to the permanent location
+//             File::move(public_path($temp_file_path), public_path(str_replace($temporary_files_location, $location, $temp_file_path)));
+//         } else {
+
+//             // throw new Exception(("no file exists"));
+//             // Handle the case where the file does not exist (e.g., log an error or take appropriate action)
+//         }
+//     }
+
+// }
+
+
+
+
+public function moveUploadedFiles($files, $location) {
+    $temporary_files_location = config("setup-config.temporary_files_location");
+
+    foreach ($files as $temp_file_path) {
+        $full_temp_path = public_path($temp_file_path);
+        $new_location_path = public_path(str_replace($temporary_files_location, $location, $temp_file_path));
+
+        if (File::exists($full_temp_path)) {
+            try {
+                // Ensure the destination directory exists
+                $new_directory_path = dirname($new_location_path);
+                if (!File::exists($new_directory_path)) {
+                    File::makeDirectory($new_directory_path, 0755, true);
+                }
+
+                // Attempt to move the file from the temporary location to the permanent location
+                File::move($full_temp_path, $new_location_path);
+                Log::info("File moved successfully from {$full_temp_path} to {$new_location_path}");
+            } catch (\Exception $e) {
+                // Log any exceptions that occur during the file move
+                Log::error("Failed to move file from {$full_temp_path} to {$new_location_path}: " . $e->getMessage());
+            }
         } else {
-
-            // throw new Exception(("no file exists"));
-            // Handle the case where the file does not exist (e.g., log an error or take appropriate action)
+            // Log the error if the file does not exist
+            Log::error("File does not exist: {$full_temp_path}");
         }
     }
-
 }
 
+
+
+public function storeUploadedFiles($file_path,$file_key, $location) {
+    $temporary_files_location = config("setup-config.temporary_files_location");
+
+    return collect($file_path)->map(function($item) use($temporary_files_location,$file_key,$location) {
+
+        $full_temp_path = public_path((!empty($file_key)?$item[$file_key]:$item));
+
+        $new_location_path = public_path(str_replace($temporary_files_location, $location, (!empty($file_key)?$item[$file_key]:$item)));
+
+        if (File::exists($full_temp_path)) {
+            try {
+                // Ensure the destination directory exists
+                $new_directory_path = dirname($new_location_path);
+                if (!File::exists($new_directory_path)) {
+                    File::makeDirectory($new_directory_path, 0755, true);
+                }
+
+                // Attempt to move the file from the temporary location to the permanent location
+                File::move($full_temp_path, $new_location_path);
+                Log::info("File moved successfully from {$full_temp_path} to {$new_location_path}");
+            } catch (\Exception $e) {
+                // Log any exceptions that occur during the file move
+                Log::error("Failed to move file from {$full_temp_path} to {$new_location_path}: " . $e->getMessage());
+            }
+        } else {
+            // Log the error if the file does not exist
+            Log::error("File does not exist: {$full_temp_path}");
+        }
+
+        return $item;
+    })->toArray();
+
+}
 
 
 

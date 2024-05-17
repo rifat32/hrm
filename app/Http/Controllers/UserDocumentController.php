@@ -197,7 +197,7 @@ class UserDocumentController extends Controller
 
 
 
-                $this->moveUploadedFiles([$request_data["file_name"]],"documents");
+                $this->moveUploadedFiles($request_data["file_name"],"documents");
 
 
 
@@ -317,7 +317,7 @@ class UserDocumentController extends Controller
                     ], 500);
                 }
 
-                $this->moveUploadedFiles([$request_data["file_name"]],"documents");
+                $this->moveUploadedFiles($request_data["file_name"],"documents");
 
                 return response($user_document, 201);
             });

@@ -252,7 +252,7 @@ class UserPayslipController extends Controller
 
 
 
-                $this->moveUploadedFiles([$request_data["payment_record_file"]],"payment_record_file");
+                $this->moveUploadedFiles($request_data["payment_record_file"],"payment_record_file");
 
 
 
@@ -441,7 +441,7 @@ class UserPayslipController extends Controller
 
 
 
-                $this->moveUploadedFiles([$request_data["payment_record_file"]],"payment_record_file");
+                $this->moveUploadedFiles($request_data["payment_record_file"],"payment_record_file");
 
 
                 return response($user_payslip, 201);
