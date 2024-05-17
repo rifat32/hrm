@@ -176,9 +176,10 @@ class UserDocumentController extends Controller
 
     public function createUserDocument(UserDocumentCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_document_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -186,7 +187,7 @@ class UserDocumentController extends Controller
                 }
 
                 $request_data = $request->validated();
-
+                $request_data = $this->storeUploadedFiles($request_data,"file_name","documents");
 
 
                 $request_data["created_by"] = $request->user()->id;
@@ -197,18 +198,19 @@ class UserDocumentController extends Controller
 
 
 
-                $this->moveUploadedFiles($request_data["file_name"],"documents");
+                // $this->moveUploadedFiles($request_data["file_name"],"documents");
 
 
 
 
 
 
+                DB::commit();
 
                 return response($user_document, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+           DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -274,55 +276,52 @@ class UserDocumentController extends Controller
     public function updateUserDocument(UserDocumentUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_document_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
                 $request_data = $request->validated();
-
-
-
-
                 $user_document_query_params = [
                     "id" => $request_data["id"],
                 ];
-                // $user_document_prev = UserDocument::where($user_document_query_params)
-                //     ->first();
-                // if (!$user_document_prev) {
-                //     return response()->json([
-                //         "message" => "no user document found"
-                //     ], 404);
-                // }
+             $user_document = UserDocument::where($user_document_query_params)->first();
+                $this->moveUploadedFilesBack($user_document->toArray(),"file_name","documents");
+                $request_data = $this->storeUploadedFiles($request_data,"file_name","documents");
 
-                $user_document  =  tap(UserDocument::where($user_document_query_params))->update(
-                    collect($request_data)->only([
-                         'user_id',
-                        'name',
-                        'file_name',
-                        // 'created_by',
 
-                    ])->toArray()
-                )
-                    // ->with("somthing")
 
-                    ->first();
-                if (!$user_document) {
-                    return response()->json([
+
+
+if($user_document) {
+    $user_document->fill(  collect($request_data)->only([
+        'user_id',
+       'name',
+       'file_name',
+       // 'created_by',
+
+   ])->toArray());
+    $user_document->save();
+} else{
+            return response()->json([
                         "message" => "something went wrong."
-                    ], 500);
+       ], 500);
                 }
 
-                $this->moveUploadedFiles($request_data["file_name"],"documents");
+                // $this->moveUploadedFiles($request_data["file_name"],"documents");
+                DB::commit();
 
                 return response($user_document, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+
+            DB::rollBack();
+            $this->moveUploadedFilesBack($request_data,"file_name","documents");
             return $this->sendError($e, 500, $request);
         }
     }

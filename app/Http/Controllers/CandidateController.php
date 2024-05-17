@@ -439,40 +439,29 @@ class CandidateController extends Controller
 
 
 
-                // $candidate_prev = Candidate::where($candidate_query_params)
-                //     ->first();
-                // if (!$candidate_prev) {
-                //     return response()->json([
-                //         "message" => "no candidate found"
-                //     ], 404);
-                // }
+             if($candidate) {
+                $candidate->fill( collect($request_data)->only([
+                    'name',
+                    'email',
+                    'phone',
+                    'experience_years',
+                    'education_level',
 
-                $candidate  =  tap(Candidate::where($candidate_query_params))->update(
-                    collect($request_data)->only([
-                        'name',
-                        'email',
-                        'phone',
-                        'experience_years',
-                        'education_level',
+                    'cover_letter',
+                    'application_date',
+                    'interview_date',
+                    'feedback',
+                    'status',
+                    'job_listing_id',
+                    'attachments',
 
-                        'cover_letter',
-                        'application_date',
-                        'interview_date',
-                        'feedback',
-                        'status',
-                        'job_listing_id',
-                        'attachments',
+                    // "is_active",
+                    // "business_id",
+                    // "created_by"
 
-                        // "is_active",
-                        // "business_id",
-                        // "created_by"
-
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
-                if (!$candidate) {
+                ])->toArray());
+                $candidate->save();
+             } else {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);

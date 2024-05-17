@@ -63,6 +63,9 @@ protected static function boot()
  *
  * @return void
  */
+
+
+
 public function deleteFiles()
 {
     // Get the file paths associated with the candidate
