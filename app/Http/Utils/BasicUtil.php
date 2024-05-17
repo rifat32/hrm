@@ -298,39 +298,102 @@ public function moveUploadedFiles($files, $location) {
 
 
 
-public function storeUploadedFiles($file_path,$file_key, $location) {
-    $temporary_files_location = config("setup-config.temporary_files_location");
+public function storeUploadedFiles($filePaths, $fileKey, $location) {
+    // Get the temporary files location from the configuration
+    $temporaryFilesLocation = config("setup-config.temporary_files_location");
 
-    return collect($file_path)->map(function($item) use($temporary_files_location,$file_key,$location) {
+    // Iterate over each file path in the array and perform necessary operations
+    return collect($filePaths)->map(function($filePathItem) use ($temporaryFilesLocation, $fileKey, $location) {
+        // Determine the file path based on whether a file key is provided
 
-        $full_temp_path = public_path((!empty($file_key)?$item[$file_key]:$item));
+        $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
 
-        $new_location_path = public_path(str_replace($temporary_files_location, $location, (!empty($file_key)?$item[$file_key]:$item)));
 
-        if (File::exists($full_temp_path)) {
+
+        // Construct the full temporary file path and the new location path
+        $fullTemporaryPath = public_path($file);
+        $newLocation = str_replace($temporaryFilesLocation, $location, $file);
+        $newLocationPath = public_path($newLocation);
+
+        // Check if the file exists at the temporary location
+        if (File::exists($fullTemporaryPath)) {
             try {
                 // Ensure the destination directory exists
-                $new_directory_path = dirname($new_location_path);
-                if (!File::exists($new_directory_path)) {
-                    File::makeDirectory($new_directory_path, 0755, true);
+                $newDirectoryPath = dirname($newLocationPath);
+                if (!File::exists($newDirectoryPath)) {
+                    File::makeDirectory($newDirectoryPath, 0755, true);
                 }
 
                 // Attempt to move the file from the temporary location to the permanent location
-                File::move($full_temp_path, $new_location_path);
-                Log::info("File moved successfully from {$full_temp_path} to {$new_location_path}");
+                File::move($fullTemporaryPath, $newLocationPath);
+                Log::info("File moved successfully from {$fullTemporaryPath} to {$newLocationPath}");
             } catch (\Exception $e) {
+                throw new Exception(("Failed to move file from {$fullTemporaryPath} to {$newLocationPath}: " . $e->getMessage()),500);
                 // Log any exceptions that occur during the file move
-                Log::error("Failed to move file from {$full_temp_path} to {$new_location_path}: " . $e->getMessage());
+                Log::error("Failed to move file from {$fullTemporaryPath} to {$newLocationPath}: " . $e->getMessage());
             }
         } else {
-            // Log the error if the file does not exist
-            Log::error("File does not exist: {$full_temp_path}");
+            // Log an error if the file does not exist
+            Log::error("File does not exist: {$fullTemporaryPath}");
+            throw new Exception("File does not exist",500);
         }
 
-        return $item;
+        // Update the file path in the item if a file key is provided
+        if (!empty($fileKey)) {
+            $filePathItem[$fileKey] = $newLocation;
+        } else {
+            // Otherwise, update the item with the new location
+            $filePathItem = $newLocation;
+        }
+
+        return $filePathItem;
     })->toArray();
 
 }
+
+
+
+
+
+
+
+public function moveUploadedFilesBack($filePaths, $fileKey, $location) {
+    // Get the temporary files location from the configuration
+    $temporaryFilesLocation = config("setup-config.temporary_files_location");
+
+    // Iterate over each file path in the array and perform necessary operations
+    collect($filePaths)->each(function($filePathItem) use ($temporaryFilesLocation, $fileKey, $location) {
+        // Determine the file path based on whether a file key is provided
+        $file = (!empty($fileKey)) ? $filePathItem[$fileKey] : $filePathItem;
+
+        // Construct the full destination path and the temporary location path
+        $destinationPath = public_path($file);
+        $temporaryLocation = str_replace($location, $temporaryFilesLocation, $file);
+
+        // Check if the file exists at the current location
+        if (File::exists($destinationPath)) {
+            try {
+                // Ensure the temporary directory exists
+                $temporaryDirectoryPath = dirname($temporaryLocation);
+                if (!File::exists($temporaryDirectoryPath)) {
+                    File::makeDirectory($temporaryDirectoryPath, 0755, true);
+                }
+
+                // Attempt to move the file back to the temporary location
+                File::move($destinationPath, public_path($temporaryLocation));
+                Log::info("File moved back successfully from {$destinationPath} to {$temporaryLocation}");
+            } catch (\Exception $e) {
+                // Log any exceptions that occur during the file move back
+                Log::error("Failed to move file back from {$destinationPath} to {$temporaryLocation}: " . $e->getMessage());
+            }
+        } else {
+            // Log an error if the file does not exist at the current location
+            Log::error("File does not exist at destination: {$destinationPath}");
+        }
+    });
+}
+
+
 
 
 

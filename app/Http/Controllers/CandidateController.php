@@ -189,9 +189,11 @@ class CandidateController extends Controller
 
     public function createCandidate(CandidateCreateRequest $request)
     {
+
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('candidate_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -200,8 +202,7 @@ class CandidateController extends Controller
 
                 $request_data = $request->validated();
 
-
-
+                $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -219,12 +220,18 @@ class CandidateController extends Controller
 
                 // $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
 
-                $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
+
+                DB::commit();
 
                 return response($candidate, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            DB::rollBack();
+
+            $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+
+
+
             return $this->sendError($e, 500, $request);
         }
     }
@@ -300,9 +307,10 @@ class CandidateController extends Controller
 
      public function createCandidateClient(CandidateCreateRequest $request)
      {
+        DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             return DB::transaction(function () use ($request) {
+
                  if (!$request->user()->hasPermissionTo('candidate_create')) {
                      return response()->json([
                          "message" => "You can not perform this action"
@@ -310,7 +318,7 @@ class CandidateController extends Controller
                  }
 
                  $request_data = $request->validated();
-
+       $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
 
 
 
@@ -323,11 +331,14 @@ class CandidateController extends Controller
 
                  $candidate->job_platforms()->sync($request_data['job_platforms']);
 
-                 $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
+                //  $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
+
+                DB::commit();
                  return response($candidate, 201);
-             });
+
          } catch (Exception $e) {
-             error_log($e->getMessage());
+            DB::rollBack();
+            $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
              return $this->sendError($e, 500, $request);
          }
      }
@@ -403,24 +414,31 @@ class CandidateController extends Controller
     public function updateCandidate(CandidateUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
+
+
                 if (!$request->user()->hasPermissionTo('candidate_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
                 $request_data = $request->validated();
-                $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
-
-
 
                 $candidate_query_params = [
                     "id" => $request_data["id"],
-                    "business_id" => $business_id
+                    "business_id" => auth()->user()->business_id
                 ];
+
+                $candidate  =     Candidate::where($candidate_query_params)->first();
+                $this->moveUploadedFilesBack($candidate->attachments,"","candidate_files");
+                $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
+
+
+
                 // $candidate_prev = Candidate::where($candidate_query_params)
                 //     ->first();
                 // if (!$candidate_prev) {
@@ -461,16 +479,24 @@ class CandidateController extends Controller
                 }
 
 
+
+
+
+
                 $candidate->job_platforms()->sync($request_data['job_platforms']);
 
+
+
+                DB::commit();
                 return response($candidate, 201);
-            });
+
 
 
 
 
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
