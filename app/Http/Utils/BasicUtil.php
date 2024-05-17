@@ -298,13 +298,37 @@ public function moveUploadedFiles($files, $location) {
 
 
 
+
+
+
+
+
+
+
+
 public function storeUploadedFiles($filePaths, $fileKey, $location) {
+
+
+    if(is_array($fileKey)) {
+
+        return collect($filePaths)->map(function($filePathItem) use ($fileKey, $location) {
+            $filePathItem[$fileKey] = $this->storeUploadedFiles($filePathItem[$fileKey], "", $location);
+            return $filePathItem;
+        });
+
+    }
+
+
     // Get the temporary files location from the configuration
     $temporaryFilesLocation = config("setup-config.temporary_files_location");
 
     // Iterate over each file path in the array and perform necessary operations
     return collect($filePaths)->map(function($filePathItem) use ($temporaryFilesLocation, $fileKey, $location) {
         // Determine the file path based on whether a file key is provided
+
+
+
+
 
         $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
 
@@ -358,6 +382,17 @@ public function storeUploadedFiles($filePaths, $fileKey, $location) {
 
 
 public function moveUploadedFilesBack($filePaths, $fileKey, $location) {
+
+    if(is_array($fileKey)) {
+
+        return collect($filePaths)->map(function($filePathItem) use ($fileKey, $location) {
+            $filePathItem[$fileKey] = $this->storeUploadedFiles($filePathItem[$fileKey], "", $location);
+            return $filePathItem;
+        });
+
+    }
+
+
     // Get the temporary files location from the configuration
     $temporaryFilesLocation = config("setup-config.temporary_files_location");
 

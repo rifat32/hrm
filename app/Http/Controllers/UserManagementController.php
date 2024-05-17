@@ -734,16 +734,18 @@ class UserManagementController extends Controller
 
 
             // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
-
+            //  $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+            //  $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_docs");
 
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
 
+            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
+
+            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
 
 
 
-            $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
 
-            $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_docs");
 
 
 
@@ -831,6 +833,11 @@ class UserManagementController extends Controller
             return response($user, 201);
         } catch (Exception $e) {
             DB::rollBack();
+            $this->moveUploadedFilesBack($request_data["recruitment_processes"],"attachments","recruitment_processes");
+
+            $this->moveUploadedFilesBack($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
+
+             $this->moveUploadedFilesBack($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
 
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -1392,6 +1399,14 @@ class UserManagementController extends Controller
             } else {
                 unset($request_data['password']);
             }
+
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
+
+            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
+
+            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
+
+            
             $request_data['is_active'] = true;
             $request_data['remember_token'] = Str::random(10);
 
@@ -1506,11 +1521,11 @@ class UserManagementController extends Controller
 
 
 
-            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+            // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
 
-            $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
+            // $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
 
-            $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
+            // $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
 
 
 

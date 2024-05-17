@@ -94,9 +94,11 @@ class UserEducationHistoryController extends Controller
 
     public function createUserEducationHistory(UserEducationHistoryCreateRequest $request)
     {
+
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+            // return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('employee_education_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -104,7 +106,7 @@ class UserEducationHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
-
+                $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","education_docs");
 
 
 
@@ -116,12 +118,15 @@ class UserEducationHistoryController extends Controller
                 $user_education_history =  UserEducationHistory::create($request_data);
 
 
-                $this->moveUploadedFiles($request_data["attachments"],"education_docs");
+                // $this->moveUploadedFiles($request_data["attachments"],"education_docs");
+
+                DB::commit();
 
                 return response($user_education_history, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+             $this->moveUploadedFilesBack($request_data["attachments"],"","education_docs");
+        DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -199,64 +204,63 @@ class UserEducationHistoryController extends Controller
     public function updateUserEducationHistory(UserEducationHistoryUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_education_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
                 $request_data = $request->validated();
-
-
 
 
                 $user_education_history_query_params = [
                     "id" => $request_data["id"],
                 ];
-                // $user_education_history_prev = UserEducationHistory::where($user_education_history_query_params)
-                //     ->first();
-                // if (!$user_education_history_prev) {
-                //     return response()->json([
-                //         "message" => "no user education history found"
-                //     ], 404);
-                // }
+             $user_education_history = UserEducationHistory::where($user_education_history_query_params)->first();
 
-                $user_education_history  =  tap(UserEducationHistory::where($user_education_history_query_params))->update(
-                    collect($request_data)->only([
-                        'user_id',
-                        'degree',
-                        'major',
-                        'school_name',
-                        'graduation_date',
-                        'start_date',
+                    $this->moveUploadedFilesBack($user_education_history->attachments,"","education_docs");
 
-                        'achievements',
-                        'description',
-                        'address',
-                        'country',
-                        'city',
-                        'postcode',
-                        'is_current',
-                        "attachments"
+                    $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","education_docs");
 
-                    ])->toArray()
-                )
-                    // ->with("somthing")
 
-                    ->first();
-                if (!$user_education_history) {
+             if($user_education_history) {
+                $user_education_history->fill( collect($request_data)->only([
+                    'user_id',
+                    'degree',
+                    'major',
+                    'school_name',
+                    'graduation_date',
+                    'start_date',
+
+                    'achievements',
+                    'description',
+                    'address',
+                    'country',
+                    'city',
+                    'postcode',
+                    'is_current',
+                    "attachments"
+
+                ])->toArray());
+                $user_education_history->save();
+
+             } else {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
-                }
-                $this->moveUploadedFiles($request_data["attachments"],"education_docs");
+             }
+                // $this->moveUploadedFiles($request_data["attachments"],"education_docs");
+
+                DB::commit();
                 return response($user_education_history, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            DB::rollBack();
+            $this->moveUploadedFilesBack($request_data["attachments"],"","education_docs");
             return $this->sendError($e, 500, $request);
         }
     }

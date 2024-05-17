@@ -230,6 +230,13 @@ class LeaveController extends Controller
             $this->authorizationComponent->hasPermission('leave_create');
 
             $request_data = $request->validated();
+
+            $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
+
+
+
+
+
             $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 
             $leave =  Leave::create($processed_leave_data["leave_data"]);
@@ -263,7 +270,7 @@ class LeaveController extends Controller
 
 
 
-            $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
+            // $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
 
 
 
@@ -277,7 +284,7 @@ class LeaveController extends Controller
             return response($leave, 200);
         } catch (Exception $e) {
             DB::rollBack();
-            error_log($e->getMessage());
+            $this->moveUploadedFilesBack($request_data["attachments"],"","leave_attachments");
             return $this->sendError($e, 500, $request);
         }
     }
@@ -728,6 +735,7 @@ class LeaveController extends Controller
                 }
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
+                $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
 
                 $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 
@@ -829,7 +837,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 $this->send_notification($leave, $leave->employee, "Leave Request Updated", "update", "leave");
 
 
-                $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
+                // $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
 
                 DB::commit();
                 return response($leave, 201);

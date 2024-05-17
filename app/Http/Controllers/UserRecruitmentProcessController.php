@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\UserRecruitmentProcess;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserRecruitmentProcessController extends Controller
 {
@@ -92,6 +93,7 @@ class UserRecruitmentProcessController extends Controller
     public function createUserRecruitmentProcess(UserCreateRecruitmentProcessRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
@@ -101,6 +103,7 @@ class UserRecruitmentProcessController extends Controller
             }
             $request_data = $request->validated();
 
+            $request_data["recruitment_processes"] =   $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
 
 
 
@@ -130,13 +133,14 @@ class UserRecruitmentProcessController extends Controller
             $this->store_recruitment_processes($request_data, $updatableUser);
 
 
-            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+            // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
 
 
-
+            DB::commit();
             return response($updatableUser, 201);
         } catch (Exception $e) {
-            error_log($e->getMessage());
+          DB::rollBack();
+           $this->moveUploadedFilesBack($request_data["recruitment_processes"],"attachments","recruitment_processes");
             return $this->sendError($e, 500, $request);
         }
     }
@@ -220,6 +224,7 @@ class UserRecruitmentProcessController extends Controller
     public function updateUserRecruitmentProcess(UserUpdateRecruitmentProcessRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
@@ -228,7 +233,7 @@ class UserRecruitmentProcessController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
-
+            $request_data["recruitment_processes"] =   $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
 
 
 
@@ -259,11 +264,12 @@ class UserRecruitmentProcessController extends Controller
             $this->update_recruitment_processes_v2($request_data, $updatableUser);
 
 
-            $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+            // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
 
+            DB::commit();
             return response($updatableUser, 201);
         } catch (Exception $e) {
-            error_log($e->getMessage());
+        DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }

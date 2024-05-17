@@ -1381,8 +1381,6 @@ class BusinessController extends Controller
                     if (
                         $fields_changed
                     ) {
-
-
                         BusinessPensionHistory::create(array_merge(["created_by" => auth()->user()->id,"business_id" =>$request_data['business']["id"] ],$pension_scheme_data));
 
                     }
@@ -1419,7 +1417,7 @@ class BusinessController extends Controller
                 ], 201);
 
         } catch (Exception $e) {
-$           $this->moveUploadedFilesBack($request_data["business"]["pension_scheme_letters"],"file","pension_scheme_letters");
+$
             DB::rollBack();
 
             return $this->sendError($e, 500, $request);

@@ -88,9 +88,10 @@ class UserRightToWorkHistoryController extends Controller
 
     public function createUserRightToWorkHistory(UserRightToWorkHistoryCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_right_to_work_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -99,6 +100,10 @@ class UserRightToWorkHistoryController extends Controller
 
 
                 $request_data = $request->validated();
+
+                $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
+
+
                 $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
@@ -111,16 +116,16 @@ class UserRightToWorkHistoryController extends Controller
 
 
 
-                $this->moveUploadedFiles(collect($request_data["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+                // $this->moveUploadedFiles(collect($request_data["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
 
-
-
+              DB::commit();
 
 
                 return response($user_right_to_work_history, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+           DB::rollBack();
+        $this->moveUploadedFilesBack($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
             return $this->sendError($e, 500, $request);
         }
     }
@@ -193,9 +198,10 @@ class UserRightToWorkHistoryController extends Controller
     public function updateRightToWorkHistory(UserRightToWorkHistoryUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_right_to_work_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -204,6 +210,7 @@ class UserRightToWorkHistoryController extends Controller
 
 
                 $request_data = $request->validated();
+                $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -256,15 +263,21 @@ class UserRightToWorkHistoryController extends Controller
                 }
 
 
-                $this->moveUploadedFiles(collect($request_data["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+
+
+                // $this->moveUploadedFiles(collect($request_data["right_to_work_docs"])->pluck("file_name"),"right_to_work_docs");
+
+
+
+                DB::commit();
 
                 return response($user_right_to_work_history, 201);
 
 
 
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+           DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }

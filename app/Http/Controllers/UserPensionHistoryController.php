@@ -91,9 +91,13 @@ class UserPensionHistoryController extends Controller
 
     public function createUserPensionHistory(UserPensionHistoryCreateRequest $request)
     {
+
+
+
+       DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_pension_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -101,6 +105,10 @@ class UserPensionHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+
+                $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
+
+
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_manual"] = 1;
@@ -110,17 +118,17 @@ class UserPensionHistoryController extends Controller
 
                 $user_pension_history =  EmployeePensionHistory::create($request_data);
 
-                $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
 
 
+                // $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
 
 
-
-
+DB::commit();
                 return response($user_pension_history, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+       DB::rollBack();
+       $this->moveUploadedFilesBack($request_data["pension_letters"],"file_name","pension_letters");
             return $this->sendError($e, 500, $request);
         }
     }
@@ -205,6 +213,12 @@ class UserPensionHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+                
+                $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
+
+
+
+
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -270,7 +284,7 @@ class UserPensionHistoryController extends Controller
 
 
 
-                $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
+                // $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
 
                 DB::commit();
                 return response($user_pension_history, 201);

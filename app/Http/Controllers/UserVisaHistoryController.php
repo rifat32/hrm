@@ -89,9 +89,10 @@ class UserVisaHistoryController extends Controller
 
     public function createUserVisaHistory(UserVisaHistoryCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_visa_history_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -99,6 +100,7 @@ class UserVisaHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+                $request_data["visa_docs"] =   $this->storeUploadedFiles($request_data["visa_docs"],"file_name","visa_docs");
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -109,12 +111,15 @@ class UserVisaHistoryController extends Controller
 
                 $user_visa_history =  EmployeeVisaDetailHistory::create($request_data);
 
-                $this->moveUploadedFiles(collect($request_data["visa_docs"])->pluck("file_name"),"visa_docs");
+                // $this->moveUploadedFiles(collect($request_data["visa_docs"])->pluck("file_name"),"visa_docs");
+
+                DB::commit();
 
                 return response($user_visa_history, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            DB::rollBack();
+          $this->moveUploadedFilesBack($request_data["visa_docs"],"file_name","visa_docs");
             return $this->sendError($e, 500, $request);
         }
     }
@@ -188,9 +193,10 @@ class UserVisaHistoryController extends Controller
     public function updateUserVisaHistory(UserVisaHistoryUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_visa_history_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -199,6 +205,7 @@ class UserVisaHistoryController extends Controller
 
 
                 $request_data = $request->validated();
+                $request_data["visa_docs"] =   $this->storeUploadedFiles($request_data["visa_docs"],"file_name","visa_docs");
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -254,7 +261,10 @@ class UserVisaHistoryController extends Controller
 
 
 
-                $this->moveUploadedFiles(collect($request_data["visa_docs"])->pluck("file_name"),"visa_docs");
+                // $this->moveUploadedFiles(collect($request_data["visa_docs"])->pluck("file_name"),"visa_docs");
+
+
+                DB::commit();
 
                 return response($user_visa_history, 201);
 
@@ -264,9 +274,9 @@ class UserVisaHistoryController extends Controller
 
 
 
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+         DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }

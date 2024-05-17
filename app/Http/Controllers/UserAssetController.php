@@ -187,9 +187,10 @@ class UserAssetController extends Controller
 
       public function createUserAsset(UserAssetCreateRequest $request)
       {
+        DB::beginTransaction();
           try {
               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-              return DB::transaction(function () use ($request) {
+
                   if (!$request->user()->hasPermissionTo('employee_asset_create')) {
                       return response()->json([
                           "message" => "You can not perform this action"
@@ -197,6 +198,11 @@ class UserAssetController extends Controller
                   }
 
                   $request_data = $request->validated();
+
+                  if(!empty($request_data["image"])) {
+                    $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets")[0];
+                  }
+
 
 
                   $request_data["created_by"] = $request->user()->id;
@@ -229,15 +235,24 @@ class UserAssetController extends Controller
 
 
 
-                  $this->moveUploadedFiles($request_data["image"],"assets");
+                //   $this->moveUploadedFiles($request_data["image"],"assets");
 
+
+    DB::commit();
                   return response($user_asset, 201);
 
-              });
+
 
 
           } catch (Exception $e) {
-              error_log($e->getMessage());
+
+            if(!empty($request_data["image"])) {
+           $this->moveUploadedFilesBack([$request_data["image"]],"","assets");
+              }
+
+    DB::rollBack();
+
+
               return $this->sendError($e, 500, $request);
           }
       }
@@ -469,6 +484,9 @@ class UserAssetController extends Controller
                   }
                   $business_id =  $request->user()->business_id;
                   $request_data = $request->validated();
+                  if(!empty($request_data["image"])) {
+                    $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets");
+                  }
 
                   if($request_data["status"] == "returned") {
                     $request_data["user_id"] = NULL;
@@ -548,7 +566,7 @@ class UserAssetController extends Controller
                           );
 
                    }
-                   $this->moveUploadedFiles($request_data["image"],"assets");
+                //    $this->moveUploadedFiles($request_data["image"],"assets");
                   return response($user_asset, 201);
               });
           } catch (Exception $e) {

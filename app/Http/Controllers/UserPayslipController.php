@@ -209,9 +209,10 @@ class UserPayslipController extends Controller
 
     public function createUserPayslip(UserPayslipCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_payslip_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -219,7 +220,12 @@ class UserPayslipController extends Controller
                 }
 
                 $request_data = $request->validated();
+                if(!empty($request_data["payment_record_file"])) {
+                    $request_data["payment_record_file"] = $this->storeUploadedFiles([$request_data["payment_record_file"]],"","payment_record_file");
+                }
                 $request_data["created_by"] = $request->user()->id;
+
+
 
                 // Fetch user's bank details
                 $user = User::find($request_data["user_id"]); // Assuming user_id is passed in the request
@@ -252,16 +258,19 @@ class UserPayslipController extends Controller
 
 
 
-                $this->moveUploadedFiles($request_data["payment_record_file"],"payment_record_file");
+                // $this->moveUploadedFiles($request_data["payment_record_file"],"payment_record_file");
 
 
 
 
-
+DB::commit();
                 return response($user_payslip, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+           DB::rollBack();
+           if(!empty($request_data["payment_record_file"])) {
+            $this->moveUploadedFilesBack([$request_data["payment_record_file"]],"","payment_record_file");
+                    }
             return $this->sendError($e, 500, $request);
         }
     }
@@ -364,16 +373,26 @@ class UserPayslipController extends Controller
     public function updateUserPayslip(UserPayslipUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('employee_payslip_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+
                 $request_data = $request->validated();
+
+
+                if(!empty($request_data["payment_record_file"])) {
+        $request_data["payment_record_file"] = $this->storeUploadedFiles([$request_data["payment_record_file"]],"","payment_record_file");
+                }
+
+
+
+
 
   // Fetch user's bank details
   $user = User::find($request_data["user_id"]); // Assuming user_id is passed in the request
@@ -441,13 +460,14 @@ class UserPayslipController extends Controller
 
 
 
-                $this->moveUploadedFiles($request_data["payment_record_file"],"payment_record_file");
+                // $this->moveUploadedFiles($request_data["payment_record_file"],"payment_record_file");
 
-
+DB::commit();
                 return response($user_payslip, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+        DB::rollBack();
+
             return $this->sendError($e, 500, $request);
         }
     }
