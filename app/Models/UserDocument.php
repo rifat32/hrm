@@ -65,8 +65,8 @@ public function deleteFiles()
 
     // Iterate over each file and delete it
     foreach ($filePaths as $filePath) {
-        if (File::exists($filePath)) {
-            File::delete($filePath);
+        if (File::exists(public_path($filePath))) {
+            File::delete(public_path($filePath));
         }
     }
 }

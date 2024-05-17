@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserDocument;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UserDocumentUpdateRequest extends BaseFormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *

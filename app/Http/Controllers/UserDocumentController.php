@@ -187,7 +187,12 @@ class UserDocumentController extends Controller
                 }
 
                 $request_data = $request->validated();
-                $request_data = $this->storeUploadedFiles($request_data,"file_name","documents");
+
+                if(!empty($request_data["file_name"])) {
+                    $request_data["file_name"] = $this->storeUploadedFiles([$request_data["file_name"]],"","documents")[0];
+                }
+
+
 
 
                 $request_data["created_by"] = $request->user()->id;
@@ -211,6 +216,9 @@ class UserDocumentController extends Controller
 
         } catch (Exception $e) {
            DB::rollBack();
+           if(!empty($request_data["file_name"])) {
+            $request_data["file_name"] = $this->moveUploadedFilesBack([$request_data["file_name"]],"","documents")[0];
+        }
             return $this->sendError($e, 500, $request);
         }
     }
@@ -291,8 +299,16 @@ class UserDocumentController extends Controller
                     "id" => $request_data["id"],
                 ];
              $user_document = UserDocument::where($user_document_query_params)->first();
-                $this->moveUploadedFilesBack($user_document->toArray(),"file_name","documents");
-                $request_data = $this->storeUploadedFiles($request_data,"file_name","documents");
+
+
+                if(!empty($user_document->file_name)) {
+                    $this->moveUploadedFilesBack([$user_document->file_name],"","documents");
+                }
+
+                if(!empty($request_data["file_name"])) {
+                    $request_data["file_name"] = $this->storeUploadedFiles([$request_data["file_name"]],"","documents")[0];
+                }
+
 
 
 
@@ -321,7 +337,11 @@ if($user_document) {
         } catch (Exception $e) {
 
             DB::rollBack();
-            $this->moveUploadedFilesBack($request_data,"file_name","documents");
+
+            if(!empty($request_data["file_name"])) {
+                $request_data["file_name"] = $this->moveUploadedFilesBack([$request_data["file_name"]],"","documents")[0];
+            }
+
             return $this->sendError($e, 500, $request);
         }
     }

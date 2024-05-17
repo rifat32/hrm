@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
-
+use Illuminate\Support\Facades\Log;
 class Candidate extends Model
 {
     use HasFactory;
@@ -73,8 +73,11 @@ public function deleteFiles()
 
     // Iterate over each file and delete it
     foreach ($filePaths as $filePath) {
-        if (File::exists($filePath)) {
-            File::delete($filePath);
+        if (File::exists(public_path($filePath))) {
+            Log::error("file deleted......");
+            File::delete(public_path($filePath));
+        } else {
+            Log::error("file not found......");
         }
     }
 }
