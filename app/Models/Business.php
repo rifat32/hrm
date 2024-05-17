@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\File;
 
 class Business extends Model
 {
@@ -113,6 +114,45 @@ class Business extends Model
     {
         return $this->hasMany(BusinessModule::class, 'business_id', 'id');
     }
+
+
+
+
+
+        // Define your model properties and relationships here
+
+protected static function boot()
+{
+    parent::boot();
+
+    // Listen for the "deleting" event on the Candidate model
+    static::deleting(function($item) {
+        // Call the deleteFiles method to delete associated files
+        $item->deleteFiles();
+    });
+}
+
+/**
+ * Delete associated files.
+ *
+ * @return void
+ */
+
+
+
+public function deleteFiles()
+{
+    // Get the file paths associated with the candidate
+    $filePaths = $this->pension_scheme_letters;
+
+    // Iterate over each file and delete it
+    foreach ($filePaths as $filePath) {
+        if (File::exists(public_path($filePath->file))) {
+            File::delete(public_path($filePath->file));
+        }
+    }
+}
+
 
 
 }

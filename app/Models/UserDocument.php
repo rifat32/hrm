@@ -44,9 +44,9 @@ protected static function boot()
     parent::boot();
 
     // Listen for the "deleting" event on the Candidate model
-    static::deleting(function($candidate) {
+    static::deleting(function($item) {
         // Call the deleteFiles method to delete associated files
-        $candidate->deleteFiles();
+        $item->deleteFiles();
     });
 }
 
@@ -70,4 +70,31 @@ public function deleteFiles()
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

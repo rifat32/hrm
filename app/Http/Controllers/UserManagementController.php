@@ -968,7 +968,10 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            if(!empty($request_data["joining_date"])) {
+                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            }
+
             $user = User::where($userQueryTerms)->first();
 
             if ($user) {
@@ -1400,7 +1403,10 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+
+            if(!empty($request_data["joining_date"])) {
+                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            }
 
             $user = User::where($userQueryTerms)->first();
 
@@ -1655,7 +1661,14 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+
+
+            if(!empty($request_data["joining_date"])) {
+                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            }
+
+
+
             $user = User::where($userQueryTerms)->first();
 
             if ($user) {
@@ -2125,8 +2138,10 @@ class UserManagementController extends Controller
 
 
 
-            $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
 
+            if(!empty($request_data["joining_date"])) {
+                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            }
 
 
             $user = tap($user_query)->update(

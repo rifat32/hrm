@@ -1330,9 +1330,11 @@ class BusinessController extends Controller
     public function updateBusinessPensionInformation(BusinessUpdatePensionRequest $request)
     {
 
+
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return  DB::transaction(function () use (&$request) {
+
                 if (!$request->user()->hasPermissionTo('business_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -1346,6 +1348,8 @@ class BusinessController extends Controller
                 }
 
                 $request_data = $request->validated();
+
+                $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"],"file","pension_scheme_letters");
 
                 $business = Business::where([
                      "id" =>$request_data['business']["id"]
@@ -1405,15 +1409,18 @@ class BusinessController extends Controller
 
 
 
-                $this->moveUploadedFiles(collect($request_data["business"]["pension_scheme_letters"])->pluck("file"),"pension_scheme_letters");
+                // $this->moveUploadedFiles(collect($request_data["business"]["pension_scheme_letters"])->pluck("file"),"pension_scheme_letters");
 
 
+
+                DB::commit();
                 return response([
-
                     "business" => $business
                 ], 201);
-            });
+
         } catch (Exception $e) {
+$           $this->moveUploadedFilesBack($request_data["business"]["pension_scheme_letters"],"file","pension_scheme_letters");
+            DB::rollBack();
 
             return $this->sendError($e, 500, $request);
         }
