@@ -1388,11 +1388,14 @@ class BusinessController extends Controller
 
 
                 $business  =  tap(Business::where([
-                    "id" => $request_data['business']["id"]
+                    "id" => $request_data['businesas']["id"]
                 ]))->update(
                     $pension_scheme_data
                 )
                     ->first();
+
+
+
 
 
 
@@ -1403,6 +1406,8 @@ class BusinessController extends Controller
                     ], 500);
                 }
 
+
+                
 
 
 
@@ -1417,7 +1422,7 @@ class BusinessController extends Controller
                 ], 201);
 
         } catch (Exception $e) {
-$
+
             DB::rollBack();
 
             return $this->sendError($e, 500, $request);

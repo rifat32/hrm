@@ -457,6 +457,7 @@ Route::delete('/v1.0/user-documents/{ids}', [UserDocumentController::class, "del
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user recruitment process  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 Route::post('/v1.0/user-recruitment-processes', [UserRecruitmentProcessController::class, "createUserRecruitmentProcess"]);
 
 Route::put('/v1.0/user-recruitment-processes', [UserRecruitmentProcessController::class, "updateUserRecruitmentProcess"]);

@@ -228,8 +228,12 @@ class CandidateController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
 
-            $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
 
+            try {
+                $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+            } catch (Exception $innerException) {
+                error_log("Failed to move candidate files back: " . $innerException->getMessage());
+            }
 
 
             return $this->sendError($e, 500, $request);
@@ -338,7 +342,13 @@ class CandidateController extends Controller
 
          } catch (Exception $e) {
             DB::rollBack();
-            $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+
+            try {
+                $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+            } catch (Exception $innerException) {
+                error_log("Failed to move candidate files back: " . $innerException->getMessage());
+            }
+
              return $this->sendError($e, 500, $request);
          }
      }
@@ -434,7 +444,11 @@ class CandidateController extends Controller
                 ];
 
                 $candidate  =     Candidate::where($candidate_query_params)->first();
+
+
                 $this->moveUploadedFilesBack($candidate->attachments,"","candidate_files");
+
+
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
 
 
@@ -484,7 +498,20 @@ class CandidateController extends Controller
 
 
         } catch (Exception $e) {
-            $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+
+
+
+
+
+            try {
+                $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+            } catch (Exception $innerException) {
+                error_log("Failed to move candidate files back: " . $innerException->getMessage());
+            }
+
+
+
+
             DB::rollBack();
             return $this->sendError($e, 500, $request);
         }

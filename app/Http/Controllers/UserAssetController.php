@@ -246,9 +246,18 @@ class UserAssetController extends Controller
 
           } catch (Exception $e) {
 
-            if(!empty($request_data["image"])) {
-           $this->moveUploadedFilesBack([$request_data["image"]],"","assets");
-              }
+
+            try {
+                if(!empty($request_data["image"])) {
+
+                    $this->moveUploadedFilesBack([$request_data["image"]],"","assets");
+                       }
+            } catch (Exception $innerException) {
+                error_log("Failed to move assets files back: " . $innerException->getMessage());
+            }
+
+
+
 
     DB::rollBack();
 

@@ -310,12 +310,12 @@ class DropdownOptionsController extends Controller
                  ], 401);
              }
              $user =  auth()->user();
+
              $business = $user->business;
-             $business_id =  $business->id;
+
              $business_created_by = $business->created_by;
 
              $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
-
 
              $data["work_locations"] = $this->get_work_locations($business_created_by);
              $data["designations"] = $this->get_designations($business_created_by);

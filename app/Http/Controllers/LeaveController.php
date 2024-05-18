@@ -284,7 +284,20 @@ class LeaveController extends Controller
             return response($leave, 200);
         } catch (Exception $e) {
             DB::rollBack();
-            $this->moveUploadedFilesBack($request_data["attachments"],"","leave_attachments");
+
+
+
+            try {
+                $this->moveUploadedFilesBack($request_data["attachments"],"","leave_attachments");
+            } catch (Exception $innerException) {
+                error_log("Failed to move leave files back: " . $innerException->getMessage());
+            }
+
+
+
+
+
+
             return $this->sendError($e, 500, $request);
         }
     }

@@ -119,7 +119,22 @@ class UserVisaHistoryController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-          $this->moveUploadedFilesBack($request_data["visa_docs"],"file_name","visa_docs");
+
+
+
+          try {
+
+
+            $this->moveUploadedFilesBack($request_data["visa_docs"],"file_name","visa_docs");
+
+
+
+        } catch (Exception $innerException) {
+
+            error_log("Failed to move right to work docs  files back: " . $innerException->getMessage());
+
+        }
+
             return $this->sendError($e, 500, $request);
         }
     }

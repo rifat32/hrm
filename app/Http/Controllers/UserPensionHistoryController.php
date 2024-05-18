@@ -128,7 +128,23 @@ DB::commit();
 
         } catch (Exception $e) {
        DB::rollBack();
-       $this->moveUploadedFilesBack($request_data["pension_letters"],"file_name","pension_letters");
+
+
+
+       try {
+
+
+        $this->moveUploadedFilesBack($request_data["pension_letters"],"file_name","pension_letters");
+
+
+
+    } catch (Exception $innerException) {
+
+        error_log("Failed to move pension letters  files back: " . $innerException->getMessage());
+
+    }
+
+
             return $this->sendError($e, 500, $request);
         }
     }
@@ -213,7 +229,7 @@ DB::commit();
                 }
 
                 $request_data = $request->validated();
-                
+
                 $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
 
 

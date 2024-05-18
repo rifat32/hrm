@@ -125,7 +125,24 @@ class UserRightToWorkHistoryController extends Controller
 
         } catch (Exception $e) {
            DB::rollBack();
+
+
+       try {
+
+
         $this->moveUploadedFilesBack($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
+
+
+
+    } catch (Exception $innerException) {
+
+        error_log("Failed to move right to work docs  files back: " . $innerException->getMessage());
+
+    }
+
+
+
+
             return $this->sendError($e, 500, $request);
         }
     }

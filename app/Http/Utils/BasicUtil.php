@@ -306,11 +306,10 @@ public function moveUploadedFiles($files, $location) {
 
 
 
-public function storeUploadedFiles($filePaths, $fileKey, $location) {
+public function storeUploadedFiles($filePaths, $fileKey, $location, $arrayOfString = NULL) {
 
 
-    if(is_array($fileKey)) {
-
+    if(is_array($arrayOfString)) {
         return collect($filePaths)->map(function($filePathItem) use ($fileKey, $location) {
             $filePathItem[$fileKey] = $this->storeUploadedFiles($filePathItem[$fileKey], "", $location);
             return $filePathItem;
@@ -326,16 +325,12 @@ public function storeUploadedFiles($filePaths, $fileKey, $location) {
     return collect($filePaths)->map(function($filePathItem) use ($temporaryFilesLocation, $fileKey, $location) {
         // Determine the file path based on whether a file key is provided
 
-
-
-
-
         $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
-
 
 
         // Construct the full temporary file path and the new location path
         $fullTemporaryPath = public_path($file);
+
         $newLocation = str_replace($temporaryFilesLocation, $location, $file);
         $newLocationPath = public_path($newLocation);
 
@@ -373,6 +368,8 @@ public function storeUploadedFiles($filePaths, $fileKey, $location) {
         return $filePathItem;
     })->toArray();
 
+
+
 }
 
 
@@ -381,10 +378,10 @@ public function storeUploadedFiles($filePaths, $fileKey, $location) {
 
 
 
-public function moveUploadedFilesBack($filePaths, $fileKey, $location) {
+public function moveUploadedFilesBack($filePaths, $fileKey, $location, $arrayOfString= NULL) {
 
-    if(is_array($fileKey)) {
 
+  if(is_array($arrayOfString)) {
         return collect($filePaths)->map(function($filePathItem) use ($fileKey, $location) {
             $filePathItem[$fileKey] = $this->storeUploadedFiles($filePathItem[$fileKey], "", $location);
             return $filePathItem;
@@ -426,6 +423,9 @@ public function moveUploadedFilesBack($filePaths, $fileKey, $location) {
             Log::error("File does not exist at destination: {$destinationPath}");
         }
     });
+
+
+
 }
 
 

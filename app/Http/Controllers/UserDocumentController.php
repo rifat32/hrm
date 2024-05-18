@@ -216,9 +216,20 @@ class UserDocumentController extends Controller
 
         } catch (Exception $e) {
            DB::rollBack();
-           if(!empty($request_data["file_name"])) {
-            $request_data["file_name"] = $this->moveUploadedFilesBack([$request_data["file_name"]],"","documents")[0];
+
+
+
+
+        try {
+            if(!empty($request_data["file_name"])) {
+                $request_data["file_name"] = $this->moveUploadedFilesBack([$request_data["file_name"]],"","documents")[0];
+            }
+        } catch (Exception $innerException) {
+            error_log("Failed to move document files back: " . $innerException->getMessage());
         }
+
+
+
             return $this->sendError($e, 500, $request);
         }
     }
@@ -338,9 +349,14 @@ if($user_document) {
 
             DB::rollBack();
 
-            if(!empty($request_data["file_name"])) {
-                $request_data["file_name"] = $this->moveUploadedFilesBack([$request_data["file_name"]],"","documents")[0];
+            try {
+                if(!empty($request_data["file_name"])) {
+                    $request_data["file_name"] = $this->moveUploadedFilesBack([$request_data["file_name"]],"","documents")[0];
+                }
+            } catch (Exception $innerException) {
+                error_log("Failed to move document files back: " . $innerException->getMessage());
             }
+
 
             return $this->sendError($e, 500, $request);
         }

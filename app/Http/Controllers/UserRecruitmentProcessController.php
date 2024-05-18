@@ -103,7 +103,7 @@ class UserRecruitmentProcessController extends Controller
             }
             $request_data = $request->validated();
 
-            $request_data["recruitment_processes"] =   $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",collect($request_data["recruitment_processes"])->pluck("attachments"));
 
 
 
@@ -140,7 +140,15 @@ class UserRecruitmentProcessController extends Controller
             return response($updatableUser, 201);
         } catch (Exception $e) {
           DB::rollBack();
-           $this->moveUploadedFilesBack($request_data["recruitment_processes"],"attachments","recruitment_processes");
+
+          try {
+            $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+        } catch (Exception $innerException) {
+            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        }
+
+
+
             return $this->sendError($e, 500, $request);
         }
     }
@@ -233,7 +241,9 @@ class UserRecruitmentProcessController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
-            $request_data["recruitment_processes"] =   $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes");
+
+
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",collect($request_data["recruitment_processes"])->pluck("attachments"));
 
 
 

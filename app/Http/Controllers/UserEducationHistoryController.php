@@ -125,7 +125,18 @@ class UserEducationHistoryController extends Controller
                 return response($user_education_history, 201);
 
         } catch (Exception $e) {
-             $this->moveUploadedFilesBack($request_data["attachments"],"","education_docs");
+
+
+
+             try {
+                $this->moveUploadedFilesBack($request_data["attachments"],"","education_docs");
+            } catch (Exception $innerException) {
+                error_log("Failed to move education docs files back: " . $innerException->getMessage());
+            }
+
+
+
+
         DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
@@ -260,7 +271,11 @@ class UserEducationHistoryController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-            $this->moveUploadedFilesBack($request_data["attachments"],"","education_docs");
+            try {
+                $this->moveUploadedFilesBack($request_data["attachments"],"","education_docs");
+            } catch (Exception $innerException) {
+                error_log("Failed to move education docs files back: " . $innerException->getMessage());
+            }
             return $this->sendError($e, 500, $request);
         }
     }
