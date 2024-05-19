@@ -95,7 +95,7 @@ class TaskCategory extends Model
 
 
     public function tasks() {
-        return $this->hasOne(Task::class, 'task_category_id', 'id');
+        return $this->hasMany(Task::class, 'task_category_id', 'id');
     }
 
     // public function getCreatedAtAttribute($value)

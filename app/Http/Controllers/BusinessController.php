@@ -1407,7 +1407,7 @@ class BusinessController extends Controller
                 }
 
 
-                
+
 
 
 
@@ -2000,8 +2000,7 @@ class BusinessController extends Controller
             $business = Business::with(
                 [
                 "owner",
-                "times",
-                "active_modules"
+                "times"
                 ]
                 //] "default_work_shift.details"
 
