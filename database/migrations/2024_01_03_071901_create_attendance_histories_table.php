@@ -48,7 +48,7 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->date('in_date');
 
             $table->boolean("does_break_taken");
-
+            $table->boolean("is_present");
 
 
             $table->double('capacity_hours');

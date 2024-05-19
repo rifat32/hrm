@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use App\Models\Role;
+use App\Models\ServicePlan;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
@@ -873,7 +874,15 @@ return "swagger generated";
                 // $default_work_shift_2 = WorkShift::create($default_work_shift_data_2);
                 // $default_work_shift_2->details()->createMany($default_work_shift_data_2['details']);
 
-
+                ServicePlan::create([
+                    "name" => "Standard Plan",
+                    "description" => "",
+                      'set_up_amount' => 100,
+                      'duration_months' => 1,
+                      'price' => 20,
+                      'business_tier_id' => 1,
+                      "created_by" => 1
+                ]);
 
         return "You are done with setup";
     }

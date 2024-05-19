@@ -888,8 +888,7 @@ class BusinessController extends Controller
                 $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
 
                 $business =  Business::create($request_data['business']);
-
-
+             
                 $user->email_verified_at = now();
                 $user->business_id = $business->id;
 
@@ -900,6 +899,8 @@ class BusinessController extends Controller
                 $user->created_by = $user->id;
 
                 $user->save();
+
+
 
                 BusinessTime::where([
                     "business_id" => $business->id
