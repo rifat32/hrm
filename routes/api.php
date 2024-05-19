@@ -26,6 +26,7 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\JobPlatformController;
 use App\Http\Controllers\JobTypeController;
+use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LeaveController;
 
 use App\Http\Controllers\ModuleController;
@@ -1342,6 +1343,32 @@ Route::delete('/v1.0/task-categories/{ids}', [TaskCategoryController::class, "de
 // end project  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/labels', [LabelController::class, "createLabel"]);
+Route::put('/v1.0/labels', [LabelController::class, "updateLabel"]);
+
+
+Route::put('/v1.0/labels/assign', [LabelController::class, "assignLabel"]);
+Route::put('/v1.0/labels/discharge', [LabelController::class, "dischargeLabel"]);
+
+
+
+
+Route::get('/v1.0/labels', [LabelController::class, "getLabels"]);
+Route::get('/v1.0/labels/{id}', [LabelController::class, "getLabelById"]);
+Route::delete('/v1.0/labels/{ids}', [LabelController::class, "deleteLabelsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end project  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

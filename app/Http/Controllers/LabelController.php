@@ -2,52 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\TaskCreateRequest;
-use App\Http\Requests\TaskUpdateRequest;
+use App\Http\Requests\LabelAssignRequest;
+use App\Http\Requests\LabelCreateRequest;
+use App\Http\Requests\LabelUpdateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\Task;
-use Carbon\Carbon;
+use App\Models\Label;
+use App\Models\TaskLabel;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class TaskController extends Controller
+class LabelController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil,BasicUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/tasks",
-     *      operationId="createTask",
-     *      tags={"task"},
+     *      path="/v1.0/labels",
+     *      operationId="createLabel",
+     *      tags={"label"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store task listing",
-     *      description="This method is to store task listing",
+     *      summary="This method is to store label ",
+     *      description="This method is to store label ",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
 
- *     @OA\Property(property="name", type="string", format="string", example="Task X"),
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Task X's objectives and scope."),
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
- *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
- *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
- *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
- *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
- *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3}),
- *
- *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
- *      @OA\Property(property="labels", type="string", format="array", example={1,2,3}),
- *      @OA\Property(property="assets", type="string", format="array", example={1,2,3}),
+ *     @OA\Property(property="name", type="string", format="string", example="Label X"),
+ *     @OA\Property(property="color", type="string", format="string", example="A brief overview of Label X's objectives and scope."),
  *
  *
      *
@@ -87,19 +76,19 @@ class TaskController extends Controller
      *     )
      */
 
-    public function createTask(TaskCreateRequest $request)
+    public function createLabel(LabelCreateRequest $request)
     {
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("project_and_label_management");
 
 
 
 
 
-                if (!$request->user()->hasPermissionTo('task_create')) {
+                if (!$request->user()->hasPermissionTo('label_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -111,20 +100,19 @@ class TaskController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["assigned_by"] = $request->user()->id;
 
 
 
 
-                $request_data["unique_identifier"] = $this->generateUniqueId("Project",$request_data["project_id"],"Task");
+
+                $request_data["unique_identifier"] = $this->generateUniqueId("Project",$request_data["project_id"],"Label");
 
 
-                $task =  Task::create($request_data);
-                $task->assignees()->sync($request_data['assignees']);
-                $task->labels()->sync($request_data['labels']);
+                $label =  Label::create($request_data);
+
 
                 DB::commit();
-                return response($task, 201);
+                return response($label, 201);
 
         } catch (Exception $e) {
 
@@ -136,32 +124,21 @@ class TaskController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/tasks",
-     *      operationId="updateTask",
-     *      tags={"task"},
+     *      path="/v1.0/labels",
+     *      operationId="updateLabel",
+     *      tags={"label"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update task listing ",
-     *      description="This method is to update task listing",
+     *      summary="This method is to update label listing ",
+     *      description="This method is to update label listing",
      *
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
- *     @OA\Property(property="name", type="string", format="string", example="Task X"),
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Task X's objectives and scope."),
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
- *     @OA\Property(property="due_date", type="string", format="date", example="2023-06-30"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
- *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
- *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
- * *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
- *
- * *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
- *      @OA\Property(property="labels", type="string", format="array", example={1,2,3}),
- *      @OA\Property(property="assets", type="string", format="array", example={1,2,3}),
+ * *     @OA\Property(property="name", type="string", format="string", example="Label X"),
+ *     @OA\Property(property="color", type="string", format="string", example="A brief overview of Label X's objectives and scope."),
  *
  *
 
@@ -202,15 +179,15 @@ class TaskController extends Controller
      *     )
      */
 
-    public function updateTask(TaskUpdateRequest $request)
+    public function updateLabel(LabelUpdateRequest $request)
     {
 
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("project_and_label_management");
 
-                if (!$request->user()->hasPermissionTo('task_update')) {
+                if (!$request->user()->hasPermissionTo('label_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -221,37 +198,22 @@ class TaskController extends Controller
 
 
 
-                $task_query_params = [
+                $label_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
                 ];
-                // $task_prev = Task::where($task_query_params)
+                // $label_prev = Label::where($label_query_params)
                 //     ->first();
-                // if (!$task_prev) {
+                // if (!$label_prev) {
                 //     return response()->json([
-                //         "message" => "no task listing found"
+                //         "message" => "no label listing found"
                 //     ], 404);
                 // }
 
-                $task  =  tap(Task::where($task_query_params))->update(
+                $label  =  tap(Label::where($label_query_params))->update(
                     collect($request_data)->only([
                         'name',
-                        'description',
-
-
-                      'assets',
-
-                      'cover',
-
-
-                        'start_date',
-                        'due_date',
-                        'end_date',
-                        'status',
-                        'project_id',
-                        'parent_task_id',
-                        "task_category_id",
-                        'assigned_by',
+                        'color',
 
                         // "is_active",
                         // "business_id",
@@ -262,21 +224,15 @@ class TaskController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$task) {
+                if (!$label) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
 
-                $task->labels()->sync($request_data['labels']);
-
-
-
-                $task->assignees()->sync($request_data['assignees']);
-
                 DB::commit();
-                return response($task, 201);
+                return response($label, 201);
 
         } catch (Exception $e) {
            DB::rollBack();
@@ -285,12 +241,208 @@ class TaskController extends Controller
     }
 
 
+
+
+     /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/labels/assign",
+     *      operationId="assignLabel",
+     *      tags={"label"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to assign label listing ",
+     *      description="This method is to assign label listing",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *    @OA\Property(property="label_id", type="number", format="number",example="1"),
+ * *     @OA\Property(property="task_ids", type="string", format="array", example={1,2,3,4,5}),
+ *
+ *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function assignLabel(LabelAssignRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("project_and_label_management");
+
+                 if (!$request->user()->hasPermissionTo('label_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+
+
+
+
+                 foreach($request_data["label_ids"] as $label_id){
+
+
+                    TaskLabel::create([
+                        "label_id" => $label_id,
+                        "task_id" => $request_data["task_id"]
+                    ]);
+                 }
+
+
+
+
+
+
+                 DB::commit();
+                 return response(["ok" => true], 201);
+
+         } catch (Exception $e) {
+            DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+       /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/labels/discharge",
+     *      operationId="dischargeLabel",
+     *      tags={"label"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to discharge label listing ",
+     *      description="This method is to discharge label listing",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *    @OA\Property(property="label_id", type="number", format="number",example="1"),
+ * *     @OA\Property(property="task_ids", type="string", format="array", example={1,2,3,4,5}),
+ *
+ *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function dischargeLabel(LabelAssignRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("project_and_label_management");
+
+                 if (!$request->user()->hasPermissionTo('label_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+
+
+                 TaskLabel::where([
+                    "task_id" => $request_data["task_id"]
+                ])
+                ->whereIn("label_id",$request_data["label_ids"])
+                ->delete();
+
+
+
+
+
+
+
+
+                 DB::commit();
+                 return response(["ok" => true], 201);
+
+         } catch (Exception $e) {
+            DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/tasks",
-     *      operationId="getTasks",
-     *      tags={"task"},
+     *      path="/v1.0/labels",
+     *      operationId="getLabels",
+     *      tags={"label"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -347,8 +499,8 @@ class TaskController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get task listings  ",
-     *      description="This method is to get task listings ",
+     *      summary="This method is to get label listings  ",
+     *      description="This method is to get label listings ",
      *
 
      *      @OA\Response(
@@ -385,57 +537,43 @@ class TaskController extends Controller
      *     )
      */
 
-    public function getTasks(Request $request)
+    public function getLabels(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("project_and_label_management");
 
 
-            if (!$request->user()->hasPermissionTo('task_view')) {
+            if (!$request->user()->hasPermissionTo('label_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
-            $tasks = Task::with("assigned_by","assignees","labels")
 
-            ->where(
+
+            $labels = Label::where(
                 [
-                    "business_id" => $business_id
+                    "business_id" => auth()->user()->id
                 ]
             )
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("location", "like", "%" . $term . "%")
-                            ->orWhere("description", "like", "%" . $term . "%");
+                            ->orWhere("color", "like", "%" . $term . "%");
                     });
                 })
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
 
-                ->when(!empty($request->project_id), function ($query) use ($request) {
-                    return $query->where('project_id' , $request->project_id);
-                })
-                ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where('status' , $request->status);
-                })
 
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
+
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("tasks.id", $request->order_by);
+                    return $query->orderBy("labels.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("tasks.id", "DESC");
+                    return $query->orderBy("labels.id", "DESC");
                 })
-                ->select('tasks.*',
+                ->select('labels.*',
 
                  )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
@@ -446,7 +584,7 @@ class TaskController extends Controller
 
 
 
-            return response()->json($tasks, 200);
+            return response()->json($labels, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -456,9 +594,9 @@ class TaskController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/tasks/{id}",
-     *      operationId="getTaskById",
-     *      tags={"task"},
+     *      path="/v1.0/labels/{id}",
+     *      operationId="getLabelById",
+     *      tags={"label"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -469,8 +607,8 @@ class TaskController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get task listing by id",
-     *      description="This method is to get task listing by id",
+     *      summary="This method is to get label listing by id",
+     *      description="This method is to get label listing by id",
      *
 
      *      @OA\Response(
@@ -508,36 +646,34 @@ class TaskController extends Controller
      */
 
 
-    public function getTaskById($id, Request $request)
+    public function getLabelById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-               $this->isModuleEnabled("project_and_task_management");
+               $this->isModuleEnabled("project_and_label_management");
 
 
-            if (!$request->user()->hasPermissionTo('task_view')) {
+            if (!$request->user()->hasPermissionTo('label_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-
-            $task =  Task::with("assigned_by","assignees","labels")
-            ->where([
+            $label =  Label::where([
                 "id" => $id,
                 "business_id" => $business_id
             ])
-            ->select('tasks.*'
+            ->select('labels.*'
              )
                 ->first();
-            if (!$task) {
+            if (!$label) {
 
                 return response()->json([
-                    "message" => "no task listing found"
+                    "message" => "no label listing found"
                 ], 404);
             }
 
-            return response()->json($task, 200);
+            return response()->json($label, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -549,9 +685,9 @@ class TaskController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/tasks/{ids}",
-     *      operationId="deleteTasksByIds",
-     *      tags={"task"},
+     *      path="/v1.0/labels/{ids}",
+     *      operationId="deleteLabelsByIds",
+     *      tags={"label"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -562,8 +698,8 @@ class TaskController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete task listing by id",
-     *      description="This method is to delete task listing by id",
+     *      summary="This method is to delete label listing by id",
+     *      description="This method is to delete label listing by id",
      *
 
      *      @OA\Response(
@@ -600,22 +736,22 @@ class TaskController extends Controller
      *     )
      */
 
-    public function deleteTasksByIds(Request $request, $ids)
+    public function deleteLabelsByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("project_and_label_management");
 
 
-            if (!$request->user()->hasPermissionTo('task_delete')) {
+            if (!$request->user()->hasPermissionTo('label_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
             $idsArray = explode(',', $ids);
-            $existingIds = Task::where([
+            $existingIds = Label::where([
                 "business_id" => $business_id
             ])
                 ->whereIn('id', $idsArray)
@@ -633,7 +769,7 @@ class TaskController extends Controller
                 ], 404);
             }
 
-            Task::destroy($existingIds);
+            Label::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

@@ -9,16 +9,15 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     use HasFactory;
+
+
     protected $fillable = [
         "unique_identifier",
         'name',
         'description',
 
         'assets',
-        'labels',
         'cover',
-
-
 
         'start_date',
         'due_date',
@@ -38,8 +37,14 @@ class Task extends Model
 
     protected $casts = [
         'assets' => 'array',
-        'labels' => 'array',
+
     ];
+
+
+    public function labels() {
+        return $this->belongsToMany(Label::class, 'task_labels', 'task_id', 'label_id');
+    }
+
 
 
     public function project()

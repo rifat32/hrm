@@ -26,7 +26,7 @@ class CreateTasksTable extends Migration
 
 
             $table->json("assets");
-            $table->json("labels");
+       
             $table->string("cover")->nullable();
 
             $table->date("start_date");

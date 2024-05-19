@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
 use App\Models\Task;
+use App\Rules\ValidateLabelId;
 use App\Rules\ValidateTaskCategory;
 use App\Rules\ValidateTaskId;
 use App\Rules\ValidProjectId;
@@ -66,7 +67,16 @@ class TaskCreateRequest extends BaseFormRequest
 
             'assets' => 'present|array',
             'assets.*' => 'string',
+
+
             'labels' => "present|array",
+            'labels.*' => [
+                'nullable',
+                'numeric',
+                new ValidateLabelId(),
+            ],
+
+
             'cover' => "nullable|string",
 
 
