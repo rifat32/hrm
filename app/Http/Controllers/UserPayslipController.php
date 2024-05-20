@@ -221,7 +221,7 @@ class UserPayslipController extends Controller
 
                 $request_data = $request->validated();
                 if(!empty($request_data["payment_record_file"])) {
-                    $request_data["payment_record_file"] = $this->storeUploadedFiles([$request_data["payment_record_file"]],"","payment_record_file");
+                    $request_data["payment_record_file"] = $this->storeUploadedFiles($request_data["payment_record_file"],"","payment_record_file");
                 }
                 $request_data["created_by"] = $request->user()->id;
 
@@ -275,7 +275,7 @@ DB::commit();
 
             if(!empty($request_data["payment_record_file"])) {
 
-                $this->moveUploadedFilesBack([$request_data["payment_record_file"]],"","payment_record_file");
+                $this->moveUploadedFilesBack($request_data["payment_record_file"],"","payment_record_file");
 
             }
 

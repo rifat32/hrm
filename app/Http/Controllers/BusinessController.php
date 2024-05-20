@@ -888,7 +888,7 @@ class BusinessController extends Controller
                 $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
 
                 $business =  Business::create($request_data['business']);
-             
+
                 $user->email_verified_at = now();
                 $user->business_id = $business->id;
 
@@ -2438,10 +2438,10 @@ class BusinessController extends Controller
             }
 
            // Disable foreign key checks
-DB::statement('SET FOREIGN_KEY_CHECKS=0');
+// DB::statement('SET FOREIGN_KEY_CHECKS=0');
             Business::whereIn('id', $existingIds)->forceDelete();
             // Re-enable foreign key checks
-DB::statement('SET FOREIGN_KEY_CHECKS=1');
+// DB::statement('SET FOREIGN_KEY_CHECKS=1');
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 

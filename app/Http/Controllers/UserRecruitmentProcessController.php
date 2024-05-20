@@ -103,7 +103,7 @@ class UserRecruitmentProcessController extends Controller
             }
             $request_data = $request->validated();
 
-            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",collect($request_data["recruitment_processes"])->pluck("attachments"));
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
 
 
 
@@ -243,7 +243,7 @@ class UserRecruitmentProcessController extends Controller
             $request_data = $request->validated();
 
 
-            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",collect($request_data["recruitment_processes"])->pluck("attachments"));
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
 
 
 
