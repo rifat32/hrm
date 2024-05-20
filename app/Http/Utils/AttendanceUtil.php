@@ -173,7 +173,21 @@ trait AttendanceUtil
 
         return $leave_record;
     }
+    public function get_existing_attendance($in_date, $user_id)
+    {
+        $attendance = Attendance::
+        where([
+            "user_id" => $user_id,
 
+        ])
+            ->where('in_date', '>=', $in_date . ' 00:00:00')
+            ->where('in_date', '<=', ($in_date . ' 23:59:59'))
+            ->first();
+
+
+          return $attendance;
+
+    }
 
     public function calculate_capacity_hours($work_shift_details)
     {

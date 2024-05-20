@@ -93,7 +93,7 @@ class TaskController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
 
 
@@ -208,7 +208,7 @@ class TaskController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
                 if (!$request->user()->hasPermissionTo('task_update')) {
                     return response()->json([
@@ -389,7 +389,7 @@ class TaskController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('task_view')) {
@@ -512,7 +512,7 @@ class TaskController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-               $this->isModuleEnabled("project_and_task_management");
+               $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('task_view')) {
@@ -605,7 +605,7 @@ class TaskController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('task_delete')) {

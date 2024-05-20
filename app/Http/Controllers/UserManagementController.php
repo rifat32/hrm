@@ -5043,7 +5043,8 @@ class UserManagementController extends Controller
                     "right_to_works",
                     "work_shifts",
                     "recruitment_processes",
-                    "work_location"
+                    "work_location",
+                    "bank"
                 ]
 
             )

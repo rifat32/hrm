@@ -82,7 +82,7 @@ class TaskCategoryController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
                 if (!$request->user()->hasPermissionTo('task_category_create')) {
                     return response()->json([
@@ -181,7 +181,7 @@ class TaskCategoryController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
                 if (!$request->user()->hasPermissionTo('task_category_update')) {
                     return response()->json([
@@ -303,7 +303,7 @@ class TaskCategoryController extends Controller
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             $this->isModuleEnabled("project_and_task_management");
+             $this->isModuleEnabled("task_management");
              if (!$request->user()->hasPermissionTo('task_category_activate')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -515,7 +515,7 @@ class TaskCategoryController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
             if (!$request->user()->hasPermissionTo('task_category_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -722,7 +722,7 @@ class TaskCategoryController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
 
             if (!$request->user()->hasPermissionTo('task_category_view')) {
                 return response()->json([
@@ -858,7 +858,7 @@ class TaskCategoryController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+            $this->isModuleEnabled("task_management");
             if (!$request->user()->hasPermissionTo('task_category_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

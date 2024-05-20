@@ -2015,6 +2015,12 @@ class AttendanceController extends Controller
                 $start_date = Carbon::parse($request_data["start_date"]);
                 $end_date = Carbon::parse($request_data["end_date"]);
 
+                $joining_date = Carbon::parse($user->joining_date);
+
+             if ($joining_date->gt($start_date)) {
+             return false;
+}
+
 
                 // Create date range between start and end dates
                 $date_range = $start_date->daysUntil($end_date->addDay());
@@ -2090,6 +2096,16 @@ class AttendanceController extends Controller
                     if ($leave_record) {
                         return false;
                     }
+
+
+ // Retrieve attendance for the user and date
+ $existing_attendance = $this->get_existing_attendance($attendance_data["in_date"], $user->id);
+
+ if (!empty($existing_attendance)) {
+     return false;
+ }
+
+
 
                     // Calculate capacity hours based on work shift details
                     $capacity_hours = $this->calculate_capacity_hours($work_shift_details);

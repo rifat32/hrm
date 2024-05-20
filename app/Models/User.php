@@ -72,6 +72,7 @@ class User extends Authenticatable
         "is_active_right_to_works",
 
 
+
         'bank_id',
         'sort_code',
         'account_number',
@@ -112,6 +113,12 @@ $all_departments = $this->get_all_departments_of_manager();
 
 return count($all_departments) > 0;
 
+        }
+
+
+        public function bank()
+        {
+            return $this->hasOne(Bank::class, "id" ,'bank_id');
         }
 
 

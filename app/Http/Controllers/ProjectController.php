@@ -94,7 +94,6 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-            $this->isModuleEnabled("project_and_task_management");
 
 
                 if (!$request->user()->hasPermissionTo('project_create')) {
@@ -197,7 +196,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             $this->isModuleEnabled("project_and_task_management");
+
 
 
                  if (!$request->user()->hasPermissionTo('project_update')) {
@@ -378,7 +377,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             $this->isModuleEnabled("project_and_task_management");
+             
 
 
                  if (!$request->user()->hasPermissionTo('project_update')) {
@@ -529,7 +528,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             $this->isModuleEnabled("project_and_task_management");
+
 
                  if (!$request->user()->hasPermissionTo('project_update')) {
                      return response()->json([
@@ -701,7 +700,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             $this->isModuleEnabled("project_and_task_management");
+
 
 
                  if (!$request->user()->hasPermissionTo('project_update')) {
@@ -840,7 +839,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+
 
 
                 if (!$request->user()->hasPermissionTo('project_update')) {
@@ -1055,7 +1054,7 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+
 
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
@@ -1219,7 +1218,7 @@ class ProjectController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-               $this->isModuleEnabled("project_and_task_management");
+
 
 
             if (!$request->user()->hasPermissionTo('project_view')) {
@@ -1315,7 +1314,7 @@ class ProjectController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_task_management");
+
 
             if (!$request->user()->hasPermissionTo('project_delete')) {
                 return response()->json([
