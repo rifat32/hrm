@@ -92,7 +92,7 @@ class SettingLeaveTypeController extends Controller
                 $request_data = $request->validated();
 
 
-                $request_data["is_active"] = 1;
+
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["business_id"] = $request->user()->business_id;
@@ -210,7 +210,7 @@ class SettingLeaveTypeController extends Controller
         'amount',
         'description',
         // 'is_earning_enabled',
-        // "is_active"
+         "is_active"
 
 
 
@@ -969,6 +969,7 @@ class SettingLeaveTypeController extends Controller
                 ->get()
                 ->pluck('id')
                 ->toArray();
+
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {

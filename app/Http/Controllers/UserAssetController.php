@@ -1064,9 +1064,7 @@ class UserAssetController extends Controller
                 $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
-                 ->orWhere('user_assets.user_id', NULL)
-                 ;
-
+                 ->orWhere('user_assets.user_id', NULL);
               })
              ->where([
                 "business_id" => auth()->user()->business_id
@@ -1085,7 +1083,9 @@ class UserAssetController extends Controller
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);
               }
-              UserAsset::destroy($canDeleteAssetIds);
+
+            UserAsset::destroy($canDeleteAssetIds);
+
 
             UserAssetHistory::where([
                 "to_date" => NULL
@@ -1094,6 +1094,10 @@ class UserAssetController extends Controller
             ->update([
                 "to_date" => now(),
             ]);
+
+
+
+
 
               return response()->json(["message" => "data deleted sussfully","deleted_ids" => $canDeleteAssetIds], 200);
           } catch (Exception $e) {

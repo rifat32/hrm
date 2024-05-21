@@ -351,11 +351,13 @@ public function storeUploadedFiles($filePaths, $fileKey, $location, $arrayOfStri
                 // Log any exceptions that occur during the file move
                 Log::error("Failed to move file from {$fullTemporaryPath} to {$newLocationPath}: " . $e->getMessage());
             }
-        } else {
-            // Log an error if the file does not exist
-            Log::error("File does not exist: {$fullTemporaryPath}");
-            throw new Exception("File does not exist",500);
         }
+
+        // else {
+        //     // Log an error if the file does not exist
+        //     Log::error("File does not exist: {$fullTemporaryPath}");
+        //     throw new Exception("File does not exist",500);
+        // }
 
         // Update the file path in the item if a file key is provided
         if (!empty($fileKey)) {

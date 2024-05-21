@@ -377,7 +377,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             
+
 
 
                  if (!$request->user()->hasPermissionTo('project_update')) {
@@ -865,27 +865,34 @@ class ProjectController extends Controller
                 //     ], 404);
                 // }
 
-                $project  =  tap(Project::where($project_query_params))->update(
-                    collect($request_data)->only([
-                        'name',
-                        'description',
-                        'start_date',
-                        'end_date',
-                        'status',
-                        // "is_active",
-                        // "business_id",
-                        // "created_by"
+                $project = Project::where($project_query_params)->first();
 
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
                 if (!$project) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+                if($project->is_default) {
+                    $request_data["end_date"] = NULL;
+                }
+
+
+                $project->fill(collect($request_data)->only([
+                    'name',
+                    'description',
+                    'start_date',
+                    'end_date',
+                    'status',
+                    // "is_active",
+                    // "business_id",
+                    // "created_by"
+
+                ])->toArray());
+                $project->save( );
+
+
+
 
                 if(empty($request_data['departments'])) {
                     $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];

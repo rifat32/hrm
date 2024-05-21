@@ -40,7 +40,7 @@ $is_in_arrears = false;
         $leave_record_ids = $leave_records->pluck("leave_records.id");
 
         // Check if leave status is approved or it's a paid leave type
-        if ($this->status == "approved" || $this->leave_type->type == "paid") {
+        if ($this->status == "approved" || (!empty($this->leave_type) && $this->leave_type->type == "paid")) {
 
             // Loop through each leave record ID
             foreach ($leave_records as $leave_record) {

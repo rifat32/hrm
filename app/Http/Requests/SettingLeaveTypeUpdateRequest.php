@@ -77,6 +77,10 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
                 'string',
                 new UniqueSettingLeaveTypeName($this->id),
             ],
+            
+            'is_active' => 'required|boolean',
+
+
             'type' => 'required|string|in:paid,unpaid',
             'amount' => 'required|numeric',
 
