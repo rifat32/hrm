@@ -32,32 +32,37 @@ class ValidEmploymentStatus implements Rule
         }
 
         $exists = EmploymentStatus::where("employment_statuses.id",$value)
-        ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
-            if (auth()->user()->hasRole('superadmin')) {
-                return $query->where('employment_statuses.business_id', NULL)
-                    ->where('employment_statuses.is_default', 1)
-                    ->where('employment_statuses.is_active', 1);
+        ->when(empty(auth()->user()->business_id), function ($query)  {
 
-            } else {
-                return $query->where('employment_statuses.business_id', NULL)
-                    ->where('employment_statuses.is_default', 1)
-                    ->where('employment_statuses.is_active', 1)
-                    ->whereDoesntHave("disabled", function($q) {
-                        $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
-                    })
+            $query->where(function($query) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 1)
+                        ->where('employment_statuses.is_active', 1);
 
-                    ->orWhere(function ($query) use($value)  {
-                        $query->where("employment_statuses.id",$value)->where('employment_statuses.business_id', NULL)
-                            ->where('employment_statuses.is_default', 0)
-                            ->where('employment_statuses.created_by', auth()->user()->id)
-                            ->where('employment_statuses.is_active', 1);
+                } else {
+                    return $query->where('employment_statuses.business_id', NULL)
+                        ->where('employment_statuses.is_default', 1)
+                        ->where('employment_statuses.is_active', 1)
+                        ->whereDoesntHave("disabled", function($q) {
+                            $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
+                        })
+
+                        ->orWhere(function ($query)   {
+                            $query->where('employment_statuses.business_id', NULL)
+                                ->where('employment_statuses.is_default', 0)
+                                ->where('employment_statuses.created_by', auth()->user()->id)
+                                ->where('employment_statuses.is_active', 1);
 
 
-                    });
-            }
+                        });
+                }
+            });
+
         })
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
-                return $query->where('employment_statuses.business_id', NULL)
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by) {
+                $query->where(function($query) use ($created_by) {
+                    $query->where('employment_statuses.business_id', NULL)
                     ->where('employment_statuses.is_default', 1)
                     ->where('employment_statuses.is_active', 1)
                     ->whereDoesntHave("disabled", function($q) use($created_by) {
@@ -67,8 +72,8 @@ class ValidEmploymentStatus implements Rule
                         $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
                     })
 
-                    ->orWhere(function ($query) use( $created_by, $value){
-                        $query->where("employment_statuses.id",$value)->where('employment_statuses.business_id', NULL)
+                    ->orWhere(function ($query) use( $created_by){
+                        $query->where('employment_statuses.business_id', NULL)
                             ->where('employment_statuses.is_default', 0)
                             ->where('employment_statuses.created_by', $created_by)
                             ->where('employment_statuses.is_active', 1)
@@ -76,12 +81,14 @@ class ValidEmploymentStatus implements Rule
                                 $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
                             });
                     })
-                    ->orWhere(function ($query) use($value)  {
-                        $query->where("employment_statuses.id",$value)->where('employment_statuses.business_id', auth()->user()->business_id)
+                    ->orWhere(function ($query)   {
+                        $query->where('employment_statuses.business_id', auth()->user()->business_id)
                             ->where('employment_statuses.is_default', 0)
                             ->where('employment_statuses.is_active', 1);
 
                     });
+                });
+
             })
         ->exists();
 

@@ -72,9 +72,8 @@ class ValidateJobPlatformName implements Rule
                     ->whereDoesntHave("disabled", function($q)  {
                         $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
                     })
-
                     ->orWhere(function ($query) use( $created_by, $value){
-                        $query->where("job_platforms.id",$value)->where('job_platforms.business_id', NULL)
+                        $query->where('job_platforms.business_id', NULL)
                             ->where('job_platforms.is_default', 0)
                             ->where('job_platforms.created_by', $created_by)
                             ->where('job_platforms.is_active', 1)
@@ -83,7 +82,7 @@ class ValidateJobPlatformName implements Rule
                             });
                     })
                     ->orWhere(function ($query) use($value)  {
-                        $query->where("job_platforms.id",$value)->where('job_platforms.business_id', auth()->user()->business_id)
+                        $query->where('job_platforms.business_id', auth()->user()->business_id)
                             ->where('job_platforms.is_default', 0)
                             ->where('job_platforms.is_active', 1);
 

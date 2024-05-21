@@ -82,7 +82,7 @@ $is_in_arrears = false;
 
             }
 
-
+            
         }
         // If leave status is not approved or it's not a paid leave type, delete arrears if any
 
