@@ -216,6 +216,8 @@ return "swagger generated";
 
 
 
+        $specialReseller->assignRole("reseller");
+        $reseller->assignRole("reseller");
         $admin->assignRole("superadmin");
 
 
