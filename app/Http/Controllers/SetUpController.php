@@ -152,7 +152,7 @@ return "swagger generated";
                 $specialReseller->email_verified_at = now();
                 $specialReseller->save();
 
-                $permissions = Permission::whereIn('name', "handle_self_registered_businesses")->get();
+                $permissions = Permission::whereIn('name', ["handle_self_registered_businesses"])->get();
                 $specialReseller->givePermissionTo($specialReseller);
 
 
