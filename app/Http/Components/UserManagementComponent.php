@@ -17,6 +17,18 @@ class UserManagementComponent
 
 use BasicUtil;
 
+protected $holidayComponent;
+protected $workShiftHistoryComponent;
+protected $leaveComponent;
+public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent)
+{
+
+    $this->workShiftHistoryComponent = $workShiftHistoryComponent;
+    $this->holidayComponent = $holidayComponent;
+    $this->leaveComponent = $leaveComponent;
+
+}
+
     public function updateUsersQuery($all_manager_department_ids,$usersQuery)
     {
 
@@ -503,6 +515,77 @@ use BasicUtil;
             return $user_recruitment_processes;
     }
 
+
+public function getScheduleInformationData ($user_id,$start_date,$end_date){
+
+
+    $all_parent_department_ids = $this->all_parent_departments_of_user($user_id);
+
+    // Process holiday dates
+    $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user_id, $all_parent_department_ids);
+
+    $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user_id);
+    $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $user_id, $work_shift_histories);
+
+    // Process already taken leave hourly dates
+    $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user_id, false);
+
+    // Merge the collections and remove duplicates
+    $all_leaves_collection = collect($holiday_dates)->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
+
+
+    // $result_collection now contains all unique dates from holidays and weekends
+    $all_leaves_array = $all_leaves_collection->values()->all();
+
+
+
+
+    $all_dates = collect(range(strtotime($start_date), strtotime($end_date), 86400)) // 86400 seconds in a day
+        ->map(function ($timestamp) {
+            return date('Y-m-d', $timestamp);
+        });
+
+
+
+    $all_scheduled_dates = $all_dates->reject(fn ($date) => in_array($date, $all_leaves_array));
+
+
+
+    $schedule_data = [];
+    $total_capacity_hours = 0;
+
+    $all_scheduled_dates->each(function ($date) use (&$schedule_data, &$total_capacity_hours, $user_id) {
+
+        $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($date, $user_id);
+        $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $date);
+
+        if ($work_shift_details) {
+            if (!$work_shift_details->start_at || !$work_shift_details->end_at) {
+                return false;
+            }
+            $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
+            $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
+            $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
+
+
+
+            $schedule_data[] = [
+                "date" => $date,
+                "capacity_hours" => $capacity_hours,
+                "break_type" => $work_shift_history->break_type,
+                "break_hours" => $work_shift_history->break_hours,
+                "start_at" => $work_shift_details->start_at,
+                'end_at' => $work_shift_details->end_at,
+                'is_weekend' => $work_shift_details->is_weekend,
+            ];
+            $total_capacity_hours += $capacity_hours;
+        }
+    });
+    return [
+        "schedule_data" => $schedule_data,
+        "total_capacity_hours" => $total_capacity_hours
+    ];
+}
 
 
 

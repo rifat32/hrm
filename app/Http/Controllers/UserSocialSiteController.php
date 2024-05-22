@@ -459,7 +459,7 @@ UserSocialSite::where([
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_social_site =  UserSocialSite::where([
                   "id" => $id,
@@ -468,7 +468,7 @@ UserSocialSite::where([
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
               ->whereHas("user", function($q) use($request) {
-                $q->where("users.business_id", $request->user()->business_id)
+                $q->where("users.business_id", auth()->user()->business_id)
                 ->orWhere("users.created_by", $request->user()->id);
             })
                   ->first();
@@ -552,12 +552,10 @@ UserSocialSite::where([
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
-              $existingIds = UserSocialSite::where([
-                  "business_id" => $business_id
-              ])
+              $existingIds = UserSocialSite::whereIn("id",$idsArray)
               ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
@@ -569,7 +567,7 @@ UserSocialSite::where([
               $nonExistingIds = array_diff($idsArray, $existingIds);
 
               if (!empty($nonExistingIds)) {
-            
+
                   return response()->json([
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);

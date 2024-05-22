@@ -601,6 +601,13 @@ class UserAssetController extends Controller
        *         required=true,
        *  example="1"
        *      ),
+       *        @OA\Parameter(
+       *         name="not_in_user_id",
+       *         in="query",
+       *         description="not_in_user_id",
+       *         required=true,
+       *  example="1"
+       *      ),
        *   *   *   *              @OA\Parameter(
      *         name="response_type",
      *         in="query",
@@ -779,6 +786,8 @@ class UserAssetController extends Controller
               })
 
 
+
+
               ->when(!empty($request->search_key), function ($query) use ($request) {
                       return $query->where(function ($query) use ($request) {
                           $term = $request->search_key;
@@ -828,6 +837,15 @@ class UserAssetController extends Controller
                   ->when(!empty($request->user_id), function ($query) use ($request) {
                       return $query->where('user_assets.user_id', $request->user_id);
                   })
+                  ->when(!empty($request->not_in_user_id), function ($query) use ($request) {
+                    return $query->whereNotIn('user_assets.not_in_user_id', [$request->not_in_user_id]);
+                })
+
+
+
+
+
+
                   ->when(!empty($request->type), function ($query) use ($request) {
                     return $query->where('user_assets.type', $request->type);
                 })
