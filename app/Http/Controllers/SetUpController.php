@@ -117,6 +117,45 @@ return "swagger generated";
         ]);
         $admin->email_verified_at = now();
         $admin->save();
+
+        $reseller =  User::create([
+            'first_Name' => "Shahbaz",
+            'last_Name'=> "Khan",
+            'phone'=> "01771034383",
+            'address_line_1',
+            'address_line_2',
+            'country'=> "Bangladesh",
+            'city'=> "Dhaka",
+            'postcode'=> "1207",
+            'email'=> "shahbaz.scm@gmail.com",
+            'password'=>Hash::make("12345678@We"),
+            "email_verified_at"=>now(),
+            'is_active' => 1
+            ]);
+            $reseller->email_verified_at = now();
+            $reseller->save();
+
+            $specialReseller =  User::create([
+                'first_Name' => "Shahbaz",
+                'last_Name'=> "Khan",
+                'phone'=> "01771034383",
+                'address_line_1',
+                'address_line_2',
+                'country'=> "Bangladesh",
+                'city'=> "Dhaka",
+                'postcode'=> "1207",
+                'email'=> "kids20acc@gmail.com",
+                'password' => Hash::make("12345678@We"),
+                "email_verified_at"=>now(),
+                'is_active' => 1
+                ]);
+                $specialReseller->email_verified_at = now();
+                $specialReseller->save();
+
+                $permissions = Permission::whereIn('name', "handle_self_registered_businesses")->get();
+                $specialReseller->givePermissionTo($specialReseller);
+
+
         // ###############################
         // permissions
         // ###############################
