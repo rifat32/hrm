@@ -320,7 +320,9 @@ if(!empty($recruitment_process["description"])){
             foreach($request_data["recruitment_processes"] as $recruitment_process){
                 if(!empty($recruitment_process["description"])){
                     $userRecruitmentProcess =   UserRecruitmentProcess::where([
-                        "id" => $recruitment_process["id"]
+                        "id" => $recruitment_process["id"],
+
+                        "user_id"  => $user->id
                     ])
                     ->first();
 
@@ -335,12 +337,6 @@ if(!empty($recruitment_process["description"])){
 
 
             }
-
-
-
-
-
-
 
 
 

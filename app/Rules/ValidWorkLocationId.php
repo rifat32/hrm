@@ -33,7 +33,7 @@ class ValidWorkLocationId implements Rule
             }
 
             $exists = WorkLocation::where("work_locations.id",$value)
-            ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
+            ->when(empty(auth()->user()->business_id), function ($query)  {
 
                 $query->where(function($query) {
                     if (auth()->user()->hasRole('superadmin')) {
@@ -49,8 +49,8 @@ class ValidWorkLocationId implements Rule
                                 $q->whereIn("disabled_work_locations.created_by", [auth()->user()->id]);
                             })
 
-                            ->orWhere(function ($query) use($value)  {
-                                $query->where("work_locations.id",$value)->where('work_locations.business_id', NULL)
+                            ->orWhere(function ($query)   {
+                                $query->where('work_locations.business_id', NULL)
                                     ->where('work_locations.is_default', 0)
                                     ->where('work_locations.created_by', auth()->user()->id)
                                     ->where('work_locations.is_active', 1);
@@ -61,8 +61,8 @@ class ValidWorkLocationId implements Rule
                 });
 
             })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
-                     $query->where(function($query) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by) {
+                     $query->where(function($query) use ($created_by) {
                         $query  ->where('work_locations.business_id', NULL)
                         ->where('work_locations.is_default', 1)
                         ->where('work_locations.is_active', 1)
@@ -73,8 +73,8 @@ class ValidWorkLocationId implements Rule
                             $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
                         })
 
-                        ->orWhere(function ($query) use( $created_by, $value){
-                            $query->where("work_locations.id",$value)->where('work_locations.business_id', NULL)
+                        ->orWhere(function ($query) use( $created_by){
+                            $query->where('work_locations.business_id', NULL)
                                 ->where('work_locations.is_default', 0)
                                 ->where('work_locations.created_by', $created_by)
                                 ->where('work_locations.is_active', 1)
@@ -82,14 +82,14 @@ class ValidWorkLocationId implements Rule
                                     $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
                                 });
                         })
-                        ->orWhere(function ($query) use($value)  {
-                            $query->where("work_locations.id",$value)->where('work_locations.business_id', auth()->user()->business_id)
+                        ->orWhere(function ($query)   {
+                            $query->where('work_locations.business_id', auth()->user()->business_id)
                                 // ->where('work_locations.is_default', 0)
                                 ->where('work_locations.is_active', 1);
 
                         });
                 });
-                     });
+                     })
 
 
             ->exists();
