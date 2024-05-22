@@ -32,32 +32,39 @@ class ValidateTaskCategory implements Rule
         }
 
         $exists = TaskCategory::where("task_categories.id",$value)
-        ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by, $value) {
-            if (auth()->user()->hasRole('superadmin')) {
-                return $query->where('task_categories.business_id', NULL)
-                    ->where('task_categories.is_default', 1)
-                    ->where('task_categories.is_active', 1);
+        ->when(empty(auth()->user()->business_id), function ($query)  {
 
-            } else {
-                return $query->where('task_categories.business_id', NULL)
-                    ->where('task_categories.is_default', 1)
-                    ->where('task_categories.is_active', 1)
-                    ->whereDoesntHave("disabled", function($q) {
-                        $q->whereIn("disabled_task_categories.created_by", [auth()->user()->id]);
-                    })
+            $query->where(function($query) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    return $query->where('task_categories.business_id', NULL)
+                        ->where('task_categories.is_default', 1)
+                        ->where('task_categories.is_active', 1);
 
-                    ->orWhere(function ($query) use($value)  {
-                        $query->where("task_categories.id",$value)->where('task_categories.business_id', NULL)
-                            ->where('task_categories.is_default', 0)
-                            ->where('task_categories.created_by', auth()->user()->id)
-                            ->where('task_categories.is_active', 1);
+                } else {
+                    return $query->where('task_categories.business_id', NULL)
+                        ->where('task_categories.is_default', 1)
+                        ->where('task_categories.is_active', 1)
+                        ->whereDoesntHave("disabled", function($q) {
+                            $q->whereIn("disabled_task_categories.created_by", [auth()->user()->id]);
+                        })
+
+                        ->orWhere(function ($query)   {
+                            $query->where('task_categories.business_id', NULL)
+                                ->where('task_categories.is_default', 0)
+                                ->where('task_categories.created_by', auth()->user()->id)
+                                ->where('task_categories.is_active', 1);
 
 
-                    });
-            }
+                        });
+                }
+            });
+
         })
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by, $value) {
-                return $query->where('task_categories.business_id', NULL)
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by) {
+
+
+                $query->where(function($query) use($created_by) {
+                    $query->where('task_categories.business_id', NULL)
                     ->where('task_categories.is_default', 1)
                     ->where('task_categories.is_active', 1)
                     ->whereDoesntHave("disabled", function($q) use($created_by) {
@@ -67,8 +74,8 @@ class ValidateTaskCategory implements Rule
                         $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
                     })
 
-                    ->orWhere(function ($query) use( $created_by, $value){
-                        $query->where("task_categories.id",$value)->where('task_categories.business_id', NULL)
+                    ->orWhere(function ($query) use( $created_by){
+                        $query->where('task_categories.business_id', NULL)
                             ->where('task_categories.is_default', 0)
                             ->where('task_categories.created_by', $created_by)
                             ->where('task_categories.is_active', 1)
@@ -76,12 +83,14 @@ class ValidateTaskCategory implements Rule
                                 $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
                             });
                     })
-                    ->orWhere(function ($query) use($value)  {
-                        $query->where("task_categories.id",$value)->where('task_categories.business_id', auth()->user()->business_id)
+                    ->orWhere(function ($query)  {
+                        $query->where('task_categories.business_id', auth()->user()->business_id)
                             ->where('task_categories.is_default', 0)
                             ->where('task_categories.is_active', 1);
 
                     });
+                });
+
             })
         ->exists();
         return $exists;

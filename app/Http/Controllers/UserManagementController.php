@@ -2068,7 +2068,7 @@ class UserManagementController extends Controller
                     'account_name',
                 ])->toArray()
             )
-                // ->with("somthing")
+                 ->with("bank")
                 ->first();
             if (!$user) {
 
