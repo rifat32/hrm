@@ -528,7 +528,17 @@ public function getScheduleInformationData ($user_id,$start_date,$end_date){
     // Process holiday dates
     $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user_id, $all_parent_department_ids);
 
-    $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user_id);
+    $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user_id,false);
+
+    if(empty($work_shift_histories)) {
+        return [
+            "schedule_data" => [],
+            "total_capacity_hours" => 0
+        ];
+    }
+
+
+
     $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $user_id, $work_shift_histories);
 
     // Process already taken leave hourly dates
@@ -632,16 +642,28 @@ public function getTotalPresentHours($user_id,$start_date,$end_date) {
 
 
 
-public function getRotaData($user_id) {
+public function getRotaData($user_id,$joining_date) {
+
+
+    $joiningDate = Carbon::parse($joining_date);
+
+    // Helper function to adjust start dates
+    $adjustDate = function($date) use ($joiningDate) {
+        return $date->lessThan($joiningDate) ? $joiningDate : $date;
+    };
 
 
 
-$startOfToday = Carbon::today();
-$endOfToday = Carbon::today()->endOfDay();
-$startOfWeek = Carbon::now()->startOfWeek();
-$endOfWeek = Carbon::now()->endOfWeek();
-$startOfMonth = Carbon::now()->startOfMonth();
-$endOfMonth = Carbon::now()->endOfMonth();
+
+    $startOfToday = $adjustDate(Carbon::today());
+    $endOfToday = $adjustDate(Carbon::today()->endOfDay());
+
+    $startOfWeek = $adjustDate(Carbon::now()->startOfWeek());
+    $endOfWeek = $adjustDate(Carbon::now()->endOfWeek());
+
+    $startOfMonth = $adjustDate(Carbon::now()->startOfMonth());
+    $endOfMonth = $adjustDate(Carbon::now()->endOfMonth());
+
 
 
 

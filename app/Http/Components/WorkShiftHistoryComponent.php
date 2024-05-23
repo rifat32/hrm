@@ -47,7 +47,7 @@ class WorkShiftHistoryComponent
 
 
     }
-    public function get_work_shift_histories($start_date,$end_date,$user_id)
+    public function get_work_shift_histories($start_date,$end_date,$user_id,$throwError)
     {
      $work_shift_histories =   WorkShiftHistory::
             where("from_date", "<=", $end_date)
@@ -67,7 +67,12 @@ class WorkShiftHistoryComponent
             ->get();
 
         if ($work_shift_histories->isEmpty()) {
-            throw new Exception("Please define workshift first",401);
+            if($throwError) {
+                throw new Exception("Please define workshift first",401);
+            } else {
+                return false;
+            }
+
 
         }
 

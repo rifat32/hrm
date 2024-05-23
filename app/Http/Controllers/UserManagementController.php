@@ -5067,6 +5067,7 @@ class UserManagementController extends Controller
                     });
                 })
                 ->first();
+
             if (!$user) {
 
                 return response()->json([
@@ -5102,7 +5103,7 @@ class UserManagementController extends Controller
             $data["leaves_data"] = $this->leaveComponent->getLeaveV4Func();
 
 
-             $data["rota_data"] = $this->userManagementComponent->getRotaData($id);
+             $data["rota_data"] = $this->userManagementComponent->getRotaData($user->id,$user->joining_date);
 
 
 
@@ -5740,7 +5741,7 @@ class UserManagementController extends Controller
 
 
             // Retrieve work shift histories for the user within the specified period
-            $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user->id);
+            $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user->id,true);
 
             // Initialize an empty collection to store weekend dates
 
