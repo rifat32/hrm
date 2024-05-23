@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class SwaggerMiddleware
+class DeveloperMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,13 +16,12 @@ class SwaggerMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!env("SWAGGER_ENABLED")) {
+        if(!env("DEVELOPER_LOGIN_ENABLED")) {
             return redirect("/");
         }
 
-        if($request->session()->get("token") !== '12345678' && !env("SwaggerAutoLogin")) {
+        if($request->session()->get("token") !== '12345678' && !env("DeveloperAutoLogin")) {
             return redirect()->route("login.view");
-
         }
         return $next($request);
     }

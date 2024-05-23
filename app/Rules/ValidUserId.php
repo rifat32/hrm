@@ -31,12 +31,15 @@ class ValidUserId implements Rule
         $user = User::where([
             'users.id' => $value,
             'users.business_id' => auth()->user()->business_id,
+            "is_active" => 1
         ])
         ->whereHas('departments', function($query) {
             $query->whereIn('departments.id', $this->all_manager_department_ids);
         })
         ->whereNotIn('users.id', [auth()->user()->id])
+
         ->first();
+
 
         return $user?1:0;
     }

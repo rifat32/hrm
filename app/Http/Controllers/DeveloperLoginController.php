@@ -4,22 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class SwaggerLoginController extends Controller
+class DeveloperLoginController extends Controller
 {
     public function login(Request $request) {
-        return view("swagger-login");
+        return view("developer-login");
 
     }
     public function passUser(Request $request) {
         if($request->email == "asjadtariq@gmail.com" && $request->password == "Sw@gger@doc1") {
             session(['token' => '12345678']);
-            return redirect("/api/documentation");
+            return redirect("/");
         }
         return response()->json([
             "message" => "Invalid Credentials"
         ],422);
-
-
 
 
     }

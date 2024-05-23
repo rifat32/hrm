@@ -1021,7 +1021,9 @@ class UserManagementController extends Controller
                     "long",
                     "image",
                     'gender',
-                    'is_in_employee',
+
+                    // 'is_in_employee',
+
                     'designation_id',
                     'employment_status_id',
                     'joining_date',
@@ -1462,7 +1464,9 @@ class UserManagementController extends Controller
                     "color_theme_name",
                     'emergency_contact_details',
                     'gender',
-                    'is_in_employee',
+
+                    // 'is_in_employee',
+
                     'designation_id',
                     'employment_status_id',
                     'joining_date',

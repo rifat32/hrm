@@ -3,7 +3,7 @@
 use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\SetUpController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\SwaggerLoginController;
+use App\Http\Controllers\DeveloperLoginController;
 use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\EmailTemplate;
@@ -24,38 +24,41 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+
+Route::get("/developer-login",[DeveloperLoginController::class,"login"])->name("login.view");
+Route::post("/developer-login",[DeveloperLoginController::class,"passUser"]);
+
+
+
+
+// Grouping the routes and applying middleware to the entire group
+Route::middleware(['developer'])->group(function () {
+
+    Route::get('/', function () {
+        return view('welcome');
+    });
+
+    Route::get('/frontend-error-log', [SetUpController::class, "getFrontEndErrorLogs"])->name("frontend-error-log");
+    Route::get('/error-log', [SetUpController::class, "getErrorLogs"])->name("error-log");
+    Route::get('/activity-log', [SetUpController::class, "getActivityLogs"])->name("activity-log");
+
+
+
+    Route::get('/setup', [SetUpController::class, "setUp"])->name("setup");
+    Route::get('/backup', [SetUpController::class, "backup"])->name("backup");
+    Route::get('/roleRefresh', [SetUpController::class, "roleRefresh"])->name("roleRefresh");
+    Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"]);
+    Route::get('/migrate', [SetUpController::class, "migrate"]);
+
+
 });
 
-Route::get('/frontend-error-log', [SetUpController::class, "getFrontEndErrorLogs"])->name("frontend-error-log");
-
-Route::get('/error-log', [SetUpController::class, "getErrorLogs"])->name("error-log");
-
-Route::get('/activity-log', [SetUpController::class, "getActivityLogs"])->name("activity-log");
-
-
-
-Route::get('/setup', [SetUpController::class, "setUp"])->name("setup");
-
-
-Route::get('/backup', [SetUpController::class, "backup"])->name("backup");
-
-
-Route::get('/roleRefresh', [SetUpController::class, "roleRefresh"])->name("roleRefresh");
-
-Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"]);
-Route::get('/migrate', [SetUpController::class, "migrate"]);
 
 
 
 
 
 
-
-
-Route::get("/swagger-login",[SwaggerLoginController::class,"login"])->name("login.view");
-Route::post("/swagger-login",[SwaggerLoginController::class,"passUser"]);
 
 
 

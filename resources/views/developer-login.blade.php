@@ -39,7 +39,7 @@
     </div>
    @endif
 
-   <form method="post" action="{{ url('/swagger-login') }}">
+   <form method="post" action="{{ url('/developer-login') }}">
     {{ csrf_field() }}
     <div class="form-group">
      <label>Enter Email</label>

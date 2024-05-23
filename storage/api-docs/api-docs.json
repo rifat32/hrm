@@ -30187,6 +30187,13 @@
                         "example": "1"
                     },
                     {
+                        "name": "not_in_user_id",
+                        "in": "query",
+                        "description": "not_in_user_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "response_type",
                         "in": "query",
                         "description": "response_type: in pdf,csv,json",

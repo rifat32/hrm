@@ -1153,7 +1153,8 @@ class DashboardManagementController extends Controller
             ->whereNotIn('id', [auth()->user()->id])
 
 
-            ->where('is_in_employee', 1)
+            // ->where('is_in_employee', 1)
+
             ->where('is_active', 1);
 
         $data["total_data"] = $data_query->get();
@@ -1269,7 +1270,9 @@ class DashboardManagementController extends Controller
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
-            ->where('is_in_employee', 1)
+            
+            // ->where('is_in_employee', 1)
+
             ->where('is_active', 1)
             ->where("business_id",auth()->user()->id);
 

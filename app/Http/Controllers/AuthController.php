@@ -276,9 +276,9 @@ class AuthController extends Controller
                 }
 
 
-                if(!$user->manages_department) {
-                    return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
-                }
+                // if(!$user->manages_department) {
+                //     return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
+                // }
 
             }
 
@@ -469,9 +469,14 @@ $datediff = $now - $user_created_date;
                 }
 
 
-                if(!$user->manages_department) {
-                    return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
-                }
+                // if(!$user->manages_department) {
+                //     return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
+                // }
+
+
+
+
+
 
             }
 
