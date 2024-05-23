@@ -2,7 +2,9 @@
 
 namespace App\Http\Components;
 
+use App\Http\Utils\AttendanceUtil;
 use App\Http\Utils\BasicUtil;
+use App\Models\Attendance;
 use App\Models\Department;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeave;
@@ -15,17 +17,19 @@ use Exception;
 class UserManagementComponent
 {
 
-use BasicUtil;
+use BasicUtil, AttendanceUtil;
 
 protected $holidayComponent;
 protected $workShiftHistoryComponent;
 protected $leaveComponent;
+
 public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent)
 {
 
     $this->workShiftHistoryComponent = $workShiftHistoryComponent;
     $this->holidayComponent = $holidayComponent;
     $this->leaveComponent = $leaveComponent;
+
 
 }
 
@@ -539,6 +543,8 @@ public function getScheduleInformationData ($user_id,$start_date,$end_date){
 
 
 
+    $start_date = Carbon::parse($start_date)->toDateString();
+$end_date = Carbon::parse($end_date)->toDateString();
 
     $all_dates = collect(range(strtotime($start_date), strtotime($end_date), 86400)) // 86400 seconds in a day
         ->map(function ($timestamp) {
@@ -586,6 +592,103 @@ public function getScheduleInformationData ($user_id,$start_date,$end_date){
         "total_capacity_hours" => $total_capacity_hours
     ];
 }
+
+
+public function getTotalPresentHours($user_id,$start_date,$end_date) {
+
+
+    $attendances = Attendance::where([
+        "user_id" => $user_id
+    ])
+    ->where('in_date', '>=', $start_date . ' 00:00:00')
+    ->where('in_date', '<=', ($end_date . ' 23:59:59'))
+    ->get();
+
+
+    $total_regular_hours = 0;
+    $total_overtime_hours = 0;
+
+    foreach($attendances as $attendance){
+        $present_hours = $this->calculate_total_present_hours($attendance->attendance_records);
+       $overtime_hours = $this->calculateOvertime($attendance);
+       $regular_hours = $present_hours - $overtime_hours;
+
+       $total_regular_hours += $regular_hours;
+       $total_overtime_hours += $overtime_hours;
+
+    }
+
+    return [
+        "total_regular_hours" => $total_regular_hours,
+        "total_overtime_hours" => $total_overtime_hours
+    ];
+
+
+}
+
+
+
+
+
+
+
+public function getRotaData($user_id) {
+
+
+
+$startOfToday = Carbon::today();
+$endOfToday = Carbon::today()->endOfDay();
+$startOfWeek = Carbon::now()->startOfWeek();
+$endOfWeek = Carbon::now()->endOfWeek();
+$startOfMonth = Carbon::now()->startOfMonth();
+$endOfMonth = Carbon::now()->endOfMonth();
+
+
+
+
+$data["today"]["total_capacity_hours"] = $this->getScheduleInformationData($user_id,$startOfToday,$endOfToday)["total_capacity_hours"];
+$data["today"]["total_present_hours"] = $this->getTotalPresentHours($user_id,$startOfToday,$endOfToday);
+
+
+
+
+$data["this_week"]["total_capacity_hours"] = $this->getScheduleInformationData($user_id,$startOfWeek,$endOfWeek)["total_capacity_hours"];
+$data["this_week"]["total_present_hours"] = $this->getTotalPresentHours($user_id,$startOfWeek,$endOfWeek);
+
+
+
+
+$data["this_month"]["total_capacity_hours"] = $this->getScheduleInformationData($user_id,$startOfMonth,$endOfMonth)["total_capacity_hours"];
+$data["this_month"]["total_present_hours"] = $this->getTotalPresentHours($user_id,$startOfMonth,$endOfMonth);
+
+
+
+return $data;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
 
 
 

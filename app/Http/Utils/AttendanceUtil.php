@@ -359,8 +359,12 @@ trait AttendanceUtil
         // Calculate work hours delta
         $work_hours_delta = $total_present_hours - $capacity_hours;
 
+
         // Calculate overtime information
         $overtime_information = $this->calculate_overtime($work_shift_details->is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $attendance_data["attendance_records"]);
+
+
+
 
         // Calculate regular work hours
         $regular_work_hours = $this->calculate_regular_work_hours($total_paid_hours, $overtime_information["overtime_hours"]);
@@ -386,6 +390,46 @@ trait AttendanceUtil
         $attendance_data["overtime_hours_salary"] =   $overtime_information["overtime_hours"] * $user_salary_info["overtime_salary_per_hour"];
 
         return $attendance_data;
+    }
+
+    public function calculateOvertime($attendance) {
+
+            // Retrieve work shift history for the user and date
+        $work_shift_history =  $this->get_work_shift_history($attendance->in_date, $attendance->user_id);
+
+        // Retrieve work shift details based on work shift history and date
+        $work_shift_details =  $this->get_work_shift_details($work_shift_history, $attendance->in_date);
+
+        // Retrieve holiday details for the user and date
+        $all_parent_departments_of_user = $this->all_parent_departments_of_user($attendance->user_id);
+
+        $holiday = $this->get_holiday_details($attendance->in_date, $attendance->user_id, $all_parent_departments_of_user);
+
+        // Retrieve leave record details for the user and date
+
+
+        $leave_record = $this->get_leave_record_details($attendance->in_date, $attendance->user_id, $attendance->attendance_records);
+
+
+        // Calculate capacity hours based on work shift details
+        $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
+
+        // Calculate total present hours based on in and out times
+        $total_present_hours = $this->calculate_total_present_hours($attendance->attendance_records);
+
+
+        // Adjust paid hours based on break taken and work shift history
+        $total_paid_hours = $this->adjust_paid_hours($attendance->does_break_taken, $total_present_hours, $work_shift_history);
+
+        // Calculate work hours delta
+        $work_hours_delta = $total_present_hours - $capacity_hours;
+
+
+        // Calculate overtime information
+        $overtime_information = $this->calculate_overtime($work_shift_details->is_weekend, $work_hours_delta, $total_paid_hours, $leave_record, $holiday, $attendance->attendance_records)["overtime_hours"];
+
+
+        return $overtime_information;
     }
 
 

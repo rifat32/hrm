@@ -5098,7 +5098,7 @@ class UserManagementController extends Controller
             $data["leaves_data"] = $this->leaveComponent->getLeaveV4Func();
 
 
-            // $data["rota_data"] = $this->userManagementComponent->getScheduleInformationData();
+             $data["rota_data"] = $this->userManagementComponent->getRotaData($id);
 
 
 
