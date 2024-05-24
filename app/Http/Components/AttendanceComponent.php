@@ -61,11 +61,8 @@ use BasicUtil;
             $idsArray = explode(',', request()->user_id);
             return $query->whereIn('attendances.user_id', $idsArray);
         })
-        ->when(empty(request()->user_id), function ($query) {
-            return $query->whereHas("employee", function ($query) {
-                $query->whereNotIn("users.id", [auth()->user()->id]);
-            });
-        })
+
+
 
 
         ->when(!empty(request()->overtime), function ($query) {
@@ -108,8 +105,15 @@ use BasicUtil;
                 $query->where("departments.id", request()->department_id);
             });
         })
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-            $query->whereIn("departments.id", $all_manager_department_ids);
+
+
+
+
+        ->where(function ($query) use ($all_manager_department_ids) {
+            $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+            })
+            ->orWhere('attendances.user_id', auth()->user()->id);
         })
 
 

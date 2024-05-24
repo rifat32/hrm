@@ -6,6 +6,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ActivityLog;
 use App\Models\Bank;
+use App\Models\Business;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\ErrorLog;
@@ -30,6 +31,7 @@ use App\Models\TaskCategory;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
+use Illuminate\Support\Facades\Log;
 
 class SetUpController extends Controller
 {
@@ -974,7 +976,6 @@ return "swagger generated";
 
             ]);
             }
-
         }
 
 // setup roles and permissions
@@ -982,7 +983,7 @@ return "swagger generated";
 $role_permissions = config("setup-config.roles_permission");
 foreach ($role_permissions as $role_permission) {
     $role = Role::where(["name" => $role_permission["role"]])->first();
-    error_log($role_permission["role"]);
+
     $permissions = $role_permission["permissions"];
 
     // Get current permissions associated with the role
@@ -1000,6 +1001,38 @@ foreach ($role_permissions as $role_permission) {
 
     // Assign permissions from the configuration
     $role->syncPermissions($permissions);
+}
+
+$business_ids = Business::get()->pluck("id");
+
+
+foreach ($role_permissions as $role_permission) {
+
+    if($role_permission["role"] == "business_employee"){
+        foreach($business_ids as $business_id){
+
+
+
+            $role = Role::where(["name" => $role_permission["role"] . "#" . $business_id])->first();
+
+           if(empty($role)){
+            continue;
+           }
+
+                $permissions = $role_permission["permissions"];
+
+                // Assign permissions from the configuration
+    $role->syncPermissions($permissions);
+
+
+
+
+        }
+
+    }
+
+
+
 }
 
 
