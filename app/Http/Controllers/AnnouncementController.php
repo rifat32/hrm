@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnnouncementCreateRequest;
 use App\Http\Requests\AnnouncementStatusUpdateRequest;
 use App\Http\Requests\AnnouncementUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Announcement;
 use App\Models\Department;
+use App\Models\DepartmentAnnouncement;
 use App\Models\User;
 use App\Models\UserAnnouncement;
 use Carbon\Carbon;
@@ -19,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 class AnnouncementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
     /**
      *
      * @OA\Post(
@@ -357,6 +359,7 @@ class AnnouncementController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
             $announcements = Announcement::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -371,6 +374,16 @@ class AnnouncementController extends Controller
                     "announcements.business_id" => $business_id
                 ]
             )
+            ->where(function($query) use($all_manager_department_ids) {
+                $query->whereHas("departments",function($query) use($all_manager_department_ids) {
+                  $query->whereIn("departments.id",$all_manager_department_ids);
+                })
+
+                ->orWhereDoesntHave("departments");
+            })
+
+
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -613,6 +626,36 @@ class AnnouncementController extends Controller
     }
 
 
+    public function addAnnouncementIfMissing() {
+        $all_parent_departments_of_user = $this->all_parent_departments_of_user(auth()->user()->id);
+
+        $announcements_to_show = Announcement::where(function($query) use($all_parent_departments_of_user) {
+            $query->whereHas("departments",function($query) use($all_parent_departments_of_user) {
+              $query->whereIn("departments.id",$all_parent_departments_of_user);
+            })
+
+            ->orWhereDoesntHave("departments");
+        })
+        ->pluck("id");
+
+        foreach($announcements_to_show as $announcement_id){
+       $userAnnouncement =  UserAnnouncement::where([
+                "announcement_id" => $announcement_id,
+                "user_id" => auth()->user()->id
+            ])
+            ->first();
+
+           if(empty($userAnnouncement)) {
+            UserAnnouncement::create([
+                "announcement_id" => $announcement_id,
+                "user_id" => auth()->user()->id,
+                "status" => "unread"
+            ]);
+           }
+
+        }
+    }
+
        /**
      *
      * @OA\Get(
@@ -704,6 +747,16 @@ class AnnouncementController extends Controller
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
              $business_id =  $request->user()->business_id;
+
+
+
+          $this->addAnnouncementIfMissing();
+
+
+
+
+
+
              $announcements = Announcement::with([
                  "creator" => function ($query) {
                      $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -851,6 +904,8 @@ class AnnouncementController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+             $this->addAnnouncementIfMissing();
 
              $business_id =  $request->user()->business_id;
              $announcements = Announcement::with([

@@ -372,9 +372,7 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
 {
 
     $query = $query
-    ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-        $query->whereIn("departments.id", $all_manager_department_ids);
-    })
+
     ->when(!empty(request()->search_key), function ($query)  {
         return $query->where(function ($query)  {
             $term = request()->search_key;
@@ -388,11 +386,23 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
     ->when(!empty(request()->user_id), function ($query)  {
         return $query->where('leaves.user_id', request()->user_id);
     })
-    ->when(empty(request()->user_id), function ($query)  {
-        return $query->whereHas("employee", function ($query) {
-            $query->whereNotIn("users.id", [auth()->user()->id]);
-        });
+    ->when(!empty($all_manager_department_ids), function ($query) use($all_manager_department_ids) {
+        $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids)
+            ;
+        })
+        // ->whereNotIn('leaves.user_id', [auth()->user()->id])
+        ;
+    }, function ($query) {
+        $query->where('leaves.user_id', auth()->user()->id);
     })
+
+
+    // ->when(empty(request()->user_id), function ($query)  {
+    //     return $query->whereHas("employee", function ($query) {
+    //         $query->whereNotIn("users.id", [auth()->user()->id]);
+    //     });
+    // })
     ->when(!empty(request()->leave_type_id), function ($query)  {
         return $query->where('leaves.leave_type_id', request()->leave_type_id);
     })
@@ -404,6 +414,10 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
             $query->where("departments.id", request()->department_id);
         });
     })
+
+
+
+
     ->when(!empty(request()->start_date), function ($query)  {
         $query->where('leaves.start_date', '>=', request()->start_date . ' 00:00:00');
     })

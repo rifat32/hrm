@@ -107,14 +107,18 @@ use BasicUtil;
         })
 
 
-
-
-        ->where(function ($query) use ($all_manager_department_ids) {
+        ->when(!empty($all_manager_department_ids), function ($query) use($all_manager_department_ids) {
             $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
+
             })
-            ->orWhere('attendances.user_id', auth()->user()->id);
+            // ->whereNotIn('attendances.user_id', [auth()->user()->id])
+            ;
+        }, function ($query) {
+            $query->where('attendances.user_id', auth()->user()->id);
         })
+
+
 
 
 

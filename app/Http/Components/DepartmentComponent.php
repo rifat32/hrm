@@ -19,7 +19,7 @@ class DepartmentComponent {
         }
 
 
-        
+
         return array_unique($all_parent_department_ids);
     }
 
@@ -33,5 +33,6 @@ class DepartmentComponent {
         return $all_manager_department_ids;
     }
 
+    
 
 }

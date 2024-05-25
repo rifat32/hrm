@@ -44,7 +44,9 @@ return $formattedBreakTime;
     @php
         $business = auth()->user()->business;
     @endphp
-
+  @php
+  $color  = "#335ff0";
+ @endphp
 
     <style>
         /* Add any additional styling for your PDF */
@@ -63,7 +65,7 @@ return $formattedBreakTime;
         }
         .table_head_row{
             color:#fff;
-            background-color:#dc2d2a;
+            background-color:{{$color}};
             font-weight:600;
         }
         .table_head_row td{
@@ -85,7 +87,7 @@ return $formattedBreakTime;
 
         }
         .employee{
-            color:#dc2d2a;
+            color:{{$color}};
             /*font-weight:600;*/
         }
         .employee_name{

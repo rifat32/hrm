@@ -1721,9 +1721,17 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
                 ]
             )
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
+
+                ->when(!empty($all_manager_department_ids), function ($query) use($all_manager_department_ids) {
+                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    })
+                    // ->whereNotIn('users.id', [auth()->user()->id])
+                    ;
+                }, function ($query) {
+                    $query->where('users.id', auth()->user()->id);
                 })
+
                 ->whereHas("leaves", function ($q) use ($request) {
                     $q->whereNotNull("user_id")
                         ->when(!empty($request->user_id), function ($q) use ($request) {
@@ -1759,9 +1767,9 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                         $q->where('user_id', $request->user_id);
                     });
                 })
-                ->when(empty($request->user_id), function ($query) use ($request) {
-                    $query->whereNotIn("users.id", [auth()->user()->id]);
-                })
+                // ->when(empty($request->user_id), function ($query) use ($request) {
+                //     $query->whereNotIn("users.id", [auth()->user()->id]);
+                // })
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("users.id", $request->order_by);

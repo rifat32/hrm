@@ -966,6 +966,7 @@ return [
                 "department_view",
                 "payrun_view",
                 "asset_type_view",
+                "setting_leave_type_view",
 
 
                 // "job_listing_view",
