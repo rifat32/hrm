@@ -964,7 +964,7 @@ return [
                 "employee_asset_view",
                 "employee_social_site_view",
                 "department_view",
-                "payrun_view",
+                // "payrun_view",
                 "asset_type_view",
                 "setting_leave_type_view",
 
@@ -977,7 +977,7 @@ return [
                 "task_category_view",
                 "project_view",
                 "holiday_view",
-                "work_shift_view",
+                // "work_shift_view",
                 "employee_rota_view",
                 "announcement_view",
                 "designation_view",

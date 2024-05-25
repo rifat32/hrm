@@ -647,21 +647,28 @@ class EmployeeRotaController extends Controller
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user_department = auth()->user()->departments[0];
 
             $employee_rotas = EmployeeRota::with("details","departments","users")
 
-            ->when(!empty(auth()->user()->business_id), function ($query) use ( $all_manager_department_ids) {
-                return $query
-                ->where(function($query) use($all_manager_department_ids) {
-                    $query
-                    ->where([
-                        "employee_rotas.business_id" => auth()->user()->business_id
-                    ])
-                    ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                        $query->whereIn("departments.id", $all_manager_department_ids);
+            ->when(!empty(auth()->user()->business_id), function ($query) use ( $all_manager_department_ids, $user_department) {
+                 $query
+               ->where(function($query) use($all_manager_department_ids, $user_department) {
+                $query
+                ->where([
+                    "employee_rotas.business_id" => auth()->user()->business_id
+                ])
+                ->where(function($query) use ($all_manager_department_ids, $user_department) {
+                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
+                        $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
+                    })
+                    ->orWhereHas("users", function($query) {
+                        $query->whereIn("users.id", [auth()->user()->id]);
                     });
-
                 })
+                ;
+
+            })
 
                 ->orWhere(function($query)  {
                     $query->where([
@@ -828,22 +835,28 @@ class EmployeeRotaController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user_department = auth()->user()->departments[0];
 
             $employee_rota =  EmployeeRota::with("details")
             ->where([
                 "id" => $id
             ])
-            ->where(function($query) use($all_manager_department_ids) {
+            ->where(function($query) use($all_manager_department_ids, $user_department) {
                 $query
                 ->where([
                     "employee_rotas.business_id" => auth()->user()->business_id
                 ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                });
+                ->where(function($query) use ($all_manager_department_ids, $user_department) {
+                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
+                        $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
+                    })
+                    ->orWhereHas("users", function($query) {
+                        $query->whereIn("users.id", [auth()->user()->id]);
+                    });
+                })
+                ;
 
             })
 

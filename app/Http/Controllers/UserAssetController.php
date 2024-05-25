@@ -781,6 +781,9 @@ class UserAssetController extends Controller
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                  ->orWhere('user_assets.user_id', NULL)
+                 ->orWhereHas("user", function($query)  {
+                    $query->where("users.id",auth()->user()->id);
+                 })
                  ;
 
               })
