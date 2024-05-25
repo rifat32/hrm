@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\HolidayExport;
+use App\Http\Components\DepartmentComponent;
 use App\Http\Requests\HolidayCreateRequest;
 use App\Http\Requests\HolidayUpdateRequest;
 use App\Http\Utils\BusinessUtil;
@@ -21,6 +22,16 @@ class HolidayController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
 
+
+    protected $departmentComponent;
+
+
+    public function __construct( DepartmentComponent $departmentComponent)
+    {
+
+        $this->departmentComponent = $departmentComponent;
+
+    }
 
     /**
      *
@@ -384,6 +395,11 @@ class HolidayController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user(auth()->user()->id);
+
+
             $holidays = Holiday::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -399,6 +415,23 @@ class HolidayController extends Controller
                     "holidays.business_id" => $business_id
                 ]
             )
+            ->where(function($query) use($all_manager_department_ids,$all_parent_department_ids) {
+                $query->whereHas("departments", function($query) use($all_manager_department_ids,$all_parent_department_ids) {
+                    $query->whereIn("departments.id",array_merge($all_manager_department_ids,$all_parent_department_ids));
+                 })
+                 ->orWhereHas("users", function ($query)  {
+                    $query->where([
+                        "users.id" => auth()->user()->id
+                    ]);
+                })
+                ->orWhere(function ($query) {
+                    $query->whereDoesntHave("users")
+                        ->whereDoesntHave("departments");
+                })
+
+                 ;
+
+              })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
