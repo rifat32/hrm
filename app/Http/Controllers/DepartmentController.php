@@ -469,6 +469,14 @@ class DepartmentController extends Controller
      * example="1"
      * ),
      *
+     *    *    *   *  * *  @OA\Parameter(
+     * name="not_in_rota",
+     * in="query",
+     * description="not_in_rota",
+     * required=true,
+     * example="1"
+     * ),
+     *
      *
      * *  @OA\Parameter(
      * name="order_by",
@@ -537,6 +545,15 @@ class DepartmentController extends Controller
             )
 
             ->whereIn("id",$all_manager_department_ids)
+
+
+            ->when(!empty($request->not_in_rota), function ($query) {
+                $query->whereDoesntHave("employee_rotas");
+            })
+
+
+
+
             ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
                 if(intval($request->doesnt_have_payrun)) {
                     return $query->whereDoesntHave("payrun_departments");

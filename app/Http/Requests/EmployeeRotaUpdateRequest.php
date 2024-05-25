@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\EmployeeRota;
 use App\Rules\ValidateDepartment;
+use App\Rules\ValidateDuplicateRotaDepartment;
+use App\Rules\ValidateDuplicateRotaUser;
 use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -65,17 +67,34 @@ class EmployeeRotaUpdateRequest extends FormRequest
 
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+
+
+
+
             'departments' => 'present|array',
             'departments.*' => [
+
                 'numeric',
-                new ValidateDepartment($all_manager_department_ids)
+
+                new ValidateDepartment($all_manager_department_ids),
+
+                new ValidateDuplicateRotaDepartment($this->id)
+
             ],
             'users' => 'present|array',
             'users.*' => [
+
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+
+                new ValidUserId($all_manager_department_ids),
+
+                new ValidateDuplicateRotaUser($this->id)
 
             ],
+
+
+
+
             'details' => 'required|array',
             'details.*.day' => 'required|numeric|between:0,6',
             'details.*.break_type' => 'required|string|in:paid,unpaid',

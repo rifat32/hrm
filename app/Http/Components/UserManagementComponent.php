@@ -76,7 +76,10 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     return $q->whereIn("name", $rolesArray);
                 });
             })
-
+            
+            ->when(!empty(request()->not_in_rota), function ($query) {
+                $query->whereDoesntHave("employee_rotas");
+            })
 
 
             ->when(!empty(request()->full_name), function ($query)  {

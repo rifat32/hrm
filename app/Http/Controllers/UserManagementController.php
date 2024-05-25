@@ -3028,7 +3028,14 @@ class UserManagementController extends Controller
      * required=true,
      * example="passport"
      * ),
-     *
+     *    *
+     *    *    *   *  * *  @OA\Parameter(
+     * name="not_in_rota",
+     * in="query",
+     * description="not_in_rota",
+     * required=true,
+     * example="1"
+     * ),
      *
      *
      *

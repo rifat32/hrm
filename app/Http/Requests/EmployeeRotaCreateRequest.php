@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
 use App\Rules\ValidateDepartment;
+use App\Rules\ValidateDuplicateRotaDepartment;
+use App\Rules\ValidateDuplicateRotaUser;
 use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -48,15 +50,27 @@ class EmployeeRotaCreateRequest extends FormRequest
 
             'departments' => 'present|array',
             'departments.*' => [
+
                 'numeric',
-                new ValidateDepartment($all_manager_department_ids)
+
+                new ValidateDepartment($all_manager_department_ids),
+
+                new ValidateDuplicateRotaDepartment(NULL)
+
             ],
             'users' => 'present|array',
             'users.*' => [
+
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+
+                new ValidUserId($all_manager_department_ids),
+
+                new ValidateDuplicateRotaUser(NULL)
 
             ],
+
+
+
             'details' => 'required|array',
             'details.*.day' => 'required|numeric|between:0,6',
 
@@ -78,7 +92,7 @@ class EmployeeRotaCreateRequest extends FormRequest
                 },
             ],
 
-            
+
             'details.*.end_at' => [
                 'nullable',
                 'date_format:H:i:s',
