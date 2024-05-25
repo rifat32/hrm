@@ -20,6 +20,8 @@ use Maatwebsite\Excel\Facades\Excel;
 class HolidayController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
+
+
     /**
      *
      * @OA\Post(
@@ -637,7 +639,7 @@ class HolidayController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-        
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

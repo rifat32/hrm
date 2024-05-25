@@ -6,6 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Rules\ValidateDepartment;
+use App\Rules\ValidateHolidayDate;
 use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -34,9 +35,23 @@ class HolidayCreateRequest extends BaseFormRequest
         return [
             'name' => 'required|string',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+
+
+            'start_date.*' => [
+                'required',
+                'date',
+                new ValidateHolidayDate()
+            ],
+            'end_date.*' => [
+                'required',
+                'date',
+                'after_or_equal:start_date',
+                new ValidateHolidayDate()
+            ],
+
+
             'repeats_annually' => 'required|boolean',
+
 
 
             'departments' => 'present|array',
@@ -44,6 +59,7 @@ class HolidayCreateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateDepartment($all_manager_department_ids)
             ],
+
             'users' => 'present|array',
             'users.*' => [
                 "numeric",
