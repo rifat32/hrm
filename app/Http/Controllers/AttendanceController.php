@@ -760,6 +760,14 @@ class AttendanceController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
+     *    *   *     *     * *  @OA\Parameter(
+     * name="show_my_data",
+     * in="query",
+     * description="show_my_data",
+     * required=true,
+     * example="show_my_data"
+     * ),
+     *
      *   *              @OA\Parameter(
      *         name="response_type",
      *         in="query",
@@ -1000,6 +1008,14 @@ class AttendanceController extends Controller
      *           {"bearerAuth": {}}
      *       },
 
+        *     *     *   *     *     * *  @OA\Parameter(
+     * name="show_my_data",
+     * in="query",
+     * description="show_my_data",
+     * required=true,
+     * example="show_my_data"
+     * ),
+     *
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -1113,6 +1129,14 @@ class AttendanceController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
+     *   * *  @OA\Parameter(
+     * name="show_my_data",
+     * in="query",
+     * description="show_my_data",
+     * required=true,
+     * example="show_my_data"
+     * ),
+     *
      *              @OA\Parameter(
      *         name="per_page",
      *         in="query",

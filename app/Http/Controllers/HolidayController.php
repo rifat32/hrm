@@ -430,7 +430,7 @@ class HolidayController extends Controller
                 )
 
                 ->when(
-                    intval(request()->has('show_my_data') && intval(request()->show_my_data) == 1),
+                    (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
                     function ($query) use ($all_parent_department_ids) {
 
 

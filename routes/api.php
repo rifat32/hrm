@@ -411,7 +411,6 @@ Route::get('/v1.0/users/get-leaves/{id}', [UserManagementController::class, "get
 
 Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
 
-
 Route::get('/v1.0/users/get-schedule-information/by-user', [UserManagementController::class, "getScheduleInformation"]);
 
 

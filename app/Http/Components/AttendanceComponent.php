@@ -107,16 +107,23 @@ use BasicUtil;
         })
 
 
-        ->when(!empty($all_manager_department_ids), function ($query) use($all_manager_department_ids) {
-            $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
-                $query->whereIn("departments.id", $all_manager_department_ids);
 
-            })
-            // ->whereNotIn('attendances.user_id', [auth()->user()->id])
-            ;
-        }, function ($query) {
-            $query->where('attendances.user_id', auth()->user()->id);
-        })
+
+
+        ->when(
+            (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
+            function ($query)  {
+                $query->where('attendances.user_id', auth()->user()->id);
+            },
+            function ($query) use ($all_manager_department_ids,) {
+
+                $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+
+                });
+
+            }
+        )
 
 
 

@@ -7,12 +7,14 @@ use Illuminate\Contracts\Validation\Rule;
 
 class ValidUserId implements Rule
 {
+
     /**
      * Create a new rule instance.
      *
      * @return void
      */
     private $all_manager_department_ids;
+    private $customMessage;
 
     public function __construct($all_manager_department_ids)
     {
@@ -28,6 +30,9 @@ class ValidUserId implements Rule
      */
     public function passes($attribute, $value)
     {
+
+        $authUser = auth()->user();
+
         $user = User::where([
             'users.id' => $value,
             'users.business_id' => auth()->user()->business_id,
@@ -41,11 +46,19 @@ class ValidUserId implements Rule
         ->first();
 
 
+     if ($value == $authUser->id) {
+            $this->customMessage = 'The :attribute is invalid. You cannot update data to yourself.';
+            return false;
+        }
+
         return $user?1:0;
     }
 
     public function message()
     {
-        return 'The :attribute is invalid.';
+       return $this->customMessage ?: 'The :attribute is invalid.';
     }
+
+
+
 }
