@@ -7,16 +7,16 @@
     @php
         // Define a function within the Blade file
         function processString($inputString) {
+            // Remove underscore
+            $withoutUnderscore = str_replace('_', '', $inputString);
 
-            $finalString = explode('#', $inputString)[0];
-
-        $finalString = str_replace('business_', '', $finalString);
-        $finalString = str_replace('_', '', $finalString);
+            // Remove everything from the pound sign (#) and onwards
+            $finalString = explode('#', $withoutUnderscore)[0];
 
             // Capitalize the string
-            $finalString = ucwords($finalString);
+            $capitalizedString = ucwords($finalString);
 
-            return $finalString;
+            return $capitalizedString;
         }
     @endphp
 
@@ -38,7 +38,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size:800px;
+            font-size:10px;
 
 
         }
@@ -98,17 +98,34 @@
 <body>
 
     <table style="margin-top:-30px">
-       <thead>
+       <tbody>
           <tr>
-            <th class="file_title">Employee List: </th>
+            @if ($business->logo)
+            <td rowspan="2">
+                <img class="logo" src="{{public_path($business->logo)}}" >
+            </td>
+            @endif
+            <td></td>
           </tr>
-        </thead>
+          <tr>
+            <td class="file_title">Employee List </td>
+          </tr>
+          <tr>
+            <td>
+                <span class="business_name">{{ $business->name ?? '' }}</span>
+
+                <address class="business_address"> {{ $business->address_line_1 ?? '' }}</address>
+            </td>
+
+          </tr>
+        </tbody>
     </table>
 
 
     <table>
         <thead>
             <tr class="table_head_row">
+                <th></th>
                 <th>Employee</th>
                 <th>Employee ID</th>
                 <th>Email</th>
@@ -120,14 +137,15 @@
         <tbody>
             @foreach($users as $index=>$user)
                 <tr class="table_row">
-
+                    <td class="employee_index" style="padding:0px 10px">{{ $index+1 }}</td>
                     <td class="employee">
                         {{ ($user->first_Name ." ". $user->last_Name ." ". $user->last_Name )}}
                     </td>
                     <td class="employee_id">{{ $user->user_id }}</td>
                     <td class="email">{{ $user->email }}</td>
-                    <td class="designation">{{ $user->designation->name }}</td>
-                    <td class="role">{{ processString($user->roles[0]->name) }}</td>
+                    <td class="designation">{{ $user->designation->name ?? '' }}</td>
+                    <td class="role">{{ isset($user->roles[0]) && $user->roles[0]->name ? processString($user->roles[0]->name) : '' }}</td>
+
                     <td class="status">{{ $user->is_active ? "Active":"De-active" }}</td>
                 </tr>
             @endforeach

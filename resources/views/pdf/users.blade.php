@@ -112,8 +112,9 @@
           </tr>
           <tr>
             <td>
-                <span class="business_name">{{$business->name}}</span>
-                <address class="business_address">{{$business->address_line_1}}</address>
+                <span class="business_name">{{ $business->name ?? '' }}</span>
+
+                <address class="business_address"> {{ $business->address_line_1 ?? '' }}</address>
             </td>
 
           </tr>
@@ -142,8 +143,9 @@
                     </td>
                     <td class="employee_id">{{ $user->user_id }}</td>
                     <td class="email">{{ $user->email }}</td>
-                    <td class="designation">{{ $user->designation->name }}</td>
-                    <td class="role">{{ processString($user->roles[0]->name) }}</td>
+                    <td class="designation">{{ $user->designation->name ?? '' }}</td>
+                    <td class="role">{{ isset($user->roles[0]) && $user->roles[0]->name ? processString($user->roles[0]->name) : '' }}</td>
+
                     <td class="status">{{ $user->is_active ? "Active":"De-active" }}</td>
                 </tr>
             @endforeach

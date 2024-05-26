@@ -630,7 +630,7 @@ class HolidayController extends Controller
             ])
             ->where(function ($query) use ($all_parent_department_ids, $all_manager_department_ids,$all_user_of_manager) {
                 $query->whereHas("departments", function ($query) use ($all_parent_department_ids,$all_manager_department_ids) {
-                    $query->whereIn("departments.id", array_map($all_parent_department_ids,$all_manager_department_ids));
+                    $query->whereIn("departments.id", array_merge($all_parent_department_ids,$all_manager_department_ids));
                 })
                     ->orWhereHas("users", function ($query) use($all_user_of_manager) {
                         $query->whereIn(

@@ -197,9 +197,16 @@ use BasicUtil;
 
                // Determine the most frequent behavior.
             $max_behavior = max($behavior_counts);
-            $data['data_highlights']['behavior'] = $behavior_counts;
-            $data['data_highlights']['average_behavior'] = array_search($max_behavior, $behavior_counts);
-            $data['data_highlights']['total_schedule_hours'] = $attendances->sum('capacity_hours');
+            if ($attendances->isEmpty()) {
+                $data['data_highlights']['behavior'] = "no data";
+                $data['data_highlights']['average_behavior'] = 0;
+                $data['data_highlights']['total_schedule_hours'] = 0;
+            } else {
+                $data['data_highlights']['behavior'] = $behavior_counts;
+                $data['data_highlights']['average_behavior'] = array_search($max_behavior, $behavior_counts);
+                $data['data_highlights']['total_schedule_hours'] = $attendances->sum('capacity_hours');
+            }
+
 
              // Calculate total leave hours.
             // $data['data_highlights']['total_leave_hours'] =  $attendances->sum('leave_hours');

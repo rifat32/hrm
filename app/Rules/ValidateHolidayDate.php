@@ -14,9 +14,10 @@ class ValidateHolidayDate implements Rule
      *
      * @return void
      */
-    public function __construct()
+    protected $id;
+    public function __construct($id = NULL)
     {
-        //
+        $this->id = $id;
     }
 
     /**
@@ -28,6 +29,7 @@ class ValidateHolidayDate implements Rule
      */
     public function passes($attribute, $value)
     {
+
         $existingHolidays = Holiday::where(
             [
                 "holidays.business_id" => auth()->user()->business_id
@@ -36,6 +38,9 @@ class ValidateHolidayDate implements Rule
 
             ->where('holidays.start_date', "<=", $value)
             ->where('holidays.end_date', ">=", $value)
+            ->when(!empty($this->id), function($query) {
+                 $query->whereNotIn("holidays.id",[$this->id]);
+            })
             ->get();
 
             return $existingHolidays->isEmpty()?1:0;

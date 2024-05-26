@@ -73,16 +73,17 @@ class HolidayUpdateRequest extends BaseFormRequest
 
              'name' => 'required|string',
             'description' => 'nullable|string',
-            'start_date.*' => [
+
+            'start_date' => [
                 'required',
                 'date',
-                new ValidateHolidayDate()
+                new ValidateHolidayDate($this->id)
             ],
-            'end_date.*' => [
+            'end_date' => [
                 'required',
                 'date',
                 'after_or_equal:start_date',
-                new ValidateHolidayDate()
+                new ValidateHolidayDate($this->id)
             ],
 
             'repeats_annually' => 'required|boolean',
