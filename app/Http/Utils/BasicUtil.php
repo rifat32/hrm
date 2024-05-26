@@ -123,6 +123,14 @@ trait BasicUtil
         return $all_manager_department_ids;
     }
 
+public function get_all_user_of_manager($all_manager_department_ids) {
+    $all_manager_user_ids = User::whereHas("departments", function($query) use($all_manager_department_ids){
+        $query->whereIn("departments.id",$all_manager_department_ids);
+    })
+    ->pluck("users.id") ;
+
+    return $all_manager_user_ids;
+}
 
     public function all_parent_departments_of_user($user_id) {
         $all_parent_department_ids = [];

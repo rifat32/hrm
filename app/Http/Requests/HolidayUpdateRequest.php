@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
 use App\Models\Department;
+use App\Models\Holiday;
 use App\Models\User;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateHolidayDate;
@@ -31,8 +32,45 @@ class HolidayUpdateRequest extends BaseFormRequest
     public function rules()
     {
         $all_manager_department_ids = $this->get_all_departments_of_manager();
+        $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);
+
         return [
-            'id' => 'required|numeric',
+            'id' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) use($all_manager_department_ids, $all_user_of_manager){
+                    $exists = Holiday::where('id', $value)
+                    ->where(function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
+                        $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        })
+                            ->orWhereHas("users", function ($query) use ($all_user_of_manager) {
+                                $query->whereIn(
+                                    "users.id",
+                                    $all_user_of_manager
+                                );
+                            })
+                            ->when(auth()->user()->hasRole("business_owner"), function($query) {
+                                $query->orWhere(function ($query) {
+                                    $query->whereDoesntHave("users")
+                                        ->whereDoesntHave("departments");
+                                });
+                            });
+
+                    })
+
+                    ->exists();
+
+                    if (!$exists) {
+                        $fail($attribute . " is invalid.");
+                        return;
+                    }
+                },
+            ],
+
+
+
+
              'name' => 'required|string',
             'description' => 'nullable|string',
             'start_date.*' => [

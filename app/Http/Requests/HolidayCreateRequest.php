@@ -36,7 +36,6 @@ class HolidayCreateRequest extends BaseFormRequest
             'name' => 'required|string',
             'description' => 'nullable|string',
 
-
             'start_date.*' => [
                 'required',
                 'date',
