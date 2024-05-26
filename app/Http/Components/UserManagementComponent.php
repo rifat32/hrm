@@ -76,7 +76,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     return $q->whereIn("name", $rolesArray);
                 });
             })
-            
+
             ->when(!empty(request()->not_in_rota), function ($query) {
                 $query->whereDoesntHave("employee_rotas");
             })
@@ -477,7 +477,10 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                  // })
                  ->where(function($query) use($user){
                     $query->whereHas("employment_statuses", function($query) use($user){
-                     $query->whereIn("employment_statuses.id", [$user->employment_status->id]);
+                        if ($user->employment_status && $user->employment_status->id) {
+                            $query->whereIn("employment_statuses.id", [$user->employment_status->id]);
+                        }
+
                     })
                     ->orWhereDoesntHave("employment_statuses");
                  })

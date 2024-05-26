@@ -30,6 +30,10 @@ class WorkLocation extends Model
         $is_active = $value;
         $user = auth()->user();
 
+        if(empty($user)){
+            return 1;
+        }
+
         if(empty($user->business_id)) {
             if(empty($this->business_id) && $this->is_default == 1) {
                 if(!$user->hasRole("superadmin")) {
@@ -87,5 +91,5 @@ class WorkLocation extends Model
 
 
 
-  
+
 }

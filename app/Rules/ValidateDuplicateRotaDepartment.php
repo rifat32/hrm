@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Models\DepartmentEmployeeRota;
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidateDuplicateRotaDepartment implements Rule
@@ -32,10 +33,12 @@ class ValidateDuplicateRotaDepartment implements Rule
         $departmentEmployeeRota =  DepartmentEmployeeRota::where([
             "department_id" => $value
         ])
-        ->when(!empty($this->id), function($query) use($value) {
-            $query->whereNotIn("department_id",[$value]);
+        ->when(!empty($this->id), function($query)  {
+            $query->whereNotIn("employee_rota_id",[$this->id]);
         })
         ->first();
+
+
 
        return empty($departmentEmployeeRota)?1:0;
 

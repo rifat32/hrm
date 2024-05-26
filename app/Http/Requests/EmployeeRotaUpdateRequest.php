@@ -72,6 +72,7 @@ class EmployeeRotaUpdateRequest extends FormRequest
 
 
             'departments' => 'present|array',
+            
             'departments.*' => [
 
                 'numeric',
