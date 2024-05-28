@@ -1210,6 +1210,13 @@
                 "operationId": "getAttendances",
                 "parameters": [
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "response_type",
                         "in": "query",
                         "description": "response_type: in pdf,csv,json",
@@ -1951,6 +1958,13 @@
                 "operationId": "getAttendancesV2",
                 "parameters": [
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
@@ -2059,6 +2073,13 @@
                 "description": "This method is to get attendances ",
                 "operationId": "getAttendancesV3",
                 "parameters": [
+                    {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
                     {
                         "name": "per_page",
                         "in": "query",
@@ -8960,6 +8981,71 @@
                 ]
             }
         },
+        "/v1.0/business-employee-dashboard": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_user"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessEmployeeDashboardData",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/dashboard-widgets": {
             "post": {
                 "tags": [
@@ -9307,6 +9393,13 @@
                         "name": "hide_parent",
                         "in": "query",
                         "description": "hide_parent",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "not_in_rota",
+                        "in": "query",
+                        "description": "not_in_rota",
                         "required": true,
                         "example": "1"
                     },
@@ -14355,6 +14448,13 @@
                         "example": "department_id"
                     },
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "order_by",
                         "in": "query",
                         "description": "order_by",
@@ -17343,6 +17443,13 @@
                 "operationId": "getLeaves",
                 "parameters": [
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "response_type",
                         "in": "query",
                         "description": "response_type: in pdf,csv,json",
@@ -18052,6 +18159,13 @@
                 "operationId": "getLeaveArrears",
                 "parameters": [
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "response_type",
                         "in": "query",
                         "description": "response_type: in pdf,csv,json",
@@ -18231,6 +18345,13 @@
                 "operationId": "getLeavesV2",
                 "parameters": [
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "response_type",
                         "in": "query",
                         "description": "response_type: in pdf,csv,json",
@@ -18361,6 +18482,13 @@
                 "operationId": "getLeavesV3",
                 "parameters": [
                     {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
@@ -18476,6 +18604,13 @@
                 "description": "This method is to get leaves ",
                 "operationId": "getLeavesV4",
                 "parameters": [
+                    {
+                        "name": "show_my_data",
+                        "in": "query",
+                        "description": "show_my_data",
+                        "required": true,
+                        "example": "show_my_data"
+                    },
                     {
                         "name": "per_page",
                         "in": "query",
@@ -33170,6 +33305,13 @@
                         "description": "upcoming_expiries",
                         "required": true,
                         "example": "passport"
+                    },
+                    {
+                        "name": "not_in_rota",
+                        "in": "query",
+                        "description": "not_in_rota",
+                        "required": true,
+                        "example": "1"
                     }
                 ],
                 "responses": {

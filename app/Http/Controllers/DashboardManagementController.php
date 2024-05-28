@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Components\UserManagementComponent;
+use App\Http\Components\WorkShiftHistoryComponent;
 use App\Http\Requests\WidgetCreateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
@@ -35,10 +36,14 @@ class DashboardManagementController extends Controller
 
 
     protected $userManagementComponent;
+    protected $workShiftHistoryComponent;
 
-    public function __construct(UserManagementComponent $userManagementComponent)
+    public function __construct(UserManagementComponent $userManagementComponent, WorkShiftHistoryComponent $workShiftHistoryComponent)
     {
         $this->userManagementComponent = $userManagementComponent;
+        $this->workShiftHistoryComponent = $workShiftHistoryComponent;
+
+
     }
 
 
@@ -3360,6 +3365,38 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
     }
 
 
+    public function self_work_shift(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+    ) {
+
+        $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history(today(), auth()->user()->id);
+
+        $work_shift_history->details = $work_shift_history->details();
+
+
+
+
+        $data["total_data"] = $work_shift_history;
+
+
+        return $data;
+    }
+
+
 
     /**
      *
@@ -4491,6 +4528,45 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
            $data["self_tasks"]["widget_type"] = "dates";
 
            $data["self_tasks"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
+
+
+
+           $data["self_work_shift"] =  $this->self_work_shift($today,
+           $start_date_of_next_month,
+           $end_date_of_next_month,
+           $start_date_of_this_month,
+           $end_date_of_this_month,
+           $start_date_of_previous_month,
+           $end_date_of_previous_month,
+           $start_date_of_next_week,
+           $end_date_of_next_week,
+           $start_date_of_this_week,
+           $end_date_of_this_week,
+           $start_date_of_previous_week,
+           $end_date_of_previous_week,
+           $all_manager_department_ids);
+
+
+          $widget = $dashboard_widgets->get("self_work_shift");
+
+          $data["self_work_shift"]["id"] = $start_id++;
+
+          if($widget) {
+              $data["self_work_shift"]["widget_id"] = $widget->id;
+              $data["self_work_shift"]["widget_order"] = $widget->widget_order;
+          }
+          else {
+              $data["self_work_shift"]["widget_id"] = 0;
+              $data["self_work_shift"]["widget_order"] = 0;
+          }
+
+
+
+          $data["self_work_shift"]["widget_name"] = "self_work_shift";
+
+          $data["self_work_shift"]["widget_type"] = "object";
+
+          $data["self_work_shift"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
 
 
 
