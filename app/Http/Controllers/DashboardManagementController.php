@@ -3388,8 +3388,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $work_shift_history->details = $work_shift_history->details();
 
 
-
-
         $data["total_data"] = $work_shift_history;
 
 
