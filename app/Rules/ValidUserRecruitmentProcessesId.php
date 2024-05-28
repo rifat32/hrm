@@ -30,12 +30,11 @@ class ValidUserRecruitmentProcessesId implements Rule
      */
     public function passes($attribute, $value)
     {
-        $index = explode('.', $attribute)[1]; // Extract the index from the attribute name
-        $recruitment_process_id = request('recruitment_processes')[$index]['recruitment_process_id'] ?? false;
+
 
         $userRecruitmentProcess = UserRecruitmentProcess::where([
             'user_recruitment_processes.user_id' => $this->user_id,
-            'user_recruitment_processes.recruitment_process_id' => $recruitment_process_id,
+
             'user_recruitment_processes.id' => $value,
         ])
         ->first();

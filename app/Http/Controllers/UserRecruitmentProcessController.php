@@ -36,7 +36,7 @@ class UserRecruitmentProcessController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 
-     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *           @OA\Property(property="user_id", type="string", format="number",example="1"),
 
      *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
      * {

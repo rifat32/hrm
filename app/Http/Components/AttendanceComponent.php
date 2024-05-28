@@ -198,8 +198,8 @@ use BasicUtil;
                // Determine the most frequent behavior.
             $max_behavior = max($behavior_counts);
             if ($attendances->isEmpty()) {
-                $data['data_highlights']['behavior'] = "no data";
-                $data['data_highlights']['average_behavior'] = 0;
+                $data['data_highlights']['behavior'] = $behavior_counts;
+                $data['data_highlights']['average_behavior'] = "no data";
                 $data['data_highlights']['total_schedule_hours'] = 0;
             } else {
                 $data['data_highlights']['behavior'] = $behavior_counts;
