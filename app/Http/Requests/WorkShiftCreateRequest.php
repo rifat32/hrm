@@ -44,8 +44,8 @@ class WorkShiftCreateRequest extends BaseFormRequest
             'type' => 'required|string|in:regular,scheduled,flexible',
 
 
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            // 'start_date' => 'nullable|date',
+            // 'end_date' => 'nullable|date|after_or_equal:start_date',
 
 
 

@@ -393,8 +393,8 @@ if($request_data["type"] !== "flexible") {
         'break_type',
         'break_hours',
 
-        'start_date',
-        'end_date',
+        // 'start_date',
+        // 'end_date',
         // "is_active",
         // "business_id",
         // "created_by"
