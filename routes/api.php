@@ -388,7 +388,7 @@ Route::put('/v1.0/users/update-joining-date', [UserManagementController::class, 
 
 Route::put('/v1.0/users/update-emergency-contact', [UserManagementController::class, "updateEmergencyContact"]);
 
-Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
+
 
 Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"]);
 

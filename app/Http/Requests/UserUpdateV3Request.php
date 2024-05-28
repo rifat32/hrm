@@ -37,7 +37,14 @@ class UserUpdateV3Request extends FormRequest
 
         $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-        return [
+        $user = User::where([
+            'id' => $this->id,
+        ])->first();
+
+
+
+
+        $rule = [
             'id' => [
                 "required",
                 "numeric",
@@ -70,30 +77,52 @@ class UserUpdateV3Request extends FormRequest
             "minimum_working_days_per_week" => 'required|numeric|max:7',
             'weekly_contractual_hours' => 'required|numeric',
             'gender' => 'nullable|string|in:male,female,other',
+
             'work_location_id' => [
                 "required",
-                'numeric',
-                new ValidWorkLocationId()
+                'numeric'
             ],
             'designation_id' => [
                 "required",
                 'numeric',
-                new ValidateDesignationId()
+
             ],
 
             'employment_status_id' => [
                 "required",
                 'numeric',
-                new ValidEmploymentStatus()
             ],
+
             'work_shift_id' => [
                 "nullable",
                 'numeric',
-                function ($attribute, $value, $fail) {
 
+            ],
 
+            'departments' => 'required|array|size:1',
+            'departments.*' =>  [
+                'numeric',
+                new ValidateDepartment($all_manager_department_ids)
+            ],
+
+        ];
+
+        if(!empty($user)) {
+            if($user->work_location_id != $this->work_location_id){
+               $rule["work_location_id"][] = new ValidWorkLocationId();
+            }
+
+            if($user->designation_id != $this->designation_id){
+                $rule["designation_id"][] =  new ValidateDesignationId();
+             }
+
+             if($user->employment_status_id != $this->employment_status_id){
+                $rule["employment_status_id"][] =  new ValidEmploymentStatus();
+             }
+
+             if($user->work_shift_id != $this->work_shift_id){
+                $rule["work_shift_id"][] =    function ($attribute, $value, $fail) {
                     if(!empty($value)){
-
                         $exists = WorkShift::where('id', $value)
                         ->where([
                             "work_shifts.business_id" => auth()->user()->business_id
@@ -103,30 +132,18 @@ class UserUpdateV3Request extends FormRequest
                                 "is_active" => 1,
                                 "business_id" => NULL,
                                 "is_default" => 1
-                            ])
-
-                        ;
-
+                            ]);
                         })
-
                         ->exists();
-
                     if (!$exists) {
                         $fail($attribute . " is invalid.");
                     }
                     }
 
-                },
-            ],
+                };
+             }
+        }
 
-            'departments' => 'required|array|size:1',
-            'departments.*' =>  [
-                'numeric',
-                new ValidateDepartment($all_manager_department_ids)
-            ],
-
-
-
-        ];
+        return $rule;
     }
 }

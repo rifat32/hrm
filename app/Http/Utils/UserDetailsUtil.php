@@ -17,6 +17,7 @@ use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetailHistory;
 use App\Models\Leave;
+use App\Models\LeaveRecord;
 use App\Models\Project;
 use App\Models\UserAssetHistory;
 use App\Models\UserRecruitmentProcess;
@@ -606,15 +607,16 @@ if(!empty($joining_date)) {
 
               }
 
-              $leave_exists = Leave::where(
-                  "start_date" , "<" ,$joining_date,
+              $leave_exists = LeaveRecord::where(
+                  "date" , "<" ,$joining_date,
                 )
-                ->where([
-                    "user_id" => $user_id
-                ])->exists();
+                ->whereHas("leave",function($query) use($user_id) {
+                  $query->where("leaves.user_id",$user_id);
+                })
+               ->exists();
 
                if($leave_exists) {
-                throw new Exception(("Leave exists before " . $joining_date),401);
+                throw new Exception(($leave_exists ."Leave exists before " . $joining_date),401);
 
 
                         $asset_assigned = UserAssetHistory::where(

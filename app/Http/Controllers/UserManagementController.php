@@ -42,14 +42,11 @@ use App\Models\Attendance;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeeAddressHistory;
-
-
-
-
+use App\Models\LeaveRecord;
 use App\Models\Role;
 
 use App\Models\User;
-
+use App\Models\UserAssetHistory;
 use Carbon\Carbon;
 
 use Exception;
@@ -5117,7 +5114,39 @@ class UserManagementController extends Controller
 
 
 
+             
 
+            $lastAttendanceDate =  Attendance::where([
+                  "user_id" => $user->id
+              ])->orderBy("in_date")->first();
+
+
+              $lastLeaveDate =    LeaveRecord::
+              whereHas("leave",function($query) use($user) {
+                $query->where("leaves.user_id",$user->id);
+              })->orderBy("leave_records.date")->first();
+
+              $lastAssetAssignDate = UserAssetHistory::where([
+                  "user_id" => $user->id
+              ])->orderBy("from_date")->first();
+
+// Find the oldest date
+$oldestDate = null;
+
+if ($lastAttendanceDate && (!$oldestDate || $lastAttendanceDate->lt($oldestDate))) {
+    $oldestDate = $lastAttendanceDate;
+}
+
+if ($lastLeaveDate && (!$oldestDate || $lastLeaveDate->lt($oldestDate))) {
+    $oldestDate = $lastLeaveDate;
+}
+
+if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDate))) {
+    $oldestDate = $lastAssetAssignDate;
+}
+
+
+             $data["user_data"]["last_activity_date"] = $oldestDate;
 
 
 
