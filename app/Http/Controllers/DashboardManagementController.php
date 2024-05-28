@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Components\UserManagementComponent;
 use App\Http\Requests\WidgetCreateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
@@ -20,6 +21,7 @@ use App\Models\EmployeeVisaDetailHistory;
 use App\Models\EmploymentStatus;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
+use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -29,6 +31,16 @@ use Illuminate\Support\Facades\DB;
 class DashboardManagementController extends Controller
 {
     use ErrorUtil, BusinessUtil, UserActivityUtil, BasicUtil;
+
+
+
+    protected $userManagementComponent;
+
+    public function __construct(UserManagementComponent $userManagementComponent)
+    {
+        $this->userManagementComponent = $userManagementComponent;
+    }
+
 
     /**
      *
@@ -3172,8 +3184,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
     ) {
 
 
-
-
         $issue_date_column = 'pension_enrollment_issue_date';
         $expiry_date_column = 'pension_re_enrollment_due_date';
 
@@ -3280,6 +3290,76 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         return $data;
     }
+
+
+    public function self_holidays(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+    ) {
+
+
+        $data["total_data"] = $this->userManagementComponent-> getHolodayDetails(
+        $all_manager_department_ids,
+        auth()->user()->id,
+        request()->start_date,
+        request()->end_date,
+        true);;
+
+
+
+        return $data;
+    }
+
+
+
+    public function self_tasks(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+    ) {
+
+
+        $data["total_data"] = Project::
+        with([
+             "tasks"
+        ])
+        ->whereHas("tasks.assignees" , function($query) {
+
+            $query->where("users.id",auth()->user()->id);
+
+        });
+
+
+
+        return $data;
+    }
+
+
 
     /**
      *
@@ -3971,7 +4051,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-employee",
+     *      path="/v1.0/business-employee-dashboard",
      *      operationId="getBusinessEmployeeDashboardData",
      *      tags={"dashboard_management.business_user"},
      *       security={
@@ -4311,7 +4391,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
              $widget = $dashboard_widgets->get("self_pension_expiries_in");
 
-
              $data["self_pension_expiries_in"]["id"] = $start_id++;
              if($widget) {
                  $data["self_pension_expiries_in"]["widget_id"] = $widget->id;
@@ -4330,6 +4409,88 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
              $data["self_pension_expiries_in"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
 
+
+
+
+
+             $data["self_holidays"] =  $this->self_holidays($today,
+             $start_date_of_next_month,
+             $end_date_of_next_month,
+             $start_date_of_this_month,
+             $end_date_of_this_month,
+             $start_date_of_previous_month,
+             $end_date_of_previous_month,
+             $start_date_of_next_week,
+             $end_date_of_next_week,
+             $start_date_of_this_week,
+             $end_date_of_this_week,
+             $start_date_of_previous_week,
+             $end_date_of_previous_week,
+             $all_manager_department_ids);
+
+
+            $widget = $dashboard_widgets->get("self_holidays");
+
+            $data["self_holidays"]["id"] = $start_id++;
+
+            if($widget) {
+                $data["self_holidays"]["widget_id"] = $widget->id;
+                $data["self_holidays"]["widget_order"] = $widget->widget_order;
+            }
+            else {
+                $data["self_holidays"]["widget_id"] = 0;
+                $data["self_holidays"]["widget_order"] = 0;
+            }
+
+
+
+            $data["self_holidays"]["widget_name"] = "self_holidays";
+
+            $data["self_holidays"]["widget_type"] = "dates";
+
+            $data["self_holidays"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
+
+
+
+
+
+
+            $data["self_tasks"] =  $this->self_tasks($today,
+            $start_date_of_next_month,
+            $end_date_of_next_month,
+            $start_date_of_this_month,
+            $end_date_of_this_month,
+            $start_date_of_previous_month,
+            $end_date_of_previous_month,
+            $start_date_of_next_week,
+            $end_date_of_next_week,
+            $start_date_of_this_week,
+            $end_date_of_this_week,
+            $start_date_of_previous_week,
+            $end_date_of_previous_week,
+            $all_manager_department_ids);
+
+
+           $widget = $dashboard_widgets->get("self_tasks");
+
+           $data["self_tasks"]["id"] = $start_id++;
+
+           if($widget) {
+               $data["self_tasks"]["widget_id"] = $widget->id;
+               $data["self_tasks"]["widget_order"] = $widget->widget_order;
+           }
+           else {
+               $data["self_tasks"]["widget_id"] = 0;
+               $data["self_tasks"]["widget_order"] = 0;
+           }
+
+
+
+           $data["self_tasks"]["widget_name"] = "self_tasks";
+
+           $data["self_tasks"]["widget_type"] = "dates";
+
+           $data["self_tasks"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
 
 
 

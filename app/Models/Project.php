@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
+
     use HasFactory;
     protected $appends = ['can_update','can_delete'];
 
@@ -20,7 +21,7 @@ class Project extends Model
         "is_active",
         "is_default",
         "business_id",
-        "created_by"
+        "created_by",
     ];
 
 
@@ -28,10 +29,13 @@ class Project extends Model
         $request = request();
         // You can now use $currentRequest as the request object
 
+
         if(!auth()->user()->hasRole("business_owner") && auth()->user()->id != $this->created_by) {
                 return 0;
         }
         return 1;
+
+
 
         }
 
@@ -56,7 +60,9 @@ class Project extends Model
     }
 
 
-
+    public function tasks() {
+        return $this->hasMany(Task::class, 'project_id', 'id');
+    }
 
     // public function getCreatedAtAttribute($value)
     // {

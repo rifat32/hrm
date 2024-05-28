@@ -22,13 +22,15 @@ use BasicUtil, AttendanceUtil;
 protected $holidayComponent;
 protected $workShiftHistoryComponent;
 protected $leaveComponent;
+protected $attendanceComponent;
 
-public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent)
+public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent)
 {
 
     $this->workShiftHistoryComponent = $workShiftHistoryComponent;
     $this->holidayComponent = $holidayComponent;
     $this->leaveComponent = $leaveComponent;
+    $this->attendanceComponent = $attendanceComponent;
 
 
 }
@@ -671,9 +673,6 @@ public function getRotaData($user_id,$joining_date) {
     $endOfMonth = $adjustDate(Carbon::now()->endOfMonth());
 
 
-
-
-
 $data["today"]["total_capacity_hours"] = $this->getScheduleInformationData($user_id,$startOfToday,$endOfToday)["total_capacity_hours"];
 $data["today"]["total_present_hours"] = $this->getTotalPresentHours($user_id,$startOfToday,$endOfToday);
 
@@ -684,8 +683,6 @@ $data["this_week"]["total_capacity_hours"] = $this->getScheduleInformationData($
 $data["this_week"]["total_present_hours"] = $this->getTotalPresentHours($user_id,$startOfWeek,$endOfWeek);
 
 
-
-
 $data["this_month"]["total_capacity_hours"] = $this->getScheduleInformationData($user_id,$startOfMonth,$endOfMonth)["total_capacity_hours"];
 $data["this_month"]["total_present_hours"] = $this->getTotalPresentHours($user_id,$startOfMonth,$endOfMonth);
 
@@ -694,6 +691,54 @@ $data["this_month"]["total_present_hours"] = $this->getTotalPresentHours($user_i
 return $data;
 
 
+}
+
+
+public function getHolodayDetails($all_manager_department_ids,$userId,$start_date = NULL, $end_date = NULL,$is_including_attendance = false,) {
+       // Retrieve the user based on the provided ID, ensuring it belongs to one of the managed departments
+       $user = User::with("roles")
+       ->where([
+           "id" => $userId
+       ])
+       ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+           $query->whereIn("departments.id", $all_manager_department_ids);
+       })
+       ->when(!auth()->user()->hasRole('superadmin'), function ($query)  {
+           return $query->where(function ($query) {
+               return  $query->where('created_by', auth()->user()->id)
+                   ->orWhere('id', auth()->user()->id)
+                   ->orWhere('business_id', auth()->user()->business_id);
+           });
+       })
+       ->first();
+
+   // If no user found, return 404 error
+   if (!$user) {
+       return response()->json([
+           "message" => "no user found"
+       ], 404);
+   }
+
+   // Get all parent department IDs of the user
+   $all_parent_department_ids = $this->all_parent_departments_of_user($userId);
+
+   // Set start and end date for the holiday period
+   $start_date = !empty($start_date) ? $start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+   $end_date = !empty($end_date) ? $end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+
+
+   // Process holiday dates
+   $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user->id, $all_parent_department_ids);
+
+
+   // Retrieve work shift histories for the user within the specified period
+   $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user->id,true);
+
+   // Initialize an empty collection to store weekend dates
+
+   $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $user->id, $work_shift_histories);
 
 
 
@@ -701,17 +746,29 @@ return $data;
 
 
 
+   // Process already taken leave dates
+   $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id);
+
+
+   $result_collection = collect($holiday_dates)->merge($weekend_dates)->merge($already_taken_leave_dates);
 
 
 
 
+   if (isset($is_including_attendance)) {
+       // Process already taken attendance dates
+   $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
+       if (intval($is_including_attendance) == 1) {
+           $result_collection = $result_collection->merge($already_taken_attendance_dates);
+       }
+   }
 
 
+   $unique_result_collection = $result_collection->unique();
 
+   $result_array = $unique_result_collection->values()->all();
 
-
-
-
+   return $result_array;
 }
 
 
