@@ -32,7 +32,7 @@ class ValidateDuplicateRotaUser implements Rule
             "user_id" => $value
         ])
         ->when(!empty($this->id), function($query) use($value) {
-            $query->whereNotIn("department_id",[$value]);
+            $query->whereNotIn("user_id",[$value]);
         })
         ->first();
 

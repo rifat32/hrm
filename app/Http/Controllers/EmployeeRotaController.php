@@ -158,18 +158,7 @@ class EmployeeRotaController extends Controller
                 }
                 $request_data = $request->validated();
 
-                if(empty($request_data['departments'])) {
-                    $request_data['departments'] = Department::where(
-                        [
 
-                        "business_id" => auth()->user()->business_id,
-                        "manager_id" => auth()->user()->id
-
-                        ]
-
-                        )
-                        ->pluck("id");
-                }
                 // @@@remove_field
                 $request_data["type"] = "flexible";
                 $request_data["is_personal"] = 0;
@@ -184,21 +173,45 @@ class EmployeeRotaController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_default"] = false;
 
-                $request_data["attendances_count"] = 0;
-                $employee_rota =  EmployeeRota::create($request_data);
-
-                $employee_rota->departments()->sync($request_data['departments']);
-                // $employee_rota->users()->sync($request_data['users'], []);
-
-             UserEmployeeRota::whereIn("user_id",$request_data['users'])->delete();
-             $employee_rota->users()->sync($request_data['users'], []);
 
 
 
 
-                $employee_rota->details()->createMany($request_data['details']);
+                if(!empty($request_data['departments'])){
+                    foreach($request_data['departments'] as $department_id) {
+                        $employee_rota =  EmployeeRota::create($request_data);
+                        $employee_rota->details()->createMany($request_data['details']);
+                        $employee_rota->departments()->sync([$department_id]);
+                    }
+                }
 
-                return response($employee_rota, 201);
+
+                if(!empty($request_data['users'])){
+                    foreach($request_data['users'] as $user_id) {
+                        $employee_rota =  EmployeeRota::create($request_data);
+                        $employee_rota->details()->createMany($request_data['details']);
+                        $employee_rota->users()->sync([$user_id]);
+                    }
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                return response(["ok" => true], 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -328,6 +341,7 @@ class EmployeeRotaController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
             return DB::transaction(function () use ($request) {
 
                 if (!$request->user()->hasPermissionTo('employee_rota_update')) {
@@ -341,9 +355,6 @@ class EmployeeRotaController extends Controller
                 if(empty($request_data['departments'])) {
                     $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
                 }
-
-
-
 
 
 
@@ -663,7 +674,7 @@ class EmployeeRotaController extends Controller
                         $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
                     })
                     ->orWhereHas("users", function($query) {
-                        $query->whereIn("users.id", [auth()->user()->id]);
+                        $query->whereNotIn("users.id", [auth()->user()->id]);
                     });
                 })
                 ;
@@ -852,9 +863,7 @@ class EmployeeRotaController extends Controller
                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
                         $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
                     })
-                    ->orWhereHas("users", function($query) {
-                        $query->whereIn("users.id", [auth()->user()->id]);
-                    });
+                   ;
                 })
                 ;
 
