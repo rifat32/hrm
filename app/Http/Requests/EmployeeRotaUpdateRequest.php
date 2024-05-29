@@ -37,22 +37,22 @@ class EmployeeRotaUpdateRequest extends FormRequest
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) use($all_manager_department_ids) {
-                    $work_shift = EmployeeRota::where('id', $value)
+                    $employeeRota = EmployeeRota::where('id', $value)
                         ->where('employee_rotas.business_id', '=', auth()->user()->business_id)
-                        ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        ->where(function($query) use ($all_manager_department_ids){
+                            $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            })
+                            ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });
                         })
                         ->first();
-                    if (!$work_shift) {
+                    if (!$employeeRota) {
                         $fail($attribute . " is invalid.");
                         return;
                     }
-                    if($work_shift->is_default == 1 && $work_shift->business_id == NULL && !auth()->user()->hasRole("superadmin")){
 
-                            $fail($attribute . " is invalid. you are not a super admin.");
-                            return;
-
-                    }
                 },
             ],
 
@@ -72,7 +72,7 @@ class EmployeeRotaUpdateRequest extends FormRequest
 
 
             'departments' => 'present|array',
-            
+
             'departments.*' => [
 
                 'numeric',

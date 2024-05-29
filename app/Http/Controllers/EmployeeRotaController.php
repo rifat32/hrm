@@ -863,22 +863,17 @@ class EmployeeRotaController extends Controller
                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
                         $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
                     })
-                   ;
+                    ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids, $user_department) {
+                        $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
+                    });
                 })
                 ;
 
             })
 
-            ->orWhere(function($query){
-                $query->where([
-                    "is_active" => 1,
-                    "business_id" => NULL,
-                    "is_default" => 1
-                ]);
 
-            })
                 ->first();
-            if (!$employee_rota) {
+            if (empty($employee_rota)) {
 
                 return response()->json([
                     "message" => "no employee rota found"
