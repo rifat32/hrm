@@ -187,9 +187,15 @@ use BasicUtil;
 
             $data['data'] = $attendances;
 
+            // Calculate total active hours.
+            $data['data_highlights']['total_active_hours'] = $attendances->sum('total_paid_hours');
+
+                // Calculate total extra hours.
+            $data['data_highlights']['total_extra_hours'] = $attendances->sum('overtime_hours');
+
     // Calculate behavior counts.
             $behavior_counts = [
-                'absent' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'absent')->count(),
+                'absent' => $attendances->filter(fn ($attendance) => ($attendance->behavior === 'absent'|| $attendance->is_present === 0))->count(),
                 'regular' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'regular')->count(),
                 'early' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'early')->count(),
                 'late' => $attendances->filter(fn ($attendance) => $attendance->behavior === 'late')->count(),
@@ -210,10 +216,10 @@ use BasicUtil;
 
              // Calculate total leave hours.
             // $data['data_highlights']['total_leave_hours'] =  $attendances->sum('leave_hours');
-            $data['data_highlights']['total_leave_hours'] =  0;
+            // $data['data_highlights']['total_leave_hours'] =  0;
 
              // Calculate total available hours.
-            $total_available_hours = $data['data_highlights']['total_schedule_hours'] - $data['data_highlights']['total_leave_hours'];
+            $total_available_hours = $data['data_highlights']['total_active_hours'] - $data['data_highlights']['total_extra_hours'];
 
 
                 // Calculate work availability percentage.
@@ -236,11 +242,7 @@ use BasicUtil;
                 $data['data_highlights']['work_availability'] = 'good';
             }
 
-                // Calculate total active hours.
-            $data['data_highlights']['total_active_hours'] = $attendances->sum('total_paid_hours');
 
-                // Calculate total extra hours.
-            $data['data_highlights']['total_extra_hours'] = $attendances->sum('overtime_hours');
 
 
             return $data;
