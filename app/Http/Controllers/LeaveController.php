@@ -382,6 +382,7 @@ class LeaveController extends Controller
 
 
                 $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"], $request_data["is_approved"]);
+
                 if (!$process_leave_approval["success"]) {
 
                     return response([

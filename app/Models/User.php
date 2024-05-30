@@ -166,6 +166,10 @@ return count($all_departments) > 0;
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
     }
 
+    public function department_user() {
+        return $this->belongsTo(DepartmentUser::class,  'id', 'user_id');
+    }
+
 
     public function recruitment_processes() {
         return $this->hasMany(UserRecruitmentProcess::class, 'user_id', 'id');

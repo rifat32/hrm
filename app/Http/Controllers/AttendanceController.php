@@ -2089,7 +2089,7 @@ class AttendanceController extends Controller
                         return false;
                     }
 
-                    if (!$work_shift_details->start_at || !$work_shift_details->end_at) {
+                    if (!$work_shift_details->start_at || !$work_shift_details->end_at || $work_shift_details->is_weekend) {
                         return false;
                     }
 

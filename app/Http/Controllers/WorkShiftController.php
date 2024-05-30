@@ -206,6 +206,15 @@ if($request_data["type"] !== "flexible") {
 
                 $work_shift->departments()->sync($request_data['departments']);
                 // $work_shift->users()->sync($request_data['users'], []);
+
+                $request_data['details'] = collect($request_data['details'])->map(function ($el) {
+
+if($el["is_weekend"]) {
+    $el["start_at"] = NULL;
+    $el["is_weekend"] = NULL;
+}
+                    return $el;
+                })->toArray();
                 $work_shift->details()->createMany($request_data['details']);
 
 

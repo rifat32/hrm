@@ -610,12 +610,13 @@ trait PayrunUtil
     {
 
         $leave_record_arrear =   LeaveRecordArrear::where(["leave_record_id" => $leave_record->id])->first();
+
         $payroll = Payroll::whereHas("payroll_leave_records", function ($query) use ($leave_record) {
             $query->where("payroll_leave_records.leave_record_id", $leave_record->id);
         })->first();
 
-        if (!$payroll) {
-            if (!$leave_record_arrear) {
+        if (empty($payroll)) {
+            if (empty($leave_record_arrear)) {
                 if ($leave_record->leave->status == "approved" || $leave_record->leave->leave_type->type == "paid") {
                 $this->create_leave_arrear($leave_record, $add_to_next_payroll);
 
@@ -691,6 +692,9 @@ trait PayrunUtil
     }
     public function recalculate_payroll_values($payroll)
     {
+        if(empty($payroll)) {
+          return NULL;
+        }
 
         if ($payroll->payroll_holidays->isNotEmpty()) {
             $total_holiday_hours = 0;
