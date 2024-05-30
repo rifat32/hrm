@@ -9,6 +9,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
 use App\Models\JobListing;
+use App\Models\LeaveRecord;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -17,6 +18,90 @@ use Illuminate\Http\Request;
 class DashboardManagementControllerV2 extends Controller
 {
     use ErrorUtil, BusinessUtil, UserActivityUtil, BasicUtil, AttendanceUtil;
+
+    public function leaves(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status,
+        $show_my_data = false
+    ) {
+
+        $data_query  = LeaveRecord::when(
+            $show_my_data,
+            function ($query)  {
+                $query->where('leaves.user_id', auth()->user()->id);
+            },
+            function ($query) use ($all_manager_department_ids,) {
+
+                $query->whereHas("leave.employee.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+
+                });
+
+            }
+        )
+
+
+
+
+
+            ->whereHas("leave", function ($query) use ($status) {
+                $query->where([
+                    "leaves.business_id" => auth()->user()->business_id,
+                    "leaves.status" => $status
+                ]);
+            });
+
+        $data["total_data_count"] = $data_query->count();
+
+        $data["today_data_count"] = clone $data_query;
+        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+        $data["yesterday_data_count"] = clone $data_query;
+        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+
+        $data["next_week_data_count"] = clone $data_query;
+        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week_data_count"] = clone $data_query;
+        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+        $data["previous_week_data_count"] = clone $data_query;
+        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+
+        $data["next_month_data_count"] = clone $data_query;
+        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month_data_count"] = clone $data_query;
+        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+        $data["previous_month_data_count"] = clone $data_query;
+        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+
+        $data["date_ranges"] = [
+            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
+            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
+          ];
+        return $data;
+    }
 
 
     public function getData($data_query,$dateField,$dates) {
@@ -207,12 +292,6 @@ return $data;
 $absent_count++;
              }
 
-
-
-
-
-
-
             }
          }
          return $absent_count;
@@ -277,10 +356,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
         ]);
 
 
-
-
         $data["today"] = $this->calculateAbsent($all_manager_user_ids, $today, $data_query);
-
 
         $data["monthly"] = $this->getAbsentData(
             $all_manager_user_ids,
@@ -294,6 +370,109 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
     );
 
     $data["weekly"] = $this->getAbsentData(
+        $all_manager_user_ids,
+        $data_query,
+        [
+            "start_date" => $start_date_of_this_week,
+            "end_date" => $end_date_of_this_week,
+            "previous_start_date" => $start_date_of_previous_week,
+            "previous_end_date" => $end_date_of_previous_week,
+        ]
+);
+
+
+        return $data;
+    }
+
+
+    public function calculatePresent($all_manager_user_ids,$date,$data_query){
+
+        $present_count = 0;
+         foreach($all_manager_user_ids as $user_id){
+
+            if(!$this->checkHoliday($date,$user_id)) {
+
+             $data_query = clone $data_query;
+             $attendance = $data_query->where("in_date",$date)->first();
+             if(!empty($attendance)) {
+    $present_count++;
+             }
+
+            }
+         }
+         return $present_count;
+
+    }
+    public function getPresentData($all_manager_user_ids,$data_query,$dates) {
+        $data["current_amount"] = 0;
+        $data["last_amount"] = 0;
+        $data["data"] = [];
+
+        $start_date = Carbon::parse($dates["start_date"]);
+        $end_date = Carbon::parse(($dates["end_date"] . ' 23:59:59'));
+        // Loop through each day in the date range
+        for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+            // Store the count of records for the current date
+            $data["data"][$date->toDateString()] = $this->calculatePresent($all_manager_user_ids, $date, $data_query);
+            $data["current_amount"] = $data["current_amount"] + $data["data"][$date->toDateString()];
+        }
+
+
+    $previous_start_date = Carbon::parse($dates["previous_start_date"]);
+    $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
+
+        // Loop through each day in the date range
+        for ($date = $previous_start_date->copy(); $date->lte($previous_end_date); $date->addDay()) {
+            // Store the count of records for the current date
+            $previous_data = $this->calculatePresent($all_manager_user_ids, $date, $data_query);
+            $data["last_amount"] = $data["last_amount"] + $previous_data;
+
+        }
+
+        return $data;
+
+      }
+    public function present(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+
+    ) {
+
+        $all_manager_user_ids = $this->get_all_user_of_manager($all_manager_department_ids);
+
+
+        $data_query  = Attendance::where([
+            "is_present" => 1
+        ]);
+
+
+        $data["today"] = $this->calculatePresent($all_manager_user_ids, $today, $data_query);
+
+        $data["monthly"] = $this->getPresentData(
+            $all_manager_user_ids,
+            $data_query,
+            [
+                "start_date" => $start_date_of_this_week,
+                "end_date" => $end_date_of_this_week,
+                "previous_start_date" => $start_date_of_previous_week,
+                "previous_end_date" => $end_date_of_previous_week,
+            ]
+    );
+
+    $data["weekly"] = $this->getPresentData(
         $all_manager_user_ids,
         $data_query,
         [
@@ -456,6 +635,23 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
             );
 
 
+            $data["present"] = $this->present(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
 
 
 
