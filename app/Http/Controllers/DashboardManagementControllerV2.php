@@ -19,6 +19,56 @@ class DashboardManagementControllerV2 extends Controller
 {
     use ErrorUtil, BusinessUtil, UserActivityUtil, BasicUtil, AttendanceUtil;
 
+
+    function getLast12MonthsDates() {
+        $dates = [];
+        $currentDate = Carbon::now();
+
+        for ($i = 0; $i < 12; $i++) {
+            $startOfMonth = $currentDate->copy()->subMonths($i)->startOfMonth()->toDateString();
+            $endOfMonth = $currentDate->copy()->subMonths($i)->endOfMonth()->toDateString();
+            $monthName = $currentDate->copy()->subMonths($i)->format('F');
+
+            $dates[] = [
+                'month' => $monthName,
+                'start_date' => $startOfMonth,
+                'end_date' => $endOfMonth,
+            ];
+        }
+
+        return $dates;
+    }
+
+
+    public function getLeaveData($data_query, $start_date = "",$end_date = "") {
+
+    $data_query = $data_query->when((!empty($start_date) && !empty($end_date)), function($query) use($start_date,$end_date) {
+          $query->whereBetween("date", [$start_date, ($end_date . ' 23:59:59')]);
+    });
+    $data["total_requested"] = clone $data_query;
+        $data["total_requested"] = $data["total_requested"]
+        ->count();
+
+        $data["total_pending"] = clone $data_query;
+        $data["total_pending"] = $data["total_pending"]->where([
+              "status" => "pending_approval"
+        ])->count();
+
+        $data["total_approved"] = clone $data_query;
+        $data["total_approved"] = $data["total_approved"]->where([
+              "status" => "approved"
+        ])->count();
+
+        $data["total_rejected"] = clone $data_query;
+        $data["total_rejected"] = $data["total_pending"]->where([
+              "status" => "rejected"
+        ])->count();
+
+
+
+
+        return $data;
+    }
     public function leaves(
         $today,
         $start_date_of_next_month,
@@ -34,7 +84,6 @@ class DashboardManagementControllerV2 extends Controller
         $start_date_of_previous_week,
         $end_date_of_previous_week,
         $all_manager_department_ids,
-        $status,
         $show_my_data = false
     ) {
 
@@ -57,49 +106,30 @@ class DashboardManagementControllerV2 extends Controller
 
 
 
-            ->whereHas("leave", function ($query) use ($status) {
+            ->whereHas("leave", function ($query)  {
                 $query->where([
                     "leaves.business_id" => auth()->user()->business_id,
-                    "leaves.status" => $status
                 ]);
             });
 
-        $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+$data["individual_total"] = $this->getLeaveData($data_query);
 
-        $data["yesterday_data_count"] = clone $data_query;
-        $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
+$last12MonthsDates = $this->getLast12MonthsDates();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+foreach ($last12MonthsDates as $month) {
+    $data["data"][] = [
+        "month" => $month['month'],
+        $this->getLeaveData($data_query,$month['start_date'],$month['end_date'])
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+    ];
+}
 
-        $data["previous_week_data_count"] = clone $data_query;
-        $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
-        $data["previous_month_data_count"] = clone $data_query;
-        $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
-        $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
-            "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
-            "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
-            "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
-          ];
+
         return $data;
     }
 
@@ -654,6 +684,46 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
             );
 
 
+            $data["leaves"] = $this->leaves(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+
+
+            $data["holidays"] = $this->leaves(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+
+
+
+
 
 
         return response()->json($data, 200);
@@ -685,43 +755,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
              $data["employee_on_holiday"]["widget_type"] = "default";
              $data["employee_on_holiday"]["route"] =  '/employee/all-employees?is_on_holiday=1&';
 
-             $start_id = 3;
-             $leave_statuses = ['pending_approval','in_progress', 'approved','rejected'];
 
-             foreach ($leave_statuses as $leave_status) {
-                 $data[($leave_status . "_leaves")] = $this->leaves(
-                     $today,
-                     $start_date_of_next_month,
-                     $end_date_of_next_month,
-                     $start_date_of_this_month,
-                     $end_date_of_this_month,
-                     $start_date_of_previous_month,
-                     $end_date_of_previous_month,
-                     $start_date_of_next_week,
-                     $end_date_of_next_week,
-                     $start_date_of_this_week,
-                     $end_date_of_this_week,
-                     $start_date_of_previous_week,
-                     $end_date_of_previous_week,
-                     $all_manager_department_ids,
-                     $leave_status
-                 );
-
-
-
-
-                 $data[($leave_status . "_leaves")]["id"] = $start_id++;
-
-
-
-
-                 $data[($leave_status . "_leaves")]["widget_name"] = ($leave_status . "_leaves");
-
-                 $data[($leave_status . "_leaves")]["widget_type"] = "default";
-
-
-                 $data[($leave_status . "_leaves")]["route"] = ('/leave/leaves?status=' . $leave_status . "&");
-             }
 
 
 
@@ -749,7 +783,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-             $data["upcoming_passport_expiries"]["id"] =$start_id++;
+
 
 
 
@@ -779,7 +813,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-             $data["upcoming_visa_expiries"]["id"] = $start_id++;
+
 
 
 
@@ -810,7 +844,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-             $data["upcoming_right_to_work_expiries"]["id"] = $start_id++;
+
 
 
 
@@ -850,7 +884,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-             $data["upcoming_sponsorship_expiries"]["id"] = $start_id++;
+
 
 
 
@@ -885,7 +919,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-                 $data[($sponsorship_status . "_sponsorships")]["id"] = $start_id++;
+
 
 
 
@@ -927,7 +961,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-             $data["upcoming_pension_expiries"]["id"] = $start_id++;
+
 
 
 
@@ -963,12 +997,6 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-                 $data[($pension_status . "_pensions")]["id"] = $start_id++;
-
-
-
-
-
                  $data[($pension_status . "_pensions")]["widget_name"] = ($pension_status . "_pensions");
                  $data[($pension_status . "_pensions")]["widget_type"] = "default";
                  $data[($pension_status . "_pensions")]["route"] = '/employee/all-employees?pension_scheme_status=' . $pension_status . "&";
@@ -997,39 +1025,11 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
                  );
 
 
-
-                 $data["emplooyment_status_wise"]["id"] = $start_id++;
-
-
-
-
-
                  $data["emplooyment_status_wise"]["widget_name"] = "employment_status_wise_employee";
                  $data["emplooyment_status_wise"]["widget_type"] = "graph";
 
                  $data["emplooyment_status_wise"]["route"] = ('/employee/?status=' . $employment_status->name . "&");
              }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1058,7 +1058,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"] . ' 23:59:59'));
 
 
 
-             $data["present_today"]["id"] = $start_id++;
+
 
 
 

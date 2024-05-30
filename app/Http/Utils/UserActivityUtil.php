@@ -14,21 +14,20 @@ trait UserActivityUtil
     {
 
  $user = auth()->user();
- $authorizationHeader = request()->header('Authorization');
 
- // Now you can parse or use the $authorizationHeader as needed
- // For example, to extract the token from a Bearer token:
- $token = str_replace('Bearer ', '', $authorizationHeader);
+
+
 $activityLog = [
+
     "api_url" => $request->fullUrl(),
     "fields" => json_encode(request()->all()),
-    "token" => $token,
-    "user"=> !empty($user)?(json_encode($user)):"",
-    "user_id"=> !empty($user)?$user->id:"",
+    "token" => request()->bearerToken()?request()->bearerToken():"",
+    "user" => auth()->user() ? json_encode(auth()->user()) : "",
+    "user_id" => auth()->user() ?auth()->user()->id:"",
+    "ip_address" => request()->header('X-Forwarded-For'),
+    "request_method" => $request->method(),
     "activity"=> $activity,
     "description"=> $description,
-    "ip_address" =>  $request->header('X-Forwarded-For'),
-    "request_method"=>$request->method(),
     "device" => $request->header('User-Agent')
 ];
          ActivityLog::create($activityLog);

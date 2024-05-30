@@ -8444,478 +8444,6 @@
                 ]
             }
         },
-        "/v1.0/business-owner-dashboard/jobs-in-area/{business_id}": {
-            "get": {
-                "tags": [
-                    "dashboard_management.business_owner"
-                ],
-                "summary": "This should return list of jobs posted by drivers within same city and which are still not finalised and this business owner have not applied yet.",
-                "description": "This should return list of jobs posted by drivers within same city and which are still not finalised and this business owner have not applied yet.",
-                "operationId": "getBusinessOwnerDashboardDataJobList",
-                "parameters": [
-                    {
-                        "name": "business_id",
-                        "in": "path",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "start_date",
-                        "in": "query",
-                        "description": "start_date",
-                        "required": true,
-                        "example": "2019-06-29"
-                    },
-                    {
-                        "name": "end_date",
-                        "in": "query",
-                        "description": "end_date",
-                        "required": true,
-                        "example": "2019-06-29"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/business-owner-dashboard/jobs-application/{business_id}": {
-            "get": {
-                "tags": [
-                    "dashboard_management.business_owner"
-                ],
-                "summary": "Total number of Jobs in the area and out of which total number of jobs this business owner have applied",
-                "description": "Total number of Jobs in the area and out of which total number of jobs this business owner have applied",
-                "operationId": "getBusinessOwnerDashboardDataJobApplications",
-                "parameters": [
-                    {
-                        "name": "business_id",
-                        "in": "path",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/business-owner-dashboard/winned-jobs-application/{business_id}": {
-            "get": {
-                "tags": [
-                    "dashboard_management.business_owner"
-                ],
-                "summary": "Total Job Won( Total job User have selcted this business )",
-                "description": "Total Job Won( Total job User have selcted this business )",
-                "operationId": "getBusinessOwnerDashboardDataWinnedJobApplications",
-                "parameters": [
-                    {
-                        "name": "business_id",
-                        "in": "path",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/business-owner-dashboard/completed-bookings/{business_id}": {
-            "get": {
-                "tags": [
-                    "dashboard_management.business_owner"
-                ],
-                "summary": "Total completed Bookings Total Bookings completed by this business owner",
-                "description": "Total completed Bookings Total Bookings completed by this business owner",
-                "operationId": "getBusinessOwnerDashboardDataCompletedBookings",
-                "parameters": [
-                    {
-                        "name": "business_id",
-                        "in": "path",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/business-owner-dashboard/upcoming-jobs/{business_id}/{duration}": {
-            "get": {
-                "tags": [
-                    "dashboard_management.business_owner"
-                ],
-                "summary": "Total completed Bookings Total Bookings completed by this business owner",
-                "description": "Total completed Bookings Total Bookings completed by this business owner",
-                "operationId": "getBusinessOwnerDashboardDataUpcomingJobs",
-                "parameters": [
-                    {
-                        "name": "business_id",
-                        "in": "path",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "duration",
-                        "in": "path",
-                        "description": "duration",
-                        "required": true,
-                        "example": "7"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/business-owner-dashboard/expiring-affiliations/{business_id}/{duration}": {
-            "get": {
-                "tags": [
-                    "dashboard_management.business_owner"
-                ],
-                "summary": "Total completed Bookings Total Bookings completed by this business owner",
-                "description": "Total completed Bookings Total Bookings completed by this business owner",
-                "operationId": "getBusinessOwnerDashboardDataExpiringAffiliations",
-                "parameters": [
-                    {
-                        "name": "business_id",
-                        "in": "path",
-                        "description": "business_id",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
-                        "name": "duration",
-                        "in": "path",
-                        "description": "duration",
-                        "required": true,
-                        "example": "7"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/v1.0/business-user-dashboard": {
             "get": {
                 "tags": [
@@ -9281,6 +8809,71 @@
                 "summary": "get all dashboard data combined",
                 "description": "get all dashboard data combined",
                 "operationId": "getDataCollectorDashboardData",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/business-manager-dashboard": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardData",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -40381,7 +39974,7 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "id": {
+                                    "user_id": {
                                         "type": "string",
                                         "format": "number",
                                         "example": "1"

@@ -337,7 +337,7 @@ const data = {
       },
     },
 
-    
+
     absent: {
       total:10, // Today absent
       monthly: {
@@ -758,6 +758,9 @@ const data = {
           total_approved: 220,
           total_rejected: 340,
         },
+
+
+
       ],
     },
 
