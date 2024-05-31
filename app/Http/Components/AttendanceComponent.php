@@ -145,7 +145,7 @@ use BasicUtil;
             "business_id" => auth()->user()->business_id
         ])
             ->first();
-        if (!$setting_attendance) {
+        if (empty($setting_attendance)) {
             throw new Exception("Please define attendance setting first", 400);
         }
         return $setting_attendance;

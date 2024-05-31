@@ -134,7 +134,7 @@ class ReminderScheduler extends Command
                 ->first();
 
             // Skip iteration if business not found or inactive
-            if (!$business) {
+            if (empty($business)) {
                 // Log that the business is not found or inactive
                 Log::warning('Business not found or inactive, skipping...');
                 continue;
@@ -193,7 +193,7 @@ class ReminderScheduler extends Command
                                 ->orderByDesc("id")
                                 ->first();
 
-                            if (!$current_data) {
+                            if (empty($current_data)) {
                                 return NULL;
                             }
 

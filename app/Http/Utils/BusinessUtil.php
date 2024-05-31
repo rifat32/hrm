@@ -61,7 +61,7 @@ trait BusinessUtil
         }
 
         $business =  $businessQuery->first();
-        if (!$business) {
+        if (empty($business)) {
             return false;
         }
         return $business;

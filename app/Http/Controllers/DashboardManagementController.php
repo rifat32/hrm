@@ -1667,7 +1667,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 ->orderByDesc("id")
                 ->first();
 
-                if(!$current_data)
+                if(empty($current_data))
                 {
                     return NULL;
                 }
@@ -1786,7 +1786,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 ->orderByDesc("id")
                 ->first();
 
-                if(!$current_data)
+                if(empty($current_data))
                 {
                     return NULL;
                 }

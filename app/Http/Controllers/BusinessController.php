@@ -1177,7 +1177,7 @@ class BusinessController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$business) {
+                if (empty($business)) {
                     return response()->json([
                         "massage" => "something went wrong"
                     ], 500);
@@ -1357,7 +1357,7 @@ class BusinessController extends Controller
                 ])
                 ->first();
 
-                if(!$business) {
+                if(empty($business)) {
                      throw new Exception("something went wrong!");
                 }
                 $pension_scheme_data =  collect($request_data['business'])->only([
@@ -1401,7 +1401,7 @@ class BusinessController extends Controller
 
 
 
-                if (!$business) {
+                if (empty($business)) {
                     return response()->json([
                         "massage" => "something went wrong"
                     ], 500);
@@ -1519,7 +1519,7 @@ class BusinessController extends Controller
             $business =  $businessQuery->first();
 
 
-            if (!$business) {
+            if (empty($business)) {
 
                 return response()->json([
                     "message" => "no business found"
@@ -1679,7 +1679,7 @@ class BusinessController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$business) {
+                if (empty($business)) {
 
                     return response()->json([
                         "massage" => "no business found"

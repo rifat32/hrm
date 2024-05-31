@@ -62,7 +62,7 @@ return true;
         $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
             ->where('setting_leaves.is_default', 0)
             ->first();
-        if (!$setting_leave) {
+        if (empty($setting_leave)) {
             return response()->json(
                 ["message" => "No leave setting found."]
             );

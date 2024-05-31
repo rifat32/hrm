@@ -265,7 +265,7 @@ class AuthController extends Controller
                     "id" =>$user->business_id
                  ])
                  ->first();
-                 if(!$business) {
+                 if(empty($business)) {
 
 
                     return response(['message' => 'Your business not found'], 403);
@@ -458,7 +458,7 @@ $datediff = $now - $user_created_date;
                     "id" =>$user->business_id
                  ])
                  ->first();
-                 if(!$business) {
+                 if(empty($business)) {
 
 
                     return response(['message' => 'Your business not found'], 403);

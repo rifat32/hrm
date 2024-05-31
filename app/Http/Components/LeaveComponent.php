@@ -81,7 +81,7 @@ class LeaveComponent
         $leave_data
         ) {
              // Check if it's feasible to take leave
-        if ((!$work_shift_details->is_weekend && (!$holiday || !$holiday->is_active) && !$previous_leave && !$previous_attendance)) {
+        if ((empty($work_shift_details->is_weekend) && (empty($holiday)|| empty($holiday->is_active)) && empty($previous_leave) && empty($previous_attendance))) {
               // Convert shift times to Carbon instances
         $leave_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
         $leave_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
@@ -312,12 +312,12 @@ public function validateLeaveAvailability($leave) {
     $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
     ->where('setting_leaves.is_default', 0)
     ->first();
-if (!$setting_leave) {
+if (empty($setting_leave)) {
     return response()->json(
         ["message" => "No leave setting found."]
     );
 }
-if (!$setting_leave->start_month) {
+if (empty($setting_leave->start_month)) {
     $setting_leave->start_month = 1;
 }
 
@@ -332,7 +332,7 @@ where([
 
     ->first();
 
-    if(!$leave_type){
+    if(empty($leave_type)){
         return false;
     }
 

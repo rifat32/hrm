@@ -446,7 +446,7 @@ class ModuleController extends Controller
              $business =  $businessQuery->first();
 
 
-             if (!$business) {
+             if (empty($business)) {
 
                  return response()->json([
                      "message" => "no business found"
