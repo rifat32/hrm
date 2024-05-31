@@ -173,6 +173,556 @@ foreach ($last12MonthsDates as $month) {
     }
 
 
+
+
+    public function getPensionExpiries(
+    $all_manager_department_ids,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week){
+
+        $issue_date_column = 'pension_enrollment_issue_date';
+        $expiry_date_column = 'pension_re_enrollment_due_date';
+
+
+        $employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+            $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+        ->whereHas("employee", function ($query)  {
+            $query->where("users.pension_eligible",">",0);
+        })
+        ->whereNotIn('user_id', [auth()->user()->id])
+        ->where($issue_date_column, '<', now())
+        ->whereNotNull($expiry_date_column)
+        ->groupBy('user_id')
+        ->get()
+        ->map(function ($record) use ($issue_date_column) {
+            $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+            ->where("pension_eligible", 1)
+            ->where($issue_date_column, '<', now())
+                ->orderByDesc("id")
+                ->first();
+
+                if(empty($current_data))
+                {
+                    return NULL;
+                }
+
+
+                return $current_data->id;
+        })
+        ->filter()->values();
+
+        $data_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids)->where($expiry_date_column,">=", today());
+
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+
+
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+
+
+
+        $expires_in_days = [15,30,60];
+        foreach($expires_in_days as $expires_in_day){
+            $query_day = Carbon::now()->addDays($expires_in_day);
+            $data[("in_". $expires_in_day ."_days")] = clone $data_query;
+            $data[("in_". $expires_in_day ."_days")] = $data[("in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+        }
+
+
+        return $data;
+    }
+
+
+    public function getPassportExpiries(
+        $all_manager_department_ids,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week){
+
+            $issue_date_column = 'passport_issue_date';
+            $expiry_date_column = 'passport_expiry_date';
+
+
+            $employee_passport_history_ids = EmployeePassportDetailHistory::select('user_id')
+            ->where("business_id",auth()->user()->business_id)
+            ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+            })
+            ->whereNotIn('user_id', [auth()->user()->id])
+            ->where($issue_date_column, '<', now())
+            ->groupBy('user_id')
+            ->get()
+            ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+                $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $record->user_id)
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc($expiry_date_column)
+                // ->latest()
+                ->first();
+
+                if($latest_expired_record) {
+                     $current_data = EmployeePassportDetailHistory::where('user_id', $record->user_id)
+                    ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                    ->where($issue_date_column, '<', now())
+                    ->orderByDesc($issue_date_column)
+                    ->first();
+                } else {
+                   return NULL;
+                }
+                    return $current_data?$current_data->id:NULL;
+            })
+            ->filter()->values();
+
+
+
+            $data_query  = EmployeePassportDetailHistory::whereIn('id', $employee_passport_history_ids)
+            ->where($expiry_date_column,">=", today());
+
+
+
+
+
+            $data["today"] = clone $data_query;
+            $data["today"] = $data["today"]->whereBetween('passport_expiry_date', [today()->startOfDay(), today()->copy()->endOfDay()])->count();
+
+
+
+            $data["next_week"] = clone $data_query;
+            $data["next_week"] = $data["next_week"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+            $data["this_week"] = clone $data_query;
+            $data["this_week"] = $data["this_week"]->whereBetween('passport_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+            $data["next_month"] = clone $data_query;
+            $data["next_month"] = $data["next_month"]->whereBetween('passport_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+            $data["this_month"] = clone $data_query;
+            $data["this_month"] = $data["this_month"]->whereBetween('passport_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+            $expires_in_days = [15,30,60];
+            foreach($expires_in_days as $expires_in_day){
+                $query_day = Carbon::now()->addDays($expires_in_day);
+                $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('passport_expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+            }
+
+            return $data;
+        }
+
+
+        public function getVisaExpiries(
+
+            $all_manager_department_ids,
+            $start_date_of_next_month,
+            $end_date_of_next_month,
+            $start_date_of_this_month,
+            $end_date_of_this_month,
+            $start_date_of_previous_month,
+            $end_date_of_previous_month,
+            $start_date_of_next_week,
+            $end_date_of_next_week,
+            $start_date_of_this_week,
+            $end_date_of_this_week,
+            $start_date_of_previous_week,
+            $end_date_of_previous_week
+
+            ){
+
+                $issue_date_column = 'visa_issue_date';
+                $expiry_date_column = 'visa_expiry_date';
+
+
+                $employee_visa_history_ids = EmployeeVisaDetailHistory::
+                select('user_id')
+                ->where("business_id",auth()->user()->business_id)
+                ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->whereNotIn('user_id', [auth()->user()->id])
+                ->where($issue_date_column, '<', now())
+                ->groupBy('user_id')
+                ->get()
+                ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+                    $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $record->user_id)
+                    ->where($issue_date_column, '<', now())
+                    ->orderByDesc($expiry_date_column)
+                    // ->latest()
+                    ->first();
+
+                    if($latest_expired_record) {
+                         $current_data = EmployeeVisaDetailHistory::where('user_id', $record->user_id)
+                        ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                        ->where($issue_date_column, '<', now())
+                        ->orderByDesc($issue_date_column)
+                        ->first();
+                    } else {
+                       return NULL;
+                    }
+
+
+                        return $current_data?$current_data->id:NULL;
+                })
+                ->filter()->values();
+
+
+                $data_query  = EmployeeVisaDetailHistory::
+                whereIn('id', $employee_visa_history_ids)
+                ->where($expiry_date_column,">=", today());
+
+
+
+                $data["today"] = clone $data_query;
+                $data["today"] = $data["today"]
+                ->whereBetween('visa_expiry_date', [today()->startOfDay(), today()->endOfDay()])->count();
+
+
+
+                $data["next_week"] = clone $data_query;
+                $data["next_week"] = $data["next_week"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+                $data["this_week"] = clone $data_query;
+                $data["this_week"] = $data["this_week"]->whereBetween('visa_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+                $data["next_month"] = clone $data_query;
+                $data["next_month"] = $data["next_month"]->whereBetween('visa_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+                $data["this_month"] = clone $data_query;
+                $data["this_month"] = $data["this_month"]->whereBetween('visa_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+                $expires_in_days = [15,30,60];
+                foreach($expires_in_days as $expires_in_day){
+                    $query_day = Carbon::now()->addDays($expires_in_day);
+                    $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                    $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('visa_expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                }
+                    return $data;
+            }
+
+
+
+            public function getRightToWorkExpiries(
+                $all_manager_department_ids,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week
+                ){
+
+                    $issue_date_column = 'right_to_work_check_date';
+                    $expiry_date_column = 'right_to_work_expiry_date';
+
+
+                    $employee_right_to_work_history_ids = EmployeeRightToWorkHistory::select('user_id')
+                    ->where("business_id",auth()->user()->business_id)
+                    ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    })
+                    ->whereNotIn('user_id', [auth()->user()->id])
+                    ->where($issue_date_column, '<', now())
+                    ->groupBy('user_id')
+                    ->get()
+                    ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+                        $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $record->user_id)
+                        ->where($issue_date_column, '<', now())
+                        ->orderByDesc($expiry_date_column)
+                        // ->latest()
+                        ->first();
+
+                        if($latest_expired_record) {
+                             $current_data = EmployeeRightToWorkHistory::where('user_id', $record->user_id)
+                            ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                            ->where($issue_date_column, '<', now())
+                            ->orderByDesc($issue_date_column)
+                            ->first();
+                        } else {
+                           return NULL;
+                        }
+
+
+                        return $current_data?$current_data->id:NULL;
+                    })
+                    ->filter()->values();
+
+
+
+                    $data_query  = EmployeeRightToWorkHistory::whereIn('id', $employee_right_to_work_history_ids)
+                    ->where($expiry_date_column,">=", today());
+
+
+
+
+                    $data["today"] = clone $data_query;
+                    $data["today"] = $data["today"]->whereBetween('right_to_work_expiry_date', [today()->startOfDay(), today()->endOfDay()])->count();
+
+
+
+                    $data["next_week"] = clone $data_query;
+                    $data["next_week"] = $data["next_week"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+                    $data["this_week"] = clone $data_query;
+                    $data["this_week"] = $data["this_week"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+                    $data["next_month"] = clone $data_query;
+                    $data["next_month"] = $data["next_month"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+                    $data["this_month"] = clone $data_query;
+                    $data["this_month"] = $data["this_month"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+                    $expires_in_days = [15,30,60];
+                    foreach($expires_in_days as $expires_in_day){
+                        $query_day = Carbon::now()->addDays($expires_in_day);
+                        $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                        $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('right_to_work_expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                    }
+
+
+
+                        return $data;
+                }
+
+
+                public function getSponsorshipExpiries(
+                    $all_manager_department_ids,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week
+                    ){
+
+                        $issue_date_column = 'date_assigned';
+                        $expiry_date_column = 'expiry_date';
+
+
+                        $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
+                        ->where("business_id",auth()->user()->business_id)
+                        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        })
+                        ->whereNotIn('user_id', [auth()->user()->id])
+                        ->where($issue_date_column, '<', now())
+                        ->groupBy('user_id')
+                        ->get()
+                        ->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+                            $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
+                            ->where($issue_date_column, '<', now())
+                            ->orderByDesc($expiry_date_column)
+                            // ->latest()
+                            ->first();
+
+                            if($latest_expired_record) {
+                                 $current_data = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
+                                ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
+                                ->where($issue_date_column, '<', now())
+                                ->orderByDesc($issue_date_column)
+                                ->first();
+                            } else {
+                               return NULL;
+                            }
+                            return $current_data?$current_data->id:NULL;
+                        })
+                        ->filter()->values();
+
+
+
+                        $data_query  = EmployeeSponsorshipHistory::whereIn('id', $employee_sponsorship_history_ids)
+                        ->where($expiry_date_column,">=", today());
+
+
+
+
+                        $data["today"] = clone $data_query;
+                        $data["today"] = $data["today"]->whereBetween('expiry_date', [today()->startOfDay(), today()->endOfDay()])->count();
+
+
+
+                        $data["next_week"] = clone $data_query;
+                        $data["next_week"] = $data["next_week"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+
+                        $data["this_week"] = clone $data_query;
+                        $data["this_week"] = $data["this_week"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+
+
+
+                        $data["next_month"] = clone $data_query;
+                        $data["next_month"] = $data["next_month"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+
+                        $data["this_month"] = clone $data_query;
+                        $data["this_month"] = $data["this_month"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+
+
+                        $expires_in_days = [15,30,60];
+                        foreach($expires_in_days as $expires_in_day){
+                            $query_day = Carbon::now()->addDays($expires_in_day);
+                            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                        }
+
+
+
+                            return $data;
+                    }
+
+    public function expiries(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+
+    ) {
+
+       $data["pension"] = $this->getPensionExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+       $data["passport"] = $this->getPassportExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+       $data["visa"] = $this->getVisaExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+       $data["right_to_work"] = $this->getRightToWorkExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+
+       $data["sponsorship"] = $this->getSponsorshipExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+
+
+
+
+        return $data;
+    }
+
+
+
     public function getData($data_query,$dateField,$dates) {
 
         $data["current_amount"] = clone $data_query;
@@ -213,6 +763,17 @@ for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
 return $data;
 
     }
+
+
+
+
+
+
+
+
+
+
+
     public function total_employee(
         $today,
         $start_date_of_next_month,
@@ -625,8 +1186,8 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
         // $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]
 
         ->where(function($query) use ($today, $total_departments)  {
                  $query->where(function($query) use ($today, $total_departments) {
@@ -682,8 +1243,8 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
        ->count();
 
-        // $data["next_week_data_count"] = clone $data_query;
-        // $data["next_week_data_count"] = $data["next_week_data_count"]
+        // $data["next_week"] = clone $data_query;
+        // $data["next_week"] = $data["next_week"]
 
         // ->where(function($query) use ($start_date_of_next_week,$end_date_of_next_week) {
         //     $query->whereHas('departments.holidays', function ($query) use ($start_date_of_next_week,$end_date_of_next_week) {
@@ -710,8 +1271,8 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
         // ->count();
 
-        // $data["this_week_data_count"] = clone $data_query;
-        // $data["this_week_data_count"] = $data["this_week_data_count"]
+        // $data["this_week"] = clone $data_query;
+        // $data["this_week"] = $data["this_week"]
 
         // ->where(function($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
         //     $query->whereHas('departments.holidays', function ($query) use ( $start_date_of_this_week,$end_date_of_this_week) {
@@ -773,8 +1334,8 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
         // ->count();
 
-        // $data["next_month_data_count"] = clone $data_query;
-        // $data["next_month_data_count"] = $data["next_month_data_count"]
+        // $data["next_month"] = clone $data_query;
+        // $data["next_month"] = $data["next_month"]
         // ->where(function($query) use ($start_date_of_next_month,$end_date_of_next_month) {
         //     $query->whereHas('departments.holidays', function ($query) use ( $start_date_of_next_month,$end_date_of_next_month) {
         //         $query->where('holidays.start_date', "<=",  $start_date_of_next_month);
@@ -805,8 +1366,8 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
         // ->count();
 
-        // $data["this_month_data_count"] = clone $data_query;
-        // $data["this_month_data_count"] = $data["this_month_data_count"]
+        // $data["this_month"] = clone $data_query;
+        // $data["this_month"] = $data["this_month"]
         // ->where(function($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
         //     $query->whereHas('departments.holidays', function ($query) use ( $start_date_of_this_month,$end_date_of_this_month) {
 
@@ -898,13 +1459,13 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -972,25 +1533,25 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('passport_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween('passport_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["yesterday_data_count"] = clone $data_query;
 $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('passport_expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween('passport_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween('passport_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('passport_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween('passport_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
         $expires_in_days = [15,30,60];
@@ -1000,13 +1561,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('passport_expiry_date', [$today, ($query_day->endOfDay() . ' 23:59:59')])->count();
         }
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1073,24 +1634,24 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('visa_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween('visa_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["yesterday_data_count"] = clone $data_query;
         $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('visa_expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween('visa_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween('visa_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('visa_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween('visa_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
         $expires_in_days = [15,30,60];
@@ -1101,13 +1662,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         }
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1175,25 +1736,25 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('right_to_work_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween('right_to_work_expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["yesterday_data_count"] = clone $data_query;
         $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('right_to_work_expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
         $expires_in_days = [15,30,60];
@@ -1204,13 +1765,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         }
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1275,25 +1836,25 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["yesterday_data_count"] = clone $data_query;
         $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('expiry_date', [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
         $expires_in_days = [15,30,60];
@@ -1305,13 +1866,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1382,34 +1943,34 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween('expiry_date', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
         $data["previous_week_data_count"] = clone $data_query;
         $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('expiry_date', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
         $data["previous_month_data_count"] = clone $data_query;
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween('expiry_date', [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1490,25 +2051,26 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween($expiry_date_column, [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween($expiry_date_column, [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
         $data["yesterday_data_count"] = clone $data_query;
         $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween($expiry_date_column, [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
         $expires_in_days = [15,30,60];
@@ -1520,13 +2082,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1623,35 +2185,35 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $data["total_data_count"] = $data_query->count();
 
-        $data["today_data_count"] = clone $data_query;
-        $data["today_data_count"] = $data["today_data_count"]->whereBetween($expiry_date_column, [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+        $data["today"] = clone $data_query;
+        $data["today"] = $data["today"]->whereBetween($expiry_date_column, [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
-        $data["next_week_data_count"] = clone $data_query;
-        $data["next_week_data_count"] = $data["next_week_data_count"]->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        $data["next_week"] = clone $data_query;
+        $data["next_week"] = $data["next_week"]->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
 
-        $data["this_week_data_count"] = clone $data_query;
-        $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        $data["this_week"] = clone $data_query;
+        $data["this_week"] = $data["this_week"]->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
         $data["previous_week_data_count"] = clone $data_query;
         $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
 
-        $data["next_month_data_count"] = clone $data_query;
-        $data["next_month_data_count"] = $data["next_month_data_count"]->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        $data["next_month"] = clone $data_query;
+        $data["next_month"] = $data["next_month"]->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
 
-        $data["this_month_data_count"] = clone $data_query;
-        $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        $data["this_month"] = clone $data_query;
+        $data["this_month"] = $data["this_month"]->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
         $data["previous_month_data_count"] = clone $data_query;
         $data["previous_month_data_count"] = $data["previous_month_data_count"]->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
 
         $data["date_ranges"] = [
-            "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+            "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
             "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-            "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-            "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+            "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+            "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
             "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-            "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-            "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+            "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+            "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
             "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
           ];
 
@@ -1753,8 +2315,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
             $data["total_data_count"] = $data_query->count();
 
-            $data["today_data_count"] = clone $data_query;
-            $data["today_data_count"] = $data["today_data_count"]->whereBetween('users.created_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
+            $data["today"] = clone $data_query;
+            $data["today"] = $data["today"]->whereBetween('users.created_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->count();
 
 
             $data["yesterday_data_count"] = clone $data_query;
@@ -1762,8 +2324,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            $data["this_week_data_count"] = clone $data_query;
-            $data["this_week_data_count"] = $data["this_week_data_count"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data["this_week"] = clone $data_query;
+            $data["this_week"] = $data["this_week"]->whereBetween('created_at', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
 
 
 
@@ -1772,8 +2334,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $data["previous_week_data_count"] = $data["previous_week_data_count"]->whereBetween('created_at', [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
 
 
-            $data["this_month_data_count"] = clone $data_query;
-            $data["this_month_data_count"] = $data["this_month_data_count"]->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data["this_month"] = clone $data_query;
+            $data["this_month"] = $data["this_month"]->whereBetween('created_at', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
             $data["previous_month_data_count"] = clone $data_query;
@@ -1781,13 +2343,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["date_ranges"] = [
-                "today_data_count_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
+                "today_date_range" => [$today->copy()->startOfDay(), $today->copy()->endOfDay() ],
                 "yesterday_data_count_date_range" => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
-                "next_week_data_count_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
-                "this_week_data_count_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
+                "next_week_date_range" => [$start_date_of_next_week, ($end_date_of_next_week )],
+                "this_week_date_range" => [$start_date_of_this_week, ($end_date_of_this_week )],
                 "previous_week_data_count_date_range" => [$start_date_of_previous_week, ($end_date_of_previous_week )],
-                "next_month_data_count_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
-                "this_month_data_count_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
+                "next_month_date_range" => [$start_date_of_next_month, ($end_date_of_next_month )],
+                "this_month_date_range" => [$start_date_of_this_month, ($end_date_of_this_month )],
                 "previous_month_data_count_date_range" => [$start_date_of_previous_month, ($end_date_of_previous_month)],
               ];
 
@@ -1979,6 +2541,24 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
             $data["holidays"] = $this->leaves(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+
+            $data["expiries"] = $this->expiries(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
