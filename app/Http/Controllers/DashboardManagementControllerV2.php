@@ -169,11 +169,175 @@ foreach ($last12MonthsDates as $month) {
 
 
 
+
+
+
+
+
+
+
+
+
+
         return $data;
     }
 
 
+    public function leavesStructure2( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,) {
 
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query)  {
+            $query->where([
+                "leaves.business_id" => auth()->user()->business_id,
+            ]);
+        });
+
+        $leave_statuses = ['pending_approval','in_progress', 'approved','rejected'];
+foreach ($leave_statuses as $leave_status) {
+
+$updated_query = clone $leaves_query;
+$updated_query = $updated_query->whereHas("leave",function($query) use($leave_status) {
+    $query->where([
+        "leaves.status" => $leave_status
+    ]);
+});
+$data[($leave_status . "_leaves")]["total"] = $updated_query->count();
+
+
+$data[($leave_status . "_leaves")]["monthly"] = $this->getData(
+    $updated_query,
+    "date",
+    [
+        "start_date" => $start_date_of_this_month,
+        "end_date" => $end_date_of_this_month,
+        "previous_start_date" => $start_date_of_previous_month,
+        "previous_end_date" => $end_date_of_previous_month,
+    ]
+);
+
+$data[($leave_status . "_leaves")]["weekly"] = $this->getData(
+$updated_query,
+"date",
+[
+    "start_date" => $start_date_of_this_week,
+    "end_date" => $end_date_of_this_week,
+    "previous_start_date" => $start_date_of_previous_week,
+    "previous_end_date" => $end_date_of_previous_week,
+]
+);
+
+
+}
+
+return $data;
+    }
+
+
+
+
+
+    public function pensionsStructure2( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,) {
+
+
+$issue_date_column = 'pension_enrollment_issue_date';
+$expiry_date_column = 'pension_re_enrollment_due_date';
+
+
+$employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
+->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+    $query->whereIn("departments.id", $all_manager_department_ids);
+})
+->whereHas("employee", function ($query) use ($all_manager_department_ids) {
+    $query->where("users.pension_eligible",">",0);
+})
+->whereNotIn('user_id', [auth()->user()->id])
+->where($issue_date_column, '<', now())
+->whereNotNull($expiry_date_column)
+->groupBy('user_id')
+->get()
+->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+
+    $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+    ->where("pension_eligible", 1)
+    ->where($issue_date_column, '<', now())
+        ->orderByDesc("id")
+        ->first();
+
+        if(empty($current_data))
+        {
+            return NULL;
+        }
+
+
+        return $current_data->id;
+})
+->filter()->values();
+
+
+
+
+$pension_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids)->where($expiry_date_column,">=", today());
+
+$pension_statuses = ["opt_in", "opt_out"];
+foreach ($pension_statuses as $pension_status) {
+
+$updated_query = clone $pension_query;
+$updated_query = $updated_query->where("pension_scheme_status",$pension_status);
+$data[($pension_status . "_pension")]["total"] = $updated_query->count();
+
+
+$data[($pension_status . "_pension")]["monthly"] = $this->getData(
+$updated_query,
+"pension_enrollment_issue_date",
+[
+"start_date" => $start_date_of_this_month,
+"end_date" => $end_date_of_this_month,
+"previous_start_date" => $start_date_of_previous_month,
+"previous_end_date" => $end_date_of_previous_month,
+]
+);
+
+$data[($pension_status . "_pension")]["weekly"] = $this->getData(
+$updated_query,
+"pension_enrollment_issue_date",
+[
+"start_date" => $start_date_of_this_week,
+"end_date" => $end_date_of_this_week,
+"previous_start_date" => $start_date_of_previous_week,
+"previous_end_date" => $end_date_of_previous_week,
+]
+);
+
+
+}
+return $data;
+    }
 
     public function getPensionExpiries(
     $all_manager_department_ids,
@@ -916,11 +1080,20 @@ return $data;
 
     public function calculateAbsent($all_manager_user_ids,$date,$data_query){
 
+
+        $current_date = Carbon::parse($date);
+        $users = User::whereIn("id",$all_manager_user_ids)->select("id","joining_date")->get();
         $absent_count = 0;
-         foreach($all_manager_user_ids as $user_id){
+         foreach($users as $user){
 
-            if(!$this->checkHoliday($date,$user_id)) {
+            $joining_date = Carbon::parse($user->joining_date);
 
+            if($joining_date->gt($current_date)) {
+ continue;
+            }
+
+
+            if(!$this->checkHoliday($date,$user->id)) {
              $data_query = clone $data_query;
              $attendance = $data_query->where("in_date",$date)->first();
              if(empty($attendance)) {
@@ -934,6 +1107,7 @@ $absent_count++;
   }
 
   public function getAbsentData($all_manager_user_ids,$data_query,$dates) {
+
     $data["current_amount"] = 0;
     $data["last_amount"] = 0;
     $data["data"] = [];
@@ -955,15 +1129,6 @@ $absent_count++;
 
 
         $data["current_amount"] = $data["current_amount"] + $absent_count;
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1014,7 +1179,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         ]);
 
 
-        $data["today"] = $this->calculateAbsent($all_manager_user_ids, $today, $data_query);
+        $data["total"] = $this->calculateAbsent($all_manager_user_ids, $today, $data_query);
 
         $data["monthly"] = $this->getAbsentData(
             $all_manager_user_ids,
@@ -1123,7 +1288,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         ]);
 
 
-        $data["today"] = $this->calculatePresent($all_manager_user_ids, $today, $data_query);
+        $data["total"] = $this->calculatePresent($all_manager_user_ids, $today, $data_query);
 
         $data["monthly"] = $this->getPresentData(
             $all_manager_user_ids,
@@ -2537,6 +2702,44 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $end_date_of_previous_week,
                 $all_manager_department_ids,
             );
+
+
+        $data =    array_merge($data,$this->leavesStructure2( $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids));
+
+
+
+
+
+        $data =    array_merge($data,$this->pensionsStructure2( $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids));
+
+
+
 
 
 
