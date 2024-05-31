@@ -103,7 +103,7 @@ class WorkShiftHistoryComponent
     }
 
     public function updateWorkShiftsQuery($request,$all_manager_department_ids,$query) {
-    $query = $query ->when(!empty(auth()->user()->business_id), function ($query) use ( $all_manager_department_ids) {
+    $query = $query->when(!empty(auth()->user()->business_id), function ($query) use ( $all_manager_department_ids) {
         return $query
         ->where(function($query) use($all_manager_department_ids) {
             $query

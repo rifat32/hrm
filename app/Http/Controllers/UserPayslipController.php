@@ -603,7 +603,7 @@ DB::commit();
                 },
 
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
 
@@ -719,7 +719,7 @@ DB::commit();
             $user_payslip =  Payslip::where([
                 "id" => $id,
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
@@ -807,7 +807,7 @@ DB::commit();
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = Payslip::whereIn('id', $idsArray)
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->select('id')

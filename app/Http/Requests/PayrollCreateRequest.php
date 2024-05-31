@@ -41,7 +41,7 @@ class PayrollCreateRequest extends BaseFormRequest
                             $query->whereHas("departments", function($query) use($all_manager_department_ids) {
                                 $query->whereIn("departments.id",$all_manager_department_ids);
                              })
-                             ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
+                             ->orWhereHas("users.department_user.department", function($query) use($all_manager_department_ids) {
                                 $query->whereIn("departments.id",$all_manager_department_ids);
                              });
                         })

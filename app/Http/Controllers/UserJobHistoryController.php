@@ -426,7 +426,7 @@ class UserJobHistoryController extends Controller
                   },
 
               ])
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+              ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
               ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -552,7 +552,7 @@ class UserJobHistoryController extends Controller
               $user_job_history =  UserJobHistory::where([
                   "id" => $id,
               ])
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+              ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                   ->first();
@@ -640,7 +640,7 @@ class UserJobHistoryController extends Controller
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
               $existingIds = UserJobHistory::whereIn('id', $idsArray)
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+              ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                   ->select('id')
@@ -650,7 +650,7 @@ class UserJobHistoryController extends Controller
               $nonExistingIds = array_diff($idsArray, $existingIds);
 
               if (!empty($nonExistingIds)) {
-             
+
                   return response()->json([
                       "message" => "Some or all of the specified data do not exist."
                   ], 404);

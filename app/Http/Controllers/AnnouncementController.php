@@ -108,7 +108,7 @@ class AnnouncementController extends Controller
 
              $user_ids  = User::
 
-                whereHas("departments", function($query) use($request_data) {
+                whereHas("department_user.department", function($query) use($request_data) {
                     $query->whereIn("departments.id",$request_data["departments"]);
                 })
                 ->orWhereHas("roles", function ($query) {
@@ -238,7 +238,7 @@ class AnnouncementController extends Controller
 
 
 
-                $user_ids = User::whereHas("departments", function($query) use($request_data) {
+                $user_ids = User::whereHas("department_user.department", function($query) use($request_data) {
                     $query->whereIn("departments.id", $request_data["departments"]);
                 })->pluck("id")->unique();
                 $announcement->users()->sync($user_ids, ['status' => 'unread']);

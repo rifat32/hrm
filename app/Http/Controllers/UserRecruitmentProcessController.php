@@ -376,7 +376,7 @@ class UserRecruitmentProcessController extends Controller
                 ->where([
                     "id" =>$id
                 ])
-                ->whereHas("user.departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->whereNotNull("description")
@@ -463,7 +463,7 @@ class UserRecruitmentProcessController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $idsArray = explode(',', $ids);
-            $existingIds = UserRecruitmentProcess::whereHas("user.departments", function ($query) use ($all_manager_department_ids) {
+            $existingIds = UserRecruitmentProcess::whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->whereHas("user", function ($query) {

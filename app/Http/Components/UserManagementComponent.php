@@ -67,7 +67,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             ->when(!empty(auth()->user()->business_id), function ($query) use ( $all_manager_department_ids) {
                 return $query->where(function ($query) use ($all_manager_department_ids) {
                     return  $query->where('business_id', auth()->user()->business_id)
-                        ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                        ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                             $query->whereIn("departments.id", $all_manager_department_ids);
                         });
                 });
@@ -254,7 +254,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                 });
             })
             ->when(!empty(request()->department_id), function ($query)  {
-                return $query->whereHas("departments", function ($query)  {
+                return $query->whereHas("department_user.department", function ($query)  {
                     $query->where("departments.id", request()->department_id);
                 });
             })
@@ -700,7 +700,7 @@ public function getHolodayDetails($all_manager_department_ids,$userId,$start_dat
        ->where([
            "id" => $userId
        ])
-       ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+       ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
            $query->whereIn("departments.id", $all_manager_department_ids);
        })
        ->when(!auth()->user()->hasRole('superadmin'), function ($query)  {

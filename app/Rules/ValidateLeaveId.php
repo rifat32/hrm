@@ -30,7 +30,7 @@ class ValidateLeaveId implements Rule
     {
         $exists = Leave::where('leaves.id', $value)
         ->where('leaves.business_id', '=', auth()->user()->business_id)
-        ->whereHas("employee.departments", function($query)  {
+        ->whereHas("employee.department_user.department", function($query)  {
             $query->whereIn("departments.id",$this->all_manager_department_ids);
          })
          ->whereHas("employee", function ($query){

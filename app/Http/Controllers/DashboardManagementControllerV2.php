@@ -27,36 +27,73 @@ class DashboardManagementControllerV2 extends Controller
     use ErrorUtil, BusinessUtil, UserActivityUtil, BasicUtil, AttendanceUtil;
 
 
-    function getLast12MonthsDates() {
-        $dates = [];
-        $currentDate = Carbon::now();
+//   function getLast12MonthsDates() {
+//     $dates = [];
+//     $currentDate = Carbon::now();
 
-        for ($i = 0; $i < 12; $i++) {
-            $startOfMonth = $currentDate->copy()->subMonths($i)->startOfMonth()->toDateString();
-            $endOfMonth = $currentDate->copy()->subMonths($i)->endOfMonth()->toDateString();
-            $monthName = $currentDate->copy()->subMonths($i)->format('F');
+//     // Start from the previous month to avoid adding the current month twice
+//     $currentDate->subMonth();
 
-            $dates[] = [
-                'month' => $monthName,
-                'start_date' => $startOfMonth,
-                'end_date' => $endOfMonth,
-            ];
-        }
+//     for ($i = 0; $i < 12; $i++) {
+//         $startOfMonth = $currentDate->copy()->startOfMonth()->toDateString();
+//         $endOfMonth = $currentDate->copy()->endOfMonth()->toDateString();
+//         $monthName = $currentDate->copy()->format('F');
 
-        return $dates;
+//         $dates[] = [
+//             'month' => $monthName,
+//             'start_date' => $startOfMonth,
+//             'end_date' => $endOfMonth,
+//         ];
+
+//         // Move to the previous month
+//         $currentDate->subMonth();
+//     }
+
+//     return $dates;
+// }
+
+function getLast12MonthsDates() {
+    $dates = [];
+    $currentDate = Carbon::now();
+
+    // Get the current year
+    $year = $currentDate->year;
+
+    for ($month = 1; $month <= 12; $month++) {
+        // Create a date object for the first day of the current month
+        $date = Carbon::createFromDate($year, $month, 1);
+
+        $startOfMonth = $date->copy()->startOfMonth()->toDateString();
+        $endOfMonth = $date->copy()->endOfMonth()->toDateString();
+        $monthName = $date->copy()->format('F');
+
+        $dates[] = [
+            'month' => substr($monthName, 0, 3),
+            'start_date' => $startOfMonth,
+            'end_date' => $endOfMonth,
+        ];
     }
 
+    return $dates;
+}
 
     public function getLeaveData($data_query, $start_date = "",$end_date = "") {
+        $updated_data_query_old = clone $data_query;
+        $updated_data_query = $updated_data_query_old->when(
+            (!empty($start_date) && !empty($end_date)),
+            function($query) use($start_date, $end_date) {
+                $query->whereBetween("leave_records.date", [$start_date, $end_date . ' 23:59:59']);
+            }
+        );
 
-    $data_query = $data_query->when((!empty($start_date) && !empty($end_date)), function($query) use($start_date,$end_date) {
-          $query->whereBetween("date", [$start_date, ($end_date . ' 23:59:59')]);
-    });
-    $data["total_requested"] = clone $data_query;
+    $data["total_requested"] = clone $updated_data_query;
         $data["total_requested"] = $data["total_requested"]
         ->count();
 
-        $data["total_pending"] = clone $data_query;
+
+
+
+        $data["total_pending"] = clone $updated_data_query;
         $data["total_pending"] = $data["total_pending"]
         ->whereHas("leave",function($query) {
             $query->where([
@@ -65,7 +102,7 @@ class DashboardManagementControllerV2 extends Controller
         })
         ->count();
 
-        $data["total_approved"] = clone $data_query;
+        $data["total_approved"] = clone $updated_data_query;
         $data["total_approved"] = $data["total_approved"]
         ->whereHas("leave",function($query) {
             $query->where([
@@ -74,7 +111,7 @@ class DashboardManagementControllerV2 extends Controller
         })
        ->count();
 
-        $data["total_rejected"] = clone $data_query;
+        $data["total_rejected"] = clone $updated_data_query;
         $data["total_rejected"] = $data["total_rejected"]
         ->whereHas("leave",function($query) {
             $query->where([
@@ -108,26 +145,7 @@ class DashboardManagementControllerV2 extends Controller
         $show_my_data = false
     ) {
 
-        $data_query  = LeaveRecord::when(
-            $show_my_data,
-            function ($query)  {
-                $query->where('leaves.user_id', auth()->user()->id);
-            },
-            function ($query) use ($all_manager_department_ids,) {
-
-                $query->whereHas("leave.employee.departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-
-                });
-
-            }
-        )
-
-
-
-
-
-            ->whereHas("leave", function ($query)  {
+        $data_query  = LeaveRecord::whereHas("leave", function ($query)  {
                 $query->where([
                     "leaves.business_id" => auth()->user()->business_id,
                 ]);
@@ -139,11 +157,11 @@ $data["individual_total"] = $this->getLeaveData($data_query);
 $last12MonthsDates = $this->getLast12MonthsDates();
 
 foreach ($last12MonthsDates as $month) {
-    $data["data"][] = [
-        "month" => $month['month'],
-        $this->getLeaveData($data_query,$month['start_date'],$month['end_date'])
-
-    ];
+    $leaveData =  $this->getLeaveData($data_query,$month['start_date'],$month['end_date']);
+    $data["data"][] = array_merge(
+        ["month" => $month['month']],
+        $leaveData
+    );
 }
 
 
@@ -167,8 +185,8 @@ foreach ($last12MonthsDates as $month) {
 
 
 
-        $data["all_data"] = clone $data_query;
-        $data["all_data"] = $data["all_data"]->whereBetween($dateField, [$dates["start_date"], ($dates["end_date"] . ' 23:59:59')])->get();
+        $all_data = clone $data_query;
+        $all_data = $all_data->whereBetween($dateField, [$dates["start_date"], ($dates["end_date"] . ' 23:59:59')])->get();
 
 $start_date = Carbon::parse($dates["start_date"]);
 $end_date = Carbon::parse(($dates["end_date"]));
@@ -178,12 +196,17 @@ $data["data"] = [];
 // Loop through each day in the date range
 for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
     // Filter the data for the current date
-    $filtered_data = $data["all_data"]->filter(function ($item) use ($date) {
+    $filtered_data = $all_data->filter(function ($item) use ($date) {
         return Carbon::parse($item->created_at)->isSameDay($date);
     });
 
     // Store the count of records for the current date
-    $data["data"][$date->toDateString()] = $filtered_data->count();
+    $data["data"][] = [
+      "date" => $date->toDateString(),
+      "total" => $filtered_data->count()
+    ];
+
+
 
 
 }
@@ -207,7 +230,7 @@ return $data;
         $all_manager_department_ids
     ) {
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -358,9 +381,32 @@ $absent_count++;
     $end_date = Carbon::parse(($dates["end_date"]));
     // Loop through each day in the date range
     for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
-        // Store the count of records for the current date
-        $data["data"][$date->toDateString()] = $this->calculateAbsent($all_manager_user_ids, $date, $data_query);
+
+
+
+
+
+        $data["data"][] = [
+            "date" => $date->toDateString(),
+            "total" => $this->calculateAbsent($all_manager_user_ids, $date, $data_query)
+        ];
+
+
+
         $data["current_amount"] = $data["current_amount"] + $data["data"][$date->toDateString()];
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 
@@ -463,8 +509,13 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         $end_date = Carbon::parse(($dates["end_date"]));
         // Loop through each day in the date range
         for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
-            // Store the count of records for the current date
-            $data["data"][$date->toDateString()] = $this->calculatePresent($all_manager_user_ids, $date, $data_query);
+
+
+            $data["data"][] = [
+                "date" => $date->toDateString(),
+                "total" => $this->calculatePresent($all_manager_user_ids, $date, $data_query)
+            ];
+
             $data["current_amount"] = $data["current_amount"] + $data["data"][$date->toDateString()];
         }
 
@@ -560,7 +611,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
             "is_active" => 1
         ])->count();
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -881,7 +932,7 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
 
         $employee_passport_history_ids = EmployeePassportDetailHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -983,7 +1034,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_visa_history_ids = EmployeeVisaDetailHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1085,7 +1136,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_right_to_work_history_ids = EmployeeRightToWorkHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1188,7 +1239,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1290,7 +1341,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1391,7 +1442,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereHas("employee", function ($query) use ($all_manager_department_ids) {
@@ -1505,7 +1556,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $employee_pension_history_ids = EmployeePensionHistory::select('user_id')
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereHas("employee", function ($query)  {
@@ -1687,7 +1738,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $employment_status_id
     ) {
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])

@@ -187,7 +187,7 @@ public function getUserByIdUtil($id,$all_manager_department_ids) {
             return  $query->where('created_by', auth()->user()->id)
                 ->orWhere('id', auth()->user()->id)
                 ->orWhere('business_id', auth()->user()->business_id)
-                ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 });
         });

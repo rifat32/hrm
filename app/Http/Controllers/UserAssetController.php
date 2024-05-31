@@ -777,7 +777,7 @@ class UserAssetController extends Controller
 
 
               ->where(function($query) use($all_manager_department_ids) {
-                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                  ->orWhere('user_assets.user_id', NULL)
@@ -969,7 +969,7 @@ class UserAssetController extends Controller
                   "business_id" => auth()->user()->business_id
               ])
               ->where(function($query) use($all_manager_department_ids) {
-                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                  ->orWhere('user_assets.user_id', NULL)
@@ -1082,7 +1082,7 @@ class UserAssetController extends Controller
 
               $userAssets = UserAsset::whereIn('id', $idsArray)
               ->where(function($query) use($all_manager_department_ids) {
-                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                  ->orWhere('user_assets.user_id', NULL);

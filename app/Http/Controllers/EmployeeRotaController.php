@@ -863,7 +863,7 @@ class EmployeeRotaController extends Controller
                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
                         $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
                     })
-                    ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids, $user_department) {
+                    ->orWhereHas("users.department_user.department", function ($query) use ($all_manager_department_ids, $user_department) {
                         $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
                     });
                 })

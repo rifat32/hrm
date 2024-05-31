@@ -275,7 +275,7 @@ class PayrunJob implements ShouldQueue
             //                         "users.id" => $employee->id
             //                     ]);
             //                 })
-            //                     ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
+            //                     ->orWhereHas("department_user.department", function ($query) use ($all_parent_department_ids) {
             //                         $query->whereIn("departments.id", $all_parent_department_ids);
             //                     })
 

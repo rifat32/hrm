@@ -559,7 +559,7 @@ $user_note->mentions()->createMany($mentions_data);
                     return $query->orderBy("user_notes.id", "DESC");
                 })
                 ->where(function($query) use($all_manager_department_ids) {
-                    $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      });
                     //  ->orWhereHas("mentions", function($query) {
@@ -664,7 +664,7 @@ $user_note->mentions()->createMany($mentions_data);
                 "id" => $id,
             ])
             ->where(function($query) use($all_manager_department_ids) {
-                $query->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
                 //  ->orWhereHas("mentions", function($query) {
@@ -767,7 +767,7 @@ $user_note->mentions()->createMany($mentions_data);
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-         
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

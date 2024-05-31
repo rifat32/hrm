@@ -394,7 +394,7 @@ class UserEducationHistoryController extends Controller
                 },
 
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
             ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -509,7 +509,7 @@ class UserEducationHistoryController extends Controller
             $user_education_history =  UserEducationHistory::where([
                 "id" => $id,
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
@@ -597,7 +597,7 @@ class UserEducationHistoryController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = UserEducationHistory::whereIn('id', $idsArray)
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->select('id')

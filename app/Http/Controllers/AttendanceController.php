@@ -1239,7 +1239,7 @@ class AttendanceController extends Controller
             $employees = User::with(
                 ["departments"]
             )
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
 
@@ -1788,7 +1788,7 @@ class AttendanceController extends Controller
                 "id" => $id,
                 "business_id" => $business_id
             ])
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
 
@@ -1879,7 +1879,7 @@ class AttendanceController extends Controller
             $existingIds = Attendance::where([
                 "business_id" => $business_id
             ])
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->whereHas("employee", function ($query) {

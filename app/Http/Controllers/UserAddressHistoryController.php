@@ -360,7 +360,7 @@ class UserAddressHistoryController extends Controller
 
             ])
             // ->where(["is_manual" => 1])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
             ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -479,7 +479,7 @@ class UserAddressHistoryController extends Controller
                 // "is_manual" => 1
             ])
 
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
@@ -572,7 +572,7 @@ class UserAddressHistoryController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeAddressHistory::whereIn('id', $idsArray)
             // ->where(["is_manual" => 1])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->select('id')

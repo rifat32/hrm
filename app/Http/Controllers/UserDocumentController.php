@@ -476,7 +476,7 @@ if($user_document) {
                 },
 
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
             ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -596,7 +596,7 @@ if($user_document) {
                 "id" => $id,
 
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                 ->first();
@@ -689,7 +689,7 @@ if($user_document) {
             $idsArray = explode(',', $ids);
             $existingIds = UserDocument::whereIn('id', $idsArray)
                 ->select('id')
-                ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                 ->get()

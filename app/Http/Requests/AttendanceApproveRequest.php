@@ -37,7 +37,7 @@ class AttendanceApproveRequest extends BaseFormRequest
 
                     $exists = Attendance::where('attendances.id', $value)
                         ->where('attendances.business_id', '=', auth()->user()->business_id)
-                        ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                        ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                             $query->whereIn("departments.id",$all_manager_department_ids);
                          })
 

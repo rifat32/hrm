@@ -65,7 +65,7 @@ class DashboardManagementController extends Controller
         $all_manager_department_ids
     ) {
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -184,7 +184,7 @@ class DashboardManagementController extends Controller
             "is_active" => 1
         ])->count();
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -512,7 +512,7 @@ class DashboardManagementController extends Controller
             },
             function ($query) use ($all_manager_department_ids,) {
 
-                $query->whereHas("leave.employee.departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
 
                 });
@@ -597,7 +597,7 @@ class DashboardManagementController extends Controller
             },
             function ($query) use ($all_manager_department_ids,) {
 
-                $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
 
                 });
@@ -669,7 +669,7 @@ class DashboardManagementController extends Controller
         $employment_status_id
     ) {
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -908,7 +908,7 @@ class DashboardManagementController extends Controller
 
         $employee_passport_history_ids = EmployeePassportDetailHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1012,7 +1012,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_visa_history_ids = EmployeeVisaDetailHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereIn('user_id', [auth()->user()->id])
@@ -1117,7 +1117,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_visa_history_ids = EmployeeVisaDetailHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1221,7 +1221,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_right_to_work_history_ids = EmployeeRightToWorkHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1332,7 +1332,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_right_to_work_history_ids = EmployeeRightToWorkHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1439,7 +1439,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1542,7 +1542,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -1647,7 +1647,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereHas("employee", function ($query) use ($all_manager_department_ids) {
@@ -1766,7 +1766,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereHas("employee", function ($query) use ($all_manager_department_ids) {
@@ -1879,7 +1879,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $day_number = Carbon::parse(today())->dayOfWeek;
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -1933,7 +1933,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $day_number = Carbon::parse(today())->dayOfWeek;
 
-        $data_query  = User::whereHas("departments", function ($query) use ($all_manager_department_ids) {
+        $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
@@ -1993,7 +1993,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         $employee_sponsorship_history_ids = EmployeeSponsorshipHistory::select('user_id')
         ->where("business_id",auth()->user()->business_id)
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereNotIn('user_id', [auth()->user()->id])
@@ -2094,7 +2094,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $employee_pension_history_ids = EmployeePensionHistory::select('user_id')
-        ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+        ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
         ->whereHas("employee", function ($query)  {

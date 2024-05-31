@@ -395,7 +395,7 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
         },
         function ($query) use ($all_manager_department_ids,) {
 
-            $query->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+            $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
 
             });
@@ -416,7 +416,7 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
         return $query->where('leaves.status', request()->status);
     })
     ->when(!empty(request()->department_id), function ($query)  {
-        return $query->whereHas("employee.departments", function ($query)  {
+        return $query->whereHas("employee.department_user.department", function ($query)  {
             $query->where("departments.id", request()->department_id);
         });
     })

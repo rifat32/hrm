@@ -4935,7 +4935,7 @@ class UserManagementController extends Controller
                         return  $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id)
-                            ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
                             });
                     });
@@ -5065,7 +5065,7 @@ class UserManagementController extends Controller
                         return  $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id)
-                            ->orWhereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
                             });
                     });
@@ -5114,7 +5114,7 @@ class UserManagementController extends Controller
 
 
 
-             
+
 
             $lastAttendanceDate =  Attendance::where([
                   "user_id" => $user->id
@@ -5129,6 +5129,11 @@ class UserManagementController extends Controller
               $lastAssetAssignDate = UserAssetHistory::where([
                   "user_id" => $user->id
               ])->orderBy("from_date")->first();
+
+// Convert the dates to Carbon instances for comparison
+$lastAttendanceDate = $lastAttendanceDate ? Carbon::parse($lastAttendanceDate->in_date) : null;
+$lastLeaveDate = $lastLeaveDate ? Carbon::parse($lastLeaveDate->date) : null;
+$lastAssetAssignDate = $lastAssetAssignDate ? Carbon::parse($lastAssetAssignDate->from_date) : null;
 
 // Find the oldest date
 $oldestDate = null;
@@ -5145,8 +5150,7 @@ if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDat
     $oldestDate = $lastAssetAssignDate;
 }
 
-
-             $data["user_data"]["last_activity_date"] = $oldestDate;
+$data["user_data"]["last_activity_date"] = $oldestDate;
 
 
 
@@ -5317,7 +5321,7 @@ if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDat
                 ->where([
                     "id" => $id
                 ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
@@ -5477,7 +5481,7 @@ if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDat
                 ->where([
                     "id" => $id
                 ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
@@ -5618,7 +5622,7 @@ if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDat
                 ->where([
                     "id" => $id
                 ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
@@ -6390,7 +6394,7 @@ if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDat
 
             $user =     User::where(["id" => $request->user_id])
                 ->when((!auth()->user()->hasRole("superadmin") && auth()->user()->id != $request->user_id), function ($query) use ($all_manager_department_ids) {
-                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
                     });
                 })

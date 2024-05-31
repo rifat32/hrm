@@ -309,7 +309,7 @@ class PayrollController extends Controller
                     $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
                     })
-                        ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids) {
+                        ->orWhereHas("users.department_user.department_user.department", function ($query) use ($all_manager_department_ids) {
                             $query->whereIn("departments.id", $all_manager_department_ids);
                         });
                 })
@@ -336,7 +336,7 @@ class PayrollController extends Controller
                 })
 
                 ->whereNotIn("id", [auth()->user()->id])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->when(!empty($request->user_ids), function ($query) use ($request, $all_manager_department_ids) {
@@ -533,7 +533,7 @@ class PayrollController extends Controller
 
       $payrolls =    Payroll::
     whereBetween('payrolls.end_date', [$startDate, $endDate])
-    ->whereHas("user.departments",function($query) use($department) {
+    ->whereHas("user.department_user.department",function($query) use($department) {
           $query->whereIn("departments.id",[$department->id]);
     })
 
@@ -729,7 +729,7 @@ if (empty($request->end_date)) {
 
                  ->whereNotIn("id", [auth()->user()->id])
 
-                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                 ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                      $query->whereIn("departments.id", $all_manager_department_ids);
                  })
 
@@ -738,7 +738,7 @@ if (empty($request->end_date)) {
 
                  ->when(!empty($request->departments), function ($query) use ($request) {
                     $department_ids = explode(',', $request->departments);
-                    $query->whereHas("departments", function ($query) use($department_ids) {
+                    $query->whereHas("department_user.department", function ($query) use($department_ids) {
                         $query->whereIn("departments.id", $department_ids);
                     });
                  })
@@ -915,7 +915,7 @@ if (empty($request->end_date)) {
                         $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                             $query->whereIn("departments.id", $all_manager_department_ids);
                         })
-                            ->orWhereHas("users.departments", function ($query) use ($all_manager_department_ids) {
+                            ->orWhereHas("users.department_user.department", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
                             });
                     })
@@ -946,7 +946,7 @@ if (empty($request->end_date)) {
                     });
                 })
                 ->where(function ($query) use ($all_manager_department_ids) {
-                    $query->whereHas("user.departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
                     });
                 })

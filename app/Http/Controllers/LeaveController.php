@@ -1755,7 +1755,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             )
 
                 ->when(!empty($all_manager_department_ids), function ($query) use($all_manager_department_ids) {
-                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
                     })
                     // ->whereNotIn('users.id', [auth()->user()->id])
@@ -2099,7 +2099,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
                 "id" => $id,
                 "business_id" => $business_id
             ])
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
                 ->first();
@@ -2274,7 +2274,7 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
             $existingIds = Leave::where([
                 "business_id" => $business_id
             ])
-                ->whereHas("employee.departments", function ($query) use ($all_manager_department_ids) {
+                ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
 

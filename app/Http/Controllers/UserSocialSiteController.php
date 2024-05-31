@@ -346,7 +346,7 @@ UserSocialSite::where([
               ->with(['user_social_site' => function ($query) use ($request, $all_manager_department_ids) {
                   $query->when(!empty($request->user_id), function ($query) use ($request, $all_manager_department_ids) {
                     return $query->where('user_social_sites.user_id', $request->user_id)
-                    ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+                    ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      });
 
@@ -464,7 +464,7 @@ UserSocialSite::where([
               $user_social_site =  UserSocialSite::where([
                   "id" => $id,
               ])
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+              ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
               ->whereHas("user", function($q) use($request) {
@@ -556,7 +556,7 @@ UserSocialSite::where([
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
               $existingIds = UserSocialSite::whereIn("id",$idsArray)
-              ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+              ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                   ->whereIn('id', $idsArray)

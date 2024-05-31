@@ -35,14 +35,14 @@ class ValidateLeaveRecordId implements Rule
         })
 
         ->whereHas("leave.employee",function($query) {
-            $query->whereHas("employee", function ($query){
-                $query->whereNotIn("users.id",[auth()->user()->id]);
-            });
+
+            $query->whereNotIn("users.id",[auth()->user()->id]);
+
         })
-        ->whereHas("leave.employee.departments",function($query) {
-            $query->whereHas("employee.departments", function($query)  {
+        ->whereHas("leave.employee.department_user.department",function($query) {
+
                 $query->whereIn("departments.id",$this->all_manager_department_ids);
-             });
+
         })
 
 

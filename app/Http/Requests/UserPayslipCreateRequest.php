@@ -51,7 +51,7 @@ class UserPayslipCreateRequest extends BaseFormRequest
                         "payrolls.user_id" => $this->user_id,
 
                     ])
-                    ->whereHas("user.departments", function($query) use($all_manager_department_ids)  {
+                    ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids)  {
                         $query->whereIn("departments.id",$all_manager_department_ids);
                      })
                      ->first();

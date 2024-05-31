@@ -158,7 +158,7 @@ class HistoryDetailsController extends Controller
             ->when(!empty($request->user_asset_id), function ($query) use ($request) {
                 return $query->where('user_asset_histories.user_asset_id', $request->user_asset_id);
             })
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -323,7 +323,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->where('employee_passport_detail_histories.user_id', $request->user()->id);
             })
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -472,7 +472,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->where('employee_visa_detail_histories.user_id', $request->user()->id);
             })
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
 
@@ -623,7 +623,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->where('employee_right_to_work_histories.user_id', $request->user()->id);
             })
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
 
@@ -780,7 +780,7 @@ class HistoryDetailsController extends Controller
                          $query->where("employee_sponsorship_histories.certificate_number", "like", "%" . $term . "%");
                      });
                  })
-                 ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                 ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
@@ -930,7 +930,7 @@ class HistoryDetailsController extends Controller
                 //          $query->where("employee_sponsorship_histories.certificate_number", "like", "%" . $term . "%");
                 //      });
                 //  })
-                 ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+                 ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
@@ -1071,7 +1071,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->where('employee_address_histories.user_id', $request->user()->id);
             })
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -1271,7 +1271,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->where('attendance_histories.user_id', $request->user()->id);
             })
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -1469,7 +1469,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 return $query->where('leave_histories.user_id', $request->user()->id);
             })
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -1653,7 +1653,7 @@ class HistoryDetailsController extends Controller
                     $query->where('employee_user_work_shift_histories.user_id', auth()->user()->id);
                });
             })
-            // ->whereHas("users.departments", function($query) use($all_manager_department_ids) {
+            // ->whereHas("users.department_user.department", function($query) use($all_manager_department_ids) {
             //     $query->whereIn("departments.id",$all_manager_department_ids);
             //  })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -1823,7 +1823,7 @@ class HistoryDetailsController extends Controller
             //    });
                $query->where('employee_user_work_shift_histories.user_id', auth()->user()->id);
             })
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -1984,7 +1984,7 @@ class HistoryDetailsController extends Controller
             ->when(empty($request->user_id), function ($query) use ($request) {
                 $query->where('employee_project_histories.user_id', auth()->user()->id);
             })
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
                  ->when(!empty($request->search_key), function ($query) use ($request) {

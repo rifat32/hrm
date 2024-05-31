@@ -393,7 +393,7 @@ class UserSponsorshipHistoryController extends Controller
 
             ])
             // ->where(["is_manual" => 1])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
             ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -512,7 +512,7 @@ class UserSponsorshipHistoryController extends Controller
                 // "is_manual" => 1
             ])
 
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->first();
@@ -601,7 +601,7 @@ class UserSponsorshipHistoryController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeSponsorshipHistory::whereIn('id', $idsArray)
             // ->where(["is_manual" => 1])
-            ->whereHas("employee.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);
            })
                 ->select('id')

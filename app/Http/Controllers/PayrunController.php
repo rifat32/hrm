@@ -365,7 +365,7 @@ class PayrunController extends Controller
             $payrun_user_exists = PayrunUser::where([
                 "payrun_id" => $payrun->id
             ])
-            ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                  $query->whereIn("departments.id",$all_manager_department_ids);
             })
             ->exists();
@@ -556,7 +556,7 @@ class PayrunController extends Controller
                 $query->whereHas("departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
-                 ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
+                 ->orWhereHas("users.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
             })
@@ -716,7 +716,7 @@ class PayrunController extends Controller
         $payrun_user_exists = PayrunUser::where([
             "payrun_id" => $payrun->id
         ])
-        ->whereHas("user.departments", function($query) use($all_manager_department_ids) {
+        ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
              $query->whereIn("departments.id",$all_manager_department_ids);
         })
         ->exists();
@@ -821,7 +821,7 @@ class PayrunController extends Controller
                 $query->whereHas("departments", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  })
-                 ->orWhereHas("users.departments", function($query) use($all_manager_department_ids) {
+                 ->orWhereHas("users.department_user.department", function($query) use($all_manager_department_ids) {
                     $query->whereIn("departments.id",$all_manager_department_ids);
                  });
             })
