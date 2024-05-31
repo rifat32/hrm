@@ -383,17 +383,17 @@ $absent_count++;
     for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
 
 
-
+     $absent_count = $this->calculateAbsent($all_manager_user_ids, $date, $data_query);
 
 
         $data["data"][] = [
             "date" => $date->toDateString(),
-            "total" => $this->calculateAbsent($all_manager_user_ids, $date, $data_query)
+            "total" => $absent_count
         ];
 
 
 
-        $data["current_amount"] = $data["current_amount"] + $data["data"][$date->toDateString()];
+        $data["current_amount"] = $data["current_amount"] + $absent_count;
 
 
 
@@ -511,12 +511,13 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
 
 
+            $present_count = $this->calculatePresent($all_manager_user_ids, $date, $data_query);
             $data["data"][] = [
                 "date" => $date->toDateString(),
-                "total" => $this->calculatePresent($all_manager_user_ids, $date, $data_query)
+                "total" => $present_count
             ];
 
-            $data["current_amount"] = $data["current_amount"] + $data["data"][$date->toDateString()];
+            $data["current_amount"] = $data["current_amount"] + $present_count;
         }
 
 
