@@ -17,6 +17,21 @@ use Illuminate\Support\Facades\File;
 trait BasicUtil
 {
 
+    public function getMainRoleId() {
+        // Retrieve the authenticated user
+    $user = auth()->user();
+
+    // Get all roles of the authenticated user
+    $roles = $user->roles;
+
+    // Extract the role IDs
+    $roleIds = $roles->pluck('id');
+
+    // Find the minimum role ID
+    $minRoleId = $roleIds->min();
+    return $minRoleId;
+    }
+
       // Define a helper function to resolve class name dynamically
       function resolveClassName($className)
       {

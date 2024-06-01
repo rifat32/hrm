@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RoleRequest;
 use App\Http\Requests\RoleUpdateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use Exception;
@@ -13,7 +14,7 @@ use Carbon\Carbon;
 
 class RolesController extends Controller
 {
-    use ErrorUtil,UserActivityUtil;
+    use ErrorUtil,UserActivityUtil,  BasicUtil;
      /**
         *
      * @OA\Post(
@@ -322,12 +323,12 @@ class RolesController extends Controller
             return $query->where('business_id', NULL)->where('is_default', 1)
             ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
                 return $query->where('name', '!=', 'superadmin')
-                ->where("id",">",auth()->user()->id);
+                ->where("id",">",$this->getMainRoleId());
             });
         })
         ->when(!(empty($request->user()->business_id)), function ($query) use ($request) {
             return $query->where('business_id', $request->user()->business_id)
-            ->where("id",">",auth()->user()->id);
+            ->where("id",">",$this->getMainRoleId());
         })
 
            ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -511,7 +512,7 @@ class RolesController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the data they can not be deleted or not exists."
                 ], 404);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Components\AuthorizationComponent;
 use App\Http\Components\DepartmentComponent;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -18,7 +19,7 @@ use Illuminate\Http\Request;
 
 class DropdownOptionsController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
     protected $authorizationComponent;
     protected $departmentComponent;
 
@@ -173,7 +174,7 @@ class DropdownOptionsController extends Controller
   }
   private function get_roles($fields=[]) {
 
-    $roles = Role::where("id",">",auth()->user()->id)
+    $roles = Role::where("id",">",$this->getMainRoleId())
     ->where('business_id', auth()->user()->business_id)
     ->when(!empty($fields), function($query) use($fields) {
         $query->select($fields);
