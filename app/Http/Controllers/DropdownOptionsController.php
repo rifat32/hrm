@@ -20,6 +20,9 @@ use Illuminate\Http\Request;
 class DropdownOptionsController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+
+
+
     protected $authorizationComponent;
     protected $departmentComponent;
 

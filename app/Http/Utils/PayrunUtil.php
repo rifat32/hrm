@@ -626,8 +626,10 @@ trait PayrunUtil
             }
 
             }
-            return true;
+
         }
+        return true;
+    }
 
         if ($leave_record->leave->status != "approved" || $leave_record->leave->leave_type->type != "paid") {
             PayrollLeaveRecord::where([
@@ -666,7 +668,7 @@ trait PayrunUtil
         return true;
     }
 
-    }
+
 
 
 

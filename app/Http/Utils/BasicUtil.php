@@ -33,7 +33,7 @@ trait BasicUtil
     }
 
       // Define a helper function to resolve class name dynamically
-      function resolveClassName($className)
+      public function resolveClassName($className)
       {
           return "App\\Models\\" . $className; // Assuming your models are stored in the "App\Models" namespace
       }

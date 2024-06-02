@@ -244,7 +244,79 @@ $updated_query,
 return $data;
     }
 
+    public function getLeavesStructure3( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,
+    $leave_status
+    ) {
 
+
+        $leave_statuses = ['pending_approval','in_progress', 'approved','rejected'];
+if (!in_array($leave_status, $leave_statuses)) {
+    $error =  [
+        "message" => "The given data was invalid.",
+        "errors" => ["status" => ["Valid Statuses are 'pending_approval','in_progress', 'approved','rejected' "]]
+    ];
+    throw new Exception(json_encode($error), 422);
+}
+
+
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query)  {
+            $query->where([
+                "leaves.business_id" => auth()->user()->business_id,
+            ]);
+        });
+
+
+
+
+$updated_query = clone $leaves_query;
+$updated_query = $updated_query->whereHas("leave",function($query) use($leave_status) {
+    $query->where([
+        "leaves.status" => $leave_status
+    ]);
+});
+$data["total"] = $updated_query->count();
+
+
+$data["monthly"] = $this->getData(
+    $updated_query,
+    "date",
+    [
+        "start_date" => $start_date_of_this_month,
+        "end_date" => $end_date_of_this_month,
+        "previous_start_date" => $start_date_of_previous_month,
+        "previous_end_date" => $end_date_of_previous_month,
+    ]
+);
+
+$data["weekly"] = $this->getData(
+$updated_query,
+"date",
+[
+    "start_date" => $start_date_of_this_week,
+    "end_date" => $end_date_of_this_week,
+    "previous_start_date" => $start_date_of_previous_week,
+    "previous_end_date" => $end_date_of_previous_week,
+]
+);
+
+
+
+
+return $data;
+    }
 
 
 
@@ -336,6 +408,110 @@ $updated_query,
 
 
 }
+
+return $data;
+    }
+
+
+    public function getPensionsStructure3( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,
+    $pension_status
+    ) {
+
+        $pension_statuses = ["opt_in", "opt_out"];
+        if (!in_array($pension_status, $pension_statuses)) {
+            $error =  [
+                "message" => "The given data was invalid.",
+                "errors" => ["status" => ["Valid Statuses are \"\opt_in\"\, \"\opt_out\"\ "]]
+            ];
+            throw new Exception(json_encode($error), 422);
+        }
+
+
+$issue_date_column = 'pension_enrollment_issue_date';
+$expiry_date_column = 'pension_re_enrollment_due_date';
+
+
+$employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
+->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+    $query->whereIn("departments.id", $all_manager_department_ids);
+})
+->whereHas("employee", function ($query) use ($all_manager_department_ids) {
+    $query->where("users.pension_eligible",">",0);
+})
+->whereNotIn('user_id', [auth()->user()->id])
+->where($issue_date_column, '<', now())
+->whereNotNull($expiry_date_column)
+->groupBy('user_id')
+->get()
+->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+
+    $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+    ->where("pension_eligible", 1)
+    ->where($issue_date_column, '<', now())
+        ->orderByDesc("id")
+        ->first();
+
+        if(empty($current_data))
+        {
+            return NULL;
+        }
+
+
+        return $current_data->id;
+})
+->filter()->values();
+
+
+
+
+$pension_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids)->where($expiry_date_column,">=", today());
+
+
+
+$updated_query = clone $pension_query;
+$updated_query = $updated_query->where("pension_scheme_status",$pension_status);
+$data["total"] = $updated_query->count();
+
+
+$data["monthly"] = $this->getData(
+$updated_query,
+"pension_enrollment_issue_date",
+[
+"start_date" => $start_date_of_this_month,
+"end_date" => $end_date_of_this_month,
+"previous_start_date" => $start_date_of_previous_month,
+"previous_end_date" => $end_date_of_previous_month,
+]
+);
+
+$data["weekly"] = $this->getData(
+$updated_query,
+"pension_enrollment_issue_date",
+[
+"start_date" => $start_date_of_this_week,
+"end_date" => $end_date_of_this_week,
+"previous_start_date" => $start_date_of_previous_week,
+"previous_end_date" => $end_date_of_previous_week,
+]
+);
+
+
+
+
 return $data;
     }
 
@@ -2204,16 +2380,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-
-
-
-
-
-
-
-
-
-
         $data["total_data_count"] = $data_query->count();
 
 
@@ -2520,6 +2686,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
         return $data;
     }
+
       /**
      *
      * @OA\Get(
@@ -2903,16 +3070,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-
-
-
-
-
             $data["widgets"]["upcoming_right_to_work_expiries"]["widget_name"] = "upcoming_right_to_work_expiries";
             $data["widgets"]["upcoming_right_to_work_expiries"]["widget_type"] = "multiple_upcoming_days";
             $data["widgets"]["upcoming_right_to_work_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=right_to_work&";
-
-
 
 
 
@@ -2936,15 +3096,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-
-
-
-
-
             $data["widgets"]["upcoming_sponsorship_expiries"]["widget_name"] = "upcoming_sponsorship_expiries";
             $data["widgets"]["upcoming_sponsorship_expiries"]["widget_type"] = "multiple_upcoming_days";
             $data["widgets"]["upcoming_sponsorship_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=sponsorship&";
-
 
 
 
@@ -2967,9 +3121,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                     $all_manager_department_ids,
                     $sponsorship_status
                 );
-
-
-
 
 
 
@@ -3005,22 +3156,11 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-
-
-
-
-
-
-
-
             $data["widgets"]["upcoming_pension_expiries"]["widget_name"] = "upcoming_pension_expiries";
 
             $data["widgets"]["upcoming_pension_expiries"]["widget_type"] = "multiple_upcoming_days";
 
             $data["widgets"]["upcoming_pension_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
-
-
-
 
 
             $pension_statuses = ["opt_in", "opt_out"];
@@ -3084,55 +3224,363 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/total-employee",
+     *      operationId="getBusinessManagerDashboardDataTotalEmployee",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataTotalEmployee(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+             $data["total_employee"] = $this->total_employee(
+                 $today,
+                 $start_date_of_next_month,
+                 $end_date_of_next_month,
+                 $start_date_of_this_month,
+                 $end_date_of_this_month,
+                 $start_date_of_previous_month,
+                 $end_date_of_previous_month,
+                 $start_date_of_next_week,
+                 $end_date_of_next_week,
+                 $start_date_of_this_week,
+                 $end_date_of_this_week,
+                 $start_date_of_previous_week,
+                 $end_date_of_previous_week,
+                 $all_manager_department_ids
+             );
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+      /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/open-roles",
+     *      operationId="getBusinessManagerDashboardDataOpenRoles",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataOpenRoles(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+             $data["open_roles"] = $this->open_roles(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+
+
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+      /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/absent",
+     *      operationId="getBusinessManagerDashboardDataAbsent",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataAbsent(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
 
 
 
 
+            $data["absent"] = $this->absent(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
 
 
 
+        return response()->json($data, 200);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-             return response()->json($data, 200);
          } catch (Exception $e) {
              return $this->sendError($e, 500, $request);
          }
@@ -3144,6 +3592,1188 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
+      /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/present",
+     *      operationId="getBusinessManagerDashboardDataPresent",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPresent(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+            $data["present"] = $this->present(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+           /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/leaves/{status}",
+     *      operationId="getBusinessManagerDashboardDataLeaves",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+*              @OA\Parameter(
+     *         name="status",
+     *         in="path",
+     *         description="rejected, pending_approval... ",
+     *         required=true,
+     *  example="status"
+     *      ),
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataLeaves($status,Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+
+
+        $data =    $this->getLeavesStructure3( $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status
+
+
+    );
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+        /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/pensions/{status}",
+     *      operationId="getBusinessManagerDashboardDataPensions",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+   *              @OA\Parameter(
+     *         name="status",
+     *         in="path",
+     *         description="opt_in, opt_out",
+     *         required=true,
+     *  example="status"
+     *      ),
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPensions($status,Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+           $data = [];
+
+
+
+        $data =    $this->getPensionsStructure3( $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status
+    );
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+           /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/holidays",
+     *      operationId="getBusinessManagerDashboardDataHolidays",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataHolidays(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+            $data["holidays"] = $this->leaves(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+           /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/pension-expiries",
+     *      operationId="getBusinessManagerDashboardDataPensionExpiries",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPensionExpiries(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+       $data["pension"] = $this->getPensionExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+            /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/passport-expiries",
+     *      operationId="getBusinessManagerDashboardDataPassportExpiries",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPassportExpiries(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+
+       $data["passport"] = $this->getPassportExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+            /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/visa-expiries",
+     *      operationId="getBusinessManagerDashboardDataVisaExpiries",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataVisaExpiries(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+       $data["visa"] = $this->getVisaExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+        return response()->json($data, 200);
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+            /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/right-to-work-expiries",
+     *      operationId="getBusinessManagerDashboardDataRightToWorkExpiries",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataRightToWorkExpiries(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+       $data["right_to_work"] = $this->getRightToWorkExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+            /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/sponsorship-expiries",
+     *      operationId="getBusinessManagerDashboardDataSponsorshipExpiries",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataSponsorshipExpiries(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+       $data["sponsorship"] = $this->getSponsorshipExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week);
+
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+           /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/other-widgets",
+     *      operationId="getBusinessManagerDashboardDataOtherWidgets",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataOtherWidgets(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+            $data["widgets"]["employee_on_holiday"] = $this->employee_on_holiday(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+
+
+            $data["widgets"]["employee_on_holiday"]["id"] = 2;
+
+
+            $data["widgets"]["employee_on_holiday"]["widget_name"] = "employee_on_holiday";
+            $data["widgets"]["employee_on_holiday"]["widget_type"] = "default";
+            $data["widgets"]["employee_on_holiday"]["route"] =  '/employee/all-employees?is_on_holiday=1&';
+
+
+
+
+
+
+            $data["widgets"]["upcoming_passport_expiries"] = $this->upcoming_passport_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
 
 
 
@@ -3153,6 +4783,228 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
+
+            $data["widgets"]["upcoming_passport_expiries"]["widget_name"] = "upcoming_passport_expiries";
+            $data["widgets"]["upcoming_passport_expiries"]["widget_type"] = "multiple_upcoming_days";
+            $data["widgets"]["upcoming_passport_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=passport&";
+
+
+
+
+
+
+
+            $data["widgets"]["upcoming_visa_expiries"] = $this->upcoming_visa_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+
+
+
+
+
+
+
+            $data["widgets"]["upcoming_visa_expiries"]["widget_name"] = "upcoming_visa_expiries";
+            $data["widgets"]["upcoming_visa_expiries"]["widget_type"] = "multiple_upcoming_days";
+
+
+            $data["widgets"]["upcoming_visa_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=visa&";
+
+
+
+
+
+            $data["widgets"]["upcoming_right_to_work_expiries"] = $this->upcoming_right_to_work_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+
+
+
+
+            $data["widgets"]["upcoming_right_to_work_expiries"]["widget_name"] = "upcoming_right_to_work_expiries";
+            $data["widgets"]["upcoming_right_to_work_expiries"]["widget_type"] = "multiple_upcoming_days";
+            $data["widgets"]["upcoming_right_to_work_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=right_to_work&";
+
+
+
+            $data["widgets"]["upcoming_sponsorship_expiries"] = $this->upcoming_sponsorship_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids
+            );
+
+
+
+
+            $data["widgets"]["upcoming_sponsorship_expiries"]["widget_name"] = "upcoming_sponsorship_expiries";
+            $data["widgets"]["upcoming_sponsorship_expiries"]["widget_type"] = "multiple_upcoming_days";
+            $data["widgets"]["upcoming_sponsorship_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=sponsorship&";
+
+
+
+            $sponsorship_statuses = ['unassigned', 'assigned', 'visa_applied','visa_rejected','visa_grantes','withdrawal'];
+            foreach ($sponsorship_statuses as $sponsorship_status) {
+                $data["widgets"][($sponsorship_status . "_sponsorships")] = $this->sponsorships(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    $sponsorship_status
+                );
+
+
+
+
+
+                $data["widgets"][($sponsorship_status . "_sponsorships")]["widget_name"] = ($sponsorship_status . "_sponsorships");
+
+                $data["widgets"][($sponsorship_status . "_sponsorships")]["widget_type"] = "default";
+                $data["widgets"][($sponsorship_status . "_sponsorships")]["route"] = '/employee/all-employees?sponsorship_status=' . $sponsorship_status . "&";
+
+            }
+
+
+
+
+            $data["widgets"]["upcoming_pension_expiries"] = $this->upcoming_pension_expiries(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+
+
+            $data["widgets"]["upcoming_pension_expiries"]["widget_name"] = "upcoming_pension_expiries";
+
+            $data["widgets"]["upcoming_pension_expiries"]["widget_type"] = "multiple_upcoming_days";
+
+            $data["widgets"]["upcoming_pension_expiries"]["route"] = "/employee/all-employees?upcoming_expiries=pension&";
+
+
+            $pension_statuses = ["opt_in", "opt_out"];
+            foreach ($pension_statuses as $pension_status) {
+                $data["widgets"][($pension_status . "_pensions")] = $this->pensions(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    "pension_scheme_status",
+                    $pension_status
+                );
+
+
+
+                $data["widgets"][($pension_status . "_pensions")]["widget_name"] = ($pension_status . "_pensions");
+                $data["widgets"][($pension_status . "_pensions")]["widget_type"] = "default";
+                $data["widgets"][($pension_status . "_pensions")]["route"] = '/employee/all-employees?pension_scheme_status=' . $pension_status . "&";
+            }
+
+            $employment_statuses = $this->getEmploymentStatuses();
+
+            foreach ($employment_statuses as $employment_status) {
+                $data["widgets"]["emplooyment_status_wise"]["data"][($employment_status->name . "_employees")] = $this->employees_by_employment_status(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    $employment_status->id
+                );
+
+
+                $data["widgets"]["emplooyment_status_wise"]["widget_name"] = "employment_status_wise_employee";
+                $data["widgets"]["emplooyment_status_wise"]["widget_type"] = "graph";
+
+                $data["widgets"]["emplooyment_status_wise"]["route"] = ('/employee/?status=' . $employment_status->name . "&");
+            }
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 

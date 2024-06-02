@@ -380,6 +380,14 @@ return [
                 "task_view",
                 "task_delete",
 
+                "label_create",
+                "label_update",
+                "label_view",
+                "label_delete",
+
+
+
+
                 "comment_create",
                 "comment_update",
                 "comment_view",
@@ -623,6 +631,11 @@ return [
                 "task_view",
                 "task_delete",
 
+                "label_create",
+                "label_update",
+                "label_view",
+                "label_delete",
+
                 "comment_create",
                 "comment_update",
                 "comment_view",
@@ -841,6 +854,11 @@ return [
                 "task_view",
                 "task_delete",
 
+                "label_create",
+                "label_update",
+                "label_view",
+                "label_delete",
+
                 "comment_create",
                 "comment_update",
                 "comment_view",
@@ -997,6 +1015,11 @@ return [
                 "task_update",
                 "task_view",
                 "task_delete",
+
+                "label_create",
+                "label_update",
+                "label_view",
+                "label_delete",
 
                 "comment_create",
                 "comment_update",
@@ -1223,6 +1246,11 @@ return [
         "task_update",
         "task_view",
         "task_delete",
+
+        "label_create",
+        "label_update",
+        "label_view",
+        "label_delete",
 
         "comment_create",
         "comment_update",
@@ -1501,6 +1529,13 @@ return [
         "task_update" => "Can update task",
         "task_view" => "Can view task",
         "task_delete" => "Can delete task",
+
+        "label_create" => "Can create task",
+        "label_update" => "Can update task",
+        "label_view" => "Can view task",
+        "label_delete" => "Can delete task",
+
+
 
         "comment_create" => "",
         "comment_update" => "",
@@ -1831,6 +1866,13 @@ return [
         "task_update" => "update",
         "task_view" => "view",
         "task_delete" => "delete",
+
+        "label_create" => "create",
+        "label_update" => "update",
+        "label_view" => "view",
+        "label_delete" => "delete",
+
+
 
         "comment_create" => "create",
         "comment_update" => "update",
@@ -2367,6 +2409,19 @@ return [
 
             ],
         ],
+
+        [
+            "header" => "task",
+            "permissions" => [
+                "label_create",
+                "label_update",
+                "label_view",
+                "label_delete",
+
+            ],
+        ],
+
+
 
         [
             "header" => "comment",

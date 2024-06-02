@@ -18,6 +18,7 @@
         <table class="table table-responsive">
             <thead>
                 <th>id</th>
+                <th>TEST</th>
 <th>api_url</th>
 <th>user</th>
 <th>user_id</th>
@@ -34,6 +35,7 @@
                 @foreach ($error_logs as $error_log)
                 <tr>
                     <td>{{$error_log->id}} </td>
+                    <td><a class="btn btn-primary"  href="{{route('api-call',$error_log->id)}}" target="_blank">TEST</a> </td>
                     <td>{{$error_log->api_url}} </td>
 
 <td> @if ($error_log->ERRuser)

@@ -59,7 +59,7 @@ class TaskCreateRequest extends BaseFormRequest
                 new ValidateTaskCategory(),
             ],
 
-            "assignees" => "required|array",
+            "assignees" => "present|array",
             "assignees.*" => [
                 'numeric',
               new ValidUserId($all_manager_department_ids)

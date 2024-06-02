@@ -196,6 +196,7 @@ Route::delete('/v1.0/notifications/{id}', [NotificationController::class, "delet
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // dashboard section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 Route::get('/v1.0/superadmin-dashboard', [DashboardManagementController::class, "getSuperAdminDashboardData"]);
 Route::post('/v1.0/dashboard-widgets', [DashboardManagementController::class, "createDashboardWidget"]);
 Route::delete('/v1.0/dashboard-widgets/{ids}', [DashboardManagementController::class, "deleteDashboardWidgetsByIds"]);
@@ -206,6 +207,36 @@ Route::get('/v1.0/business-employee-dashboard', [DashboardManagementController::
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Route::get('/v2.0/business-manager-dashboard', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardData"]);
 
+Route::get('/v1.0/business-manager-dashboard/other-widgets', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOtherWidgets"]);
+
+Route::get('/v1.0/business-manager-dashboard/sponsorship-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataSponsorshipExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/right-to-work-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataRightToWorkExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/visa-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataVisaExpiries"]);
+
+Route::get('/v1.0/business-manager-dashboard/passport-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPassportExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/pension-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensionExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/holidays', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataHolidays"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/pensions/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensions"]);
+
+Route::get('/v1.0/business-manager-dashboard/leaves/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeaves"]);
+
+Route::get('/v1.0/business-manager-dashboard/present', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresent"]);
+
+Route::get('/v1.0/business-manager-dashboard/absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataAbsent"]);
+
+Route::get('/v1.0/business-manager-dashboard/open-roles', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRoles"]);
+
+Route::get('/v1.0/business-manager-dashboard/total-employee', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataTotalEmployee"]);
 
 
 

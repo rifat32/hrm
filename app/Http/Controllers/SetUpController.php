@@ -66,6 +66,19 @@ class SetUpController extends Controller
         ->orderbyDesc("id")->paginate(10);
         return view("error-log",compact("error_logs"));
     }
+
+    public function testError($id,Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        $error_log = ErrorLog::where("id",$request->id)
+
+        ->first();
+        return view("test-error",compact("error_log"));
+    }
+
+
+
+
+
     public function getActivityLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $activity_logs = ActivityLog::orderbyDesc("id")->paginate(10);

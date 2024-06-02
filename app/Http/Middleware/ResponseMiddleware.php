@@ -11,15 +11,40 @@ use Illuminate\Support\Facades\Session;
 
 class ResponseMiddleware
 {
+
+     // Function to get the base URL of a given URL
+   public  function getBaseUrl($url) {
+         $parsedUrl = parse_url($url);
+         return $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+     }
     public function handle($request, Closure $next)
     {
+
+     // Define your API project's base URL
+     $apiBaseUrl = config('app.url'); // This gets the base URL from the app configuration
+
+     // Get the requesting URL
+     $requestingUrl = $request->fullUrl();
+
+         // Get the base URL of the requesting URL
+         $requestingBaseUrl = $this->getBaseUrl($requestingUrl);
+
+
         $response = $next($request);
+
+
 
         if ($response->headers->get('content-type') === 'application/json') {
             Session::flush();
             $content = $response->getContent();
             $convertedContent = $this->convertDatesInJson($content);
             $response->setContent($convertedContent);
+
+
+
+            if ($requestingBaseUrl == $apiBaseUrl) {
+                return $response;
+            }
 
             if (($response->getStatusCode() >= 500 && $response->getStatusCode() < 600)) {
                 $errorLog = [
