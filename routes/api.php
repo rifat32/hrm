@@ -230,21 +230,27 @@ Route::get('/v1.0/business-manager-dashboard/holidays', [DashboardManagementCont
 Route::get('/v1.0/business-manager-dashboard/leaves', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeaves"]);
 
 
-
 Route::get('/v1.0/business-manager-dashboard/leaves/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesByStatus"]);
 
 
 Route::get('/v1.0/business-manager-dashboard/pensions/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensions"]);
 
 
-
 Route::get('/v1.0/business-manager-dashboard/present', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresent"]);
 
 Route::get('/v1.0/business-manager-dashboard/absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataAbsent"]);
 
-Route::get('/v1.0/business-manager-dashboard/open-roles', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRoles"]);
+Route::get('/v1.0/business-manager-dashboard/open-roles/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRoles"]);
 
-Route::get('/v1.0/business-manager-dashboard/total-employee', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataTotalEmployee"]);
+
+
+
+Route::get('/v1.0/business-manager-dashboard/total-employee/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataTotalEmployee"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/open-roles-and-total-employee', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRolesAndTotalEmployee"]);
+
+
 
 
 

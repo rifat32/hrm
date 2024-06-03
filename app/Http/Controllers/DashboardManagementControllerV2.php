@@ -1089,8 +1089,60 @@ $data["data"] = [];
 // Loop through each day in the date range
 for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
     // Filter the data for the current date
-    $filtered_data = $all_data->filter(function ($item) use ($date) {
-        return Carbon::parse($item->created_at)->isSameDay($date);
+    $filtered_data = $all_data->filter(function ($item) use ($dateField,$date) {
+        return Carbon::parse($item[$dateField])->isSameDay($date);
+    });
+
+    // Store the count of records for the current date
+    $data["data"][] = [
+      "date" => $date->toDateString(),
+      "total" => $filtered_data->count()
+    ];
+
+
+
+
+}
+return $data;
+
+    }
+
+
+    public function getDataV2($data_query,$startDateField,$endDateField,$dates) {
+
+        $data["current_amount"] = clone $data_query;
+        $data["current_amount"] = $data["current_amount"]
+        ->where($startDateField,">", $dates["start_date"])
+        ->where($endDateField,"<=", $dates["end_date"])
+        ->count();
+
+
+
+        $data["last_amount"] = clone $data_query;
+        $data["last_amount"] = $data["last_amount"]
+        ->where($startDateField,">", $dates["previous_start_date"])
+        ->where($endDateField,"<=", $dates["previous_end_date"])->count();
+
+
+
+        $all_data = clone $data_query;
+        $all_data = $all_data
+        ->where($startDateField,">", $dates["start_date"])
+        ->where($endDateField,"<=", $dates["end_date"])
+        ->select("id",)
+        ->get();
+
+$start_date = Carbon::parse($dates["start_date"]);
+$end_date = Carbon::parse(($dates["end_date"]));
+// Initialize an array to hold the counts for each date
+$data["data"] = [];
+
+// Loop through each day in the date range
+for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+    // Filter the data for the current date
+    $filtered_data = $all_data->filter(function ($item) use ($date, $startDateField, $endDateField) {
+        return Carbon::parse($item[$startDateField])->greaterThan($date) &&
+               Carbon::parse($item[$endDateField])->lessThanOrEqualTo($date);
     });
 
     // Store the count of records for the current date
@@ -1114,9 +1166,6 @@ return $data;
 
 
 
-
-
-
     public function total_employee(
         $today,
         $start_date_of_next_month,
@@ -1131,7 +1180,8 @@ return $data;
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
-        $all_manager_department_ids
+        $all_manager_department_ids,
+        $duration
     ) {
 
         $data_query  = User::whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
@@ -1144,32 +1194,44 @@ return $data;
 
             ->where('is_active', 1);
 
+            if($duration == "total") {
+                $data["today"] = $data_query
+                ->count();
+            }
+
+            if($duration == "today") {
+                $data["today"] = $data_query
+                ->where("joining_date", today())
+                ->count();
+            }
+
+            if($duration == "this_month") {
+                $data["monthly"] = $this->getData(
+                    $data_query,
+                    "joining_date",
+                    [
+                        "start_date" => $start_date_of_this_month,
+                        "end_date" => $end_date_of_this_month,
+                        "previous_start_date" => $start_date_of_previous_month,
+                        "previous_end_date" => $end_date_of_previous_month,
+                    ]
+            );
+            }
+
+            if($duration == "this_week") {
+                $data["weekly"] = $this->getData(
+                    $data_query,
+                    "joining_date",
+                    [
+                        "start_date" => $start_date_of_this_week,
+                        "end_date" => $end_date_of_this_week,
+                        "previous_start_date" => $start_date_of_previous_week,
+                        "previous_end_date" => $end_date_of_previous_week,
+                    ]
+            );
+            }
 
 
-        $data["total"] = $data_query->count();
-
-
-        $data["monthly"] = $this->getData(
-            $data_query,
-            "users.created_at",
-            [
-                "start_date" => $start_date_of_this_month,
-                "end_date" => $end_date_of_this_month,
-                "previous_start_date" => $start_date_of_previous_month,
-                "previous_end_date" => $end_date_of_previous_month,
-            ]
-    );
-
-    $data["weekly"] = $this->getData(
-        $data_query,
-        "users.created_at",
-        [
-            "start_date" => $start_date_of_this_week,
-            "end_date" => $end_date_of_this_week,
-            "previous_start_date" => $start_date_of_previous_week,
-            "previous_end_date" => $end_date_of_previous_week,
-        ]
-);
 
         return $data;
     }
@@ -1189,36 +1251,58 @@ return $data;
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
-        $all_manager_department_ids
+        $all_manager_department_ids,
+        $duration
     ) {
 
-        $data_query  = JobListing::where("application_deadline",">=", today())
-        ->where("business_id",auth()->user()->business_id);
-
-        $data["total"] = $data_query->count();
+        $data_query  = JobListing::where("business_id",auth()->user()->business_id);
 
 
-        $data["monthly"] = $this->getData(
-            $data_query,
-            "posted_on",
-            [
-                "start_date" => $start_date_of_this_month,
-                "end_date" => $end_date_of_this_month,
-                "previous_start_date" => $start_date_of_previous_month,
-                "previous_end_date" => $end_date_of_previous_month,
-            ]
-    );
 
-    $data["weekly"] = $this->getData(
-        $data_query,
-        "posted_on",
-        [
-            "start_date" => $start_date_of_this_week,
-            "end_date" => $end_date_of_this_week,
-            "previous_start_date" => $start_date_of_previous_week,
-            "previous_end_date" => $end_date_of_previous_week,
-        ]
-);
+        // $data["total"] = $data_query->count();
+
+        if($duration == "today") {
+            $data["today"] = $data_query
+            ->where("application_deadline",">", today())
+            ->where("posted_on","<=", today())
+            ->count();
+        }
+
+        if($duration == "this_month") {
+            $data["monthly"] = $this->getDataV2(
+                $data_query,
+                "posted_on",
+                "application_deadline",
+                [
+                    "start_date" => $start_date_of_this_month,
+                    "end_date" => $end_date_of_this_month,
+                    "previous_start_date" => $start_date_of_previous_month,
+                    "previous_end_date" => $end_date_of_previous_month,
+                ]
+        );
+
+        }
+
+        if($duration == "this_week") {
+            $data["weekly"] = $this->getDataV2(
+                $data_query,
+                "posted_on",
+                "application_deadline",
+                [
+                    "start_date" => $start_date_of_this_week,
+                    "end_date" => $end_date_of_this_week,
+                    "previous_start_date" => $start_date_of_previous_week,
+                    "previous_end_date" => $end_date_of_previous_week,
+                ]
+        );
+
+
+        }
+
+
+
+
+
 
 
         return $data;
@@ -1435,11 +1519,10 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         ->where("in_date",today())
         ->count();
 
+
+
+
         $data["today_absent"] = $today_present_expectation -   $data["today_present"];
-
-
-
-
 
 
 
@@ -2838,43 +2921,43 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-             $data["total_employee"] = $this->total_employee(
-                 $today,
-                 $start_date_of_next_month,
-                 $end_date_of_next_month,
-                 $start_date_of_this_month,
-                 $end_date_of_this_month,
-                 $start_date_of_previous_month,
-                 $end_date_of_previous_month,
-                 $start_date_of_next_week,
-                 $end_date_of_next_week,
-                 $start_date_of_this_week,
-                 $end_date_of_this_week,
-                 $start_date_of_previous_week,
-                 $end_date_of_previous_week,
-                 $all_manager_department_ids
-             );
+            //  $data["total_employee"] = $this->total_employee(
+            //      $today,
+            //      $start_date_of_next_month,
+            //      $end_date_of_next_month,
+            //      $start_date_of_this_month,
+            //      $end_date_of_this_month,
+            //      $start_date_of_previous_month,
+            //      $end_date_of_previous_month,
+            //      $start_date_of_next_week,
+            //      $end_date_of_next_week,
+            //      $start_date_of_this_week,
+            //      $end_date_of_this_week,
+            //      $start_date_of_previous_week,
+            //      $end_date_of_previous_week,
+            //      $all_manager_department_ids
+            //  );
 
 
 
 
 
-             $data["open_roles"] = $this->open_roles(
-                $today,
-                $start_date_of_next_month,
-                $end_date_of_next_month,
-                $start_date_of_this_month,
-                $end_date_of_this_month,
-                $start_date_of_previous_month,
-                $end_date_of_previous_month,
-                $start_date_of_next_week,
-                $end_date_of_next_week,
-                $start_date_of_this_week,
-                $end_date_of_this_week,
-                $start_date_of_previous_week,
-                $end_date_of_previous_week,
-                $all_manager_department_ids
-            );
+            //  $data["open_roles"] = $this->open_roles(
+            //     $today,
+            //     $start_date_of_next_month,
+            //     $end_date_of_next_month,
+            //     $start_date_of_this_month,
+            //     $end_date_of_this_month,
+            //     $start_date_of_previous_month,
+            //     $end_date_of_previous_month,
+            //     $start_date_of_next_week,
+            //     $end_date_of_next_week,
+            //     $start_date_of_this_week,
+            //     $end_date_of_this_week,
+            //     $start_date_of_previous_week,
+            //     $end_date_of_previous_week,
+            //     $all_manager_department_ids
+            // );
 
 
 
@@ -3296,14 +3379,20 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
   /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/total-employee",
+     *      path="/v1.0/business-manager-dashboard/total-employee/{duration}",
      *      operationId="getBusinessManagerDashboardDataTotalEmployee",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
 
-
+*              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="total,today, this_month, this_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
      *
@@ -3342,11 +3431,26 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataTotalEmployee(Request $request)
+     public function getBusinessManagerDashboardDataTotalEmployee($duration,Request $request)
      {
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             $durations = ['total','today','this_month', 'this_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'total',today,'this_month', 'this_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
+
+
+
+
+
 
              $business_id = auth()->user()->business_id;
 
@@ -3395,7 +3499,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                  $end_date_of_this_week,
                  $start_date_of_previous_week,
                  $end_date_of_previous_week,
-                 $all_manager_department_ids
+                 $all_manager_department_ids,
+                 $duration
              );
 
 
@@ -3414,13 +3519,19 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
       /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/open-roles",
+     *      path="/v1.0/business-manager-dashboard/open-roles/{duration}",
      *      operationId="getBusinessManagerDashboardDataOpenRoles",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-
+*              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -3460,7 +3571,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataOpenRoles(Request $request)
+     public function getBusinessManagerDashboardDataOpenRoles($duration,Request $request)
      {
 
          try {
@@ -3512,7 +3623,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $end_date_of_this_week,
                 $start_date_of_previous_week,
                 $end_date_of_previous_week,
-                $all_manager_department_ids
+                $all_manager_department_ids,
+                $duration
             );
 
 
@@ -3528,7 +3640,140 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
          }
      }
 
+   /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/open-roles-and-total-employee",
+     *      operationId="getBusinessManagerDashboardDataOpenRolesAndTotalEmployee",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataOpenRolesAndTotalEmployee(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+             $data["open_roles"] = $this->open_roles(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+                "today"
+            );
+
+            $data["total_employee"] = $this->total_employee(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+                "total"
+            );
+
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
       /**
      *
@@ -5267,7 +5512,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                     "pension_scheme_status",
                     $pension_status
                 );
-
 
 
                 $data["widgets"][($pension_status . "_pensions")]["widget_name"] = ($pension_status . "_pensions");
