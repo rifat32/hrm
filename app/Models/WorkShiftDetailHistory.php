@@ -24,4 +24,10 @@ class WorkShiftDetailHistory extends Model
     // {
     //     return (new Carbon($value))->format('d-m-Y');
     // }
+
+    public function work_shift(){
+        return $this->belongsTo(WorkShiftHistory::class,'work_shift_id', 'id');
+    }
+
+
 }

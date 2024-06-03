@@ -205,6 +205,9 @@ Route::get('/v1.0/business-employee-dashboard', [DashboardManagementController::
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end dashboard section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 Route::get('/v2.0/business-manager-dashboard', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardData"]);
 
 Route::get('/v1.0/business-manager-dashboard/other-widgets', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOtherWidgets"]);
@@ -228,8 +231,6 @@ Route::get('/v1.0/business-manager-dashboard/leaves', [DashboardManagementContro
 
 
 
-
-
 Route::get('/v1.0/business-manager-dashboard/leaves/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesByStatus"]);
 
 
@@ -244,6 +245,18 @@ Route::get('/v1.0/business-manager-dashboard/absent', [DashboardManagementContro
 Route::get('/v1.0/business-manager-dashboard/open-roles', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRoles"]);
 
 Route::get('/v1.0/business-manager-dashboard/total-employee', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataTotalEmployee"]);
+
+
+
+
+
+
+
+
+
+
+
+Route::get('/v2.0/business-manager-dashboard/present-absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresentAbsent"]);
 
 
 

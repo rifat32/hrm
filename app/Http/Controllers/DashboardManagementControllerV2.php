@@ -18,9 +18,12 @@ use App\Models\EmploymentStatus;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
 use App\Models\User;
+use App\Models\WorkShiftDetailHistory;
+use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardManagementControllerV2 extends Controller
 {
@@ -1378,6 +1381,66 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
             "previous_end_date" => $end_date_of_previous_week,
         ]
 );
+
+
+        return $data;
+    }
+
+
+    public function presentAbsent(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+
+    ) {
+
+        $all_manager_user_ids = $this->get_all_user_of_manager($all_manager_department_ids);
+
+
+
+
+
+        $today_present_expectation = WorkShiftDetailHistory::where([
+            "day" =>  Carbon::parse(today())->dayOfWeek,
+            "is_weekend" => 0
+
+        ])
+        ->whereHas("work_shift.users", function ($query) use ( $all_manager_user_ids) {
+            $query->whereIn("users.id", $all_manager_user_ids)
+                ->where("employee_user_work_shift_histories.from_date", "<=", today())
+                ->where(function ($query) {
+                    $query->where("employee_user_work_shift_histories.to_date", ">", today())
+                        ->orWhereNull("employee_user_work_shift_histories.to_date");
+                });
+        })
+        ->count();
+
+
+        $data["today_present"] = Attendance::where([
+            "is_present" => 1
+        ])
+        ->whereIn("user_id", $all_manager_user_ids)
+        ->where("in_date",today())
+        ->count();
+
+        $data["today_absent"] = $today_present_expectation -   $data["today_present"];
+
+
+
+
+
 
 
         return $data;
@@ -3677,8 +3740,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-
-
             $data["present"] = $this->present(
                 $today,
                 $start_date_of_next_month,
@@ -3697,11 +3758,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
             );
 
-
-
         return response()->json($data, 200);
-
-
 
          } catch (Exception $e) {
              return $this->sendError($e, 500, $request);
@@ -4753,6 +4810,140 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
              return $this->sendError($e, 500, $request);
          }
      }
+
+
+
+
+
+
+
+
+
+
+      /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/business-manager-dashboard/present-absent",
+     *      operationId="getBusinessManagerDashboardDataPresentAbsent",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPresentAbsent(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+             DB::enableQueryLog();
+
+            $data["present_absent"] = $this->presentAbsent(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+            $data["queries"] = DB::getQueryLog();
+
+                // Disable query logging
+    DB::disableQueryLog();
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
 
            /**
      *
