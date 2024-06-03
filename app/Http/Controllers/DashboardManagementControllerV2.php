@@ -3713,7 +3713,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *
      * @OA\Get(
      *      path="/v1.0/business-manager-dashboard/leaves/{status}",
-     *      operationId="getBusinessManagerDashboardDataLeaves",
+     *      operationId="getBusinessManagerDashboardDataLeavesByStatus",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
@@ -3764,7 +3764,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataLeaves($status,Request $request)
+     public function getBusinessManagerDashboardDataLeavesByStatus($status,Request $request)
      {
 
          try {
@@ -4078,6 +4078,122 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
          }
      }
 
+
+
+         /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/leaves",
+     *      operationId="getBusinessManagerDashboardDataLeaves",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataLeaves(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+            $data["leaves"] = $this->leaves(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
            /**
      *
      * @OA\Get(
