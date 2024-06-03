@@ -300,6 +300,7 @@ if($duration == "this_month") {
         "previous_end_date" => $end_date_of_previous_month,
         ]
         );
+        $data["total"] = $data["data"]["current_amount"];
 }
 
 if($duration == "this_week") {
@@ -313,6 +314,7 @@ if($duration == "this_week") {
         "previous_end_date" => $end_date_of_previous_week,
         ]
         );
+        $data["total"] = $data["data"]["current_amount"];
 }
 
 
@@ -561,6 +563,7 @@ if($duration == "this_month") {
         "previous_end_date" => $end_date_of_previous_month,
         ]
         );
+        $data["total"] = $data["data"]["current_amount"];
 }
 
 if($duration == "this_week") {
@@ -574,6 +577,7 @@ if($duration == "this_week") {
         "previous_end_date" => $end_date_of_previous_week,
         ]
         );
+        $data["total"] = $data["data"]["current_amount"];
 }
 
 
@@ -1463,6 +1467,7 @@ return $data;
                         "previous_end_date" => $end_date_of_previous_month,
                     ]
             );
+            $data["total"] = $data["data"]["current_amount"];
             }
 
             if($duration == "this_week") {
@@ -1476,6 +1481,7 @@ return $data;
                         "previous_end_date" => $end_date_of_previous_week,
                     ]
             );
+            $data["total"] = $data["data"]["current_amount"];
             }
 
 
@@ -1527,6 +1533,7 @@ return $data;
                     "previous_end_date" => $end_date_of_previous_month,
                 ]
         );
+        $data["total"] = $data["data"]["current_amount"];
 
         }
 
@@ -1543,7 +1550,7 @@ return $data;
                 ]
         );
 
-
+        $data["total"] = $data["data"]["current_amount"];
         }
 
 
