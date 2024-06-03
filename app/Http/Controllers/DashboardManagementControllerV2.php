@@ -167,21 +167,6 @@ foreach ($last12MonthsDates as $month) {
     );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         return $data;
     }
 
@@ -201,11 +186,13 @@ foreach ($last12MonthsDates as $month) {
     $end_date_of_previous_week,
     $all_manager_department_ids,) {
 
-        $leaves_query  = LeaveRecord::whereHas("leave", function ($query)  {
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) use($all_manager_department_ids)  {
             $query->where([
                 "leaves.business_id" => auth()->user()->business_id,
-            ]);
-        });
+            ])
+            ->whereIn("leaves.user_id", $all_manager_department_ids);
+        })
+        ;
 
         $leave_statuses = ['pending_approval','in_progress', 'approved','rejected'];
 foreach ($leave_statuses as $leave_status) {
@@ -261,7 +248,8 @@ return $data;
     $start_date_of_previous_week,
     $end_date_of_previous_week,
     $all_manager_department_ids,
-    $leave_status
+    $leave_status,
+    $duration
     ) {
 
 
@@ -275,51 +263,115 @@ if (!in_array($leave_status, $leave_statuses)) {
 }
 
 
-        $leaves_query  = LeaveRecord::whereHas("leave", function ($query)  {
+         $leaves_query  = LeaveRecord::whereHas("leave", function ($query) use($all_manager_department_ids)  {
             $query->where([
                 "leaves.business_id" => auth()->user()->business_id,
-            ]);
-        });
+            ])
+            ->whereIn("leaves.user_id", $all_manager_department_ids);
+        })
+        ;
 
 
 
-
-$updated_query = clone $leaves_query;
-$updated_query = $updated_query->whereHas("leave",function($query) use($leave_status) {
+$leaves_query = $leaves_query->whereHas("leave",function($query) use($leave_status) {
     $query->where([
         "leaves.status" => $leave_status
     ]);
 });
-$data["total"] = $updated_query->count();
 
 
-$data["monthly"] = $this->getData(
-    $updated_query,
-    "date",
-    [
+
+if($duration == "total") {
+    $data["total"] = $leaves_query->count();
+}
+
+if($duration == "today") {
+    $data["today"] = $leaves_query->where("date", today())->count();
+}
+
+if($duration == "this_month") {
+    $data["monthly"] = $this->getData(
+        $leaves_query,
+        "date",
+        [
         "start_date" => $start_date_of_this_month,
         "end_date" => $end_date_of_this_month,
         "previous_start_date" => $start_date_of_previous_month,
         "previous_end_date" => $end_date_of_previous_month,
-    ]
-);
+        ]
+        );
+}
 
-$data["weekly"] = $this->getData(
-$updated_query,
-"date",
-[
-    "start_date" => $start_date_of_this_week,
-    "end_date" => $end_date_of_this_week,
-    "previous_start_date" => $start_date_of_previous_week,
-    "previous_end_date" => $end_date_of_previous_week,
-]
-);
+if($duration == "this_week") {
+    $data["weekly"] = $this->getData(
+        $leaves_query,
+        "date",
+        [
+        "start_date" => $start_date_of_this_week,
+        "end_date" => $end_date_of_this_week,
+        "previous_start_date" => $start_date_of_previous_week,
+        "previous_end_date" => $end_date_of_previous_week,
+        ]
+        );
+}
+
+
+
+
+
 
 
 
 
 return $data;
     }
+
+
+    public function getLeavesStructure4( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,
+
+    ) {
+
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) use($all_manager_department_ids)  {
+            $query->where([
+                "leaves.business_id" => auth()->user()->business_id,
+            ])
+            ->whereIn("leaves.user_id", $all_manager_department_ids);
+        })
+        ;
+        $leave_statuses = ['pending_approval','in_progress', 'approved','rejected'];
+
+        foreach($leave_statuses as $leave_status) {
+            $updated_query = clone $leaves_query;
+            $updated_query = $updated_query->whereHas("leave",function($query) use($leave_status) {
+                $query->where([
+                    "leaves.status" => $leave_status
+                ]);
+            });
+            $data[("total_" . $leave_status)] = $updated_query->count();
+        }
+
+
+
+
+
+
+
+return $data;
+    }
+
 
 
 
@@ -430,7 +482,8 @@ return $data;
     $start_date_of_previous_week,
     $end_date_of_previous_week,
     $all_manager_department_ids,
-    $pension_status
+    $pension_status,
+    $duration
     ) {
 
         $pension_statuses = ["opt_in", "opt_out"];
@@ -481,42 +534,129 @@ $employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
 
 
 
-$pension_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids)->where($expiry_date_column,">=", today());
+$pension_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids);
 
 
 
-$updated_query = clone $pension_query;
-$updated_query = $updated_query->where("pension_scheme_status",$pension_status);
-$data["total"] = $updated_query->count();
+
+$pension_query = $pension_query->where("pension_scheme_status",$pension_status);
 
 
-$data["monthly"] = $this->getData(
-$updated_query,
-"pension_enrollment_issue_date",
-[
-"start_date" => $start_date_of_this_month,
-"end_date" => $end_date_of_this_month,
-"previous_start_date" => $start_date_of_previous_month,
-"previous_end_date" => $end_date_of_previous_month,
-]
-);
+if($duration == "total") {
+    $data["total"] = $pension_query->count();
+}
 
-$data["weekly"] = $this->getData(
-$updated_query,
-"pension_enrollment_issue_date",
-[
-"start_date" => $start_date_of_this_week,
-"end_date" => $end_date_of_this_week,
-"previous_start_date" => $start_date_of_previous_week,
-"previous_end_date" => $end_date_of_previous_week,
-]
-);
+if($duration == "today") {
+    $data["today"] = $pension_query->where("pension_enrollment_issue_date", today())->count();
+}
+
+if($duration == "this_month") {
+    $data["monthly"] = $this->getData(
+        $pension_query,
+        "pension_enrollment_issue_date",
+        [
+        "start_date" => $start_date_of_this_month,
+        "end_date" => $end_date_of_this_month,
+        "previous_start_date" => $start_date_of_previous_month,
+        "previous_end_date" => $end_date_of_previous_month,
+        ]
+        );
+}
+
+if($duration == "this_week") {
+    $data["weekly"] = $this->getData(
+        $pension_query,
+        "pension_enrollment_issue_date",
+        [
+        "start_date" => $start_date_of_this_week,
+        "end_date" => $end_date_of_this_week,
+        "previous_start_date" => $start_date_of_previous_week,
+        "previous_end_date" => $end_date_of_previous_week,
+        ]
+        );
+}
+
+
+
+
 
 
 
 
 return $data;
     }
+
+    public function getPensionsStructure4( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,
+
+    ) {
+
+        $pension_statuses = ["opt_in", "opt_out"];
+
+
+$issue_date_column = 'pension_enrollment_issue_date';
+$expiry_date_column = 'pension_re_enrollment_due_date';
+
+
+$employee_pension_history_ids = EmployeePensionHistory::select('id','user_id')
+->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+    $query->whereIn("departments.id", $all_manager_department_ids);
+})
+->whereHas("employee", function ($query) use ($all_manager_department_ids) {
+    $query->where("users.pension_eligible",">",0);
+})
+->whereNotIn('user_id', [auth()->user()->id])
+->where($issue_date_column, '<', now())
+->whereNotNull($expiry_date_column)
+->groupBy('user_id')
+->get()
+->map(function ($record) use ($issue_date_column, $expiry_date_column) {
+
+
+    $current_data = EmployeePensionHistory::where('user_id', $record->user_id)
+    ->where("pension_eligible", 1)
+    ->where($issue_date_column, '<', now())
+        ->orderByDesc("id")
+        ->first();
+
+        if(empty($current_data))
+        {
+            return NULL;
+        }
+
+
+        return $current_data->id;
+})
+->filter()->values();
+
+
+
+
+$pension_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids);
+
+
+foreach($pension_statuses as $pension_status) {
+    $updated_query = clone $pension_query;
+    $updated_query = $updated_query->where("pension_scheme_status",$pension_status);
+    $data[("total_" . $pension_status)] = $updated_query->count();
+}
+
+
+return $data;
+    }
+
 
     public function getPensionExpiries(
     $all_manager_department_ids,
@@ -4239,7 +4379,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
            /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/leaves/{status}",
+     *      path="/v1.0/business-manager-dashboard/leaves/{status}/{duration}",
      *      operationId="getBusinessManagerDashboardDataLeavesByStatus",
      *      tags={"dashboard_management.business_manager"},
      *       security={
@@ -4291,7 +4431,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataLeavesByStatus($status,Request $request)
+     public function getBusinessManagerDashboardDataLeavesByStatus($status,$duration,Request $request)
      {
 
          try {
@@ -4346,7 +4486,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $start_date_of_previous_week,
         $end_date_of_previous_week,
         $all_manager_department_ids,
-        $status
+        $status,
+        $duration
 
 
     );
@@ -4361,11 +4502,269 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
          }
      }
 
-
         /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/pensions/{status}",
+     *      path="/v1.0/business-manager-dashboard/holidays/{status}/{duration}",
+     *      operationId="getBusinessManagerDashboardDataHolidaysByStatus",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+*              @OA\Parameter(
+     *         name="status",
+     *         in="path",
+     *         description="rejected, pending_approval... ",
+     *         required=true,
+     *  example="status"
+     *      ),
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataHolidaysByStatus($status,$duration,Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+
+
+        $data =    $this->getLeavesStructure3( $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status,
+        $duration
+
+
+    );
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+        /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/pensions/{status}/{duration}",
+     *      operationId="getBusinessManagerDashboardDataPensionsByStatus",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+   *              @OA\Parameter(
+     *         name="status",
+     *         in="path",
+     *         description="opt_in, opt_out",
+     *         required=true,
+     *  example="status"
+     *      ),
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPensionsByStatus($status,$duration,Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+             $durations = ['today','this_month', 'this_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'total',today,'this_month', 'this_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+           $data = [];
+
+
+
+        $data =    $this->getPensionsStructure3(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $status,
+        $duration
+    );
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/pensions",
      *      operationId="getBusinessManagerDashboardDataPensions",
      *      tags={"dashboard_management.business_manager"},
      *       security={
@@ -4460,7 +4859,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-        $data =    $this->getPensionsStructure3( $today,
+
+
+        $data =    $this->getPensionsStructure4( $today,
         $start_date_of_next_month,
         $end_date_of_next_month,
         $start_date_of_this_month,
@@ -4473,9 +4874,12 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
-        $all_manager_department_ids,
-        $status
+        $all_manager_department_ids
     );
+
+
+
+
 
 
         return response()->json($data, 200);
@@ -4721,6 +5125,145 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
              return $this->sendError($e, 500, $request);
          }
      }
+
+
+
+           /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/leaves-holidays",
+     *      operationId="getBusinessManagerDashboardDataLeavesAndHolidays",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataLeavesAndHolidays(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+            $data["leaves"] = $this->getLeavesStructure4(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+            $data["holidays"] = $this->getLeavesStructure4(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+            );
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+
            /**
      *
      * @OA\Get(

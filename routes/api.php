@@ -245,11 +245,17 @@ Route::get('/v1.0/business-manager-dashboard/holidays', [DashboardManagementCont
 Route::get('/v1.0/business-manager-dashboard/leaves', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeaves"]);
 
 
-Route::get('/v1.0/business-manager-dashboard/leaves/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesByStatus"]);
+
+Route::get('/v1.0/business-manager-dashboard/leaves/{status}/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesByStatus"]);
+
+Route::get('/v1.0/business-manager-dashboard/holidays/{status}/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataHolidaysByStatus"]);
+
+Route::get('/v1.0/business-manager-dashboard/leaves-holidays', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesAndHolidays"]);
 
 
-Route::get('/v1.0/business-manager-dashboard/pensions/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensions"]);
+Route::get('/v1.0/business-manager-dashboard/pensions/{status}/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensionsByStatus"]);
 
+Route::get('/v1.0/business-manager-dashboard/pensions', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensions"]);
 
 
 
