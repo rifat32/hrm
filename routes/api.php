@@ -212,18 +212,33 @@ Route::get('/v2.0/business-manager-dashboard', [DashboardManagementControllerV2:
 
 Route::get('/v1.0/business-manager-dashboard/other-widgets', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOtherWidgets"]);
 
-Route::get('/v1.0/business-manager-dashboard/sponsorship-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataSponsorshipExpiries"]);
 
 
-Route::get('/v1.0/business-manager-dashboard/right-to-work-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataRightToWorkExpiries"]);
 
 
-Route::get('/v1.0/business-manager-dashboard/visa-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataVisaExpiries"]);
-
-Route::get('/v1.0/business-manager-dashboard/passport-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPassportExpiries"]);
 
 
-Route::get('/v1.0/business-manager-dashboard/pension-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensionExpiries"]);
+Route::get('/v1.0/business-manager-dashboard/sponsorship-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataSponsorshipExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/right-to-work-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataRightToWorkExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/visa-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataVisaExpiries"]);
+
+Route::get('/v1.0/business-manager-dashboard/passport-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPassportExpiries"]);
+
+
+Route::get('/v1.0/business-manager-dashboard/pension-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensionExpiries"]);
+
+
+
+Route::get('/v1.0/business-manager-dashboard/combined-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataCombinedExpiries"]);
+
+
+
+
+
 
 
 Route::get('/v1.0/business-manager-dashboard/holidays', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataHolidays"]);
@@ -236,13 +251,19 @@ Route::get('/v1.0/business-manager-dashboard/leaves/{status}', [DashboardManagem
 Route::get('/v1.0/business-manager-dashboard/pensions/{status}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensions"]);
 
 
+
+
+
 Route::get('/v1.0/business-manager-dashboard/present', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresent"]);
 
 Route::get('/v1.0/business-manager-dashboard/absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataAbsent"]);
 
+
+
+
+
+
 Route::get('/v1.0/business-manager-dashboard/open-roles/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRoles"]);
-
-
 
 
 Route::get('/v1.0/business-manager-dashboard/total-employee/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataTotalEmployee"]);
@@ -263,6 +284,9 @@ Route::get('/v1.0/business-manager-dashboard/open-roles-and-total-employee', [Da
 
 
 Route::get('/v2.0/business-manager-dashboard/present-absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresentAbsent"]);
+
+
+Route::get('/v2.0/business-manager-dashboard/present-absent-hours', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresentAbsentHours"]);
 
 
 

@@ -531,7 +531,12 @@ return $data;
     $start_date_of_this_week,
     $end_date_of_this_week,
     $start_date_of_previous_week,
-    $end_date_of_previous_week){
+    $end_date_of_previous_week,
+    $duration,
+    $expires_in_days = 0
+
+
+    ){
 
         $issue_date_column = 'pension_enrollment_issue_date';
         $expiry_date_column = 'pension_re_enrollment_due_date';
@@ -568,33 +573,53 @@ return $data;
 
         $data_query  = EmployeePensionHistory::whereIn('id', $employee_pension_history_ids)->where($expiry_date_column,">=", today());
 
-        $data["today"] = clone $data_query;
-        $data["today"] = $data["today"]->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
-
-
-        $data["next_week"] = clone $data_query;
-        $data["next_week"] = $data["next_week"]->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
-
-        $data["this_week"] = clone $data_query;
-        $data["this_week"] = $data["this_week"]->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
-
-
-
-        $data["next_month"] = clone $data_query;
-        $data["next_month"] = $data["next_month"]->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
-
-        $data["this_month"] = clone $data_query;
-        $data["this_month"] = $data["this_month"]->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
 
 
 
 
+        if($duration == "today") {
+            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+        }
 
-        $expires_in_days = [15,30,60];
-        foreach($expires_in_days as $expires_in_day){
-            $query_day = Carbon::now()->addDays($expires_in_day);
-            $data[("in_". $expires_in_day ."_days")] = clone $data_query;
-            $data[("in_". $expires_in_day ."_days")] = $data[("in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+        if($duration == "next_week") {
+            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        }
+
+        if($duration == "this_week") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        }
+
+        if($duration == "previous_week") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "next_month") {
+            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "this_month") {
+            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "previous_month") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+        }
+
+
+
+
+
+
+        if($expires_in_days){
+            $expires_in_days = [15,30,60];
+            foreach($expires_in_days as $expires_in_day){
+                $query_day = Carbon::now()->addDays($expires_in_day);
+                $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+            }
         }
 
 
@@ -615,7 +640,10 @@ return $data;
         $start_date_of_this_week,
         $end_date_of_this_week,
         $start_date_of_previous_week,
-        $end_date_of_previous_week){
+        $end_date_of_previous_week,
+        $duration,
+        $expires_in_days = 0
+        ){
 
             $issue_date_column = 'passport_issue_date';
             $expiry_date_column = 'passport_expiry_date';
@@ -660,33 +688,47 @@ return $data;
 
 
 
-            $data["today"] = clone $data_query;
-            $data["today"] = $data["today"]->whereBetween('passport_expiry_date', [today()->startOfDay(), today()->copy()->endOfDay()])->count();
+           if($duration == "today") {
+            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+        }
+
+        if($duration == "next_week") {
+            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        }
+
+        if($duration == "this_week") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        }
+
+        if($duration == "previous_week") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "next_month") {
+            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "this_month") {
+            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "previous_month") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+        }
 
 
 
-            $data["next_week"] = clone $data_query;
-            $data["next_week"] = $data["next_week"]->whereBetween('passport_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
-
-            $data["this_week"] = clone $data_query;
-            $data["this_week"] = $data["this_week"]->whereBetween('passport_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
-
-
-
-            $data["next_month"] = clone $data_query;
-            $data["next_month"] = $data["next_month"]->whereBetween('passport_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
-
-            $data["this_month"] = clone $data_query;
-            $data["this_month"] = $data["this_month"]->whereBetween('passport_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
-
-
+        if($expires_in_days){
             $expires_in_days = [15,30,60];
             foreach($expires_in_days as $expires_in_day){
                 $query_day = Carbon::now()->addDays($expires_in_day);
                 $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
-                $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('passport_expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
             }
-
+        }
             return $data;
         }
 
@@ -705,7 +747,9 @@ return $data;
             $start_date_of_this_week,
             $end_date_of_this_week,
             $start_date_of_previous_week,
-            $end_date_of_previous_week
+            $end_date_of_previous_week,
+            $duration,
+            $expires_in_days = 0
 
             ){
 
@@ -753,32 +797,50 @@ return $data;
 
 
 
-                $data["today"] = clone $data_query;
-                $data["today"] = $data["today"]
-                ->whereBetween('visa_expiry_date', [today()->startOfDay(), today()->endOfDay()])->count();
+
+           if($duration == "today") {
+            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+        }
+
+        if($duration == "next_week") {
+            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+        }
+
+        if($duration == "this_week") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+        }
+
+        if($duration == "previous_week") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "next_month") {
+            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "this_month") {
+            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+        }
+
+
+        if($duration == "previous_month") {
+            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+        }
+
+
+        if($expires_in_days){
+            $expires_in_days = [15,30,60];
+            foreach($expires_in_days as $expires_in_day){
+                $query_day = Carbon::now()->addDays($expires_in_day);
+                $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+            }
+        }
 
 
 
-                $data["next_week"] = clone $data_query;
-                $data["next_week"] = $data["next_week"]->whereBetween('visa_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
-
-                $data["this_week"] = clone $data_query;
-                $data["this_week"] = $data["this_week"]->whereBetween('visa_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
-
-
-                $data["next_month"] = clone $data_query;
-                $data["next_month"] = $data["next_month"]->whereBetween('visa_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
-
-                $data["this_month"] = clone $data_query;
-                $data["this_month"] = $data["this_month"]->whereBetween('visa_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
-
-
-                $expires_in_days = [15,30,60];
-                foreach($expires_in_days as $expires_in_day){
-                    $query_day = Carbon::now()->addDays($expires_in_day);
-                    $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
-                    $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('visa_expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
-                }
                     return $data;
             }
 
@@ -797,7 +859,9 @@ return $data;
                 $start_date_of_this_week,
                 $end_date_of_this_week,
                 $start_date_of_previous_week,
-                $end_date_of_previous_week
+                $end_date_of_previous_week,
+               $duration,
+               $expires_in_days = 0
                 ){
 
                     $issue_date_column = 'right_to_work_check_date';
@@ -844,31 +908,45 @@ return $data;
 
 
 
-                    $data["today"] = clone $data_query;
-                    $data["today"] = $data["today"]->whereBetween('right_to_work_expiry_date', [today()->startOfDay(), today()->endOfDay()])->count();
+                    if($duration == "today") {
+                        $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+                    }
+
+                    if($duration == "next_week") {
+                        $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+                    }
+
+                    if($duration == "this_week") {
+                        $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+                    }
+
+                    if($duration == "previous_week") {
+                        $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+                    }
 
 
-
-                    $data["next_week"] = clone $data_query;
-                    $data["next_week"] = $data["next_week"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
-
-                    $data["this_week"] = clone $data_query;
-                    $data["this_week"] = $data["this_week"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+                    if($duration == "next_month") {
+                        $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+                    }
 
 
-
-                    $data["next_month"] = clone $data_query;
-                    $data["next_month"] = $data["next_month"]->whereBetween('right_to_work_expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
-
-                    $data["this_month"] = clone $data_query;
-                    $data["this_month"] = $data["this_month"]->whereBetween('right_to_work_expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+                    if($duration == "this_month") {
+                        $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+                    }
 
 
-                    $expires_in_days = [15,30,60];
-                    foreach($expires_in_days as $expires_in_day){
-                        $query_day = Carbon::now()->addDays($expires_in_day);
-                        $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
-                        $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('right_to_work_expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                    if($duration == "previous_month") {
+                        $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+                    }
+
+
+                    if($expires_in_days){
+                        $expires_in_days = [15,30,60];
+                        foreach($expires_in_days as $expires_in_day){
+                            $query_day = Carbon::now()->addDays($expires_in_day);
+                            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                        }
                     }
 
 
@@ -890,7 +968,9 @@ return $data;
                     $start_date_of_this_week,
                     $end_date_of_this_week,
                     $start_date_of_previous_week,
-                    $end_date_of_previous_week
+                    $end_date_of_previous_week,
+                    $duration,
+                    $expires_in_days = 0
                     ){
 
                         $issue_date_column = 'date_assigned';
@@ -933,33 +1013,49 @@ return $data;
 
 
 
-
-                        $data["today"] = clone $data_query;
-                        $data["today"] = $data["today"]->whereBetween('expiry_date', [today()->startOfDay(), today()->endOfDay()])->count();
-
-
-
-                        $data["next_week"] = clone $data_query;
-                        $data["next_week"] = $data["next_week"]->whereBetween('expiry_date', [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
-
-                        $data["this_week"] = clone $data_query;
-                        $data["this_week"] = $data["this_week"]->whereBetween('expiry_date', [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
-
-
-
-                        $data["next_month"] = clone $data_query;
-                        $data["next_month"] = $data["next_month"]->whereBetween('expiry_date', [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
-
-                        $data["this_month"] = clone $data_query;
-                        $data["this_month"] = $data["this_month"]->whereBetween('expiry_date', [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
-
-
-                        $expires_in_days = [15,30,60];
-                        foreach($expires_in_days as $expires_in_day){
-                            $query_day = Carbon::now()->addDays($expires_in_day);
-                            $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
-                            $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween('expiry_date', [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                        if($duration == "today") {
+                            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
                         }
+
+                        if($duration == "next_week") {
+                            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+                        }
+
+                        if($duration == "this_week") {
+                            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+                        }
+
+                        if($duration == "previous_week") {
+                            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+                        }
+
+
+                        if($duration == "next_month") {
+                            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+                        }
+
+
+                        if($duration == "this_month") {
+                            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+                        }
+
+
+                        if($duration == "previous_month") {
+                            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+                        }
+
+
+
+
+                        if($expires_in_days){
+                            $expires_in_days = [15,30,60];
+                            foreach($expires_in_days as $expires_in_day){
+                                $query_day = Carbon::now()->addDays($expires_in_day);
+                                $data[("expires_in_". $expires_in_day ."_days")] = clone $data_query;
+                                $data[("expires_in_". $expires_in_day ."_days")] = $data[("expires_in_". $expires_in_day ."_days")]->whereBetween($expiry_date_column, [today(), ($query_day->endOfDay() . ' 23:59:59')])->count();
+                            }
+                        }
+
 
 
 
@@ -995,7 +1091,9 @@ return $data;
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       "today"
+    );
 
 
        $data["passport"] = $this->getPassportExpiries($all_manager_department_ids,     $start_date_of_next_month,
@@ -1009,7 +1107,8 @@ return $data;
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+    "today");
 
        $data["visa"] = $this->getVisaExpiries($all_manager_department_ids,     $start_date_of_next_month,
        $end_date_of_next_month,
@@ -1022,7 +1121,9 @@ return $data;
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       "today"
+    );
 
        $data["right_to_work"] = $this->getRightToWorkExpiries($all_manager_department_ids,     $start_date_of_next_month,
        $end_date_of_next_month,
@@ -1035,7 +1136,9 @@ return $data;
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       "today"
+    );
 
 
 
@@ -1052,7 +1155,10 @@ return $data;
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+
+       "today"
+    );
 
 
 
@@ -1103,6 +1209,7 @@ for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
 
 
 }
+
 return $data;
 
     }
@@ -1195,7 +1302,7 @@ return $data;
             ->where('is_active', 1);
 
             if($duration == "total") {
-                $data["today"] = $data_query
+                $data["total"] = $data_query
                 ->count();
             }
 
@@ -1503,30 +1610,135 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         ])
         ->whereHas("work_shift.users", function ($query) use ( $all_manager_user_ids) {
             $query->whereIn("users.id", $all_manager_user_ids)
+
                 ->where("employee_user_work_shift_histories.from_date", "<=", today())
+
                 ->where(function ($query) {
-                    $query->where("employee_user_work_shift_histories.to_date", ">", today())
+                    $query
+
+                    ->where("employee_user_work_shift_histories.to_date", ">", today())
                         ->orWhereNull("employee_user_work_shift_histories.to_date");
                 });
         })
         ->count();
 
 
+
+
         $data["today_present"] = Attendance::where([
             "is_present" => 1
         ])
         ->whereIn("user_id", $all_manager_user_ids)
-        ->where("in_date",today())
+        ->whereBetween("in_date",[$start_date_of_this_week,($end_date_of_this_week . ' 23:59:59')])
         ->count();
 
 
 
 
-        $data["today_absent"] = $today_present_expectation -   $data["today_present"];
+        $data["this_week_present"] = $today_present_expectation -  $data["today_present"];
 
 
 
         return $data;
+    }
+
+
+    public function presentAbsentHours(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids
+
+
+    ) {
+
+        $all_manager_user_ids = $this->get_all_user_of_manager($all_manager_department_ids);
+
+        $start_date = Carbon::parse($start_date_of_this_week);
+        $end_date = Carbon::parse(($end_date_of_this_week));
+        // Initialize an array to hold the counts for each date
+
+
+        $total_present_expectation = 0;
+        $total_present = 0;
+        // Loop through each day in the date range
+        for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+            // Filter the data for the current date
+
+            $workShiftDetails = WorkShiftDetailHistory::where([
+                "day" =>  Carbon::parse(today())->dayOfWeek,
+                "is_weekend" => 0
+
+            ])
+            ->whereHas("work_shift.users", function ($query) use ( $all_manager_user_ids, $date) {
+                $query->whereIn("users.id", $all_manager_user_ids)
+
+                    ->where("employee_user_work_shift_histories.from_date", "<=", $date)
+
+                    ->where(function ($query) use($date) {
+                        $query
+
+                        ->where("employee_user_work_shift_histories.to_date", ">", $date)
+                            ->orWhereNull("employee_user_work_shift_histories.to_date");
+                    });
+            })
+            ->select("id",'start_at', 'end_at')
+            ->get(); // Retrieve start and end times
+
+// Calculate the total hours
+$today_present_expectation = $workShiftDetails->reduce(function ($carry, $shiftDetail) {
+    $start = Carbon::parse($shiftDetail->start_at);
+    $end = Carbon::parse($shiftDetail->end_at);
+    $hours = $end->diffInHours($start);
+    return $carry + $hours;
+}, 0);
+
+
+
+
+            $total_present_expectation += $today_present_expectation;
+
+
+
+
+            $today_present = Attendance::where([
+                "is_present" => 1
+            ])
+            ->whereIn("user_id", $all_manager_user_ids)
+            ->whereBetween("in_date",[$start_date_of_this_week,($end_date_of_this_week . ' 23:59:59')])
+            ->sum(DB::raw('total_paid_hours - overtime_hours'));
+
+            $total_present += $today_present;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        return [
+          "total_present_expectation" =>  $total_present_expectation,
+          "total_present" =>  $total_present,
+          "total_absent" => $total_present_expectation - $total_present,
+        ];
     }
 
 
@@ -3386,7 +3598,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *           {"bearerAuth": {}}
      *       },
 
-*              @OA\Parameter(
+     *              @OA\Parameter(
      *         name="duration",
      *         in="path",
      *         description="total,today, this_month, this_week... ",
@@ -3579,6 +3791,15 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
              $business_id = auth()->user()->business_id;
 
+             $durations = ['today','this_month', 'this_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'total',today,'this_month', 'this_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
+
 
              if (!$business_id) {
                  return response()->json([
@@ -3626,6 +3847,10 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $all_manager_department_ids,
                 $duration
             );
+
+
+
+
 
 
 
@@ -4499,13 +4724,20 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
            /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/pension-expiries",
+     *      path="/v1.0/business-manager-dashboard/pension-expiries/{duration}",
      *      operationId="getBusinessManagerDashboardDataPensionExpiries",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
 
+     *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -4545,13 +4777,23 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataPensionExpiries(Request $request)
+     public function getBusinessManagerDashboardDataPensionExpiries($duration,Request $request)
      {
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
              $business_id = auth()->user()->business_id;
+
+             $durations = ['today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
+
 
 
              if (!$business_id) {
@@ -4593,7 +4835,10 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       $duration
+
+    );
 
 
 
@@ -4609,11 +4854,12 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
          }
      }
 
-            /**
+
+       /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/passport-expiries",
-     *      operationId="getBusinessManagerDashboardDataPassportExpiries",
+     *      path="/v1.0/business-manager-dashboard/combined-expiries",
+     *      operationId="getBusinessManagerDashboardDataCombinedExpiries",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
@@ -4658,11 +4904,210 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataPassportExpiries(Request $request)
+     public function getBusinessManagerDashboardDataCombinedExpiries(Request $request)
      {
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+      $data["pension"] = $this->getPensionExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $end_date_of_next_month,
+       $start_date_of_this_month,
+       $end_date_of_this_month,
+       $start_date_of_previous_month,
+       $end_date_of_previous_month,
+       $start_date_of_next_week,
+       $end_date_of_next_week,
+       $start_date_of_this_week,
+       $end_date_of_this_week,
+       $start_date_of_previous_week,
+       $end_date_of_previous_week,
+       "today",1
+    );
+
+    $data["passport"] = $this->getPassportExpiries($all_manager_department_ids,     $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    "today",1
+
+);
+
+
+
+    $data["visa"] = $this->getVisaExpiries($all_manager_department_ids,     $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    "today",1
+);
+
+
+
+    $data["right_to_work"] = $this->getRightToWorkExpiries($all_manager_department_ids,     $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    "today",1
+);
+
+    $data["sponsorship"] = $this->getSponsorshipExpiries($all_manager_department_ids,     $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    "today",
+1);
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+
+            /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-manager-dashboard/passport-expiries/{duration}",
+     *      operationId="getBusinessManagerDashboardDataPassportExpiries",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *
+     *  *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPassportExpiries($duration,Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             $durations = ['today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
 
              $business_id = auth()->user()->business_id;
 
@@ -4708,7 +5153,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       $duration
+    );
 
 
 
@@ -4727,13 +5174,19 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/visa-expiries",
+     *      path="/v1.0/business-manager-dashboard/visa-expiries/{duration}",
      *      operationId="getBusinessManagerDashboardDataVisaExpiries",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-
+ *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -4773,13 +5226,23 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataVisaExpiries(Request $request)
+     public function getBusinessManagerDashboardDataVisaExpiries($duration,Request $request)
      {
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
              $business_id = auth()->user()->business_id;
+
+             $durations = ['today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
+
 
 
              if (!$business_id) {
@@ -4808,7 +5271,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-       $data["visa"] = $this->getVisaExpiries($all_manager_department_ids,     $start_date_of_next_month,
+       $data["visa"] = $this->getVisaExpiries(
+       $all_manager_department_ids,
+       $start_date_of_next_month,
        $end_date_of_next_month,
        $start_date_of_this_month,
        $end_date_of_this_month,
@@ -4819,7 +5284,10 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       $duration
+
+    );
 
 
 
@@ -4835,13 +5303,20 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/right-to-work-expiries",
+     *      path="/v1.0/business-manager-dashboard/right-to-work-expiries/{duration}",
      *      operationId="getBusinessManagerDashboardDataRightToWorkExpiries",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
 
+      *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -4881,13 +5356,24 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataRightToWorkExpiries(Request $request)
+     public function getBusinessManagerDashboardDataRightToWorkExpiries($duration,Request $request)
      {
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
              $business_id = auth()->user()->business_id;
+
+
+             $durations = ['today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
+
 
 
              if (!$business_id) {
@@ -4930,7 +5416,10 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       $duration
+
+    );
 
 
 
@@ -4948,13 +5437,20 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             /**
      *
      * @OA\Get(
-     *      path="/v1.0/business-manager-dashboard/sponsorship-expiries",
+     *      path="/v1.0/business-manager-dashboard/sponsorship-expiries/{duration}",
      *      operationId="getBusinessManagerDashboardDataSponsorshipExpiries",
      *      tags={"dashboard_management.business_manager"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
 
+      *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -4994,13 +5490,22 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataSponsorshipExpiries(Request $request)
+     public function getBusinessManagerDashboardDataSponsorshipExpiries($duration,Request $request)
      {
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
              $business_id = auth()->user()->business_id;
+
+             $durations = ['today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'today','this_month', 'previous_month', 'next_month' ,'this_week', 'previous_week','next_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
 
 
              if (!$business_id) {
@@ -5042,7 +5547,9 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
        $start_date_of_this_week,
        $end_date_of_this_week,
        $start_date_of_previous_week,
-       $end_date_of_previous_week);
+       $end_date_of_previous_week,
+       $duration
+    );
 
 
 
@@ -5187,7 +5694,124 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
          }
      }
 
+   /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/business-manager-dashboard/present-absent-hours",
+     *      operationId="getBusinessManagerDashboardDataPresentAbsentHours",
+     *      tags={"dashboard_management.business_manager"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
 
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessManagerDashboardDataPresentAbsentHours(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+
+
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+
+
+
+
+            $data["present_absent"] = $this->presentAbsentHours(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                $all_manager_department_ids,
+
+            );
+
+
+
+        return response()->json($data, 200);
+
+
+
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
            /**
