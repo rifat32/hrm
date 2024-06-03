@@ -4392,7 +4392,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *         required=true,
      *  example="status"
      *      ),
-
+   *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week",
+     *         required=true,
+     *  example="duration"
+     *      ),
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
      *
@@ -4440,12 +4446,22 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
              $business_id = auth()->user()->business_id;
 
 
+
              if (!$business_id) {
                  return response()->json([
                      "message" => "You are not a business user"
                  ], 401);
              }
              $today = today();
+
+ $durations = ['today','this_month', 'this_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'total',today,'this_month', 'this_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
 
 
 
@@ -4573,7 +4589,14 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
              }
              $today = today();
 
-
+ $durations = ['today','this_month', 'this_week'];
+             if (!in_array($duration, $durations)) {
+                 $error =  [
+                     "message" => "The given data was invalid.",
+                     "errors" => ["duration" => ["Valid Durations are 'total',today,'this_month', 'this_week' "]]
+                 ];
+                 throw new Exception(json_encode($error), 422);
+             }
 
              $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
              $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
@@ -4642,6 +4665,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *         description="opt_in, opt_out",
      *         required=true,
      *  example="status"
+     *      ),
+     *    *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="today, this_month, this_week",
+     *         required=true,
+     *  example="duration"
      *      ),
 
      *      summary="get all dashboard data combined",
