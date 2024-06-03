@@ -211,7 +211,7 @@ if($request_data["type"] !== "flexible") {
 
 if($el["is_weekend"]) {
     $el["start_at"] = NULL;
-    $el["is_weekend"] = NULL;
+    $el["end_at"] = NULL;
 }
                     return $el;
                 })->toArray();

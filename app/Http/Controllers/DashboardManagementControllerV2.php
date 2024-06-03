@@ -286,11 +286,11 @@ if($duration == "total") {
 }
 
 if($duration == "today") {
-    $data["today"] = $leaves_query->where("date", today())->count();
+    $data["total"] = $leaves_query->where("date", today())->count();
 }
 
 if($duration == "this_month") {
-    $data["monthly"] = $this->getData(
+    $data["data"] = $this->getData(
         $leaves_query,
         "date",
         [
@@ -303,7 +303,7 @@ if($duration == "this_month") {
 }
 
 if($duration == "this_week") {
-    $data["weekly"] = $this->getData(
+    $data["data"] = $this->getData(
         $leaves_query,
         "date",
         [
@@ -547,11 +547,11 @@ if($duration == "total") {
 }
 
 if($duration == "today") {
-    $data["today"] = $pension_query->where("pension_enrollment_issue_date", today())->count();
+    $data["total"] = $pension_query->where("pension_enrollment_issue_date", today())->count();
 }
 
 if($duration == "this_month") {
-    $data["monthly"] = $this->getData(
+    $data["data"] = $this->getData(
         $pension_query,
         "pension_enrollment_issue_date",
         [
@@ -564,7 +564,7 @@ if($duration == "this_month") {
 }
 
 if($duration == "this_week") {
-    $data["weekly"] = $this->getData(
+    $data["data"] = $this->getData(
         $pension_query,
         "pension_enrollment_issue_date",
         [
@@ -718,34 +718,34 @@ return $data;
 
 
         if($duration == "today") {
-            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if($duration == "next_week") {
-            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if($duration == "this_week") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if($duration == "previous_week") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if($duration == "next_month") {
-            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if($duration == "this_month") {
-            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if($duration == "previous_month") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -829,34 +829,34 @@ return $data;
 
 
            if($duration == "today") {
-            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if($duration == "next_week") {
-            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if($duration == "this_week") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if($duration == "previous_week") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if($duration == "next_month") {
-            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if($duration == "this_month") {
-            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if($duration == "previous_month") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -943,30 +943,30 @@ return $data;
         }
 
         if($duration == "next_week") {
-            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if($duration == "this_week") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if($duration == "previous_week") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if($duration == "next_month") {
-            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if($duration == "this_month") {
-            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if($duration == "previous_month") {
-            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -1049,34 +1049,34 @@ return $data;
 
 
                     if($duration == "today") {
-                        $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
                     }
 
                     if($duration == "next_week") {
-                        $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
                     }
 
                     if($duration == "this_week") {
-                        $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
                     }
 
                     if($duration == "previous_week") {
-                        $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
                     }
 
 
                     if($duration == "next_month") {
-                        $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
                     }
 
 
                     if($duration == "this_month") {
-                        $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
                     }
 
 
                     if($duration == "previous_month") {
-                        $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+                        $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
                     }
 
 
@@ -1158,30 +1158,30 @@ return $data;
                         }
 
                         if($duration == "next_week") {
-                            $data["next_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+                            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
                         }
 
                         if($duration == "this_week") {
-                            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+                            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
                         }
 
                         if($duration == "previous_week") {
-                            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+                            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
                         }
 
 
                         if($duration == "next_month") {
-                            $data["next_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+                            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
                         }
 
 
                         if($duration == "this_month") {
-                            $data["this_month"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+                            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
                         }
 
 
                         if($duration == "previous_month") {
-                            $data["this_week"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+                            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
                         }
 
 
@@ -1447,13 +1447,13 @@ return $data;
             }
 
             if($duration == "today") {
-                $data["today"] = $data_query
+                $data["total"] = $data_query
                 ->where("joining_date", today())
                 ->count();
             }
 
             if($duration == "this_month") {
-                $data["monthly"] = $this->getData(
+                $data["data"] = $this->getData(
                     $data_query,
                     "joining_date",
                     [
@@ -1466,7 +1466,7 @@ return $data;
             }
 
             if($duration == "this_week") {
-                $data["weekly"] = $this->getData(
+                $data["data"] = $this->getData(
                     $data_query,
                     "joining_date",
                     [
@@ -1509,14 +1509,14 @@ return $data;
         // $data["total"] = $data_query->count();
 
         if($duration == "today") {
-            $data["today"] = $data_query
+            $data["total"] = $data_query
             ->where("application_deadline",">", today())
             ->where("posted_on","<=", today())
             ->count();
         }
 
         if($duration == "this_month") {
-            $data["monthly"] = $this->getDataV2(
+            $data["data"] = $this->getDataV2(
                 $data_query,
                 "posted_on",
                 "application_deadline",
@@ -1531,7 +1531,7 @@ return $data;
         }
 
         if($duration == "this_week") {
-            $data["weekly"] = $this->getDataV2(
+            $data["data"] = $this->getDataV2(
                 $data_query,
                 "posted_on",
                 "application_deadline",
@@ -6753,16 +6753,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
              return $this->sendError($e, 500, $request);
          }
      }
-
-
-
-
-
-
-
-
-
-
 
 
 
