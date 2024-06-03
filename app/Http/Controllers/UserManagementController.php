@@ -6122,7 +6122,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
                 ], 401);
             }
 
-            User::whereIn('id', $existingIds)->forceDelete();
+            User::whereIn('id', $existingIds)->delete();
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 

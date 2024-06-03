@@ -2329,7 +2329,7 @@ class BusinessController extends Controller
             }
 
 
-            BusinessPensionHistory::whereIn('id', $existingIds)->forceDelete();
+            BusinessPensionHistory::whereIn('id', $existingIds)->delete();
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
@@ -2439,7 +2439,7 @@ class BusinessController extends Controller
 
            // Disable foreign key checks
 // DB::statement('SET FOREIGN_KEY_CHECKS=0');
-            Business::whereIn('id', $existingIds)->forceDelete();
+            Business::whereIn('id', $existingIds)->delete();
             // Re-enable foreign key checks
 // DB::statement('SET FOREIGN_KEY_CHECKS=1');
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
