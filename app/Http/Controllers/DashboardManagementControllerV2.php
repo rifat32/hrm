@@ -4807,13 +4807,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *       security={
      *           {"bearerAuth": {}}
      *       },
-   *              @OA\Parameter(
-     *         name="status",
-     *         in="path",
-     *         description="opt_in, opt_out",
-     *         required=true,
-     *  example="status"
-     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -4853,7 +4846,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      *     )
      */
 
-     public function getBusinessManagerDashboardDataPensions($status,Request $request)
+     public function getBusinessManagerDashboardDataPensions(Request $request)
      {
 
          try {
