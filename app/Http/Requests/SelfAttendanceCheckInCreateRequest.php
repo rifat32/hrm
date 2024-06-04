@@ -29,18 +29,7 @@ class SelfAttendanceCheckInCreateRequest extends FormRequest
     {
         return [
 
-            'id' => [
-                'required',
-                'numeric',
-                function ($attribute, $value, $fail) {
-                    $exists = Attendance::where('id', $value)
-                    ->where("user_id",$this->user_id)
-                        ->exists();
-                    if (!$exists) {
-                        $fail($attribute . " is invalid.");
-                    }
-                },
-            ],
+
 
             'in_geolocation' => 'required|string',
 

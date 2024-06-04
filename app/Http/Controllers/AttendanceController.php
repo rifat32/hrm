@@ -49,7 +49,7 @@ class AttendanceController extends Controller
 
       /**
      *
-     * @OA\Post(
+     * @OA\PUT(
      *      path="/v1.0/attendances/self/check-out",
      *      operationId="createSelfAttendanceCheckOut",
      *      tags={"attendances"},
@@ -62,11 +62,11 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
+     *  *     @OA\Property(property="id", type="number",  format="number", example="1"),
      *     @OA\Property(property="note", type="string",  format="string", example="r"),
-     *    *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
      *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
      *
-     *     @OA\Property(property="user_id", type="number", format="number", example="1"),
+
      *
      * *     @OA\Property(property="attendance_records", type="string", format="array", example={
      * {
@@ -82,10 +82,10 @@ class AttendanceController extends Controller
      *
      *
      *
-     *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
+
      * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
-     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
-     *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+     * * *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="1"),
+
      *
      *
      *
@@ -250,9 +250,9 @@ class AttendanceController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *     @OA\Property(property="note", type="string",  format="string", example="r"),
+
      *    *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
-     *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
+
      *
      *     @OA\Property(property="user_id", type="number", format="number", example="1"),
      *
@@ -268,14 +268,7 @@ class AttendanceController extends Controller
      *
      * }),
      *
-
-     *
-     *
-     *
-     *
-     *
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
-     * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
      *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
      *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
      *

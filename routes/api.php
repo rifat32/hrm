@@ -1208,7 +1208,7 @@ Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "cr
 
 
 Route::post('/v1.0/attendances/self/check-in', [AttendanceController::class, "createSelfAttendanceCheckIn"]);
-Route::post('/v1.0/attendances/self/check-out', [AttendanceController::class, "createSelfAttendanceCheckOut"]);
+Route::put('/v1.0/attendances/self/check-out', [AttendanceController::class, "createSelfAttendanceCheckOut"]);
 
 
 
