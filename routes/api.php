@@ -1206,6 +1206,10 @@ Route::post('/v1.0/setting-attendance', [SettingAttendanceController::class, "cr
 // attendances  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+Route::post('/v1.0/attendances/self/checkin', [AttendanceController::class, "createSelfAttendance"]);
+
+
 Route::post('/v1.0/attendances', [AttendanceController::class, "createAttendance"]);
 Route::post('/v1.0/attendances/multiple', [AttendanceController::class, "createMultipleAttendance"]);
 Route::put('/v1.0/attendances', [AttendanceController::class, "updateAttendance"]);

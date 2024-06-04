@@ -10,6 +10,7 @@ use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
 use App\Http\Requests\AttendanceCreateRequest;
 use App\Http\Requests\AttendanceMultipleCreateRequest;
 use App\Http\Requests\AttendanceUpdateRequest;
+use App\Http\Requests\SelfAttendanceCreateRequest;
 use App\Http\Utils\AttendanceUtil;
 use App\Http\Utils\BasicNotificationUtil;
 use App\Http\Utils\BasicUtil;
@@ -45,6 +46,133 @@ class AttendanceController extends Controller
         $this->attendanceComponent = $attendanceComponent;
     }
 
+  /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/attendances/self/checkin",
+     *      operationId="createSelfAttendance",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store attendance",
+     *      description="This method is to store attendance",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *     @OA\Property(property="note", type="string",  format="string", example="r"),
+     *    *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
+     *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
+     *
+     *     @OA\Property(property="user_id", type="number", format="number", example="1"),
+     *
+     * *     @OA\Property(property="attendance_records", type="string", format="array", example={
+     * {
+     * "in_time":"00:44:00",
+     * "out_time":"00:45:00"
+     * },
+     * * {
+     * "in_time":"00:48:00",
+     *  "out_time":"00:50:00"
+     * }
+     *
+     * }),
+     *
+
+     *
+     *
+     *
+     *
+     *
+     *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
+     * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+     *
+     *
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createSelfAttendance(SelfAttendanceCreateRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $request_data = $request->validated();
+             $request_data["user_id"] = auth()->user()->id;
+
+             $request_data["attendance_records"] = collect($request_data["attendance_records"])
+             ->map(function($item){
+                $item["out_time"] = $item["out_time"]
+             })
+             ->toArray()
+;
+             $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
+
+
+
+             // Retrieve attendance setting
+             $setting_attendance = $this->get_attendance_setting();
+
+
+             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+
+
+             // Assign additional data to request data for attendance creation
+             $attendance =  Attendance::create($attendance_data);
+
+
+             $this->adjust_payroll_on_attendance_update($attendance, 0);
+
+
+             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
+
+             DB::commit();
+             return response($attendance, 201);
+         } catch (Exception $e) {
+             DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *
@@ -155,7 +283,6 @@ class AttendanceController extends Controller
 
             // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($attendance_data);
-
 
 
             $this->adjust_payroll_on_attendance_update($attendance, 0);

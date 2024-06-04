@@ -1,104 +1,54 @@
 {
-    "NI_number": "44",
-    "first_Name": "Test",
-    "last_Name": "Test",
-    "email": "sfhsdfhd@gmail.com",
-    "date_of_birth": "01-06-2010",
+    "NI_number": "534563",
+    "first_Name": "dfyhj",
+    "last_Name": "tj",
+    "email": "dtyjhtyj@gmail.com",
+    "date_of_birth": "04-06-2010",
     "password": "12345678#We",
     "password_confirmation": "12345678#We",
     "phone": "01777777777",
-    "address_line_1": "e",
-    "country": "r",
-    "city": "e",
+    "address_line_1": "djt",
+    "country": "tydj",
+    "city": "tyj",
     "lat": "",
     "long": "",
-    "role": "business_employee#36",
+    "role": "business_employee#1",
     "gender": "male",
-    "user_id": "A-0001",
-    "postcode": "t",
-    "work_shift_id": 70,
+    "user_id": "FAT-0003",
+    "postcode": "dyj",
+    "work_shift_id": 69,
     "is_in_employee": 1,
     "designation_id": 3,
-    "employment_status_id": 2,
-    "salary_per_annum": "5000",
-    "work_location_id": 1,
-    "weekly_contractual_hours": "50",
+    "employment_status_id": 4,
+    "salary_per_annum": "500",
+    "work_location_id": 4,
+    "weekly_contractual_hours": "5",
     "minimum_working_days_per_week": "5",
-    "overtime_rate": "50",
+    "overtime_rate": "5",
     "recruitment_processes": [
         {
-            "recruitment_process_id": 11,
-            "description": "fxgjfxgj",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 10,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 9,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 8,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 7,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 6,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 5,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 4,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 3,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 2,
-            "description": "",
-            "attachments": []
-        },
-        {
-            "recruitment_process_id": 1,
-            "description": "",
+            "recruitment_process_id": 57,
+            "description": "dgfhfgh tgh tgth",
             "attachments": []
         }
     ],
-    "joining_date": "01-06-2024",
+    "joining_date": "04-06-2024",
     "address_line_2": "",
     "departments": [
-        74
+        8
     ],
     "emergency_contact_details": [
         {
-            "relationship_of_above_to_you": "Child",
-            "first_Name": "fgyjdj",
-            "last_Name": "fjfyjfyj",
-            "address_line_1": "fxghfdgh",
-            "postcode": "gjfxgjh",
-            "mobile_tel_number": "01444444444"
+            "relationship_of_above_to_you": "Daughter",
+            "first_Name": "yt",
+            "last_Name": "gchj",
+            "postcode": "dyti",
+            "mobile_tel_number": "01111111111",
+            "address_line_1": "drtydrty"
         },
         {}
     ],
-    "immigration_status": "ilr",
+    "immigration_status": "immigrant",
     "sponsorship_details": {
         "date_assigned": "",
         "expiry_date": "",
@@ -108,42 +58,48 @@
         "current_certificate_status": "",
         "is_sponsorship_withdrawn": 0
     },
-    "is_active_visa_details": 0,
+    "is_active_visa_details": 1,
     "is_active_right_to_works": 1,
     "visa_details": {
-        "BRP_number": "",
-        "visa_issue_date": "",
-        "visa_expiry_date": "",
-        "place_of_issue": "",
+        "BRP_number": "445454563453453453453453434534534534534534345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345343453453453453",
+        "visa_issue_date": "01-02-1785",
+        "visa_expiry_date": "27-06-2155",
+        "place_of_issue": "Algeria",
         "visa_docs": [
             {
                 "id": 0,
-                "file_name": "",
-                "description": ""
+                "file_name": "/temporary_files/1717493852_Screenshot_from_2024-06-04_01-14-09.png",
+                "description": "ttt"
+            },
+            {
+                "id": 1,
+                "file_name": "/temporary_files/1717493871_Screenshot_from_2024-06-03_22-22-57.png",
+                "description": "hhh"
             }
         ]
     },
     "right_to_works": {
-        "right_to_work_code": "4545",
-        "right_to_work_check_date": "05-06-2024",
-        "right_to_work_expiry_date": "12-06-2024",
+        "right_to_work_code": "4545454545",
+        "right_to_work_check_date": "13-06-2024",
+        "right_to_work_expiry_date": "14-06-2024",
         "right_to_work_docs": [
             {
                 "id": 0,
-                "file_name": "/temporary_files/1717259656_Screenshot_from_2024-06-01_18-56-57.png",
-                "description": "yjjty"
+                "file_name": "/temporary_files/1717493913_Screenshot_from_2024-06-03_22-22-57.png",
+                "description": "hhh"
             },
             {
                 "id": 1,
-                "file_name": "/temporary_files/1717259666_Screenshot_from_2024-06-01_15-47-31.png",
-                "description": "dfhfhhtfghfgh"
+                "file_name": "/temporary_files/1717493929_Screenshot_from_2024-06-03_22-22-57.png",
+                "description": "uuu"
             }
         ]
     },
     "passport_details": {
-        "passport_number": "",
-        "passport_issue_date": "",
-        "passport_expiry_date": "",
-        "place_of_issue": ""
-    }
+        "passport_number": "xftghxfdth",
+        "passport_issue_date": "03-06-2024",
+        "passport_expiry_date": "12-06-2024",
+        "place_of_issue": "Algeria"
+    },
+    "middle_Name": "trjh"
 }
