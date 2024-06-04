@@ -42,6 +42,8 @@ class SettingAttendanceController extends Controller
  *  *     @OA\Property(property="api_key", type="string", format="string", example="sdthsd@hrhfgf"),
  *
  *     @OA\Property(property="auto_approval", type="boolean", format="boolean", example="1"),
+ *  *     @OA\Property(property="is_geolocation_enabled", type="boolean", format="boolean", example="1"),
+ *
 *     @OA\Property(property="special_users", type="string", format="array", example={1,2,3}),
  *     @OA\Property(property="special_roles", type="string", format="array", example={1,2,3})
  *

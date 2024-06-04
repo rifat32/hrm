@@ -807,8 +807,9 @@ $responseData = [
 
 
 
-
+            if(env("SEND_EMAIL") == true) {
             $result = Mail::to($request_data["email"])->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+            }
 
             if (count(Mail::failures()) > 0) {
                 // Handle failed recipients and log the error messages
@@ -908,8 +909,9 @@ $responseData = [
 
 
 
-
+            if(env("SEND_EMAIL") == true) {
             $result = Mail::to($user->email)->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+            }
 
             if (count(Mail::failures()) > 0) {
                 // Handle failed recipients and log the error messages

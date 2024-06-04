@@ -17,6 +17,7 @@ class SettingAttendance extends Model
         'punch_in_out_interval',
         'alert_area',
         'auto_approval',
+        "is_geolocation_enabled",
 
         'service_name',
         'api_key',

@@ -74,7 +74,7 @@ class WorkLocationUpdateRequest extends BaseFormRequest
             ],
 
 
-            'name' => 'required|string',
+            'address' => 'nullable|string',
             'description' => 'nullable|string',
             'name' => [
                 "required",

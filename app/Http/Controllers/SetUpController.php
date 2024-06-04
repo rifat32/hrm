@@ -767,6 +767,7 @@ return "swagger generated";
             'punch_in_out_interval' => 0.5,
             'alert_area' => (["web","system"]),
             'auto_approval' => false,
+            "is_geolocation_enabled" => 0,
 
             "business_id" => NULL,
             "is_active" => 1,

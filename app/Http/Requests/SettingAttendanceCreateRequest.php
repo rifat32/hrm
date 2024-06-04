@@ -41,6 +41,8 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
             'api_key'  => 'nullable|string',
 
             'auto_approval' => 'nullable|boolean',
+            'is_geolocation_enabled' => 'nullable|boolean',
+
             'special_users' => 'present|array',
             'special_users.*' => [
                 "numeric",
@@ -86,6 +88,7 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
             'alert_area.array' => 'The :attribute field must be an array.',
             'alert_area.*.string' => 'Each item in :attribute must be a string.',
             'auto_approval.boolean' => 'The :attribute field must be a boolean.',
+            
         ];
     }
 }

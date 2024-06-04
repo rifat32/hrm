@@ -701,9 +701,11 @@ trait BusinessUtil
                 'punch_in_out_interval' => $defaultSettingAttendance->punch_in_out_interval,
                 'alert_area' => $defaultSettingAttendance->alert_area,
                 'auto_approval' => $defaultSettingAttendance->auto_approval,
+                'is_geolocation_enabled' => $defaultSettingAttendance->is_geolocation_enabled,
 
-                'service_name' => $defaultSettingAttendance->auto_approval,
-                'api_key'=> $defaultSettingAttendance->auto_approval,
+
+                'service_name' => $defaultSettingAttendance->service_name,
+                'api_key'=> $defaultSettingAttendance->api_key,
 
                 "created_by" => auth()->user()->id,
                 "is_active" => 1,

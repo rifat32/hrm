@@ -34,7 +34,9 @@ class WorkLocationController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
+     *      * @OA\Property(property="address", type="string", format="string", example="erg ear ga&nbsp;"),
+     *
      *
      *
      *
@@ -133,7 +135,9 @@ class WorkLocationController extends Controller
      *         @OA\JsonContent(
      *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
+     * @OA\Property(property="address", type="string", format="string", example="erg ear ga&nbsp;"),
+     *
 
      *
      *         ),
@@ -195,6 +199,7 @@ class WorkLocationController extends Controller
                     collect($request_data)->only([
                         'name',
                         'description',
+                        'address'
                         // "is_default",
                         // "is_active",
                         // "business_id",
@@ -854,7 +859,7 @@ class WorkLocationController extends Controller
                     'id', 'first_Name',
                     'last_Name',
                 ]);
-             
+
 
                 return response()->json([
                     "message" => "Some users are associated with the specified work_locations",

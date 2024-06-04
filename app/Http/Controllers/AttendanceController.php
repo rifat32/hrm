@@ -269,10 +269,8 @@ class AttendanceController extends Controller
      * }),
      *
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
-     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
-     *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
-     *
-     *
+     *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *     @OA\Property(property="project_id", type="integer", format="int", example="1")
      *
      *
      *

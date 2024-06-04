@@ -25,6 +25,10 @@ class CreateSettingAttendancesTable extends Migration
             $table->text('api_key')->nullable();
 
             $table->boolean('auto_approval')->nullable();
+            
+
+            $table->boolean('is_geolocation_enabled')->nullable();
+
 
 
             $table->boolean('is_active')->default(false);

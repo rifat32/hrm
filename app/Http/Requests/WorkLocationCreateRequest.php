@@ -25,6 +25,8 @@ class WorkLocationCreateRequest extends BaseFormRequest
     public function rules()
     {
         $rules = [
+
+            'address' => 'nullable|string',
             'description' => 'nullable|string',
             'name' => [
                 "required",
