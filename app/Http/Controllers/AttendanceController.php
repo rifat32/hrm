@@ -10,7 +10,8 @@ use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
 use App\Http\Requests\AttendanceCreateRequest;
 use App\Http\Requests\AttendanceMultipleCreateRequest;
 use App\Http\Requests\AttendanceUpdateRequest;
-use App\Http\Requests\SelfAttendanceCreateRequest;
+use App\Http\Requests\SelfAttendanceCheckInCreateRequest;
+use App\Http\Requests\SelfAttendanceCheckOutCreateRequest;
 use App\Http\Utils\AttendanceUtil;
 use App\Http\Utils\BasicNotificationUtil;
 use App\Http\Utils\BasicUtil;
@@ -46,11 +47,199 @@ class AttendanceController extends Controller
         $this->attendanceComponent = $attendanceComponent;
     }
 
+      /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/attendances/self/check-out",
+     *      operationId="createSelfAttendanceCheckOut",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store attendance",
+     *      description="This method is to store attendance",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *     @OA\Property(property="note", type="string",  format="string", example="r"),
+     *    *     @OA\Property(property="in_geolocation", type="string",  format="string", example="r"),
+     *   *    *     @OA\Property(property="out_geolocation", type="string",  format="string", example="r"),
+     *
+     *     @OA\Property(property="user_id", type="number", format="number", example="1"),
+     *
+     * *     @OA\Property(property="attendance_records", type="string", format="array", example={
+     * {
+     * "in_time":"00:44:00",
+     * "out_time":"00:45:00"
+     * },
+     * * {
+     * "in_time":"00:48:00",
+     *  "out_time":"00:50:00"
+     * }
+     *
+     * }),
+     *
+     *
+     *
+     *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
+     * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
+     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+     *
+     *
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createSelfAttendanceCheckOut(SelfAttendanceCheckOutCreateRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $request_data = $request->validated();
+
+             // Ensure the authenticated user exists and has a business_id
+             $user = auth()->user();
+             if (!$user || !$user->business_id) {
+                 // Handle the error as needed, e.g., throw an exception or return an error response
+                 throw new Exception("User or business ID not found.");
+             }
+
+             // Create the query parameters
+             $attendance_query_params = [
+                 "id" => $request_data["id"],
+                 "business_id" => $user->business_id,
+             ];
+
+             // Find the attendance record
+             $attendance = Attendance::where($attendance_query_params)->first();
+
+             if (!$attendance) {
+                 // Handle the case where the attendance record is not found, e.g., throw an exception or return an error response
+                 throw new Exception("Attendance record not found.");
+             }
+
+             // Convert the attendance record to an array
+             $attendance_data = $attendance->toArray();
+
+             // Merge request data into the attendance data, overriding existing keys with request data
+             $request_data = array_merge($attendance_data, $request_data);
+
+             // Now $request_data contains the merged data
+
+
+
+
+             $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
+
+
+             // Retrieve attendance setting
+             $setting_attendance = $this->get_attendance_setting();
+
+             // Process attendance data for update
+             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+
+
+
+             if ($attendance) {
+                 $attendance->fill(collect($attendance_data)->only([
+                     'note',
+
+                     "out_geolocation",
+                     'does_break_taken',
+                     "behavior",
+                     "capacity_hours",
+                     "work_hours_delta",
+                     "break_type",
+                     "break_hours",
+                     "total_paid_hours",
+                     "regular_work_hours",
+                     "work_shift_start_at",
+                     "work_shift_end_at",
+                     "work_shift_history_id",
+                     "holiday_id",
+                     "leave_record_id",
+                     "is_weekend",
+                     "overtime_hours",
+                     "punch_in_time_tolerance",
+                     "status",
+                     'work_location_id',
+                     'project_id',
+                     "is_present",
+                     "is_active",
+                     // "business_id",
+                     // "created_by",
+                     "regular_hours_salary",
+                     "overtime_hours_salary",
+                 ])->toArray());
+                 $attendance->save();
+             }
+
+
+             $observer = new AttendanceObserver();
+             $observer->updated_action($attendance, 'update');
+
+             $this->adjust_payroll_on_attendance_update($attendance, 0);
+
+
+
+             $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
+
+
+
+
+             DB::commit();
+             return response($attendance, 201);
+         } catch (Exception $e) {
+             DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
   /**
      *
      * @OA\Post(
-     *      path="/v1.0/attendances/self/checkin",
-     *      operationId="createSelfAttendance",
+     *      path="/v1.0/attendances/self/check-in",
+     *      operationId="createSelfAttendanceCheckIn",
      *      tags={"attendances"},
      *       security={
      *           {"bearerAuth": {}}
@@ -130,7 +319,7 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function createSelfAttendance(SelfAttendanceCreateRequest $request)
+     public function createSelfAttendanceCheckIn(SelfAttendanceCheckInCreateRequest $request)
      {
 
          DB::beginTransaction();
@@ -140,12 +329,15 @@ class AttendanceController extends Controller
              $request_data = $request->validated();
              $request_data["user_id"] = auth()->user()->id;
 
+
+
              $request_data["attendance_records"] = collect($request_data["attendance_records"])
              ->map(function($item){
-                $item["out_time"] = $item["out_time"]
+                $item["out_time"] = $item["out_time"];
+                return $item;
              })
-             ->toArray()
-;
+             ->toArray();
+
              $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
 
 
@@ -173,6 +365,11 @@ class AttendanceController extends Controller
              return $this->sendError($e, 500, $request);
          }
      }
+
+
+
+
+
 
     /**
      *
@@ -279,6 +476,7 @@ class AttendanceController extends Controller
 
 
             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+
 
 
             // Assign additional data to request data for attendance creation
