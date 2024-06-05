@@ -124,10 +124,6 @@ Route::post('/v1.0/files/single-file-upload', [FileUploadController::class, "cre
 
 
 
-
-
-
-
 Route::post('/v1.0/register', [AuthController::class, "register"]);
 Route::post('/v1.0/login', [AuthController::class, "login"]);
 Route::post('/v2.0/login', [AuthController::class, "loginV2"]);

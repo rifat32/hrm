@@ -36,6 +36,7 @@ class UserJobHistoryCreateRequest extends BaseFormRequest
                 new ValidUserId($all_manager_department_ids)
             ],
             'company_name' => 'required|string',
+            'country' => 'required|string',
             'job_title' => 'required|string',
             'employment_start_date' => 'required|date',
             'employment_end_date' => 'nullable|date|after_or_equal:employment_start_date',

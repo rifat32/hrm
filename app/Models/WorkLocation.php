@@ -12,6 +12,11 @@ class WorkLocation extends Model
     protected $fillable = [
         'name',
         'description',
+        'is_location_enabled',
+        
+        'latitude',
+        'longitude',
+
         "is_active",
         "is_default",
         "business_id",

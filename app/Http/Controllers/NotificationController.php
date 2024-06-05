@@ -546,7 +546,7 @@ class NotificationController extends Controller
             ])->first();
 
             if(!$notification) {
-           
+
                 return response(["message" => "Notification not found"], 404);
             }
 

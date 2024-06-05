@@ -32,3 +32,5 @@ ALTER TABLE `payrolls`
 ADD CONSTRAINT `payrolls_payrun_id_foreign` FOREIGN KEY (`payrun_id`) REFERENCES `payruns`(`id`) ON DELETE CASCADE;
 
 5. emailer_logs table upload to db
+
+6. ALTER TABLE `work_locations` ADD `latitude` VARCHAR(255) NULL DEFAULT NULL AFTER `updated_at`, ADD `longitude` VARCHAR(255) NULL DEFAULT NULL AFTER `latitude`, ADD `is_location_enabled` BOOLEAN NOT NULL AFTER `longitude`; 

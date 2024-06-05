@@ -16,7 +16,16 @@ class CreateWorkLocationsTable extends Migration
         Schema::create('work_locations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+
             $table->string('address');
+            
+            $table->boolean('is_location_enabled');
+
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
+
+
+
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(false);
             $table->boolean('is_default')->default(false);

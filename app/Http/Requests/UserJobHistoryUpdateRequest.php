@@ -50,6 +50,7 @@ class UserJobHistoryUpdateRequest extends BaseFormRequest
                 },
             ],
             'company_name' => 'required|string',
+            'country' => 'required|string',
             'job_title' => 'required|string',
             'employment_start_date' => 'required|date',
             'employment_end_date' => 'nullable|date|after_or_equal:employment_start_date',

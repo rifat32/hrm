@@ -1,105 +1,44 @@
-{
-    "NI_number": "534563",
-    "first_Name": "dfyhj",
-    "last_Name": "tj",
-    "email": "dtyjhtyj@gmail.com",
-    "date_of_birth": "04-06-2010",
-    "password": "12345678#We",
-    "password_confirmation": "12345678#We",
-    "phone": "01777777777",
-    "address_line_1": "djt",
-    "country": "tydj",
-    "city": "tyj",
-    "lat": "",
-    "long": "",
-    "role": "business_employee#1",
-    "gender": "male",
-    "user_id": "FAT-0003",
-    "postcode": "dyj",
-    "work_shift_id": 69,
-    "is_in_employee": 1,
-    "designation_id": 3,
-    "employment_status_id": 4,
-    "salary_per_annum": "500",
-    "work_location_id": 4,
-    "weekly_contractual_hours": "5",
-    "minimum_working_days_per_week": "5",
-    "overtime_rate": "5",
-    "recruitment_processes": [
-        {
-            "recruitment_process_id": 57,
-            "description": "dgfhfgh tgh tgth",
-            "attachments": []
-        }
-    ],
-    "joining_date": "04-06-2024",
-    "address_line_2": "",
-    "departments": [
-        8
-    ],
-    "emergency_contact_details": [
-        {
-            "relationship_of_above_to_you": "Daughter",
-            "first_Name": "yt",
-            "last_Name": "gchj",
-            "postcode": "dyti",
-            "mobile_tel_number": "01111111111",
-            "address_line_1": "drtydrty"
-        },
-        {}
-    ],
-    "immigration_status": "immigrant",
-    "sponsorship_details": {
-        "date_assigned": "",
-        "expiry_date": "",
-        "status": "",
-        "note": "",
-        "certificate_number": "",
-        "current_certificate_status": "",
-        "is_sponsorship_withdrawn": 0
+"queries": [
+    {
+        "query": "select users.id from users where exists (select * from department_users where users.id = department_users.user_id and exists (select * from departments where department_users.department_id = departments.id and departments.id in (?, ?, ?, ?))) and users.deleted_at is null",
+        "bindings": [
+            2,
+            3,
+            5,
+            75
+        ],
+        "time": 0.450000000000000011102230246251565404236316680908203125
     },
-    "is_active_visa_details": 1,
-    "is_active_right_to_works": 1,
-    "visa_details": {
-        "BRP_number": "445454563453453453453453434534534534534534345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345345343453453453453",
-        "visa_issue_date": "01-02-1785",
-        "visa_expiry_date": "27-06-2155",
-        "place_of_issue": "Algeria",
-        "visa_docs": [
-            {
-                "id": 0,
-                "file_name": "/temporary_files/1717493852_Screenshot_from_2024-06-04_01-14-09.png",
-                "description": "ttt"
-            },
-            {
-                "id": 1,
-                "file_name": "/temporary_files/1717493871_Screenshot_from_2024-06-03_22-22-57.png",
-                "description": "hhh"
-            }
-        ]
+    {
+        "query": "select count(*) as aggregate from work_shift_detail_histories where (day = ? and is_weekend = ?) and exists (select * from work_shift_histories where work_shift_detail_histories.work_shift_id = work_shift_histories.id and exists (select * from users inner join employee_user_work_shift_histories on users.id = employee_user_work_shift_histories.user_id where work_shift_histories.id = employee_user_work_shift_histories.work_shift_id and users.id in (?, ?, ?, ?, ?, ?, ?) and employee_user_work_shift_histories.from_date <= ? and (employee_user_work_shift_histories.to_date > ? or employee_user_work_shift_histories.to_date is null) and users.deleted_at is null))",
+        "bindings": [
+            1,
+            0,
+            5,
+            45,
+            7,
+            8,
+            58,
+            59,
+            68,
+            "03-06-2024",
+            "03-06-2024"
+        ],
+        "time": 2.649999999999999911182158029987476766109466552734375
     },
-    "right_to_works": {
-        "right_to_work_code": "4545454545",
-        "right_to_work_check_date": "13-06-2024",
-        "right_to_work_expiry_date": "14-06-2024",
-        "right_to_work_docs": [
-            {
-                "id": 0,
-                "file_name": "/temporary_files/1717493913_Screenshot_from_2024-06-03_22-22-57.png",
-                "description": "hhh"
-            },
-            {
-                "id": 1,
-                "file_name": "/temporary_files/1717493929_Screenshot_from_2024-06-03_22-22-57.png",
-                "description": "uuu"
-            }
-        ]
-    },
-    "passport_details": {
-        "passport_number": "xftghxfdth",
-        "passport_issue_date": "03-06-2024",
-        "passport_expiry_date": "12-06-2024",
-        "place_of_issue": "Algeria"
-    },
-    "middle_Name": "trjh"
-}
+    {
+        "query": "select count(*) as aggregate from attendances where (is_present = ?) and user_id in (?, ?, ?, ?, ?, ?, ?) and in_date = ?",
+        "bindings": [
+            1,
+            5,
+            45,
+            7,
+            8,
+            58,
+            59,
+            68,
+            "03-06-2024"
+        ],
+        "time": 0.2600000000000000088817841970012523233890533447265625
+    }
+]

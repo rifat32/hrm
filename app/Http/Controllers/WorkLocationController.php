@@ -35,8 +35,10 @@ class WorkLocationController extends Controller
      *         @OA\JsonContent(
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
-     *      * @OA\Property(property="address", type="string", format="string", example="erg ear ga&nbsp;"),
-     *
+     * @OA\Property(property="address", type="string", format="string", example="erg ear ga&nbsp;"),
+     * @OA\Property(property="is_location_enabled", type="string", format="string", example="test"),
+     * @OA\Property(property="latitude", type="string", format="string", example="test"),
+     * @OA\Property(property="longitude", type="string", format="string", example="test"),
      *
      *
      *
@@ -137,6 +139,9 @@ class WorkLocationController extends Controller
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
      * @OA\Property(property="address", type="string", format="string", example="erg ear ga&nbsp;"),
+     * @OA\Property(property="is_location_enabled", type="string", format="string", example="test"),
+     *    * @OA\Property(property="latitude", type="string", format="string", example="test"),
+     * @OA\Property(property="longitude", type="string", format="string", example="test"),
      *
 
      *
@@ -199,7 +204,11 @@ class WorkLocationController extends Controller
                     collect($request_data)->only([
                         'name',
                         'description',
-                        'address'
+                        'address',
+                        "is_location_enabled",
+                        "latitude",
+                        "longitude"
+
                         // "is_default",
                         // "is_active",
                         // "business_id",

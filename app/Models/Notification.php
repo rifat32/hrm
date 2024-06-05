@@ -41,13 +41,13 @@ class Notification extends Model
         return $this->belongsTo(NotificationTemplate::class,'notification_template_id', 'id');
     }
     public function sender(){
-        return $this->belongsTo(User::class,'sender_id', 'id')->withTrashed();
+        return $this->belongsTo(User::class,'sender_id', 'id');
     }
     public function receiver(){
-        return $this->belongsTo(User::class,'receiver_id', 'id')->withTrashed();
+        return $this->belongsTo(User::class,'receiver_id', 'id');
     }
     public function business(){
-        return $this->belongsTo(Business::class,'business_id', 'id')->withTrashed();
+        return $this->belongsTo(Business::class,'business_id', 'id');
     }
 
     // public function getCreatedAtAttribute($value)

@@ -28,6 +28,10 @@ class WorkLocationCreateRequest extends BaseFormRequest
 
             'address' => 'nullable|string',
             'description' => 'nullable|string',
+            'is_location_enabled' => 'required|boolean',
+            'latitude' => 'required_if:is_location_enabled,1|string',
+            'longitude' => 'required_if:is_location_enabled,1|string',
+
             'name' => [
                 "required",
                 'string',

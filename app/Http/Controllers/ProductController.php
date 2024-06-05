@@ -150,8 +150,8 @@ class ProductController extends Controller
               ]);
            } else {
               foreach($insertableData["product_variations"] as $product_variation) {
-                  $c = ProductVariation::withTrashed()
-                  ->where('product_id', $product->id)
+                  $c = ProductVariation::
+                  where('product_id', $product->id)
                   ->count() + 1;
 
                   $product->product_variations()->create([
@@ -359,8 +359,8 @@ class ProductController extends Controller
               foreach($updatableData["product_variations"] as $product_variation) {
 
                   if(empty($product_variation["id"])) {
-                      $c = ProductVariation::withTrashed()
-                      ->where('product_id', $product->id)
+                      $c = ProductVariation::
+                      where('product_id', $product->id)
                       ->count() + 1;
 
                       $product->product_variations()->create([
@@ -557,8 +557,8 @@ class ProductController extends Controller
                         ]);
                      } else {
                         foreach($updatableData["product_variations"] as $product_variation) {
-                            $c = ProductVariation::withTrashed()
-                            ->where('product_id', $product->id)
+                            $c = ProductVariation::
+                              where('product_id', $product->id)
                             ->count() + 1;
 
                             $product->product_variations()->create([
@@ -793,7 +793,7 @@ class ProductController extends Controller
         ->first()
         ;
         if(!$product) {
-        
+
 return response()->json([
    "message" => "no product found"
 ],404);
