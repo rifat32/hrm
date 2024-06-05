@@ -19,7 +19,7 @@ class CreatePayrollsTable extends Migration
 
 
             $table->unsignedBigInteger("payrun_id")->nullable();
-            $table->foreign('payrun_id')->references('id')->on('payruns')->onDelete('set null');
+            $table->foreign('payrun_id')->references('id')->on('payruns')->onDelete('cascade');
 
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
