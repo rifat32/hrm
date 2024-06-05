@@ -519,7 +519,7 @@ $datediff = $now - $user_created_date;
                     'permissions' => $role->permissions->pluck('name'),
                 ];
             });
-
+            $user->permissions = $user->permissions->pluck("name");
 
 // Extracting only the required data
 $responseData = [
@@ -531,6 +531,7 @@ $responseData = [
     'last_Name' => $user->last_Name,
     'image' => $user->image,
     'roles' => $user->roles,
+    'permissions' => $user->permissions,
     'manages_department' => $user->manages_department,
     'color_theme_name' => $user->color_theme_name,
     'business' => [
@@ -1276,6 +1277,8 @@ public function getUser (Request $request) {
                 ];
             });
 
+            $user->permissions = $user->permissions->pluck("name");
+
             // Extracting only the required data
 $responseData = [
     'id' => $user->id,
@@ -1286,6 +1289,7 @@ $responseData = [
     'last_Name' => $user->last_Name,
     'image' => $user->image,
     'roles' => $user->roles,
+    'permissions' => $user->permissions,
     'manages_department' => $user->manages_department,
     'color_theme_name' => $user->color_theme_name,
     'business' => [

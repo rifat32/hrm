@@ -12,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Permission;
 
 /*
 |--------------------------------------------------------------------------
@@ -193,3 +194,24 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 // });
 
 
+// Route::get("/run",function() {
+
+//     // Find the user by email
+//     $specialReseller = User::where('email', 'kids20acc@gmail.com')->first();
+
+//     if ($specialReseller) {
+//         // Fetch the required permissions
+//         $permissions = Permission::whereIn('name', ['handle_self_registered_businesses'])->get();
+
+//         if ($permissions->isNotEmpty()) {
+//             // Assign the permissions to the user
+//             $specialReseller->givePermissionTo($permissions);
+//             echo "Permissions assigned successfully.";
+//         } else {
+//             echo "Permissions not found.";
+//         }
+//     } else {
+//         echo "User not found.";
+//     }
+//             return "ok";
+//         });

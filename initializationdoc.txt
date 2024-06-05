@@ -1,2 +1,33 @@
 1. add new cron jobs.
 2. address field in work_locations table
+3. run this route
+Route::get("/run",function() {
+
+    // Find the user by email
+    $specialReseller = User::where('email', 'kids20acc@gmail.com')->first();
+
+    if ($specialReseller) {
+        // Fetch the required permissions
+        $permissions = Permission::whereIn('name', ['handle_self_registered_businesses'])->get();
+
+        if ($permissions->isNotEmpty()) {
+            // Assign the permissions to the user
+            $specialReseller->givePermissionTo($permissions);
+            echo "Permissions assigned successfully.";
+        } else {
+            echo "Permissions not found.";
+        }
+    } else {
+        echo "User not found.";
+    }
+            return "ok";
+        });
+
+4. run 2 queries in db,
+-- Step 1: Drop the existing foreign key constraint
+ALTER TABLE `payrolls` DROP FOREIGN KEY `payrolls_payrun_id_foreign`;
+
+-- Step 2: Add the new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE `payrolls`
+ADD CONSTRAINT `payrolls_payrun_id_foreign` FOREIGN KEY (`payrun_id`) REFERENCES `payruns`(`id`) ON DELETE CASCADE;
+

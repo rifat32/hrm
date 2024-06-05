@@ -168,7 +168,7 @@ return "swagger generated";
                 $specialReseller->save();
 
                 $permissions = Permission::whereIn('name', ["handle_self_registered_businesses"])->get();
-                $specialReseller->givePermissionTo($specialReseller);
+                $specialReseller->givePermissionTo($permissions);
 
 
         // ###############################
