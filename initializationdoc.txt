@@ -31,3 +31,4 @@ ALTER TABLE `payrolls` DROP FOREIGN KEY `payrolls_payrun_id_foreign`;
 ALTER TABLE `payrolls`
 ADD CONSTRAINT `payrolls_payrun_id_foreign` FOREIGN KEY (`payrun_id`) REFERENCES `payruns`(`id`) ON DELETE CASCADE;
 
+5. emailer_logs table upload to db

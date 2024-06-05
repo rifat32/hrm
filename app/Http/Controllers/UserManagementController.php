@@ -32,6 +32,7 @@ use App\Http\Requests\UserUpdateV2Request;
 use App\Http\Requests\UserUpdateV3Request;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -67,7 +68,7 @@ use Illuminate\Support\Facades\Mail;
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil,BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil,BasicUtil, EmailLogUtil;
 
     protected $workShiftHistoryComponent;
     protected $holidayComponent;
@@ -819,7 +820,12 @@ class UserManagementController extends Controller
             $user->roles = $user->roles->pluck('name');
 
             if (env("SEND_EMAIL") == true) {
+                $this->checkEmailSender($user->id,0);
+
                 Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
+
+                $this->storeEmailSender($user->id,0);
+
             }
 
 

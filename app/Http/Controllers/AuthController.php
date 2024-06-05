@@ -14,6 +14,7 @@ use App\Http\Requests\PasswordChangeRequest;
 use App\Http\Requests\UserInfoUpdateRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\ForgetPasswordMail;
 use App\Mail\VerifyMail;
@@ -32,7 +33,7 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil;
     /**
      *
      * @OA\Post(
@@ -131,7 +132,12 @@ class AuthController extends Controller
 
 
             if(env("SEND_EMAIL") == true) {
+
+                $this->checkEmailSender($user->id,0);
+
                 Mail::to($user->email)->send(new VerifyMail($user));
+
+                $this->storeEmailSender($user->id,0);
             }
 
 // verify email ends
@@ -296,7 +302,13 @@ $datediff = $now - $user_created_date;
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);
                 if(env("SEND_EMAIL") == true) {
+
+
+                    $this->checkEmailSender($user->id,0);
+
                     Mail::to($user->email)->send(new VerifyMail($user));
+
+                    $this->storeEmailSender($user->id,0);
                 }
                 $user->save();
 
@@ -494,7 +506,12 @@ $datediff = $now - $user_created_date;
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);
                 if(env("SEND_EMAIL") == true) {
+
+                    $this->checkEmailSender($user->id,0);
+
                     Mail::to($user->email)->send(new VerifyMail($user));
+
+                    $this->storeEmailSender($user->id,0);
                 }
                 $user->save();
 
@@ -736,6 +753,7 @@ $responseData = [
             return $this->sendError($e, 500,$request);
         }
     }
+
    /**
         *
      * @OA\Post(
@@ -809,7 +827,11 @@ $responseData = [
 
 
             if(env("SEND_EMAIL") == true) {
+            $this->checkEmailSender($user->id,1);
+
             $result = Mail::to($request_data["email"])->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+
+            $this->storeEmailSender($user->id,1);
             }
 
             if (count(Mail::failures()) > 0) {
@@ -911,7 +933,15 @@ $responseData = [
 
 
             if(env("SEND_EMAIL") == true) {
-            $result = Mail::to($user->email)->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+
+                $this->checkEmailSender($user->id,1);
+
+                $result = Mail::to($user->email)->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+
+                $this->storeEmailSender($user->id,1);
+
+
+
             }
 
             if (count(Mail::failures()) > 0) {
@@ -1008,7 +1038,17 @@ $responseData = [
             $user->email_verify_token = $email_token;
             $user->email_verify_token_expires = Carbon::now()->subDays(-1);
             if(env("SEND_EMAIL") == true) {
+
+
+
+                $this->checkEmailSender($user->id,0);
+
                 Mail::to($user->email)->send(new VerifyMail($user));
+
+                $this->storeEmailSender($user->id,0);
+
+
+
             }
 
             $user->save();

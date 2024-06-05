@@ -15,6 +15,7 @@ use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\DiscountUtil;
+use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\SendPassword;
 
@@ -36,7 +37,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BusinessController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil,BasicUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil,BasicUtil,EmailLogUtil;
 
 
     /**
@@ -702,7 +703,12 @@ class BusinessController extends Controller
 
 
                 if (env("SEND_EMAIL") == true) {
+                    $this->checkEmailSender($user->id,0);
+
                     Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
+
+                    $this->storeEmailSender($user->id,0);
+
                 }
 
 
@@ -922,7 +928,12 @@ class BusinessController extends Controller
 
 
                 if (env("SEND_EMAIL") == true) {
+                    $this->checkEmailSender($user->id,0);
+
                     Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
+
+                    $this->storeEmailSender($user->id,0);
+
                 }
 
 
