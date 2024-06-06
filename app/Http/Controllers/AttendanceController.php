@@ -258,12 +258,10 @@ class AttendanceController extends Controller
      *
      * *     @OA\Property(property="attendance_records", type="string", format="array", example={
      * {
-     * "in_time":"00:44:00",
-     * "out_time":"00:45:00"
+     * "in_time":"00:44:00"
      * },
      * * {
-     * "in_time":"00:48:00",
-     *  "out_time":"00:50:00"
+     * "in_time":"00:48:00"
      * }
      *
      * }),
@@ -319,12 +317,12 @@ class AttendanceController extends Controller
 
              $request_data = $request->validated();
              $request_data["user_id"] = auth()->user()->id;
-
+             $request_data["does_break_taken"] = 0;
 
 
              $request_data["attendance_records"] = collect($request_data["attendance_records"])
              ->map(function($item){
-                $item["out_time"] = $item["out_time"];
+                $item["out_time"] = $item["in_time"];
                 return $item;
              })
              ->toArray();

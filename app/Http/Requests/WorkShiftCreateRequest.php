@@ -56,7 +56,7 @@ class WorkShiftCreateRequest extends BaseFormRequest
                 new ValidateDepartment($all_manager_department_ids)
             ],
             'work_locations' => [
-                "required",
+                "present",
                 'array',
             ],
 

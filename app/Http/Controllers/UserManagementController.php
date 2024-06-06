@@ -3107,7 +3107,7 @@ class UserManagementController extends Controller
                         );
                     },
                     "roles",
-                    "work_location"
+                    "work_locations"
                 ]
             );
 
@@ -3262,7 +3262,7 @@ class UserManagementController extends Controller
                     },
                     "roles",
                     "recruitment_processes",
-                    "work_location"
+                    "work_locations"
                 ]
             );
 
@@ -3425,7 +3425,7 @@ class UserManagementController extends Controller
                     },
                     "roles",
                     "recruitment_processes",
-                    "work_location"
+                    "work_locations"
                 ]
             );
 
@@ -4803,7 +4803,7 @@ class UserManagementController extends Controller
                     "designation",
                     "employment_status",
                     "business",
-                    "work_location",
+                    "work_locations",
                     "pension_detail"
 
                 ]
@@ -5060,7 +5060,7 @@ class UserManagementController extends Controller
                     "right_to_works",
                     "work_shifts",
                     "recruitment_processes",
-                    "work_location",
+                    "work_locations",
                     "bank"
                 ]
 

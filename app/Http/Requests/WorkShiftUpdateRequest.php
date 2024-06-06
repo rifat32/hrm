@@ -82,7 +82,7 @@ class WorkShiftUpdateRequest extends BaseFormRequest
             ],
 
             'work_locations' => [
-                "required",
+                "present",
                 'array',
             ],
 

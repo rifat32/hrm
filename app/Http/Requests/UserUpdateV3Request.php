@@ -85,7 +85,7 @@ class UserUpdateV3Request extends FormRequest
             ],
 
             "work_location_ids.*" =>[
-                "numeric",
+                "present",
             new ValidWorkLocationId()],
 
             'designation_id' => [

@@ -13,6 +13,7 @@ use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeePensionHistory;
 use App\Models\EmployeeRightToWorkHistory;
 use App\Models\EmployeeSponsorshipHistory;
+use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetailHistory;
 use App\Models\EmploymentStatus;
 use App\Models\JobListing;
@@ -1820,43 +1821,33 @@ $previous_end_date = Carbon::parse(($dates["previous_end_date"]));
         $total_present = 0;
         // Loop through each day in the date range
         for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
-            // Filter the data for the current date
+// Raw SQL query for calculating total time
+$query = DB::table('employee_user_work_shift_histories')
+    ->join('work_shift_histories', 'employee_user_work_shift_histories.work_shift_id', '=', 'work_shift_histories.id')
+    ->join('work_shift_detail_histories', 'work_shift_histories.id', '=', 'work_shift_detail_histories.work_shift_id')
+    ->select(DB::raw('SUM(TIMESTAMPDIFF(SECOND, work_shift_detail_histories.start_at, work_shift_detail_histories.end_at)) as total_seconds'))
+    ->whereIn('employee_user_work_shift_histories.user_id', $all_manager_user_ids)
+    ->where('employee_user_work_shift_histories.from_date', '<=', $date)
+    ->where(function ($query) use ($date) {
+        $query->where('employee_user_work_shift_histories.to_date', '>', $date)
+              ->orWhereNull('employee_user_work_shift_histories.to_date');
+    })
+    ->where([
+        ['work_shift_detail_histories.day', '=', $date->dayOfWeek],
+        ['work_shift_detail_histories.is_weekend', '=', 0]
+    ])
+    ->first();
 
-            $workShiftDetails = WorkShiftDetailHistory::where([
-                "day" =>  Carbon::parse(today())->dayOfWeek,
-                "is_weekend" => 0
+// Extract total seconds from the query result
+$totalSeconds = $query->total_seconds ?? 0;
 
-            ])
-            ->whereHas("work_shift.users", function ($query) use ( $all_manager_user_ids, $date) {
-                $query->whereIn("users.id", $all_manager_user_ids)
+// Extract total seconds from the query result
+$totalSeconds = $query->total_seconds ?? 0;
 
-                    ->where("employee_user_work_shift_histories.from_date", "<=", $date)
+// Convert total seconds to hours directly
+$totalHours = $totalSeconds / 3600;
 
-                    ->where(function ($query) use($date) {
-                        $query
-
-                        ->where("employee_user_work_shift_histories.to_date", ">", $date)
-                            ->orWhereNull("employee_user_work_shift_histories.to_date");
-                    });
-            })
-            ->select("id",'start_at', 'end_at')
-            ->get(); // Retrieve start and end times
-
-// Calculate the total hours
-$today_present_expectation = $workShiftDetails->reduce(function ($carry, $shiftDetail) {
-    $start = Carbon::parse($shiftDetail->start_at);
-    $end = Carbon::parse($shiftDetail->end_at);
-    $hours = $end->diffInHours($start);
-    return $carry + $hours;
-}, 0);
-
-
-
-
-            $total_present_expectation += $today_present_expectation;
-
-
-
+            $total_present_expectation += $totalHours;
 
             $today_present = Attendance::where([
                 "is_present" => 1
@@ -1867,18 +1858,7 @@ $today_present_expectation = $workShiftDetails->reduce(function ($carry, $shiftD
 
             $total_present += $today_present;
 
-
-
         }
-
-
-
-
-
-
-
-
-
 
 
         return [
@@ -1886,6 +1866,10 @@ $today_present_expectation = $workShiftDetails->reduce(function ($carry, $shiftD
           "total_present" =>  $total_present,
           "total_absent" => $total_present_expectation - $total_present,
         ];
+
+
+
+
     }
 
 
@@ -4132,7 +4116,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $start_date_of_previous_week,
                 $end_date_of_previous_week,
                 $all_manager_department_ids,
-                "total"
+                "today"
             );
 
 

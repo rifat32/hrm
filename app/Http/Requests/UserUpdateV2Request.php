@@ -205,7 +205,7 @@ class UserUpdateV2Request extends BaseFormRequest
 
 
         'work_location_ids' => [
-            "required",
+            "present",
             'array',
         ],
 

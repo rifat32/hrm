@@ -1200,6 +1200,238 @@
                 ]
             }
         },
+        "/v1.0/attendances/self/check-out": {
+            "put": {
+                "tags": [
+                    "attendances"
+                ],
+                "summary": "This method is to store attendance",
+                "description": "This method is to store attendance",
+                "operationId": "createSelfAttendanceCheckOut",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
+                                    "out_geolocation": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
+                                    "attendance_records": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "in_time": "00:44:00",
+                                                "out_time": "00:45:00"
+                                            },
+                                            {
+                                                "in_time": "00:48:00",
+                                                "out_time": "00:50:00"
+                                            }
+                                        ]
+                                    },
+                                    "does_break_taken": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    },
+                                    "break_hours": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/attendances/self/check-in": {
+            "post": {
+                "tags": [
+                    "attendances"
+                ],
+                "summary": "This method is to store attendance",
+                "description": "This method is to store attendance",
+                "operationId": "createSelfAttendanceCheckIn",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "in_geolocation": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "r"
+                                    },
+                                    "user_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "attendance_records": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            {
+                                                "in_time": "00:44:00",
+                                                "out_time": "00:45:00"
+                                            },
+                                            {
+                                                "in_time": "00:48:00",
+                                                "out_time": "00:50:00"
+                                            }
+                                        ]
+                                    },
+                                    "in_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-18"
+                                    },
+                                    "work_location_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": "1"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "format": "int",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/attendances": {
             "get": {
                 "tags": [
@@ -8874,6 +9106,1475 @@
                 "summary": "get all dashboard data combined",
                 "description": "get all dashboard data combined",
                 "operationId": "getBusinessManagerDashboardData",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/total-employee/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataTotalEmployee",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "total,today, this_month, this_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/open-roles/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataOpenRoles",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/open-roles-and-total-employee": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataOpenRolesAndTotalEmployee",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/absent": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataAbsent",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/present": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPresent",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/leaves/{status}/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataLeavesByStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "rejected, pending_approval... ",
+                        "required": true,
+                        "example": "status"
+                    },
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/holidays/{status}/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataHolidaysByStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "rejected, pending_approval... ",
+                        "required": true,
+                        "example": "status"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/pensions/{status}/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPensionsByStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "opt_in, opt_out",
+                        "required": true,
+                        "example": "status"
+                    },
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/pensions": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPensions",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/holidays": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataHolidays",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/leaves": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataLeaves",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/leaves-holidays": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataLeavesAndHolidays",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/pension-expiries/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPensionExpiries",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/combined-expiries": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataCombinedExpiries",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/passport-expiries/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPassportExpiries",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/visa-expiries/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataVisaExpiries",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/right-to-work-expiries/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataRightToWorkExpiries",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/sponsorship-expiries/{duration}": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataSponsorshipExpiries",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "path",
+                        "description": "today, this_month, this_week, previous_month, next_month, previous_week, next_week... ",
+                        "required": true,
+                        "example": "duration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/business-manager-dashboard/present-absent": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPresentAbsent",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/business-manager-dashboard/present-absent-hours": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataPresentAbsentHours",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-manager-dashboard/other-widgets": {
+            "get": {
+                "tags": [
+                    "dashboard_management.business_manager"
+                ],
+                "summary": "get all dashboard data combined",
+                "description": "get all dashboard data combined",
+                "operationId": "getBusinessManagerDashboardDataOtherWidgets",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -25900,6 +27601,11 @@
                                         "format": "boolean",
                                         "example": "1"
                                     },
+                                    "is_geolocation_enabled": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "1"
+                                    },
                                     "special_users": {
                                         "type": "string",
                                         "format": "array",
@@ -32578,11 +34284,11 @@
                         "example": "1"
                     },
                     {
-                        "name": "work_location_id",
+                        "name": "work_location_ids",
                         "in": "query",
-                        "description": "work_location_id",
+                        "description": "work_location_ids",
                         "required": true,
-                        "example": "1"
+                        "example": "1,2"
                     },
                     {
                         "name": "holiday_id",
@@ -33727,7 +35433,7 @@
                                         "format": "number",
                                         "example": "1"
                                     },
-                                    "work_location_id": {
+                                    "work_location_ids": {
                                         "type": "integer",
                                         "format": "int",
                                         "example": "1"
@@ -34007,10 +35713,10 @@
                                         "format": "number",
                                         "example": "1"
                                     },
-                                    "work_location_id": {
+                                    "work_location_ids": {
                                         "type": "integer",
                                         "format": "int",
-                                        "example": "1"
+                                        "example": "1,1"
                                     },
                                     "recruitment_processes": {
                                         "type": "string",
@@ -34628,10 +36334,10 @@
                                         "format": "number",
                                         "example": "1"
                                     },
-                                    "work_location_id": {
+                                    "work_location_ids": {
                                         "type": "integer",
                                         "format": "int",
-                                        "example": "1"
+                                        "example": "1,2"
                                     },
                                     "departments": {
                                         "type": "string",
@@ -35461,11 +37167,11 @@
                         "example": "1"
                     },
                     {
-                        "name": "work_location_id",
+                        "name": "work_location_ids",
                         "in": "query",
-                        "description": "work_location_id",
+                        "description": "work_location_ids",
                         "required": true,
-                        "example": "1"
+                        "example": "1,2"
                     },
                     {
                         "name": "holiday_id",
@@ -42270,6 +43976,26 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "erg ear ga&nbsp;"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    },
+                                    "is_location_enabled": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test"
+                                    },
+                                    "latitude": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test"
+                                    },
+                                    "longitude": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test"
                                     }
                                 },
                                 "type": "object"
@@ -42355,6 +44081,26 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "erg ear ga&nbsp;"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    },
+                                    "is_location_enabled": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test"
+                                    },
+                                    "latitude": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test"
+                                    },
+                                    "longitude": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test"
                                     }
                                 },
                                 "type": "object"
@@ -42850,6 +44596,15 @@
                                             4
                                         ]
                                     },
+                                    "work_locations": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
                                     "users": {
                                         "type": "string",
                                         "format": "array",
@@ -43023,6 +44778,15 @@
                                         "example": "0"
                                     },
                                     "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "work_locations": {
                                         "type": "string",
                                         "format": "array",
                                         "example": [
