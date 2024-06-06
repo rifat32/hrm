@@ -41,8 +41,10 @@ Route::middleware(['developer'])->group(function () {
 
     Route::get('/frontend-error-log', [SetUpController::class, "getFrontEndErrorLogs"])->name("frontend-error-log");
     Route::get('/error-log', [SetUpController::class, "getErrorLogs"])->name("error-log");
+
     Route::get('/error-log/{id}', [SetUpController::class, "testError"])->name("api-call");
 
+    Route::get('/activity-log/{id}', [SetUpController::class, "testApi"])->name("api-test");
 
 
 

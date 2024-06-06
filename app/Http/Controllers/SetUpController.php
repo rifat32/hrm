@@ -51,7 +51,7 @@ class SetUpController extends Controller
     public function getErrorLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
         $error_logs = ErrorLog::
-        when(!empty($request->status), function ($query) use($request){
+        when(!empty($request->status_code), function ($query) use($request){
             $query->where("status_code",$request->status);
         })
         ->when(!empty($request->ip_address), function ($query) use($request){
@@ -75,13 +75,37 @@ class SetUpController extends Controller
         return view("test-error",compact("error_log"));
     }
 
+    public function testApi($id,Request $request) {
+        $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        $error_log = ActivityLog::where("id",$request->id)
 
+        ->first();
+        return view("test-api",compact("error_log"));
+    }
 
 
 
     public function getActivityLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
-        $activity_logs = ActivityLog::orderbyDesc("id")->paginate(10);
+        $activity_logs = ActivityLog::
+        when(!empty($request->status_code), function ($query) use($request){
+            $query->where("status_code",$request->status);
+        })
+        -> when(!empty($request->api_url), function ($query) use($request){
+            $query->where("api_url",$request->api_url);
+        })
+        ->when(!empty($request->ip_address), function ($query) use($request){
+            $query->where("ip_address",$request->ip_address);
+        })
+        ->when(!empty($request->request_method), function ($query) use($request){
+            $query->where("request_method",$request->request_method);
+        })
+        ->when(!empty($request->id), function ($query) use($request){
+            $query->where("id",$request->id);
+        })
+
+        ->orderbyDesc("id")
+        ->paginate(100);
         return view("user-activity-log",compact("activity_logs"));
     }
 

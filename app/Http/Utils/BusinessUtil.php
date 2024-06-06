@@ -570,9 +570,7 @@ trait BusinessUtil
                 ->where('setting_leave_types.is_active', 1)
                 ->whereDoesntHave("disabled", function($q)  {
                     $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
-                })
-
-              ;
+                });
             })
             ->orWhere(function ($query) {
                 $query->where('setting_leave_types.business_id', NULL)
@@ -611,12 +609,10 @@ trait BusinessUtil
         $default_setting_leave_query = [
             "business_id" => NULL,
             "is_active" => 1,
-            "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
+            "is_default" =>  1,
         ];
 
-        if (!auth()->user()->hasRole("superadmin")) {
-            $default_setting_leave_query["created_by"] = auth()->user()->id;
-        }
+
 
         $defaultSettingLeaves = SettingLeave::where($default_setting_leave_query)->get();
 
@@ -670,12 +666,10 @@ trait BusinessUtil
         $default_setting_attendance_query = [
             "business_id" => NULL,
             "is_active" => 1,
-            "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
+            "is_default" =>  1,
         ];
 
-        if (!auth()->user()->hasRole("superadmin")) {
-            $default_setting_attendance_query["created_by"] = auth()->user()->id;
-        }
+
 
         $defaultSettingAttendances = SettingAttendance::where($default_setting_attendance_query)->get();
 
@@ -742,12 +736,9 @@ trait BusinessUtil
         $default_setting_payrun_query = [
             "business_id" => NULL,
             "is_active" => 1,
-            "is_default" => auth()->user()->hasRole("superadmin") ? 1 : 0,
+            "is_default" => 1,
         ];
 
-        if (!auth()->user()->hasRole("superadmin")) {
-            $default_setting_payrun_query["created_by"] = auth()->user()->id;
-        }
 
         $defaultSettingPayruns = SettingPayrun::where($default_setting_payrun_query)->get();
 
@@ -790,12 +781,10 @@ trait BusinessUtil
     $default_setting_payment_date_query = [
         'business_id' => null,
         'is_active' => 1,
-        'is_default' => auth()->user()->hasRole('superadmin') ? 1 : 0,
+        'is_default' =>  1,
     ];
 
-    if (!auth()->user()->hasRole('superadmin')) {
-        $default_setting_payment_date_query['created_by'] = auth()->user()->id;
-    }
+
 
     $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
 

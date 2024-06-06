@@ -17,6 +17,7 @@
         <table class="table table-responsive">
             <thead>
                 <th>id</th>
+                <th> TEST</th>
                 <th>api_url</th>
                 <th>user</th>
                 <th>user_id</th>
@@ -34,6 +35,7 @@
                 <tr>
                     <tr>
                         <td>{{$activity_log->id}} </td>
+                        <td><a class="btn btn-primary"  href="{{route('api-test',$activity_log->id)}}" target="_blank">TEST</a> </td>
                         <td>{{$activity_log->api_url}} </td>
 
     <td> @if ($activity_log->ERRuser)
