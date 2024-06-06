@@ -2121,6 +2121,100 @@ class AttendanceController extends Controller
         }
     }
 
+     /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/attendances/show/check-in-status",
+     *      operationId="getCurrentAttendance",
+     *      tags={"attendances"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to get attendance by id",
+     *      description="This method is to get attendance by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getCurrentAttendance( Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $business_id =  $request->user()->business_id;
+
+             $attendance =  Attendance::with("employee")->where([
+                 "business_id" => $business_id
+             ])
+             ->where("created_by",auth()->user()->id)
+
+             ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+             })
+             ->latest()
+            ->first();
+
+            if (empty($attendance)) {
+                return response()->json([
+                    "message" => "no data found"
+                ], 404);
+            }
+
+            $isCheckedIn = collect($attendance->records)->contains(function ($item) {
+                return ($item->out_time == $item->in_time);
+            });
+
+
+         $attendance_in_date = Carbon::parse($attendance->in_date);
+         $isToday = $attendance_in_date->isToday();
+
+
+
+             if (!$isCheckedIn && !$isToday) {
+                 return response()->json([
+                 ], 200);
+             }
+
+             return response()->json($attendance, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**

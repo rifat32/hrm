@@ -1224,10 +1224,18 @@ Route::get('/v2.0/attendances', [AttendanceController::class, "getAttendancesV2"
 Route::get('/v3.0/attendances', [AttendanceController::class, "getAttendancesV3"]);
 
 
+
+
+
+
 Route::get('/v1.0/attendance-arrears', [AttendanceController::class, "getAttendanceArrears"]);
 
 
 Route::get('/v1.0/attendances/{id}', [AttendanceController::class, "getAttendanceById"]);
+
+Route::get('/v1.0/attendances/show/check-in-status', [AttendanceController::class, "getCurrentAttendance"]);
+
+
 Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAttendancesByIds"]);
 
 
