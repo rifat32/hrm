@@ -54,6 +54,11 @@ class WorkShift extends Model
         return $this->belongsToMany(Department::class, 'department_work_shifts', 'work_shift_id', 'department_id');
     }
 
+    public function work_locations() {
+        return $this->belongsToMany(WorkLocation::class, 'work_shift_location', 'work_shift_id', 'work_location_id');
+    }
+
+
 
 
 

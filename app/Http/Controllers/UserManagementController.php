@@ -567,7 +567,7 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="string", format="boolean",example="customer"),
      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
-     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *  *     @OA\Property(property="work_location_ids", type="integer", format="int", example="1,1"),
      *
      *
      *
@@ -798,6 +798,7 @@ class UserManagementController extends Controller
             // Update the user's departments
             $user->departments()->sync($departments);
 
+            $user->work_locations()->sync($request_data["work_location_ids"]);
 
             $user->assignRole($request_data['role']);
 
@@ -1334,7 +1335,7 @@ class UserManagementController extends Controller
      *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
      *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
      *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
-     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *  *     @OA\Property(property="work_location_ids", type="integer", format="int", example="1"),
      * *         @OA\Property(property="is_active_visa_details", type="boolean", format="boolean",example="1"),
      *  * *         @OA\Property(property="is_active_right_to_works", type="boolean", format="boolean",example="1"),
      *     * @OA\Property(property="recruitment_processes", type="string", format="array", example={
@@ -1490,9 +1491,8 @@ class UserManagementController extends Controller
                     'is_active_visa_details',
                     "is_active_right_to_works",
                     'is_sponsorship_offered',
-
                     "immigration_status",
-                    'work_location_id',
+
 
                 ])->toArray());
 
@@ -1511,6 +1511,7 @@ class UserManagementController extends Controller
             // Get the user's departments
             $departments = $user->departments->pluck("id");
 
+
             // Remove the first department from the collection
             $removedDepartment = $departments->shift();
 
@@ -1520,7 +1521,7 @@ class UserManagementController extends Controller
             // Update the user's departments
             $user->departments()->sync($departments);
 
-
+            $user->work_locations()->sync($request_data["work_location_ids"]);
 
             $user->syncRoles([$request_data['role']]);
 
@@ -1623,7 +1624,7 @@ class UserManagementController extends Controller
      *  * *  @OA\Property(property="phone", type="boolean", format="boolean",example="1"),
 
      *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
-     *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
+     *  *     @OA\Property(property="work_location_ids", type="integer", format="int", example="1,2"),
 
      *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
 
@@ -1738,7 +1739,7 @@ class UserManagementController extends Controller
                     'overtime_rate',
                     'phone',
 
-                    'work_location_id',
+
 
                 ])->toArray());
 
@@ -1762,6 +1763,8 @@ class UserManagementController extends Controller
 
             // Update the user's departments
             $user->departments()->sync($departments);
+
+            $user->work_locations()->sync($request_data["work_location_ids"]);
 
 
             $this->update_work_shift($request_data, $user);
@@ -2680,11 +2683,11 @@ class UserManagementController extends Controller
      * example="1"
      * ),
      *    *  * @OA\Parameter(
-     * name="work_location_id",
+     * name="work_location_ids",
      * in="query",
-     * description="work_location_id",
+     * description="work_location_ids",
      * required=true,
-     * example="1"
+     * example="1,2"
      * ),
      *     *    *  * @OA\Parameter(
      * name="holiday_id",
@@ -3552,11 +3555,11 @@ class UserManagementController extends Controller
      * example="1"
      * ),
      *    *  * @OA\Parameter(
-     * name="work_location_id",
+     * name="work_location_ids",
      * in="query",
-     * description="work_location_id",
+     * description="work_location_ids",
      * required=true,
-     * example="1"
+     * example="1,2"
      * ),
      *     *    *  * @OA\Parameter(
      * name="holiday_id",
@@ -4928,7 +4931,7 @@ class UserManagementController extends Controller
                     "right_to_works",
                     "work_shifts",
                     "recruitment_processes",
-                    "work_location"
+                    "work_locations"
                 ]
 
             )

@@ -63,6 +63,7 @@ class WorkShiftController extends Controller
      *  *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="0"),
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
+     *  *     @OA\Property(property="work_locations", type="string",  format="array", example={1,2,3}),
 
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      * *     @OA\Property(property="details", type="string", format="array", example={
@@ -180,8 +181,6 @@ class WorkShiftController extends Controller
                         )
                         ->pluck("id");
 
-
-
                 }
 
 if($request_data["type"] !== "flexible") {
@@ -205,6 +204,8 @@ if($request_data["type"] !== "flexible") {
                 $work_shift =  WorkShift::create($request_data);
 
                 $work_shift->departments()->sync($request_data['departments']);
+
+                $work_shift->work_locations()->sync($request_data["work_locations"]);
                 // $work_shift->users()->sync($request_data['users'], []);
 
                 $request_data['details'] = collect($request_data['details'])->map(function ($el) {
@@ -226,6 +227,10 @@ if($el["is_weekend"]) {
 
                  $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
                  $employee_work_shift_history->departments()->sync($request_data['departments']);
+
+
+
+
                  $employee_work_shift_history->details()->createMany($request_data['details']);
 
 
@@ -262,6 +267,7 @@ if($el["is_weekend"]) {
      *  *     @OA\Property(property="break_hours", type="boolean", format="boolean", example="0"),
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
+     *      *  *     @OA\Property(property="work_locations", type="string",  format="array", example={1,2,3}),
 
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
      * *     @OA\Property(property="details", type="string", format="array", example={
@@ -426,6 +432,7 @@ if($el["is_weekend"]) {
                 // $work_shift->users()->delete();
                 // $work_shift->users()->sync($request_data['users'], []);
                 $work_shift->departments()->sync($request_data['departments']);
+                $work_shift->work_locations()->sync($request_data['work_locations']);
                 $work_shift_prev_details  =  ($work_shift_prev->details)->toArray();
 
                 $work_shift->details()->delete();
@@ -517,6 +524,11 @@ if(!$fields_changed){
          $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
          $employee_work_shift_history->details()->createMany($request_data['details']);
          $employee_work_shift_history->departments()->sync($request_data['departments']);
+
+
+
+
+
         //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"));
 
         $user_ids = $work_shift->users()->pluck('users.id')->toArray();
@@ -627,6 +639,7 @@ if(!$fields_changed){
             ->whereHas("departments",function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
             })
+
 
                 ->first();
             if (!$work_shift) {
@@ -892,7 +905,7 @@ if($work_shift->type !== "flexible") {
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $work_shifts_query = WorkShift::with("details","departments","users");
+            $work_shifts_query = WorkShift::with("details","departments","users","work_locations");
 
             $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($request,$all_manager_department_ids,$work_shifts_query)
 
@@ -1083,6 +1096,14 @@ if($work_shift->type !== "flexible") {
                         'departments.name',
                     );
                 },
+                "work_locations" => function ($query) {
+                    $query->select(
+                        'work_locations.id',
+                        'work_locations.name',
+                    );
+                },
+
+
 
                 ]
             );
@@ -1206,7 +1227,7 @@ if($work_shift->type !== "flexible") {
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $work_shift =  WorkShift::with("details")
+            $work_shift =  WorkShift::with("details","departments","users","work_locations")
             ->where([
                 "id" => $id
             ])
@@ -1217,7 +1238,10 @@ if($work_shift->type !== "flexible") {
                 ])
                 ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
-                });
+                })
+
+
+                ;
 
             })
 
@@ -1236,8 +1260,7 @@ if($work_shift->type !== "flexible") {
                     "message" => "no work shift found"
                 ], 404);
             }
-            $work_shift->departments = $work_shift->departments;
-            $work_shift->users = $work_shift->users;
+
 
             return response()->json($work_shift, 200);
         } catch (Exception $e) {

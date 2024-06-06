@@ -260,8 +260,12 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             })
 
 
-            ->when(!empty(request()->work_location_id), function ($query)  {
-                return $query->where('work_location_id', (request()->work_location_id));
+
+            ->when(!empty(request()->work_location_ids), function ($query)  {
+                $work_location_ids = explode(',', request()->work_location_ids);
+                return   $query->whereHas("work_locations", function ($q) use ($work_location_ids) {
+                    return $q->whereIn("work_locations.id", $work_location_ids);
+                });
             })
             ->when(!empty(request()->holiday_id), function ($query)  {
                 return $query->whereHas("holidays", function ($query)  {

@@ -213,11 +213,15 @@ class UserCreateV2Request extends BaseFormRequest
         'recruitment_processes.*.description' => "nullable|string",
         'recruitment_processes.*.attachments' => "present|array",
 
-        'work_location_id' => [
+
+        'work_location_ids' => [
             "required",
-            'numeric',
-            new ValidWorkLocationId()
+            'array',
         ],
+
+        "work_location_ids.*" =>[
+            "numeric",
+        new ValidWorkLocationId()],
 
 
 

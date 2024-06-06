@@ -203,11 +203,16 @@ class UserUpdateV2Request extends BaseFormRequest
             'recruitment_processes.*.description' => "nullable|string",
             'recruitment_processes.*.attachments' => "present|array",
 
-            'work_location_id' => [
-                "required",
-                'numeric',
-                new ValidWorkLocationId()
-            ],
+
+        'work_location_ids' => [
+            "required",
+            'array',
+        ],
+
+        "work_location_ids.*" =>[
+            "numeric",
+        new ValidWorkLocationId()],
+
 
 
 

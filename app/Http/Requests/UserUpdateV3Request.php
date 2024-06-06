@@ -78,10 +78,16 @@ class UserUpdateV3Request extends FormRequest
             'weekly_contractual_hours' => 'required|numeric',
             'gender' => 'nullable|string|in:male,female,other',
 
-            'work_location_id' => [
+
+            'work_location_ids' => [
                 "required",
-                'numeric'
+                'array',
             ],
+
+            "work_location_ids.*" =>[
+                "numeric",
+            new ValidWorkLocationId()],
+
             'designation_id' => [
                 "required",
                 'numeric',
@@ -108,9 +114,7 @@ class UserUpdateV3Request extends FormRequest
         ];
 
         if(!empty($user)) {
-            if($user->work_location_id != $this->work_location_id){
-               $rule["work_location_id"][] = new ValidWorkLocationId();
-            }
+
 
             if($user->designation_id != $this->designation_id){
                 $rule["designation_id"][] =  new ValidateDesignationId();

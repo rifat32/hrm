@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidUserId;
+use App\Rules\ValidWorkLocationId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WorkShiftUpdateRequest extends BaseFormRequest
@@ -79,6 +80,18 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateDepartment($all_manager_department_ids)
             ],
+
+            'work_locations' => [
+                "required",
+                'array',
+            ],
+
+            "work_locations.*" =>[
+                "numeric",
+            new ValidWorkLocationId()
+        ],
+
+
             'users' => 'present|array',
             'users.*' => [
                 "numeric",

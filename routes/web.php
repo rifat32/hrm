@@ -9,6 +9,7 @@ use App\Models\AttendanceHistory;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
 use App\Models\User;
+use App\Models\UserWorkLocation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -214,6 +215,20 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 //         }
 //     } else {
 //         echo "User not found.";
+//     }
+//             return "ok";
+//         });
+
+
+// Route::get("/run",function() {
+
+
+//     $users = User::whereNotNull("work_location_id")->get();
+//     foreach($users as $user){
+//         UserWorkLocation::create([
+//             "user_id" => $user->id,
+//             "work_location_id" => $user->work_location_id
+//         ]);
 //     }
 //             return "ok";
 //         });

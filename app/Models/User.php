@@ -67,7 +67,7 @@ class User extends Authenticatable
 
         "immigration_status",
 
-        'work_location_id',
+        
         "is_active_visa_details",
         "is_active_right_to_works",
 
@@ -141,15 +141,20 @@ return count($all_departments) > 0;
     }
 
 
+    public function work_locations() {
+        return $this->belongsToMany(WorkLocation::class, 'user_work_locations', 'user_id', 'work_location_id');
+    }
+
+
+
+
+
     public function holidays() {
         return $this->belongsToMany(Holiday::class, 'user_holidays', 'user_id', 'holiday_id');
     }
 
 
-    public function work_location()
-    {
-        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
-    }
+
 
 
     public function business() {

@@ -26,8 +26,9 @@ class CreateDepartmentsTable extends Migration
             $table->foreign('parent_id')->references('id')->on('departments')->onDelete('cascade');
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->unsignedBigInteger("work_location_id");
-            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
+
+            $table->unsignedBigInteger("work_location_id")->nullable();
+            $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('set null');
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')
