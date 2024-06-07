@@ -13,7 +13,12 @@ class WorkLocation extends Model
         'name',
         'description',
         'is_location_enabled',
-        
+
+        "is_geo_location_enabled",
+        "is_ip_enabled",
+        "max_radius" ,
+        "ip_address",
+
         'latitude',
         'longitude',
 

@@ -45,9 +45,21 @@ class SelfAttendanceCheckOutCreateRequest extends FormRequest
             'note' => 'nullable|string',
             'out_geolocation' => 'required|string',
             'attendance_records' => 'required|array',
+
+            'attendance_records.*.note' => 'nullable|string',
+
+            'attendance_records.*.in_latitude' => 'required|string',
+            'attendance_records.*.in_longitude' => 'required|string',
+            'attendance_records.*.in_ip_address' => 'required|string',
+
+            'attendance_records.*.out_latitude' => 'nullable|string',
+            'attendance_records.*.out_longitude' => 'nullable|string',
+            'attendance_records.*.out_ip_address' => 'nullable|string',
+
+
             'attendance_records.*.in_time' => 'required|date_format:H:i:s',
             'attendance_records.*.out_time' => [
-                'required',
+                'nullable',
                 'date_format:H:i:s',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1]; // Extract the index from the attribute name

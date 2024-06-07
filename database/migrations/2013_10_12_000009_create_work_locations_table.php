@@ -18,11 +18,18 @@ class CreateWorkLocationsTable extends Migration
             $table->string('name');
 
             $table->string('address');
-            
+
             $table->boolean('is_location_enabled');
 
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();
+
+
+            $table->boolean('is_geo_location_enabled');
+            $table->boolean('is_ip_enabled');
+            $table->double('max_radius')->nullable();
+            $table->string('ip_address')->nullable();
+
 
 
 

@@ -64,3 +64,4 @@ Route::get("/run",function() {
 
 
 10. insert work_shift_locations table
+11. ALTER TABLE `work_locations` ADD `is_geo_location_enabled` BOOLEAN NOT NULL AFTER `is_location_enabled`, ADD `is_ip_enabled` BOOLEAN NOT NULL AFTER `is_geo_location_enabled`, ADD `max_radius` DOUBLE NULL AFTER `is_ip_enabled`, ADD `ip_address` VARCHAR(255) NULL AFTER `max_radius`; 

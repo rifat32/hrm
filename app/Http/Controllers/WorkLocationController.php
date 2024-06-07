@@ -37,6 +37,13 @@ class WorkLocationController extends Controller
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
      * @OA\Property(property="address", type="string", format="string", example="erg ear ga&nbsp;"),
      * @OA\Property(property="is_location_enabled", type="string", format="string", example="test"),
+     * @OA\Property(property="is_geo_location_enabled", type="string", format="string", example="test"),
+     * @OA\Property(property="is_ip_enabled", type="string", format="string", example="test"),
+     * @OA\Property(property="max_radius", type="string", format="string", example="test"),
+     * @OA\Property(property="ip_address", type="string", format="string", example="test"),
+     *
+     *
+     *
      * @OA\Property(property="latitude", type="string", format="string", example="test"),
      * @OA\Property(property="longitude", type="string", format="string", example="test"),
      *
@@ -142,6 +149,10 @@ class WorkLocationController extends Controller
      * @OA\Property(property="is_location_enabled", type="string", format="string", example="test"),
      *    * @OA\Property(property="latitude", type="string", format="string", example="test"),
      * @OA\Property(property="longitude", type="string", format="string", example="test"),
+     *    @OA\Property(property="is_geo_location_enabled", type="string", format="string", example="test"),
+     * @OA\Property(property="is_ip_enabled", type="string", format="string", example="test"),
+     * @OA\Property(property="max_radius", type="string", format="string", example="test"),
+     * @OA\Property(property="ip_address", type="string", format="string", example="test"),
      *
 
      *
@@ -207,7 +218,11 @@ class WorkLocationController extends Controller
                         'address',
                         "is_location_enabled",
                         "latitude",
-                        "longitude"
+                        "longitude",
+                        "is_geo_location_enabled",
+                        "is_ip_enabled",
+                        "max_radius",
+                        "ip_address",
 
                         // "is_default",
                         // "is_active",

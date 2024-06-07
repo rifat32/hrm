@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Rules\ValidUserId;
+use App\Rules\ValidWorkLocationId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceBypassMultipleCreateRequest extends BaseFormRequest
@@ -45,7 +46,11 @@ class AttendanceBypassMultipleCreateRequest extends BaseFormRequest
             "start_date" => "required|date",
             "end_date" => "required|date|after_or_equal:start_date",
 
-
+            'work_location_id' => [
+                "required",
+                'numeric',
+                new ValidWorkLocationId
+            ],
 
 
         ];

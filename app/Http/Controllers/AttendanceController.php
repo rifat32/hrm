@@ -162,54 +162,61 @@ class AttendanceController extends Controller
              $attendance_data = $attendance->toArray();
 
              // Merge request data into the attendance data, overriding existing keys with request data
-             $request_data = array_merge($attendance_data, $request_data);
+
+
+             $request_data_update = array_replace($attendance_data, $request_data);
+
+
+
 
              // Now $request_data contains the merged data
 
 
 
-
-             $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
+             $request_data_update["is_present"] =  $this->calculate_total_present_hours($request_data_update["attendance_records"]) > 0;
 
 
              // Retrieve attendance setting
              $setting_attendance = $this->get_attendance_setting();
 
              // Process attendance data for update
-             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+             $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $request_data_update["user_id"]);
 
 
 
              if ($attendance) {
                  $attendance->fill(collect($attendance_data)->only([
-                     'note',
-
-                     "out_geolocation",
-                     'does_break_taken',
-                     "behavior",
-                     "capacity_hours",
-                     "work_hours_delta",
-                     "break_type",
-                     "break_hours",
-                     "total_paid_hours",
-                     "regular_work_hours",
-                     "work_shift_start_at",
-                     "work_shift_end_at",
-                     "work_shift_history_id",
-                     "holiday_id",
-                     "leave_record_id",
-                     "is_weekend",
-                     "overtime_hours",
-                     "punch_in_time_tolerance",
-                     "status",
-                     'work_location_id',
-                     'project_id',
-                     "is_present",
-                     "is_active",
-                     // "business_id",
-                     // "created_by",
-                     "regular_hours_salary",
-                     "overtime_hours_salary",
+                    'note',
+                    "in_geolocation",
+                    "out_geolocation",
+                    'user_id',
+                    'in_date',
+                    'does_break_taken',
+                    "behavior",
+                    "capacity_hours",
+                    "work_hours_delta",
+                    "break_type",
+                    "break_hours",
+                    "total_paid_hours",
+                    "regular_work_hours",
+                    "work_shift_start_at",
+                    "work_shift_end_at",
+                    "work_shift_history_id",
+                    "holiday_id",
+                    "leave_record_id",
+                    "is_weekend",
+                    "overtime_hours",
+                    "punch_in_time_tolerance",
+                    "status",
+                    'work_location_id',
+                    'project_id',
+                    "is_active",
+                    "business_id",
+                    "created_by",
+                    "regular_hours_salary",
+                    "overtime_hours_salary",
+                    "attendance_records",
+                    "is_present"
                  ])->toArray());
                  $attendance->save();
              }
@@ -2190,8 +2197,8 @@ class AttendanceController extends Controller
 
             if (empty($attendance)) {
                 return response()->json([
-                    "message" => "no data found"
-                ], 404);
+
+                ], 200);
             }
 
             $isCheckedIn = collect($attendance->records)->contains(function ($item) {
@@ -2468,8 +2475,9 @@ class AttendanceController extends Controller
                     $temp_data["project_id"] = UserProject::where([
                         "user_id" => $user->id
                     ])
-                        ->first()->project_id;
-                    $temp_data["work_location_id"] = $user->work_location_id;
+                    ->first()->project_id;
+
+                    $temp_data["work_location_id"] = $request_data["work_location_id"];
 
 
                     array_push($attendance_details, $temp_data);

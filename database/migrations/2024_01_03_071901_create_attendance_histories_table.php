@@ -26,14 +26,11 @@ class CreateAttendanceHistoriesTable extends Migration
 
 
 
-
-
-
-
-
             $table->text('note')->nullable();
-            $table->string('in_geolocation')->nullable();
-            $table->string('out_geolocation')->nullable();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('ip_address')->nullable();
+
 
             $table->unsignedBigInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

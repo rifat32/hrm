@@ -29,6 +29,15 @@ class WorkLocationCreateRequest extends BaseFormRequest
             'address' => 'nullable|string',
             'description' => 'nullable|string',
             'is_location_enabled' => 'required|boolean',
+
+            "is_geo_location_enabled" => 'required|boolean',
+            "is_ip_enabled" => 'required|boolean',
+            "max_radius" => "nullable|numeric",
+            "ip_address" => "nullable|string",
+
+
+
+
             'latitude' => 'required_if:is_location_enabled,1|string',
             'longitude' => 'required_if:is_location_enabled,1|string',
 
