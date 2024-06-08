@@ -55,7 +55,7 @@ class WorkShift extends Model
     }
 
     public function work_locations() {
-        return $this->belongsToMany(WorkLocation::class, 'work_shift_location', 'work_shift_id', 'work_location_id');
+        return $this->belongsToMany(WorkLocation::class, 'work_shift_locations', 'work_shift_id', 'work_location_id');
     }
 
 

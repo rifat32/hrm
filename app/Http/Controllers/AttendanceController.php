@@ -2182,16 +2182,14 @@ class AttendanceController extends Controller
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
              $all_manager_department_ids = $this->get_all_departments_of_manager();
-             $business_id =  $request->user()->business_id;
+
 
              $attendance =  Attendance::with("employee")->where([
-                 "business_id" => $business_id
+                 "business_id" => auth()->user()->business_id
              ])
-             ->where("created_by",auth()->user()->id)
+              ->where("created_by",auth()->user()->id)
 
-             ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
-                     $query->whereIn("departments.id", $all_manager_department_ids);
-             })
+
              ->latest()
             ->first();
 
