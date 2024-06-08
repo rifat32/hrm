@@ -47,7 +47,7 @@ class AttendanceController extends Controller
         $this->attendanceComponent = $attendanceComponent;
     }
 
-      /**
+    /**
      *
      * @OA\PUT(
      *      path="/v1.0/attendances/self/check-out",
@@ -127,65 +127,65 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function createSelfAttendanceCheckOut(SelfAttendanceCheckOutCreateRequest $request)
-     {
+    public function createSelfAttendanceCheckOut(SelfAttendanceCheckOutCreateRequest $request)
+    {
 
-         DB::beginTransaction();
-         try {
+        DB::beginTransaction();
+        try {
 
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $request_data = $request->validated();
+            $request_data = $request->validated();
 
-             // Ensure the authenticated user exists and has a business_id
-             $user = auth()->user();
-             if (!$user || !$user->business_id) {
-                 // Handle the error as needed, e.g., throw an exception or return an error response
-                 throw new Exception("User or business ID not found.");
-             }
+            // Ensure the authenticated user exists and has a business_id
+            $user = auth()->user();
+            if (!$user || !$user->business_id) {
+                // Handle the error as needed, e.g., throw an exception or return an error response
+                throw new Exception("User or business ID not found.");
+            }
 
-             // Create the query parameters
-             $attendance_query_params = [
-                 "id" => $request_data["id"],
-                 "business_id" => $user->business_id,
-             ];
+            // Create the query parameters
+            $attendance_query_params = [
+                "id" => $request_data["id"],
+                "business_id" => $user->business_id,
+            ];
 
-             // Find the attendance record
-             $attendance = Attendance::where($attendance_query_params)->first();
+            // Find the attendance record
+            $attendance = Attendance::where($attendance_query_params)->first();
 
-             if (!$attendance) {
-                 // Handle the case where the attendance record is not found, e.g., throw an exception or return an error response
-                 throw new Exception("Attendance record not found.");
-             }
+            if (!$attendance) {
+                // Handle the case where the attendance record is not found, e.g., throw an exception or return an error response
+                throw new Exception("Attendance record not found.");
+            }
 
-             // Convert the attendance record to an array
-             $attendance_data = $attendance->toArray();
+            // Convert the attendance record to an array
+            $attendance_data = $attendance->toArray();
 
-             // Merge request data into the attendance data, overriding existing keys with request data
-
-
-             $request_data_update = array_replace($attendance_data, $request_data);
+            // Merge request data into the attendance data, overriding existing keys with request data
 
 
-
-
-             // Now $request_data contains the merged data
+            $request_data_update = array_replace($attendance_data, $request_data);
 
 
 
-             $request_data_update["is_present"] =  $this->calculate_total_present_hours($request_data_update["attendance_records"]) > 0;
 
-
-             // Retrieve attendance setting
-             $setting_attendance = $this->get_attendance_setting();
-
-             // Process attendance data for update
-             $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $request_data_update["user_id"]);
+            // Now $request_data contains the merged data
 
 
 
-             if ($attendance) {
-                 $attendance->fill(collect($attendance_data)->only([
+            $request_data_update["is_present"] =  $this->calculate_total_present_hours($request_data_update["attendance_records"]) > 0;
+
+
+            // Retrieve attendance setting
+            $setting_attendance = $this->get_attendance_setting();
+
+            // Process attendance data for update
+            $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $request_data_update["user_id"]);
+
+
+
+            if ($attendance) {
+                $attendance->fill(collect($attendance_data)->only([
                     'note',
                     "in_geolocation",
                     "out_geolocation",
@@ -217,32 +217,32 @@ class AttendanceController extends Controller
                     "overtime_hours_salary",
                     "attendance_records",
                     "is_present"
-                 ])->toArray());
-                 $attendance->save();
-             }
+                ])->toArray());
+                $attendance->save();
+            }
 
 
-             $observer = new AttendanceObserver();
-             $observer->updated_action($attendance, 'update');
+            $observer = new AttendanceObserver();
+            $observer->updated_action($attendance, 'update');
 
-             $this->adjust_payroll_on_attendance_update($attendance, 0);
-
-
-
-             $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
+            $this->adjust_payroll_on_attendance_update($attendance, 0);
 
 
 
+            $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
 
-             DB::commit();
-             return response($attendance, 201);
-         } catch (Exception $e) {
-             DB::rollBack();
-             return $this->sendError($e, 500, $request);
-         }
-     }
 
-  /**
+
+
+            DB::commit();
+            return response($attendance, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/attendances/self/check-in",
@@ -315,52 +315,52 @@ class AttendanceController extends Controller
      *     )
      */
 
-     public function createSelfAttendanceCheckIn(SelfAttendanceCheckInCreateRequest $request)
-     {
+    public function createSelfAttendanceCheckIn(SelfAttendanceCheckInCreateRequest $request)
+    {
 
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $request_data = $request->validated();
-             $request_data["user_id"] = auth()->user()->id;
-             $request_data["does_break_taken"] = 0;
-
-
-             $request_data["attendance_records"] = collect($request_data["attendance_records"])
-             ->map(function($item){
-                $item["out_time"] = $item["in_time"];
-                return $item;
-             })
-             ->toArray();
-
-             $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
+            $request_data = $request->validated();
+            $request_data["user_id"] = auth()->user()->id;
+            $request_data["does_break_taken"] = 0;
 
 
+            $request_data["attendance_records"] = collect($request_data["attendance_records"])
+                ->map(function ($item) {
+                    $item["out_time"] = $item["in_time"];
+                    return $item;
+                })
+                ->toArray();
 
-             // Retrieve attendance setting
-             $setting_attendance = $this->get_attendance_setting();
-
-
-             $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
-
-
-             // Assign additional data to request data for attendance creation
-             $attendance =  Attendance::create($attendance_data);
+            $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
 
 
-             $this->adjust_payroll_on_attendance_update($attendance, 0);
+
+            // Retrieve attendance setting
+            $setting_attendance = $this->get_attendance_setting();
 
 
-             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
+            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
 
-             DB::commit();
-             return response($attendance, 201);
-         } catch (Exception $e) {
-             DB::rollBack();
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            // Assign additional data to request data for attendance creation
+            $attendance =  Attendance::create($attendance_data);
+
+
+            $this->adjust_payroll_on_attendance_update($attendance, 0);
+
+
+            $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
+
+            DB::commit();
+            return response($attendance, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -948,8 +948,8 @@ class AttendanceController extends Controller
 
             if (!empty($request_data["add_in_next_payroll"]) && !empty($request_data["is_approved"])) {
                 AttendanceArrear::where([
-                        "attendance_id" => $attendance->id
-                    ])
+                    "attendance_id" => $attendance->id
+                ])
                     ->update(["status" => "approved"]);
             }
 
@@ -1282,22 +1282,22 @@ class AttendanceController extends Controller
 
 
             $attendancesQuery = Attendance::with([
-                    "employee" => function ($query) {
-                        $query->select(
-                            'users.id',
-                            'users.first_Name',
-                            'users.middle_Name',
-                            'users.last_Name'
-                        );
-                    },
-                    "employee.departments" => function ($query) {
-                        $query->select('departments.id', 'departments.name');
-                    },
-                    "work_location",
-                    "project"
-                ]);
+                "employee" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "employee.departments" => function ($query) {
+                    $query->select('departments.id', 'departments.name');
+                },
+                "work_location",
+                "project"
+            ]);
 
-            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery( $all_manager_department_ids, $attendancesQuery);
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($all_manager_department_ids, $attendancesQuery);
 
             $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
 
@@ -1329,7 +1329,7 @@ class AttendanceController extends Controller
      *           {"bearerAuth": {}}
      *       },
 
-        *     *     *   *     *     * *  @OA\Parameter(
+     *     *     *   *     *     * *  @OA\Parameter(
      * name="show_my_data",
      * in="query",
      * description="show_my_data",
@@ -1430,7 +1430,7 @@ class AttendanceController extends Controller
             }
 
 
-       $data = $this->attendanceComponent->getAttendanceV2Data();
+            $data = $this->attendanceComponent->getAttendanceV2Data();
 
 
 
@@ -2000,7 +2000,7 @@ class AttendanceController extends Controller
 
                 );
 
-            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery( $all_manager_department_ids, $attendancesQuery);
+            $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($all_manager_department_ids, $attendancesQuery);
 
             $attendances = $this->retrieveData($attendancesQuery, "attendances.id");
 
@@ -2128,7 +2128,7 @@ class AttendanceController extends Controller
         }
     }
 
-     /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/attendances/show/check-in-status",
@@ -2176,27 +2176,25 @@ class AttendanceController extends Controller
      */
 
 
-     public function getCurrentAttendance( Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function getCurrentAttendance(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-             $attendance =  Attendance::with("employee")->where([
-                 "business_id" => auth()->user()->business_id
-             ])
-              ->where("created_by",auth()->user()->id)
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-             ->latest()
-            ->first();
+            $attendance =  Attendance::with("employee")->where([
+                "business_id" => auth()->user()->business_id
+            ])
+                ->where("created_by", auth()->user()->id)
+
+
+                ->latest()
+                ->first();
 
             if (empty($attendance)) {
-                return response()->json([
-
-                ], 200);
+                return response()->json([], 200);
             }
 
             $isCheckedIn = collect($attendance->records)->contains(function ($item) {
@@ -2204,22 +2202,21 @@ class AttendanceController extends Controller
             });
 
 
-         $attendance_in_date = Carbon::parse($attendance->in_date);
-         $isToday = $attendance_in_date->isToday();
+            $attendance_in_date = Carbon::parse($attendance->in_date);
+            $isToday = $attendance_in_date->isToday();
 
 
 
-             if (!$isCheckedIn && !$isToday) {
-                 return response()->json([
-                 ], 200);
-             }
+            if (!$isCheckedIn && !$isToday) {
+                return response()->json([], 200);
+            }
 
-             return response()->json($attendance, 200);
-         } catch (Exception $e) {
+            return response()->json($attendance, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -2454,9 +2451,9 @@ class AttendanceController extends Controller
 
                 $joining_date = Carbon::parse($user->joining_date);
 
-             if ($joining_date->gt($start_date)) {
-             return false;
-}
+                if ($joining_date->gt($start_date)) {
+                   continue;
+                }
 
 
                 // Create date range between start and end dates
@@ -2473,7 +2470,7 @@ class AttendanceController extends Controller
                     $temp_data["project_id"] = UserProject::where([
                         "user_id" => $user->id
                     ])
-                    ->first()->project_id;
+                        ->first()->project_id;
 
                     $temp_data["work_location_id"] = $request_data["work_location_id"];
 
@@ -2500,7 +2497,7 @@ class AttendanceController extends Controller
                     $work_shift_details =  $this->get_work_shift_details($work_shift_history, $item["in_date"]);
 
                     if ($work_shift_history->type == "flexible") {
-                        return false;
+                         return false;
                     }
 
                     if (!$work_shift_details->start_at || !$work_shift_details->end_at || $work_shift_details->is_weekend) {
@@ -2536,12 +2533,12 @@ class AttendanceController extends Controller
                     }
 
 
- // Retrieve attendance for the user and date
- $existing_attendance = $this->get_existing_attendance($attendance_data["in_date"], $user->id);
+                    // Retrieve attendance for the user and date
+                    $existing_attendance = $this->get_existing_attendance($attendance_data["in_date"], $user->id);
 
- if (!empty($existing_attendance)) {
-     return false;
- }
+                    if (!empty($existing_attendance)) {
+                        return false;
+                    }
 
 
 
@@ -2589,6 +2586,8 @@ class AttendanceController extends Controller
                 }
             }
             DB::commit();
+
+            return response()->json(["ok" => true], 201);
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());
