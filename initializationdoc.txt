@@ -85,7 +85,4 @@ UPDATE `holidays` SET `status` = 'approved' WHERE `status` IS NULL;
 
 
 
-
-
-
 hr compliance 12 ->
