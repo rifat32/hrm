@@ -1258,7 +1258,7 @@ class HistoryDetailsController extends Controller
                 },
 
                 "work_location",
-                "project",
+                "projects",
 
 
              ])

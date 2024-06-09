@@ -73,7 +73,7 @@ ADD `status` VARCHAR(100) NOT NULL DEFAULT 'pending_approval' AFTER `updated_at`
 UPDATE `holidays` SET `status` = 'approved' WHERE `status` IS NULL;
 
 
-
+13. import attendance_projects  and attendance_history_projects
 
 
 

@@ -88,10 +88,12 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
             'attendance_details.*.does_break_taken' => "required|boolean",
 
 
-            'attendance_details.*.project_id' => [
-                'nullable',
+
+            "attendance_details.*.project_ids" => "present|array",
+
+            'attendance_details.*.project_ids.*' => [
                 'numeric',
-                new ValidProjectId
+                new ValidProjectId,
             ],
 
 

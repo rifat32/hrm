@@ -86,8 +86,10 @@ class AttendanceCreateRequest extends BaseFormRequest
 
             'does_break_taken' => "required|boolean",
 
-            'project_id' => [
-                'required',
+
+            "project_ids" => "present|array",
+
+            'project_ids.*' => [
                 'numeric',
                 new ValidProjectId,
             ],

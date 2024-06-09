@@ -526,12 +526,10 @@ return $data;
 
         foreach($holiday_statuses as $holiday_status) {
             $updated_query = clone $holiday_query;
-            $updated_query = $updated_query->whereHas("leave",function($query) use($holiday_status) {
-                $query->where([
-                    "holidays.status" => $holiday_status
-                ]);
-            });
-            $data[("total_" . $holiday_query)] = $updated_query->count();
+            $updated_query = $updated_query->where([
+                "holidays.status" => $holiday_status
+            ]);
+            $data[("total_" . $holiday_status)] = $updated_query->count();
         }
 
 

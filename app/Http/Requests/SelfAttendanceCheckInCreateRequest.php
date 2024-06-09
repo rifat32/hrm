@@ -54,11 +54,14 @@ class SelfAttendanceCheckInCreateRequest extends FormRequest
                 new UniqueAttendanceDate(NULL, $this->user_id),
             ],
 
-            'project_id' => [
-                'required',
+            "project_ids" => "present|array",
+
+            'project_ids.*' => [
                 'numeric',
                 new ValidProjectId,
             ],
+
+
 
             'work_location_id' => [
                 "required",

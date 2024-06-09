@@ -81,12 +81,15 @@ class AttendanceUpdateRequest extends BaseFormRequest
             ],
 
             'does_break_taken' => "required|boolean",
-            
-            'attendance_details.*.project_id' => [
-                'required',
+
+            "attendance_details.*.project_ids" => "present|array",
+
+            'attendance_details.*.project_ids.*' => [
                 'numeric',
                 new ValidProjectId,
             ],
+
+            
             'work_location_id' => [
                 "required",
                 'numeric',

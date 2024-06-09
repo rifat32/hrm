@@ -18,15 +18,15 @@ class AttendanceObserver
 
 
 
-        $attendance_history_data = $attendance->toArray();
-        $attendance_history_data['attendance_id'] = $attendance->id;
-        $attendance_history_data['actor_id'] = auth()->user()->id;
-        $attendance_history_data['action'] = "create";
-        $attendance_history_data['attendance_created_at'] = $attendance->created_at;
-        $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
+        // $attendance_history_data = $attendance->toArray();
+        // $attendance_history_data['attendance_id'] = $attendance->id;
+        // $attendance_history_data['actor_id'] = auth()->user()->id;
+        // $attendance_history_data['action'] = "create";
+        // $attendance_history_data['attendance_created_at'] = $attendance->created_at;
+        // $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
 
-        // Create the attendance history record
-        AttendanceHistory::create($attendance_history_data);
+        // // Create the attendance history record
+        // AttendanceHistory::create($attendance_history_data);
     }
 
     /**
@@ -46,7 +46,10 @@ class AttendanceObserver
             $attendance_history_data['action'] = $action;
             $attendance_history_data['attendance_created_at'] = $attendance->created_at;
             $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
-            AttendanceHistory::create($attendance_history_data);
+
+       $attendance_history = AttendanceHistory::create($attendance_history_data);
+      $attendance_history->projects->sync($attendance->projects->pluck("projects.id")->toArray());
+
         }
     }
 

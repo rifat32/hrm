@@ -91,7 +91,10 @@ use BasicUtil;
         })
 
         ->when(!empty(request()->project_id), function ($query) {
-            return $query->where('attendances.project_id', request()->project_id);
+            $idsArray = explode(',', request()->project_id);
+            return $query->whereHas('projects', function($query) use($idsArray) {
+              $query->whereIn("projects.id",$idsArray);
+            });
         })
         ->when(!empty(request()->work_location_id), function ($query) {
             return $query->where('attendances.work_location_id', request()->work_location_id);

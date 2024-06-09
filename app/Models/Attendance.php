@@ -36,7 +36,7 @@ class Attendance extends Model
         "punch_in_time_tolerance",
         "status",
         'work_location_id',
-        'project_id',
+
         "is_active",
         "business_id",
         "created_by",
@@ -127,16 +127,15 @@ class Attendance extends Model
     }
 
 
-    public function project()
-    {
-        return $this->belongsTo(Project::class, "project_id" ,'id');
+
+
+
+
+
+
+    public function projects() {
+        return $this->belongsToMany(Project::class, 'attendance_projects', 'attendance_id', 'project_id');
     }
-
-
-
-
-
-
 
 
 

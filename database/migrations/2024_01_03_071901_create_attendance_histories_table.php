@@ -38,7 +38,7 @@ class CreateAttendanceHistoriesTable extends Migration
             $table->unsignedBigInteger("work_location_id");
             $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('restrict');
 
-            $table->unsignedBigInteger("project_id")->nullable();
+            $table->json("project_ids")->nullable();
 
 
 

@@ -209,7 +209,6 @@ class AttendanceController extends Controller
                     "punch_in_time_tolerance",
                     "status",
                     'work_location_id',
-                    'project_id',
                     "is_active",
                     "business_id",
                     "created_by",
@@ -221,6 +220,8 @@ class AttendanceController extends Controller
                 $attendance->save();
             }
 
+
+        $attendance->projects->sync($request_data["project_ids"]);
 
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'update');
@@ -275,7 +276,8 @@ class AttendanceController extends Controller
      *
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
-     *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+     *
+     *     @OA\Property(property="project_ids", type="string", format="array", example="{1,2,3}")
      *
      *
      *
@@ -348,6 +350,11 @@ class AttendanceController extends Controller
             // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($attendance_data);
 
+            $attendance->projects->sync($request_data["project_ids"]);
+
+            $observer = new AttendanceObserver();
+            $observer->updated_action($attendance, 'create');
+
 
             $this->adjust_payroll_on_attendance_update($attendance, 0);
 
@@ -409,7 +416,7 @@ class AttendanceController extends Controller
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      * *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
      *  *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
-     *     *  *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+   *     @OA\Property(property="project_ids", type="string", format="array", example="{1,2,3}")
      *
      *
      *
@@ -478,6 +485,11 @@ class AttendanceController extends Controller
             // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($attendance_data);
 
+            $attendance->projects->sync($request_data["project_ids"]);
+
+            $observer = new AttendanceObserver();
+            $observer->updated_action($attendance, 'create');
+
 
             $this->adjust_payroll_on_attendance_update($attendance, 0);
 
@@ -519,7 +531,7 @@ class AttendanceController extends Controller
      * "in_date" : "2023-11-18",
      * "does_break_taken" : 1,
      * "work_location_id" : 1,
-     * "project_id" : 1
+     * "project_ids" : [1]
      *
      *
      *
@@ -598,11 +610,11 @@ class AttendanceController extends Controller
 
                 // @@@@@
 
-                if (empty($item["project_id"])) {
-                    $item["project_id"] = UserProject::where([
+                if (empty($item["project_ids"])) {
+                    $item["project_ids"] = [UserProject::where([
                         "user_id" => $user->id
                     ])
-                        ->first()->project_id;
+                        ->first()->project_id];
                 }
                 if (empty($item["work_location_id"])) {
                     $item["work_location_id"] = $user->work_location_id;
@@ -616,8 +628,6 @@ class AttendanceController extends Controller
                         ]
                     ];
                 }
-
-
 
                 $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
 
@@ -638,15 +648,23 @@ class AttendanceController extends Controller
                 ]);
             }
 
+            $created_attendances = [];
+            foreach ($attendances_data as $attendance_data) {
+                $created_attendance = $employee->attendances()->create($attendance_data);
 
-            $created_attendances = $employee->attendances()->createMany($attendances_data);
+                if ($created_attendance) {
+                    $created_attendance->projects->sync($attendance_data["project_ids"]);
 
-            if (!empty($created_attendances)) {
-                foreach ($created_attendances as $created_attendance) {
+                    $observer = new AttendanceObserver();
+                    $observer->updated_action($created_attendance, 'create');
+
                     $this->adjust_payroll_on_attendance_update($created_attendance, 0);
+
+                    $created_attendances[] = $created_attendance;
                 }
-                $this->send_notification($created_attendances, $employee, "Attendance Taken", "create", "attendance");
             }
+
+            $this->send_notification($employee->attendances()->latest()->take(count($attendances_data))->get(), $employee, "Attendance Taken", "create", "attendance");
 
 
             DB::commit();
@@ -707,7 +725,7 @@ class AttendanceController extends Controller
      *     @OA\Property(property="in_date", type="string", format="date", example="2023-11-18"),
      *     @OA\Property(property="does_break_taken", type="boolean", format="boolean", example="1"),
      *     @OA\Property(property="work_location_id", type="integer", format="int", example="1"),
-     * *     @OA\Property(property="project_id", type="integer", format="int", example="1")
+      *     @OA\Property(property="project_ids", type="string", format="array", example="{1,2,3}")
      *
 
      *
@@ -805,7 +823,6 @@ class AttendanceController extends Controller
                     "punch_in_time_tolerance",
                     "status",
                     'work_location_id',
-                    'project_id',
                     "is_present",
                     "is_active",
 
@@ -818,10 +835,17 @@ class AttendanceController extends Controller
             }
 
 
+            $attendance->projects->sync($request_data["project_ids"]);
+
+
+
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'update');
 
+
             $this->adjust_payroll_on_attendance_update($attendance, 0);
+
+
 
 
 
@@ -938,9 +962,17 @@ class AttendanceController extends Controller
             // Save the updated attendance
             $attendance->save();
 
+
+
+
+
             // Update observer with approval
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, $request_data["is_approved"] ? "approve" : "reject");
+
+
+
+
 
             // Adjust payroll based on attendance update
             $this->adjust_payroll_on_attendance_update($attendance, $request_data["add_in_next_payroll"]);
@@ -1294,7 +1326,7 @@ class AttendanceController extends Controller
                     $query->select('departments.id', 'departments.name');
                 },
                 "work_location",
-                "project"
+                "projects"
             ]);
 
             $attendancesQuery = $this->attendanceComponent->updateAttendanceQuery($all_manager_department_ids, $attendancesQuery);
@@ -1968,7 +2000,7 @@ class AttendanceController extends Controller
                     $query->select('departments.id', 'departments.name');
                 },
                 "work_location",
-                "project"
+                "projects"
             ])
 
 
@@ -2467,10 +2499,10 @@ class AttendanceController extends Controller
 
                     $temp_data["is_present"] = 1;
 
-                    $temp_data["project_id"] = UserProject::where([
+                    $temp_data["project_ids"] = [UserProject::where([
                         "user_id" => $user->id
                     ])
-                        ->first()->project_id;
+                        ->first()->project_id];
 
                     $temp_data["work_location_id"] = $request_data["work_location_id"];
 
@@ -2576,14 +2608,24 @@ class AttendanceController extends Controller
                 })->filter()->values();
 
 
-                $created_attendances = $user->attendances()->createMany($attendances_data);
 
-                if (!empty($created_attendances)) {
-                    foreach ($created_attendances as $created_attendance) {
+
+                foreach ($attendances_data as $attendance_data) {
+                    $created_attendance = $user->attendances()->create($attendance_data);
+
+                    if ($created_attendance) {
+                        $created_attendance->projects->sync($attendance_data["project_ids"]);
+
+                        $observer = new AttendanceObserver();
+                        $observer->updated_action($created_attendance, 'create');
+
                         $this->adjust_payroll_on_attendance_update($created_attendance, 0);
+
+
                     }
-                    $this->send_notification($created_attendances, $user, "Attendance Taken", "create", "attendance");
                 }
+
+                $this->send_notification($user->attendances()->latest()->take(count($attendances_data))->get(), $user, "Attendance Taken", "create", "attendance");
             }
             DB::commit();
 

@@ -42,6 +42,13 @@ class SelfAttendanceCheckOutCreateRequest extends FormRequest
                 },
             ],
 
+            "project_ids" => "present|array",
+
+            'project_ids.*' => [
+                'numeric',
+                new ValidProjectId,
+            ],
+
             'note' => 'nullable|string',
             'out_geolocation' => 'required|string',
             'attendance_records' => 'required|array',

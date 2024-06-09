@@ -259,6 +259,7 @@ Route::get('/v1.0/business-manager-dashboard/pensions', [DashboardManagementCont
 
 
 
+
 Route::get('/v1.0/business-manager-dashboard/present', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresent"]);
 
 Route::get('/v1.0/business-manager-dashboard/absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataAbsent"]);
