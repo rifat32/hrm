@@ -232,3 +232,4 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 //     }
 //             return "ok";
 //         });
+
