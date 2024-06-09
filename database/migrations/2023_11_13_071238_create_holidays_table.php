@@ -16,6 +16,7 @@ class CreateHolidaysTable extends Migration
         Schema::create('holidays', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('status', ['pending_approval','in_progress', 'approved','rejected'])->default("pending_approval");
             $table->text('description')->nullable();
             $table->date('start_date');
             $table->date('end_date');
@@ -30,7 +31,7 @@ class CreateHolidaysTable extends Migration
                 ->on('users')
                 ->onDelete('set null');
 
-                
+
             $table->softDeletes();
             $table->timestamps();
 

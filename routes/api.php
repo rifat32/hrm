@@ -924,6 +924,8 @@ Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDe
 
 Route::post('/v1.0/holidays', [HolidayController::class, "createHoliday"]);
 Route::put('/v1.0/holidays', [HolidayController::class, "updateHoliday"]);
+Route::put('/v1.0/holidays/approve', [HolidayController::class, "approveHoliday"]);
+
 Route::get('/v1.0/holidays', [HolidayController::class, "getHolidays"]);
 Route::get('/v1.0/holidays/{id}', [HolidayController::class, "getHolidayById"]);
 Route::delete('/v1.0/holidays/{ids}', [HolidayController::class, "deleteHolidaysByIds"]);

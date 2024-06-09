@@ -385,9 +385,11 @@ class LeaveController extends Controller
 
                 if (!$process_leave_approval["success"]) {
 
-                    return response([
-                        "message" => $process_leave_approval["message"]
-                    ], $process_leave_approval["status"]);
+                    return response(
+                    [
+                    "message" => $process_leave_approval["message"]
+                    ], $process_leave_approval["status"]
+                );
                 }
 
                 $leave = Leave::where([

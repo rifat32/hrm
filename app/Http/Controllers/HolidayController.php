@@ -6,9 +6,11 @@ use App\Exports\HolidayExport;
 use App\Http\Components\DepartmentComponent;
 use App\Http\Requests\HolidayCreateRequest;
 use App\Http\Requests\HolidayUpdateRequest;
+use App\Http\Requests\HolidayUpdateStatusRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\HolidayUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Holiday;
 use App\Models\User;
@@ -114,6 +116,7 @@ class HolidayController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
+                $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
 
                 $holiday =  Holiday::create($request_data);
 
@@ -125,13 +128,118 @@ class HolidayController extends Controller
 
 
 
-                return response($holiday, 201);
+                return response()->json()($holiday, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
     }
+
+     /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/holidays/approve",
+     *      operationId="approveHoliday",
+     *      tags={"administrator.holiday"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update holiday ",
+     *      description="This method is to update holiday",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     *             @OA\Property(property="status", type="string", format="string", example="Updated Christmas"),
+
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function approveHoliday(HolidayUpdateStatusRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('holiday_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+                 $holiday_query_params = [
+                     "id" => $request_data["id"],
+                     "business_id" => $business_id
+                 ];
+
+
+                 $holiday = Holiday::where($holiday_query_params)->first();
+
+
+
+                 if ($holiday) {
+                     $holiday->fill(collect($request_data)->only(['status'])->toArray());
+                     $holiday->save();
+                 }
+
+
+
+             if (!$holiday) {
+                 return response()->json([
+                     "message" => "Something went wrong."
+                 ], 500);
+             }
+
+
+
+            return response()->json()($holiday, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

@@ -16,6 +16,7 @@ use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetailHistory;
 use App\Models\EmploymentStatus;
+use App\Models\Holiday;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
 use App\Models\User;
@@ -131,6 +132,55 @@ function getLast12MonthsDates() {
 
         return $data;
     }
+
+
+    public function getHolidayData($data_query, $start_date = "",$end_date = "") {
+        $updated_data_query_old = clone $data_query;
+        $updated_data_query = $updated_data_query_old->when(
+            (!empty($start_date) && !empty($end_date)),
+            function($query) use($start_date, $end_date) {
+                $query->where("holidays.end_date", ">=" , $start_date)
+                ->where("holidays.start_date", "<=" , ($end_date . ' 23:59:59'));
+            }
+        );
+
+        $data["total_requested"] = clone $updated_data_query;
+        $data["total_requested"] = $data["total_requested"]
+        ->count();
+
+
+
+
+        $data["total_pending"] = clone $updated_data_query;
+        $data["total_pending"] = $data["total_pending"]
+        ->where([
+            "holidays.status" => "pending_approval"
+        ])
+        ->count();
+
+        $data["total_approved"] = clone $updated_data_query;
+        $data["total_approved"] = $data["total_approved"]
+        ->where([
+            "leaves.status" => "approved"
+        ])
+
+       ->count();
+
+        $data["total_rejected"] = clone $updated_data_query;
+        $data["total_rejected"] = $data["total_rejected"]
+
+        ->where([
+            "leaves.status" => "rejected"
+        ])
+
+
+        ->count();
+
+
+
+
+        return $data;
+    }
     public function leaves(
         $today,
         $start_date_of_next_month,
@@ -149,10 +199,11 @@ function getLast12MonthsDates() {
         $show_my_data = false
     ) {
 
-        $data_query  = LeaveRecord::whereHas("leave", function ($query)  {
+        $data_query  = LeaveRecord::whereHas("leave", function ($query) use($all_manager_department_ids)  {
                 $query->where([
                     "leaves.business_id" => auth()->user()->business_id,
-                ]);
+                ])->whereIn("leaves.user_id", $all_manager_department_ids);
+
             });
 
 
@@ -162,6 +213,62 @@ $last12MonthsDates = $this->getLast12MonthsDates();
 
 foreach ($last12MonthsDates as $month) {
     $leaveData =  $this->getLeaveData($data_query,$month['start_date'],$month['end_date']);
+    $data["data"][] = array_merge(
+        ["month" => $month['month']],
+        $leaveData
+    );
+}
+
+        return $data;
+    }
+
+    public function holidays(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $all_manager_department_ids,
+        $show_my_data = false
+    ) {
+        $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);
+        $data_query  = Holiday::where([
+            "holidays.business_id" => auth()->user()->business_id,
+        ])
+        ->where(function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
+            $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+            })
+                ->orWhereHas("users", function ($query) use ($all_user_of_manager) {
+                    $query->whereIn(
+                        "users.id",
+                        $all_user_of_manager
+                    );
+                })
+                ->when(auth()->user()->hasRole("business_owner"), function($query) {
+                    $query->orWhere(function ($query) {
+                        $query->whereDoesntHave("users")
+                            ->whereDoesntHave("departments");
+                    });
+                });
+
+        });
+
+
+$data["individual_total"] = $this->getHolidayData($data_query);
+
+$last12MonthsDates = $this->getLast12MonthsDates();
+
+foreach ($last12MonthsDates as $month) {
+    $leaveData =  $this->getHolidayData($data_query,$month['start_date'],$month['end_date']);
     $data["data"][] = array_merge(
         ["month" => $month['month']],
         $leaveData
@@ -364,6 +471,67 @@ return $data;
                 ]);
             });
             $data[("total_" . $leave_status)] = $updated_query->count();
+        }
+
+
+
+
+
+
+
+return $data;
+    }
+
+
+    public function getHolidaysStructure4( $today,
+    $start_date_of_next_month,
+    $end_date_of_next_month,
+    $start_date_of_this_month,
+    $end_date_of_this_month,
+    $start_date_of_previous_month,
+    $end_date_of_previous_month,
+    $start_date_of_next_week,
+    $end_date_of_next_week,
+    $start_date_of_this_week,
+    $end_date_of_this_week,
+    $start_date_of_previous_week,
+    $end_date_of_previous_week,
+    $all_manager_department_ids,
+
+    ) {
+
+        $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);
+        $holiday_query  = Holiday::where([
+            "holidays.business_id" => auth()->user()->business_id,
+        ])
+        ->where(function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
+            $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+            })
+                ->orWhereHas("users", function ($query) use ($all_user_of_manager) {
+                    $query->whereIn(
+                        "users.id",
+                        $all_user_of_manager
+                    );
+                })
+                ->when(auth()->user()->hasRole("business_owner"), function($query) {
+                    $query->orWhere(function ($query) {
+                        $query->whereDoesntHave("users")
+                            ->whereDoesntHave("departments");
+                    });
+                });
+
+        });
+        $holiday_statuses = ['pending_approval','in_progress', 'approved','rejected'];
+
+        foreach($holiday_statuses as $holiday_status) {
+            $updated_query = clone $holiday_query;
+            $updated_query = $updated_query->whereHas("leave",function($query) use($holiday_status) {
+                $query->where([
+                    "holidays.status" => $holiday_status
+                ]);
+            });
+            $data[("total_" . $holiday_query)] = $updated_query->count();
         }
 
 
@@ -3399,7 +3567,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            $data["holidays"] = $this->leaves(
+            $data["holidays"] = $this->holidays(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
@@ -3415,6 +3583,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $end_date_of_previous_week,
                 $all_manager_department_ids,
             );
+
+
 
 
             $data["expiries"] = $this->expiries(
@@ -4995,7 +5165,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-            $data["holidays"] = $this->leaves(
+            $data["holidays"] = $this->holidays(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
@@ -5246,7 +5416,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                 $all_manager_department_ids,
             );
 
-            $data["holidays"] = $this->getLeavesStructure4(
+            $data["holidays"] = $this->getHolidaysStructure4(
                 $today,
                 $start_date_of_next_month,
                 $end_date_of_next_month,
