@@ -2,35 +2,21 @@
 
 namespace App\Http\Requests;
 
-use App\Http\Utils\BasicUtil;
-use App\Models\Department;
-use App\Models\SettingLeaveType;
-use App\Models\User;
 use App\Rules\ValidSettingLeaveType;
-use App\Rules\ValidUserId;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LeaveCreateRequest extends BaseFormRequest
+class LeaveSelfCreateRequest extends FormRequest
 {
-    use BasicUtil;
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
+
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
+
     public function rules()
     {
-        $all_manager_department_ids = $this->get_all_departments_of_manager();
+
         return [
             'leave_duration' => 'required|in:single_day,multiple_day,half_day,hours',
             'day_type' => 'nullable|in:first_half,last_half',
@@ -42,11 +28,7 @@ class LeaveCreateRequest extends BaseFormRequest
             ],
 
 
-            'user_id' => [
-                'required',
-                'numeric',
-                new ValidUserId($all_manager_department_ids)
-            ],
+
 
             'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
             'note' => 'required|string',
@@ -69,8 +51,5 @@ class LeaveCreateRequest extends BaseFormRequest
         // ... other custom messages
     ];
 }
-
-
-
 
 }

@@ -12,6 +12,7 @@ use App\Http\Requests\LeaveApproveRequest;
 use App\Http\Requests\LeaveArrearApproveRequest;
 use App\Http\Requests\LeaveBypassRequest;
 use App\Http\Requests\LeaveCreateRequest;
+use App\Http\Requests\LeaveSelfCreateRequest;
 use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BasicNotificationUtil;
@@ -155,7 +156,144 @@ class LeaveController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+  /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/leaves/self",
+     *      operationId="createSelfLeave",
+     *      tags={"leaves"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store leave",
+     *      description="This method is to store leave",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *   @OA\Property(property="leave_duration", type="string", format="string", example="single_day"),
+     *   @OA\Property(property="day_type", type="string", format="string", example="first_half"),
+     *   @OA\Property(property="leave_type_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="user_id", type="integer", format="int", example=2),
+     *   @OA\Property(property="date", type="string", format="date", example="2023-11-03"),
+     *   @OA\Property(property="note", type="string", format="string", example="dfzg drfg"),
+     *   @OA\Property(property="start_date", type="string", format="date", example="2023-11-22"),
+     *   @OA\Property(property="end_date", type="string", format="date", example="2023-11-08"),
+     *   @OA\Property(property="start_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="end_time", type="string", format="date-time", example="18:00:00"),
+     *   @OA\Property(property="hourly_rate", type="number", format="number", example="5"),
+     *   @OA\Property(property="attachments", type="string", format="array", example={"/abcd.jpg","/efgh.jpg"})
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
 
+     public function createSelfLeave(LeaveSelfCreateRequest $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             $request_data = $request->validated();
+
+             $request_data["user_id"] = auth()->user()->id;
+
+             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
+
+
+
+
+
+             $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
+
+             $leave =  Leave::create($processed_leave_data["leave_data"]);
+             $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
+
+             $this->leaveComponent->validateLeaveAvailability($leave);
+
+
+             foreach ($leave->records as $leave_record) {
+                 $this->adjust_payroll_on_leave_update($leave_record,0);
+             }
+
+
+             $leaveObserver = new LeaveObserver();
+             $leaveObserver->create($leave);
+
+             // $leave_history_data = $leave->toArray();
+             // $leave_history_data['leave_id'] = $leave->id;
+             // $leave_history_data['actor_id'] = auth()->user()->id;
+             // $leave_history_data['action'] = "create";
+             // $leave_history_data['is_approved'] = NULL;
+             // $leave_history_data['leave_created_at'] = $leave->created_at;
+             // $leave_history_data['leave_updated_at'] = $leave->updated_at;
+             // $leave_history = LeaveHistory::create($leave_history_data);
+             // $leave_history->records()->createMany($leave->records->toArray());
+
+
+             $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
+
+
+
+             // $this->moveUploadedFiles($request_data["attachments"],"leave_request_docs");
+
+
+
+             DB::commit();
+
+             return response($leave, 200);
+         } catch (Exception $e) {
+             DB::rollBack();
+
+
+
+             try {
+                 $this->moveUploadedFilesBack($request_data["attachments"],"","leave_attachments");
+             } catch (Exception $innerException) {
+                 error_log("Failed to move leave files back: " . $innerException->getMessage());
+             }
+
+
+
+
+
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

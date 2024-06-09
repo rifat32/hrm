@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\HolidayExport;
 use App\Http\Components\DepartmentComponent;
 use App\Http\Requests\HolidayCreateRequest;
+use App\Http\Requests\HolidaySelfCreateRequest;
 use App\Http\Requests\HolidayUpdateRequest;
 use App\Http\Requests\HolidayUpdateStatusRequest;
 use App\Http\Utils\BasicUtil;
@@ -35,6 +36,101 @@ class HolidayController extends Controller
 
         $this->departmentComponent = $departmentComponent;
     }
+
+      /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/holidays/self",
+     *      operationId="createSelfHoliday",
+     *      tags={"administrator.holiday"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store holiday",
+     *      description="This method is to store holiday",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
+     *             @OA\Property(property="description", type="string", format="string", example="Updated holiday celebration"),
+     *             @OA\Property(property="start_date", type="string", format="date", example="2023-12-25"),
+     *             @OA\Property(property="end_date", type="string", format="date", example="2023-12-25"),
+     *             @OA\Property(property="repeats_annually", type="boolean", format="boolean", example=false),
+     *  *     @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+     *  *     @OA\Property(property="users", type="string", format="array", example={1,2,3})
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function createSelfHoliday(HolidaySelfCreateRequest $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             return DB::transaction(function () use ($request) {
+
+
+                 $request_data = $request->validated();
+
+
+                 $request_data["business_id"] = $request->user()->business_id;
+                 $request_data["is_active"] = true;
+                 $request_data["created_by"] = $request->user()->id;
+                 $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
+
+                 $holiday =  Holiday::create($request_data);
+
+
+
+                 $holiday->users()->sync([auth()->user()->id]);
+
+
+
+
+
+                 return response()->json()($holiday, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
     /**
      *

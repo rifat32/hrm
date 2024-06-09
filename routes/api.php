@@ -922,7 +922,9 @@ Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDe
 // holiday  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+Route::post('/v1.0/holidays/self', [HolidayController::class, "createSelfHoliday"]);
 Route::post('/v1.0/holidays', [HolidayController::class, "createHoliday"]);
+
 Route::put('/v1.0/holidays', [HolidayController::class, "updateHoliday"]);
 Route::put('/v1.0/holidays/approve', [HolidayController::class, "approveHoliday"]);
 
@@ -1151,6 +1153,7 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/leaves/multiple-file-upload', [LeaveController::class, "createLeaveFileMultiple"]);
+Route::post('/v1.0/leaves/self', [LeaveController::class, "createSelfLeave"]);
 Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
 Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
 
