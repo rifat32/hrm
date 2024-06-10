@@ -48,7 +48,7 @@ class AttendanceObserver
             $attendance_history_data['attendance_updated_at'] = $attendance->updated_at;
 
        $attendance_history = AttendanceHistory::create($attendance_history_data);
-      $attendance_history->projects->sync($attendance->projects->pluck("projects.id")->toArray());
+      $attendance_history->projects()->sync($attendance->projects()->pluck("projects.id")->toArray());
 
         }
     }

@@ -150,6 +150,4 @@ class Attendance extends Model
 
 
 
-
-
 }

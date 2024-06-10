@@ -140,20 +140,24 @@ trait BasicUtil
 
 
 public function validateUserQuery($user_id,$all_manager_department_ids) {
+
     $user = User::where([
         "id" => $user_id
     ])
     ->where(function($query) use($all_manager_department_ids) {
-
         $query->whereHas("departments", function($query) use($all_manager_department_ids){
             $query->whereIn("departments.id",$all_manager_department_ids);
-        });
+        })
+        ->orWhere([
+            "id" => auth()->user()->id
+        ]);
     })
     ->first();
 
     if(empty($user)){
         throw new Exception("You don't have access to this user.",401);
     }
+
 }
 
 

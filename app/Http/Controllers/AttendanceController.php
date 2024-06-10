@@ -221,7 +221,7 @@ class AttendanceController extends Controller
             }
 
 
-        $attendance->projects->sync($request_data["project_ids"]);
+        $attendance->projects()->sync($request_data["project_ids"]);
 
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'update');
@@ -233,10 +233,13 @@ class AttendanceController extends Controller
             $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
 
 
-
+            $responseData = [
+                "project_ids" => $attendance->projects()->pluck("projects.id")
+              ];
+              $responseData = array_merge($responseData,$attendance);
 
             DB::commit();
-            return response($attendance, 201);
+            return response($responseData, 201);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e, 500, $request);
@@ -350,7 +353,7 @@ class AttendanceController extends Controller
             // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($attendance_data);
 
-            $attendance->projects->sync($request_data["project_ids"]);
+            $attendance->projects()->sync($request_data["project_ids"]);
 
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'create');
@@ -362,7 +365,13 @@ class AttendanceController extends Controller
             $this->send_notification($attendance, $attendance->employee, "Attendance Taken", "create", "attendance");
 
             DB::commit();
-            return response($attendance, 201);
+
+            $responseData = [
+              "project_ids" => $attendance->projects()->pluck("projects.id")
+            ];
+            $responseData = array_merge($responseData,$attendance);
+
+            return response($responseData, 201);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e, 500, $request);
@@ -485,7 +494,7 @@ class AttendanceController extends Controller
             // Assign additional data to request data for attendance creation
             $attendance =  Attendance::create($attendance_data);
 
-            $attendance->projects->sync($request_data["project_ids"]);
+            $attendance->projects()->sync($request_data["project_ids"]);
 
             $observer = new AttendanceObserver();
             $observer->updated_action($attendance, 'create');
@@ -531,7 +540,7 @@ class AttendanceController extends Controller
      * "in_date" : "2023-11-18",
      * "does_break_taken" : 1,
      * "work_location_id" : 1,
-     * "project_ids" : [1]
+     * "project_ids" : {1}
      *
      *
      *
@@ -653,7 +662,7 @@ class AttendanceController extends Controller
                 $created_attendance = $employee->attendances()->create($attendance_data);
 
                 if ($created_attendance) {
-                    $created_attendance->projects->sync($attendance_data["project_ids"]);
+                    $created_attendance->projects()->sync($attendance_data["project_ids"]);
 
                     $observer = new AttendanceObserver();
                     $observer->updated_action($created_attendance, 'create');
@@ -835,7 +844,7 @@ class AttendanceController extends Controller
             }
 
 
-            $attendance->projects->sync($request_data["project_ids"]);
+            $attendance->projects()->sync($request_data["project_ids"]);
 
 
 
@@ -2216,7 +2225,26 @@ class AttendanceController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-            $attendance =  Attendance::with("employee")->where([
+            $attendance =  Attendance::with(
+                [
+                    "employee" => function ($query) {
+                        $query->select(
+                            'users.id',
+                        );
+                    },
+                    "projects" => function ($query) {
+                        $query->select(
+                            'projects.id',
+                            'projects.name',
+                        );
+                    },
+
+
+
+                    ]
+
+
+                )->where([
                 "business_id" => auth()->user()->business_id
             ])
                 ->where("created_by", auth()->user()->id)
@@ -2611,10 +2639,12 @@ class AttendanceController extends Controller
 
 
                 foreach ($attendances_data as $attendance_data) {
-                    $created_attendance = $user->attendances()->create($attendance_data);
+                    $attendance_data["user_id"] = $user->id;
+                    $created_attendance = Attendance::create($attendance_data);
 
-                    if ($created_attendance) {
-                        $created_attendance->projects->sync($attendance_data["project_ids"]);
+                    if (!empty($created_attendance)) {
+                        $created_attendance->projects()->sync($attendance_data["project_ids"]);
+
 
                         $observer = new AttendanceObserver();
                         $observer->updated_action($created_attendance, 'create');

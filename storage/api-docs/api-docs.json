@@ -1362,10 +1362,10 @@
                                         "format": "int",
                                         "example": "1"
                                     },
-                                    "project_id": {
-                                        "type": "integer",
-                                        "format": "int",
-                                        "example": "1"
+                                    "project_ids": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": "{1,2,3}"
                                     }
                                 },
                                 "type": "object"
@@ -1708,10 +1708,10 @@
                                         "format": "int",
                                         "example": "1"
                                     },
-                                    "project_id": {
-                                        "type": "integer",
-                                        "format": "int",
-                                        "example": "1"
+                                    "project_ids": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": "{1,2,3}"
                                     }
                                 },
                                 "type": "object"
@@ -1837,10 +1837,10 @@
                                         "format": "int",
                                         "example": "1"
                                     },
-                                    "project_id": {
-                                        "type": "integer",
-                                        "format": "int",
-                                        "example": "1"
+                                    "project_ids": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": "{1,2,3}"
                                     }
                                 },
                                 "type": "object"
@@ -1937,7 +1937,9 @@
                                                 "in_date": "2023-11-18",
                                                 "does_break_taken": 1,
                                                 "work_location_id": 1,
-                                                "project_id": 1
+                                                "project_ids": [
+                                                    1
+                                                ]
                                             }
                                         ]
                                     }

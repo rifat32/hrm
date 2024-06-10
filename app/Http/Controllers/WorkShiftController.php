@@ -1330,11 +1330,18 @@ if($work_shift->type !== "flexible") {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-             if ((!auth()->user()->hasPermissionTo('work_shift_view') && auth()->user()->id !== $user_id)) {
+             $user_id = intval($user_id);
+
+             $request_user_id = auth()->user()->id;
+             $hasPermission = auth()->user()->hasPermissionTo('work_shift_view');
+
+             if ((!$hasPermission && ($request_user_id !== $user_id))) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
              }
+
+
              $business_id =  auth()->user()->business_id;
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
