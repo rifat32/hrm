@@ -2243,6 +2243,7 @@ class AttendanceController extends Controller
                             'projects.name',
                         );
                     },
+                    "work_location"
 
 
 
