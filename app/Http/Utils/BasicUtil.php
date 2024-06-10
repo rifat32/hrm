@@ -138,6 +138,25 @@ trait BasicUtil
         return $all_manager_department_ids;
     }
 
+
+public function validateUserQuery($user_id,$all_manager_department_ids) {
+    $user = User::where([
+        "id" => $user_id
+    ])
+    ->where(function($query) use($all_manager_department_ids) {
+
+        $query->whereHas("departments", function($query) use($all_manager_department_ids){
+            $query->whereIn("departments.id",$all_manager_department_ids);
+        });
+    })
+    ->first();
+
+    if(empty($user)){
+        throw new Exception("You don't have access to this user.",401);
+    }
+}
+
+
 public function get_all_user_of_manager($all_manager_department_ids) {
     $all_manager_user_ids = User::whereHas("department_user.department", function($query) use($all_manager_department_ids){
         $query->whereIn("departments.id",$all_manager_department_ids);

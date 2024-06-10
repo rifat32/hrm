@@ -35,9 +35,9 @@ class SelfAttendanceCheckInCreateRequest extends FormRequest
 
             'attendance_records' => 'required|array',
 
-            'attendance_records.*.in_latitude' => 'required|string',
-            'attendance_records.*.in_longitude' => 'required|string',
-            'attendance_records.*.in_ip_address' => 'required|string',
+            'attendance_records.*.in_latitude' => 'nullable|string',
+            'attendance_records.*.in_longitude' => 'nullable|string',
+            'attendance_records.*.in_ip_address' => 'nullable|string',
 
             'attendance_records.*.out_latitude' => 'nullable|string',
             'attendance_records.*.out_longitude' => 'nullable|string',

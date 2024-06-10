@@ -1329,18 +1329,28 @@ if($work_shift->type !== "flexible") {
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('work_shift_view')) {
+
+             if ((!auth()->user()->hasPermissionTo('work_shift_view') && auth()->user()->id !== $user_id)) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
              }
              $business_id =  auth()->user()->business_id;
-             $business_times =    BusinessTime::where([
-                "is_weekend" => 1,
-                "business_id" => auth()->user()->business_id,
-            ])->get();
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $this->validateUserQuery($user_id,$all_manager_department_ids);
+
+
+            //  $business_times =    BusinessTime::where([
+            //     "is_weekend" => 1,
+            //     "business_id" => auth()->user()->business_id,
+            // ])->get();
+
+
+
 
              $work_shift =   WorkShift::with("details")
+
             ->where(function($query) use($business_id,$user_id) {
                 $query->where([
                     "business_id" => $business_id
@@ -1348,8 +1358,7 @@ if($work_shift->type !== "flexible") {
                     $query->where('users.id', $user_id);
                 });
             })
-
-            ->orWhere(function($query) use($business_times) {
+            ->orWhere(function($query) {
                 $query->where([
                     "is_active" => 1,
                     "business_id" => NULL,
@@ -1375,7 +1384,6 @@ if($work_shift->type !== "flexible") {
             //     }
             // })
             ;
-
             })
 
             ->first();
@@ -1383,11 +1391,12 @@ if($work_shift->type !== "flexible") {
 
 
              if (!$work_shift) {
-
                  return response()->json([
                      "message" => "no work shift found for the user"
                  ], 404);
              }
+
+
 
              return response()->json($work_shift, 200);
          } catch (Exception $e) {
