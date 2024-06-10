@@ -2217,7 +2217,6 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
         $data["total_data"] = $this->userManagementComponent-> getHolodayDetails(
-        $all_manager_department_ids,
         auth()->user()->id,
         request()->start_date,
         request()->end_date,

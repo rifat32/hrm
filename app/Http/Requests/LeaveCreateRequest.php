@@ -8,6 +8,7 @@ use App\Models\SettingLeaveType;
 use App\Models\User;
 use App\Rules\ValidSettingLeaveType;
 use App\Rules\ValidUserId;
+use App\Rules\ValidUserIdAllowSelf;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveCreateRequest extends BaseFormRequest
@@ -45,7 +46,7 @@ class LeaveCreateRequest extends BaseFormRequest
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidUserIdAllowSelf($all_manager_department_ids)
             ],
 
             'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',

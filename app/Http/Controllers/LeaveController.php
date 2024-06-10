@@ -365,9 +365,22 @@ class LeaveController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            $this->authorizationComponent->hasPermission('leave_create');
-
             $request_data = $request->validated();
+
+
+            $user_id = intval($request_data["user_id"]);
+
+            $request_user_id = auth()->user()->id;
+
+
+            if ((!auth()->user()->hasPermissionTo('leave_create') && ($request_user_id !== $user_id))) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+
+
 
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
 
@@ -2324,13 +2337,19 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
      {
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('leave_create')) {
+
+             $user_id = intval($request->user_id);
+             $request_user_id = auth()->user()->id;
+             if (!$request->user()->hasPermissionTo('leave_create') && ($request_user_id !== $user_id)) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
              }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
 
-         $salary_info = $this->get_salary_info((!empty($request->user_id)?$request->user_id:auth()->user()->id),(!empty($request->date)?$request->date:today()));
+
+         $salary_info = $this->get_salary_info((!empty($user_id)?$user_id:auth()->user()->id),(!empty($request->date)?$request->date:today()));
          $salary_info["hourly_salary"] =  number_format($salary_info["hourly_salary"], 2);
          $salary_info["overtime_salary_per_hour"] = number_format($salary_info["overtime_salary_per_hour"],2);
          $salary_info["holiday_considered_hours"] = number_format($salary_info["holiday_considered_hours"],2);

@@ -177,7 +177,7 @@ use BasicUtil;
                 $query->select('departments.id', 'departments.name');
             },
             "work_location",
-            "project"
+            "projects"
         ]);
 
 

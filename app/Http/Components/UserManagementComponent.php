@@ -698,22 +698,11 @@ return $data;
 }
 
 
-public function getHolodayDetails($all_manager_department_ids,$userId,$start_date = NULL, $end_date = NULL,$is_including_attendance = false,) {
+public function getHolodayDetails($userId,$start_date = NULL, $end_date = NULL,$is_including_attendance = false,) {
        // Retrieve the user based on the provided ID, ensuring it belongs to one of the managed departments
-       $user = User::with("roles")
-       ->where([
+       $user = User::where([
            "id" => $userId
        ])
-       ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
-           $query->whereIn("departments.id", $all_manager_department_ids);
-       })
-       ->when(!auth()->user()->hasRole('superadmin'), function ($query)  {
-           return $query->where(function ($query) {
-               return  $query->where('created_by', auth()->user()->id)
-                   ->orWhere('id', auth()->user()->id)
-                   ->orWhere('business_id', auth()->user()->business_id);
-           });
-       })
        ->first();
 
    // If no user found, return 404 error

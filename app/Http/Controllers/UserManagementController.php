@@ -5603,44 +5603,20 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
     public function getAttendancesByUserId($id, Request $request)
     {
 
-
-        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-            File::delete($file);
-        }
+        // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+        //     File::delete($file);
+        // }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('user_view')) {
+            $user_id = intval($id);
+            $request_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-            $user = User::with("roles")
-                ->where([
-                    "id" => $id
-                ])
-                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
-                    });
-                })
-                ->first();
-
-            if (!$user) {
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
-
-
+            $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
 
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
@@ -5648,14 +5624,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
 
 
 
-
-
-
-
             $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
-
-
-
 
 
 
@@ -5873,17 +5842,21 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            // Check if the user has permission to view users
-            if (!$request->user()->hasPermissionTo('user_view')) {
+            $user_id = intval($id);
+            $request_user_id = auth()->user()->id;
+
+            if ((!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id))) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            // Get all department IDs managed by the current user
+
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-        $result_array =  $this->userManagementComponent->getHolodayDetails($all_manager_department_ids,$id,$request->start_date,$request->end_date,true);
+            $this->validateUserQuery($user_id,$all_manager_department_ids);
+
+        $result_array =  $this->userManagementComponent->getHolodayDetails($id,$request->start_date,$request->end_date,true);
 
 
 

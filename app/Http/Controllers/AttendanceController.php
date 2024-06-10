@@ -228,15 +228,16 @@ class AttendanceController extends Controller
 
             $this->adjust_payroll_on_attendance_update($attendance, 0);
 
-
-
             $this->send_notification($attendance, $attendance->employee, "Attendance updated", "update", "attendance");
 
 
             $responseData = [
                 "project_ids" => $attendance->projects()->pluck("projects.id")
               ];
-              $responseData = array_merge($responseData,$attendance);
+
+              $attendance->work_location = $attendance->work_location;
+            $responseData = array_merge($responseData,$attendance->toArray());
+
 
             DB::commit();
             return response($responseData, 201);
@@ -369,7 +370,11 @@ class AttendanceController extends Controller
             $responseData = [
               "project_ids" => $attendance->projects()->pluck("projects.id")
             ];
-            $responseData = array_merge($responseData,$attendance);
+
+
+         $attendance->work_location = $attendance->work_location;
+            $responseData = array_merge($responseData,$attendance->toArray());
+
 
             return response($responseData, 201);
         } catch (Exception $e) {

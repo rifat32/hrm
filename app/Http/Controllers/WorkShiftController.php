@@ -1331,8 +1331,8 @@ if($work_shift->type !== "flexible") {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
              $user_id = intval($user_id);
-
              $request_user_id = auth()->user()->id;
+
              $hasPermission = auth()->user()->hasPermissionTo('work_shift_view');
 
              if ((!$hasPermission && ($request_user_id !== $user_id))) {

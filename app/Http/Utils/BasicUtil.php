@@ -157,6 +157,7 @@ public function validateUserQuery($user_id,$all_manager_department_ids) {
     if(empty($user)){
         throw new Exception("You don't have access to this user.",401);
     }
+    return $user;
 
 }
 
