@@ -505,30 +505,25 @@ class DashboardManagementController extends Controller
         $show_my_data = false
     ) {
 
-        $data_query  = LeaveRecord::when(
-            $show_my_data,
-            function ($query)  {
-                $query->where('leaves.user_id', auth()->user()->id);
-            },
-            function ($query) use ($all_manager_department_ids,) {
-
-                $query->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-
-                });
-
-            }
-        )
-
-
-
-
-
-            ->whereHas("leave", function ($query) use ($status) {
+        $data_query  = LeaveRecord::whereHas("leave", function ($query) use ($status, $show_my_data, $all_manager_department_ids) {
                 $query->where([
                     "leaves.business_id" => auth()->user()->business_id,
                     "leaves.status" => $status
-                ]);
+                ])
+                ->when(
+                    $show_my_data,
+                    function ($query)  {
+                        $query->where('leaves.user_id', auth()->user()->id);
+                    },
+                    function ($query) use ($all_manager_department_ids) {
+
+                        $query->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+
+                        });
+
+                    }
+                );
             });
 
         $data["total_data_count"] = $data_query->count();
@@ -2216,11 +2211,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
     ) {
 
 
-        $data["total_data"] = $this->userManagementComponent-> getHolodayDetails(
+        $data["total_data"] = $this->userManagementComponent->getHolodayDetails(
         auth()->user()->id,
         request()->start_date,
         request()->end_date,
-        true);;
+        true,
+        false)
+        ;
 
 
 
@@ -2282,7 +2279,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
     ) {
 
-        $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history(today(), auth()->user()->id);
+        $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history(today(), auth()->user()->id,false);
 
         $work_shift_history->details = $work_shift_history->details();
 

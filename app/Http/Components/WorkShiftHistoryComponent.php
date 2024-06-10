@@ -8,7 +8,7 @@ use Exception;
 
 class WorkShiftHistoryComponent
 {
-    public function get_work_shift_history($in_date,$user_id)
+    public function get_work_shift_history($in_date,$user_id,$throwError=true)
     {
         $work_shift_history =  WorkShiftHistory::
            where(function($query) use($in_date,$user_id) {
@@ -40,7 +40,11 @@ class WorkShiftHistoryComponent
 
             ->first();
         if (!$work_shift_history) {
-            throw new Exception("Please define workshift first",401);
+            if($throwError) {
+                throw new Exception("Please define workshift first",401);
+            } else {
+                return false;
+            }
         }
 
         return $work_shift_history;
@@ -72,8 +76,6 @@ class WorkShiftHistoryComponent
             } else {
                 return false;
             }
-
-
         }
 
         return $work_shift_histories;

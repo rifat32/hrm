@@ -2151,7 +2151,24 @@ class AttendanceController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $business_id =  $request->user()->business_id;
 
-            $attendance =  Attendance::with("employee")->where([
+            $attendance =  Attendance::with(
+
+                [
+                    "employee",
+                    "projects" => function ($query) {
+                        $query->select(
+                            'projects.id',
+                            // 'projects.name',
+                        );
+                    },
+
+
+                ]
+
+
+
+
+                )->where([
                 "id" => $id,
                 "business_id" => $business_id
             ])

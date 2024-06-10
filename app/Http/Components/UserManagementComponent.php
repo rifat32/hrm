@@ -542,7 +542,7 @@ public function getScheduleInformationData ($user_id,$start_date,$end_date){
 
     $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user_id,false);
 
-    if(empty($work_shift_histories)) {
+    if(empty($work_shift_histories) || !$work_shift_histories) {
         return [
             "schedule_data" => [],
             "total_capacity_hours" => 0
@@ -698,7 +698,7 @@ return $data;
 }
 
 
-public function getHolodayDetails($userId,$start_date = NULL, $end_date = NULL,$is_including_attendance = false,) {
+public function getHolodayDetails($userId,$start_date = NULL, $end_date = NULL,$is_including_attendance = false,$throwErr = true) {
        // Retrieve the user based on the provided ID, ensuring it belongs to one of the managed departments
        $user = User::where([
            "id" => $userId
@@ -727,7 +727,7 @@ public function getHolodayDetails($userId,$start_date = NULL, $end_date = NULL,$
 
 
    // Retrieve work shift histories for the user within the specified period
-   $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user->id,true);
+   $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user->id,$throwErr);
 
    // Initialize an empty collection to store weekend dates
 
