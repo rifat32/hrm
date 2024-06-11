@@ -734,6 +734,8 @@ return [
             "role" => "business_manager",
             "permissions" => [
 
+                "business_manager",
+
                 "user_create",
                 "user_update",
                 "user_view",
@@ -865,10 +867,10 @@ return [
                 "comment_delete",
 
 
-                // "holiday_create",
-                // "holiday_update",
-                // "holiday_view",
-                // "holiday_delete",
+                "holiday_create",
+                "holiday_update",
+             "holiday_view",
+                "holiday_delete",
 
                 "work_shift_create",
                 "work_shift_update",
@@ -1056,6 +1058,12 @@ return [
         "business_owner",
         "business_admin",
         "business_employee",
+
+        "superadmin",
+        'reseller',
+        "business_admin",
+        "business_manager",
+
 
         "reminder_create",
         "reminder_update",

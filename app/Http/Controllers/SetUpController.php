@@ -1049,11 +1049,10 @@ foreach ($role_permissions as $role_permission) {
     if($role_permission["role"] == "business_employee"){
         foreach($business_ids as $business_id){
 
-
-
             $role = Role::where(["name" => $role_permission["role"] . "#" . $business_id])->first();
 
            if(empty($role)){
+
             continue;
            }
 
@@ -1062,6 +1061,26 @@ foreach ($role_permissions as $role_permission) {
                 // Assign permissions from the configuration
     $role->syncPermissions($permissions);
 
+
+
+        }
+
+    }
+
+    if($role_permission["role"] == "business_manager"){
+        foreach($business_ids as $business_id){
+
+            $role = Role::where(["name" => $role_permission["role"] . "#" . $business_id])->first();
+
+           if(empty($role)){
+
+            continue;
+           }
+
+                $permissions = $role_permission["permissions"];
+
+                // Assign permissions from the configuration
+    $role->syncPermissions($permissions);
 
 
 
