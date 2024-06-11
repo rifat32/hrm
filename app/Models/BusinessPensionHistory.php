@@ -18,7 +18,9 @@ class BusinessPensionHistory extends Model
         "created_by"
     ];
 
-
+    protected $casts = [
+        'pension_scheme_letters' => 'array',
+    ];
 
     public function business(){
         return $this->belongsTo(Business::class,'business_id', 'id');

@@ -1399,12 +1399,16 @@ class BusinessController extends Controller
 
 
 
-                $business  =  tap(Business::where([
-                    "id" => $request_data['businesas']["id"]
-                ]))->update(
-                    $pension_scheme_data
-                )
-                    ->first();
+                    $business = Business::where([
+                        'id' => $request_data['business']['id']
+                    ])->first();
+
+                    if ($business) {
+                        $business
+                        ->fill($pension_scheme_data)
+                        ->save();
+                    }
+
 
 
 

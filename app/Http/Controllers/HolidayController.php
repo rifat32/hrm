@@ -123,7 +123,7 @@ class HolidayController extends Controller
 
 
 
-                 return response()->json()($holiday, 201);
+                 return response()->json($holiday, 201);
              });
          } catch (Exception $e) {
              error_log($e->getMessage());
@@ -224,7 +224,7 @@ class HolidayController extends Controller
 
 
 
-                return response()->json()($holiday, 201);
+                return response()->json($holiday, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());

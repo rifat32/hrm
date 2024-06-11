@@ -2571,8 +2571,19 @@ class AttendanceController extends Controller
                 // Map attendance details to create attendances data
                 $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids) {
 
-                    // Retrieve work shift history for the user and date
-                    $user_salary_info = $this->get_salary_info($user->id, $item["in_date"]);
+                       // Retrieve attendance for the user and date
+                       $existing_attendance = $this->get_existing_attendance($item["in_date"], $user->id);
+
+                       if (!empty($existing_attendance)) {
+                           return false;
+                       }
+
+                         // Retrieve holiday details for the user and date
+                    $holiday = $this->get_holiday_details($item["in_date"], $user->id, $all_parent_department_ids);
+
+                    if ($holiday && $holiday->is_active) {
+                        return false;
+                    }
 
                     // Retrieve work shift history for the user and date
                     $work_shift_history =  $this->get_work_shift_history($item["in_date"], $user->id);
@@ -2602,12 +2613,7 @@ class AttendanceController extends Controller
                     $user_salary_info = $this->get_salary_info($user->id, $attendance_data["in_date"]);
 
 
-                    // Retrieve holiday details for the user and date
-                    $holiday = $this->get_holiday_details($item["in_date"], $user->id, $all_parent_department_ids);
 
-                    if ($holiday && $holiday->is_active) {
-                        return false;
-                    }
                     // Retrieve leave record details for the user and date
                     $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"], true);
 
@@ -2616,12 +2622,7 @@ class AttendanceController extends Controller
                     }
 
 
-                    // Retrieve attendance for the user and date
-                    $existing_attendance = $this->get_existing_attendance($attendance_data["in_date"], $user->id);
 
-                    if (!empty($existing_attendance)) {
-                        return false;
-                    }
 
 
 
