@@ -5444,9 +5444,9 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
     {
 
 
-        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-            File::delete($file);
-        }
+        // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+        //     File::delete($file);
+        // }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_view')) {
@@ -5455,30 +5455,18 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
                 ], 401);
             }
 
-            $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-            $user = User::with("roles")
-                ->where([
-                    "id" => $id
-                ])
-                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
-                    });
-                })
-                ->first();
-
-            if (!$user) {
+            $user_id = intval($id);
+            $request_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
                 return response()->json([
-                    "message" => "no user found"
-                ], 404);
+                    "message" => "You can not perform this action"
+                ], 401);
             }
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+
+
 
 
 
@@ -5608,6 +5596,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         // }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
             $user_id = intval($id);
             $request_user_id = auth()->user()->id;
             if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
@@ -5615,6 +5604,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
 
@@ -5719,36 +5709,17 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('user_view')) {
+
+            $user_id = intval($id);
+            $request_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-            $user = User::with("roles")
-                ->where([
-                    "id" => $id
-                ])
-                ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id)
-                            ->orWhere('business_id', auth()->user()->business_id);
-                    });
-                })
-                ->first();
-
-            if (!$user) {
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
+            $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
 
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');

@@ -478,12 +478,21 @@ class AttendanceController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!auth()->user()->hasPermissionTo('attendance_create')) {
+
+            $request_data = $request->validated();
+
+            $user_id = intval($request_data["user_id"]);
+
+            $request_user_id = auth()->user()->id;
+
+
+            if ((!auth()->user()->hasPermissionTo('attendance_create') && ($request_user_id !== $user_id))) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $request_data = $request->validated();
+
+
 
             $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
 
