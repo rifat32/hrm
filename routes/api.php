@@ -201,6 +201,8 @@ Route::post('/v1.0/dashboard-widgets', [DashboardManagementController::class, "c
 Route::delete('/v1.0/dashboard-widgets/{ids}', [DashboardManagementController::class, "deleteDashboardWidgetsByIds"]);
 Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::class, "getBusinessUserDashboardData"]);
 Route::get('/v1.0/business-employee-dashboard', [DashboardManagementController::class, "getBusinessEmployeeDashboardData"]);
+
+Route::get('/v2.0/business-employee-dashboard', [DashboardManagementController::class, "getBusinessEmployeeDashboardDataV2"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end dashboard section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -451,6 +453,8 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
 Route::put('/v3.0/users', [UserManagementController::class, "updateUserV3"]);
+Route::put('/v4.0/users', [UserManagementController::class, "updateUserV4"]);
+
 
 
 Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);

@@ -626,35 +626,7 @@ class AnnouncementController extends Controller
     }
 
 
-    public function addAnnouncementIfMissing() {
-        $all_parent_departments_of_user = $this->all_parent_departments_of_user(auth()->user()->id);
 
-        $announcements_to_show = Announcement::where(function($query) use($all_parent_departments_of_user) {
-            $query->whereHas("departments",function($query) use($all_parent_departments_of_user) {
-              $query->whereIn("departments.id",$all_parent_departments_of_user);
-            })
-
-            ->orWhereDoesntHave("departments");
-        })
-        ->pluck("id");
-
-        foreach($announcements_to_show as $announcement_id){
-       $userAnnouncement =  UserAnnouncement::where([
-                "announcement_id" => $announcement_id,
-                "user_id" => auth()->user()->id
-            ])
-            ->first();
-
-           if(empty($userAnnouncement)) {
-            UserAnnouncement::create([
-                "announcement_id" => $announcement_id,
-                "user_id" => auth()->user()->id,
-                "status" => "unread"
-            ]);
-           }
-
-        }
-    }
 
        /**
      *
@@ -748,9 +720,9 @@ class AnnouncementController extends Controller
 
              $business_id =  $request->user()->business_id;
 
+             $all_parent_departments_of_user = $this->all_parent_departments_of_user(auth()->user()->id);
 
-
-          $this->addAnnouncementIfMissing();
+          $this->addAnnouncementIfMissing($all_parent_departments_of_user);
 
 
 
@@ -905,7 +877,9 @@ class AnnouncementController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-             $this->addAnnouncementIfMissing();
+             $all_parent_departments_of_user = $this->all_parent_departments_of_user(auth()->user()->id);
+
+             $this->addAnnouncementIfMissing($all_parent_departments_of_user);
 
              $business_id =  $request->user()->business_id;
              $announcements = Announcement::with([

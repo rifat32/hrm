@@ -2,10 +2,12 @@
 
 namespace App\Http\Utils;
 
+use App\Models\Announcement;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeePensionHistory;
 use App\Models\User;
+use App\Models\UserAnnouncement;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +18,37 @@ use Illuminate\Support\Facades\File;
 
 trait BasicUtil
 {
+    public function addAnnouncementIfMissing($all_parent_departments_of_user) {
+
+
+        $announcements_to_show = Announcement::where(function($query) use($all_parent_departments_of_user) {
+            $query->whereHas("departments",function($query) use($all_parent_departments_of_user) {
+              $query->whereIn("departments.id",$all_parent_departments_of_user);
+            })
+
+            ->orWhereDoesntHave("departments");
+        })
+        ->pluck("id");
+
+        foreach($announcements_to_show as $announcement_id){
+       $userAnnouncement =  UserAnnouncement::where([
+                "announcement_id" => $announcement_id,
+                "user_id" => auth()->user()->id
+            ])
+            ->first();
+
+           if(empty($userAnnouncement)) {
+            UserAnnouncement::create([
+                "announcement_id" => $announcement_id,
+                "user_id" => auth()->user()->id,
+                "status" => "unread"
+            ]);
+           }
+
+        }
+    }
+
+
 
     public function getMainRoleId() {
         // Retrieve the authenticated user

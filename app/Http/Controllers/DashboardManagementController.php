@@ -9,6 +9,7 @@ use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Announcement;
 use App\Models\Attendance;
 use App\Models\Business;
 use App\Models\Candidate;
@@ -20,8 +21,10 @@ use App\Models\EmployeeRightToWorkHistory;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeVisaDetailHistory;
 use App\Models\EmploymentStatus;
+use App\Models\Holiday;
 use App\Models\JobListing;
 use App\Models\LeaveRecord;
+use App\Models\Notification;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
@@ -3473,6 +3476,213 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
          }
      }
 
+
+     public function getHolidayData($all_parent_department_ids) {
+
+      $data =  Holiday::where(
+                [
+                    "holidays.business_id" => auth()->user()->business_id
+                ]
+            )
+            ->where(function ($query) use ($all_parent_department_ids) {
+                $query->whereHas("departments", function ($query) use ($all_parent_department_ids) {
+                    $query->whereIn("departments.id", $all_parent_department_ids);
+                })
+                    ->orWhereHas("users", function ($query) {
+                        $query->whereIn(
+                            "users.id",
+                            [auth()->user()->id]
+                        );
+                    })
+                    ->orWhere(function ($query) {
+                        $query->whereDoesntHave("users")
+                            ->whereDoesntHave("departments");
+                    });
+            })
+            ->where("start_date", ">", today())
+            ->orderBy('start_date',"ASC")
+
+
+            ->first();
+            return $data;
+
+     }
+     public function getNotifications() {
+        $data = Notification::with("sender","business")->where([
+            "receiver_id" => auth()->user()->id
+        ]
+    )
+    ->orderBy("notifications.id", "DESC")
+    ->take(6)->get();
+
+
+
+            return $data;
+
+     }
+
+
+
+
+     public function getAnnouncements($all_parent_department_ids) {
+
+
+
+        $this->addAnnouncementIfMissing($all_parent_department_ids);
+
+           $data = Announcement::with([
+               "creator" => function ($query) {
+                   $query->select('users.id', 'users.first_Name','users.middle_Name',
+                   'users.last_Name');
+               },
+               "departments" => function ($query) {
+                   $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
+               },
+           ])
+           ->where(
+               [
+          "announcements.business_id" => auth()->user()->business_id
+               ]
+           )
+           ->whereHas("users", function($query)  {
+              $query->where("user_announcements.user_id",auth()->user()->id);
+          })
+          ->orderBy("created_at","DESC")
+
+->take(7)->get();
+
+
+
+            return $data;
+
+     }
+
+
+
+
+
+
+     public function getOngoingProjects() {
+
+
+
+        $data = Project::with("departments","users")
+        ->where(
+            [
+                "business_id" => auth()->user()->business_id
+            ]
+        )
+        ->whereHas('users', function($query)  {
+            $query->where("users.id",auth()->user()->id);
+    })
+
+
+        ->get();
+
+
+        return $data;
+
+
+     }
+
+
+
+
+
+  /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/business-employee-dashboard",
+     *      operationId="getBusinessEmployeeDashboardDataV2",
+     *      tags={"dashboard_management.business_user"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessEmployeeDashboardDataV2(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+             $today = today();
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_parent_department_ids = $this->all_parent_departments_of_user(auth()->user()->id);
+
+             $data["upcoming_holiday"] = $this->getHolidayData($all_parent_department_ids);
+
+             $data["notifications"] = $this->getNotifications();
+
+             $data["announcements"] = $this->getAnnouncements($all_parent_department_ids);
+
+             $data["on_going_projects"] = $this->getOngoingProjects();
+
+
+             return response()->json($data, 200);
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 
