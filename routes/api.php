@@ -203,6 +203,8 @@ Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::clas
 Route::get('/v1.0/business-employee-dashboard', [DashboardManagementController::class, "getBusinessEmployeeDashboardData"]);
 
 Route::get('/v2.0/business-employee-dashboard', [DashboardManagementController::class, "getBusinessEmployeeDashboardDataV2"]);
+
+Route::get('/v2.0/business-employee-dashboard/present-hours', [DashboardManagementController::class, "getBusinessEmployeeDashboardDataPresentHours"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end dashboard section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

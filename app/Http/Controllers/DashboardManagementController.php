@@ -3685,7 +3685,278 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      }
 
 
+     public function presentHours() {
 
+$authUserId = auth()->user()->id;
+
+// Define start and end dates for the week
+$start_date_of_this_week = Carbon::now()->startOfWeek();
+$end_date_of_this_week = Carbon::now()->endOfWeek();
+
+// Fetch weekly attendance data
+$weeklyAttendance = Attendance::where('is_present', 1)
+    ->where('user_id', $authUserId)
+    ->whereBetween('in_date', [$start_date_of_this_week, $end_date_of_this_week->endOfDay()])
+    ->select('id', 'total_paid_hours', 'break_hours', 'in_date')
+    ->get();
+
+// Initialize an array for week data
+$weekData = [];
+
+// Define an array of days for reference
+$daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+// Process each day of the week
+foreach ($daysOfWeek as $index => $day) {
+    $date = $start_date_of_this_week->copy()->addDays($index);
+    $dateTitle = $date->format('d-m-Y');
+
+    // Find the attendance record for the current day
+    $attendanceRecord = $weeklyAttendance->firstWhere('in_date', $date->toDateString());
+
+    if ($attendanceRecord) {
+        $workingHours = $attendanceRecord->total_paid_hours;
+        $breakHours = $attendanceRecord->break_hours;
+    } else {
+        $workingHours = 0;
+        $breakHours = 0;
+    }
+
+    // Add data to weekData array
+    $weekData[] = [
+        'name' => $day,
+        'working_hours' => $workingHours,
+        'break_hours' => -$breakHours,
+        'date_title' => $dateTitle,
+    ];
+}
+
+// Define start and end dates for the month
+$start_date_of_this_month = Carbon::now()->startOfMonth();
+$end_date_of_this_month = Carbon::now()->endOfMonth();
+
+// Fetch monthly attendance data
+$monthlyAttendance = Attendance::where('is_present', 1)
+    ->where('user_id', $authUserId)
+    ->whereBetween('in_date', [$start_date_of_this_month, $end_date_of_this_month->endOfDay()])
+    ->select('id', 'total_paid_hours', 'break_hours', 'in_date')
+    ->get();
+
+// Initialize an array for month data
+$monthData = [];
+
+// Process each day of the month
+for ($date = $start_date_of_this_month; $date->lte($end_date_of_this_month); $date->addDay()) {
+    $dateTitle = $date->format('d-m-Y');
+    $dayName = $date->format('D'); // Get the three-letter day name
+
+    // Find the attendance record for the current day
+    $attendanceRecord = $monthlyAttendance->firstWhere('in_date', $date->toDateString());
+
+    if ($attendanceRecord) {
+        $workingHours = $attendanceRecord->total_paid_hours;
+        $breakHours = $attendanceRecord->break_hours;
+    } else {
+        $workingHours = 0;
+        $breakHours = 0;
+    }
+
+    // Add data to monthData array
+    $monthData[] = [
+        'name' => $dayName,
+        'working_hours' => $workingHours,
+        'break_hours' => -$breakHours,
+        'date_title' => $dateTitle,
+    ];
+}
+
+// Return or use the $weekData and $monthData arrays as needed
+return response()->json([
+    'weekData' => $weekData,
+    'monthData' => $monthData,
+]);
+
+
+
+
+
+
+
+
+
+    }
+       /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/business-employee-dashboard/present-hours",
+     *      operationId="getBusinessEmployeeDashboardDataPresentHours",
+     *      tags={"dashboard_management.business_user"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessEmployeeDashboardDataPresentHours(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+
+
+
+
+             $data = $this->presentHours();
+
+             return response()->json($data, 200);
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+ /**
+     *
+     * @OA\Get(
+     *      path="/v3.0/business-employee-dashboard",
+     *      operationId="getBusinessEmployeeDashboardDataV3",
+     *      tags={"dashboard_management.business_user"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessEmployeeDashboardDataV3(Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $business_id = auth()->user()->business_id;
+             if (!$business_id) {
+                 return response()->json([
+                     "message" => "You are not a business user"
+                 ], 401);
+             }
+
+             $today = today();
+
+             $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+             $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+             $start_date_of_this_month = Carbon::now()->startOfMonth();
+             $end_date_of_this_month = Carbon::now()->endOfMonth();
+             $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+             $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+             $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+             $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+             $start_date_of_this_week = Carbon::now()->startOfWeek();
+             $end_date_of_this_week = Carbon::now()->endOfWeek();
+             $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+             $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+             $all_parent_department_ids = $this->all_parent_departments_of_user(auth()->user()->id);
+
+             $data["upcoming_holiday"] = $this->getHolidayData($all_parent_department_ids);
+
+             $data["notifications"] = $this->getNotifications();
+
+             $data["announcements"] = $this->getAnnouncements($all_parent_department_ids);
+
+             $data["on_going_projects"] = $this->getOngoingProjects();
+
+
+
+
+
+             return response()->json($data, 200);
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
  /**

@@ -2019,7 +2019,7 @@ $totalHours = $totalSeconds / 3600;
                 "is_present" => 1
             ])
             ->whereIn("user_id", $all_manager_user_ids)
-            ->whereBetween("in_date",[$start_date_of_this_week,($end_date_of_this_week . ' 23:59:59')])
+            ->where("in_date",$date)
             ->sum(DB::raw('total_paid_hours - overtime_hours'));
 
             $total_present += $today_present;
