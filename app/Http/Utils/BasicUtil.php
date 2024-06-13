@@ -18,6 +18,28 @@ use Illuminate\Support\Facades\File;
 
 trait BasicUtil
 {
+
+    function getLast12MonthsDates($year) {
+        $dates = [];
+
+
+        for ($month = 1; $month <= 12; $month++) {
+            // Create a date object for the first day of the current month
+            $date = Carbon::createFromDate($year, $month, 1);
+
+            $startOfMonth = $date->copy()->startOfMonth()->toDateString();
+            $endOfMonth = $date->copy()->endOfMonth()->toDateString();
+            $monthName = $date->copy()->format('F');
+
+            $dates[] = [
+                'month' => substr($monthName, 0, 3),
+                'start_date' => $startOfMonth,
+                'end_date' => $endOfMonth,
+            ];
+        }
+
+        return $dates;
+    }
     public function addAnnouncementIfMissing($all_parent_departments_of_user) {
 
 

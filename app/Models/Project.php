@@ -24,6 +24,10 @@ class Project extends Model
         "created_by",
     ];
 
+    public function creator() {
+        return $this->belongsTo(User::class, "created_by","id");
+    }
+
 
     public function getCanDeleteAttribute($value) {
         $request = request();
@@ -62,6 +66,10 @@ class Project extends Model
 
     public function tasks() {
         return $this->hasMany(Task::class, 'project_id', 'id');
+    }
+
+    public function completed_tasks() {
+        return $this->hasMany(Task::class, 'project_id', 'id')->where("tasks.status",'done');
     }
 
     // public function getCreatedAtAttribute($value)

@@ -200,11 +200,14 @@ Route::get('/v1.0/superadmin-dashboard', [DashboardManagementController::class, 
 Route::post('/v1.0/dashboard-widgets', [DashboardManagementController::class, "createDashboardWidget"]);
 Route::delete('/v1.0/dashboard-widgets/{ids}', [DashboardManagementController::class, "deleteDashboardWidgetsByIds"]);
 Route::get('/v1.0/business-user-dashboard', [DashboardManagementController::class, "getBusinessUserDashboardData"]);
+
 Route::get('/v1.0/business-employee-dashboard', [DashboardManagementController::class, "getBusinessEmployeeDashboardData"]);
 
 Route::get('/v2.0/business-employee-dashboard', [DashboardManagementController::class, "getBusinessEmployeeDashboardDataV2"]);
 
 Route::get('/v2.0/business-employee-dashboard/present-hours', [DashboardManagementController::class, "getBusinessEmployeeDashboardDataPresentHours"]);
+
+Route::get('/v2.0/business-employee-dashboard/leaves', [DashboardManagementControllerV2::class, "getBusinessEmployeeDashboardDataLeaves"]);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // end dashboard section
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -542,12 +545,7 @@ Route::post('/v1.0/user-recruitment-processes', [UserRecruitmentProcessControlle
 
 Route::put('/v1.0/user-recruitment-processes', [UserRecruitmentProcessController::class, "updateUserRecruitmentProcess"]);
 
-
 Route::get('/v1.0/user-recruitment-processes/{id}', [UserRecruitmentProcessController::class, "getUserRecruitmentProcessesById"]);
-
-
-
-
 
 Route::delete('/v1.0/user-recruitment-processes/{ids}', [UserRecruitmentProcessController::class, "deleteUserRecruitmentProcess"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1105,6 +1103,16 @@ Route::delete('/v1.0/recruitment-processes/{ids}', [RecruitmentProcessController
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end recruitment processes management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+
+
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // employment status management section

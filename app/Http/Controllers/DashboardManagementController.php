@@ -2256,7 +2256,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
             $query->where("users.id",auth()->user()->id);
 
-        });
+        })
+        ;
 
 
 
@@ -3566,7 +3567,25 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-        $data = Project::with("departments","users")
+        $data = Project::with([
+            "creator" => function ($query) {
+                $query->select('users.id',
+                 'users.first_Name','users.middle_Name',
+                'users.last_Name');
+            },
+            "users" => function ($query) {
+                $query->select(
+                    'users.id',
+                 'users.first_Name','users.middle_Name',
+                'users.last_Name'
+            );
+            },
+
+
+        ])
+
+        ->withCount(['tasks', 'completed_tasks'])
+
         ->where(
             [
                 "business_id" => auth()->user()->business_id
@@ -3575,7 +3594,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
         ->whereHas('users', function($query)  {
             $query->where("users.id",auth()->user()->id);
     })
+    // ->whereHas("tasks.assignees" , function($query) {
 
+    //     $query->where("users.id",auth()->user()->id);
+
+    // })
+
+    ->select("id","name","end_date","status")
 
         ->get();
 
@@ -3685,9 +3710,13 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      }
 
 
-     public function presentHours() {
+
+
+     public function presentHours($duration,$year) {
 
 $authUserId = auth()->user()->id;
+
+if($duration == "this_week" ) {
 
 // Define start and end dates for the week
 $start_date_of_this_week = Carbon::now()->startOfWeek();
@@ -3731,6 +3760,13 @@ foreach ($daysOfWeek as $index => $day) {
     ];
 }
 
+    return $weekData;
+
+
+}
+
+
+if($duration == "this_month" ) {
 // Define start and end dates for the month
 $start_date_of_this_month = Carbon::now()->startOfMonth();
 $end_date_of_this_month = Carbon::now()->endOfMonth();
@@ -3742,11 +3778,12 @@ $monthlyAttendance = Attendance::where('is_present', 1)
     ->select('id', 'total_paid_hours', 'break_hours', 'in_date')
     ->get();
 
+
 // Initialize an array for month data
 $monthData = [];
 
 // Process each day of the month
-for ($date = $start_date_of_this_month; $date->lte($end_date_of_this_month); $date->addDay()) {
+for ($date = clone $start_date_of_this_month; $date->lte($end_date_of_this_month); $date->addDay()) {
     $dateTitle = $date->format('d-m-Y');
     $dayName = $date->format('D'); // Get the three-letter day name
 
@@ -3761,24 +3798,61 @@ for ($date = $start_date_of_this_month; $date->lte($end_date_of_this_month); $da
         $breakHours = 0;
     }
 
+    // Adjust break hours to negative as per your example
+    $adjustedBreakHours = -$breakHours;
+
     // Add data to monthData array
     $monthData[] = [
         'name' => $dayName,
         'working_hours' => $workingHours,
-        'break_hours' => -$breakHours,
+        'break_hours' => $adjustedBreakHours,
         'date_title' => $dateTitle,
     ];
 }
 
-// Return or use the $weekData and $monthData arrays as needed
-return response()->json([
-    'weekData' => $weekData,
-    'monthData' => $monthData,
-]);
+  return $monthData;
+
+}
 
 
+if($duration == "this_year" ) {
+
+    if(!$year){
+        throw new Exception("year is required",400);
+
+    }
+
+    $last12MonthsDates = $this->getLast12MonthsDates($year);
+$data = [];
+
+    foreach ($last12MonthsDates as $month) {
+        $monthlyAttendance = Attendance::where('is_present', 1)
+    ->where('user_id', $authUserId)
+    ->whereBetween('in_date', [$month['start_date'], $month['end_date'] . ' 23:59:59'])
+    ->selectRaw('SUM(total_paid_hours) as total_paid_hours_sum, SUM(break_hours) as break_hours_sum')
+    ->first();
+
+// Check if there are any records matching the criteria
+if ($monthlyAttendance) {
+    $attendanceData["total_paid_hours"] = $monthlyAttendance->total_paid_hours_sum;
+    $attendanceData["break_hours"] = $monthlyAttendance->break_hours_sum;
+
+} else {
+    $attendanceData["total_paid_hours"] = 0;
+    $attendanceData["break_hours"] = 0;
+}
+        $data["data"][] = array_merge(
+            ["month" => $month['month']],
+            $monthlyAttendance
+        );
+    }
 
 
+    return  $data;
+
+}
+
+return $duration;
 
 
 
@@ -3794,7 +3868,20 @@ return response()->json([
      *       security={
      *           {"bearerAuth": {}}
      *       },
-
+   *              @OA\Parameter(
+     *         name="duration",
+     *         in="path",
+     *         description="total,today, this_month, this_week... ",
+     *         required=true,
+     *  example="duration"
+     *      ),
+     *      *              @OA\Parameter(
+     *         name="year",
+     *         in="path",
+     *         description="total,today, this_month, this_week... ",
+     *         required=true,
+     *  example="year"
+     *      ),
 
      *      summary="get all dashboard data combined",
      *      description="get all dashboard data combined",
@@ -3850,7 +3937,7 @@ return response()->json([
 
 
 
-             $data = $this->presentHours();
+             $data = $this->presentHours($request->duration,$request->year);
 
              return response()->json($data, 200);
          } catch (Exception $e) {
