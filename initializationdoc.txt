@@ -139,6 +139,8 @@ ON DELETE SET NULL;
     return "ok";
 });
 
+18. ALTER TABLE `setting_attendances` ADD `is_geolocation_enabled` BOOLEAN NULL DEFAULT NULL AFTER `updated_at`;
+
 
 
 
@@ -147,4 +149,4 @@ ON DELETE SET NULL;
 hr compliance 14 ->
 
 
-hrm, hrm-produ 15 ->
+hrm, hrm-produ 18 ->

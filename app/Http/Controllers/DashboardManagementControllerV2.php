@@ -1039,7 +1039,8 @@ return $data;
                      $current_data = EmployeePassportDetailHistory::where('user_id', $record->user_id)
                     ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                     ->where($issue_date_column, '<', now())
-                    ->orderByDesc($issue_date_column)
+                    ->orderByDesc("id")
+                    // ->orderByDesc($issue_date_column)
                     ->first();
                 } else {
                    return NULL;
@@ -1148,7 +1149,8 @@ return $data;
                          $current_data = EmployeeVisaDetailHistory::where('user_id', $record->user_id)
                         ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                         ->where($issue_date_column, '<', now())
-                        ->orderByDesc($issue_date_column)
+                        ->orderByDesc("id")
+                        // ->orderByDesc($issue_date_column)
                         ->first();
                     } else {
                        return NULL;
@@ -1258,7 +1260,8 @@ return $data;
                              $current_data = EmployeeRightToWorkHistory::where('user_id', $record->user_id)
                             ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                             ->where($issue_date_column, '<', now())
-                            ->orderByDesc($issue_date_column)
+                            ->orderByDesc("id")
+                            // ->orderByDesc($issue_date_column)
                             ->first();
                         } else {
                            return NULL;
@@ -1366,7 +1369,8 @@ return $data;
                                  $current_data = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
                                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                                 ->where($issue_date_column, '<', now())
-                                ->orderByDesc($issue_date_column)
+                                ->orderByDesc("id")
+                                // ->orderByDesc($issue_date_column)
                                 ->first();
                             } else {
                                return NULL;
@@ -2567,7 +2571,8 @@ $totalHours = $totalSeconds / 3600;
                  $current_data = EmployeePassportDetailHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->where($issue_date_column, '<', now())
-                ->orderByDesc($issue_date_column)
+                ->orderByDesc("id")
+                // ->orderByDesc($issue_date_column)
                 ->first();
             } else {
                return NULL;
@@ -2669,7 +2674,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                  $current_data = EmployeeVisaDetailHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->where($issue_date_column, '<', now())
-                ->orderByDesc($issue_date_column)
+                ->orderByDesc("id")
+                // ->orderByDesc($issue_date_column)
                 ->first();
             } else {
                return NULL;
@@ -2771,7 +2777,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                  $current_data = EmployeeRightToWorkHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->where($issue_date_column, '<', now())
-                ->orderByDesc($issue_date_column)
+                ->orderByDesc("id")
+                // ->orderByDesc($issue_date_column)
                 ->first();
             } else {
                return NULL;
@@ -2873,7 +2880,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                  $current_data = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->where($issue_date_column, '<', now())
-                ->orderByDesc($issue_date_column)
+                ->orderByDesc("id")
+                // ->orderByDesc($issue_date_column)
                 ->first();
             } else {
                return NULL;
@@ -2975,7 +2983,8 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
                  $current_data = EmployeeSponsorshipHistory::where('user_id', $record->user_id)
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 ->where($issue_date_column, '<', now())
-                ->orderByDesc($issue_date_column)
+                ->orderByDesc("id")
+                // ->orderByDesc($issue_date_column)
                 ->first();
             } else {
                return NULL;

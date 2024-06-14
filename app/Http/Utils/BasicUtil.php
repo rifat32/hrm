@@ -169,7 +169,7 @@ trait BasicUtil
                 $current_data = $model::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc("id")
                 ->first();
             }

@@ -30,6 +30,7 @@ class ValidateHolidayDate implements Rule
     public function passes($attribute, $value)
     {
 
+        return 1;
         $existingHolidays = Holiday::where(
             [
                 "holidays.business_id" => auth()->user()->business_id
