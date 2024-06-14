@@ -186,12 +186,12 @@ class DashboardManagementControllerV2 extends Controller
 
 $data["individual_total"] = $this->getLeaveData($data_query);
 
-if(!request()->year){
+if(!request()->input("year")){
     throw new Exception("year is required",400);
 
 }
 
-$last12MonthsDates = $this->getLast12MonthsDates(request()->year);
+$last12MonthsDates = $this->getLast12MonthsDates(request()->input("year"));
 
 foreach ($last12MonthsDates as $month) {
     $leaveData =  $this->getLeaveData($data_query,$month['start_date'],$month['end_date']);
@@ -220,23 +220,36 @@ foreach ($last12MonthsDates as $month) {
         $all_manager_department_ids,
         $show_my_data = false
     ) {
+        $year = request()->input("year");
+        if(!$year){
+            throw new Exception("year is required",400);
+
+        }
 
         $data_query  = LeaveRecord::whereHas("leave", function ($query)   {
                 $query->where([
                     "leaves.business_id" => auth()->user()->business_id,
                 ])->whereIn("leaves.user_id", [auth()->user()->id]);
 
-            });
+            })
+            ->whereYear("leave_records.date", $year);
 
 
-$data["individual_total"] = $this->getLeaveData($data_query);
+//             // Clone the query if year is provided
+// $data_query_year = clone $data_query;
+// $data_query_year->whereYear("leave_records.date", $year);
 
-if(!request()->year){
-    throw new Exception("year is required",400);
 
-}
+// $data["individual_total"] = $this->getLeaveData($data_query_year);
 
-$last12MonthsDates = $this->getLast12MonthsDates(request()->year);
+         // Clone the query if year is provided
+
+
+         $data["individual_total"] = $this->getLeaveData($data_query);
+
+
+
+$last12MonthsDates = $this->getLast12MonthsDates(request()->input("year"));
 
 foreach ($last12MonthsDates as $month) {
     $leaveData =  $this->getLeaveData($data_query,$month['start_date'],$month['end_date']);
@@ -246,13 +259,6 @@ foreach ($last12MonthsDates as $month) {
     );
 }
 
-foreach ($last12MonthsDates as $month) {
-    $leaveData =  $this->getLeaveData($data_query,$month['start_date'],$month['end_date']);
-    $data["data"][] = array_merge(
-        ["month" => $month['month']],
-        $leaveData
-    );
-}
 
         return $data;
     }
@@ -304,12 +310,12 @@ foreach ($last12MonthsDates as $month) {
 
 $data["individual_total"] = $this->getHolidayData($data_query);
 
-if(!request()->year){
+if(!request()->input("year")){
     throw new Exception("year is required",400);
 
 }
 
-$last12MonthsDates = $this->getLast12MonthsDates(request()->year);
+$last12MonthsDates = $this->getLast12MonthsDates(request()->input("year"));
 
 foreach ($last12MonthsDates as $month) {
     $leaveData =  $this->getLeaveData($data_query,$month['start_date'],$month['end_date']);

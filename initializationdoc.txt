@@ -1,6 +1,7 @@
 1. add new cron jobs.
 2. address field in work_locations table
 3. run this route
+
 Route::get("/run",function() {
 
     // Find the user by email
@@ -39,6 +40,9 @@ ADD CONSTRAINT `payrolls_payrun_id_foreign` FOREIGN KEY (`payrun_id`) REFERENCES
 7. run 2 queries in db,
 -- Step 1: Drop the existing foreign key constraint
 ALTER TABLE `users` DROP FOREIGN KEY `users_designation_id_foreign`;
+step 2 ALTER TABLE `users`
+MODIFY `designation_id` INT NULL;
+
 -- Step 2: Add the new foreign key constraint with ON DELETE CASCADE
 ALTER TABLE `users`
 ADD CONSTRAINT `users_designation_id_foreign` FOREIGN KEY (`designation_id`) REFERENCES `users`(`id`) ON DELETE set null;
@@ -79,10 +83,68 @@ UPDATE `holidays` SET `status` = 'approved' WHERE `status` IS NULL;
 
 
 
+15. Route::get("/run",function() {
+
+
+    $attendances = Attendance::whereNotNull("project_id")->get();
+    foreach($attendances as $attendance){
+        AttendanceProject::create([
+            "attendance_id" => $attendance->id,
+            "project_id" => $attendance->project_id
+        ]);
+    }
+            return "ok";
+        });
+
+
+16. ALTER TABLE attendance_projects
+DROP FOREIGN KEY attendance_projects_project_id_foreign;
+
+ALTER TABLE attendance_projects
+MODIFY project_id BIGINT UNSIGNED NULL;
+
+ALTER TABLE attendance_projects
+ADD CONSTRAINT attendance_projects_project_id_foreign
+FOREIGN KEY (project_id)
+REFERENCES projects(id)
+ON DELETE SET NULL;
+
+
+ALTER TABLE attendance_projects
+ADD CONSTRAINT attendance_projects_project_id_foreign
+FOREIGN KEY (project_id)
+REFERENCES projects(id)
+ON DELETE SET NULL;
+
+17 Route::get("/run", function() {
+    // Get all attendances with non-null project_id using a single query
+    $attendances = Attendance::whereNotNull("project_id")->get();
+
+    // Prepare data for bulk insertion
+    $attendanceProjects = [];
+    foreach ($attendances as $attendance) {
+        // Check if project exists, otherwise insert null
+        $project = Project::find($attendance->project_id);
+        $projectId = $project ? $attendance->project_id : null;
+
+        $attendanceProjects[] = [
+            "attendance_id" => $attendance->id,
+            "project_id" => $projectId
+        ];
+    }
+
+    // Bulk insert into AttendanceProject table
+    AttendanceProject::insert($attendanceProjects);
+
+    return "ok";
+});
 
 
 
 
 
 
-hr compliance 13 ->
+hr compliance 14 ->
+
+
+hrm, hrm-produ 15 ->

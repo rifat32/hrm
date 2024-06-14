@@ -520,7 +520,7 @@ class DashboardManagementController extends Controller
                     },
                     function ($query) use ($all_manager_department_ids) {
 
-                        $query->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                        $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                             $query->whereIn("departments.id", $all_manager_department_ids);
 
                         });
@@ -3759,7 +3759,7 @@ foreach ($daysOfWeek as $index => $day) {
     $weekData[] = [
         'name' => $day,
         'working_hours' => $workingHours,
-        'break_hours' => -$breakHours,
+        'break_hours' => -number_format($breakHours, 2),
         'date_title' => $dateTitle,
     ];
 }
@@ -3809,7 +3809,7 @@ for ($date = clone $start_date_of_this_month; $date->lte($end_date_of_this_month
     $monthData[] = [
         'name' => $dayName,
         'working_hours' => $workingHours,
-        'break_hours' => $adjustedBreakHours,
+        'break_hours' => -number_format($adjustedBreakHours, 2),
         'date_title' => $dateTitle,
     ];
 }
@@ -3838,12 +3838,12 @@ foreach ($last12MonthsDates as $month) {
 
     // The $monthlyAttendance will always have the sum results, defaulted to 0 if there were no matching records
     $attendanceData = [
-        "total_paid_hours" => $monthlyAttendance->total_paid_hours_sum,
-        "break_hours" => $monthlyAttendance->break_hours_sum
+        "working_hours" => $monthlyAttendance->total_paid_hours_sum,
+        "break_hours" => -number_format($monthlyAttendance->break_hours_sum, 2)
     ];
 
-    $data["data"][] = array_merge(
-        ["month" => $month['month']],
+    $data[] = array_merge(
+        ["name" => $month['month']],
         $attendanceData
     );
 }

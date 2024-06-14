@@ -67,7 +67,7 @@ class User extends Authenticatable
 
         "immigration_status",
 
-        
+
         "is_active_visa_details",
         "is_active_right_to_works",
 
@@ -233,7 +233,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -270,7 +270,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -307,7 +307,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -340,7 +340,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -373,7 +373,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -488,7 +488,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -525,7 +525,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }
@@ -558,7 +558,7 @@ return count($all_departments) > 0;
                 $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
-                ->orderByDesc($issue_date_column)
+                // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
             }

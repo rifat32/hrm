@@ -19,8 +19,8 @@ class CreateAttendanceProjectsTable extends Migration
             $table->unsignedBigInteger("attendance_id");
             $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
 
-            $table->unsignedBigInteger("project_id");
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->unsignedBigInteger("project_id")->nullable();
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('set null');
 
 
             $table->timestamps();
