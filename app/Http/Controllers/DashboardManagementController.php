@@ -3712,11 +3712,15 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
 
 
 
-     public function presentHours($duration,$year) {
+     public function presentHours() {
+
 
 $authUserId = auth()->user()->id;
 
-if($duration == "this_week" ) {
+
+
+
+if(request()->input("duration") == "this_week") {
 
 // Define start and end dates for the week
 $start_date_of_this_week = Carbon::now()->startOfWeek();
@@ -3766,7 +3770,7 @@ foreach ($daysOfWeek as $index => $day) {
 }
 
 
-if($duration == "this_month" ) {
+if(request()->input("duration") == "this_month" ) {
 // Define start and end dates for the month
 $start_date_of_this_month = Carbon::now()->startOfMonth();
 $end_date_of_this_month = Carbon::now()->endOfMonth();
@@ -3785,7 +3789,7 @@ $monthData = [];
 // Process each day of the month
 for ($date = clone $start_date_of_this_month; $date->lte($end_date_of_this_month); $date->addDay()) {
     $dateTitle = $date->format('d-m-Y');
-    $dayName = $date->format('D'); // Get the three-letter day name
+    $dayName = $date->format('d'); // Get the three-letter day name
 
     // Find the attendance record for the current day
     $attendanceRecord = $monthlyAttendance->firstWhere('in_date', $date->toDateString());
@@ -3815,44 +3819,40 @@ for ($date = clone $start_date_of_this_month; $date->lte($end_date_of_this_month
 }
 
 
-if($duration == "this_year" ) {
+if(request()->input("duration") == "this_year" ) {
 
-    if(!$year){
+    if(empty(request()->input("year"))){
         throw new Exception("year is required",400);
 
     }
 
-    $last12MonthsDates = $this->getLast12MonthsDates($year);
+    $last12MonthsDates = $this->getLast12MonthsDates(request()->input("year"));
 $data = [];
 
-    foreach ($last12MonthsDates as $month) {
-        $monthlyAttendance = Attendance::where('is_present', 1)
-    ->where('user_id', $authUserId)
-    ->whereBetween('in_date', [$month['start_date'], $month['end_date'] . ' 23:59:59'])
-    ->selectRaw('SUM(total_paid_hours) as total_paid_hours_sum, SUM(break_hours) as break_hours_sum')
-    ->first();
+foreach ($last12MonthsDates as $month) {
+    $monthlyAttendance = Attendance::where('is_present', 1)
+        ->where('user_id', $authUserId)
+        ->whereBetween('in_date', [$month['start_date'], $month['end_date'] . ' 23:59:59'])
+        ->selectRaw('COALESCE(SUM(total_paid_hours), 0) as total_paid_hours_sum, COALESCE(SUM(break_hours), 0) as break_hours_sum')
+        ->first();
 
-// Check if there are any records matching the criteria
-if ($monthlyAttendance) {
-    $attendanceData["total_paid_hours"] = $monthlyAttendance->total_paid_hours_sum;
-    $attendanceData["break_hours"] = $monthlyAttendance->break_hours_sum;
+    // The $monthlyAttendance will always have the sum results, defaulted to 0 if there were no matching records
+    $attendanceData = [
+        "total_paid_hours" => $monthlyAttendance->total_paid_hours_sum,
+        "break_hours" => $monthlyAttendance->break_hours_sum
+    ];
 
-} else {
-    $attendanceData["total_paid_hours"] = 0;
-    $attendanceData["break_hours"] = 0;
+    $data["data"][] = array_merge(
+        ["month" => $month['month']],
+        $attendanceData
+    );
 }
-        $data["data"][] = array_merge(
-            ["month" => $month['month']],
-            $monthlyAttendance
-        );
-    }
-
 
     return  $data;
 
 }
 
-return $duration;
+
 
 
 
@@ -3870,14 +3870,14 @@ return $duration;
      *       },
    *              @OA\Parameter(
      *         name="duration",
-     *         in="path",
+     *         in="query",
      *         description="total,today, this_month, this_week... ",
      *         required=true,
-     *  example="duration"
+     *  example="query"
      *      ),
      *      *              @OA\Parameter(
      *         name="year",
-     *         in="path",
+     *         in="query",
      *         description="total,today, this_month, this_week... ",
      *         required=true,
      *  example="year"
@@ -3937,9 +3937,12 @@ return $duration;
 
 
 
-             $data = $this->presentHours($request->duration,$request->year);
+
+             $data = $this->presentHours();
 
              return response()->json($data, 200);
+
+
          } catch (Exception $e) {
              return $this->sendError($e, 500, $request);
          }

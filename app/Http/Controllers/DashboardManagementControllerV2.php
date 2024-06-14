@@ -5366,10 +5366,17 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
      * @OA\Get(
      *      path="/v2.0/business-employee-dashboard/leaves",
      *      operationId="getBusinessEmployeeDashboardDataLeaves",
-     *      tags={"dashboard_management.business_manager"},
+     *      tags={"dashboard_management.business_user"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
+   *      *              @OA\Parameter(
+     *         name="year",
+     *         in="query",
+     *         description="total,today, this_month, this_week... ",
+     *         required=true,
+     *  example="year"
+     *      ),
 
 
      *      summary="get all dashboard data combined",

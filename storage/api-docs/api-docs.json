@@ -8944,6 +8944,22 @@
                 "summary": "get all dashboard data combined",
                 "description": "get all dashboard data combined",
                 "operationId": "getBusinessEmployeeDashboardDataPresentHours",
+                "parameters": [
+                    {
+                        "name": "duration",
+                        "in": "query",
+                        "description": "total,today, this_month, this_week... ",
+                        "required": true,
+                        "example": "query"
+                    },
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "total,today, this_month, this_week... ",
+                        "required": true,
+                        "example": "year"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -10205,6 +10221,15 @@
                 "summary": "get all dashboard data combined",
                 "description": "get all dashboard data combined",
                 "operationId": "getBusinessEmployeeDashboardDataLeaves",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "total,today, this_month, this_week... ",
+                        "required": true,
+                        "example": "year"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",

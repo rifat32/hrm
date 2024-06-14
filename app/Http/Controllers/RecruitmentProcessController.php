@@ -35,7 +35,9 @@ class RecruitmentProcessController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
+     * @OA\Property(property="use_in_employee", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="use_in_on_boarding", type="string", format="string", example="tttttt"),
      *
      *
      *
@@ -134,7 +136,9 @@ class RecruitmentProcessController extends Controller
      *         @OA\JsonContent(
      *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
+     * @OA\Property(property="use_in_employee", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="use_in_on_boarding", type="string", format="string", example="tttttt"),
 
      *
      *         ),
@@ -196,6 +200,9 @@ class RecruitmentProcessController extends Controller
                     collect($request_data)->only([
                         'name',
                         'description',
+                        "use_in_employee",
+                        "use_in_on_boarding"
+
                         // "is_default",
                         // "is_active",
                         // "business_id",
@@ -421,6 +428,21 @@ class RecruitmentProcessController extends Controller
      * required=true,
      * example="1"
      * ),
+     *   @OA\Parameter(
+     * name="use_in_employee",
+     * in="query",
+     * description="use_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *   @OA\Parameter(
+     * name="use_in_on_boarding",
+     * in="query",
+     * description="use_in_on_boarding",
+     * required=true,
+     * example="1"
+     * ),
+     *
      *      * *  @OA\Parameter(
      * name="start_date",
      * in="query",
@@ -582,7 +604,7 @@ class RecruitmentProcessController extends Controller
                                 ->where('recruitment_processes.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     return $query->where('recruitment_processes.is_active', intval($request->is_active));
-                                });;
+                                });
                         });
                     });
 
@@ -598,6 +620,23 @@ class RecruitmentProcessController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+
+
+                ->when(!empty($request->use_in_employee), function ($query) use ($request) {
+                    // Convert the request parameter to boolean
+                    $useInEmployee = filter_var($request->use_in_employee, FILTER_VALIDATE_BOOLEAN);
+                    return $query->where('recruitment_processes.use_in_employee', $useInEmployee);
+                })
+                ->when(!empty($request->use_in_on_boarding), function ($query) use ($request) {
+                    // Convert the request parameter to boolean
+                    $useInOnBoarding = filter_var($request->use_in_on_boarding, FILTER_VALIDATE_BOOLEAN);
+                    return $query->where('recruitment_processes.use_in_on_boarding', $useInOnBoarding);
+                })
+
+
+                    ->when(!empty($request->start_date), function ($query) use ($request) {
+                        return $query->where('recruitment_processes.created_at', ">=", $request->start_date);
+                    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('recruitment_processes.created_at', ">=", $request->start_date);
                 })
@@ -856,7 +895,7 @@ class RecruitmentProcessController extends Controller
                     'last_Name',
                 ]);
 
-           
+
                 return response()->json([
                     "message" => "Some users are associated with the specified recruitment_processes",
                     "conflicting_users" => $conflictingUsers
