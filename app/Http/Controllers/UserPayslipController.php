@@ -220,9 +220,14 @@ class UserPayslipController extends Controller
                 }
 
                 $request_data = $request->validated();
+
                 if(!empty($request_data["payment_record_file"])) {
                     $request_data["payment_record_file"] = $this->storeUploadedFiles($request_data["payment_record_file"],"","payment_record_file");
                 }
+                if(!empty($request_data["payslip_file"])) {
+                    $request_data["payslip_file"] = $this->storeUploadedFiles([$request_data["payslip_file"]],"","payment_record_file")[0];
+                }
+
                 $request_data["created_by"] = $request->user()->id;
 
 
@@ -272,11 +277,11 @@ DB::commit();
 
 
            try {
-
             if(!empty($request_data["payment_record_file"])) {
-
                 $this->moveUploadedFilesBack($request_data["payment_record_file"],"","payment_record_file");
-
+            }
+            if(!empty($request_data["payslip_file"])) {
+                $this->moveUploadedFilesBack([$request_data["payslip_file"]],"","payment_record_file");
             }
 
         } catch (Exception $innerException) {
@@ -406,9 +411,12 @@ DB::commit();
 
                 $request_data = $request->validated();
 
-
                 if(!empty($request_data["payment_record_file"])) {
-        $request_data["payment_record_file"] = $this->storeUploadedFiles([$request_data["payment_record_file"]],"","payment_record_file");
+                    $request_data["payment_record_file"] = $this->storeUploadedFiles($request_data["payment_record_file"],"","payment_record_file");
+                }
+
+                if(!empty($request_data["payslip_file"])) {
+                    $request_data["payslip_file"] = $this->storeUploadedFiles([$request_data["payslip_file"]],"","payment_record_file")[0];
                 }
 
 
@@ -446,31 +454,29 @@ DB::commit();
                 //     ], 404);
                 // }
 
-                $user_payslip  =  tap(Payslip::where($user_payslip_query_params))->update(
-                    collect($request_data)->only([
-                        'user_id',
-                         'month',
-                          'year',
-                          "payment_method",
-                          "payment_notes",
-                           'payment_amount',
+                $user_payslip = Payslip::where($user_payslip_query_params)->first();
+
+                if ($user_payslip) {
+                    $user_payslip->fill(
+                        collect($request_data)->only([
+                            'user_id',
+                            'month',
+                            'year',
+                            'payment_method',
+                            'payment_notes',
+                            'payment_amount',
                             'payment_date',
-                             'payslip_file',
-                              'payment_record_file',
-                               "payroll_id",
-
-
-    'gross_pay',
-    'tax',
-    'employee_ni_deduction',
-    'employer_ni'
-                                // "created_by"
-
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
+                            'payslip_file',
+                            'payment_record_file',
+                            'payroll_id',
+                            'gross_pay',
+                            'tax',
+                            'employee_ni_deduction',
+                            'employer_ni',
+                            // 'created_by'
+                        ])->toArray()
+                    )->save();
+                }
 
 
                 if (!$user_payslip) {

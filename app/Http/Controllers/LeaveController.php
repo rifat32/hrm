@@ -137,7 +137,7 @@ class LeaveController extends Controller
 
             $insertableData = $request->validated();
 
-            $location =  config("setup-config.leave_files_location");
+            $location =  config("setup-config.temporary_files_location");
 
             $files = [];
             if (!empty($insertableData["files"])) {
@@ -155,6 +155,10 @@ class LeaveController extends Controller
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
+
+
+
+
     }
   /**
      *

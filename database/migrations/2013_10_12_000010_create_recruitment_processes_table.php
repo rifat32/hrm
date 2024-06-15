@@ -21,8 +21,8 @@ class CreateRecruitmentProcessesTable extends Migration
             $table->boolean('is_default')->default(false);
 
 
-            $table->boolean('use_in_employee')->default(false);
-            $table->boolean('use_in_on_boarding')->default(false);
+            $table->boolean('use_in_employee')->default(true);
+            $table->boolean('use_in_on_boarding')->default(true);
 
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

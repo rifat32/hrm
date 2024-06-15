@@ -98,6 +98,8 @@ class UserPayslipUpdateRequest extends BaseFormRequest
             'payment_amount' => 'required|numeric',
             'payment_notes' => 'nullable|string',
             'payment_date' => 'required|date',
+
+
             'payslip_file' => 'nullable|string',
 
             'payment_record_file' => 'present|array',

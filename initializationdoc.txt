@@ -141,7 +141,17 @@ ON DELETE SET NULL;
 
 18. ALTER TABLE `setting_attendances` ADD `is_geolocation_enabled` BOOLEAN NULL DEFAULT NULL AFTER `updated_at`;
 
+19. import candidate_job_platforms table
 
+20. -- Add the new columns to the table
+ALTER TABLE `recruitment_processes`
+ADD `use_in_employee` BOOLEAN NOT NULL DEFAULT TRUE AFTER `updated_at`,
+ADD `use_in_on_boarding` BOOLEAN NOT NULL DEFAULT TRUE AFTER `use_in_employee`;
+
+-- Update all existing records to set the new fields to TRUE (1)
+UPDATE `recruitment_processes`
+SET `use_in_employee` = TRUE,
+    `use_in_on_boarding` = TRUE;
 
 
 
