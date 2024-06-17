@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\AttendancesExport;
 use App\Http\Components\AttendanceComponent;
+use App\Http\Components\HolidayComponent;
+use App\Http\Components\LeaveComponent;
 use App\Http\Requests\AttendanceApproveRequest;
 use App\Http\Requests\AttendanceArrearApproveRequest;
 use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
@@ -44,11 +46,15 @@ class AttendanceController extends Controller
 
 
     protected $attendanceComponent;
-
-    public function __construct(AttendanceComponent $attendanceComponent)
+    protected $holidayComponent;
+    protected $leaveComponent;
+    public function __construct(AttendanceComponent $attendanceComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent)
     {
         $this->attendanceComponent = $attendanceComponent;
+        $this->holidayComponent = $holidayComponent;
+        $this->leaveComponent = $leaveComponent;
     }
+
 
     /**
      *
@@ -2551,27 +2557,6 @@ class AttendanceController extends Controller
                 }
 
 
-                // Create date range between start and end dates
-                $date_range = $start_date->daysUntil($end_date->addDay());
-
-                $attendance_details = [];
-                // Map date range to create attendance details
-                foreach ($date_range as $date) {
-                    $temp_data["in_date"] = $date;
-                    $temp_data["does_break_taken"] = 1;
-
-                    $temp_data["is_present"] = 1;
-
-                    $temp_data["project_ids"] = [UserProject::where([
-                        "user_id" => $user->id
-                    ])
-                        ->first()->project_id];
-
-                    $temp_data["work_location_id"] = $request_data["work_location_id"];
-
-                    array_push($attendance_details, $temp_data);
-                }
-
 
 
 
@@ -2582,32 +2567,76 @@ class AttendanceController extends Controller
 
 // Get all existing attendance dates for the user within the date range
 $existingAttendanceDates = $this->get_existing_attendanceDates($start_date, $end_date, $user->id);
+$holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user->id, $all_parent_department_ids);
+$leave_dates =  $this->leaveComponent->get_already_taken_leave_records($start_date, $end_date, $user->id, $all_parent_department_ids);
 
-                // Map attendance details to create attendances data
-                $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $all_parent_department_ids, $existingAttendanceDates) {
 
-                    // Check if attendance record exists for the given date ($item["in_date"])
-    if (in_array($item["in_date"], $existingAttendanceDates)) {
-        return false; // Attendance already exists for this date
+// Merge all arrays
+$combinedDates = array_merge($existingAttendanceDates, $holiday_dates, $leave_dates);
+
+// Make sure dates are unique
+$uniqueRestrictedDates = array_unique($combinedDates);
+
+
+  // Create date range between start and end dates
+  $date_range = $start_date->daysUntil($end_date->addDay());
+
+  $attendance_details = [];
+  // Map date range to create attendance details
+  foreach ($date_range as $date) {
+    // Convert Carbon date object to string for comparison
+    $dateString = $date->format('Y-m-d');
+
+    // Check if the date is in restricted dates array
+    if (in_array($dateString, $uniqueRestrictedDates)) {
+        continue; // Skip this date
     }
 
-                    // Retrieve holiday details for the user and date
-                    $holiday = $this->get_holiday_details($item["in_date"], $user->id, $all_parent_department_ids);
+      $temp_data["in_date"] = $date;
+      $temp_data["does_break_taken"] = 1;
 
-                    if ($holiday && $holiday->is_active) {
-                        return false;
-                    }
+      $temp_data["is_present"] = 1;
+
+      $temp_data["project_ids"] = [UserProject::where([
+          "user_id" => $user->id
+      ])
+          ->first()->project_id];
+
+      $temp_data["work_location_id"] = $request_data["work_location_id"];
+
+      array_push($attendance_details, $temp_data);
+  }
+
+
+
+ // Retrieve work shift history for the user and date
+ $workShiftHistories =  $this->get_work_shift_histories($start_date,$end_date, $user->id,["flexible"]);
+
+                // Map attendance details to create attendances data
+                $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $workShiftHistories) {
+
+                    $itemInDate = Carbon::parse($item["in_date"]);
+                    $work_shift_history = $workShiftHistories->first(function ($history) use ($itemInDate) {
+                        $fromDate = Carbon::parse($history->from_date);
+                        $toDate = $history->to_date ? Carbon::parse($history->to_date) : null;
+
+                        return $itemInDate->greaterThanOrEqualTo($fromDate)
+                            && ($toDate === null || $itemInDate->lessThan($toDate));
+                    });
+
+
 
                     // Retrieve work shift history for the user and date
-                    $work_shift_history =  $this->get_work_shift_history($item["in_date"], $user->id);
-                    // Retrieve work shift details based on work shift history and date
-                    $work_shift_details =  $this->get_work_shift_details($work_shift_history, $item["in_date"]);
 
-                    if ($work_shift_history->type == "flexible") {
+                    if(empty($work_shift_history)) {
                         return false;
                     }
 
-                    if (!$work_shift_details->start_at || !$work_shift_details->end_at || $work_shift_details->is_weekend) {
+                    // Retrieve work shift details based on work shift history and date
+                    $work_shift_details =  $this->get_work_shift_detailsV2($work_shift_history, $item["in_date"]);
+
+
+                    if (empty($work_shift_details)) {
                         return false;
                     }
 
@@ -2627,12 +2656,7 @@ $existingAttendanceDates = $this->get_existing_attendanceDates($start_date, $end
 
 
 
-                    // Retrieve leave record details for the user and date
-                    $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"], true);
 
-                    if ($leave_record) {
-                        return false;
-                    }
 
 
 
@@ -2657,8 +2681,7 @@ $existingAttendanceDates = $this->get_existing_attendanceDates($start_date, $end
                     $attendance_data["work_shift_start_at"] = $work_shift_details->start_at;
                     $attendance_data["work_shift_end_at"] =  $work_shift_details->end_at;
                     $attendance_data["work_shift_history_id"] = $work_shift_history->id;
-                    $attendance_data["holiday_id"] = $holiday ? $holiday->id : NULL;
-                    $attendance_data["leave_record_id"] = $leave_record ? $leave_record->id : NULL;
+
                     $attendance_data["is_weekend"] = $work_shift_details->is_weekend;
                     $attendance_data["overtime_hours"] = 0;
                     $attendance_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;

@@ -282,6 +282,25 @@ public function get_already_taken_leaves($start_date,$end_date,$user_id,$is_full
           return $already_taken_leaves;
   }
 
+  public function get_already_taken_leave_records($start_date,$end_date,$user_id) {
+
+
+    $already_taken_leaves =  LeaveRecord::whereHas("leave",function($query) use($user_id){
+
+        $query->where("leaves.user_id",$user_id);
+    })
+
+     ->where('leave_records.date', '>=', $start_date)
+                  ->where('leave_records.date', '<=', $end_date . ' 23:59:59')
+
+
+
+          ->pluck("leave_records.date");
+
+
+          return $already_taken_leaves;
+  }
+
 
 
 public function get_already_taken_leave_dates($start_date,$end_date,$user_id,$is_full_day_leave=NULL) {
