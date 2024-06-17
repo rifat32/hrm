@@ -351,9 +351,9 @@ where([
             return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
         });
 
-        if($already_taken_hours > $leave_type->amount) {
-   throw new Exception(("You can not take leave hours mor than available. Currently ".$leave_type->amount." hours available"),403);
-        }
+//         if($already_taken_hours > $leave_type->amount) {
+//    throw new Exception(("You can not take leave hours mor than available. Currently ".$leave_type->amount." hours available"),403);
+//         }
 
 
 

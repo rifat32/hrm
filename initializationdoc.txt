@@ -154,9 +154,64 @@ SET `use_in_employee` = TRUE,
     `use_in_on_boarding` = TRUE;
 
 
+21. run 2 queries in db,
+-- Step 1: Drop the existing foreign key constraint
+ALTER TABLE `users` DROP FOREIGN KEY `users_employment_status_id_foreign`;
+step 2 ALTER TABLE `users`
+MODIFY `employment_status_id` BIGINT UNSIGNED NULL;
+
+-- Step 2: Add the new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE `users`
+ADD CONSTRAINT `users_employment_status_id_foreign` FOREIGN KEY (`employment_status_id`) REFERENCES `employment_statuses`(`id`) ON DELETE set null;
+
+
+22. ALTER TABLE attendance_arrears DROP FOREIGN KEY attendance_arrears_attendance_id_foreign;
+ALTER TABLE attendance_arrears ADD CONSTRAINT attendance_arrears_attendance_id_foreign FOREIGN KEY (attendance_id) REFERENCES attendances(id) ON DELETE CASCADE;
+
+
+23. -- Step 1: Drop the existing foreign key constraint
+ALTER TABLE user_recruitment_processes DROP FOREIGN KEY user_recruitment_processes_recruitment_process_id_foreign;
+
+-- Step 2: Add a new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE user_recruitment_processes ADD CONSTRAINT user_recruitment_processes_recruitment_process_id_foreign FOREIGN KEY (recruitment_process_id) REFERENCES recruitment_processes(id) ON DELETE CASCADE;
+
+
+24. -- Step 1: Drop the existing foreign key constraint
+ALTER TABLE payroll_attendances DROP FOREIGN KEY payroll_attendances_attendance_id_foreign;
+
+-- Step 2: Add a new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE payroll_attendances ADD CONSTRAINT payroll_attendances_attendance_id_foreign FOREIGN KEY (attendance_id) REFERENCES attendances(id) ON DELETE CASCADE;
+
+25. -- Step 1: Drop the existing foreign key constraint
+ALTER TABLE payroll_holidays DROP FOREIGN KEY payroll_holidays_holiday_id_foreign;
+
+-- Step 2: Add a new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE payroll_holidays ADD CONSTRAINT payroll_holidays_holiday_id_foreign FOREIGN KEY (holiday_id) REFERENCES holidays(id) ON DELETE CASCADE;
+
+
+26. -- Step 1: Drop the existing foreign key constraint
+ALTER TABLE payroll_leave_records DROP FOREIGN KEY payroll_leave_records_leave_record_id_foreign;
+
+-- Step 2: Add a new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_record_id_foreign FOREIGN KEY (leave_record_id) REFERENCES leave_records(id) ON DELETE CASCADE;
+
+
+27. Route::get("/run", function() {
+    $role = Role::where('name','reseller')->first();
+
+    $permission = Permission::where('name', "bank_create")->first();
+
+        $role->givePermissionTo($permission);
+
+
+    return "ok";
+});
+
+
+
 
 
 hr compliance 14 ->
 
 
-hrm, hrm-produ 18 ->
+hrm, hrm-produ 27 ->

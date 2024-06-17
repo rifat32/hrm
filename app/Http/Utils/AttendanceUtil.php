@@ -188,6 +188,15 @@ trait AttendanceUtil
           return $attendance;
 
     }
+    public function get_existing_attendanceDates($start_date, $end_date, $user_id)
+{
+    $attendance_dates = Attendance::where('user_id', $user_id)
+        ->whereBetween('in_date', [$start_date, $end_date])
+        ->pluck('in_date')
+        ->toArray();
+
+    return $attendance_dates;
+}
 
     public function calculate_capacity_hours($work_shift_details)
     {

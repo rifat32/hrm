@@ -12,11 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 trait BasicNotificationUtil
 {
+    use BasicUtil;
     // this function do all the task and returns transaction id or -1
-    public function send_notification($data, $user, $title, $type, $entity_name)
+    public function send_notification($data, $user, $title, $type, $entity_name,$all_parent_department_ids=[])
     {
-
-
 
             if ($data instanceof \Illuminate\Support\Collection) {
                 // If it's a collection, check if it's empty
@@ -72,6 +71,11 @@ trait BasicNotificationUtil
 
 
 
+
+
+          if(!empty($all_parent_department_ids)) {
+            $this->get_all_parent_department_manager_ids($all_parent_department_ids);
+          } else {
             $all_parent_department_manager_ids = collect([]);
             foreach ($departments as $department) {
                 $all_parent_department_manager_ids->push($department->manager_id);
@@ -81,28 +85,37 @@ trait BasicNotificationUtil
                 ->filter() // Removes null values
                 ->unique()
                 ->values(); // Extracts the values from the collection
+          }
 
 
 
-            foreach ($unique_all_parent_department_manager_ids->all() as $manager_id) {
 
-                // Create notification
-                $notification = [
-                    "entity_id" => $entity->id,
-                    "entity_ids" => $entity_ids,
-                    "entity_name" => $entity_name,
-                    'notification_title' => $title,
-                    'notification_description' => $notification_description,
-                    'notification_link' => $notification_link,
-                    "sender_id" => 1,
-                    "receiver_id" => $manager_id,
-                    "business_id" => auth()->user()->business_id,
-                    "is_system_generated" => 1,
-                    "status" => "unread",
-                ];
 
-                Notification::create($notification);
-            }
+
+      // Initialize an array to hold all notification data
+$notifications = [];
+
+foreach ($unique_all_parent_department_manager_ids->all() as $manager_id) {
+    // Create notification data for each manager
+    $notifications[] = [
+        "entity_id" => $entity->id,
+        "entity_ids" => $entity_ids,
+        "entity_name" => $entity_name,
+        'notification_title' => $title,
+        'notification_description' => $notification_description,
+        'notification_link' => $notification_link,
+        "sender_id" => 1,
+        "receiver_id" => $manager_id,
+        "business_id" => auth()->user()->business_id,
+        "is_system_generated" => 1,
+        "status" => "unread",
+        "created_at" => now(),
+        "updated_at" => now(),
+    ];
+}
+
+// Perform bulk insertion
+Notification::insert($notifications);
 
 
     }

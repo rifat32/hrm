@@ -161,7 +161,7 @@ return [
                 "designation_view",
                 // "designation_delete",
 
-                // "bank_create",
+                 "bank_create",
                 // "bank_update",
                  "bank_view",
                 // "bank_delete",

@@ -45,7 +45,7 @@ class CreateUsersTable extends Migration
             $table->foreign('designation_id')->references('id')->on('designations')->onDelete('set null');
 
             $table->unsignedBigInteger('employment_status_id')->nullable();
-            $table->foreign('employment_status_id')->references('id')->on('employment_statuses')->onDelete('restrict');
+            $table->foreign('employment_status_id')->references('id')->on('employment_statuses')->onDelete('set null');
 
             $table->date('joining_date')->nullable()->default(today());
             $table->date('date_of_birth')->nullable();
@@ -92,7 +92,7 @@ class CreateUsersTable extends Migration
             $table->enum('immigration_status', ['british_citizen', 'ilr', 'immigrant', 'sponsored'])->nullable();
             $table->boolean('is_sponsorship_offered')->default(0)->nullable();
 
-        
+
 
 
             $table->unsignedBigInteger("recruitment_process_id")->nullable();

@@ -241,6 +241,9 @@ public function get_all_user_of_manager($all_manager_department_ids) {
         return array_unique($all_parent_department_ids);
     }
 
+
+
+
     public function all_parent_departments_manager_of_user($user_id,$business_id) {
         $all_parent_department_manager_ids = [];
         $assigned_departments = Department::whereHas("users", function ($query) use ($user_id) {
@@ -528,10 +531,19 @@ public function moveUploadedFilesBack($filePaths, $fileKey, $location, $arrayOfS
         }
     });
 
-
-
 }
 
+
+
+
+
+public function get_all_parent_department_manager_ids($all_parent_department_ids) {
+    $manager_ids = Department::whereIn("id",$all_parent_department_ids)->pluck("manager_id")
+    ->filter() // Removes null values
+    ->unique()
+    ->values();
+    return $manager_ids;
+}
 
 
 

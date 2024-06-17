@@ -21,7 +21,7 @@ class CreatePayrollHolidaysTable extends Migration
             $table->foreign('payroll_id')->references('id')->on('payrolls')->onDelete('cascade');
 
             $table->unsignedBigInteger("holiday_id");
-            $table->foreign('holiday_id')->references('id')->on('holidays')->onDelete('restrict');
+            $table->foreign('holiday_id')->references('id')->on('holidays')->onDelete('cascade');
 
 
 

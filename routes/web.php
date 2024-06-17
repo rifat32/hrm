@@ -10,6 +10,7 @@ use App\Models\AttendanceProject;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
 use App\Models\Project;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserWorkLocation;
 use Carbon\Carbon;
@@ -256,6 +257,20 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 
 //     // Bulk insert into AttendanceProject table
 //     AttendanceProject::insert($attendanceProjects);
+
+//     return "ok";
+// });
+
+
+
+
+// Route::get("/run", function() {
+//     $role = Role::where('name','reseller')->first();
+
+//     $permission = Permission::where('name', "bank_create")->first();
+
+//         $role->givePermissionTo($permission);
+
 
 //     return "ok";
 // });
