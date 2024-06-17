@@ -37,6 +37,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -2571,11 +2572,14 @@ $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_d
 $leave_dates =  $this->leaveComponent->get_already_taken_leave_records($start_date, $end_date, $user->id, $all_parent_department_ids);
 
 
-// Merge all arrays
-$combinedDates = array_merge($existingAttendanceDates, $holiday_dates, $leave_dates);
+
 
 // Make sure dates are unique
-$uniqueRestrictedDates = array_unique($combinedDates);
+$uniqueRestrictedDates = collect($existingAttendanceDates)
+    ->merge($holiday_dates)
+    ->merge($leave_dates)
+    ->unique()
+    ->toArray();
 
 
   // Create date range between start and end dates
@@ -2603,6 +2607,7 @@ $uniqueRestrictedDates = array_unique($combinedDates);
           ->first()->project_id];
 
       $temp_data["work_location_id"] = $request_data["work_location_id"];
+      $temp_data["user_id"] = $user->id;
 
       array_push($attendance_details, $temp_data);
   }
@@ -2646,6 +2651,9 @@ $uniqueRestrictedDates = array_unique($combinedDates);
                     $item["attendance_records"][0]["in_time"] = $work_shift_details->start_at;
                     $item["attendance_records"][0]["out_time"] = $work_shift_details->end_at;
 
+
+                    $item["attendance_records"] =     json_encode($item["attendance_records"]);
+
                     // Prepare data for attendance creation
                     $attendance_data = $this->prepare_data_on_attendance_create($item, $user->id);
                     $attendance_data["status"] = "approved";
@@ -2664,7 +2672,7 @@ $uniqueRestrictedDates = array_unique($combinedDates);
                     $capacity_hours = $this->calculate_capacity_hours($work_shift_details);
 
 
-                    $total_present_hours = $this->calculate_total_present_hours($attendance_data["attendance_records"]);
+                    $total_present_hours = $this->calculate_total_present_hours(json_decode($attendance_data["attendance_records"],true));
 
                     // Adjust paid hours based on break taken and work shift history
                     $total_paid_hours = $this->adjust_paid_hours($attendance_data["does_break_taken"], $total_present_hours, $work_shift_history);
@@ -2688,25 +2696,66 @@ $uniqueRestrictedDates = array_unique($combinedDates);
                     $attendance_data["regular_hours_salary"] =   $total_paid_hours * $user_salary_info["hourly_salary"];
                     $attendance_data["overtime_hours_salary"] =   0;
 
-                    $attendance_data["user_id"] =   $user->id;
 
-                    return $attendance_data;
+
+                    return collect($attendance_data)->only([
+                        'note',
+                        "in_geolocation",
+                        "out_geolocation",
+                        'user_id',
+                        'in_date',
+                        'does_break_taken',
+                        "behavior",
+                        "capacity_hours",
+                        "work_hours_delta",
+                        "break_type",
+                        "break_hours",
+                        "total_paid_hours",
+                        "regular_work_hours",
+                        "work_shift_start_at",
+                        "work_shift_end_at",
+                        "work_shift_history_id",
+                        "holiday_id",
+                        "leave_record_id",
+                        "is_weekend",
+                        "overtime_hours",
+                        "punch_in_time_tolerance",
+                        "status",
+                        'work_location_id',
+
+                        "is_active",
+                        "business_id",
+                        "created_by",
+                        "regular_hours_salary",
+                        "overtime_hours_salary",
+                        "attendance_records",
+                        "is_present"
+                    ])->toArray();
                 })->filter()->values();
 
 
 
+
+
                 // Bulk insert all attendance records
-                $created_attendances = Attendance::insert($attendances_data);
+                $created_attendances = DB::table("attendances")->insert($attendances_data->toArray())
+                 ;
+
 
                 if ($created_attendances) {
                     // Retrieve latest attendances for the user
-                    $latest_attendances = $user->attendances()->latest()->take(count($attendances_data))->get();
+                    $latest_attendances = $user->attendances()->latest()->take(count($attendances_data->toArray()))->get();
+
+                    Log::info(json_encode($latest_attendances));
+                    Log::info("........................................................ attendances");
+
+
 
                     // Prepare project associations for bulk insert
                     $project_associations = [];
                     foreach ($latest_attendances as $attendance) {
                         foreach ($attendances_data as $attendance_data) {
-                            if ($attendance_data['user_id'] === $attendance->user_id && $attendance_data['attendance_date'] === $attendance->attendance_date) {
+                            if ($attendance_data['user_id'] === $attendance->user_id && $attendance_data['in_date'] === $attendance->attendance_date) {
                                 foreach ($attendance_data['project_ids'] as $project_id) {
                                     $project_associations[] = [
                                         'attendance_id' => $attendance->id,
@@ -2717,6 +2766,7 @@ $uniqueRestrictedDates = array_unique($combinedDates);
                                 }
                             }
                         }
+
                     }
 
                     // Bulk insert project associations
@@ -2730,32 +2780,84 @@ $uniqueRestrictedDates = array_unique($combinedDates);
 
                     foreach ($latest_attendances as $attendance) {
                         // Prepare data for AttendanceHistory
-                        $attendance_history_data[] = [
+
+                        $attendance_history = $attendance->toArray();
+
+                        $attendance_history = array_merge($attendance_history,  [
                             'attendance_id' => $attendance->id,
                             'actor_id' => auth()->user()->id,
                             'action' => 'create', // or use $action variable if needed
                             'attendance_created_at' => $attendance->created_at,
                             'attendance_updated_at' => $attendance->updated_at,
+                            "attendance_records" => json_encode($attendance->attendance_records)
                             // Add other fields as needed
                             // Example: 'field_name' => $attendance->field_name,
-                        ];
+                        ]);
 
-                        // Prepare data for AttendanceHistory-Project relationship
-                        $project_ids = $attendance->projects()->pluck('projects.id')->toArray();
-                        foreach ($project_ids as $project_id) {
-                            $attendance_project_data[] = [
-                                'attendance_history_id' => null, // placeholder for later assignment
-                                'project_id' => $project_id,
-                            ];
-                        }
+                        $attendance_history_data[] = collect($attendance_history)->only([
+                            "attendance_id",
+                            "actor_id",
+                            "action",
+
+                            "attendance_created_at",
+                            "attendance_updated_at",
+
+                            'note',
+                            "in_geolocation",
+                            "out_geolocation",
+                            'user_id',
+
+                            'in_date',
+                            'does_break_taken',
+
+                            "behavior",
+                            "capacity_hours",
+                            "work_hours_delta",
+                            "break_type",
+                            "break_hours",
+                            "total_paid_hours",
+                            "regular_work_hours",
+                            "work_shift_start_at",
+                            "work_shift_end_at",
+                            "work_shift_history_id",
+                            "holiday_id",
+                            "leave_record_id",
+                            "is_weekend",
+
+                            "overtime_hours",
+                            "punch_in_time_tolerance",
+                            "status",
+                            'work_location_id',
+
+                            "is_active",
+                            "business_id",
+                            "created_by",
+                            "regular_hours_salary",
+                            "overtime_hours_salary",
+                            "attendance_records",
+                        ])
+                    ->toArray();
+
+
+
+
                     }
 
+
+
                     // Perform bulk insertion for AttendanceHistory
-                    $attendance_history_ids = AttendanceHistory::insertGetIds($attendance_history_data);
+                AttendanceHistory::insert($attendance_history_data);
+
+
+         $attendance_history_ids = AttendanceHistory::where([
+            "user_id" => $user->id
+         ])->latest()->take(count($attendance_history_data))->pluck("id");
+
+
 
                     // Assign attendance history IDs to attendance_project_data
                     foreach ($attendance_history_ids as $key => $history_id) {
-                        $attendance_project_data[$key]['attendance_history_id'] = $history_id;
+                        $project_associations[$key]['attendance_id'] = $history_id;
                     }
 
                     // Perform bulk insertion for AttendanceHistory-Project relationship

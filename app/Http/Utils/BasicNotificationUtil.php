@@ -74,7 +74,7 @@ trait BasicNotificationUtil
 
 
           if(!empty($all_parent_department_ids)) {
-            $this->get_all_parent_department_manager_ids($all_parent_department_ids);
+            $unique_all_parent_department_manager_ids = $this->get_all_parent_department_manager_ids($all_parent_department_ids);
           } else {
             $all_parent_department_manager_ids = collect([]);
             foreach ($departments as $department) {
@@ -99,7 +99,7 @@ foreach ($unique_all_parent_department_manager_ids->all() as $manager_id) {
     // Create notification data for each manager
     $notifications[] = [
         "entity_id" => $entity->id,
-        "entity_ids" => $entity_ids,
+        "entity_ids" => json_encode($entity_ids),
         "entity_name" => $entity_name,
         'notification_title' => $title,
         'notification_description' => $notification_description,
@@ -115,7 +115,26 @@ foreach ($unique_all_parent_department_manager_ids->all() as $manager_id) {
 }
 
 // Perform bulk insertion
-Notification::insert($notifications);
+Notification::insert(collect($notifications)
+->only([
+    "sender_id",
+    "receiver_id",
+    "business_id",
+    "entity_name",
+    "entity_id",
+    "entity_ids",
+
+
+    'notification_title',
+    'notification_description',
+    'notification_link',
+    "is_system_generated",
+    "notification_template_id",
+    "status",
+])
+->toArray()
+
+);
 
 
     }
