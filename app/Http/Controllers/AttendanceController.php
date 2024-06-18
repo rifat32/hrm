@@ -2706,6 +2706,8 @@ class AttendanceController extends Controller
                     $attendance_data["overtime_hours_salary"] =   0;
 
 
+                    $attendance_data["created_at"] =   now();
+                    $attendance_data["updated_at"] =   now();
 
 
 
@@ -2740,7 +2742,9 @@ class AttendanceController extends Controller
                         "regular_hours_salary",
                         "overtime_hours_salary",
                         "attendance_records",
-                        "is_present"
+                        "is_present",
+                        "created_at",
+                        "updated_at"
                     ])
                     ->toArray();
 
@@ -3133,7 +3137,8 @@ class AttendanceController extends Controller
                     $attendance_data["overtime_hours_salary"] =   0;
 
 
-
+                    $attendance_data["created_at"] =   now();
+                    $attendance_data["updated_at"] =   now();
                     return collect($attendance_data)->only([
                         'note',
                         "in_geolocation",
@@ -3165,7 +3170,9 @@ class AttendanceController extends Controller
                         "regular_hours_salary",
                         "overtime_hours_salary",
                         "attendance_records",
-                        "is_present"
+                        "is_present",
+                        "created_at",
+                        "updated_at"
                     ])->toArray();
                 })->filter()->values();
 
