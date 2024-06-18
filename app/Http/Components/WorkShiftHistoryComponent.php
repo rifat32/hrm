@@ -82,7 +82,35 @@ class WorkShiftHistoryComponent
     }
 
 
+    public function get_work_shift_historiesV2($start_date,$end_date,$user_id,$throwError)
+    {
+     $work_shift_histories =   WorkShiftHistory::
+            where("from_date", "<=", $end_date)
+            ->where(function ($query) use ($start_date) {
+                $query->where("to_date", ">", $start_date)
+                    ->orWhereNull("to_date");
+            })
+            ->whereHas("users", function ($query) use ($start_date, $user_id, $end_date) {
+                $query->where("users.id", $user_id)
+                    ->where("employee_user_work_shift_histories.from_date", "<", $end_date)
+                    ->where(function ($query) use ($start_date) {
+                        $query->where("employee_user_work_shift_histories.to_date", ">=", $start_date)
+                            ->orWhereNull("employee_user_work_shift_histories.to_date");
+                    });
+            })
+ ->with("details")
+            ->get();
 
+        if ($work_shift_histories->isEmpty()) {
+            if($throwError) {
+                throw new Exception("Please define workshift first",401);
+            } else {
+                return false;
+            }
+        }
+
+        return $work_shift_histories;
+    }
 
 
 

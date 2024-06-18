@@ -105,13 +105,7 @@ trait AttendanceUtil
                     });
             })
             // @@@ confusion
-            ->orWhere(function ($query) {
-                $query->where([
-                    "business_id" => NULL,
-                    "is_active" => 1,
-                    "is_default" => 1
-                ]);
-            })
+
             ->with([
                 "details"
             ])
