@@ -857,7 +857,7 @@ class CandidateController extends Controller
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $candidate =  Candidate:: with("job_listing","job_platforms")
+            $candidate =  Candidate:: with("job_listing","job_platforms","recruitment_processes")
             ->where([
                 "id" => $id,
                 "business_id" => $business_id

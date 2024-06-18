@@ -208,7 +208,7 @@ ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_rec
 });
 
 28 FRONT_END_VERSION=red
-
+29. candidate_Recruitment_processeses import table
 
 
 
