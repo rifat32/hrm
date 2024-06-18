@@ -28,7 +28,7 @@
         $business = auth()->user()->business;
     @endphp
   @php
-  $color  = "#335ff0";
+   $color  = env("FRONT_END_VERSION") == "red"?"#dc2b28" : "#335ff0";
  @endphp
 
     <style>

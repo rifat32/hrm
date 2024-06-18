@@ -207,6 +207,9 @@ ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_rec
     return "ok";
 });
 
+28 FRONT_END_VERSION=red
+
+
 
 
 
@@ -214,4 +217,4 @@ ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_rec
 hr compliance 14 ->
 
 
-hrm, hrm-produ 27 ->
+hrm, hrm-produ 28 ->

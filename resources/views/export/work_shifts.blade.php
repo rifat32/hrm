@@ -25,7 +25,7 @@
     @endphp
 
 @php
-$color  = "#335ff0";
+   $color  = env("FRONT_END_VERSION") == "red"?"#dc2b28" : "#335ff0";
 @endphp
     <style>
         /* Add any additional styling for your PDF */

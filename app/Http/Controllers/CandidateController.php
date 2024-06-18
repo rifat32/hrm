@@ -194,6 +194,7 @@ class CandidateController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
+
                 if (!$request->user()->hasPermissionTo('candidate_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -201,6 +202,13 @@ class CandidateController extends Controller
                 }
 
                 $request_data = $request->validated();
+
+                if (!empty($request_data["recruitment_processes"])) {
+                    $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+                }
+
+
+
 
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
 
@@ -210,6 +218,18 @@ class CandidateController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $candidate =  Candidate::create($request_data);
 
+
+
+                if (!empty($request_data["recruitment_processes"])) {
+
+                    foreach($request_data["recruitment_processes"] as $recruitment_process){
+
+                        if(!empty($recruitment_process["description"])){
+            $candidate->recruitment_processes()->create($recruitment_process);
+                        }
+        }
+
+                }
 
 
 
@@ -227,7 +247,11 @@ class CandidateController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-
+            try {
+                $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
 
             try {
                 $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
@@ -322,9 +346,13 @@ class CandidateController extends Controller
                  }
 
                  $request_data = $request->validated();
+
+
        $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
 
-
+               if (!empty($request_data["recruitment_processes"])) {
+                    $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+                }
 
 
                  $request_data["business_id"] = $request->user()->business_id;
@@ -335,6 +363,18 @@ class CandidateController extends Controller
 
                  $candidate->job_platforms()->sync($request_data['job_platforms']);
 
+
+                 if (!empty($request_data["recruitment_processes"])) {
+
+                    foreach($request_data["recruitment_processes"] as $recruitment_process){
+
+                        if(!empty($recruitment_process["description"])){
+            $candidate->recruitment_processes()->create($recruitment_process);
+                        }
+        }
+
+                }
+
                 //  $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
 
                 DB::commit();
@@ -342,6 +382,13 @@ class CandidateController extends Controller
 
          } catch (Exception $e) {
             DB::rollBack();
+
+            try {
+                $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+
 
             try {
                 $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
@@ -452,6 +499,10 @@ class CandidateController extends Controller
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
 
 
+                if (!empty($request_data["recruitment_processes"])) {
+                    $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+                }
+
 
              if($candidate) {
                 $candidate->fill( collect($request_data)->only([
@@ -488,6 +539,15 @@ class CandidateController extends Controller
 
                 $candidate->job_platforms()->sync($request_data['job_platforms']);
 
+                if (!empty($request_data["recruitment_processes"])) {
+                    $candidate->recruitment_processes()->delete();
+                    foreach($request_data["recruitment_processes"] as $recruitment_process){
+        if(!empty($recruitment_process["description"])){
+            $candidate->recruitment_processes()->create($recruitment_process);
+        }
+                    }
+
+                }
 
 
                 DB::commit();
@@ -503,11 +563,11 @@ class CandidateController extends Controller
 
 
 
-            try {
-                $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
-            } catch (Exception $innerException) {
-                error_log("Failed to move candidate files back: " . $innerException->getMessage());
-            }
+            // try {
+            //     $this->moveUploadedFilesBack($request_data["attachments"],"","candidate_files");
+            // } catch (Exception $innerException) {
+            //     error_log("Failed to move candidate files back: " . $innerException->getMessage());
+            // }
 
 
 

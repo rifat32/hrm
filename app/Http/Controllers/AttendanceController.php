@@ -2990,9 +2990,6 @@ class AttendanceController extends Controller
 
 
 
-
-
-
                 // Get all parent department IDs of the employee
                 $all_parent_department_ids = $this->all_parent_departments_of_user($user->id);
 

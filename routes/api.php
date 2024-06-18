@@ -457,6 +457,7 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 
 
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
+
 Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
 Route::put('/v3.0/users', [UserManagementController::class, "updateUserV3"]);
 Route::put('/v4.0/users', [UserManagementController::class, "updateUserV4"]);

@@ -12,6 +12,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\AttendanceProject;
 use App\Models\Department;
 use App\Models\EmployeeProjectHistory;
 use App\Models\Project;
@@ -1344,13 +1345,21 @@ class ProjectController extends Controller
 
 
             if (!empty($nonExistingIds)) {
-
-
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
-            Project::destroy($canDeleteProjectIds);
+
+            $attendanceExists = AttendanceProject::whereIn("project_id",$idsArray)->exists();
+
+            if (!empty($nonExistingIds)) {
+                return response()->json([
+                    "message" => "Attendance exists for this project."
+                ], 404);
+            }
+
+
+            Project::destroy($idsArray);
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $canDeleteProjectIds], 200);

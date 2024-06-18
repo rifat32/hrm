@@ -33,8 +33,17 @@ class Candidate extends Model
 
     protected $casts = [
         'attachments' => 'array',
-
     ];
+
+
+
+    public function recruitment_processes() {
+        return $this->hasMany(CandidateRecruitmentProcess::class, 'candidate_id', 'id');
+    }
+
+
+
+
 
     public function job_listing()
     {

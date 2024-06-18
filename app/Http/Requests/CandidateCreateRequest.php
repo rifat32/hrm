@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\JobPlatform;
 use App\Rules\ValidateJobListing;
 use App\Rules\ValidateJobPlatform;
+use App\Rules\ValidateRecruitmentProcessId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
@@ -59,6 +60,18 @@ class CandidateCreateRequest extends BaseFormRequest
             ],
             'attachments' => 'present|array',
             'attachments.*' => 'string',
+
+
+        'recruitment_processes' => "present|array",
+        'recruitment_processes.*.recruitment_process_id' => [
+            "required",
+            'numeric',
+            new ValidateRecruitmentProcessId()
+        ],
+        'recruitment_processes.*.description' => "nullable|string",
+        'recruitment_processes.*.attachments' => "present|array",
+
+
         ];
     }
 

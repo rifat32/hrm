@@ -277,9 +277,7 @@ DB::commit();
 
 
            try {
-            if(!empty($request_data["payment_record_file"])) {
-                $this->moveUploadedFilesBack($request_data["payment_record_file"],"","payment_record_file");
-            }
+            
             if(!empty($request_data["payslip_file"])) {
                 $this->moveUploadedFilesBack([$request_data["payslip_file"]],"","payment_record_file");
             }
@@ -290,7 +288,17 @@ DB::commit();
 
         }
 
+        try {
+            if(!empty($request_data["payment_record_file"])) {
+                $this->moveUploadedFilesBack($request_data["payment_record_file"],"","payment_record_file");
+            }
 
+
+        } catch (Exception $innerException) {
+
+            error_log("Failed to move payment_record  files back: " . $innerException->getMessage());
+
+        }
 
 
 

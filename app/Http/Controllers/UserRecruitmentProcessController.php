@@ -141,6 +141,9 @@ class UserRecruitmentProcessController extends Controller
         } catch (Exception $e) {
           DB::rollBack();
 
+
+
+          
           try {
             $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
         } catch (Exception $innerException) {

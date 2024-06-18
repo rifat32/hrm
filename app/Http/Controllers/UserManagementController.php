@@ -729,7 +729,7 @@ class UserManagementController extends Controller
 
             $request_data = $request->validated();
 
-            $temporary_files_location = config("setup-config.temporary_files_location");
+
 
 
             // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
@@ -1812,7 +1812,7 @@ class UserManagementController extends Controller
 
 
      *  * *  @OA\Property(property="phone", type="boolean", format="boolean",example="1"),
-    
+
      *
      *         ),
      *      ),

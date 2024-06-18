@@ -204,6 +204,8 @@ class UserCreateV2Request extends BaseFormRequest
             new ValidEmploymentStatus()
         ],
 
+
+
         'recruitment_processes' => "present|array",
         'recruitment_processes.*.recruitment_process_id' => [
             "required",
@@ -212,6 +214,10 @@ class UserCreateV2Request extends BaseFormRequest
         ],
         'recruitment_processes.*.description' => "nullable|string",
         'recruitment_processes.*.attachments' => "present|array",
+
+
+
+
 
 
         'work_location_ids' => [
