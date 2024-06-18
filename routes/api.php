@@ -1262,7 +1262,9 @@ Route::get('/v1.0/attendances/show/check-in-status', [AttendanceController::clas
 Route::delete('/v1.0/attendances/{ids}', [AttendanceController::class, "deleteAttendancesByIds"]);
 
 
-Route::post('/v1.0/attendances/bypass/multiple', [AttendanceController::class, "createMultipleBypassAttendance"]);
+Route::post('/v2.0/attendances/bypass/multiple', [AttendanceController::class, "createMultipleBypassAttendanceV2"]);
+
+Route::post('/v1.0/attendances/bypass/multiple', [AttendanceController::class, "createMultipleBypassAttendanceV1"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end attendances management section

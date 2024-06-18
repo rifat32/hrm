@@ -112,6 +112,9 @@ trait AttendanceUtil
                     "is_default" => 1
                 ]);
             })
+            ->with([
+                "details"
+            ])
 
             ->orderByDesc("work_shift_histories.id")
             ->get();
@@ -155,6 +158,19 @@ trait AttendanceUtil
         // }
         return $work_shift_details;
     }
+
+    public function get_work_shift_detailsV3($work_shift_history, $in_date)
+    {
+        $day_number = Carbon::parse($in_date)->dayOfWeek;
+
+    $work_shift_details = $work_shift_history->details->first(function ($detail) use ($day_number) {
+        return $detail->day == $day_number && $detail->is_weekend == 0 && !is_null($detail->start_at) && !is_null($detail->end_at);
+    });
+
+
+        return $work_shift_details;
+    }
+
 
     public function get_holiday_details($in_date, $user_id, $all_parent_department_ids)
     {
