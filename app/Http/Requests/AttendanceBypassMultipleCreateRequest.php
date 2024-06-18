@@ -33,14 +33,11 @@ class AttendanceBypassMultipleCreateRequest extends BaseFormRequest
     public function rules()
     {
 
-        $all_manager_department_ids = $this->get_all_departments_of_manager();
 
         return [
             'user_ids' => 'present|array',
             'user_ids.*' => [
                 "numeric",
-             new ValidUserId($all_manager_department_ids)
-
             ],
 
             "start_date" => "required|date",

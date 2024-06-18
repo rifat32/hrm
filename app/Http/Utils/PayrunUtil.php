@@ -256,6 +256,51 @@ trait PayrunUtil
         ];
     }
 
+    public function get_salary_infos($user_id, $start_date, $end_date)
+    {
+        $salary_histories = SalaryHistory::where([
+            "user_id" => $user_id
+        ])
+            ->where("from_date", "<=", $end_date)
+            ->where(function ($query) use ($start_date) {
+                $query->where("to_date", ">", $start_date)
+                    ->orWhereNull("to_date");
+            })
+
+            ->orderByDesc("to_date")
+            ->get()->map(function($salary_history) {
+                $salary_per_annum = $salary_history->salary_per_annum; // in euros
+                $weekly_contractual_hours = $salary_history->weekly_contractual_hours;
+                $weeks_per_year = 52;
+                if (!$weekly_contractual_hours) {
+                    $hourly_salary = 0;
+                } else {
+                    $hourly_salary = $salary_per_annum / ($weeks_per_year * $weekly_contractual_hours);
+                }
+
+                $overtime_salary_per_hour = $salary_history->overtime_rate ? $salary_history->overtime_rate : $hourly_salary;
+
+                if (!$weekly_contractual_hours || !$salary_history->minimum_working_days_per_week) {
+                    $holiday_considered_hours = 0;
+                } else {
+                    $holiday_considered_hours = $weekly_contractual_hours / $salary_history->minimum_working_days_per_week;
+                }
+
+                return [
+                    "id" => $salary_history->id,
+                    "from_date" => $salary_history->from_date,
+                    "to_date" => $salary_history->to_date,
+                    "hourly_salary" => $hourly_salary,
+                    "overtime_salary_per_hour" => $overtime_salary_per_hour,
+                    "holiday_considered_hours" => $holiday_considered_hours
+                ];
+            });
+
+return $salary_histories;
+
+
+    }
+
     // this function do all the task and returns transaction id or -1
     public function process_payrun($payrun, $employees, $start_date, $end_date = NULL, $is_manual = false, $generate_payroll = false)
     {
