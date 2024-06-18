@@ -2624,7 +2624,7 @@ class AttendanceController extends Controller
 
 
                 // Map attendance details to create attendances data
-                $attendances_data =  collect($attendance_details)->map(function ($item) use ($user, $workShiftHistories, $salaryHistories, &$all_attendance_data) {
+                $attendances_data =  collect($attendance_details)->map(function ($item) use ($user, $workShiftHistories, $salaryHistories) {
 
                     $itemInDate = Carbon::parse($item["in_date"]);
 
@@ -3044,8 +3044,11 @@ class AttendanceController extends Controller
                 // Retrieve work shift history for the user and date
                 $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
 
+                // Retrieve salary information for the user and date
+ $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
+
                 // Map attendance details to create attendances data
-                $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $workShiftHistories) {
+                $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $workShiftHistories, $salaryHistories) {
 
                     $itemInDate = Carbon::parse($item["in_date"]);
                     $work_shift_history = $workShiftHistories->first(function ($history) use ($itemInDate) {
@@ -3064,8 +3067,10 @@ class AttendanceController extends Controller
                         return false;
                     }
 
-                    // Retrieve work shift details based on work shift history and date
-                    $work_shift_details =  $this->get_work_shift_detailsV2($work_shift_history, $item["in_date"]);
+
+                     // Retrieve work shift details based on work shift history and date
+                     $work_shift_details =  $this->get_work_shift_detailsV3($work_shift_history, $item["in_date"]);
+
 
 
                     if (empty($work_shift_details)) {
@@ -3087,7 +3092,15 @@ class AttendanceController extends Controller
 
 
                     // Retrieve salary information for the user and date
-                    $user_salary_info = $this->get_salary_info($user->id, $attendance_data["in_date"]);
+                  // Retrieve salary information for the user and date
+                  $user_salary_info = $salaryHistories->first(function ($history) use ($itemInDate) {
+                    $fromDate = Carbon::parse($history["from_date"]);
+                    $toDate = $history["to_date"] ? Carbon::parse($history["to_date"]) : null;
+
+                    return $itemInDate->greaterThanOrEqualTo($fromDate)
+                        && ($toDate === null || $itemInDate->lessThan($toDate));
+                });
+
 
 
 
@@ -3115,7 +3128,7 @@ class AttendanceController extends Controller
 
                     $attendance_data["is_weekend"] = $work_shift_details->is_weekend;
                     $attendance_data["overtime_hours"] = 0;
-                    $attendance_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
+
                     $attendance_data["regular_hours_salary"] =   $total_paid_hours * $user_salary_info["hourly_salary"];
                     $attendance_data["overtime_hours_salary"] =   0;
 
@@ -3142,7 +3155,7 @@ class AttendanceController extends Controller
                         "leave_record_id",
                         "is_weekend",
                         "overtime_hours",
-                        "punch_in_time_tolerance",
+
                         "status",
                         'work_location_id',
 
@@ -3161,7 +3174,7 @@ class AttendanceController extends Controller
 
 
                 // Bulk insert all attendance records
-                $created_attendances = DB::table("attendances")->insert($attendances_data->toArray());
+                $created_attendances = Attendance::insert($attendances_data->toArray());
 
 
                 if ($created_attendances) {
@@ -3174,26 +3187,26 @@ class AttendanceController extends Controller
 
 
                     // Prepare project associations for bulk insert
-                    $project_associations = [];
-                    foreach ($latest_attendances as $attendance) {
-                        foreach ($attendances_data as $attendance_data) {
-                            if ($attendance_data['user_id'] === $attendance->user_id && $attendance_data['in_date'] === $attendance->attendance_date) {
-                                foreach ($attendance_data['project_ids'] as $project_id) {
-                                    $project_associations[] = [
-                                        'attendance_id' => $attendance->id,
-                                        'project_id' => $project_id,
-                                        'created_at' => now(),
-                                        'updated_at' => now(),
-                                    ];
-                                }
-                            }
-                        }
-                    }
+                    // $project_associations = [];
+                    // foreach ($latest_attendances as $attendance) {
+                    //     foreach ($attendances_data as $attendance_data) {
+                    //         if ($attendance_data['user_id'] === $attendance->user_id && $attendance_data['in_date'] === $attendance->attendance_date) {
+                    //             foreach ($attendance_data['project_ids'] as $project_id) {
+                    //                 $project_associations[] = [
+                    //                     'attendance_id' => $attendance->id,
+                    //                     'project_id' => $project_id,
+                    //                     'created_at' => now(),
+                    //                     'updated_at' => now(),
+                    //                 ];
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
                     // Bulk insert project associations
-                    if (!empty($project_associations)) {
-                        AttendanceProject::insert($project_associations);
-                    }
+                    // if (!empty($project_associations)) {
+                    //     AttendanceProject::insert($project_associations);
+                    // }
 
                     // Initialize arrays to hold attendance history data and project IDs
                     $attendance_history_data = [];
@@ -3246,7 +3259,7 @@ class AttendanceController extends Controller
                             "is_weekend",
 
                             "overtime_hours",
-                            "punch_in_time_tolerance",
+
                             "status",
                             'work_location_id',
 
@@ -3266,19 +3279,19 @@ class AttendanceController extends Controller
                     AttendanceHistory::insert($attendance_history_data);
 
 
-                    $attendance_history_ids = AttendanceHistory::where([
-                        "user_id" => $user->id
-                    ])->latest()->take(count($attendance_history_data))->pluck("id");
+                    // $attendance_history_ids = AttendanceHistory::where([
+                    //     "user_id" => $user->id
+                    // ])->latest()->take(count($attendance_history_data))->pluck("id");
 
 
 
-                    // Assign attendance history IDs to attendance_project_data
-                    foreach ($attendance_history_ids as $key => $history_id) {
-                        $project_associations[$key]['attendance_id'] = $history_id;
-                    }
+                    // // Assign attendance history IDs to attendance_project_data
+                    // foreach ($attendance_history_ids as $key => $history_id) {
+                    //     $project_associations[$key]['attendance_id'] = $history_id;
+                    // }
 
-                    // Perform bulk insertion for AttendanceHistory-Project relationship
-                    AttendanceHistoryProject::insert($attendance_project_data);
+                    // // Perform bulk insertion for AttendanceHistory-Project relationship
+                    // AttendanceHistoryProject::insert($attendance_project_data);
                     // Send notification
                     $this->send_notification($latest_attendances, $user, "Attendance Taken", "create", "attendance", $all_parent_department_ids);
                 }
