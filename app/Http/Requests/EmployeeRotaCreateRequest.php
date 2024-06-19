@@ -35,14 +35,6 @@ class EmployeeRotaCreateRequest extends FormRequest
             'name' => 'required|string',
             'description' => 'nullable|string',
 
-
-
-
-
-
-
-
-
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
 

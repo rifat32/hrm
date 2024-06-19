@@ -104,8 +104,6 @@ class EmployeeRotaController extends Controller
      *     @OA\Property(property="end_date", type="string", format="date", example="2023-11-16"),
      *
      *
-     *
-     *
      *         ),
      *      ),
      *      @OA\Response(
@@ -176,23 +174,54 @@ class EmployeeRotaController extends Controller
 
 
 
-
                 if(!empty($request_data['departments'])){
-                    foreach($request_data['departments'] as $department_id) {
-                        $employee_rota =  EmployeeRota::create($request_data);
-                        $employee_rota->details()->createMany($request_data['details']);
-                        $employee_rota->departments()->sync([$department_id]);
+                    $rota_data = []; // Initialize an array to hold all rota_data
+
+                    foreach ($request_data['departments'] as $department_id) {
+                        $rota_data[] = [
+                            'department_id' => $department_id,
+
+                            'name' => $request_data['name'],
+                            'description' => $request_data['description'],
+                            'start_date' => $request_data['start_date'],
+                            'end_date' => $request_data['end_date'],
+                        ];
                     }
+                    // Perform bulk insertion using insert() method
+                    EmployeeRota::insert($rota_data);
+                    // $employee_rota->details()->createMany($request_data['details']);
                 }
 
 
                 if(!empty($request_data['users'])){
                     foreach($request_data['users'] as $user_id) {
-                        $employee_rota =  EmployeeRota::create($request_data);
+                        $rota_data = $request_data;
+                        $rota_data["user_id"] = $user_id;
+                        $employee_rota =  EmployeeRota::create($rota_data);
                         $employee_rota->details()->createMany($request_data['details']);
-                        $employee_rota->users()->sync([$user_id]);
+
                     }
                 }
+
+
+
+
+                // if(!empty($request_data['departments'])){
+                //     foreach($request_data['departments'] as $department_id) {
+                //         $employee_rota =  EmployeeRota::create($request_data);
+                //         $employee_rota->details()->createMany($request_data['details']);
+                //         $employee_rota->departments()->sync([$department_id]);
+                //     }
+                // }
+
+
+                // if(!empty($request_data['users'])){
+                //     foreach($request_data['users'] as $user_id) {
+                //         $employee_rota =  EmployeeRota::create($request_data);
+                //         $employee_rota->details()->createMany($request_data['details']);
+                //         $employee_rota->users()->sync([$user_id]);
+                //     }
+                // }
 
 
 
