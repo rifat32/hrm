@@ -7,6 +7,7 @@ use App\Http\Controllers\DeveloperLoginController;
 use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\AttendanceProject;
+use App\Models\Business;
 use App\Models\DepartmentUser;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
@@ -277,26 +278,54 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 // });
 
 
-Route::get("/run", function() {
-    // Fetch all users in chunks to handle large data sets efficiently
-    User::chunk(100, function($users) {
-        foreach ($users as $user) {
-            // Fetch all DepartmentUser records for the user, ordered by creation date
-            $departmentUsers = DepartmentUser::where('user_id', $user->id)
-                                              ->orderBy('created_at')
-                                              ->get();
+// Route::get("/run", function() {
+//     // Fetch all users in chunks to handle large data sets efficiently
+//     User::chunk(100, function($users) {
+//         foreach ($users as $user) {
+//             // Fetch all DepartmentUser records for the user, ordered by creation date
+//             $departmentUsers = DepartmentUser::where('user_id', $user->id)
+//                                               ->orderBy('created_at')
+//                                               ->get();
 
-            // Check if there are more than one records
-            if ($departmentUsers->count() > 1) {
-                // Get the IDs of the records to delete, excluding the first one
-                $idsToDelete = $departmentUsers->skip(1)->pluck('id');
+//             // Check if there are more than one records
+//             if ($departmentUsers->count() > 1) {
+//                 // Get the IDs of the records to delete, excluding the first one
+//                 $idsToDelete = $departmentUsers->skip(1)->pluck('id');
 
-                // Bulk delete the records
-                DepartmentUser::whereIn('id', $idsToDelete)->delete();
-            }
-        }
-    });
+//                 // Bulk delete the records
+//                 DepartmentUser::whereIn('id', $idsToDelete)->delete();
+//             }
+//         }
+//     });
 
-    return "ok";
-});
+//     return "ok";
+// });
 
+
+// Route::get("/run", function() {
+//     // Get all business ids
+//     $business_ids = Business::pluck("id");
+
+//     // Define the permission key you want to revoke
+//     $permissionKey = 'department_delete'; // Replace with your actual permission key
+
+//     foreach($business_ids as $business_id) {
+//         // Construct role name based on business id
+//         $roleName = "business_manager#" . $business_id;
+
+//         // Find the role by name
+//         $role = Role::where("name", $roleName)->first();
+
+//         // Revoke the permission from the role
+//         if ($role) {
+//             $permission = Permission::where('name', $permissionKey)->first();
+//             if ($permission) {
+//                 $role->revokePermissionTo($permission);
+//                 // Optionally, you can sync permissions to remove all other permissions except the one you're revoking
+//                 // $role->syncPermissions([$permission]);
+//             }
+//         }
+//     }
+
+//     return "ok";
+// });

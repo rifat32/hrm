@@ -822,7 +822,7 @@ return [
                 "department_create",
                 "department_update",
                 "department_view",
-                "department_delete",
+                // "department_delete",
 
                  "asset_type_create",
                  "asset_type_update",

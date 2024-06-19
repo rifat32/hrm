@@ -1033,6 +1033,7 @@ class DepartmentController extends Controller
             ])
             ->whereNotNull('parent_id')
             ->whereIn("id",$all_manager_department_ids)
+            ->whereNotIn("departments.manager_id",[auth()->user()->id])
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

@@ -233,6 +233,35 @@ ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_rec
     return "ok";
 });
 
+31. Route::get("/run", function() {
+    // Get all business ids
+    $business_ids = Business::pluck("id");
+
+    // Define the permission key you want to revoke
+    $permissionKey = 'department_delete'; // Replace with your actual permission key
+
+    foreach($business_ids as $business_id) {
+        // Construct role name based on business id
+        $roleName = "business_manager#" . $business_id;
+
+        // Find the role by name
+        $role = Role::where("name", $roleName)->first();
+
+        // Revoke the permission from the role
+        if ($role) {
+            $permission = Permission::where('name', $permissionKey)->first();
+            if ($permission) {
+                $role->revokePermissionTo($permission);
+                // Optionally, you can sync permissions to remove all other permissions except the one you're revoking
+                // $role->syncPermissions([$permission]);
+            }
+        }
+    }
+
+    return "ok";
+});
+
+
 
 
 
