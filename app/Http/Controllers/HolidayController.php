@@ -665,11 +665,17 @@ class HolidayController extends Controller
                                         "users.id",
                                         $all_user_of_manager
                                     );
-                                })
-                                ->orWhere(function ($query) {
-                                    $query->whereDoesntHave("users")
-                                        ->whereDoesntHave("departments");
                                 });
+
+                                if (auth()->user()->hasRole('business_owner')) {
+                                    $query ->orWhere(function ($query) {
+                                        $query->whereDoesntHave("users")
+                                            ->whereDoesntHave("departments");
+                                    });
+                                }
+
+
+
                         });
 
                     }

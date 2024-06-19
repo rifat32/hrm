@@ -110,9 +110,9 @@ class DepartmentController extends Controller
 
                 $department =  Department::create($request_data);
 
-                if(!empty($department->manager_id)) {
-                    $department->users()->attach($department->manager_id);
-                }
+                // if(!empty($department->manager_id)) {
+                //     $department->users()->attach($department->manager_id);
+                // }
 
                 DB::commit();
                 return response($department, 201);
@@ -278,16 +278,24 @@ class DepartmentController extends Controller
 
 
 
-                if ($department_prev->manager_id != $department->manager_id) {
-                    // Remove the previous manager's relationship with the department
-                    DepartmentUser::where([
-                        'department_id' => $department->id,
-                        'user_id'       => $department_prev->manager_id
-                    ])->delete();
+                // if ($department_prev->manager_id != $department->manager_id) {
+                //     // Remove the previous manager's relationship with the department
+                // $last_added_manager =  DepartmentUser::where([
+                //         'department_id' => $department->id,
+                //         'user_id'       => $department_prev->manager_id
+                //     ])
+                //    ->orderByDesc("id")
+                //     ->first();
 
-                    // Attach the new manager to the department
-                    $department->users()->attach($department->manager_id);
-                }
+                //     if(!empty($last_added_manager)) {
+                //         $last_added_manager->delete();
+                //     }
+
+
+
+                //     // Attach the new manager to the department
+                //     $department->users()->attach($department->manager_id);
+                // }
 
 
 

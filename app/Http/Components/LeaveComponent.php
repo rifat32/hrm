@@ -417,7 +417,9 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
             $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
 
-            });
+            })
+            ->whereNotIn('leaves.user_id', [auth()->user()->id]);
+            ;
 
         }
     )

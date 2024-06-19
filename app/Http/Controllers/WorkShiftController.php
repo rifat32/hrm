@@ -898,10 +898,10 @@ if($work_shift->type !== "flexible") {
                     "message" => "You can not perform this action"
                 ], 401);
             }
-        $business_times =  BusinessTime::where([
-                "is_weekend" => 1,
-                "business_id" => auth()->user()->business_id,
-            ])->get();
+        // $business_times =  BusinessTime::where([
+        //         "is_weekend" => 1,
+        //         "business_id" => auth()->user()->business_id,
+        //     ])->get();
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\DeveloperLoginController;
 use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\AttendanceProject;
+use App\Models\DepartmentUser;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
 use App\Models\Project;
@@ -274,3 +275,28 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 
 //     return "ok";
 // });
+
+
+Route::get("/run", function() {
+    // Fetch all users in chunks to handle large data sets efficiently
+    User::chunk(100, function($users) {
+        foreach ($users as $user) {
+            // Fetch all DepartmentUser records for the user, ordered by creation date
+            $departmentUsers = DepartmentUser::where('user_id', $user->id)
+                                              ->orderBy('created_at')
+                                              ->get();
+
+            // Check if there are more than one records
+            if ($departmentUsers->count() > 1) {
+                // Get the IDs of the records to delete, excluding the first one
+                $idsToDelete = $departmentUsers->skip(1)->pluck('id');
+
+                // Bulk delete the records
+                DepartmentUser::whereIn('id', $idsToDelete)->delete();
+            }
+        }
+    });
+
+    return "ok";
+});
+

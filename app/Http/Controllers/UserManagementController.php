@@ -43,6 +43,7 @@ use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Business;
 use App\Models\Department;
+use App\Models\DepartmentUser;
 use App\Models\EmployeeAddressHistory;
 use App\Models\LeaveRecord;
 use App\Models\Role;
@@ -787,17 +788,31 @@ class UserManagementController extends Controller
             $this->delete_old_histories();
 
 
-            // Get the user's departments
-            $departments = $user->departments->pluck("id");
 
-            // Remove the first department from the collection
-            $removedDepartment = $departments->shift();
+            if (!empty($request_data['departments'])) {
+                $user->departments()->sync($request_data['departments']);
+                }
 
-            // Insert the department from $request_data at the beginning of the collection
-            $departments->prepend($request_data['departments'][0]);
 
-            // Update the user's departments
-            $user->departments()->sync($departments);
+
+
+
+            // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
+            //     // Fetch the first department ID and user ID
+            //     $departmentUser = DepartmentUser::where([
+            //         'department_id' => $user->departments[0]->id,
+            //         'user_id'       => $user->id
+            //     ])->first();
+
+            //     // Check if the DepartmentUser relationship exists
+            //     if (!empty($departmentUser)) {
+            //         // Update the department_id to the new department ID from the request data
+            //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+            //     }
+            // }
+
+
+
 
             $user->work_locations()->sync($request_data["work_location_ids"]);
 
@@ -1509,18 +1524,38 @@ class UserManagementController extends Controller
             $this->delete_old_histories();
 
 
-            // Get the user's departments
-            $departments = $user->departments->pluck("id");
+            if (!empty($request_data['departments'])) {
+                $user->departments()->sync($request_data['departments']);
+                }
 
 
-            // Remove the first department from the collection
-            $removedDepartment = $departments->shift();
+            // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
+            //     // Fetch the first department ID and user ID
+            //     $departmentUser = DepartmentUser::where([
+            //         'department_id' => $user->departments[0]->id,
+            //         'user_id'       => $user->id
+            //     ])->first();
 
-            // Insert the department from $request_data at the beginning of the collection
-            $departments->prepend($request_data['departments'][0]);
+            //     // Check if the DepartmentUser relationship exists
+            //     if (!empty($departmentUser)) {
+            //         // Update the department_id to the new department ID from the request data
+            //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+            //     }
+            // }
 
-            // Update the user's departments
-            $user->departments()->sync($departments);
+
+            // // Get the user's departments
+            // $departments = $user->departments->pluck("id");
+
+
+            // // Remove the first department from the collection
+            // $removedDepartment = $departments->shift();
+
+            // // Insert the department from $request_data at the beginning of the collection
+            // $departments->prepend($request_data['departments'][0]);
+
+            // // Update the user's departments
+            // $user->departments()->sync($departments);
 
             $user->work_locations()->sync($request_data["work_location_ids"]);
 
@@ -1753,17 +1788,39 @@ class UserManagementController extends Controller
                 ], 404);
             }
 
-            // Get the user's departments
-            $departments = $user->departments->pluck("id");
 
-            // Remove the first department from the collection
-            $removedDepartment = $departments->shift();
+            if (!empty($request_data['departments'])) {
+            $user->departments()->sync($request_data['departments']);
+            }
 
-            // Insert the department from $request_data at the beginning of the collection
-            $departments->prepend($request_data['departments'][0]);
 
-            // Update the user's departments
-            $user->departments()->sync($departments);
+
+
+            // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
+
+                // // Fetch the first department ID and user ID
+                // $departmentUser = DepartmentUser::where([
+                //     'department_id' => $user->departments[0]->id,
+                //     'user_id'       => $user->id
+                // ])->first();
+
+                // // Check if the DepartmentUser relationship exists
+                // if (!empty($departmentUser)) {
+                //     // Update the department_id to the new department ID from the request data
+                //     $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+                // }
+            // }
+            // // Get the user's departments
+            // $departments = $user->departments->pluck("id");
+
+            // // Remove the first department from the collection
+            // $removedDepartment = $departments->shift();
+
+            // // Insert the department from $request_data at the beginning of the collection
+            // $departments->prepend($request_data['departments'][0]);
+
+            // // Update the user's departments
+            // $user->departments()->sync($departments);
 
             $user->work_locations()->sync($request_data["work_location_ids"]);
 
@@ -1937,17 +1994,39 @@ class UserManagementController extends Controller
                  ], 404);
              }
 
-             // Get the user's departments
-             $departments = $user->departments->pluck("id");
 
-             // Remove the first department from the collection
-             $removedDepartment = $departments->shift();
+             if (!empty($request_data['departments'])) {
+                $user->departments()->sync($request_data['departments']);
+                }
 
-             // Insert the department from $request_data at the beginning of the collection
-             $departments->prepend($request_data['departments'][0]);
 
-             // Update the user's departments
-             $user->departments()->sync($departments);
+
+
+            //  if (!empty($user->departments) && !empty($request_data['departments'][0])) {
+            //     // Fetch the first department ID and user ID
+            //     $departmentUser = DepartmentUser::where([
+            //         'department_id' => $user->departments[0]->id,
+            //         'user_id'       => $user->id
+            //     ])->first();
+
+            //     // Check if the DepartmentUser relationship exists
+            //     if (!empty($departmentUser)) {
+            //         // Update the department_id to the new department ID from the request data
+            //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+            //     }
+            // }
+
+            //  // Get the user's departments
+            //  $departments = $user->departments->pluck("id");
+
+            //  // Remove the first department from the collection
+            //  $removedDepartment = $departments->shift();
+
+            //  // Insert the department from $request_data at the beginning of the collection
+            //  $departments->prepend($request_data['departments'][0]);
+
+            //  // Update the user's departments
+            //  $user->departments()->sync($departments);
 
              $user->work_locations()->sync($request_data["work_location_ids"]);
 
@@ -5408,6 +5487,8 @@ class UserManagementController extends Controller
             //     // return $query->where('name','!=', 'customer');
             // });
             $user->work_shift = $user->work_shifts()->first();
+
+
 
             $user->department_ids = [$user->departments->pluck("id")[0]];
 

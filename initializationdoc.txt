@@ -210,6 +210,28 @@ ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_rec
 28 FRONT_END_VERSION=red
 29. candidate_Recruitment_processeses import table
 
+30. Route::get("/run", function() {
+    // Fetch all users in chunks to handle large data sets efficiently
+    User::chunk(100, function($users) {
+        foreach ($users as $user) {
+            // Fetch all DepartmentUser records for the user, ordered by creation date
+            $departmentUsers = DepartmentUser::where('user_id', $user->id)
+                                              ->orderBy('created_at')
+                                              ->get();
+
+            // Check if there are more than one records
+            if ($departmentUsers->count() > 1) {
+                // Get the IDs of the records to delete, excluding the first one
+                $idsToDelete = $departmentUsers->skip(1)->pluck('id');
+
+                // Bulk delete the records
+                DepartmentUser::whereIn('id', $idsToDelete)->delete();
+            }
+        }
+    });
+
+    return "ok";
+});
 
 
 

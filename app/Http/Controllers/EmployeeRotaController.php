@@ -658,45 +658,32 @@ class EmployeeRotaController extends Controller
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user_department = auth()->user()->departments[0];
+
 
             $employee_rotas = EmployeeRota::with("details","departments","users")
+            ->where([
+                "employee_rotas.business_id" => auth()->user()->business_id
+            ])
 
-            ->when(!empty(auth()->user()->business_id), function ($query) use ( $all_manager_department_ids, $user_department) {
-                 $query
-               ->where(function($query) use($all_manager_department_ids, $user_department) {
-                $query
-                ->where([
-                    "employee_rotas.business_id" => auth()->user()->business_id
-                ])
-                ->where(function($query) use ($all_manager_department_ids, $user_department) {
-                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
-                        $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
-                    })
-                    ->orWhereHas("users", function($query) {
-                        $query->whereNotIn("users.id", [auth()->user()->id]);
-                    });
+
+            ->where(function($query) use ($all_manager_department_ids) {
+                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ;
-
-            })
-
-                ->orWhere(function($query)  {
-                    $query->where([
-                        "is_active" => 1,
-                        "business_id" => NULL,
-                        "is_default" => 1
-                    ]);
-
+                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
                 });
             })
-
-            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
-                return $query->where([
-                    "employee_rotas.is_default" => 1,
-                    "employee_rotas.business_id" => NULL
-                ]);
+            ->whereDoesntHave("users", function($query){
+                $query->whereIn("users.id", [auth()->user()->id]);
             })
+
+
+
+
+
+
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -848,28 +835,27 @@ class EmployeeRotaController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user_department = auth()->user()->departments[0];
 
-            $employee_rota =  EmployeeRota::with("details")
+
+            $employee_rota =  EmployeeRota::with("details","departments","users")
             ->where([
-                "id" => $id
+                "id" => $id,
+                "employee_rotas.business_id" => auth()->user()->business_id
             ])
-            ->where(function($query) use($all_manager_department_ids, $user_department) {
-                $query
-                ->where([
-                    "employee_rotas.business_id" => auth()->user()->business_id
-                ])
-                ->where(function($query) use ($all_manager_department_ids, $user_department) {
-                    $query->whereHas("departments", function ($query) use ($all_manager_department_ids, $user_department) {
-                        $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
-                    })
-                    ->orWhereHas("users.department_user.department", function ($query) use ($all_manager_department_ids, $user_department) {
-                        $query->whereIn("departments.id", array_merge($all_manager_department_ids,[$user_department]));
-                    });
-                })
-                ;
 
+            ->where(function($query) use ($all_manager_department_ids) {
+                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->orWhereHas("users", function($query){
+                    $query->whereIn("users.id", [auth()->user()->id]);
+                });
             })
+
+
 
 
                 ->first();
@@ -879,8 +865,7 @@ class EmployeeRotaController extends Controller
                     "message" => "no employee rota found"
                 ], 404);
             }
-            $employee_rota->departments = $employee_rota->departments;
-            $employee_rota->users = $employee_rota->users;
+
 
             return response()->json($employee_rota, 200);
         } catch (Exception $e) {
@@ -956,6 +941,8 @@ class EmployeeRotaController extends Controller
              }
              $business_id =  auth()->user()->business_id;
 
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
              $employee_rota =   EmployeeRota::with("details")
             ->where(function($query) use($business_id,$user_id) {
@@ -965,35 +952,19 @@ class EmployeeRotaController extends Controller
                     $query->where('users.id', $user_id);
                 });
             })
-
-            ->orWhere(function($query)  {
-                $query->where([
-                    "is_active" => 1,
-                    "business_id" => NULL,
-                    "is_default" => 1
-                ])
-            //     ->whereHas('details', function($query) use($business_times) {
-
-            //     foreach($business_times as $business_time) {
-            //         $query->where([
-            //             "day" => $business_time->day,
-            //         ]);
-            //         if($business_time["is_weekend"]) {
-            //             $query->where([
-            //                 "is_weekend" => 1,
-            //             ]);
-            //         } else {
-            //             $query->where(function($query) use($business_time) {
-            //                 $query->whereTime("start_at", ">=", $business_time->start_at);
-            //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
-            //             });
-            //         }
-
-            //     }
-            // })
-            ;
-
+            ->where(function($query) use ($all_manager_department_ids) {
+                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->orWhereHas("users", function($query){
+                    $query->whereIn("users.id", [auth()->user()->id]);
+                });
             })
+
+
 
             ->first();
 
@@ -1077,12 +1048,24 @@ class EmployeeRotaController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  auth()->user()->business_id;
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeRota::where([
-                "business_id" => $business_id,
-                "is_default" => 0
+                "business_id" => auth()->user()->business_id,
             ])
+            ->where(function($query) use ($all_manager_department_ids) {
+                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
+                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                });
+            })
+            ->whereDoesntHave("users", function($query){
+                $query->whereIn("users.id", [auth()->user()->id]);
+            })
+
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()
@@ -1098,33 +1081,7 @@ class EmployeeRotaController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::
 
-            whereHas("employee_rotas", function($query) use($existingIds) {
-                $query->whereIn("employee_rotas.id", $existingIds);
-            })
-            ->where("users.business_id",auth()->user()->id)
-           ->exists();
-
-            if ($user_exists) {
-                $conflictingUsers = User:: whereHas("employee_rotas", function($query) use($existingIds) {
-                    $query->whereIn("employee_rotas.id", $existingIds);
-                })
-                ->where("users.business_id",auth()->user()->id)
-                ->select([
-                    'users.id',
-                    'users.first_Name',
-                    'users.last_Name',
-                ])
-                ->get()
-                ;
-
-                return response()->json([
-                    "message" => "Some users are associated with the specified employee rotas",
-                    "conflicting_users" => $conflictingUsers,
-                    "conflicting_users2" => $conflictingUsers
-                ], 409);
-            }
 
             EmployeeRota::destroy($existingIds);
 

@@ -523,7 +523,9 @@ class DashboardManagementController extends Controller
                         $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                             $query->whereIn("departments.id", $all_manager_department_ids);
 
-                        });
+                        })
+                        ->whereNotIn('leaves.user_id', [auth()->user()->id]);
+                        ;;
 
                     }
                 );
@@ -598,7 +600,8 @@ class DashboardManagementController extends Controller
                 $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
 
-                });
+                })      ->whereNotIn('attendances.user_id', [auth()->user()->id]);
+                ;
 
             }
         );
