@@ -16,7 +16,7 @@ class WorkShiftHistory extends Model
         "break_hours",
         'type',
         "description",
-        'attendances_count',
+ 
         'is_business_default',
         'is_personal',
 

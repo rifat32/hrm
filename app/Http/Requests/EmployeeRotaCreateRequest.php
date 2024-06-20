@@ -35,19 +35,19 @@ class EmployeeRotaCreateRequest extends FormRequest
             'name' => 'required|string',
             'description' => 'nullable|string',
 
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+
 
 
 
             'departments' => 'present|array',
+
             'departments.*' => [
 
                 'numeric',
 
-                new ValidateDepartment($all_manager_department_ids),
+                // new ValidateDepartment($all_manager_department_ids),
 
-                new ValidateDuplicateRotaDepartment(NULL)
+                // new ValidateDuplicateRotaDepartment(NULL)
 
             ],
             'users' => 'present|array',
@@ -55,9 +55,9 @@ class EmployeeRotaCreateRequest extends FormRequest
 
                 "numeric",
 
-                new ValidUserId($all_manager_department_ids),
+                // new ValidUserId($all_manager_department_ids),
 
-                new ValidateDuplicateRotaUser(NULL)
+                // new ValidateDuplicateRotaUser(NULL)
 
             ],
 

@@ -200,7 +200,7 @@ if($request_data["type"] !== "flexible") {
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_default"] = false;
 
-                $request_data["attendances_count"] = 0;
+         
                 $work_shift =  WorkShift::create($request_data);
 
                 $work_shift->departments()->sync($request_data['departments']);
@@ -403,7 +403,7 @@ if($el["is_weekend"]) {
         'name',
         'type',
         "description",
-        'attendances_count',
+
         'is_personal',
         'break_type',
         'break_hours',
@@ -444,7 +444,7 @@ if($el["is_weekend"]) {
                 'name',
                 'type',
                 "description",
-                'attendances_count',
+
                 'is_personal',
                 'break_type',
                 'break_hours'

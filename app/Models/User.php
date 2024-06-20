@@ -193,8 +193,9 @@ return count($all_departments) > 0;
         return $this->belongsToMany(WorkShift::class, 'user_work_shifts', 'user_id', 'work_shift_id');
     }
 
-    public function employee_rotas() {
-        return $this->belongsToMany(EmployeeRota::class, 'user_employee_rotas', 'user_id', 'employee_rota_id');
+
+    public function employee_rota() {
+        return $this->hasOne(EmployeeRota::class, 'user_id', 'id');
     }
 
     public function leaves() {

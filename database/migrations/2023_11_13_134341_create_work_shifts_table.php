@@ -21,7 +21,7 @@ class CreateWorkShiftsTable extends Migration
             $table->enum('type', ['regular', 'scheduled', 'flexible'])->default("regular");
 
 
-            $table->unsignedInteger('attendances_count')->default(0);
+       
 
 
 

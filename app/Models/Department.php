@@ -252,8 +252,11 @@ class Department extends Model
 
 
 
-    public function employee_rotas() {
-        return $this->belongsToMany(EmployeeRota::class, 'department_employee_rotas', 'department_id', 'employee_rota_id');
+
+
+    public function employee_rota()
+    {
+        return $this->hasOne(EmployeeRota::class, "department_id" ,'id');
     }
 
 

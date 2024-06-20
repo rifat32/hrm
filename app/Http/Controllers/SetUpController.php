@@ -831,7 +831,7 @@ return "swagger generated";
             'is_personal' => false,
             'break_type' => 'unpaid',
             'break_hours' => 1,
-            "attendances_count" => 0,
+   
             "is_active" => 1,
             "is_default"=> 1,
             'details' => [
@@ -902,7 +902,7 @@ return "swagger generated";
             'is_personal' => false,
             'break_type' => 'unpaid',
             'break_hours' => 1,
-            "attendances_count" => 0,
+
             "is_active" => 1,
             "is_default"=> 1,
             'details' => [

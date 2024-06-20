@@ -557,7 +557,7 @@ class DepartmentController extends Controller
 
             ->when(request()->has("not_in_rota") && intval(request()->input("not_in_rota")), function ($query) {
 
-                $query->whereDoesntHave("employee_rotas");
+                $query->whereDoesntHave("employee_rota");
             })
 
 

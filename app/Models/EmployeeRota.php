@@ -14,10 +14,14 @@ class EmployeeRota extends Model
         'name',
         'type',
         "description",
-        'attendances_count',
+
         'is_business_default',
         'is_personal',
-    
+
+        "department_id",
+        "user_id",
+
+
         "is_default",
         "is_active",
         "business_id",
@@ -37,17 +41,16 @@ class EmployeeRota extends Model
     }
 
 
+    public function department() {
+        return $this->belongsTo(Department::class,  'department_id', 'id');
+    }
 
-    public function departments() {
-        return $this->belongsToMany(Department::class, 'department_employee_rotas', 'employee_rota_id', 'department_id');
+    public function user() {
+        return $this->belongsTo(User::class,  'user_id', 'id');
     }
 
 
-
-    public function users() {
-        return $this->belongsToMany(User::class, 'user_employee_rotas', 'employee_rota_id', 'user_id');
-    }
-
+ 
 
 
 

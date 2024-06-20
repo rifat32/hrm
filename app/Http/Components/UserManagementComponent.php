@@ -80,7 +80,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             })
 
             ->when(!empty(request()->not_in_rota), function ($query) {
-                $query->whereDoesntHave("employee_rotas");
+                $query->whereDoesntHave("employee_rota");
             })
 
 

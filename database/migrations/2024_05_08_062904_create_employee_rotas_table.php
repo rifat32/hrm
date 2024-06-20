@@ -21,7 +21,7 @@ class CreateEmployeeRotasTable extends Migration
             $table->enum('type', ['regular', 'scheduled', 'flexible'])->default("regular");
 
 
-            
+
             $table->unsignedBigInteger("department_id")->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
 
@@ -29,7 +29,7 @@ class CreateEmployeeRotasTable extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
 
-            $table->unsignedInteger('attendances_count')->default(0);
+       
 
 
 

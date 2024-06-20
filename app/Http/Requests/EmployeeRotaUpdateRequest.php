@@ -40,10 +40,10 @@ class EmployeeRotaUpdateRequest extends FormRequest
                     $employeeRota = EmployeeRota::where('id', $value)
                         ->where('employee_rotas.business_id', '=', auth()->user()->business_id)
                         ->where(function($query) use ($all_manager_department_ids){
-                            $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            $query->whereHas("department", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
                             })
-                            ->orWhereHas("users.department_user.department", function ($query) use ($all_manager_department_ids) {
+                            ->orWhereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
                             });
                         })
@@ -71,27 +71,7 @@ class EmployeeRotaUpdateRequest extends FormRequest
 
 
 
-            'departments' => 'present|array',
 
-            'departments.*' => [
-
-                'numeric',
-
-                new ValidateDepartment($all_manager_department_ids),
-
-                new ValidateDuplicateRotaDepartment($this->id)
-
-            ],
-            'users' => 'present|array',
-            'users.*' => [
-
-                "numeric",
-
-                new ValidUserId($all_manager_department_ids),
-
-                new ValidateDuplicateRotaUser($this->id)
-
-            ],
 
 
 

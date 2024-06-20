@@ -11,8 +11,8 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\EmployeeRota;
+use App\Models\EmployeeRotaDetail;
 use App\Models\User;
-use App\Models\UserEmployeeRota;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -157,13 +157,58 @@ class EmployeeRotaController extends Controller
                 $request_data = $request->validated();
 
 
+                $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+                $departments = [];
+
+                if(!empty($request_data['departments'])) {
+                    $departments = Department::whereIn('id', $request_data['departments'])
+                    ->whereIn(
+                        "id",
+                        $all_manager_department_ids
+                    )
+                    ->whereDoesntHave("employee_rota")
+                    ->where('business_id', auth()->user()->business_id)
+                    ->pluck("id");
+                }
+
+                $invalid_department_ids = array_diff($request_data['departments'], $departments);
+
+
+                if (!empty($invalid_department_ids)) {
+                    throw new Exception('Invalid department IDs found.',403);
+                }
+
+
+                $users = [];
+
+                if(!empty($request_data['users'])) {
+                    $users = User::where([
+                        'users.business_id' => auth()->user()->business_id,
+                        "is_active" => 1
+                    ])
+                    ->whereHas('departments', function($query) use($all_manager_department_ids) {
+                        $query->whereIn('departments.id', $all_manager_department_ids);
+                    })
+                    ->whereDoesntHave("employee_rota")
+                    ->whereIn('users.id', $request_data['users'])
+                    ->whereNotIn('users.id', [auth()->user()->id])
+                    ->pluck("id");
+                }
+
+                $invalid_user_ids = array_diff($request_data['users'], $users);
+
+
+                if (!empty($invalid_user_ids)) {
+                    throw new Exception('Invalid user IDs found.',403);
+                }
+
+
+
                 // @@@remove_field
                 $request_data["type"] = "flexible";
                 $request_data["is_personal"] = 0;
                // @@@remove_field
-
-
-
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -174,35 +219,74 @@ class EmployeeRotaController extends Controller
 
 
 
-                if(!empty($request_data['departments'])){
-                    $rota_data = []; // Initialize an array to hold all rota_data
+                $data_to_process = collect();
 
-                    foreach ($request_data['departments'] as $department_id) {
-                        $rota_data[] = [
-                            'department_id' => $department_id,
+                $common_data = collect([
+                    'name' => $request_data['name'],
+                    'type' => $request_data['type'],
+                    'description' => $request_data['description'],
+                    'is_business_default' => $request_data['is_business_default'],
+                    'is_personal' => $request_data['is_personal'],
+                    'is_default' => $request_data['is_default'],
+                    'is_active' => $request_data['is_active'],
+                    'business_id' => $request_data['business_id'],
+                    'created_by' => $request_data['created_by'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-                            'name' => $request_data['name'],
-                            'description' => $request_data['description'],
-                            'start_date' => $request_data['start_date'],
-                            'end_date' => $request_data['end_date'],
-                        ];
-                    }
-                    // Perform bulk insertion using insert() method
-                    EmployeeRota::insert($rota_data);
+                if (!empty($departments)) {
+                    $data_to_process = $data_to_process->concat(collect($departments)->map(function ($department_id) use ($common_data) {
+                        return $common_data->merge(['department_id' => $department_id])->all();
+                    }));
+                }
+
+                if (!empty($users)) {
+                    $data_to_process = $data_to_process->concat(collect($users)->map(function ($user_id) use ($common_data) {
+                        return $common_data->merge(['user_id' => $user_id])->all();
+                    }));
+                }
+
+                if ($data_to_process->isNotEmpty()) {
+                    $chunkSize = 1000; // Example chunk size
+                    $data_to_process->chunk($chunkSize)->each(function ($chunk) {
+                        EmployeeRota::insert($chunk->toArray());
+                    });
                     // $employee_rota->details()->createMany($request_data['details']);
                 }
 
 
-                if(!empty($request_data['users'])){
-                    foreach($request_data['users'] as $user_id) {
-                        $rota_data = $request_data;
-                        $rota_data["user_id"] = $user_id;
-                        $employee_rota =  EmployeeRota::create($rota_data);
-                        $employee_rota->details()->createMany($request_data['details']);
+                // Query to retrieve data based on department and user IDs
+$employeeRotaIds = EmployeeRota::whereIn('department_id', $departments)
+->orWhereIn('user_id', $users)
+->pluck("id");
 
-                    }
-                }
 
+$processedDetails = collect($request_data['details'])->crossJoin($employeeRotaIds)->map(function ($item) {
+    $detail = $item[0];
+    $employeeRotaId = $item[1];
+
+    return [
+        'employee_rota_id' => $employeeRotaId,
+        'day' => $detail['day'],
+        'start_at' => $detail['start_at'],
+        'end_at' => $detail['end_at'],
+        'break_type' => $detail['break_type'],
+        'break_hours' => $detail['break_hours'],
+        "created_at" => now(),
+        "updated_at" => now()
+    ];
+});
+
+
+
+if ($processedDetails->isNotEmpty()) {
+    $chunkSize = 1000; // Example chunk size
+    $processedDetails->chunk($chunkSize)->each(function ($chunk) {
+        EmployeeRotaDetail::insert($chunk->toArray());
+    });
+    // $employee_rota->details()->createMany($request_data['details']);
+}
 
 
 
@@ -381,11 +465,6 @@ class EmployeeRotaController extends Controller
 
 
                 $request_data = $request->validated();
-                if(empty($request_data['departments'])) {
-                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
-                }
-
-
 
 
 
@@ -402,10 +481,8 @@ class EmployeeRotaController extends Controller
         'name',
         'type',
         "description",
-        'attendances_count',
+
         'is_personal',
-
-
 
         'start_date',
         'end_date',
@@ -424,7 +501,7 @@ class EmployeeRotaController extends Controller
                 }
 
 
-                $employee_rota->departments()->sync($request_data['departments']);
+
 
 
                 $employee_rota->details()->delete();
@@ -516,13 +593,17 @@ class EmployeeRotaController extends Controller
                 "id" => $request_data["id"],
                 "business_id" => auth()->user()->business_id
             ])
-            ->whereHas("departments",function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
+            ->where(function($query) use ($all_manager_department_ids) {
+                $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
+                ->orWhereHas("user.departments", function($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                });
             })
+            ->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
                 ->first();
             if (!$employee_rota) {
                 return response()->json([
-                    "message" => "no department found"
+                    "message" => "no rota found"
                 ], 404);
             }
             $is_active = !$employee_rota->is_active;
@@ -535,7 +616,7 @@ class EmployeeRotaController extends Controller
              ]);
 
 
-             return response()->json(['message' => 'department status updated successfully'], 200);
+             return response()->json(['message' => 'Rota status updated successfully'], 200);
          } catch (Exception $e) {
              error_log($e->getMessage());
              return $this->sendError($e, 500, $request);
@@ -679,6 +760,7 @@ class EmployeeRotaController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
             if (!$request->user()->hasPermissionTo('employee_rota_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -695,22 +777,16 @@ class EmployeeRotaController extends Controller
             ])
 
 
+
             ->where(function($query) use ($all_manager_department_ids) {
-                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
+                $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
+                ->orWhereHas("user.departments", function($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 });
             })
-            ->whereDoesntHave("users", function($query){
-                $query->whereIn("users.id", [auth()->user()->id]);
-            })
 
 
-
-
-
+            ->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
 
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -720,8 +796,6 @@ class EmployeeRotaController extends Controller
                             ->orWhere("employee_rotas.description", "like", "%" . $term . "%");
                     });
                 })
-
-
 
 
 
@@ -737,10 +811,6 @@ class EmployeeRotaController extends Controller
                 ->when(isset($request->type), function ($query) use ($request) {
                     return $query->where('employee_rotas.type', ($request->type));
                 })
-
-
-
-
 
 
                 ->when(isset($request->is_personal), function ($query) use ($request) {
@@ -873,15 +943,13 @@ class EmployeeRotaController extends Controller
             ])
 
             ->where(function($query) use ($all_manager_department_ids) {
-                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+
+                $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
+                ->orWhereHas("user.departments", function($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->orWhereHas("users", function($query){
-                    $query->whereIn("users.id", [auth()->user()->id]);
-                });
+                ->orWhereIn("employee_rotas.user_id", [auth()->user()->id]);
+
             })
 
 
@@ -982,15 +1050,13 @@ class EmployeeRotaController extends Controller
                 });
             })
             ->where(function($query) use ($all_manager_department_ids) {
-                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+
+                $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
+                ->orWhereHas("user.departments", function($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->orWhereHas("users", function($query){
-                    $query->whereIn("users.id", [auth()->user()->id]);
-                });
+                ->orWhereIn("employee_rotas.user_id", [auth()->user()->id]);
+
             })
 
 
@@ -1084,16 +1150,13 @@ class EmployeeRotaController extends Controller
                 "business_id" => auth()->user()->business_id,
             ])
             ->where(function($query) use ($all_manager_department_ids) {
-                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->orWhereHas("users.departments", function($query) use ($all_manager_department_ids) {
+                $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
+                ->orWhereHas("user.departments", function($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 });
             })
-            ->whereDoesntHave("users", function($query){
-                $query->whereIn("users.id", [auth()->user()->id]);
-            })
+            ->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
+
 
                 ->whereIn('id', $idsArray)
                 ->select('id')
