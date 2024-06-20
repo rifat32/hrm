@@ -624,6 +624,8 @@ class DepartmentController extends Controller
              0
          ) AS total_users
          '),
+
+         DB::raw('IF(departments.manager_id = ' . auth()->user()->id . ', 1, 0) AS restrict_delete')
                  )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);

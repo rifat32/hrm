@@ -282,11 +282,8 @@ class NotificationController extends Controller
     {
         try {
      $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$this->businessOwnerCheck($business_id)) {
-                return response()->json([
-                    "message" => "you are not the owner of the business or the requested business does not exist."
-                ], 401);
-            }
+           
+             $business = $this->businessOwnerCheck($business_id);
 
             $notificationsQuery = Notification::where([
                 "receiver_id" => $request->user()->id,

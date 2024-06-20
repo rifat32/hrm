@@ -62,7 +62,7 @@ trait BusinessUtil
 
         $business =  $businessQuery->first();
         if (empty($business)) {
-            return false;
+           throw new Exception("you are not the owner of the business or the requested business does not exist.",401);
         }
         return $business;
     }

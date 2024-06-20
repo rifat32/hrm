@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRegisterBusinessRequest;
 use App\Http\Requests\BusinessCreateRequest;
+use App\Http\Requests\BusinessUpdatePart1Request;
+use App\Http\Requests\BusinessUpdatePart2Request;
+use App\Http\Requests\BusinessUpdatePart3Request;
 use App\Http\Requests\BusinessUpdatePensionRequest;
 use App\Http\Requests\BusinessUpdateRequest;
 use App\Http\Requests\BusinessUpdateSeparateRequest;
@@ -1057,22 +1060,20 @@ class BusinessController extends Controller
     public function updateBusiness(BusinessUpdateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return  DB::transaction(function () use (&$request) {
+
                 if (!$request->user()->hasPermissionTo('business_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
 
-                if (!$this->businessOwnerCheck($request["business"]["id"])) {
-                    return response()->json([
-                        "message" => "you are not the owner of the business or the requested business does not exist."
-                    ], 401);
-                }
-
                 $request_data = $request->validated();
+
+                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
                 //    user email check
                 $userPrev = User::where([
                     "id" => $request_data["user"]["id"]
@@ -1084,11 +1085,9 @@ class BusinessController extends Controller
                     });
                 }
                 $userPrev = $userPrev->first();
-                if (!$userPrev) {
 
-                    return response()->json([
-                        "message" => "no user found with this id"
-                    ], 404);
+                if (!$userPrev) {
+                    throw new Exception("no user found with this id",404);
                 }
 
 
@@ -1144,50 +1143,39 @@ class BusinessController extends Controller
 
                     ->first();
                 if (!$user) {
-                    return response()->json([
-                        "message" => "something went wrong."
-                    ], 500);
+                        throw new Exception("something went wrong updating user.",500);
                 }
 
                 // $user->syncRoles(["business_owner"]);
 
 
 
-                //  business info ##############
-                // $request_data['business']['status'] = "pending";
+                $business->fill(collect($request_data['business'])->only([
+                    "name",
+                    "start_date",
+                    "about",
+                    "web_page",
+                    "phone",
+                    "email",
+                    "additional_information",
+                    "address_line_1",
+                    "address_line_2",
+                    "lat",
+                    "long",
+                    "country",
+                    "city",
+                    "postcode",
+                    "logo",
+                    "image",
+                    "status",
+                    "background_image",
+                    "currency",
+                    "flexible_rota_enabled"
+                ])->toArray());
 
-                $business  =  tap(Business::where([
-                    "id" => $request_data['business']["id"]
-                ]))->update(
-                    collect($request_data['business'])->only([
-                        "name",
-                        "start_date",
-                        "about",
-                        "web_page",
-                        "phone",
-                        "email",
-                        "additional_information",
-                        "address_line_1",
-                        "address_line_2",
-                        "lat",
-                        "long",
-                        "country",
-                        "city",
-                        "postcode",
-                        "logo",
-                        "image",
-                        "status",
-                        "background_image",
-                        // "is_active",
-                        "currency",
+                $business->save();
 
-                        "flexible_rota_enabled"
 
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
                 if (empty($business)) {
                     return response()->json([
                         "massage" => "something went wrong"
@@ -1260,19 +1248,558 @@ class BusinessController extends Controller
 
 
 
+                DB::commit();
 
                 return response([
                     "user" => $user,
                     "business" => $business
                 ], 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
 
             return $this->sendError($e, 500, $request);
         }
     }
 
 
+
+     /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/businesses-part-1",
+     *      operationId="updateBusinessPart1",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user with business",
+     *      description="This method is to update user with business",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+     *             @OA\Property(property="user", type="string", format="array",example={
+     *  * "id":1,
+     * "first_Name":"Rifat",
+     *  * "middle_Name":"Al-Ashwad",
+     *
+     * "last_Name":"Al-Ashwad",
+     * "email":"rifatalashwad@gmail.com",
+     *  "password":"12345678",
+     *  "password_confirmation":"12345678",
+     *  "phone":"01771034383",
+     *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     * "gender":"male"
+     *
+     *
+     * }),
+     *
+     *
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function updateBusinessPart1(BusinessUpdatePart1Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+                if (!$request->user()->hasPermissionTo('business_update')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+
+             $business = $this->businessOwnerCheck(auth()->user()->business_id);
+
+                $request_data = $request->validated();
+                //    user email check
+                $userPrev = User::where([
+                    "id" => $request_data["user"]["id"]
+                ]);
+                if (!$request->user()->hasRole('superadmin')) {
+                    $userPrev  = $userPrev->where(function ($query) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id);
+                    });
+                }
+                $userPrev = $userPrev->first();
+
+                if (!$userPrev) {
+                        throw new Exception("no user found with this id",404);
+
+                }
+
+
+
+
+                //  $businessPrev = Business::where([
+                //     "id" => $request_data["business"]["id"]
+                //  ]);
+
+                // $businessPrev = $businessPrev->first();
+                // if(!$businessPrev) {
+                //     return response()->json([
+                //        "message" => "no business found with this id"
+                //     ],404);
+                //   }
+
+
+                if (!empty($request_data['user']['password'])) {
+                    $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+                } else {
+                    unset($request_data['user']['password']);
+                }
+                $request_data['user']['is_active'] = true;
+                $request_data['user']['remember_token'] = Str::random(10);
+                $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+                $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
+                $request_data['user']['country'] = $request_data['business']['country'];
+                $request_data['user']['city'] = $request_data['business']['city'];
+                $request_data['user']['postcode'] = $request_data['business']['postcode'];
+                $request_data['user']['lat'] = $request_data['business']['lat'];
+                $request_data['user']['long'] = $request_data['business']['long'];
+                $user  =  tap(User::where([
+                    "id" => $request_data['user']["id"]
+                ]))->update(
+                    collect($request_data['user'])->only([
+                        'first_Name',
+                        'middle_Name',
+                        'last_Name',
+                        'phone',
+                        'image',
+                        'address_line_1',
+                        'address_line_2',
+                        'country',
+                        'city',
+                        'postcode',
+                        'email',
+                        'password',
+                        "lat",
+                        "long",
+                        "gender"
+                    ])->toArray()
+                )
+                    // ->with("somthing")
+
+                    ->first();
+                if (!$user) {
+                    throw new Exception("something went wrong updating user.",500);
+
+                }
+
+
+                DB::commit();
+                return response([
+                    "user" => $user,
+
+                ], 201);
+
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+        /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/businesses-part-2",
+     *      operationId="updateBusinessPart2",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user with business",
+     *      description="This method is to update user with business",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+
+     *
+     *  @OA\Property(property="business", type="string", format="array",example={
+     *   *  * "id":1,
+     * "name":"ABCD businesses",
+     * "about":"Best businesses in Dhaka",
+     * "web_page":"https://www.facebook.com/",
+     *  "phone":"01771034383",
+     *  "email":"rifatalashwad@gmail.com",
+     *  "phone":"01771034383",
+     *  "additional_information":"No Additional Information",
+     *  "address_line_1":"Dhaka",
+     *  "address_line_2":"Dinajpur",
+     *    * *  "lat":"23.704263332849386",
+     *    * *  "long":"90.44707059805279",
+     *
+     *  "country":"Bangladesh",
+     *  "city":"Dhaka",
+     *  "postcode":"Dinajpur",
+     *
+     *  "logo":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     *  "images":{"/a","/b","/c"},
+     *  "currency":"BDT",
+     * "flexible_rota_enabled":1
+     *
+     * }),
+     *
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function updateBusinessPart2(BusinessUpdatePart2Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+                if (!$request->user()->hasPermissionTo('business_update')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+
+
+
+                $request_data = $request->validated();
+
+                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
+
+                $business->fill(collect($request_data['business'])->only([
+                    "name",
+                    "start_date",
+                    "about",
+                    "web_page",
+                    "phone",
+                    "email",
+                    "additional_information",
+                    "address_line_1",
+                    "address_line_2",
+                    "lat",
+                    "long",
+                    "country",
+                    "city",
+                    "postcode",
+                    "logo",
+                    "image",
+                    "status",
+                    "background_image",
+                    "currency",
+                    "flexible_rota_enabled"
+                ])->toArray());
+
+                $business->save();
+
+
+
+
+                if (empty($business)) {
+                    return response()->json([
+                        "massage" => "something went wrong"
+                    ], 500);
+                }
+
+
+
+
+                DB::commit();
+                return response([
+                    "business" => $business
+                ], 201);
+
+
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/businesses-part-3",
+     *      operationId="updateBusinessPart3",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user with business",
+     *      description="This method is to update user with business",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+     *             @OA\Property(property="user", type="string", format="array",example={
+     *  * "id":1,
+     * "first_Name":"Rifat",
+     *  * "middle_Name":"Al-Ashwad",
+     *
+     * "last_Name":"Al-Ashwad",
+     * "email":"rifatalashwad@gmail.com",
+     *  "password":"12345678",
+     *  "password_confirmation":"12345678",
+     *  "phone":"01771034383",
+     *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     * "gender":"male"
+     *
+     *
+     * }),
+     *
+     *  @OA\Property(property="business", type="string", format="array",example={
+     *   *  * "id":1,
+     * "name":"ABCD businesses",
+     * "about":"Best businesses in Dhaka",
+     * "web_page":"https://www.facebook.com/",
+     *  "phone":"01771034383",
+     *  "email":"rifatalashwad@gmail.com",
+     *  "phone":"01771034383",
+     *  "additional_information":"No Additional Information",
+     *  "address_line_1":"Dhaka",
+     *  "address_line_2":"Dinajpur",
+     *    * *  "lat":"23.704263332849386",
+     *    * *  "long":"90.44707059805279",
+     *
+     *  "country":"Bangladesh",
+     *  "city":"Dhaka",
+     *  "postcode":"Dinajpur",
+     *
+     *  "logo":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     *  "images":{"/a","/b","/c"},
+     *  "currency":"BDT",
+     * "flexible_rota_enabled":1
+     *
+     * }),
+     *
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function updateBusinessPart3(BusinessUpdatePart3Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+                if (!$request->user()->hasPermissionTo('business_update')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+
+                $business = $this->businessOwnerCheck(auth()->user()->business_id);
+
+
+
+
+                $request_data = $request->validated();
+
+                $business  =  Business::where([
+                    "id" => auth()->user()->business_id
+                ])
+                    // ->with("somthing")
+                    ->first();
+
+                if (!empty($request_data["times"])) {
+
+                    $timesArray = collect($request_data["times"])->unique("day");
+
+
+                    $conflicted_work_shift_ids = collect();
+
+                    foreach ($timesArray as $business_time) {
+                        $work_shift_ids = WorkShift::where([
+                            "business_id" => auth()->user()->business_id
+                        ])
+                            ->whereHas('details', function ($query) use ($business_time) {
+                                $query->where('work_shift_details.day', ($business_time["day"]))
+                                    ->when(!empty($time["is_weekend"]), function ($query) {
+                                        $query->where('work_shift_details.is_weekend', 1);
+                                    })
+                                    ->where(function ($query) use ($business_time) {
+                                        $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
+                                            ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
+                                    });
+                            })
+                            ->pluck("id");
+                        $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
+                    }
+                    $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
+
+                    if (!empty($conflicted_work_shift_ids)) {
+                        WorkShift::whereIn("id", $conflicted_work_shift_ids)->update([
+                            "is_active" => 0
+                        ]);
+
+                        WorkShiftHistory::where([
+                            "to_date" => NULL
+                        ])
+                            ->whereIn("work_shift_id", $conflicted_work_shift_ids)
+                            ->update([
+                                "to_date" => now()
+                            ]);
+                    }
+
+
+
+
+
+                    BusinessTime::where([
+                        "business_id" => $business->id
+                    ])
+                        ->delete();
+
+                    $timesArray = collect($request_data["times"])->unique("day");
+                    foreach ($timesArray as $business_time) {
+                        BusinessTime::create([
+                            "business_id" => $business->id,
+                            "day" => $business_time["day"],
+                            "start_at" => $business_time["start_at"],
+                            "end_at" => $business_time["end_at"],
+                            "is_weekend" => $business_time["is_weekend"],
+                        ]);
+                    }
+                }
+
+
+
+
+                DB::commit();
+                return response([
+
+                    "business" => $business
+                ], 201);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -1353,13 +1880,12 @@ class BusinessController extends Controller
                     ], 401);
                 }
 
-                if (!$this->businessOwnerCheck($request["business"]["id"])) {
-                    return response()->json([
-                        "message" => "you are not the owner of the business or the requested business does not exist."
-                    ], 401);
-                }
+
+
+
 
                 $request_data = $request->validated();
+                $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
                 $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"],"file","pension_scheme_letters");
 
@@ -1535,10 +2061,8 @@ class BusinessController extends Controller
 
 
             if (empty($business)) {
+                throw new Exception("no business found",404);
 
-                return response()->json([
-                    "message" => "no business found"
-                ], 404);
             }
 
 
@@ -1642,58 +2166,49 @@ class BusinessController extends Controller
     public function updateBusinessSeparate(BusinessUpdateSeparateRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return  DB::transaction(function () use (&$request) {
+
                 if (!$request->user()->hasPermissionTo('business_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                if (!$this->businessOwnerCheck($request["business"]["id"])) {
-                    return response()->json([
-                        "message" => "you are not the owner of the business or the requested business does not exist."
-                    ], 401);
-                }
+
+
 
                 $request_data = $request->validated();
-
+                $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
                 //  business info ##############
                 // $request_data['business']['status'] = "pending";
+                $business->fill(collect($request_data['business'])->only([
+                    "name",
+                    "start_date",
+                    "about",
+                    "web_page",
+                    "phone",
+                    "email",
+                    "additional_information",
+                    "address_line_1",
+                    "address_line_2",
+                    "lat",
+                    "long",
+                    "country",
+                    "city",
+                    "postcode",
+                    "logo",
+                    "image",
+                    "status",
+                    "background_image",
+                    "currency",
+                    "flexible_rota_enabled"
+                ])->toArray());
 
-                $business  =  tap(Business::where([
-                    "id" => $request_data['business']["id"]
-                ]))->update(
-                    collect($request_data['business'])->only([
-                        "name",
-                        "about",
-                        "web_page",
-                        "phone",
-                        "email",
-                        "additional_information",
-                        "address_line_1",
-                        "address_line_2",
-                        "lat",
-                        "long",
-                        "country",
-                        "city",
-                        "postcode",
-                        "logo",
-                        "image",
-                        "background_image",
-                        "status",
-                        // "is_active",
+                $business->save();
 
 
-
-                        "currency",
-
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
                 if (empty($business)) {
 
                     return response()->json([
@@ -1708,11 +2223,13 @@ class BusinessController extends Controller
 
 
 
+                DB::commit();
                 return response([
                     "business" => $business
                 ], 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
 
             return $this->sendError($e, 500, $request);
         }
@@ -2007,23 +2524,11 @@ class BusinessController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            if (!$this->businessOwnerCheck($id)) {
-                return response()->json([
-                    "message" => "you are not the owner of the business or the requested business does not exist."
-                ], 401);
-            }
 
-            $business = Business::with(
-                [
-                "owner",
-                "times"
-                ]
-                //] "default_work_shift.details"
+            $business = $this->businessOwnerCheck($id);
 
-            )->where([
-                "businesses.id" => $id
-            ])
-                ->first();
+            $business->load('owner', 'times');
+
 
 
 
@@ -2098,24 +2603,17 @@ class BusinessController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             if (!$this->businessOwnerCheck($id)) {
-                 return response()->json([
-                     "message" => "you are not the owner of the business or the requested business does not exist."
-                 ], 401);
-             }
-
-             $business = Business::where([
-                 "id" => $id
-             ])
-             ->select(
-                "pension_scheme_registered",
-                "pension_scheme_name",
-                "pension_scheme_letters",
-             )
-                 ->first();
+             $business = $this->businessOwnerCheck($id);
 
 
-             return response()->json($business, 200);
+             $businessData = [
+                'pension_scheme_registered' => $business->pension_scheme_registered,
+                'pension_scheme_name' => $business->pension_scheme_name,
+                'pension_scheme_letters' => $business->pension_scheme_letters,
+            ];
+
+
+             return response()->json($businessData, 200);
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);
@@ -2186,11 +2684,7 @@ class BusinessController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             if (!$this->businessOwnerCheck($id)) {
-                 return response()->json([
-                     "message" => "you are not the owner of the business or the requested business does not exist."
-                 ], 401);
-             }
+             $business = $this->businessOwnerCheck($id);
 
         $businessPensionHistoriesQuery =  BusinessPensionHistory::where([
             "business_id" => $id

@@ -793,6 +793,9 @@ Route::post('/v1.0/businesses', [BusinessController::class, "createBusiness"]);
 Route::put('/v1.0/businesses/toggle-active', [BusinessController::class, "toggleActiveBusiness"]);
 Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
 
+Route::put('/v1.0/businesses-part-1', [BusinessController::class, "updateBusinessPart1"]);
+Route::put('/v1.0/businesses-part-2', [BusinessController::class, "updateBusinessPart2"]);
+Route::put('/v1.0/businesses-part-3', [BusinessController::class, "updateBusinessPart3"]);
 
 Route::put('/v1.0/business-pension-information', [BusinessController::class, "updateBusinessPensionInformation"]);
 
