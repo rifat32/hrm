@@ -2839,7 +2839,103 @@
                 ],
                 "summary": "This method is to store attendance",
                 "description": "This method is to store attendance",
-                "operationId": "createMultipleBypassAttendance",
+                "operationId": "createMultipleBypassAttendanceV1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user_ids": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "date"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/attendances/bypass/multiple": {
+            "post": {
+                "tags": [
+                    "attendances"
+                ],
+                "summary": "This method is to store attendance",
+                "description": "This method is to store attendance",
+                "operationId": "createMultipleBypassAttendanceV2",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5949,6 +6045,339 @@
                                                 "/b",
                                                 "/c"
                                             ]
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/businesses-part-1": {
+            "put": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "This method is to update user with business",
+                "description": "This method is to update user with business",
+                "operationId": "updateBusinessPart1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user",
+                                    "business"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "id": 1,
+                                            "first_Name": "Rifat",
+                                            "middle_Name": "Al-Ashwad",
+                                            "last_Name": "Al-Ashwad",
+                                            "email": "rifatalashwad@gmail.com",
+                                            "password": "12345678",
+                                            "password_confirmation": "12345678",
+                                            "phone": "01771034383",
+                                            "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "gender": "male"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/businesses-part-2": {
+            "put": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "This method is to update user with business",
+                "description": "This method is to update user with business",
+                "operationId": "updateBusinessPart2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user",
+                                    "business"
+                                ],
+                                "properties": {
+                                    "business": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "id": 1,
+                                            "name": "ABCD businesses",
+                                            "about": "Best businesses in Dhaka",
+                                            "web_page": "https://www.facebook.com/",
+                                            "phone": "01771034383",
+                                            "email": "rifatalashwad@gmail.com",
+                                            "additional_information": "No Additional Information",
+                                            "address_line_1": "Dhaka",
+                                            "address_line_2": "Dinajpur",
+                                            "lat": "23.704263332849386",
+                                            "long": "90.44707059805279",
+                                            "country": "Bangladesh",
+                                            "city": "Dhaka",
+                                            "postcode": "Dinajpur",
+                                            "logo": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "images": [
+                                                "/a",
+                                                "/b",
+                                                "/c"
+                                            ],
+                                            "currency": "BDT",
+                                            "flexible_rota_enabled": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/businesses-part-3": {
+            "put": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "This method is to update user with business",
+                "description": "This method is to update user with business",
+                "operationId": "updateBusinessPart3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user",
+                                    "business"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "id": 1,
+                                            "first_Name": "Rifat",
+                                            "middle_Name": "Al-Ashwad",
+                                            "last_Name": "Al-Ashwad",
+                                            "email": "rifatalashwad@gmail.com",
+                                            "password": "12345678",
+                                            "password_confirmation": "12345678",
+                                            "phone": "01771034383",
+                                            "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "gender": "male"
+                                        }
+                                    },
+                                    "business": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": {
+                                            "id": 1,
+                                            "name": "ABCD businesses",
+                                            "about": "Best businesses in Dhaka",
+                                            "web_page": "https://www.facebook.com/",
+                                            "phone": "01771034383",
+                                            "email": "rifatalashwad@gmail.com",
+                                            "additional_information": "No Additional Information",
+                                            "address_line_1": "Dhaka",
+                                            "address_line_2": "Dinajpur",
+                                            "lat": "23.704263332849386",
+                                            "long": "90.44707059805279",
+                                            "country": "Bangladesh",
+                                            "city": "Dhaka",
+                                            "postcode": "Dinajpur",
+                                            "logo": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "image": "https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+                                            "images": [
+                                                "/a",
+                                                "/b",
+                                                "/c"
+                                            ],
+                                            "currency": "BDT",
+                                            "flexible_rota_enabled": 1
                                         }
                                     }
                                 },
@@ -10216,7 +10645,7 @@
         "/v2.0/business-employee-dashboard/leaves": {
             "get": {
                 "tags": [
-                    "dashboard_management.business_manager"
+                    "dashboard_management.business_user"
                 ],
                 "summary": "get all dashboard data combined",
                 "description": "get all dashboard data combined",
@@ -25793,6 +26222,20 @@
                         "example": "1"
                     },
                     {
+                        "name": "use_in_employee",
+                        "in": "query",
+                        "description": "use_in_employee",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "use_in_on_boarding",
+                        "in": "query",
+                        "description": "use_in_on_boarding",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
                         "name": "start_date",
                         "in": "query",
                         "description": "start_date",
@@ -25904,6 +26347,16 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "erg ear ga&nbsp;"
+                                    },
+                                    "use_in_employee": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "use_in_on_boarding": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
                                     }
                                 },
                                 "type": "object"
@@ -25989,6 +26442,16 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "erg ear ga&nbsp;"
+                                    },
+                                    "use_in_employee": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "use_in_on_boarding": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
                                     }
                                 },
                                 "type": "object"

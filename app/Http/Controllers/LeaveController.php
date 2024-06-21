@@ -244,9 +244,19 @@ class LeaveController extends Controller
              $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 
              $leave =  Leave::create($processed_leave_data["leave_data"]);
-             $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
 
-             $this->leaveComponent->validateLeaveAvailability($leave);
+             $leaveRecordsCollection = collect($processed_leave_data["leave_record_data_list"]);
+// Define chunk size (e.g., 100 records per chunk)
+$chunkSize = 1000;
+// Chunk the collection and insert each chunk
+$leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) {
+    $leave->records()->createMany($chunk->toArray());
+});
+
+
+
+
+            //  $this->leaveComponent->validateLeaveAvailability($leave);
 
 
              foreach ($leave->records as $leave_record) {
@@ -254,18 +264,28 @@ class LeaveController extends Controller
              }
 
 
-             $leaveObserver = new LeaveObserver();
-             $leaveObserver->create($leave);
+            //  $leaveObserver = new LeaveObserver();
+            //  $leaveObserver->create($leave);
 
-             // $leave_history_data = $leave->toArray();
-             // $leave_history_data['leave_id'] = $leave->id;
-             // $leave_history_data['actor_id'] = auth()->user()->id;
-             // $leave_history_data['action'] = "create";
-             // $leave_history_data['is_approved'] = NULL;
-             // $leave_history_data['leave_created_at'] = $leave->created_at;
-             // $leave_history_data['leave_updated_at'] = $leave->updated_at;
-             // $leave_history = LeaveHistory::create($leave_history_data);
-             // $leave_history->records()->createMany($leave->records->toArray());
+
+
+             $leave_history_data = $leave->toArray();
+             $leave_history_data['leave_id'] = $leave->id;
+             $leave_history_data['actor_id'] = auth()->user()->id;
+             $leave_history_data['action'] = "create";
+             $leave_history_data['is_approved'] = NULL;
+             $leave_history_data['leave_created_at'] = $leave->created_at;
+             $leave_history_data['leave_updated_at'] = $leave->updated_at;
+             $leave_history = LeaveHistory::create($leave_history_data);
+
+
+
+             // Chunk the collection and insert each chunk
+             $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave_history) {
+                 $leave_history->records()->createMany($chunk->toArray());
+             });
+
+
 
 
              $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
@@ -395,28 +415,40 @@ class LeaveController extends Controller
             $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 
             $leave =  Leave::create($processed_leave_data["leave_data"]);
-            $leave->records()->createMany($processed_leave_data["leave_record_data_list"]);
 
-            $this->leaveComponent->validateLeaveAvailability($leave);
+              $leaveRecordsCollection = collect($processed_leave_data["leave_record_data_list"]);
+// Define chunk size (e.g., 100 records per chunk)
+$chunkSize = 1000;
+// Chunk the collection and insert each chunk
+$leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) {
+    $leave->records()->createMany($chunk->toArray());
+});
+
+            // $this->leaveComponent->validateLeaveAvailability($leave);
 
 
-            foreach ($leave->records as $leave_record) {
-                $this->adjust_payroll_on_leave_update($leave_record,0);
-            }
 
 
-            $leaveObserver = new LeaveObserver();
-            $leaveObserver->create($leave);
 
-            // $leave_history_data = $leave->toArray();
-            // $leave_history_data['leave_id'] = $leave->id;
-            // $leave_history_data['actor_id'] = auth()->user()->id;
-            // $leave_history_data['action'] = "create";
-            // $leave_history_data['is_approved'] = NULL;
-            // $leave_history_data['leave_created_at'] = $leave->created_at;
-            // $leave_history_data['leave_updated_at'] = $leave->updated_at;
-            // $leave_history = LeaveHistory::create($leave_history_data);
-            // $leave_history->records()->createMany($leave->records->toArray());
+            // $leaveObserver = new LeaveObserver();
+            // $leaveObserver->create($leave);
+
+            $leave_history_data = $leave->toArray();
+            $leave_history_data['leave_id'] = $leave->id;
+            $leave_history_data['actor_id'] = auth()->user()->id;
+            $leave_history_data['action'] = "create";
+            $leave_history_data['is_approved'] = NULL;
+            $leave_history_data['leave_created_at'] = $leave->created_at;
+            $leave_history_data['leave_updated_at'] = $leave->updated_at;
+            $leave_history = LeaveHistory::create($leave_history_data);
+
+
+
+            // Chunk the collection and insert each chunk
+            $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave_history) {
+                $leave_history->records()->createMany($chunk->toArray());
+            });
+
 
 
             $this->send_notification($leave, $leave->employee, "Leave Request Taken", "create", "leave");
@@ -557,11 +589,19 @@ class LeaveController extends Controller
 
                 $leave_history_data['action'] = $request_data["is_approved"] ? "approve" : "reject";
 
-
                 $leave_history_data['is_approved'] =  $request_data['is_approved'];
                 $leave_history_data['leave_created_at'] = $leave->created_at;
                 $leave_history_data['leave_updated_at'] = $leave->updated_at;
+
                 $leave_history = LeaveHistory::create($leave_history_data);
+
+
+              $chunkSize = 1000;
+                // Chunk the collection and insert each chunk
+                $leave->records()->chunk($chunkSize)->each(function ($chunk) use ($leave_history) {
+                    $leave_history->records()->createMany($chunk->toArray());
+                });
+
 
 
                 foreach ($leave->records as $leave_record) {
@@ -945,27 +985,62 @@ class LeaveController extends Controller
 
 
                 // Get the IDs of existing leave records
-$existingRecordIds = $leave->records()->pluck('id')->toArray();
+$existingRecordIds = $leave->records()->pluck('id');
+$existingRecordIdsArray = $existingRecordIds->toArray();
 
 // Delete records that don't exist in the new data
-$recordsToDelete = array_diff($existingRecordIds, array_column($processed_leave_data["leave_record_data_list"], 'id'));
+$recordsToDelete = array_diff($existingRecordIdsArray, array_column($processed_leave_data["leave_record_data_list"], 'id'));
 
 
-// Update or create new records
-foreach ($processed_leave_data["leave_record_data_list"] as $recordData) {
-    $record = $leave->records()->find($recordData['id']);
+$recordDataList = collect($processed_leave_data["leave_record_data_list"]);
+
+
+// Separate collections for updates and inserts
+$leaveRecordsToUpdate = collect();
+$leaveRecordsToInsert = collect();
+
+// Partition records into updates and inserts
+$recordDataList->each(function ($recordData) use ($leave,$existingRecordIds,&$leaveRecordsToUpdate, &$leaveRecordsToInsert) {
+    $recordData["leave_id"] = $leave->id;
+    $record = $existingRecordIds->find($recordData['id']);
     if ($record) {
-        // Update existing record
-        $record->update($recordData);
+        // Add to update collection
+        $leaveRecordsToUpdate->push($recordData);
     } else {
-        // Create new record
-        $leave->records()->create($recordData);
+        // Add to insert collection
+        $leaveRecordsToInsert->push($recordData);
     }
+});
+
+// Perform bulk updates using updateOrCreate
+$leaveRecordsToUpdate->each(function ($data) use ($leave) {
+    LeaveRecord::where("id",$data["id"])
+    ->where("leave_id",$leave->id)
+    ->update(collect($data) -> only([
+        'date',
+        'start_time',
+        'end_time',
+        "capacity_hours",
+        "leave_hours",
+    ])->toArray());
+
+});
+
+// Perform bulk inserts using insert method for efficiency
+if ($leaveRecordsToInsert->isNotEmpty()) {
+    $chunkSize = 1000;
+    $leaveRecordsToInsert->chunk($chunkSize)->each(function ($chunk) use ($leave) {
+        $leave->records()->createMany($chunk->toArray());
+    });
+
 }
 
 
 
-$this->leaveComponent->validateLeaveAvailability($leave);
+
+
+
+// $this->leaveComponent->validateLeaveAvailability($leave);
 
 
 $payrolls = Payroll::whereHas("payroll_leave_records", function ($query) use ($recordsToDelete) {
@@ -1001,7 +1076,17 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
                 $leave_record_history = $leave->records->toArray();
                 $leave_record_history["leave_id"] = $leave_history->id;
-                $leave_history->records()->createMany($processed_leave_data["leave_record_data_list"]);
+
+
+                // Perform bulk inserts using insert method for efficiency
+if ($recordDataList->isNotEmpty()) {
+    $chunkSize = 1000;
+    $recordDataList->chunk($chunkSize)->each(function ($chunk) use ($leave_history) {
+        $leave_history->records()->createMany($chunk->toArray());
+    });
+
+}
+
 
 
 

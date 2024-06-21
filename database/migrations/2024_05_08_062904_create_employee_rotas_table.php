@@ -18,7 +18,7 @@ class CreateEmployeeRotasTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
 
-            $table->enum('type', ['regular', 'scheduled', 'flexible'])->default("regular");
+
 
 
 
@@ -29,15 +29,16 @@ class CreateEmployeeRotasTable extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
 
-       
+
 
 
 
             $table->boolean("is_default")->default(false);
 
             $table->boolean("is_active")->default(true);
-            $table->boolean("is_business_default")->default(false);
-            $table->boolean("is_personal")->default(false);
+
+
+
 
 
 

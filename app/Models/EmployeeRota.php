@@ -12,11 +12,11 @@ class EmployeeRota extends Model
 
     protected $fillable = [
         'name',
-        'type',
+
         "description",
 
-        'is_business_default',
-        'is_personal',
+
+
 
         "department_id",
         "user_id",
@@ -50,7 +50,7 @@ class EmployeeRota extends Model
     }
 
 
- 
+
 
 
 

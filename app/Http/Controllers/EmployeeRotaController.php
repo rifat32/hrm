@@ -41,7 +41,7 @@ class EmployeeRotaController extends Controller
      *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
      *     @OA\Property(property="type", type="string", format="string", example="regular"),
      *  *     @OA\Property(property="description", type="string", format="string", example="description"),
-     *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
+
      *
 
      *
@@ -170,14 +170,16 @@ class EmployeeRotaController extends Controller
                     ->whereDoesntHave("employee_rota")
                     ->where('business_id', auth()->user()->business_id)
                     ->pluck("id");
+
+                    $invalid_department_ids = array_diff($request_data['departments'], $departments->toArray());
+
+
+                    if (!empty($invalid_department_ids)) {
+                        throw new Exception('Invalid department IDs found.',403);
+                    }
+
                 }
 
-                $invalid_department_ids = array_diff($request_data['departments'], $departments);
-
-
-                if (!empty($invalid_department_ids)) {
-                    throw new Exception('Invalid department IDs found.',403);
-                }
 
 
                 $users = [];
@@ -194,21 +196,20 @@ class EmployeeRotaController extends Controller
                     ->whereIn('users.id', $request_data['users'])
                     ->whereNotIn('users.id', [auth()->user()->id])
                     ->pluck("id");
+
+                    $invalid_user_ids = array_diff($request_data['users'], $users->toArray());
+
+
+                    if (!empty($invalid_user_ids)) {
+                        throw new Exception('Invalid user IDs found.',403);
+                    }
                 }
 
-                $invalid_user_ids = array_diff($request_data['users'], $users);
-
-
-                if (!empty($invalid_user_ids)) {
-                    throw new Exception('Invalid user IDs found.',403);
-                }
 
 
 
-                // @@@remove_field
-                $request_data["type"] = "flexible";
-                $request_data["is_personal"] = 0;
-               // @@@remove_field
+
+
 
 
                 $request_data["business_id"] = $request->user()->business_id;
@@ -223,10 +224,7 @@ class EmployeeRotaController extends Controller
 
                 $common_data = collect([
                     'name' => $request_data['name'],
-                    'type' => $request_data['type'],
                     'description' => $request_data['description'],
-                    'is_business_default' => $request_data['is_business_default'],
-                    'is_personal' => $request_data['is_personal'],
                     'is_default' => $request_data['is_default'],
                     'is_active' => $request_data['is_active'],
                     'business_id' => $request_data['business_id'],
@@ -237,13 +235,13 @@ class EmployeeRotaController extends Controller
 
                 if (!empty($departments)) {
                     $data_to_process = $data_to_process->concat(collect($departments)->map(function ($department_id) use ($common_data) {
-                        return $common_data->merge(['department_id' => $department_id])->all();
+                        return $common_data->merge(['department_id' => $department_id, 'user_id' => NULL])->all();
                     }));
                 }
 
                 if (!empty($users)) {
                     $data_to_process = $data_to_process->concat(collect($users)->map(function ($user_id) use ($common_data) {
-                        return $common_data->merge(['user_id' => $user_id])->all();
+                        return $common_data->merge(['department_id' => NULL,'user_id' => $user_id])->all();
                     }));
                 }
 
@@ -349,9 +347,9 @@ if ($processedDetails->isNotEmpty()) {
      *         @OA\JsonContent(
      *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
      *     @OA\Property(property="name", type="string", format="string", example="Updated Christmas"),
-     *     @OA\Property(property="type", type="string", format="string", example="regular"),
+
      *     @OA\Property(property="description", type="string", format="string", example="description"),
-     *    *      *  *     @OA\Property(property="is_personal", type="boolean", format="boolean", example="0"),
+
      *
      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3,4}),
 
@@ -481,9 +479,6 @@ if ($processedDetails->isNotEmpty()) {
         'name',
         'type',
         "description",
-
-        'is_personal',
-
         'start_date',
         'end_date',
 
@@ -684,14 +679,7 @@ if ($processedDetails->isNotEmpty()) {
      * required=true,
      * example="description"
      * ),
-     *    * @OA\Parameter(
-     * name="type",
-     * in="query",
-     * description="type",
-     * required=true,
-     * example="type"
-     * ),
-     *
+
      *
      * *  @OA\Parameter(
      * name="search_key",
@@ -700,13 +688,7 @@ if ($processedDetails->isNotEmpty()) {
      * required=true,
      * example="search_key"
      * ),
-     *      * *  @OA\Parameter(
-     * name="is_personal",
-     * in="query",
-     * description="is_personal",
-     * required=true,
-     * example="1"
-     * ),
+
      *
      *
      * @OA\Parameter(
@@ -771,7 +753,7 @@ if ($processedDetails->isNotEmpty()) {
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-            $employee_rotas = EmployeeRota::with("details","departments","users")
+            $employee_rotas = EmployeeRota::with("details","department","user")
             ->where([
                 "employee_rotas.business_id" => auth()->user()->business_id
             ])
@@ -813,16 +795,11 @@ if ($processedDetails->isNotEmpty()) {
                 })
 
 
-                ->when(isset($request->is_personal), function ($query) use ($request) {
-                    return $query->where('employee_rotas.is_personal', intval($request->is_personal));
-                })
-                ->when(!isset($request->is_personal), function ($query) use ($request) {
-                    return $query->where('employee_rotas.is_personal', 0);
-                })
+
 
 
                 ->when(isset($request->is_default), function ($query) use ($request) {
-                    return $query->where('employee_rotas.is_default', intval($request->is_personal));
+                    return $query->where('employee_rotas.is_default', intval($request->is_default));
                 })
 
 
@@ -936,7 +913,7 @@ if ($processedDetails->isNotEmpty()) {
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-            $employee_rota =  EmployeeRota::with("details","departments","users")
+            $employee_rota =  EmployeeRota::with("details","department","user")
             ->where([
                 "id" => $id,
                 "employee_rotas.business_id" => auth()->user()->business_id

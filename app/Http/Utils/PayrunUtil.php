@@ -665,12 +665,13 @@ return $salary_histories;
                 if ($leave_record->leave->status == "approved" || $leave_record->leave->leave_type->type == "paid") {
                 $this->create_leave_arrear($leave_record, $add_to_next_payroll);
 
-            } else {
-                if ($leave_record->leave->status == "rejected") {
-                    $leave_record_arrear->delete();
             }
 
-            }
+        }
+        else {
+            if ($leave_record->leave->status == "rejected") {
+                $leave_record_arrear->delete();
+        }
 
         }
         return true;
@@ -714,6 +715,68 @@ return $salary_histories;
     }
 
 
+    public function adjust_payroll_on_leave_update_v2($leave_record, $add_to_next_payroll = 0,)
+    {
+
+        $leave_record_arrear =   LeaveRecordArrear::where(["leave_record_id" => $leave_record->id])->first();
+
+        $payroll = Payroll::whereHas("payroll_leave_records", function ($query) use ($leave_record) {
+            $query->where("payroll_leave_records.leave_record_id", $leave_record->id);
+        })->first();
+
+        if (empty($payroll)) {
+            if (empty($leave_record_arrear)) {
+                if ($leave_record->leave->status == "approved" || $leave_record->leave->leave_type->type == "paid") {
+                $this->create_leave_arrear($leave_record, $add_to_next_payroll);
+
+            }
+
+        }
+        else {
+            if ($leave_record->leave->status == "rejected") {
+                $leave_record_arrear->delete();
+        }
+
+        }
+        return true;
+    }
+
+        if ($leave_record->leave->status != "approved" || $leave_record->leave->leave_type->type != "paid") {
+            PayrollLeaveRecord::where([
+                "leave_record_id" => $leave_record->id,
+                "payroll_id" => $payroll->id
+            ])
+                ->delete();
+
+
+
+                if ($leave_record_arrear) {
+                    $leave_record_arrear->delete();
+                }
+
+                // if ($leave_record_arrear) {
+                //     $leave_record_arrear->update([
+                //         "status" =>  "pending_approval",
+                //     ]);
+                // } else {
+                //     $this->create_leave_arrear($leave_record, 0);
+                // }
+
+
+        } else {
+            if ($leave_record_arrear) {
+                $leave_record_arrear->update([
+                    "status" =>  "approved",
+                ]);
+            }
+        }
+
+
+
+        $this->recalculate_payroll_values($payroll);
+
+        return true;
+    }
 
 
 

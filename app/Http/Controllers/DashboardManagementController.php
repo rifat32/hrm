@@ -1892,7 +1892,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
-           ->whereDoesntHave("employee_rotas.details", function($query) use($day_number) {
+           ->whereDoesntHave("employee_rota.details", function($query) use($day_number) {
             $query->where([
                 "employee_rota_details.day" => $day_number,
 
@@ -1946,7 +1946,7 @@ $data["yesterday_data_count"] = $data["yesterday_data_count"]->whereBetween('pas
             $query->whereIn("departments.id", $all_manager_department_ids);
         })
             ->whereNotIn('id', [auth()->user()->id])
-        //    ->whereHas("employee_rotas.details", function($query) use($day_number) {
+        //    ->whereHas("employee_rota.details", function($query) use($day_number) {
         //     $query->where([
         //         "employee_rota_details.is_weekend" => 0,
         //         "employee_rota_details.day" => $day_number,

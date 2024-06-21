@@ -235,6 +235,34 @@ ALTER TABLE payroll_leave_records ADD CONSTRAINT payroll_leave_records_leave_rec
 
 31. DROP TABLE `department_employee_rotas`, `user_employee_rotas`;
 
+32. ALTER TABLE employee_rotas
+ADD COLUMN department_id BIGINT UNSIGNED NULL,
+ADD COLUMN user_id BIGINT UNSIGNED NULL;
+
+ALTER TABLE employee_rotas
+ADD CONSTRAINT fk_department
+FOREIGN KEY (department_id)
+REFERENCES departments(id)
+ON DELETE CASCADE;
+
+ALTER TABLE employee_rotas
+ADD CONSTRAINT fk_user
+FOREIGN KEY (user_id)
+REFERENCES users(id)
+ON DELETE CASCADE;
+
+
+
+33. ALTER TABLE `employee_rotas`
+  DROP `type`,
+  DROP `attendances_count`,
+  DROP `is_business_default`,
+  DROP `is_personal`;
+
+  34. ALTER TABLE `work_shifts` DROP `attendances_count`;
+  35. ALTER TABLE `work_shift_histories` DROP `attendances_count`;
+
+
 
 
 
