@@ -430,6 +430,9 @@ public function storeUploadedFiles($filePaths, $fileKey, $location, $arrayOfStri
     return collect($filePaths)->map(function($filePathItem) use ($temporaryFilesLocation, $fileKey, $location) {
         // Determine the file path based on whether a file key is provided
 
+        Log::info(json_encode($filePathItem));
+        Log::info(json_encode($fileKey));
+
         $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
 
 

@@ -847,8 +847,9 @@ class UserAssetController extends Controller
                   ->when(!empty($request->user_id), function ($query) use ($request) {
                       return $query->where('user_assets.user_id', $request->user_id);
                   })
+                  
                   ->when(!empty($request->not_in_user_id), function ($query) use ($request) {
-                    return $query->whereNotIn('user_assets.not_in_user_id', [$request->not_in_user_id]);
+                    return $query->whereNotIn('user_assets.user_id', [$request->not_in_user_id]);
                 })
 
 

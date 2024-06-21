@@ -273,7 +273,7 @@ return "swagger generated";
             ['id' => 10, 'name' => 'Twitch', 'icon' => 'FaTwitch', 'link' => 'https://www.twitch.tv/'],
             ['id' => 11, 'name' => 'Stack Overflow', 'icon' => 'FaStackOverflow', 'link' => 'https://stackoverflow.com/'],
             ['id' => 12, 'name' => 'Slack', 'icon' => 'FaSlack', 'link' => 'https://slack.com/'],
-            ['id' => 13, 'name' => 'Other', 'icon' => 'FaGlobe', 'link' => 'https://www.example.com/'], // Change 'https://www.example.com/' to the desired link
+            ['id' => 13, 'name' => 'Other', 'icon' => 'FaGlobe', 'link' => ''], 
         ];
 
 
@@ -831,7 +831,7 @@ return "swagger generated";
             'is_personal' => false,
             'break_type' => 'unpaid',
             'break_hours' => 1,
-   
+
             "is_active" => 1,
             "is_default"=> 1,
             'details' => [

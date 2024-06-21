@@ -766,9 +766,13 @@ if ($processedDetails->isNotEmpty()) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 });
             })
+            ->where(function($query)  {
+                $query->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
+                ->orWhereNull("employee_rotas.user_id");
+            })
 
 
-            ->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
+
 
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -790,9 +794,6 @@ if ($processedDetails->isNotEmpty()) {
                     return $query->where("employee_rotas.description", "like", "%" . $term . "%");
                 })
 
-                ->when(isset($request->type), function ($query) use ($request) {
-                    return $query->where('employee_rotas.type', ($request->type));
-                })
 
 
 

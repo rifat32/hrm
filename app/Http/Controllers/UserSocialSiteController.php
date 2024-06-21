@@ -208,6 +208,7 @@ UserSocialSite::where([
 
                   if (empty($request["profile_link"])) {
                     UserSocialSite::where($user_social_site_query_params)->delete();
+                    return response(["ok" => true], 201);
                   } else {
                     $user_social_site  =  tap(UserSocialSite::where($user_social_site_query_params))->update(
                         collect($request_data)->only([
@@ -221,7 +222,7 @@ UserSocialSite::where([
                         // ->with("somthing")
 
                         ->first();
-                    if (!$user_social_site) {
+                    if (empty($user_social_site)) {
                         return response()->json([
                             "message" => "something went wrong."
                         ], 500);

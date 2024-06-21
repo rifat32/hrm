@@ -262,6 +262,7 @@ ON DELETE CASCADE;
   34. ALTER TABLE `work_shifts` DROP `attendances_count`;
   35. ALTER TABLE `work_shift_histories` DROP `attendances_count`;
 
+36. UPDATE `social_sites` SET `link` = '', `deleted_at` = NULL WHERE `social_sites`.`name` = "Other"
 
 
 

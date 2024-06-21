@@ -1881,13 +1881,10 @@ class BusinessController extends Controller
                 }
 
 
-
-
-
                 $request_data = $request->validated();
                 $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
-                $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"],"file","pension_scheme_letters");
+                $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"],"","pension_scheme_letters");
 
                 $business = Business::where([
                      "id" =>$request_data['business']["id"]

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 trait LeaveUtil
 {
-    use ErrorUtil;
+    use ErrorUtil, BasicUtil;
 
     public function processLeaveApproval($leave,$is_approved=0) {
         $leave = Leave::where([
@@ -101,52 +101,36 @@ trait LeaveUtil
         }
         if ($setting_leave->approval_level == "multiple") {
 
-            $not_approved_manager_found = false;
-
-            $department = Department::whereHas('users', function ($query) use ($leave) {
-                $query->where('departments.id', $leave->employee->departments[0]->id);
-            })->first();
 
 
 
-            if (!$department) {
-                return [
-                    "success" => false,
-                    "message" => "Hey please specify department for the employee first!",
-                    "status" => 400
-                ];
 
-            }
-
-
-            $parentData = [$department];
-
-            $parent = clone $department;
-
-            while (!empty($parent->parent)) {
-
-                $parentData[] = $parent->parent;
-                $parent = clone $parent->parent;
-
-            }
-
-            $parentData = array_reverse($parentData);
+        $all_parent_departments_manager_of_user   = $this->all_parent_departments_manager_of_user($leave->user_id,$user->busines_id);
 
 
 
-            foreach($parentData as $single_department) {
-                 $verify_leave_approval =   LeaveApproval::where([
+
+                 $not_approved_manager_found =   LeaveApproval::where([
                         'leave_id' => $leave->id,
-                        'is_approved' => 1,
-                        "created_by" => $single_department->manager_id
-                    ])->latest()->first();
-                if(!$verify_leave_approval) {
-                    $not_approved_manager_found = true;
-                    break;
-                }
-            }
+                        'is_approved' => 0,
 
-            if(!$not_approved_manager_found || auth()->user()->hasRole("business_owner") ) {
+                    ])
+                    ->whereIn("created_by",$all_parent_departments_manager_of_user)
+                    ->exists();
+
+                    if(!$not_approved_manager_found) {
+                        $leave->status = "rejected";
+                    } else {
+                        if($is_approved) {
+                            $leave->status = "approved";
+                        }else {
+                            $leave->status = "rejected";
+                        }
+                    }
+
+
+
+            if(auth()->user()->hasRole("business_owner") ) {
                 if($is_approved) {
                     $leave->status = "approved";
                 }else {
@@ -155,14 +139,13 @@ trait LeaveUtil
 
             }
 
+
+
+
         }
 
         $leave->save();
-        return [
-            "success" => true,
-            "message" => "",
-            "status" => ''
-        ];
+
 
     }
 
