@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Holiday;
 use Illuminate\Foundation\Http\FormRequest;
 
 class HolidayUpdateStatusRequest extends FormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *

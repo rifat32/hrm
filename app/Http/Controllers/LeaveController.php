@@ -552,14 +552,41 @@ $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('leave_approve')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+
+            if (!$request->user()->hasPermissionTo('leave_approve')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
                 $request_data = $request->validated();
+
+
+                $leave = Leave::where([
+                    "id" => $request_data["leave_id"]
+                ])
+                ->where('leaves.business_id', '=', auth()->user()->business_id)
+                ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids)  {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 })
+                 ->whereHas("employee", function ($query){
+                    $query->whereNotIn("users.id",[auth()->user()->id]);
+                })
+
+
+                ->first();
+
+                if (empty($leave)) {
+                    throw new Exception("No leave request found",400);
+                }
+
+
+
                 $request_data["created_by"] = $request->user()->id;
+
                 $leave_approval =  LeaveApproval::create($request_data);
                 if (!$leave_approval) {
                     return response()->json([
@@ -568,7 +595,8 @@ $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) 
                 }
 
 
-                $process_leave_approval =   $this->processLeaveApproval($request_data["leave_id"], $request_data["is_approved"]);
+
+                $process_leave_approval =   $this->processLeaveApproval($leave, $request_data["is_approved"]);
 
                 if (!$process_leave_approval["success"]) {
 
@@ -579,9 +607,7 @@ $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) 
                 );
                 }
 
-                $leave = Leave::where([
-                    "id" => $request_data["leave_id"]
-                ])->first();
+
 
                 $leave_history_data = $leave->toArray();
                 $leave_history_data['leave_id'] = $leave->id;
@@ -1057,8 +1083,6 @@ $leave->records()->whereIn('id', $recordsToDelete)->delete();
 
 
 
-
-
                 foreach ($leave->records as $leave_record) {
                     $this->adjust_payroll_on_leave_update($leave_record,0);
                 }
@@ -1086,8 +1110,6 @@ if ($recordDataList->isNotEmpty()) {
     });
 
 }
-
-
 
 
                 $this->send_notification($leave, $leave->employee, "Leave Request Updated", "update", "leave");

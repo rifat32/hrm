@@ -10,7 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveApproveRequest extends BaseFormRequest
 {
-    use BasicUtil;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -28,12 +28,12 @@ class LeaveApproveRequest extends BaseFormRequest
      */
     public function rules()
     {
-        $all_manager_department_ids = $this->get_all_departments_of_manager();
+
         return [
             'leave_id' => [
                 'required',
                 'numeric',
-                new ValidateLeaveId($all_manager_department_ids),
+
 
             ],
 
