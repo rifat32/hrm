@@ -596,16 +596,9 @@ $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) 
 
 
 
-                $process_leave_approval =   $this->processLeaveApproval($leave, $request_data["is_approved"]);
+          $this->processLeaveApproval($leave, $request_data["is_approved"]);
 
-                if (!$process_leave_approval["success"]) {
 
-                    return response(
-                    [
-                    "message" => $process_leave_approval["message"]
-                    ], $process_leave_approval["status"]
-                );
-                }
 
 
 
@@ -622,11 +615,20 @@ $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) 
                 $leave_history = LeaveHistory::create($leave_history_data);
 
 
-              $chunkSize = 1000;
-                // Chunk the collection and insert each chunk
-                $leave->records()->chunk($chunkSize)->each(function ($chunk) use ($leave_history) {
-                    $leave_history->records()->createMany($chunk->toArray());
-                });
+
+                $chunkSize = 1000;
+
+           // Fetch the records with the necessary fields
+$leave_records = $leave->records()->get(['date', 'start_time', 'end_time', 'capacity_hours', 'leave_hours']);
+
+// Chunk the records and insert each chunk
+$leave_records->chunk($chunkSize, function ($chunk) use ($leave_history) {
+    // Convert the chunk to an array
+    $data = $chunk->toArray();
+
+    // Bulk insert the chunk data
+    $leave_history->records()->createMany($data);
+});
 
 
 
@@ -1028,7 +1030,7 @@ $leaveRecordsToInsert = collect();
 // Partition records into updates and inserts
 $recordDataList->each(function ($recordData) use ($leave,$existingRecordIds,&$leaveRecordsToUpdate, &$leaveRecordsToInsert) {
     $recordData["leave_id"] = $leave->id;
-    $record = $existingRecordIds->find($recordData['id']);
+    $record = $existingRecordIds->contains($recordData['id']);
     if ($record) {
         // Add to update collection
         $leaveRecordsToUpdate->push($recordData);

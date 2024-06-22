@@ -20,6 +20,18 @@ trait LeaveUtil
     use ErrorUtil, BasicUtil;
 
     public function processLeaveApproval($leave,$is_approved=0) {
+
+        if(auth()->user()->hasRole("business_owner") ) {
+            if($is_approved) {
+                $leave->status = "approved";
+            }else {
+                $leave->status = "rejected";
+            }
+             $leave->save();
+             return;
+
+        }
+        $user = auth()->user();
         $leave = Leave::where([
             "id" => $leave->id,
             "business_id" => auth()->user()->business_id
@@ -35,66 +47,72 @@ trait LeaveUtil
 
 
 
-        $leave->status = "in_progress";
+
         $setting_leave = SettingLeave::where([
             "business_id" => auth()->user()->business_id,
             "is_default" => 0
         ])->first();
 
-       $special_user_ids = $setting_leave->special_users()->pluck("id");
 
-       $special_role_ids =  $setting_leave->special_roles()->pluck("role_id");
+
+
 
         if ($setting_leave->approval_level == "single") {
-            $leave_approval = LeaveApproval::where([
-                "leave_id" => $leave->id,
-            ])
-            ->whereIn("created_by",$special_user_ids->toArray())
-            ->orderBy("id","DESC")
-            ->select(
-                "leave_approvals.id",
-                "leave_approvals.is_approved"
-            )
-            ->first();
-
-
-
-                $user = auth()->user();
 
 
 
 
-                $is_special_user =  $special_user_ids->contains($user->id);
-                if ($is_special_user) {
-                    if($leave_approval->is_approved) {
-                        $leave->status = "approved";
-                    }else {
-                        $leave->status = "rejected";
-                    }
+            $special_user_ids = $setting_leave->special_users()->pluck("users.id");
+            $is_special_user =  $special_user_ids->contains($user->id);
 
+            if(!$is_special_user){
+                $special_role_ids =  $setting_leave->special_roles()->pluck("role_id");
 
-                }
-                else {
+                $role_names = $user->getRoleNames()->toArray();
 
-                    $role_names = $user->getRoleNames()->toArray();
-
-                    $role_ids =  Role::whereIn("name", $role_names)->pluck("roles.id");
+                $role_ids =  Role::whereIn("name", $role_names)->pluck("roles.id");
 
 
 
-                    $special_role = $special_role_ids->contains(function ($value) use ($role_ids) {
-                        return in_array($value, $role_ids);
-                    });
+                $special_role = $special_role_ids->contains(function ($value) use ($role_ids) {
+                    return in_array($value, $role_ids->toArray());
+                });
 
-                    if($special_role) {
-                            if($leave_approval->is_approved) {
-                                $leave->status = "approved";
-                            }else {
-                                $leave->status = "rejected";
-                            }
+                if(!$special_role) {
+                      return ;
+            }
 
-                    }
-                }
+            }
+
+
+
+            if($is_approved) {
+                $leave->status = "approved";
+            }else {
+                $leave->status = "rejected";
+            }
+
+
+
+
+
+
+
+            // $leave_approval = LeaveApproval::where([
+            //     "leave_id" => $leave->id,
+            // ])
+            // ->whereIn("created_by",$special_user_ids->toArray())
+            // ->orderBy("id","DESC")
+            // ->select(
+            //     "leave_approvals.id",
+            //     "leave_approvals.is_approved"
+            // )
+            // ->first();
+
+
+
+
+
 
 
 

@@ -650,7 +650,7 @@ class AttendanceController extends Controller
                         ->first()->project_id];
                 }
                 if (empty($item["work_location_id"])) {
-                    $item["work_location_id"] = $user->work_location_id;
+                    $item["work_location_id"] = $user->work_locations[0]->id;
                 }
 
                 if (empty($item["is_present"])) {
