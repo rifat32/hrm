@@ -22,94 +22,7 @@ class UserPayslipController extends Controller
 
 
 
- /**
-     *
-     * @OA\Post(
-     *      path="/v1.0/user-payslips/single-file-upload",
-     *      operationId="createPayslipFileSingle",
-     *      tags={"user_payslips"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *      summary="This method is to store user payslip file ",
-     *      description="This method is to store user payslip file",
-     *
-     *  @OA\RequestBody(
-     *   * @OA\MediaType(
-     *     mediaType="multipart/form-data",
-     *     @OA\Schema(
-     *         required={"file"},
-     *         @OA\Property(
-     *             description="file to upload",
-     *             property="file",
-     *             type="file",
-     *             collectionFormat="multi",
-     *         )
-     *     )
-     * )
 
-
-
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-     public function createPayslipFileSingle(SingleFileUploadRequest $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             // if(!$request->user()->hasPermissionTo('business_create')){
-             //      return response()->json([
-             //         "message" => "You can not perform this action"
-             //      ],401);
-             // }
-
-             $request_data = $request->validated();
-
-             $location =  config("setup-config.payslip_files_location");
-
-             $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["file"]->getClientOriginalName());
-
-             $request_data["file"]->move(public_path($location), $new_file_name);
-
-
-             return response()->json(["file" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
 
 
 
@@ -277,7 +190,7 @@ DB::commit();
 
 
            try {
-            
+
             if(!empty($request_data["payslip_file"])) {
                 $this->moveUploadedFilesBack([$request_data["payslip_file"]],"","payment_record_file");
             }

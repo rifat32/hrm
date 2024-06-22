@@ -26,93 +26,7 @@ class UserAssetController extends Controller
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
-    /**
-          *
-       * @OA\Post(
-       *      path="/v1.0/user-assets/single-file-upload",
-       *      operationId="createUserAssetFileSingle",
-       *      tags={"user_assets"},
-       *       security={
-       *           {"bearerAuth": {}}
-       *       },
-       *      summary="This method is to store user asset file ",
-       *      description="This method is to store user asset file",
-       *
-     *  @OA\RequestBody(
-          *   * @OA\MediaType(
-  *     mediaType="multipart/form-data",
-  *     @OA\Schema(
-  *         required={"file"},
-  *         @OA\Property(
-  *             description="file to upload",
-  *             property="file",
-  *             type="file",
-  *             collectionFormat="multi",
-  *         )
-  *     )
-  * )
-       *      ),
-       *      @OA\Response(
-       *          response=200,
-       *          description="Successful operation",
-       *       @OA\JsonContent(),
-       *       ),
-       *      @OA\Response(
-       *          response=401,
-       *          description="Unauthenticated",
-       * @OA\JsonContent(),
-       *      ),
-       *        @OA\Response(
-       *          response=422,
-       *          description="Unprocesseble Content",
-       *    @OA\JsonContent(),
-       *      ),
-       *      @OA\Response(
-       *          response=403,
-       *          description="Forbidden",
-       *   @OA\JsonContent()
-       * ),
-       *  * @OA\Response(
-       *      response=400,
-       *      description="Bad Request",
-       *   *@OA\JsonContent()
-       *   ),
-       * @OA\Response(
-       *      response=404,
-       *      description="not found",
-       *   *@OA\JsonContent()
-       *   )
-       *      )
-       *     )
-       */
-
-       public function createUserAssetFileSingle(SingleFileUploadRequest $request)
-       {
-           try{
-               $this->storeActivity($request, "DUMMY activity","DUMMY description");
-               // if(!$request->user()->hasPermissionTo('business_create')){
-               //      return response()->json([
-               //         "message" => "You can not perform this action"
-               //      ],401);
-               // }
-
-               $request_data = $request->validated();
-
-               $location =  config("setup-config.user_assets_location");
-
-               $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["file"]->getClientOriginalName());
-
-               $request_data["file"]->move(public_path($location), $new_file_name);
-
-
-               return response()->json(["file" => $new_file_name,"location" => $location,"full_location"=>("/".$location."/".$new_file_name)], 200);
-
-
-           } catch(Exception $e){
-               error_log($e->getMessage());
-           return $this->sendError($e,500,$request);
-           }
-       }
+ 
 
 
 
@@ -207,6 +121,14 @@ class UserAssetController extends Controller
 
                   $request_data["created_by"] = $request->user()->id;
                   $request_data["business_id"] = $request->user()->business_id;
+
+
+                  if(empty($request_data["user_id"])) {
+                    $request_data["status"] = "available";
+                  } else {
+                    $request_data["status"] = "assigned";
+                  }
+
 
                   $user_asset =  UserAsset::create($request_data);
 
@@ -847,9 +769,14 @@ class UserAssetController extends Controller
                   ->when(!empty($request->user_id), function ($query) use ($request) {
                       return $query->where('user_assets.user_id', $request->user_id);
                   })
-                  
+
                   ->when(!empty($request->not_in_user_id), function ($query) use ($request) {
-                    return $query->whereNotIn('user_assets.user_id', [$request->not_in_user_id]);
+                    return $query->where(function($query) use($request) {
+                        $query->whereNotIn('user_assets.user_id', [$request->not_in_user_id])
+                        ->orWhereNull('user_assets.user_id');
+                    });
+
+
                 })
 
 

@@ -118,7 +118,7 @@ Route::patch('/health', function () {
 
 
 Route::post('/v1.0/files/single-file-upload', [FileUploadController::class, "createFileSingle"]);
-
+Route::post('/v1.0/files/multiple-file-upload', [FileUploadController::class, "createFileMultiple"]);
 
 
 
@@ -140,7 +140,7 @@ Route::post('/auth/check/email', [AuthController::class, "checkEmail"]);
 
 Route::post('/auth/check/business/email', [AuthController::class, "checkBusinessEmail"]);
 
-Route::post('/v1.0/users/single-file-upload', [UserManagementController::class, "createUserFileSingle"]);
+
 
 
 
@@ -434,7 +434,7 @@ Route::delete('/v1.0/service-plans/{ids}', [ServicePlanController::class, "delet
 // ********************************************
 
 
-Route::post('/v1.0/users/multiple-file-upload', [UserManagementController::class, "createUserFileMultiple"]);
+
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
@@ -538,8 +538,6 @@ Route::delete('/v1.0/roles/{ids}', [RolesController::class, "deleteRolesByIds"])
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user document  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-Route::post('/v1.0/user-documents/single-file-upload', [UserDocumentController::class, "createUserDocumentFileSingle"]);
 Route::post('/v1.0/user-documents', [UserDocumentController::class, "createUserDocument"]);
 Route::put('/v1.0/user-documents', [UserDocumentController::class, "updateUserDocument"]);
 Route::get('/v1.0/user-documents', [UserDocumentController::class, "getUserDocuments"]);
@@ -612,7 +610,7 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user payslip   management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Route::post('/v1.0/user-payslips/single-file-upload', [UserPayslipController::class, "createPayslipFileSingle"]);
+
 Route::post('/v1.0/user-payslips', [UserPayslipController::class, "createUserPayslip"]);
 Route::put('/v1.0/user-payslips', [UserPayslipController::class, "updateUserPayslip"]);
 Route::get('/v1.0/user-payslips', [UserPayslipController::class, "getUserPayslips"]);
@@ -755,7 +753,7 @@ Route::delete('/v1.0/user-pension-histories/{ids}', [UserPensionHistoryControlle
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user asset  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Route::post('/v1.0/user-assets/single-file-upload', [UserAssetController::class, "createUserAssetFileSingle"]);
+
 Route::post('/v1.0/user-assets', [UserAssetController::class, "createUserAsset"]);
 Route::put('/v1.0/user-assets/add-existing', [UserAssetController::class, "addExistingUserAsset"]);
 Route::put('/v1.0/user-assets', [UserAssetController::class, "updateUserAsset"]);
@@ -1189,7 +1187,7 @@ Route::post('/v1.0/setting-leave', [SettingLeaveController::class, "createSettin
 // leaves  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-Route::post('/v1.0/leaves/multiple-file-upload', [LeaveController::class, "createLeaveFileMultiple"]);
+
 Route::post('/v1.0/leaves/self', [LeaveController::class, "createSelfLeave"]);
 Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
 Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
@@ -1413,7 +1411,7 @@ Route::delete('/v1.0/job-listings/{ids}', [JobListingController::class, "deleteJ
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // candidates  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Route::post('/v1.0/candidates/multiple-file-upload', [CandidateController::class, "createCandidateFileMultiple"]);
+
 Route::post('/v1.0/candidates', [CandidateController::class, "createCandidate"]);
 Route::put('/v1.0/candidates', [CandidateController::class, "updateCandidate"]);
 Route::get('/v1.0/candidates', [CandidateController::class, "getCandidates"]);
