@@ -6,6 +6,7 @@ use App\Exports\UserAssetsExport;
 use App\Http\Requests\SingleFileUploadRequest;
 use App\Http\Requests\UserAssetAddExistingRequest;
 use App\Http\Requests\UserAssetCreateRequest;
+use App\Http\Requests\UserAssetReturnRequest;
 use App\Http\Requests\UserAssetUpdateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
@@ -26,7 +27,7 @@ class UserAssetController extends Controller
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
- 
+
 
 
 
@@ -418,7 +419,7 @@ class UserAssetController extends Controller
                           "message" => "You can not perform this action"
                       ], 401);
                   }
-                  $business_id =  $request->user()->business_id;
+
                   $request_data = $request->validated();
                   if(!empty($request_data["image"])) {
                     $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets");
@@ -480,30 +481,30 @@ class UserAssetController extends Controller
                     ]);
 
 
-                        $user_asset_history  =  UserAssetHistory::create([
-                            'user_id' => $user_asset->user_id,
-                            "user_asset_id" => $user_asset->id,
-
-                            'name' => $user_asset->name,
-                            'code' => $user_asset->code,
-                            'serial_number' => $user_asset->serial_number,
-                            'type' => $user_asset->type,
-                            "is_working" => $user_asset->is_working,
-                            "status" => $user_asset->status,
-                            'image' => $user_asset->image,
-                            'date' => $user_asset->date,
-                            'note' => $user_asset->note,
-                            "business_id" => $user_asset->business_id,
-
-                            "from_date" => now(),
-                            "to_date" => NULL,
-                            'created_by' => $user_asset->created_by
-
-                          ]
-                          );
-
-
                    }
+
+
+                   $user_asset_history  =  UserAssetHistory::create([
+                    'user_id' => $user_asset->user_id,
+                    "user_asset_id" => $user_asset->id,
+
+                    'name' => $user_asset->name,
+                    'code' => $user_asset->code,
+                    'serial_number' => $user_asset->serial_number,
+                    'type' => $user_asset->type,
+                    "is_working" => $user_asset->is_working,
+                    "status" => $user_asset->status,
+                    'image' => $user_asset->image,
+                    'date' => $user_asset->date,
+                    'note' => $user_asset->note,
+                    "business_id" => $user_asset->business_id,
+
+                    "from_date" => now(),
+                    "to_date" => NULL,
+                    'created_by' => $user_asset->created_by
+
+                  ]
+                  );
                 //    $this->moveUploadedFiles($request_data["image"],"assets");
                   return response($user_asset, 201);
               });
@@ -512,6 +513,122 @@ class UserAssetController extends Controller
               return $this->sendError($e, 500, $request);
           }
       }
+   /**
+       *
+       * @OA\Put(
+       *      path="/v1.0/user-assets/return",
+       *      operationId="returnUserAsset",
+       *      tags={"user_assets"},
+       *       security={
+       *           {"bearerAuth": {}}
+       *       },
+       *      summary="This method is to update  user document ",
+       *      description="This method is to update user document",
+       *
+       *  @OA\RequestBody(
+       *         required=true,
+       *         @OA\JsonContent(
+  *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+*     @OA\Property(property="user_id", type="integer", format="int", example=1),
+
+ *
+   *
+
+       *
+       *         ),
+       *      ),
+       *      @OA\Response(
+       *          response=200,
+       *          description="Successful operation",
+       *       @OA\JsonContent(),
+       *       ),
+       *      @OA\Response(
+       *          response=401,
+       *          description="Unauthenticated",
+       * @OA\JsonContent(),
+       *      ),
+       *        @OA\Response(
+       *          response=422,
+       *          description="Unprocesseble Content",
+       *    @OA\JsonContent(),
+       *      ),
+       *      @OA\Response(
+       *          response=403,
+       *          description="Forbidden",
+       *   @OA\JsonContent()
+       * ),
+       *  * @OA\Response(
+       *      response=400,
+       *      description="Bad Request",
+       *   *@OA\JsonContent()
+       *   ),
+       * @OA\Response(
+       *      response=404,
+       *      description="not found",
+       *   *@OA\JsonContent()
+       *   )
+       *      )
+       *     )
+       */
+
+       public function returnUserAsset(UserAssetReturnRequest $request)
+       {
+
+           try {
+               $this->storeActivity($request, "DUMMY activity","DUMMY description");
+               return DB::transaction(function () use ($request) {
+                   if (!$request->user()->hasPermissionTo('employee_asset_update')) {
+                       return response()->json([
+                           "message" => "You can not perform this action"
+                       ], 401);
+                   }
+
+                   $request_data = $request->validated();
+
+
+
+                   $user_asset_query_params = [
+                       "id" => $request_data["id"],
+                       "user_id" => $request_data["user_id"],
+                   ];
+
+                   $user_asset  =  tap(UserAsset::where($user_asset_query_params))->update(
+                       collect($request_data)->only([
+                            'user_id',
+                       ])->toArray()
+                   )
+                       // ->with("somthing")
+
+                       ->first();
+                   if (empty($user_asset)) {
+                       return response()->json([
+                           "message" => "something went wrong."
+                       ], 500);
+                   }
+
+
+                     UserAssetHistory::where([
+                         'user_id' => $request_data["user_id"],
+                         "user_asset_id" => $request_data["id"],
+                         "to_date" => NULL
+                     ])
+                     ->update([
+                         "to_date" => now(),
+                         "status" => "returned",
+                     ]);
+
+
+
+
+
+
+                   return response($user_asset, 201);
+               });
+           } catch (Exception $e) {
+               error_log($e->getMessage());
+               return $this->sendError($e, 500, $request);
+           }
+       }
 
 
       /**
@@ -698,6 +815,11 @@ class UserAssetController extends Controller
                       $query->select('users.id', 'users.first_Name','users.middle_Name',
                       'users.last_Name');
                   },
+                  "user" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+
 
               ])
               ->where([
