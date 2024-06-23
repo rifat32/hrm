@@ -74,9 +74,10 @@ class AssetTypeController extends Controller
 
     public function createAssetType(AssetTypeCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('asset_type_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -93,10 +94,12 @@ class AssetTypeController extends Controller
                 $request_data["created_by"] = $request->user()->id;
 
                 $asset_type =  AssetType::create($request_data);
+
+                DB::commit();
                 return response($asset_type, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+          DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -158,10 +161,10 @@ class AssetTypeController extends Controller
 
     public function updateAssetType(AssetTypeUpdateRequest $request)
     {
-
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('asset_type_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -192,10 +195,11 @@ class AssetTypeController extends Controller
                     ], 500);
                 }
 
+                DB::commit();
                 return response($asset_type, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+           DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -501,7 +505,7 @@ class AssetTypeController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-         
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

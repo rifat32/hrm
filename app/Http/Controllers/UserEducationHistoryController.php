@@ -107,6 +107,7 @@ class UserEducationHistoryController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","education_docs");
+                $this->makeFilePermanent($request_data["attachments"],"");
 
 
 
@@ -236,6 +237,7 @@ class UserEducationHistoryController extends Controller
                     $this->moveUploadedFilesBack($user_education_history->attachments,"","education_docs");
 
                     $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","education_docs");
+                    $this->makeFilePermanent($request_data["attachments"],"");
 
 
              if($user_education_history) {

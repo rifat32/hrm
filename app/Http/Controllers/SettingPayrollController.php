@@ -345,9 +345,10 @@ class SettingPayrollController extends Controller
 
     public function createSettingPayslip(SettingPayslipCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -359,6 +360,7 @@ class SettingPayrollController extends Controller
 
                 if(!empty($request_data["logo"])) {
                     $request_data["logo"]= $this->storeUploadedFiles([$request_data["image"]],"","payslip_logo")[0];
+                    $this->makeFilePermanent($request_data["image"],"");
                   }
 
 
@@ -392,9 +394,11 @@ class SettingPayrollController extends Controller
 
 
 
+                DB::commit();
                 return response($setting_payslip, 201);
-            });
+
         } catch (Exception $e) {
+            DB::rollBack();
             try {
                 if(!empty($request_data["image"])) {
 

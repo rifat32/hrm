@@ -102,6 +102,7 @@ class UserRightToWorkHistoryController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
+                $this->makeFilePermanent($request_data["right_to_work_docs"],"file_name");
 
 
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -228,6 +229,7 @@ class UserRightToWorkHistoryController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
+                $this->makeFilePermanent($request_data["right_to_work_docs"],"file_name");
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;

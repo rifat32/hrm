@@ -101,6 +101,7 @@ class UserVisaHistoryController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["visa_docs"] =   $this->storeUploadedFiles($request_data["visa_docs"],"file_name","visa_docs");
+                $this->makeFilePermanent($request_data["visa_docs"],"file_name");
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -220,7 +221,11 @@ class UserVisaHistoryController extends Controller
 
 
                 $request_data = $request->validated();
+                
                 $request_data["visa_docs"] =   $this->storeUploadedFiles($request_data["visa_docs"],"file_name","visa_docs");
+                $this->makeFilePermanent($request_data["visa_docs"],"file_name");
+
+
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;

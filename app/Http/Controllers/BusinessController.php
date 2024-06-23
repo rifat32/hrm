@@ -149,17 +149,20 @@ class BusinessController extends Controller
 
                 if (!empty($request_data["business"]["images"])) {
                     $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                    $this->makeFilePermanent($request_data["business"]["images"],"");
                 }
                 if (!empty($request_data["business"]["image"])) {
                     $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
                 }
                 if (!empty($request_data["business"]["logo"])) {
                     $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
                 }
                 if (!empty($request_data["business"]["background_image"])) {
                     $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
                 }
-
 
                 $user = User::where([
                     "id" =>  $request_data['business']['owner_id']
@@ -510,15 +513,19 @@ class BusinessController extends Controller
 
                 if (!empty($request_data["business"]["images"])) {
                     $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                    $this->makeFilePermanent($request_data["business"]["images"],"");
                 }
                 if (!empty($request_data["business"]["image"])) {
                     $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
                 }
                 if (!empty($request_data["business"]["logo"])) {
                     $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
                 }
                 if (!empty($request_data["business"]["background_image"])) {
                     $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
                 }
 
 
@@ -797,15 +804,19 @@ class BusinessController extends Controller
 
                 if (!empty($request_data["business"]["images"])) {
                     $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                    $this->makeFilePermanent($request_data["business"]["images"],"");
                 }
                 if (!empty($request_data["business"]["image"])) {
                     $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
                 }
                 if (!empty($request_data["business"]["logo"])) {
                     $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
                 }
                 if (!empty($request_data["business"]["background_image"])) {
                     $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
                 }
 
 
@@ -1073,17 +1084,20 @@ class BusinessController extends Controller
 
                 if (!empty($request_data["business"]["images"])) {
                     $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                    $this->makeFilePermanent($request_data["business"]["images"],"");
                 }
                 if (!empty($request_data["business"]["image"])) {
                     $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
                 }
                 if (!empty($request_data["business"]["logo"])) {
                     $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
                 }
                 if (!empty($request_data["business"]["background_image"])) {
                     $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
                 }
-
 
                 $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
@@ -1559,15 +1573,19 @@ class BusinessController extends Controller
                 $request_data = $request->validated();
                 if (!empty($request_data["business"]["images"])) {
                     $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                    $this->makeFilePermanent($request_data["business"]["images"],"");
                 }
                 if (!empty($request_data["business"]["image"])) {
                     $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
                 }
                 if (!empty($request_data["business"]["logo"])) {
                     $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
                 }
                 if (!empty($request_data["business"]["background_image"])) {
                     $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
                 }
 
 
@@ -1911,6 +1929,9 @@ class BusinessController extends Controller
                 $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
                 $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"],"","pension_scheme_letters");
+
+                $this->makeFilePermanent($request_data["business"]["pension_scheme_letters"],"");
+
 
                 $business = Business::where([
                      "id" =>$request_data['business']["id"]

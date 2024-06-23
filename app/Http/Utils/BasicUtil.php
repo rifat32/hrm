@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeePensionHistory;
+use App\Models\UploadedFile;
 use App\Models\User;
 use App\Models\UserAnnouncement;
 use Carbon\Carbon;
@@ -483,6 +484,29 @@ public function storeUploadedFiles($filePaths, $fileKey, $location, $arrayOfStri
 }
 
 
+public function makeFilePermanent($filePaths, $fileKey, $arrayOfString = NULL) {
+
+
+    if(is_array($arrayOfString)) {
+        return collect($filePaths)->map(function($filePathItem) use ($fileKey) {
+            $filePathItem[$fileKey] = $this->makeFilePermanent($filePathItem[$fileKey], "");
+            return $filePathItem;
+        });
+
+    }
+
+    return collect($filePaths)->map(function($filePathItem) use ( $fileKey) {
+
+        $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
+        UploadedFile::where([
+            "file_name" => $file
+        ])->delete();
+        return $filePathItem;
+    })->toArray();
+
+
+
+}
 
 
 

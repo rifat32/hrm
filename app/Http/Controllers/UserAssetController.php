@@ -116,6 +116,7 @@ class UserAssetController extends Controller
 
                   if(!empty($request_data["image"])) {
                     $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets")[0];
+                    $this->makeFilePermanent($request_data["image"],"");
                   }
 
 
@@ -423,6 +424,7 @@ class UserAssetController extends Controller
                   $request_data = $request->validated();
                   if(!empty($request_data["image"])) {
                     $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets");
+                    $this->makeFilePermanent($request_data["image"],"");
                   }
 
                   if($request_data["status"] == "returned") {

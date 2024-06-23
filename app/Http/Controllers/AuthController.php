@@ -807,9 +807,10 @@ $responseData = [
 
     public function storeToken(ForgetPasswordRequest $request) {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use (&$request) {
+
                 $request_data = $request->validated();
 
             $user = User::where(["email" => $request_data["email"]])->first();
@@ -842,6 +843,7 @@ $responseData = [
                 throw new Exception("Failed to send email to:" . $emailFailure);
             }
 
+            DB::commit();
             return response()->json([
                 "message" => "Please check your email."
             ],200);
@@ -849,12 +851,13 @@ $responseData = [
 
 
 
-            });
+
 
 
 
 
         } catch (Exception $e) {
+            DB::rollBack();
 
             return $this->sendError($e, 500,$request);
         }
@@ -913,9 +916,10 @@ $responseData = [
 
      public function storeTokenV2(ForgetPasswordV2Request $request) {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use (&$request) {
+
                 $request_data = $request->validated();
 
             $user = User::where(["id" => $request_data["id"]])->first();
@@ -951,18 +955,20 @@ $responseData = [
                 throw new Exception("Failed to send email to:" . $emailFailure);
             }
 
+            DB::commit();
+
             return response()->json([
                 "message" => "Please check your email."
             ],200);
 
 
-            });
+
 
 
 
 
         } catch (Exception $e) {
-
+            DB::rollBack();
             return $this->sendError($e, 500,$request);
         }
 
@@ -1021,9 +1027,10 @@ $responseData = [
 
     public function resendEmailVerifyToken(EmailVerifyTokenRequest $request) {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use (&$request) {
+
                 $request_data = $request->validated();
 
             $user = User::where(["email" => $request_data["email"]])->first();
@@ -1053,17 +1060,17 @@ $responseData = [
 
             $user->save();
 
-
+            DB::commit();
             return response()->json([
                 "message" => "please check email"
             ]);
-            });
+
 
 
 
 
         } catch (Exception $e) {
-
+            DB::rollBack();
             return $this->sendError($e, 500,$request);
         }
 
@@ -1132,9 +1139,10 @@ $responseData = [
 
     public function changePasswordByToken($token, ChangePasswordRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use (&$request,&$token) {
+
                 $request_data = $request->validated();
                 $user = User::where([
                     "resetPasswordToken" => $token,
@@ -1157,17 +1165,17 @@ $responseData = [
 
                 $user->save();
 
-
+                DB::commit();
                 return response()->json([
                     "message" => "password changed"
                 ], 200);
-            });
+
 
 
 
 
         } catch (Exception $e) {
-
+            DB::rollBack();
             return $this->sendError($e, 500,$request);
         }
 

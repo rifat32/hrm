@@ -169,7 +169,7 @@ Route::middleware(['auth:api'])->group(function () {
 
 Route::post('/v2.0/files/single-file-upload', [FileManagementController::class, "createFileSingleV2"]);
 Route::post('/v2.0/files/multiple-file-upload', [FileManagementController::class, "createFileMultipleV2"]);
-
+Route::get('/v1.0/file/{filename}', [FileManagementController::class, "getFile"]);
 
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);

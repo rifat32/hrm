@@ -21,7 +21,7 @@ class UserDocumentController extends Controller
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
- 
+
 
 
     /**
@@ -100,6 +100,7 @@ class UserDocumentController extends Controller
 
                 if(!empty($request_data["file_name"])) {
                     $request_data["file_name"] = $this->storeUploadedFiles([$request_data["file_name"]],"","documents")[0];
+                    $this->makeFilePermanent($request_data["file_name"],"");
                 }
 
 
@@ -228,6 +229,7 @@ class UserDocumentController extends Controller
 
                 if(!empty($request_data["file_name"])) {
                     $request_data["file_name"] = $this->storeUploadedFiles([$request_data["file_name"]],"","documents")[0];
+                    $this->makeFilePermanent($request_data["file_name"],"");
                 }
 
 

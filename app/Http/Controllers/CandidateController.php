@@ -19,7 +19,7 @@ class CandidateController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
-   
+
 
 
     /**
@@ -108,13 +108,12 @@ class CandidateController extends Controller
 
                 if (!empty($request_data["recruitment_processes"])) {
                     $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+                    $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
+
                 }
 
-
-
-
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
-
+                $this->makeFilePermanent($request_data["attachments"],"");
 
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
@@ -252,9 +251,11 @@ class CandidateController extends Controller
 
 
        $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
+       $this->makeFilePermanent($request_data["attachments"],"");
 
                if (!empty($request_data["recruitment_processes"])) {
                     $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+                    $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
                 }
 
 
@@ -400,10 +401,12 @@ class CandidateController extends Controller
 
 
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
+                $this->makeFilePermanent($request_data["attachments"],"");
 
 
                 if (!empty($request_data["recruitment_processes"])) {
                     $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+                    $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
                 }
 
 

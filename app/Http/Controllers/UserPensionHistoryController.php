@@ -107,7 +107,7 @@ class UserPensionHistoryController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
-
+                $this->makeFilePermanent($request_data["pension_letters"],"file_name");
 
 
                 $request_data["created_by"] = $request->user()->id;
@@ -231,7 +231,7 @@ DB::commit();
                 $request_data = $request->validated();
 
                 $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
-
+                $this->makeFilePermanent($request_data["pension_letters"],"file_name");
 
 
 

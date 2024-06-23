@@ -37,7 +37,9 @@ class SingleFileUploadRequestV2 extends FormRequest
                 "numeric",
                 new ValidUserId($all_manager_department_ids)
             ],
-            "folder_location" => "required|string"
+            "folder_location" => "required|string",
+            "is_public" => "required|boolean",
+
         ];
     }
 }

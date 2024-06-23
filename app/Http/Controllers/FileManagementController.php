@@ -9,6 +9,7 @@ use App\Http\Requests\SingleFileUploadRequestV2;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\UploadedFile;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -215,7 +216,7 @@ class FileManagementController extends Controller
   /**
      *
      * @OA\Post(
-     *      path="/v1.0/files/single-file-upload",
+     *      path="/v2.0/files/single-file-upload",
      *      operationId="createFileSingleV2",
      *      tags={"files"},
      *       security={
@@ -315,7 +316,7 @@ if (!in_array($folder, $locations)) {
              $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
 
              // Generate the new file name using timestamp, user_id, employee_id, and modified original file name
-             $newFileName = time() . '_' . $createdBy . '_' . $employeeId . '_' . $fileNameWithoutSpaces;
+             $newFileName = time() . '_' . $createdBy . '_' . $employeeId . '_' . $fileNameWithoutSpaces . "_" . $request_data["is_public"];
 
              // Store the file in the specified folder
              $storedFilePath = $file->storeAs($folder, $newFileName . '.' . $extension);
@@ -443,7 +444,7 @@ if (!in_array($folder, $locations)) {
                  $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
 
 
-                 $newFileName = time() . '_' . $createdBy . '_' . $employeeId . '_' . $fileNameWithoutSpaces;
+                 $newFileName = time() . '_' . $createdBy . '_' . $employeeId . '_' . $fileNameWithoutSpaces . "_" . $request_data["is_public"];
 
                  // Store the file in the specified folder
                  $storedFilePath = $file->storeAs($folder, $newFileName . '.' . $extension);
@@ -474,7 +475,138 @@ if (!in_array($folder, $locations)) {
 
 
 
+ /**
+        *
+     * @OA\Get(
+     *      path="/v1.0/file/{filename}",
+     *      operationId="getFile",
+     *      tags={"auth"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+ *              @OA\Parameter(
+     *         name="filename",
+     *         in="path",
+     *         description="filename",
+     *         required=true,
+     *  example="filename"
+     *      ),
 
+     *      summary="This method is to get  user ",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getFile ($filename, Request $request) {
+        try{
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+
+           // Extract employee_id and created_by from the filename
+    $filenameParts = explode('_', $filename);
+    if (count($filenameParts) < 5) {
+        return response()->json(
+       [
+        "message" => "File not found"
+       ],
+            404
+        );
+    }
+
+    $is_public = $filenameParts[4];
+
+    if($is_public == 1){
+ // Get the full storage path
+ $path = storage_path($filename);
+
+ // Return the file as a response
+ return response()->file($path);
+    }
+
+    $createdBy = $filenameParts[1];
+    $employeeId = $filenameParts[2];
+
+    if($employeeId == 0 ){
+        if( $createdBy != auth()->user()->id) {
+            return response()->json(
+                [
+                 "message" => "You don't have access to this file"
+                ],
+                     404
+                 );
+        }
+
+    } else {
+        $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+        $employee = User::where([
+            "id" => $employeeId
+        ])
+        ->whereHas("departments", function($query) use ($all_manager_department_ids){
+             $query->whereIn("departments.id",$all_manager_department_ids);
+        })
+        ->first();
+        if(empty($employee)){
+            return response()->json(
+                [
+                 "message" => "You don't have access to this file"
+                ],
+                     404
+                 );
+        }
+
+
+    }
+
+
+    // Get the full storage path
+    $path = storage_path($filename);
+
+    // Return the file as a response
+    return response()->file($path);
+
+
+
+
+        }catch(Exception $e) {
+            return $this->sendError($e, 500,$request);
+        }
+
+    }
 
 
 

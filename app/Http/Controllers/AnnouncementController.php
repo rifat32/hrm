@@ -83,9 +83,10 @@ class AnnouncementController extends Controller
 
     public function createAnnouncement(AnnouncementCreateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return DB::transaction(function () use ($request) {
+
                 if (!$request->user()->hasPermissionTo('announcement_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
@@ -117,10 +118,12 @@ class AnnouncementController extends Controller
                 ->pluck("id")->unique();
             $announcement->users()->attach($user_ids, ['status' => 'unread']);
 
+
+            DB::commit();
                 return response($announcement, 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -999,9 +1002,10 @@ class AnnouncementController extends Controller
 
     public function updateAnnouncementStatus(AnnouncementStatusUpdateRequest $request)
     {
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            return    DB::transaction(function () use (&$request) {
+
 
                 $request_data = $request->validated();
 
@@ -1014,10 +1018,11 @@ class AnnouncementController extends Controller
 
 
 
+    DB::commit();
                 return response(["ok" => true], 201);
-            });
+
         } catch (Exception $e) {
-            error_log($e->getMessage());
+        DB::rollBack();
             return $this->sendError($e, 500,$request);
         }
     }

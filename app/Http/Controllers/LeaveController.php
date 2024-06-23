@@ -142,7 +142,7 @@ class LeaveController extends Controller
              $request_data["user_id"] = auth()->user()->id;
 
              $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
-
+             $this->makeFilePermanent($request_data["attachments"],"");
 
 
 
@@ -314,7 +314,7 @@ $leaveRecordsCollection->chunk($chunkSize)->each(function ($chunk) use ($leave) 
 
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
 
-
+            $this->makeFilePermanent($request_data["attachments"],"");
 
 
 
@@ -881,6 +881,7 @@ $leave_records->chunk($chunkSize, function ($chunk) use ($leave_history) {
                 $business_id =  $request->user()->business_id;
                 $request_data = $request->validated();
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","leave_attachments");
+                $this->makeFilePermanent($request_data["attachments"],"");
 
                 $processed_leave_data = $this->leaveComponent->processLeaveRequest($request_data);
 

@@ -104,7 +104,7 @@ class UserRecruitmentProcessController extends Controller
             $request_data = $request->validated();
 
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
-
+            $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
 
 
             $updatableUser = User::where([
@@ -143,7 +143,7 @@ class UserRecruitmentProcessController extends Controller
 
 
 
-          
+
           try {
             $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
         } catch (Exception $innerException) {
@@ -247,7 +247,7 @@ class UserRecruitmentProcessController extends Controller
 
 
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
-
+            $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
 
 
             $updatableUser = User::where([

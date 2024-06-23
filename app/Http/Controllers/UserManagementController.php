@@ -90,7 +90,7 @@ class UserManagementController extends Controller
 
 
 
-   
+
 
 
     function generate_unique_username($firstName, $middleName, $lastName, $business_id = null)
@@ -470,12 +470,15 @@ class UserManagementController extends Controller
 
 
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+          $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
+
 
 
             $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
+            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"],"file_name");
 
             $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
-
+            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"],"file_name");
 
 
 
@@ -1174,12 +1177,14 @@ class UserManagementController extends Controller
 
 
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
+            $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
 
 
             $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
+            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"],"file_name");
 
             $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
-
+            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"],"file_name");
 
 
 
