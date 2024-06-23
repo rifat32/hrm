@@ -264,6 +264,14 @@ ON DELETE CASCADE;
 
 36. UPDATE `social_sites` SET `link` = '', `deleted_at` = NULL WHERE `social_sites`.`name` = "Other"
 
+37. ALTER TABLE `users` DROP FOREIGN KEY `users_designation_id_foreign`;
+38. ALTER TABLE `users`
+ADD CONSTRAINT `users_designation_id_foreign`
+FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NULL;
+
+39. 
+
+
 
 
 

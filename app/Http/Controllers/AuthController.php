@@ -1238,7 +1238,7 @@ public function getUser (Request $request) {
         $user->roles = $user->roles->pluck('name');
         $user->business = $user->business;
 
-        // $user->default_background_image = ("/".  config("setup-config.business_background_image_location_full"));
+
 
         return response()->json(
             $user,

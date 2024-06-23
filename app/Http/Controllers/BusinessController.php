@@ -43,188 +43,6 @@ class BusinessController extends Controller
     use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil,BasicUtil,EmailLogUtil;
 
 
-    /**
-     *
-     * @OA\Post(
-     *      path="/v1.0/business-image",
-     *      operationId="createBusinessImage",
-     *      tags={"business_management"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *      summary="This method is to store business image ",
-     *      description="This method is to store business image",
-     *
-     *  @OA\RequestBody(
-     *   * @OA\MediaType(
-     *     mediaType="multipart/form-data",
-     *     @OA\Schema(
-     *         required={"image"},
-     *         @OA\Property(
-     *             description="image to upload",
-     *             property="image",
-     *             type="file",
-     *             collectionFormat="multi",
-     *         )
-     *     )
-     * )
-
-
-
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-    public function createBusinessImage(ImageUploadRequest $request)
-    {
-        try {
-            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            // if(!$request->user()->hasPermissionTo('business_create')){
-            //      return response()->json([
-            //         "message" => "You can not perform this action"
-            //      ],401);
-            // }
-
-            $request_data = $request->validated();
-
-            $location =  config("setup-config.business_gallery_location");
-
-            $new_file_name = time() . '_' . str_replace(' ', '_', $request_data["image"]->getClientOriginalName());
-
-            $request_data["image"]->move(public_path($location), $new_file_name);
-
-
-            return response()->json(["image" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-            return $this->sendError($e, 500, $request);
-        }
-    }
-
-    /**
-     *
-     * @OA\Post(
-     *      path="/v1.0/business-image-multiple",
-     *      operationId="createBusinessImageMultiple",
-     *      tags={"business_management"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-
-     *      summary="This method is to store business gallery",
-     *      description="This method is to store business gallery",
-     *
-     *  @OA\RequestBody(
-     *   * @OA\MediaType(
-     *     mediaType="multipart/form-data",
-     *     @OA\Schema(
-     *         required={"images[]"},
-     *         @OA\Property(
-     *             description="array of images to upload",
-     *             property="images[]",
-     *             type="array",
-     *             @OA\Items(
-     *                 type="file"
-     *             ),
-     *             collectionFormat="multi",
-     *         )
-     *     )
-     * )
-
-
-
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-    public function createBusinessImageMultiple(MultipleImageUploadRequest $request)
-    {
-        try {
-            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-
-            $request_data = $request->validated();
-
-            $location =  config("setup-config.business_gallery_location");
-
-            $images = [];
-            if (!empty($request_data["images"])) {
-                foreach ($request_data["images"] as $image) {
-                    $new_file_name = time() . '_' . str_replace(' ', '_', $image->getClientOriginalName());
-                    $image->move(public_path($location), $new_file_name);
-
-                    array_push($images, ("/" . $location . "/" . $new_file_name));
-                }
-            }
-
-
-            return response()->json(["images" => $images], 201);
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-            return $this->sendError($e, 500, $request);
-        }
-    }
 
     /**
      *
@@ -329,6 +147,20 @@ class BusinessController extends Controller
                 }
                 $request_data = $request->validated();
 
+                if (!empty($request_data["business"]["images"])) {
+                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                }
+                if (!empty($request_data["business"]["image"])) {
+                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["logo"])) {
+                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["background_image"])) {
+                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                }
+
+
                 $user = User::where([
                     "id" =>  $request_data['business']['owner_id']
                 ])
@@ -369,6 +201,53 @@ class BusinessController extends Controller
                 ], 201);
 
         } catch (Exception $e) {
+            if(!empty($request_data["business"]["images"])) {
+            try {
+
+                    $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
+
+
+
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
+
+        if(!empty($request_data["business"]["image"])) {
+            try {
+
+                    $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
+
+
+
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
+        if(!empty($request_data["business"]["logo"])) {
+            try {
+
+                    $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
+
+
+
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
+
+        if(!empty($request_data["business"]["background_image"])) {
+            try {
+
+                    $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
+
+
+
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
+
     DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
@@ -629,6 +508,20 @@ class BusinessController extends Controller
                 }
                 $request_data = $request->validated();
 
+                if (!empty($request_data["business"]["images"])) {
+                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                }
+                if (!empty($request_data["business"]["image"])) {
+                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["logo"])) {
+                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["background_image"])) {
+                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                }
+
+
 
 
                 // user info starts ##############
@@ -725,6 +618,52 @@ class BusinessController extends Controller
                 ], 201);
 
         } catch (Exception $e) {
+            if(!empty($request_data["business"]["images"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
+
+            if(!empty($request_data["business"]["image"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
+            if(!empty($request_data["business"]["logo"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
+
+            if(!empty($request_data["business"]["background_image"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
             DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
@@ -856,6 +795,20 @@ class BusinessController extends Controller
 
                 $request_data = $request->validated();
 
+                if (!empty($request_data["business"]["images"])) {
+                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                }
+                if (!empty($request_data["business"]["image"])) {
+                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["logo"])) {
+                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["background_image"])) {
+                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                }
+
+
                 // user info starts ##############
 
                 $password = $request_data['user']['password'];
@@ -951,6 +904,52 @@ class BusinessController extends Controller
                 ], 201);
 
         } catch (Exception $e) {
+            if(!empty($request_data["business"]["images"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
+
+            if(!empty($request_data["business"]["image"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
+            if(!empty($request_data["business"]["logo"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
+
+            if(!empty($request_data["business"]["background_image"])) {
+                try {
+
+                        $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
+
+
+
+                } catch (Exception $innerException) {
+                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                }
+            }
             DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
@@ -1071,6 +1070,20 @@ class BusinessController extends Controller
                 }
 
                 $request_data = $request->validated();
+
+                if (!empty($request_data["business"]["images"])) {
+                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                }
+                if (!empty($request_data["business"]["image"])) {
+                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["logo"])) {
+                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["background_image"])) {
+                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                }
+
 
                 $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
@@ -1544,6 +1557,19 @@ class BusinessController extends Controller
 
 
                 $request_data = $request->validated();
+                if (!empty($request_data["business"]["images"])) {
+                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                }
+                if (!empty($request_data["business"]["image"])) {
+                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["logo"])) {
+                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                }
+                if (!empty($request_data["business"]["background_image"])) {
+                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                }
+
 
                 $business = $this->businessOwnerCheck($request_data['business']["id"]);
 

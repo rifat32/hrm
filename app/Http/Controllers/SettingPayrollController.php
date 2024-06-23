@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SettingPayrunCreateRequest;
 use App\Http\Requests\SettingPayslipCreateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class SettingPayrollController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
     /**
      *
      * @OA\Post(
@@ -284,94 +285,7 @@ class SettingPayrollController extends Controller
         }
     }
 
-    /**
-     *
-     * @OA\Post(
-     *      path="/v1.0/setting-payslip/upload-logo",
-     *      operationId="createSettingPayslipUploadLogo",
-     *      tags={"settings.setting_payroll.payslip"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *      summary="This method is to store payslip logo",
-     *      description="This method is to store payslip logo",
-     *
-     *  @OA\RequestBody(
-     *   * @OA\MediaType(
-     *     mediaType="multipart/form-data",
-     *     @OA\Schema(
-     *         required={"image"},
-     *         @OA\Property(
-     *             description="image to upload",
-     *             property="image",
-     *             type="file",
-     *             collectionFormat="multi",
-     *         )
-     *     )
-     * )
 
-
-
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-    public function createSettingPayslipUploadLogo(ImageUploadRequest $request)
-    {
-        try {
-            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('setting_payroll_create')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
-            }
-
-            $insertableData = $request->validated();
-
-            $location =  config("setup-config.payslip_logo_location");
-
-
-            $new_file_name = time() . '_' . str_replace(' ', '_', $insertableData["image"]->getClientOriginalName());
-            $insertableData["image"]->move(public_path($location), $new_file_name);
-
-
-            return response()->json(["image" => $new_file_name, "location" => $location, "full_location" => ("/" . $location . "/" . $new_file_name)], 200);
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-            return $this->sendError($e, 500, $request);
-        }
-    }
 
     /**
      *
@@ -443,6 +357,10 @@ class SettingPayrollController extends Controller
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_active"] = 1;
 
+                if(!empty($request_data["logo"])) {
+                    $request_data["logo"]= $this->storeUploadedFiles([$request_data["image"]],"","payslip_logo")[0];
+                  }
+
 
                 if (empty($request->user()->business_id)) {
 
@@ -477,6 +395,14 @@ class SettingPayrollController extends Controller
                 return response($setting_payslip, 201);
             });
         } catch (Exception $e) {
+            try {
+                if(!empty($request_data["image"])) {
+
+                    $this->moveUploadedFilesBack([$request_data["image"]],"","payslip_logo");
+                       }
+            } catch (Exception $innerException) {
+                error_log("Failed to move assets files back: " . $innerException->getMessage());
+            }
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }

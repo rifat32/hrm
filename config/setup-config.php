@@ -2739,16 +2739,10 @@ return [
 
 
 
-    "user_image_location" => "user_image",
-    "user_files_location" => "user_files",
-    "payslip_files_location" => "payslip_files",
-    "user_assets_location" => "user_assets",
-    "leave_files_location" => "leave_files",
-    "candidate_files_location" => "candidate_files",
-    "payslip_logo_location" => "payslip_logo",
-    "business_gallery_location" => "business_gallery",
-    "business_background_image_location" => "business_background_image",
-    "business_background_image_location_full" => "business_background_image/business_background_image.jpeg",
+    "folder_locations" => ["pension_scheme_letters","recruitment_processes","candidate_files","leave_attachments","assets","documents","education_docs","right_to_work_docs","visa_docs","payment_record_file","pension_letters","payslip_logo","business_images"],
+
+
+
     "temporary_files_location" => "temporary_files",
 
 

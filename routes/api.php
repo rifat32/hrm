@@ -8,7 +8,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardManagementController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmailTemplateWrapperController;
-use App\Http\Controllers\BusinessBackgroundImageController;
+
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessTierController;
 use App\Http\Controllers\BusinessTimesController;
@@ -21,7 +21,7 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\DropdownOptionsController;
 use App\Http\Controllers\EmployeeRotaController;
 use App\Http\Controllers\EmploymentStatusController;
-use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\FileManagementController;
 use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JobListingController;
@@ -117,8 +117,9 @@ Route::patch('/health', function () {
 
 
 
-Route::post('/v1.0/files/single-file-upload', [FileUploadController::class, "createFileSingle"]);
-Route::post('/v1.0/files/multiple-file-upload', [FileUploadController::class, "createFileMultiple"]);
+Route::post('/v1.0/files/single-file-upload', [FileManagementController::class, "createFileSingle"]);
+
+Route::post('/v1.0/files/multiple-file-upload', [FileManagementController::class, "createFileMultiple"]);
 
 
 
@@ -156,10 +157,8 @@ Route::post('/auth/check/business/email', [AuthController::class, "checkBusiness
 
 
 
-Route::post('/v1.0/user-image', [UserManagementController::class, "createUserImage"]);
 
-Route::post('/v1.0/business-image', [BusinessController::class, "createBusinessImage"]);
-Route::post('/v1.0/business-image-multiple', [BusinessController::class, "createBusinessImageMultiple"]);
+
 
 
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
@@ -167,6 +166,9 @@ Route::post('/v1.0/business-image-multiple', [BusinessController::class, "create
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
 
 Route::middleware(['auth:api'])->group(function () {
+
+Route::post('/v2.0/files/single-file-upload', [FileManagementController::class, "createFileSingleV2"]);
+Route::post('/v2.0/files/multiple-file-upload', [FileManagementController::class, "createFileMultipleV2"]);
 
 
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
@@ -838,13 +840,6 @@ Route::get('/v1.0/business-times', [BusinessTimesController::class, "getBusiness
 // Garage Background Image Management
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// businesses Background Image Management
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-Route::post('/v1.0/business-background-image', [BusinessBackgroundImageController::class, "updateBusinessBackgroundImage"]);
-Route::post('/v1.0/business-background-image/by-user', [BusinessBackgroundImageController::class, "updateBusinessBackgroundImageByUser"]);
-Route::get('/v1.0/business-background-image', [BusinessBackgroundImageController::class, "getBusinessBackgroundImage"]);
 
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1378,7 +1373,7 @@ Route::get('/v1.0/payroll-list', [PayrollController::class, "getPayrollList"]);
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // setting payslip  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Route::post('/v1.0/setting-payslip/upload-logo', [SettingPayrollController::class, "createSettingPayslipUploadLogo"]);
+
 Route::post('/v1.0/setting-payslip', [SettingPayrollController::class, "createSettingPayslip"]);
 // Route::put('/v1.0/setting-leave', [SettingLeaveTypeController::class, "updateSettingLeaveType"]);
  Route::get('/v1.0/setting-payslip', [SettingPayrollController::class, "getSettingPayslip"]);
