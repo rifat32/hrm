@@ -161,7 +161,7 @@ class UserPayslipController extends Controller
 
 
                 // Check if payment_method is bank_transfer and payment_notes is empty
-                if ($request_data["payment_method"] === 'bank_transfer' && empty($request_data["payment_notes"])) {
+                if ($request_data["payment_method"] === 'bank_transfer' && empty(trim($request_data["payment_notes"]))) {
                     // Build the payment notes with the user's bank details
                     $payment_notes = "Payment made to bank account number: " . $user->account_number . " Sort Code: " . $user->sort_code . " Account Name: " . $user->account_name;
                     $request_data["payment_notes"] = $payment_notes;
@@ -361,12 +361,11 @@ DB::commit();
   }
 
   // Check if payment_method is bank_transfer and payment_notes is empty
-  if ($request_data["payment_method"] === 'bank_transfer' && empty($request_data["payment_notes"])) {
-      // Build the payment notes with the user's bank details
-      $payment_notes = "Payment made to bank account number: " . $user->account_number . " Sort Code: " . $user->sort_code . " Account Name: " . $user->account_name;
-      $request_data["payment_notes"] = $payment_notes;
-  }
-
+  if ($request_data["payment_method"] === 'bank_transfer' && empty(trim($request_data["payment_notes"]))) {
+    // Build the payment notes with the user's bank details
+    $payment_notes = "Payment made to bank account number: " . $user->account_number . " Sort Code: " . $user->sort_code . " Account Name: " . $user->account_name;
+    $request_data["payment_notes"] = $payment_notes;
+}
 
                 $user_payslip_query_params = [
                     "id" => $request_data["id"],
