@@ -119,7 +119,7 @@ class DepartmentController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-            error_log($e->getMessage());
+
             return $this->sendError($e, 500, $request);
         }
     }
@@ -1035,7 +1035,13 @@ class DepartmentController extends Controller
             ])
             ->whereNotNull('parent_id')
             ->whereIn("id",$all_manager_department_ids)
-            ->whereNotIn("departments.manager_id",[auth()->user()->id])
+            ->where(function($query) {
+                $query->whereNotIn("departments.manager_id",[auth()->user()->id])
+                ->when(auth()->user()->hasRole("business_owner"), function($query) {
+                       $query->orWhereNull("departments.manager_id");
+                });
+            })
+
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

@@ -55,6 +55,7 @@ class UserUpdateV3Request extends FormRequest
             'last_Name' => 'required|string|max:255',
             'email' => 'required|string|unique:users,email,' . $this->id . ',id',
             'phone' => 'nullable|string',
+            'image' => 'nullable|string',
             'date_of_birth' => "required|date",
             "NI_number" => "required|string",
             'joining_date' => [

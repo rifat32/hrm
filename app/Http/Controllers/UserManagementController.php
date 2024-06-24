@@ -1507,6 +1507,7 @@ class UserManagementController extends Controller
                     'minimum_working_days_per_week',
                     'overtime_rate',
                     'phone',
+                    'image'
 
 
 
@@ -5383,6 +5384,125 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         }
     }
 
+       /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/load-data-for-attendances/{id}",
+     *      operationId="getLoadDataForAttendanceByUserId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+         *     *     *              @OA\Parameter(
+     *         name="start_date",
+     *         in="path",
+     *         description="start_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *     *     *     *              @OA\Parameter(
+     *         name="end_date",
+     *         in="path",
+     *         description="end_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *
+
+     *      summary="This method is to get user attendance related data by id",
+     *      description="This method is to get user attendance related data by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLoadDataForAttendanceByUserId($id, Request $request)
+     {
+
+         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+         //     File::delete($file);
+         // }
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+             $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+             $user_id = intval($id);
+             $request_user_id = auth()->user()->id;
+             if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+
+        $disabled_days_for_attendance = $this->userManagementComponent->getDisableDatesForAttendance($user->id,$start_date,$end_date);
+
+        $holiday_details =  $this->userManagementComponent->getHolodayDetails($id,$start_date,$end_date,true);
+
+        $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
+
+
+        $responseArray = [
+            "disabled_days_for_attendance" => $disabled_days_for_attendance,
+            "holiday_details" => $holiday_details,
+            "work_shift" => $work_shift
+        ];
+             return response()->json($responseArray, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
     /**
      *
      * @OA\Get(
@@ -5453,6 +5573,8 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
             $user_id = intval($id);
             $request_user_id = auth()->user()->id;
@@ -5466,45 +5588,8 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
 
 
+            $result_array = $this->userManagementComponent->getDisableDatesForAttendance($user->id,$start_date,$end_date);
 
-
-
-
-            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
-            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
-
-
-
-
-
-
-
-            $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
-
-
-            $already_taken_full_day_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id, TRUE);
-
-
-            $disable_days_collection = collect($already_taken_attendance_dates);
-
-
-            $disable_days_collection = $disable_days_collection->merge($already_taken_full_day_leave_dates);
-
-
-
-            $unique_disable_days_collection = $disable_days_collection->unique();
-            $disable_days_array = $unique_disable_days_collection->values()->all();
-
-
-
-
-            $already_taken_hourly_leave_dates = $this->leaveComponent->get_already_taken_half_day_leaves($start_date, $end_date, $user->id);
-
-
-            $result_array = [
-                "disable_days" => $disable_days_array,
-                "enable_days_with_condition" => $already_taken_hourly_leave_dates,
-            ];
 
             return response()->json($result_array, 200);
         } catch (Exception $e) {
@@ -5763,6 +5848,22 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *         required=true,
      *  example="1"
      *      ),
+     *     *     *              @OA\Parameter(
+     *         name="start_date",
+     *         in="path",
+     *         description="start_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *     *     *     *              @OA\Parameter(
+     *         name="end_date",
+     *         in="path",
+     *         description="end_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *
+     *
 
      *      summary="This method is to get user by id",
      *      description="This method is to get user by id",
@@ -5806,11 +5907,15 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
     {
 
 
-        foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-            File::delete($file);
-        }
+        // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+        //     File::delete($file);
+        // }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+            $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
             $user_id = intval($id);
             $request_user_id = auth()->user()->id;
@@ -5826,7 +5931,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
 
             $this->validateUserQuery($user_id,$all_manager_department_ids);
 
-        $result_array =  $this->userManagementComponent->getHolodayDetails($id,$request->start_date,$request->end_date,true);
+        $result_array =  $this->userManagementComponent->getHolodayDetails($id,$start_date,$end_date,true);
 
 
 

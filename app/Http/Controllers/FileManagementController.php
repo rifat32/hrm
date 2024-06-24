@@ -480,7 +480,7 @@ if (!in_array($folder, $locations)) {
      * @OA\Get(
      *      path="/v1.0/file/{filename}",
      *      operationId="getFile",
-     *      tags={"auth"},
+     *      tags={"files"},
     *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -535,70 +535,92 @@ if (!in_array($folder, $locations)) {
         try{
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-
-           // Extract employee_id and created_by from the filename
-    $filenameParts = explode('_', $filename);
-    if (count($filenameParts) < 5) {
-        return response()->json(
-       [
-        "message" => "File not found"
-       ],
-            404
-        );
-    }
-
-    $is_public = $filenameParts[4];
-
-    if($is_public == 1){
- // Get the full storage path
- $path = storage_path($filename);
-
- // Return the file as a response
- return response()->file($path);
-    }
-
-    $createdBy = $filenameParts[1];
-    $employeeId = $filenameParts[2];
-
-    if($employeeId == 0 ){
-        if( $createdBy != auth()->user()->id) {
-            return response()->json(
-                [
-                 "message" => "You don't have access to this file"
-                ],
-                     404
-                 );
-        }
-
-    } else {
-        $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-        $employee = User::where([
-            "id" => $employeeId
-        ])
-        ->whereHas("departments", function($query) use ($all_manager_department_ids){
-             $query->whereIn("departments.id",$all_manager_department_ids);
-        })
-        ->first();
-        if(empty($employee)){
-            return response()->json(
-                [
-                 "message" => "You don't have access to this file"
-                ],
-                     404
-                 );
-        }
+            $filenames = explode(',', $filename);
 
 
-    }
+            $filenames = explode(',', $filename);
+            $fileResponses = [];
 
+            foreach ($filenames as $filename) {
+                $filenameParts = explode('_', $filename);
+                if (count($filenameParts) < 5) {
+                    $fileResponses[] = [
+                        "filename" => $filename,
+                        "message" => "File not found",
+                        "status" => 404
+                    ];
+                    continue;
+                }
 
-    // Get the full storage path
-    $path = storage_path($filename);
+                $is_public = $filenameParts[4];
 
-    // Return the file as a response
-    return response()->file($path);
+                if ($is_public == 1) {
+                    $path = storage_path($filename);
+                    $fileResponses[] = [
+                        "filename" => $filename,
+                        "file" => $path,
+                        "status" => 200
+                    ];
+                    continue;
+                }
 
+                $createdBy = $filenameParts[1];
+                $employeeId = $filenameParts[2];
+
+                if ($employeeId == 0) {
+                    if ($createdBy != auth()->user()->id) {
+                        $fileResponses[] = [
+                            "filename" => $filename,
+                            "message" => "You don't have access to this file",
+                            "status" => 404
+                        ];
+                        continue;
+                    }
+                } else {
+                    $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+                    $employee = User::where([
+                        "id" => $employeeId
+                    ])
+                    ->whereHas("departments", function($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    })
+                    ->first();
+
+                    if (empty($employee)) {
+                        $fileResponses[] = [
+                            "filename" => $filename,
+                            "message" => "You don't have access to this file",
+                            "status" => 404
+                        ];
+                        continue;
+                    }
+                }
+
+                $path = storage_path($filename);
+                $fileResponses[] = [
+                    "filename" => $filename,
+                    "file" => $path,
+                    "status" => 200
+                ];
+            }
+
+            $filesToReturn = [];
+            foreach ($fileResponses as $fileResponse) {
+                if ($fileResponse['status'] == 200) {
+                    $filesToReturn[] = response()->file($fileResponse['file']);
+                } else {
+                    $filesToReturn[] = response()->json(
+                        [
+                            "filename" => $fileResponse['filename'],
+                            "message" => $fileResponse['message']
+                        ],
+                        $fileResponse['status']
+                    );
+                }
+            }
+
+            return $filesToReturn;
 
 
 

@@ -767,6 +767,40 @@ public function getHolodayDetails($userId,$start_date = NULL, $end_date = NULL,$
 
 
 
+public function getDisableDatesForAttendance($user_id,$start_date,$end_date) {
+
+
+
+
+    $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user_id, $start_date, $end_date);
+
+
+    $already_taken_full_day_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user_id, TRUE);
+
+
+    $disable_days_collection = collect($already_taken_attendance_dates);
+
+
+    $disable_days_collection = $disable_days_collection->merge($already_taken_full_day_leave_dates);
+
+
+
+    $unique_disable_days_collection = $disable_days_collection->unique();
+    $disable_days_array = $unique_disable_days_collection->values()->all();
+
+
+
+
+    $already_taken_hourly_leave_dates = $this->leaveComponent->get_already_taken_half_day_leaves($start_date, $end_date, $user_id);
+
+
+    $result_array = [
+        "disable_days" => $disable_days_array,
+        "enable_days_with_condition" => $already_taken_hourly_leave_dates,
+    ];
+
+    return $result_array;
+}
 
 
 

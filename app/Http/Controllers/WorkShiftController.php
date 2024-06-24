@@ -200,7 +200,7 @@ if($request_data["type"] !== "flexible") {
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_default"] = false;
 
-         
+
                 $work_shift =  WorkShift::create($request_data);
 
                 $work_shift->departments()->sync($request_data['departments']);
@@ -1327,6 +1327,7 @@ if($work_shift->type !== "flexible") {
 
      public function getWorkShiftByUserId($user_id, Request $request)
      {
+        
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
@@ -1342,7 +1343,7 @@ if($work_shift->type !== "flexible") {
              }
 
 
-             $business_id =  auth()->user()->business_id;
+
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $this->validateUserQuery($user_id,$all_manager_department_ids);
@@ -1356,52 +1357,8 @@ if($work_shift->type !== "flexible") {
 
 
 
-             $work_shift =   WorkShift::with("details")
+         $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
 
-            ->where(function($query) use($business_id,$user_id) {
-                $query->where([
-                    "business_id" => $business_id
-                ])->whereHas('users', function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                });
-            })
-            ->orWhere(function($query) {
-                $query->where([
-                    "is_active" => 1,
-                    "business_id" => NULL,
-                    "is_default" => 1
-                ])
-            //     ->whereHas('details', function($query) use($business_times) {
-
-            //     foreach($business_times as $business_time) {
-            //         $query->where([
-            //             "day" => $business_time->day,
-            //         ]);
-            //         if($business_time["is_weekend"]) {
-            //             $query->where([
-            //                 "is_weekend" => 1,
-            //             ]);
-            //         } else {
-            //             $query->where(function($query) use($business_time) {
-            //                 $query->whereTime("start_at", ">=", $business_time->start_at);
-            //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
-            //             });
-            //         }
-
-            //     }
-            // })
-            ;
-            })
-
-            ->first();
-
-
-
-             if (!$work_shift) {
-                 return response()->json([
-                     "message" => "no work shift found for the user"
-                 ], 404);
-             }
 
 
 

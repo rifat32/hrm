@@ -1460,7 +1460,7 @@ class HistoryDetailsController extends Controller
                 ]
 
                 )
-             ->when(!empty($request->attendance_id), function ($query) use ($request) {
+             ->when(!empty($request->leave_id), function ($query) use ($request) {
                 return $query->where('leave_histories.leave_id', $request->leave_id);
             })
              ->when(!empty($request->user_id), function ($query) use ($request) {

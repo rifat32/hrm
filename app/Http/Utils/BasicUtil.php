@@ -487,22 +487,22 @@ public function storeUploadedFiles($filePaths, $fileKey, $location, $arrayOfStri
 public function makeFilePermanent($filePaths, $fileKey, $arrayOfString = NULL) {
 
 
-    if(is_array($arrayOfString)) {
-        return collect($filePaths)->map(function($filePathItem) use ($fileKey) {
-            $filePathItem[$fileKey] = $this->makeFilePermanent($filePathItem[$fileKey], "");
-            return $filePathItem;
-        });
+    // if(is_array($arrayOfString)) {
+    //     return collect($filePaths)->map(function($filePathItem) use ($fileKey) {
+    //         $filePathItem[$fileKey] = $this->makeFilePermanent($filePathItem[$fileKey], "");
+    //         return $filePathItem;
+    //     });
 
-    }
+    // }
 
-    return collect($filePaths)->map(function($filePathItem) use ( $fileKey) {
+    // return collect($filePaths)->map(function($filePathItem) use ( $fileKey) {
 
-        $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
-        UploadedFile::where([
-            "file_name" => $file
-        ])->delete();
-        return $filePathItem;
-    })->toArray();
+    //     $file = !empty($fileKey)?$filePathItem[$fileKey]:$filePathItem;
+    //     UploadedFile::where([
+    //         "file_name" => $file
+    //     ])->delete();
+    //     return $filePathItem;
+    // })->toArray();
 
 
 

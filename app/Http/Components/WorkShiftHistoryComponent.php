@@ -2,6 +2,7 @@
 
 namespace App\Http\Components;
 
+use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
@@ -237,4 +238,40 @@ class WorkShiftHistoryComponent
         });
         return $query;
     }
+
+
+
+
+
+    public function getWorkShiftByUserId ($user_id) {
+        $work_shift =   WorkShift::with("details")
+
+        ->where(function($query) use($user_id) {
+            $query->where([
+                "business_id" => auth()->user()->business_id
+            ])->whereHas('users', function ($query) use ($user_id) {
+                $query->where('users.id', $user_id);
+            });
+        })
+        ->orWhere(function($query) {
+            $query->where([
+                "is_active" => 1,
+                "business_id" => NULL,
+                "is_default" => 1
+            ]);
+
+        })
+
+        ->first();
+
+         if (empty($work_shift)) {
+            throw new Exception("no work shift found for the user",404);
+         }
+
+         return $work_shift;
+
+    }
+
+
+
 }

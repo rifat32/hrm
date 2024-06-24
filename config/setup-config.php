@@ -2739,7 +2739,7 @@ return [
 
 
 
-    "folder_locations" => ["pension_scheme_letters","recruitment_processes","candidate_files","leave_attachments","assets","documents","education_docs","right_to_work_docs","visa_docs","payment_record_file","pension_letters","payslip_logo","business_images"],
+    "folder_locations" => ["pension_scheme_letters","recruitment_processes","candidate_files","leave_attachments","assets","documents","education_docs","right_to_work_docs","visa_docs","payment_record_file","pension_letters","payslip_logo","business_images","user_images"],
 
 
 

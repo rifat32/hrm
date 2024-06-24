@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Rules\ValidateLeaveRecordId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveArrearApproveRequest extends FormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
