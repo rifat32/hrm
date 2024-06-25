@@ -8,7 +8,9 @@ use App\Exports\UsersExport;
 use App\Http\Components\AttendanceComponent;
 use App\Http\Components\HolidayComponent;
 use App\Http\Components\LeaveComponent;
+use App\Http\Components\ProjectComponent;
 use App\Http\Components\UserManagementComponent;
+use App\Http\Components\WorkLocationComponent;
 use App\Http\Components\WorkShiftHistoryComponent;
 use App\Http\Requests\AssignPermissionRequest;
 use App\Http\Requests\AssignRoleRequest;
@@ -77,8 +79,10 @@ class UserManagementController extends Controller
     protected $leaveComponent;
     protected $attendanceComponent;
     protected $userManagementComponent;
+    protected $workLocationComponent;
+    protected $projectComponent;
 
-    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent,  LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent, UserManagementComponent $userManagementComponent)
+    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent,  LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent, UserManagementComponent $userManagementComponent, WorkLocationComponent $workLocationComponent, ProjectComponent $projectComponent)
     {
 
         $this->workShiftHistoryComponent = $workShiftHistoryComponent;
@@ -86,6 +90,10 @@ class UserManagementController extends Controller
         $this->leaveComponent = $leaveComponent;
         $this->attendanceComponent = $attendanceComponent;
         $this->userManagementComponent = $userManagementComponent;
+        $this->workLocationComponent = $workLocationComponent;
+        $this->projectComponent = $projectComponent;
+
+
     }
 
 
@@ -5295,7 +5303,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
 
 
 
-            // @@@@@@@@@@
+
 
 
 
@@ -5502,6 +5510,127 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
              return $this->sendError($e, 500, $request);
          }
      }
+
+       /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/load-global-data-for-attendances",
+     *      operationId="getLoadGlobalDataForAttendance",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+         *     *     *              @OA\Parameter(
+     *         name="start_date",
+     *         in="path",
+     *         description="start_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *     *     *     *              @OA\Parameter(
+     *         name="end_date",
+     *         in="path",
+     *         description="end_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *
+
+     *      summary="This method is to get user attendance related data ",
+     *      description="This method is to get user attendance related data ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLoadGlobalDataForAttendance($id, Request $request)
+     {
+
+         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+         //     File::delete($file);
+         // }
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+// @@@@@@@@@@@@@@@@
+
+$all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+$usersQuery = User::with(
+    [
+        "designation" => function ($query) {
+            $query->select(
+                'designations.id',
+                'designations.name',
+            );
+        },
+        "roles",
+        "work_locations"
+    ]
+);
+
+$usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+
+$users = $this->retrieveData($usersQuery, "users.first_Name");
+
+
+        $work_locations = $this->workLocationComponent->getWorkLocations();
+
+
+
+        $projects =   $this->projectComponent->getProjects();
+
+
+        $responseArray = [
+            "work_locations" => $work_locations,
+            "users" => $users,
+            "projects" => $projects
+        ];
+             return response()->json($responseArray, 200);
+         } catch (Exception $e) {
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
 
     /**
      *

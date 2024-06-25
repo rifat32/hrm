@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ProjectsExport;
+use App\Http\Components\ProjectComponent;
 use App\Http\Requests\ProjectAssignToUserRequest;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
@@ -29,6 +30,19 @@ use Maatwebsite\Excel\Facades\Excel;
 class ProjectController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil,ModuleUtil, BasicUtil;
+
+
+     protected $projectComponent;
+
+
+    public function __construct(ProjectComponent $projectComponent)
+    {
+        $this->projectComponent = $projectComponent;
+
+    }
+
+
+
     /**
      *
      * @OA\Post(
@@ -1069,83 +1083,10 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
 
 
 
-
-            $projects = Project::with("departments","users")
-            ->where(
-                [
-                    "business_id" => $business_id
-                ]
-            )
-             ->when(!empty($request->user_id), function ($query) use ($request) {
-                return $query->whereHas('users', function($query) use($request) {
-                        $query->where("users.id",$request->user_id);
-                });
-            })
-            ->when(!empty($request->assigned_user_id_not), function ($query) use ($request) {
-                return $query->whereDoesntHave('users', function($query) use($request) {
-                        $query->where("users.id",$request->assigned_user_id_not);
-                });
-            })
-
-
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        $query->where("name", "like", "%" . $term . "%")
-                            ->orWhere("description", "like", "%" . $term . "%");
-                    });
-                })
-                ->when(!empty($request->name), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->name;
-                        $query->where("name", "like", "%" . $term . "%");
-                    });
-                })
-                ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->status;
-                        $query->where("status",  $term);
-                    });
-                })
-
-
-
-
-
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('start_date', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('end_date', "<=", ($request->end_date . ' 23:59:59'));
-                })
-                ->when(!empty($request->in_date), function ($query) use ($request) {
-                    return $query->where('start_date', "<=", ($request->in_date . ' 00:00:00'))
-                    ->where('end_date', "<=", ($request->in_date . ' 23:59:59'));
-                })
-
-
-
-
-                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("projects.id", $request->order_by);
-                }, function ($query) {
-                    return $query->orderBy("projects.id", "DESC");
-                })
-
-                ->select('projects.*')
-
-                ->when(!empty($request->per_page), function ($query) use ($request) {
-                    return $query->paginate($request->per_page);
-                }, function ($query) {
-                    return $query->get();
-                });
+$projects = $this->projectComponent->getProjects();
 
                 if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                     if (strtoupper($request->response_type) == 'PDF') {
@@ -1158,7 +1099,7 @@ class ProjectController extends Controller
                     return response()->json($projects, 200);
                 }
 
-
+// @@@@@@@@@@@@@@@@
 
             return response()->json($projects, 200);
         } catch (Exception $e) {
