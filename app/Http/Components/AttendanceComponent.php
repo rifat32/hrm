@@ -209,11 +209,11 @@ use BasicUtil;
             if ($attendances->isEmpty()) {
                 $data['data_highlights']['behavior'] = $behavior_counts;
                 $data['data_highlights']['average_behavior'] = "no data";
-                $data['data_highlights']['total_schedule_hours'] = 0;
+                $data['data_highlights']['total_schedule_hours_gone'] = 0;
             } else {
                 $data['data_highlights']['behavior'] = $behavior_counts;
                 $data['data_highlights']['average_behavior'] = array_search($max_behavior, $behavior_counts);
-                $data['data_highlights']['total_schedule_hours'] = $attendances->sum('capacity_hours');
+                $data['data_highlights']['total_schedule_hours_gone'] = $attendances->sum('capacity_hours');
             }
 
 
@@ -226,10 +226,10 @@ use BasicUtil;
 
 
                 // Calculate work availability percentage.
-            if ($total_available_hours == 0 || $data['data_highlights']['total_schedule_hours'] == 0) {
+            if ($total_available_hours == 0 || $data['data_highlights']['total_schedule_hours_gone'] == 0) {
                 $data['data_highlights']['total_work_availability_per_centum'] = 0;
             } else {
-                $data['data_highlights']['total_work_availability_per_centum'] = ($total_available_hours / $data['data_highlights']['total_schedule_hours']) * 100;
+                $data['data_highlights']['total_work_availability_per_centum'] = ($total_available_hours / $data['data_highlights']['total_schedule_hours_gone']) * 100;
             }
 
   // Determine work availability status based on settings.

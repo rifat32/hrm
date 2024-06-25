@@ -1968,7 +1968,6 @@ class BusinessController extends Controller
                     }
 
 
-
                     $business = Business::where([
                         'id' => $request_data['business']['id']
                     ])->first();

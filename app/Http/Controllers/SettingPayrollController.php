@@ -359,8 +359,8 @@ class SettingPayrollController extends Controller
                 $request_data["is_active"] = 1;
 
                 if(!empty($request_data["logo"])) {
-                    $request_data["logo"]= $this->storeUploadedFiles([$request_data["image"]],"","payslip_logo")[0];
-                    $this->makeFilePermanent($request_data["image"],"");
+                    $request_data["logo"]= $this->storeUploadedFiles([$request_data["logo"]],"","payslip_logo")[0];
+                    $this->makeFilePermanent($request_data["logo"],"");
                   }
 
 

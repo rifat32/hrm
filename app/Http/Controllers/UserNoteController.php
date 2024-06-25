@@ -12,6 +12,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserNote;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -228,18 +229,33 @@ $user_note->mentions()->createMany($mentions_data);
                 //     ], 404);
                 // }
 
-                $user_note  =  tap(UserNote::where($user_note_query_params))->update(
-                    collect($request_data)->only([
-                        'user_id',
-                        'title',
-                        'description',
-                        // "hidden_note",
-                        'updated_by'
-                    ])->toArray()
-                )
-                    // ->with("somthing")
 
-                    ->first();
+               // Retrieve the first matching UserNote object
+$user_note = UserNote::where($user_note_query_params)->first();
+
+if ($user_note) {
+    // Fill the UserNote object with the updated data
+    $user_note->fill(collect($request_data)->only([
+        'user_id',
+        'title',
+        'description',
+        'updated_by'
+    ])->toArray());
+
+    if(auth()->user()->hasRole("business_owner")){
+  // Update the timestamps explicitly
+  if (isset($request_data['created_at'])) {
+    $user_note->created_at = Carbon::parse($request_data['created_at']);
+}
+if (isset($request_data['updated_at'])) {
+    $user_note->updated_at = Carbon::parse($request_data['updated_at']);
+}
+    }
+
+
+    // Save the updated UserNote object
+    $user_note->save();
+}
 
                 if (!$user_note) {
                     return response()->json([
@@ -257,6 +273,8 @@ $mentions_data = $mentioned_users->map(function ($mentioned_user) {
         'user_id' => $mentioned_user->id,
     ];
 });
+
+
 
 $user_note->mentions()->createMany($mentions_data);
                 return response($user_note, 201);

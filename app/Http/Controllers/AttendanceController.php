@@ -6,6 +6,7 @@ use App\Exports\AttendancesExport;
 use App\Http\Components\AttendanceComponent;
 use App\Http\Components\HolidayComponent;
 use App\Http\Components\LeaveComponent;
+use App\Http\Components\UserManagementComponent;
 use App\Http\Requests\AttendanceApproveRequest;
 use App\Http\Requests\AttendanceArrearApproveRequest;
 use App\Http\Requests\AttendanceBypassMultipleCreateRequest;
@@ -49,11 +50,13 @@ class AttendanceController extends Controller
     protected $attendanceComponent;
     protected $holidayComponent;
     protected $leaveComponent;
-    public function __construct(AttendanceComponent $attendanceComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent)
+    protected $userManagementComponent;
+    public function __construct(AttendanceComponent $attendanceComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent, UserManagementComponent $userManagementComponent)
     {
         $this->attendanceComponent = $attendanceComponent;
         $this->holidayComponent = $holidayComponent;
         $this->leaveComponent = $leaveComponent;
+        $this->userManagementComponent = $userManagementComponent;
     }
 
 
@@ -1494,8 +1497,14 @@ class AttendanceController extends Controller
                 ], 401);
             }
 
-
+            $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
             $data = $this->attendanceComponent->getAttendanceV2Data();
+
+
+            $data["data_highlights"]["total_schedule_hours"] = collect(!empty($request->user_id)?[$request->user_id]:$data["data"]->pluck("user_id")->unique())->map(function($user_id) use($start_date,$end_date) {
+                 return $this->userManagementComponent->getScheduleInformationData($user_id,$start_date,$end_date)["total_capacity_hours"];
+            })->sum();
 
 
 
@@ -2378,6 +2387,7 @@ class AttendanceController extends Controller
     public function deleteAttendancesByIds(Request $request, $ids)
     {
 
+
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('attendance_delete')) {
@@ -2424,10 +2434,15 @@ class AttendanceController extends Controller
 
 
 
-            $this->recalculate_payrolls($payrolls);
+            Attendance::whereIn('id', $existingIds)->delete();
 
 
-            Attendance::destroy($existingIds);
+
+
+            // $this->recalculate_payrolls($payrolls);
+
+
+
             $this->send_notification($attendances, $attendances->first()->employee, "Attendance deleted", "delete", "attendance");
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
@@ -2529,10 +2544,10 @@ class AttendanceController extends Controller
                 $users  =  User::where([
                     "business_id" => auth()->user()->business_id
                 ])
-                ->select(
-                    "id",
-                    "joining_date"
-                )
+                    ->select(
+                        "id",
+                        "joining_date"
+                    )
                     ->get();
             } else {
                 $users  =  User::where([
@@ -2546,8 +2561,10 @@ class AttendanceController extends Controller
                     ->get();
             }
 
+            $attendanceNotCreatedForUsers = collect();
 
-            $all_attendance_data = collect([]);
+            $allAttendanceData = collect();
+
 
             // Iterate over each user
             foreach ($users as $user) {
@@ -2617,14 +2634,16 @@ class AttendanceController extends Controller
                 // Retrieve work shift history for the user and date
                 $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
 
- // Retrieve salary information for the user and date
- $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
+                // Retrieve salary information for the user and date
+                $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
+
+
 
 
 
 
                 // Map attendance details to create attendances data
-                $attendances_data =  collect($attendance_details)->map(function ($item) use ($user, $workShiftHistories, $salaryHistories) {
+                $attendances_data =  collect($attendance_details)->map(function ($item) use ($user, $workShiftHistories, $salaryHistories, &$allAttendanceData) {
 
                     $itemInDate = Carbon::parse($item["in_date"]);
 
@@ -2746,115 +2765,128 @@ class AttendanceController extends Controller
                         "created_at",
                         "updated_at"
                     ])
-                    ->toArray();
+                        ->toArray();
 
                     // $all_attendance_data->push($attendance);
 
-
+$allAttendanceData->push($attendance);
                     return  $attendance;
-
                 })->filter()->values();
+
+                if(!$attendances_data->count()){
+
+                    $attendanceNotCreatedForUsers->push($user);
+                }
 
 
             }
 
-         $all_attendance_data =   $all_attendance_data->merge($attendances_data);
-
-            Log::info("........................................................ attendances");
-            Log::info(json_encode($all_attendance_data->toArray()));
-            Log::info("........................................................ attendances");
 
 
+            Log::info("........................................................ attendances data");
+            Log::info(json_encode($allAttendanceData->toArray()));
+            Log::info("........................................................ attendances data ");
 
-            $all_attendance_data->chunk(1000, function ($chunkedAttendances) {
-                foreach ($chunkedAttendances as $attendances) {
-                    Attendance::insert($attendances->toArray());
-                }
-            });
+            Log::info("........................................................ attendances data count");
+            Log::info($allAttendanceData->count());
+            Log::info("........................................................ attendances data count");
 
-                // Retrieve latest attendances for the user
-                $latest_attendances = Attendance::whereIn(
+
+
+            foreach ($allAttendanceData->chunk(1000) as $chunkedAttendances) {
+                Log::info("Chunk callback invoked.");
+                Log::info("Chunk size: " . count($chunkedAttendances));
+                Log::info("Chunk data: " . json_encode($chunkedAttendances));
+                Attendance::insert($chunkedAttendances->toArray());
+            }
+
+
+            // Retrieve latest attendances for the user
+            $latest_attendances = Attendance::whereIn(
                 "user_id",
                 $users->pluck("id")
-                )->latest()
-                ->take($all_attendance_data->count())
+            )->latest()
+                ->take($attendances_data->count())
                 ->get();
 
-                Log::info("........................................................ attendances");
-                Log::info(json_encode($latest_attendances));
-                Log::info("........................................................ attendances");
+            Log::info("........................................................ uploaded attendances");
+            Log::info(json_encode($latest_attendances));
+            Log::info("........................................................ uploaded attendances");
+
+            Log::info("........................................................ uploaded attendances count");
+            Log::info($latest_attendances->count());
+            Log::info("........................................................ uploaded attendances count");
+
+
+            // Initialize arrays to hold attendance history data and project IDs
+            $attendance_history_data = [];
+
+
+            foreach ($latest_attendances as $attendance) {
+                // Prepare data for AttendanceHistory
+
+                $attendance_history = $attendance->toArray();
+
+                $attendance_history = array_merge($attendance_history,  [
+                    'attendance_id' => $attendance->id,
+                    'actor_id' => auth()->user()->id,
+                    'action' => 'create', // or use $action variable if needed
+                    'attendance_created_at' => $attendance->created_at,
+                    'attendance_updated_at' => $attendance->updated_at,
+                    "attendance_records" => json_encode($attendance->attendance_records)
+                    // Add other fields as needed
+                    // Example: 'field_name' => $attendance->field_name,
+                ]);
+
+                $attendance_history_data[] = collect($attendance_history)->only([
+                    "attendance_id",
+                    "actor_id",
+                    "action",
+
+                    "attendance_created_at",
+                    "attendance_updated_at",
+
+                    'note',
+                    "in_geolocation",
+                    "out_geolocation",
+                    'user_id',
+
+                    'in_date',
+                    'does_break_taken',
+
+                    "behavior",
+                    "capacity_hours",
+                    "work_hours_delta",
+                    "break_type",
+                    "break_hours",
+                    "total_paid_hours",
+                    "regular_work_hours",
+                    "work_shift_start_at",
+                    "work_shift_end_at",
+                    "work_shift_history_id",
+                    "holiday_id",
+                    "leave_record_id",
+                    "is_weekend",
+
+                    "overtime_hours",
+
+                    "status",
+                    'work_location_id',
+
+                    "is_active",
+                    "business_id",
+                    "created_by",
+                    "regular_hours_salary",
+                    "overtime_hours_salary",
+                    "attendance_records",
+                ])
+                    ->toArray();
+            }
 
 
 
-                // Initialize arrays to hold attendance history data and project IDs
-                $attendance_history_data = [];
-
-
-                foreach ($latest_attendances as $attendance) {
-                    // Prepare data for AttendanceHistory
-
-                    $attendance_history = $attendance->toArray();
-
-                    $attendance_history = array_merge($attendance_history,  [
-                        'attendance_id' => $attendance->id,
-                        'actor_id' => auth()->user()->id,
-                        'action' => 'create', // or use $action variable if needed
-                        'attendance_created_at' => $attendance->created_at,
-                        'attendance_updated_at' => $attendance->updated_at,
-                        "attendance_records" => json_encode($attendance->attendance_records)
-                        // Add other fields as needed
-                        // Example: 'field_name' => $attendance->field_name,
-                    ]);
-
-                    $attendance_history_data[] = collect($attendance_history)->only([
-                        "attendance_id",
-                        "actor_id",
-                        "action",
-
-                        "attendance_created_at",
-                        "attendance_updated_at",
-
-                        'note',
-                        "in_geolocation",
-                        "out_geolocation",
-                        'user_id',
-
-                        'in_date',
-                        'does_break_taken',
-
-                        "behavior",
-                        "capacity_hours",
-                        "work_hours_delta",
-                        "break_type",
-                        "break_hours",
-                        "total_paid_hours",
-                        "regular_work_hours",
-                        "work_shift_start_at",
-                        "work_shift_end_at",
-                        "work_shift_history_id",
-                        "holiday_id",
-                        "leave_record_id",
-                        "is_weekend",
-
-                        "overtime_hours",
-
-                        "status",
-                        'work_location_id',
-
-                        "is_active",
-                        "business_id",
-                        "created_by",
-                        "regular_hours_salary",
-                        "overtime_hours_salary",
-                        "attendance_records",
-                    ])
-                        ->toArray();
-                }
-
-
-
-                // Perform bulk insertion for AttendanceHistory
-                collect($attendance_history_data)
+            // Perform bulk insertion for AttendanceHistory
+            collect($attendance_history_data)
                 ->chunk(1000, function ($chunkedHistoryData) {
                     foreach ($chunkedHistoryData as $historyData) {
                         AttendanceHistory::insert($historyData->toArray());
@@ -2863,12 +2895,12 @@ class AttendanceController extends Controller
 
 
 
-                $this->send_notification($latest_attendances, $user, "Attendance Taken", "create", "attendance", $all_parent_department_ids);
+            $this->send_notification($latest_attendances, $user, "Attendance Taken", "create", "attendance", $all_parent_department_ids);
 
 
             DB::commit();
 
-            return response()->json(["ok" => true], 201);
+            return response()->json(["ok" => true,"attendance_not_createdFor_users" => $attendanceNotCreatedForUsers->toArray()], 201);
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());
@@ -3046,7 +3078,7 @@ class AttendanceController extends Controller
                 $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
 
                 // Retrieve salary information for the user and date
- $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
+                $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
 
                 // Map attendance details to create attendances data
                 $attendances_data =  collect($attendance_details)->map(function ($item) use ($setting_attendance, $user, $workShiftHistories, $salaryHistories) {
@@ -3069,8 +3101,8 @@ class AttendanceController extends Controller
                     }
 
 
-                     // Retrieve work shift details based on work shift history and date
-                     $work_shift_details =  $this->get_work_shift_detailsV3($work_shift_history, $item["in_date"]);
+                    // Retrieve work shift details based on work shift history and date
+                    $work_shift_details =  $this->get_work_shift_detailsV3($work_shift_history, $item["in_date"]);
 
 
 
@@ -3093,14 +3125,14 @@ class AttendanceController extends Controller
 
 
                     // Retrieve salary information for the user and date
-                  // Retrieve salary information for the user and date
-                  $user_salary_info = $salaryHistories->first(function ($history) use ($itemInDate) {
-                    $fromDate = Carbon::parse($history["from_date"]);
-                    $toDate = $history["to_date"] ? Carbon::parse($history["to_date"]) : null;
+                    // Retrieve salary information for the user and date
+                    $user_salary_info = $salaryHistories->first(function ($history) use ($itemInDate) {
+                        $fromDate = Carbon::parse($history["from_date"]);
+                        $toDate = $history["to_date"] ? Carbon::parse($history["to_date"]) : null;
 
-                    return $itemInDate->greaterThanOrEqualTo($fromDate)
-                        && ($toDate === null || $itemInDate->lessThan($toDate));
-                });
+                        return $itemInDate->greaterThanOrEqualTo($fromDate)
+                            && ($toDate === null || $itemInDate->lessThan($toDate));
+                    });
 
 
 

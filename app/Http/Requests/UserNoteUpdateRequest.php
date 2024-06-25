@@ -61,7 +61,8 @@ class UserNoteUpdateRequest extends BaseFormRequest
             'description' => 'required|string',
             // 'hidden_note' => 'present|string',
 
-
+            'created_at' => 'nullable|date',
+            'updated_at' => 'nullable|date',
         ];
     }
 }
