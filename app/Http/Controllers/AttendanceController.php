@@ -2605,7 +2605,7 @@ class AttendanceController extends Controller
 
 
                 // Create date range between start and end dates
-                $date_range = $start_date->daysUntil($end_date->addDay());
+                $date_range = $start_date->daysUntil($end_date->copy()->addDay());
 
                 $attendance_details = [];
                 // Map date range to create attendance details

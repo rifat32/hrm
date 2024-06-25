@@ -192,6 +192,7 @@ class BusinessController extends Controller
                 $request_data['business']['created_by'] = $request->user()->id;
                 $request_data['business']['is_active'] = true;
                 $request_data['business']['is_self_registered_businesses'] = false;
+                $request_data['business']["pension_scheme_letters"] = [];
                 $business =  Business::create($request_data['business']);
 
                 $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
@@ -569,6 +570,7 @@ class BusinessController extends Controller
                 $request_data['business']['is_active'] = true;
                 $request_data['business']['is_self_registered_businesses'] = false;
 
+                $request_data['business']["pension_scheme_letters"] = [];
 
                 $business =  Business::create($request_data['business']);
 
@@ -859,7 +861,7 @@ class BusinessController extends Controller
                 $request_data['business']['is_self_registered_businesses'] = true;
 
                 $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
-
+                $request_data['business']["pension_scheme_letters"] = [];
                 $business =  Business::create($request_data['business']);
 
                 $user->email_verified_at = now();
@@ -2648,6 +2650,16 @@ class BusinessController extends Controller
              }
              $business = $this->businessOwnerCheck($id);
 
+             if (!is_array($business->pension_scheme_letters) || empty($business->pension_scheme_letters)) {
+                $business->pension_scheme_letters = [];
+            } else {
+
+                    if (!is_string($business->pension_scheme_letters[0])) {
+                        $business->pension_scheme_letters = [];
+
+                    }
+
+            }
 
              $businessData = [
                 'pension_scheme_registered' => $business->pension_scheme_registered,
