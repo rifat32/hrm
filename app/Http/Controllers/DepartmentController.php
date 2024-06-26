@@ -1056,6 +1056,28 @@ class DepartmentController extends Controller
                 ], 404);
             }
 
+
+
+
+
+            $conflictingUsers = User::whereHas("departments", function($query) use($existingIds) {
+                $query->whereIn("department_id", $existingIds);
+            })->get(['id', 'first_name', 'last_name']);
+
+            if ($conflictingUsers->isNotEmpty()) {
+                return response()->json([
+                    "message" => "Some users are associated with the specified departments",
+                    "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+
+
+
+
+
+
+
+
             Department::destroy($existingIds);
 
 

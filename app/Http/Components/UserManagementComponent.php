@@ -766,6 +766,45 @@ public function getHolodayDetails($userId,$start_date = NULL, $end_date = NULL,$
 
 
 
+public function getHolodayDetailsV2($userId,$start_date , $end_date,$throwErr = true) {
+
+
+// Get all parent department IDs of the user
+$all_parent_department_ids = $this->all_parent_departments_of_user($userId);
+
+// Set start and end date for the holiday period
+$start_date = !empty($start_date) ? $start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+$end_date = !empty($end_date) ? $end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+
+
+// Process holiday dates
+$holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $userId, $all_parent_department_ids);
+
+
+// Retrieve work shift histories for the user within the specified period
+$work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $userId,$throwErr);
+
+// Initialize an empty collection to store weekend dates
+
+$weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $userId, $work_shift_histories);
+
+
+$result_collection = collect($holiday_dates)->merge($weekend_dates);
+
+
+$unique_result_collection = $result_collection->unique();
+
+$result_array = $unique_result_collection->values()->all();
+
+return $result_array;
+
+}
+
+
+
+
 
 public function getDisableDatesForAttendance($user_id,$start_date,$end_date) {
 

@@ -472,6 +472,10 @@ class UserAssetController extends Controller
                   }
                   if($user_asset_prev->user_id != $user_asset->user_id) {
 
+                    $user_asset->status = "assigned";
+                    $user_asset->save();
+
+
                     UserAssetHistory::where([
                         'user_id' => $user_asset_prev->user_id,
                         "user_asset_id" => $user_asset_prev->id,
@@ -481,7 +485,6 @@ class UserAssetController extends Controller
                         "to_date" => now(),
                         "status" => "returned",
                     ]);
-
 
                    }
 
@@ -505,8 +508,7 @@ class UserAssetController extends Controller
                     "to_date" => NULL,
                     'created_by' => $user_asset->created_by
 
-                  ]
-                  );
+                  ]);
                 //    $this->moveUploadedFiles($request_data["image"],"assets");
                   return response($user_asset, 201);
               });

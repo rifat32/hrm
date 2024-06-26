@@ -851,19 +851,20 @@ class DesignationController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::whereIn("designation_id", $existingIds)->exists();
-            if ($user_exists) {
-                $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
-                    'id', 'first_Name',
-                    'last_Name',
-                ]);
 
-          
+            $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
+                'id', 'first_Name',
+                'last_Name',
+            ]);
+
+            if ($conflictingUsers->isNotEmpty()) {
                 return response()->json([
                     "message" => "Some users are associated with the specified designations",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
+
+
 
             Designation::destroy($existingIds);
 

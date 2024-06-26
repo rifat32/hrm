@@ -772,19 +772,23 @@ class WorkLocationController extends Controller
                 ], 404);
             }
 
-            $user_exists =  User::whereIn("work_location_id", $existingIds)->exists();
-            if ($user_exists) {
-                $conflictingUsers = User::whereIn("work_location_id", $existingIds)->get([
-                    'id', 'first_Name',
-                    'last_Name',
-                ]);
 
+            $conflictingUsers = User::whereHas("work_locations", function($query) use($existingIds) {
+                $query->whereIn("work_location_id", $existingIds);
+            })->get(['id', 'first_name', 'last_name']);
 
+            if ($conflictingUsers->isNotEmpty()) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified work_locations",
+                    "message" => "Some users are associated with the specified departments",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
+
+
+
+
+
+
 
             WorkLocation::destroy($existingIds);
 

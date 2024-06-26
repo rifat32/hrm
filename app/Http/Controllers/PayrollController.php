@@ -756,15 +756,27 @@ if (empty($request->end_date)) {
 
                  ->get();
 
-             $processed_employees =  $this->estimate_payrun_data( $employees, $request->start_date, $request->end_date);
+                 $processed_employees = collect($this->estimate_payrun_data($employees, $request->start_date, $request->end_date));
+
+                 // Filter out users with both regular_hours_salary and overtime_hours_salary as 0
+                 $filtered_employees = $processed_employees->filter(function($employee) {
+                     return $employee['payroll']['regular_hours_salary'] != 0 || $employee['payroll']['overtime_hours_salary'] != 0;
+                 });
+
+                 // Convert the filtered collection back to an array if needed
+                 $filtered_employees_array = $filtered_employees->values()->all();
+
+
+
+
 
              DB::commit();
 
-             return response()->json($processed_employees, 200);
+             return response()->json($filtered_employees_array, 200);
 
          } catch (Exception $e) {
              DB::rollBack();
-             error_log($e->getMessage());
+
              return $this->sendError($e, 500, $request);
          }
      }

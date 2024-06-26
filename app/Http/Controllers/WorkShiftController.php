@@ -1327,7 +1327,7 @@ if($work_shift->type !== "flexible") {
 
      public function getWorkShiftByUserId($user_id, Request $request)
      {
-        
+
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
@@ -1454,34 +1454,7 @@ if($work_shift->type !== "flexible") {
                 ], 404);
             }
 
-            $user_exists =  User::
-
-            whereHas("work_shifts", function($query) use($existingIds) {
-                $query->whereIn("work_shifts.id", $existingIds);
-            })
-            ->where("users.business_id",auth()->user()->id)
-           ->exists();
-
-            if ($user_exists) {
-                $conflictingUsers = User:: whereHas("work_shifts", function($query) use($existingIds) {
-                    $query->whereIn("work_shifts.id", $existingIds);
-                })
-                ->where("users.business_id",auth()->user()->id)
-                ->select([
-                    'users.id',
-                    'users.first_Name',
-                    'users.last_Name',
-                ])
-                ->get()
-                ;
-
-                return response()->json([
-                    "message" => "Some users are associated with the specified work shifts",
-                    "conflicting_users" => $conflictingUsers,
-                    "conflicting_users2" => $conflictingUsers
-                ], 409);
-            }
-
+       
             WorkShift::destroy($existingIds);
 
 

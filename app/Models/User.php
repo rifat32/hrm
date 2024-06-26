@@ -30,8 +30,8 @@ class User extends Authenticatable
     protected $fillable = [
         'first_Name',
         'last_Name',
-
         'middle_Name',
+
         "NI_number",
         "pension_eligible",
         "color_theme_name",

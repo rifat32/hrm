@@ -2546,7 +2546,10 @@ class AttendanceController extends Controller
                 ])
                     ->select(
                         "id",
-                        "joining_date"
+                        "joining_date",
+                        'first_Name',
+                        'last_Name',
+                        'middle_Name',
                     )
                     ->get();
             } else {
@@ -2556,7 +2559,10 @@ class AttendanceController extends Controller
                     ->whereIn("id", $request_data["user_ids"])
                     ->select(
                         "id",
-                        "joining_date"
+                        "joining_date",
+                        'first_Name',
+                        'last_Name',
+                        'middle_Name',
                     )
                     ->get();
             }
@@ -2576,6 +2582,7 @@ class AttendanceController extends Controller
                 $joining_date = Carbon::parse($user->joining_date);
 
                 if ($joining_date->gt($end_date)) {
+                    $attendanceNotCreatedForUsers->push($user);
                     continue;
                 }
 
@@ -2769,12 +2776,11 @@ class AttendanceController extends Controller
 
                     // $all_attendance_data->push($attendance);
 
-$allAttendanceData->push($attendance);
+                 $allAttendanceData->push($attendance);
                     return  $attendance;
                 })->filter()->values();
 
                 if(!$attendances_data->count()){
-
                     $attendanceNotCreatedForUsers->push($user);
                 }
 

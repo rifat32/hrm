@@ -888,19 +888,25 @@ class RecruitmentProcessController extends Controller
                 ], 404);
             }
 
-            $user_recruitment_process_exists =  UserRecruitmentProcess::whereIn("recruitment_process_id", $existingIds)->exists();
-            if ($user_recruitment_process_exists) {
-                $conflictingUsers = User::whereIn("recruitment_process_id", $existingIds)->get([
-                    'id', 'first_Name',
-                    'last_Name',
-                ]);
 
 
+            $conflictingUsers = User::whereIn("recruitment_process_id", $existingIds)->get([
+                'id', 'first_Name',
+                'last_Name',
+            ]);
+
+            if ($conflictingUsers->isNotEmpty()) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified recruitment_processes",
+                    "message" => "Some users are associated with the specified recruitment processes",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
+
+
+
+
+
+
 
             RecruitmentProcess::destroy($existingIds);
 

@@ -653,7 +653,6 @@ return $salary_histories;
 
     public function adjust_payroll_on_leave_update($leave_record, $add_to_next_payroll = 0)
     {
-
         $leave_record_arrear =   LeaveRecordArrear::where(["leave_record_id" => $leave_record->id])->first();
 
         $payroll = Payroll::whereHas("payroll_leave_records", function ($query) use ($leave_record) {
@@ -800,6 +799,9 @@ return $salary_histories;
             $this->recalculate_payroll_values($payroll);
         }
     }
+
+
+
     public function recalculate_payroll_values($payroll)
     {
         if(empty($payroll)) {
@@ -882,4 +884,10 @@ return $salary_histories;
         $payroll->save();
         return $payroll;
     }
+
+
+
+
+
+
 }

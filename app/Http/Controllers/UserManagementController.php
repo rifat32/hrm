@@ -5392,6 +5392,138 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         }
     }
 
+           /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/load-data-for-leaves/{id}",
+     *      operationId="getLoadDataForLeaveByUserId",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+         *     *     *              @OA\Parameter(
+     *         name="start_date",
+     *         in="path",
+     *         description="start_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *     *     *     *              @OA\Parameter(
+     *         name="end_date",
+     *         in="path",
+     *         description="end_date",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *
+
+     *      summary="This method is to get user attendance related data by id",
+     *      description="This method is to get user attendance related data by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLoadDataForLeaveByUserId($id, Request $request)
+     {
+
+         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+         //     File::delete($file);
+         // }
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+             $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
+
+             $user_id = intval($id);
+             $request_user_id = auth()->user()->id;
+             if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+
+
+
+            $already_taken_attendance_dates = $this->attendanceComponent->get_already_taken_attendance_dates($user->id, $start_date, $end_date);
+
+            $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user->id, (isset($is_full_day_leave) ? $is_full_day_leave : NULL));
+
+            $blocked_dates_collection = collect($already_taken_attendance_dates);
+
+            $blocked_dates_collection = $blocked_dates_collection->merge($already_taken_leave_dates);
+
+            $unique_blocked_dates_collection = $blocked_dates_collection->unique();
+            $blocked_dates_collection = $unique_blocked_dates_collection->values()->all();
+
+
+            $colored_dates =  $this->userManagementComponent->getHolodayDetailsV2($user->id,$start_date,$end_date,false);
+
+
+
+            // $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
+
+        $responseArray = [
+            "blocked_dates" => $blocked_dates_collection,
+            "colored_dates" => $colored_dates,
+        ];
+
+             return response()->json($responseArray, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
        /**
      *
      * @OA\Get(
@@ -5807,6 +5939,7 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
         //     File::delete($file);
         // }
+
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
