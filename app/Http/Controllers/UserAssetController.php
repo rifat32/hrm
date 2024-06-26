@@ -590,26 +590,27 @@ class UserAssetController extends Controller
                    $request_data = $request->validated();
 
 
+                   $request_data["status"] = "returned";
+
 
                    $user_asset_query_params = [
                        "id" => $request_data["id"],
                        "user_id" => $request_data["user_id"],
+                       "business_id" => auth()->user()->business_id
                    ];
 
-                   $user_asset  =  tap(UserAsset::where($user_asset_query_params))->update(
-                       collect($request_data)->only([
-                            'user_id',
-                       ])->toArray()
-                   )
-                       // ->with("somthing")
+                   $user_asset  =  UserAsset::where($user_asset_query_params)
 
+                       // ->with("somthing")
                        ->first();
+
                    if (empty($user_asset)) {
                        return response()->json([
                            "message" => "something went wrong."
                        ], 500);
                    }
-
+                   $user_asset->status = "returned";
+                   $user_asset->save();
 
                      UserAssetHistory::where([
                          'user_id' => $request_data["user_id"],

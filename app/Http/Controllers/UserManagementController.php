@@ -4133,6 +4133,7 @@ class UserManagementController extends Controller
                  "users.first_Name",
                  "users.middle_Name",
                  "users.last_Name",
+                 "users.joining_date",
              );
              $users = $this->retrieveData($usersQuery, "users.first_Name");
 
