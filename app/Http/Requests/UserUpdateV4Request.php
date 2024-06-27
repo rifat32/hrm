@@ -51,7 +51,7 @@ class UserUpdateV4Request extends FormRequest
             'last_Name' => 'required|string|max:255',
             'email' => 'required|string|unique:users,email,' . $this->id . ',id',
             'phone' => 'nullable|string',
-            'date_of_birth' => "required|date",
+            'date_of_birth' => "nullable|date",
             // "NI_number" => "required|string",
             'gender' => 'nullable|string|in:male,female,other',
 

@@ -590,7 +590,7 @@ class UserAssetController extends Controller
                    $request_data = $request->validated();
 
 
-                   $request_data["status"] = "returned";
+
 
 
                    $user_asset_query_params = [
@@ -609,7 +609,8 @@ class UserAssetController extends Controller
                            "message" => "something went wrong."
                        ], 500);
                    }
-                   $user_asset->status = "returned";
+                   $user_asset->user_id = NULL;
+                   $user_asset->status = "available";
                    $user_asset->save();
 
                      UserAssetHistory::where([

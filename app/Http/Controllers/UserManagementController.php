@@ -1696,9 +1696,6 @@ class UserManagementController extends Controller
 
 
 
-             if(!empty($request_data["joining_date"])) {
-                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
-             }
 
 
 
@@ -1737,10 +1734,6 @@ class UserManagementController extends Controller
              }
 
 
-             if (!empty($request_data['departments'])) {
-                $user->departments()->sync($request_data['departments']);
-                }
-
 
 
 
@@ -1770,10 +1763,10 @@ class UserManagementController extends Controller
             //  // Update the user's departments
             //  $user->departments()->sync($departments);
 
-             $user->work_locations()->sync($request_data["work_location_ids"]);
 
 
-             $this->update_work_shift($request_data, $user);
+
+
 
 
 

@@ -6,6 +6,7 @@ use App\Http\Requests\AuthRegisterBusinessRequest;
 use App\Http\Requests\BusinessCreateRequest;
 use App\Http\Requests\BusinessUpdatePart1Request;
 use App\Http\Requests\BusinessUpdatePart2Request;
+use App\Http\Requests\BusinessUpdatePart2RequestV2;
 use App\Http\Requests\BusinessUpdatePart3Request;
 use App\Http\Requests\BusinessUpdatePensionRequest;
 use App\Http\Requests\BusinessUpdateRequest;
@@ -1645,6 +1646,158 @@ class BusinessController extends Controller
         }
     }
 
+          /**
+     *
+     * @OA\Put(
+     *      path="/v2.0/businesses-part-2",
+     *      operationId="updateBusinessPart2V2",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user with business",
+     *      description="This method is to update user with business",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+
+     *
+     *  @OA\Property(property="business", type="string", format="array",example={
+     *   *  * "id":1,
+     * "name":"ABCD businesses",
+     * "about":"Best businesses in Dhaka",
+     * "web_page":"https://www.facebook.com/",
+     *  "phone":"01771034383",
+     *  "email":"rifatalashwad@gmail.com",
+     *  "phone":"01771034383",
+     *  "additional_information":"No Additional Information",
+     *  "address_line_1":"Dhaka",
+     *  "address_line_2":"Dinajpur",
+     *    * *  "lat":"23.704263332849386",
+     *    * *  "long":"90.44707059805279",
+     *
+     *  "country":"Bangladesh",
+     *  "city":"Dhaka",
+     *  "postcode":"Dinajpur",
+     *
+     *  "logo":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+     *  "images":{"/a","/b","/c"},
+     *  "currency":"BDT",
+     * "flexible_rota_enabled":1
+     *
+     * }),
+     *
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function updateBusinessPart2V2(BusinessUpdatePart2RequestV2 $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+                if (!$request->user()->hasPermissionTo('business_update')) {
+                    return response()->json([
+                        "message" => "You can not perform this action"
+                    ], 401);
+                }
+
+
+
+                $request_data = $request->validated();
+                if (!empty($request_data["business"]["images"])) {
+                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
+                    $this->makeFilePermanent($request_data["business"]["images"],"");
+                }
+                if (!empty($request_data["business"]["image"])) {
+                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
+                }
+                if (!empty($request_data["business"]["logo"])) {
+                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
+                }
+                if (!empty($request_data["business"]["background_image"])) {
+                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
+                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
+                }
+
+
+                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
+
+                $business->fill(collect($request_data['business'])->only([
+                    "name","email","phone","address_line_1","city","country","postcode","start_date","web_page"
+                ])->toArray());
+
+                $business->save();
+
+
+
+
+                if (empty($business)) {
+                    return response()->json([
+                        "massage" => "something went wrong"
+                    ], 500);
+                }
+
+
+
+
+                DB::commit();
+                return response([
+                    "business" => $business
+                ], 201);
+
+
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -2584,6 +2737,113 @@ class BusinessController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+       /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/businesses/{id}",
+     *      operationId="getBusinessByIdV2",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *      summary="This method is to get business by id",
+     *      description="This method is to get business by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getBusinessByIdV2($id, Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('business_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $businessQuery  = Business::where(["id" => $id]);
+             if (!auth()->user()->hasRole('superadmin')) {
+                 $businessQuery = $businessQuery->where(function ($query) {
+
+                     $query->where(function ($query) {
+                         return   $query
+                            ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
+                             $query->where('id', auth()->user()->business_id)
+                             ->orWhere('created_by', auth()->user()->id)
+                             ->orWhere('owner_id', auth()->user()->id);
+                            },
+                            function($query) {
+                             $query->where('is_self_registered_businesses', 1)
+                             ->orWhere('created_by', auth()->user()->id);
+                            }
+
+                         );
+
+                     });
+
+
+
+                 });
+             }
+
+             $business =  $businessQuery
+             ->select("id","name","email","phone","address_line_1","city","country","postcode","start_date","web_page")
+             ->first();
+             if (empty($business)) {
+                throw new Exception("you are not the owner of the business or the requested business does not exist.",401);
+             }
+             return $business;
+
+
+
+             return response()->json($business, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
      /**
      *
      * @OA\Get(

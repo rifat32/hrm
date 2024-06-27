@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\SomeTimes;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class BusinessUpdatePart2Request extends BaseFormRequest
+class BusinessUpdatePart2RequestV2 extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,40 +22,35 @@ class BusinessUpdatePart2Request extends BaseFormRequest
      *
      * @return array
      */
-
-
     public function rules()
     {
+        $businessId = $this->business['id'] ?? null;
         $rules = [
 
 
             'business.id' => 'required|numeric|required|exists:businesses,id',
             'business.name' => 'required|string|max:255',
             'business.start_date' => 'required|date|before_or_equal:today',
-            'business.about' => 'nullable|string',
+
             'business.web_page' => 'nullable|string',
             'business.phone' => 'nullable|string',
-            // 'business.email' => 'required|string|email|indisposable|max:255',
-            'business.email' => 'required|string|unique:businesses,email,' . $this->business["id"] . ',id',
-            'business.additional_information' => 'nullable|string',
+ // 'business.email' => 'required|string|email|indisposable|max:255',
+ 'business.email' => [
+    'required',
+    'string',
+    Rule::unique('businesses', 'email')->ignore($businessId, 'id'),
+],
 
 
-            'business.lat' => 'nullable|string',
-            'business.long' => 'nullable|string',
-            'business.currency' => 'nullable|string',
+
+
             'business.country' => 'required|string',
             'business.city' => 'required|string',
             'business.postcode' => 'nullable|string',
             'business.address_line_1' => 'required|string',
-            'business.address_line_2' => 'nullable|string',
 
 
-            'business.logo' => 'nullable|string',
-            'business.image' => 'nullable|string',
-            'business.background_image' => 'nullable|string',
 
-            'business.images' => 'nullable|array',
-            'business.images.*' => 'nullable|string',
 
 
         ];
