@@ -77,8 +77,8 @@ class WorkLocationUpdateRequest extends BaseFormRequest
             'address' => 'nullable|string',
 
             'is_location_enabled' => 'required|boolean',
-            'latitude' => 'required_if:is_location_enabled,1|numeric',
-            'longitude' => 'required_if:is_location_enabled,1|numeric',
+            'latitude' => 'nullable|required_if:is_location_enabled,1|numeric',
+            'longitude' => 'nullable|required_if:is_location_enabled,1|numeric',
 
 
             "is_geo_location_enabled" => 'required|boolean',

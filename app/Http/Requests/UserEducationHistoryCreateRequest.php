@@ -36,8 +36,9 @@ class UserEducationHistoryCreateRequest extends BaseFormRequest
             'degree' => 'required|string',
             'major' => 'required|string',
             'school_name' => 'required|string',
-            'graduation_date' => 'required|date',
             'start_date' => 'required|date',
+            'graduation_date' => 'required|date|after_or_equal:start_date',
+
             'achievements' => 'nullable|string',
             'description' => 'nullable|string',
             'address' => 'nullable|string',

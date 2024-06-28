@@ -27,7 +27,9 @@ use App\Http\Requests\UserUpdateAddressRequest;
 use App\Http\Requests\UserUpdateBankDetailsRequest;
 use App\Http\Requests\UserUpdateEmergencyContactRequest;
 use App\Http\Requests\UserUpdateJoiningDateRequest;
+use App\Http\Requests\UserUpdateProfilePictureRequest;
 use App\Http\Requests\UserUpdateProfileRequest;
+use App\Http\Requests\UserUpdateProfileRequestV2;
 use App\Http\Requests\UserUpdateRecruitmentProcessRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
@@ -2522,10 +2524,8 @@ class UserManagementController extends Controller
             }
 
 
-            $userQuery = User::where([
-                "id" => $request["id"]
-            ]);
-            $updatableUser = $userQuery->first();
+
+
             //  $request_data['is_active'] = true;
             //  $request_data['remember_token'] = Str::random(10);
             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
@@ -2575,7 +2575,248 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+      /**
+     *
+     * @OA\Put(
+     *      path="/v2.0/users/profile",
+     *      operationId="updateUserProfileV2",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user profile",
+     *      description="This method is to update user profile",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
+     *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
+     *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
 
+     * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="password_confirmation", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="phone", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="address_line_1", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="address_line_2", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="country", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="city", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="postcode", type="boolean", format="boolean",example="1"),
+     *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
+     *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
+     * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserProfileV2(UserUpdateProfileRequestV2 $request)
+     {
+
+         try {
+
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $request_data = $request->validated();
+
+
+             if (!empty($request_data['password'])) {
+                 $request_data['password'] = Hash::make($request_data['password']);
+             } else {
+                 unset($request_data['password']);
+             }
+
+
+
+
+             //  $request_data['is_active'] = true;
+             //  $request_data['remember_token'] = Str::random(10);
+             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+                 collect($request_data)->only([
+                     'first_Name',
+                     'middle_Name',
+
+                     'last_Name',
+
+                     "email"
+
+                 ])->toArray()
+             )
+                 // ->with("somthing")
+
+                 ->first();
+
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+          
+
+
+
+             $user->roles = $user->roles->pluck('name');
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+  /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/profile-picture",
+     *      operationId="updateUserProfilePicture",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user profile",
+     *      description="This method is to update user profile",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *             @OA\Property(property="first_Name", type="string", format="string",example="Rifat"),
+     *            @OA\Property(property="last_Name", type="string", format="string",example="How was this?"),
+     *            @OA\Property(property="email", type="string", format="string",example="How was this?"),
+
+     * *  @OA\Property(property="password", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="password_confirmation", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="phone", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="address_line_1", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="address_line_2", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="country", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="city", type="boolean", format="boolean",example="1"),
+     *  * *  @OA\Property(property="postcode", type="boolean", format="boolean",example="1"),
+     *     *     *  * *  @OA\Property(property="lat", type="string", format="boolean",example="1207"),
+     *     *  * *  @OA\Property(property="long", type="string", format="boolean",example="1207"),
+     * * *   @OA\Property(property="emergency_contact_details", type="string", format="array", example={})
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserProfilePicture(UserUpdateProfilePictureRequest $request)
+     {
+
+         try {
+
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $request_data = $request->validated();
+
+
+
+
+
+
+
+             //  $request_data['is_active'] = true;
+             //  $request_data['remember_token'] = Str::random(10);
+             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+                 collect($request_data)->only([
+                     "image",
+                 ])->toArray()
+             )
+                 // ->with("somthing")
+
+                 ->first();
+
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+
+
+             $user->roles = $user->roles->pluck('name');
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**

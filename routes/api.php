@@ -174,7 +174,7 @@ Route::get('/v1.0/file/{filename}', [FileManagementController::class, "getFile"]
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
     Route::get('/v2.0/user', [AuthController::class, "getUserV2"]);
-
+    Route::get('/v3.0/user', [AuthController::class, "getUserV3"]);
 
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // notification management section
@@ -445,6 +445,11 @@ Route::put('/v1.0/users/assign-roles', [UserManagementController::class, "assign
 Route::put('/v1.0/users/assign-permissions', [UserManagementController::class, "assignUserPermission"]);
 
 Route::put('/v1.0/users/profile', [UserManagementController::class, "updateUserProfile"]);
+Route::put('/v2.0/users/profile', [UserManagementController::class, "updateUserProfileV2"]);
+
+Route::put('/v1.0/users/profile-picture', [UserManagementController::class, "updateUserProfilePicture"]);
+
+
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
 
 Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);

@@ -1365,6 +1365,101 @@ $responseData = [
 
 
 
+/**
+        *
+     * @OA\Get(
+     *      path="/v3.0/user",
+     *      operationId="getUserV3",
+     *      tags={"auth"},
+    *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="This method is to get  user ",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getUserV3 (Request $request) {
+        try{
+            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+
+
+            $user = $request->user();
+            $user->token = auth()->user()->createToken('authToken')->accessToken;
+
+
+            $user->roles = $user->roles->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name'),
+                ];
+            });
+
+            $user->permissions = $user->permissions->pluck("name");
+
+            // Extracting only the required data
+$responseData = [
+    'id' => $user->id,
+    "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
+    'business_id' => $user->business_id,
+    'first_Name' => $user->first_Name,
+    'middle_Name' => $user->middle_Name,
+    'last_Name' => $user->last_Name,
+    'image' => $user->image,
+    'roles' => $user->roles,
+    'permissions' => $user->permissions,
+    'manages_department' => $user->manages_department,
+    'color_theme_name' => $user->color_theme_name,
+    'email' => $user->email,
+];
+
+
+
+            return response()->json(
+                $responseData,
+                200
+            );
+        }catch(Exception $e) {
+            return $this->sendError($e, 500,$request);
+        }
+
+    }
 
   /**
         *
