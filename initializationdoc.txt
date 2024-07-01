@@ -269,7 +269,8 @@ ON DELETE CASCADE;
 ADD CONSTRAINT `users_designation_id_foreign`
 FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NULL;
 
-39. import 
+39. import
+40. ALTER TABLE `departments` CHANGE `work_location_id` `work_location_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL; 
 
 
 

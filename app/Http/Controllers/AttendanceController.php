@@ -2570,6 +2570,7 @@ class AttendanceController extends Controller
             $attendanceNotCreatedForUsers = collect();
 
             $allAttendanceData = collect();
+            $attendances_data = collect();
 
 
             // Iterate over each user
@@ -2582,6 +2583,7 @@ class AttendanceController extends Controller
                 $joining_date = Carbon::parse($user->joining_date);
 
                 if ($joining_date->gt($end_date)) {
+                    $user->message_1="User joining date is after the end date";
                     $attendanceNotCreatedForUsers->push($user);
                     continue;
                 }
@@ -2589,6 +2591,20 @@ class AttendanceController extends Controller
                 if ($joining_date->gt($start_date)) {
                     $start_date = $joining_date;
                 }
+
+                  // Retrieve work shift history for the user and date
+                  $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
+
+                  if (collect($workShiftHistories)->count() == 0) {
+                    $user->message_2="No Work Shift Found for this Employee";
+                    $attendanceNotCreatedForUsers->push($user);
+                    continue;
+                }
+
+                  // Retrieve salary information for the user and date
+                  $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
+
+
 
 
                 // Get all parent department IDs of the employee
@@ -2638,11 +2654,7 @@ class AttendanceController extends Controller
 
 
 
-                // Retrieve work shift history for the user and date
-                $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
 
-                // Retrieve salary information for the user and date
-                $salaryHistories = $this->get_salary_infos($user->id, $start_date, $end_date);
 
 
 
@@ -2781,6 +2793,7 @@ class AttendanceController extends Controller
                 })->filter()->values();
 
                 if(!$attendances_data->count()){
+                    $user->message_3="No Attendance Record To Insert";
                     $attendanceNotCreatedForUsers->push($user);
                 }
 
@@ -2812,8 +2825,8 @@ class AttendanceController extends Controller
                 "user_id",
                 $users->pluck("id")
             )->latest()
-                ->take($attendances_data->count())
-                ->get();
+            ->take($attendances_data->count())
+            ->get();
 
             Log::info("........................................................ uploaded attendances");
             Log::info(json_encode($latest_attendances));
@@ -2901,7 +2914,7 @@ class AttendanceController extends Controller
 
 
 
-            $this->send_notification($latest_attendances, $user, "Attendance Taken", "create", "attendance", $all_parent_department_ids);
+            // $this->send_notification($latest_attendances, $user, "Attendance Taken", "create", "attendance", $all_parent_department_ids);
 
 
             DB::commit();
