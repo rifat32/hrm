@@ -420,6 +420,10 @@ class TaskController extends Controller
                 ->when(!empty($request->project_id), function ($query) use ($request) {
                     return $query->where('project_id' , $request->project_id);
                 })
+                ->when(!empty($request->task_category_id), function ($query) use ($request) {
+                    return $query->where('task_category_id' , $request->task_category_id);
+                })
+
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('status' , $request->status);
                 })

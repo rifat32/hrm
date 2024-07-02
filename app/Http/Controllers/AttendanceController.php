@@ -2567,7 +2567,7 @@ class AttendanceController extends Controller
                     ->get();
             }
 
-            $attendanceNotCreatedForUsers = collect();
+            $userList = collect();
 
             $allAttendanceData = collect();
             $attendances_data = collect();
@@ -2583,8 +2583,8 @@ class AttendanceController extends Controller
                 $joining_date = Carbon::parse($user->joining_date);
 
                 if ($joining_date->gt($end_date)) {
-                    $user->message_1="User joining date is after the end date";
-                    $attendanceNotCreatedForUsers->push($user);
+                    $user->message="User joining date is after the end date";
+                    $userList->push($user);
                     continue;
                 }
 
@@ -2596,8 +2596,8 @@ class AttendanceController extends Controller
                   $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
 
                   if (collect($workShiftHistories)->count() == 0) {
-                    $user->message_2="No Work Shift Found for this Employee";
-                    $attendanceNotCreatedForUsers->push($user);
+                    $user->message="No Work Shift Found for this Employee";
+                    $userList->push($user);
                     continue;
                 }
 
@@ -2616,8 +2616,9 @@ class AttendanceController extends Controller
                 $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user->id, $all_parent_department_ids);
                 $leave_dates =  $this->leaveComponent->get_already_taken_leave_records($start_date, $end_date, $user->id, $all_parent_department_ids);
 
-
-
+                $user->existing_attendance_dates = $existingAttendanceDates;
+                $user->existing_holiday_dates = $holiday_dates;
+                $user->existing_leave_dates = $leave_dates;
 
                 // Make sure dates are unique
                 $uniqueRestrictedDates = collect($existingAttendanceDates)
@@ -2793,10 +2794,10 @@ class AttendanceController extends Controller
                 })->filter()->values();
 
                 if(!$attendances_data->count()){
-                    $user->message_3="No Attendance Record To Insert";
-                    $attendanceNotCreatedForUsers->push($user);
-                }
+                    $user->message="No Attendance Record To Insert";
 
+                }
+                $userList->push($user);
 
             }
 
@@ -2919,7 +2920,7 @@ class AttendanceController extends Controller
 
             DB::commit();
 
-            return response()->json(["ok" => true,"attendance_not_createdFor_users" => $attendanceNotCreatedForUsers->toArray()], 201);
+            return response()->json(["ok" => true,"attendance_not_createdFor_users" => $userList->toArray()], 201);
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());

@@ -15,6 +15,7 @@ class TaskCategory extends Model
         "is_active",
         "is_default",
         "business_id",
+        "project_id",
         "created_by"
     ];
 

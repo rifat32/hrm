@@ -662,6 +662,260 @@ class TaskCategoryController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+    /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/task-categories",
+     *      operationId="getTaskCategoriesV2",
+     *      tags={"task_categories"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *   *    *      * *  @OA\Parameter(
+     * name="task_id",
+     * in="query",
+     * description="task_id",
+     * required=true,
+     * example="1"
+     * ),
+
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get task categories  ",
+     *      description="This method is to get task categories ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getTaskCategoriesV2(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("task_management");
+             if (!$request->user()->hasPermissionTo('task_category_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $created_by  = NULL;
+             if(auth()->user()->business) {
+                 $created_by = auth()->user()->business->created_by;
+             }
+
+             $task_categories = TaskCategory::
+             with([
+                "tasks" => function($query) {
+                    $query->when(empty(request()->project_id), function($query) {
+                            $query->where("project_id",request()->project_id);
+                    });
+                }
+             ])
+
+             ->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                 if (auth()->user()->hasRole('superadmin')) {
+                     return $query->where('task_categories.business_id', NULL)
+                         ->where('task_categories.is_default', 1)
+                         ->when(isset($request->is_active), function ($query) use ($request) {
+                             return $query->where('task_categories.is_active', intval($request->is_active));
+                         });
+                 } else {
+                     return $query
+
+                     ->where(function($query) use($request) {
+                         $query->where('task_categories.business_id', NULL)
+                         ->where('task_categories.is_default', 1)
+                         ->where('task_categories.is_active', 1)
+                         ->when(isset($request->is_active), function ($query) use ($request) {
+                             if(intval($request->is_active)) {
+                                 return $query->whereDoesntHave("disabled", function($q) {
+                                     $q->whereIn("disabled_task_categories.created_by", [auth()->user()->id]);
+                                 });
+                             }
+
+                         })
+                         ->orWhere(function ($query) use ($request) {
+                             $query->where('task_categories.business_id', NULL)
+                                 ->where('task_categories.is_default', 0)
+                                 ->where('task_categories.created_by', auth()->user()->id)
+                                 ->when(isset($request->is_active), function ($query) use ($request) {
+                                     return $query->where('task_categories.is_active', intval($request->is_active));
+                                 });
+                         });
+
+                     });
+                 }
+             })
+
+
+                 ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                    return $query
+                    ->where(function($query) use($request, $created_by) {
+
+
+                        $query->where('task_categories.business_id', NULL)
+                        ->where('task_categories.is_default', 1)
+                        ->where('task_categories.is_active', 1)
+                        ->whereDoesntHave("disabled", function($q) use($created_by) {
+                            $q->whereIn("disabled_task_categories.created_by", [$created_by]);
+                        })
+                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+                            if(intval($request->is_active)) {
+                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                                    $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
+                                });
+                            }
+
+                        })
+
+
+                        ->orWhere(function ($query) use($request, $created_by){
+                            $query->where('task_categories.business_id', NULL)
+                                ->where('task_categories.is_default', 0)
+                                ->where('task_categories.created_by', $created_by)
+                                ->where('task_categories.is_active', 1)
+
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    if(intval($request->is_active)) {
+                                        return $query->whereDoesntHave("disabled", function($q) {
+                                            $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
+                                        });
+                                    }
+
+                                })
+
+
+                                ;
+                        })
+                        ->orWhere(function ($query) use($request) {
+                            $query->where('task_categories.business_id', auth()->user()->business_id)
+                                ->where('task_categories.is_default', 0)
+                                ->when(isset($request->is_active), function ($query) use ($request) {
+                                    return $query->where('task_categories.is_active', intval($request->is_active));
+                                });;
+                        });
+                    });
+
+
+                })
+
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                 return $query->where(function ($query) use ($request) {
+                     $term = $request->search_key;
+                     $query->where("task_categories.name", "like", "%" . $term . "%")
+                         ->orWhere("task_categories.description", "like", "%" . $term . "%");
+                 });
+             })
+
+             //     when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             //     return $query->where('task_categories.business_id', NULL)
+             //                  ->where('task_categories.is_default', 1);
+             // })
+             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             //     return $query->where('task_categories.business_id', $request->user()->business_id);
+             // })
+
+
+                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                 //        return $query->where('product_category_id', $request->product_category_id);
+                 //    })
+                 ->when(!empty($request->task_id), function ($query) use ($request) {
+                     return $query->whereHas('tasks',function($query) use($request) {
+                         $query->where('tasks.id',$request->task_id);
+                     });
+                 })
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('task_categories.created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('task_categories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("task_categories.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("task_categories.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });
+
+
+
+             return response()->json($task_categories, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *
@@ -797,7 +1051,140 @@ class TaskCategoryController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+/**
+     *
+     * @OA\Get(
+     *      path="/v1.0/task-categories-by-project-id/{project_id}",
+     *      operationId="getTaskCategoryByProjectId",
+     *      tags={"task_categories"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="project_id",
+     *         in="path",
+     *         description="project_id",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      summary="This method is to get task category by id",
+     *      description="This method is to get task category by id",
+     *
 
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getTaskCategoryByProjectId($project_id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("task_management");
+
+             if (!$request->user()->hasPermissionTo('task_category_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $task_category =  TaskCategory::with("tasks")->where([
+                 "project_id" => $project_id,
+             ])
+             // ->when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             //     return $query->where('task_categories.business_id', NULL)
+             //                  ->where('task_categories.is_default', 1);
+             // })
+             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+             //     return $query->where('task_categories.business_id', $request->user()->business_id);
+             // })
+                 ->first();
+             if (!$task_category) {
+
+                 return response()->json([
+                     "message" => "no data found"
+                 ], 404);
+             }
+
+             if (empty(auth()->user()->business_id)) {
+
+                 if (auth()->user()->hasRole('superadmin')) {
+                     if (($task_category->business_id != NULL || $task_category->is_default != 1)) {
+
+                         return response()->json([
+                             "message" => "You do not have permission to update this task category due to role restrictions."
+                         ], 403);
+                     }
+                 } else {
+                     if ($task_category->business_id != NULL) {
+
+                         return response()->json([
+                             "message" => "You do not have permission to update this task category due to role restrictions."
+                         ], 403);
+                     } else if ($task_category->is_default == 0 && $task_category->created_by != auth()->user()->id) {
+
+                             return response()->json([
+                                 "message" => "You do not have permission to update this task category due to role restrictions."
+                             ], 403);
+
+                     }
+                 }
+             } else {
+                 if ($task_category->business_id != NULL) {
+                     if (($task_category->business_id != auth()->user()->business_id)) {
+
+                         return response()->json([
+                             "message" => "You do not have permission to update this task category due to role restrictions."
+                         ], 403);
+                     }
+                 } else {
+                     if ($task_category->is_default == 0) {
+                         if ($task_category->created_by != auth()->user()->created_by) {
+
+                             return response()->json([
+                                 "message" => "You do not have permission to update this task category due to role restrictions."
+                             ], 403);
+                         }
+                     }
+                 }
+             }
+
+             return response()->json($task_category, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

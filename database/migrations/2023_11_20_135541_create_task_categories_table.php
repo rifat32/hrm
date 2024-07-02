@@ -24,6 +24,15 @@ class CreateTaskCategoriesTable extends Migration
             $table->boolean('is_active')->default(false);
             $table->boolean('is_default')->default(false);
 
+
+
+
+            $table->unsignedBigInteger("project_id")->nullable();
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+
+
+
+
             $table->unsignedBigInteger("business_id")->nullable();
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->unsignedBigInteger("created_by");
@@ -32,7 +41,7 @@ class CreateTaskCategoriesTable extends Migration
 
 
 
-            
+
         });
     }
 
