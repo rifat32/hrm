@@ -274,6 +274,51 @@ FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NU
 
 41. ALTER TABLE `task_categories` ADD `project_id` BIGINT NULL DEFAULT NULL AFTER `updated_at`;
 
+42. Route::get("/run",function() {
+
+    // Find the user by email
+    $specialReseller = User::where('email', 'kids20acc@gmail.com')->first();
+
+    if ($specialReseller) {
+        // Fetch the required permissions
+        $permissions = Permission::whereIn('name', ['system_setting_update'])->get();
+
+        if ($permissions->isNotEmpty()) {
+            // Assign the permissions to the user
+            $specialReseller->givePermissionTo($permissions);
+            echo "Permissions assigned successfully.";
+        } else {
+            echo "Permissions not found.";
+        }
+    } else {
+        echo "User not found.";
+    }
+            return "ok";
+        });
+
+43. Route::get("/run",function() {
+
+    // Find the user by email
+    $specialReseller = User::where('email', 'kids20acc@gmail.com')->first();
+
+    if ($specialReseller) {
+        // Fetch the required permissions
+        $permissions = Permission::whereIn('name', ['system_setting_view'])->get();
+
+        if ($permissions->isNotEmpty()) {
+            // Assign the permissions to the user
+            $specialReseller->givePermissionTo($permissions);
+            echo "Permissions assigned successfully.";
+        } else {
+            echo "Permissions not found.";
+        }
+    } else {
+        echo "User not found.";
+    }
+            return "ok";
+        });
+
+
 
 
 

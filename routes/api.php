@@ -440,6 +440,7 @@ Route::delete('/v1.0/service-plans/{ids}', [ServicePlanController::class, "delet
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
+Route::put('/v1.0/users/update-password', [UserManagementController::class, "updatePassword"]);
 
 Route::put('/v1.0/users/assign-roles', [UserManagementController::class, "assignUserRole"]);
 Route::put('/v1.0/users/assign-permissions', [UserManagementController::class, "assignUserPermission"]);
@@ -1630,6 +1631,8 @@ Route::delete('/v1.0/reminders/{ids}', [ReminderController::class, "deleteRemind
 Route::get('/v1.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownData"]);
 Route::get('/v2.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownDataV2"]);
 
+
+Route::get('/v1.0/dropdown-options/employee-filter', [DropdownOptionsController::class, "getEmployeeFilterDropdownData"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end dropdown management section

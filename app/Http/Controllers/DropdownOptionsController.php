@@ -11,6 +11,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmploymentStatus;
+use App\Models\Project;
 use App\Models\Role;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
@@ -175,6 +176,24 @@ class DropdownOptionsController extends Controller
 
          return $work_shifts;
   }
+
+  private function get_projects($fields=[]) {
+    $projects = Project::
+    where(
+        [
+            "business_id" => auth()->user()->business_id
+        ]
+    )
+
+
+ ->when(!empty($fields), function($query) use($fields) {
+    $query->select($fields);
+ })
+         ->get();
+
+         return $projects;
+  }
+
   private function get_roles($fields=[]) {
 
     $roles = Role::where("id",">",$this->getMainRoleId())
@@ -480,6 +499,125 @@ class DropdownOptionsController extends Controller
          }
      }
 
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/dropdown-options/employee-filter",
+     *      operationId="getEmployeeFilterDropdownData",
+     *      tags={"dropdowns"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get reminders  ",
+     *      description="This method is to get reminders ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getEmployeeFilterDropdownData(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $user =  auth()->user();
+
+             $business = $user->business;
+
+             $business_created_by = $business->created_by;
+
+             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
+
+             $data["work_locations"] = $this->get_work_locations($business_created_by);
+             $data["designations"] = $this->get_designations($business_created_by);
+             $data["employment_statuses"] = $this->get_employment_statuses($business_created_by);
+
+            //  $data["work_shifts"] = $this->get_work_shifts($all_manager_department_ids);
+            //  $data["roles"] = $this->get_roles();
+             $data["departments"] = $this->get_departments($all_manager_department_ids);
+
+             $data["projects"] = $this->get_projects();
+
+
+             return response()->json($data, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 }

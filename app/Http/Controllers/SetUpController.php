@@ -191,7 +191,9 @@ return "swagger generated";
                 $specialReseller->email_verified_at = now();
                 $specialReseller->save();
 
-                $permissions = Permission::whereIn('name', ["handle_self_registered_businesses"])->get();
+                $permissions = Permission::whereIn('name', ["handle_self_registered_businesses","system_setting_update"])->get();
+
+
                 $specialReseller->givePermissionTo($permissions);
 
 
@@ -273,7 +275,7 @@ return "swagger generated";
             ['id' => 10, 'name' => 'Twitch', 'icon' => 'FaTwitch', 'link' => 'https://www.twitch.tv/'],
             ['id' => 11, 'name' => 'Stack Overflow', 'icon' => 'FaStackOverflow', 'link' => 'https://stackoverflow.com/'],
             ['id' => 12, 'name' => 'Slack', 'icon' => 'FaSlack', 'link' => 'https://slack.com/'],
-            ['id' => 13, 'name' => 'Other', 'icon' => 'FaGlobe', 'link' => ''], 
+            ['id' => 13, 'name' => 'Other', 'icon' => 'FaGlobe', 'link' => ''],
         ];
 
 
