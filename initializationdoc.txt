@@ -319,7 +319,7 @@ FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NU
         });
 
 
-
+44. ALTER TABLE `recruitment_processes` ADD `use_in_employee` BOOLEAN NOT NULL DEFAULT TRUE AFTER `updated_at`, ADD `use_in_on_boarding` BOOLEAN NOT NULL DEFAULT TRUE AFTER `use_in_employee`; 
 
 
 

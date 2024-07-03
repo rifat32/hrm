@@ -5056,7 +5056,18 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-             $usersQuery = User::query();
+             $usersQuery = User::with(
+                [
+
+                    "roles" => function ($query) {
+                        $query->select(
+                            'roles.id',
+                            'roles.name',
+                        );
+                    },
+
+                ]
+            );
 
              $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
              $usersQuery = $usersQuery->select(
@@ -5065,6 +5076,14 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                  "users.middle_Name",
                  "users.last_Name",
                  "users.email",
+
+                 'users.address_line_1',
+                 'users.address_line_2',
+                 'users.country',
+                 'users.city',
+                 'users.postcode',
+                 'users.gender',
+                 'users.phone',
              );
              $users = $this->retrieveData($usersQuery, "users.first_Name")->map(function($user) {
 
@@ -6251,7 +6270,125 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         }
     }
 
+ /**
+     *
+     * @OA\Get(
+     *      path="/v4.0/users/{id}",
+     *      operationId="getUserByIdV2",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
 
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserByIdV4($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $user = User::with(
+                 [
+                     "roles",
+                 ]
+
+             )
+
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                     return $query->where(function ($query) use ($all_manager_department_ids) {
+                         return  $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id)
+                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
+                                 $query->whereIn("departments.id", $all_manager_department_ids);
+                             });
+                     });
+                 })
+                 ->select(
+                    "users.id",
+                    "users.first_Name",
+                    "users.middle_Name",
+                    "users.last_Name",
+                    "users.email",
+
+                    'users.address_line_1',
+                    'users.address_line_2',
+                    'users.country',
+                    'users.city',
+                    'users.postcode',
+                    'users.gender',
+                    'users.phone',
+                 )
+                 ->first();
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+             $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+
+
+
+             return response()->json($user, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

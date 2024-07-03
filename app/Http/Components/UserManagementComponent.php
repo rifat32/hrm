@@ -113,10 +113,46 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                 ]);
             })
 
+            ->when(!empty(request()->NI_number), function ($query)  {
+                return   $query->where([
+                    "NI_number" => request()->NI_number
+                ]);
+            })
+            ->when(!empty(request()->gender), function ($query)  {
+                return   $query->where([
+                    "gender" => request()->gender
+                ]);
+            })
+            ->when(!empty(request()->start_salary_per_annum), function ($query)  {
+                return   $query->where(
+                    "salary_per_annum" ,
+                    ">=" , request()->start_salary_per_annum
+                );
+            })
+            ->when(!empty(request()->end_salary_per_annum), function ($query)  {
+                return   $query->where(
+                    "salary_per_annum" ,
+                    "<=" , request()->end_salary_per_annum
+                );
+            })
+
 
             ->when(!empty(request()->designation_id), function ($query)  {
                 $idsArray = explode(',', request()->designation_id);
                 return $query->whereIn('designation_id', $idsArray);
+            })
+
+            ->when(!empty(request()->start_weekly_contractual_hours), function ($query)  {
+                return   $query->where(
+                    "weekly_contractual_hours" ,
+                    ">=" , request()->start_weekly_contractual_hours
+                );
+            })
+            ->when(!empty(request()->end_weekly_contractual_hours), function ($query)  {
+                return   $query->where(
+                    "weekly_contractual_hours" ,
+                    "<=" , request()->end_weekly_contractual_hours
+                );
             })
 
             ->when(!empty(request()->employment_status_id), function ($query)  {
@@ -176,6 +212,10 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                                     }
                                 );
                         });
+
+
+
+
                 } else {
                     // Inverted logic for when employees are not on holiday
                     $query->where(function ($query) use ($today, $total_departments) {
@@ -232,6 +272,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     $query->where("employee_sponsorship_histories.note", request()->sponsorship_note);
                 });
             })
+
             ->when(!empty(request()->sponsorship_certificate_number), function ($query)  {
                 return $query->whereHas("sponsorship_details", function ($query)  {
                     $query->where("employee_sponsorship_histories.certificate_number", request()->sponsorship_certificate_number);
@@ -250,16 +291,23 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
 
             ->when(!empty(request()->project_id), function ($query)  {
                 return $query->whereHas("projects", function ($query)  {
-                    $query->where("projects.id", request()->project_id);
+                    $idsArray = explode(',', request()->project_id);
+                    $query->whereIn("projects.id", $idsArray);
                 });
             })
             ->when(!empty(request()->department_id), function ($query)  {
                 return $query->whereHas("department_user.department", function ($query)  {
-                    $query->where("departments.id", request()->department_id);
+                    $idsArray = explode(',', request()->department_id);
+                    $query->whereIn("departments.id", $idsArray);
                 });
             })
 
-
+            ->when(!empty(request()->recruitment_process_ids), function ($query)  {
+                return $query->whereHas("recruitment_processes", function ($query)  {
+                    $idsArray = explode(',', request()->recruitment_process_ids);
+                    $query->whereIn("recruitment_processes.id", $idsArray);
+                });
+            })
 
             ->when(!empty(request()->work_location_ids), function ($query)  {
                 $work_location_ids = explode(',', request()->work_location_ids);
@@ -347,6 +395,11 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     $query->where("employee_pension_histories.pension_scheme_status", request()->pension_scheme_status);
                 });
             })
+            ->when(!empty(request()->passport_number), function ($query)  {
+                return $query->whereHas("passport_details", function ($query)  {
+                    $query->where("employee_passport_detail_histories.passport_number", request()->passport_number);
+                });
+            })
 
 
             ->when(!empty(request()->start_passport_issue_date), function ($query)  {
@@ -377,6 +430,11 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     $query->whereBetween("employee_passport_detail_histories.passport_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
                 });
             })
+            ->when(!empty(request()->BRP_number), function ($query)  {
+                return $query->whereHas("visa_details", function ($query)  {
+                    $query->where("employee_visa_detail_histories.BRP_number", request()->BRP_number);
+                });
+            })
             ->when(!empty(request()->start_visa_issue_date), function ($query)  {
                 return $query->whereHas("visa_details", function ($query)  {
                     $query->where("employee_visa_detail_histories.visa_issue_date", ">=", request()->start_visa_issue_date);
@@ -401,6 +459,12 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                 return $query->whereHas("visa_details", function ($query) use ( $today) {
                     $query_day = Carbon::now()->addDays(request()->visa_expires_in_day);
                     $query->whereBetween("employee_visa_detail_histories.visa_expiry_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
+                });
+            })
+
+            ->when(!empty(request()->right_to_work_code), function ($query)  {
+                return $query->whereHas("right_to_works", function ($query)  {
+                    $query->where("employee_right_to_work_histories.right_to_work_code", request()->right_to_work_code);
                 });
             })
 
@@ -438,12 +502,96 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                 }
             })
 
+
+            ->when(!empty(request()->leave_status), function ($query)  {
+                return $query->whereHas("leaves", function ($query)  {
+                    $query->where("leaves.status", request()->leave_status);
+                });
+            })
+
+
+            ->when(!empty(request()->start_leave_date) && !empty(request()->end_leave_date) , function ($query)  {
+                return $query->whereHas("leaves.records", function ($query)  {
+                return  $query
+
+                ->where('leave_records.date', '>=', request()->start_leave_date)
+                ->where('leave_records.date', '<=', request()->end_leave_date . ' 23:59:59');
+
+                });
+            })
+
+
+
+            ->when(!empty(request()->holiday_status), function ($query)  {
+                return $query->whereHas("holidays", function ($query)  {
+                    $query->where("holidays.status", request()->holiday_status);
+                });
+            })
+
+
+
+            ->when(!empty(request()->start_holiday_date) && !empty(request()->end_holiday_date), function ($query) use($total_departments) {
+
+                $startDate = request()->start_holiday_date;
+                $endDate = request()->end_holiday_date;
+
+                $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
+                    $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
+                        $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
+                            $query->whereHas('holidays', function ($query) use ($startDate, $endDate) {
+                                $query->where('holidays.start_date', '<=', $startDate->copy()->startOfDay())
+                                      ->where('holidays.end_date', '>=', $endDate->copy()->endOfDay());
+                            })
+                            ->orWhere(function ($query) use ($startDate, $endDate, $total_departments) {
+                                $query->scopeWhereHasRecursiveHolidaysByDateRange($startDate, $endDate, $total_departments);
+                            });
+                        })
+                        ->where(function ($query) use ($startDate) {
+                            $query->orWhereDoesntHave('holidays', function ($query) use ($startDate) {
+                                $query->where('holidays.start_date', '<=', $startDate->copy()->startOfDay())
+                                      ->where('holidays.end_date', '>=', $startDate->copy()->endOfDay())
+                                      ->orWhere(function ($query) {
+                                          $query->whereDoesntHave("users")
+                                                ->whereDoesntHave("departments");
+                                      });
+                            });
+                        });
+                    })
+                    ->orWhere(function ($query) use ($startDate) {
+                        $query->orWhereDoesntHave('holidays', function ($query) use ($startDate) {
+                            $query->where('holidays.start_date', '<=', $startDate->copy()->startOfDay())
+                                  ->where('holidays.end_date', '>=', $startDate->copy()->endOfDay())
+                                  ->doesntHave('users');
+                        });
+                    });
+                });
+            })
+
+
+
+
+
+            // LeaveRecord::whereHas("leave",function($query) use($user_id){
+
+            //     $query->where("leaves.user_id",$user_id);
+            // })
+
+            //  ->where('leave_records.date', '>=', $start_date)
+            //               ->where('leave_records.date', '<=', $end_date . ' 23:59:59')
+
+
+
+
+
             ->when(!empty(request()->start_date), function ($query)  {
                 return $query->where('created_at', ">=", request()->start_date);
             })
             ->when(!empty(request()->end_date), function ($query)  {
                 return $query->where('created_at', "<=", (request()->end_date . ' 23:59:59'));
-            });
+            })
+            ->groupBy('users.id');
+
+            ;
 
         return $usersQuery;
     }

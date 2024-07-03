@@ -15,6 +15,9 @@ class RecruitmentProcess extends Model
         "is_active",
         "is_default",
         "business_id",
+        "use_in_employee",
+        "use_in_on_boarding",
+
         "created_by"
     ];
 

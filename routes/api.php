@@ -503,7 +503,7 @@ Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"
 
 Route::get('/v3.0/users/{id}', [UserManagementController::class, "getUserByIdV3"]);
 
-
+Route::get('/v4.0/users/{id}', [UserManagementController::class, "getUserByIdV4"]);
 
 
 

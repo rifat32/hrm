@@ -294,6 +294,22 @@ class Department extends Model
     }
 
 
+    public function scopeWhereHasRecursiveHolidaysByDateRange($query, $startDate, $endDate, $depth = 5)
+    {
+        if ($depth <= 0) {
+            return; // Stop recursion if depth limit is reached
+        }
+
+        $query->whereHas('holidays', function ($subQuery) use ($startDate, $endDate) {
+            $subQuery->where('start_date', '<=', $startDate->startOfDay())
+                     ->where('end_date', '>=', $endDate->endOfDay());
+        })->orWhere(function ($query) use ($startDate, $endDate, $depth) {
+            $query->whereHas('parent', function ($subQuery) use ($startDate, $endDate, $depth) {
+                $subQuery->whereNotNull('parent_id');
+                $subQuery->whereHasRecursiveHolidays($startDate, $endDate, $depth - 1); // Decrease depth
+            });
+        });
+    }
 
 
 
