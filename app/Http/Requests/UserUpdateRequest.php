@@ -107,6 +107,7 @@ class UserUpdateRequest extends BaseFormRequest
         'weekly_contractual_hours' => 'nullable|numeric',
         "minimum_working_days_per_week" => 'nullable|numeric|max:7',
         "overtime_rate" => 'nullable|numeric',
+        "handle_self_registered_businesses" => "required|boolean"
         ];
     }
 

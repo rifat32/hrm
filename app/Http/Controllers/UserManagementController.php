@@ -808,7 +808,26 @@ class UserManagementController extends Controller
 
 
 
+
             $user->roles = $user->roles->pluck('name');
+
+
+
+// @@@crw
+
+if(!empty($request_data["handle_self_registered_businesses"])) {
+    $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update","system_setting_view"])->get();
+    $user->givePermissionTo($permissions);
+}
+
+
+
+
+
+
+
+
+
 
 
             return response($user, 201);
@@ -4518,7 +4537,562 @@ class UserManagementController extends Controller
              return $this->sendError($e, 500, $request);
          }
      }
+ /**
+     *
+     * @OA\Get(
+     *      path="/v6.0/users",
+     *      operationId="getUsersV6",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="full_name",
+     * in="query",
+     * description="full_name",
+     * required=true,
+     * example="full_name"
+     * ),
+     *
+     *    * @OA\Parameter(
+     * name="employee_id",
+     * in="query",
+     * description="employee_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *
+     *    * @OA\Parameter(
+     * name="email",
+     * in="query",
+     * description="email",
+     * required=true,
+     * example="email"
+     * ),
+     *
+     *
+     *
+     *
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *   * *  @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="is_in_employee",
+     * in="query",
+     * description="is_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *  * @OA\Parameter(
+     * name="designation_id",
+     * in="query",
+     * description="designation_id",
+     * required=true,
+     * example="1"
+     * ),
+     *    *  * @OA\Parameter(
+     * name="work_location_ids",
+     * in="query",
+     * description="work_location_ids",
+     * required=true,
+     * example="1,2"
+     * ),
+     *     *    *  * @OA\Parameter(
+     * name="holiday_id",
+     * in="query",
+     * description="holiday_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="has_this_project",
+     * in="query",
+     * description="has_this_project",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *      *     @OA\Parameter(
+     * name="business_id",
+     * in="query",
+     * description="business_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *      *     @OA\Parameter(
+     * name="employment_status_id",
+     * in="query",
+     * description="employment_status_id",
+     * required=true,
+     * example="1"
+     * ),
+     *      *  *      *     @OA\Parameter(
+     * name="immigration_status",
+     * in="query",
+     * description="immigration_status",
+     * required=true,
+     * example="immigration_status"
+     * ),
+     *      *  @OA\Parameter(
+     * name="pension_scheme_status",
+     * in="query",
+     * description="pension_scheme_status",
+     * required=true,
+     * example="pension_scheme_status"
+     * ),
+     *  @OA\Parameter(
+     * name="sponsorship_status",
+     * in="query",
+     * description="sponsorship_status",
+     * required=true,
+     * example="sponsorship_status"
+     * ),
 
+     * *  @OA\Parameter(
+     * name="sponsorship_note",
+     * in="query",
+     * description="sponsorship_note",
+     * required=true,
+     * example="sponsorship_note"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_certificate_number",
+     * in="query",
+     * description="sponsorship_certificate_number",
+     * required=true,
+     * example="sponsorship_certificate_number"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_current_certificate_status",
+     * in="query",
+     * description="sponsorship_current_certificate_status",
+     * required=true,
+     * example="sponsorship_current_certificate_status"
+     * ),
+     * *  @OA\Parameter(
+     * name="sponsorship_is_sponsorship_withdrawn",
+     * in="query",
+     * description="sponsorship_is_sponsorship_withdrawn",
+     * required=true,
+     * example="0"
+     * ),
+     *  * *  @OA\Parameter(
+     * name="start_joining_date",
+     * in="query",
+     * description="start_joining_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *  *  * *  @OA\Parameter(
+     * name="end_joining_date",
+     * in="query",
+     * description="end_joining_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *
+     *    *    *  *   @OA\Parameter(
+     * name="start_pension_pension_enrollment_issue_date",
+     * in="query",
+     * description="start_pension_pension_enrollment_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_pension_pension_enrollment_issue_date",
+     * in="query",
+     * description="end_pension_pension_enrollment_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *    *  *   @OA\Parameter(
+     * name="start_pension_re_enrollment_due_date_date",
+     * in="query",
+     * description="start_pension_re_enrollment_due_date_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_pension_re_enrollment_due_date_date",
+     * in="query",
+     * description="end_pension_re_enrollment_due_date_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *   @OA\Parameter(
+     * name="pension_re_enrollment_due_date_in_day",
+     * in="query",
+     * description="pension_re_enrollment_due_date_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *
+     *
+     * @OA\Parameter(
+     * name="start_sponsorship_date_assigned",
+     * in="query",
+     * description="start_sponsorship_date_assigned",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_sponsorship_date_assigned",
+     * in="query",
+     * description="end_sponsorship_date_assigned",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *    *  *   @OA\Parameter(
+     * name="start_sponsorship_expiry_date",
+     * in="query",
+     * description="start_sponsorship_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_sponsorship_expiry_date",
+     * in="query",
+     * description="end_sponsorship_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *    *   @OA\Parameter(
+     * name="sponsorship_expires_in_day",
+     * in="query",
+     * description="sponsorship_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *
+     *
+     *      *    *  *   @OA\Parameter(
+     * name="start_passport_issue_date",
+     * in="query",
+     * description="start_passport_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_passport_issue_date",
+     * in="query",
+     * description="end_passport_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="start_passport_expiry_date",
+     * in="query",
+     * description="start_passport_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_passport_expiry_date",
+     * in="query",
+     * description="end_passport_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *   *    *   @OA\Parameter(
+     * name="passport_expires_in_day",
+     * in="query",
+     * description="passport_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     *     * @OA\Parameter(
+     * name="start_visa_issue_date",
+     * in="query",
+     * description="start_visa_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_visa_issue_date",
+     * in="query",
+     * description="end_visa_issue_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *      *     * @OA\Parameter(
+     * name="start_visa_expiry_date",
+     * in="query",
+     * description="start_visa_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     *   @OA\Parameter(
+     * name="end_visa_expiry_date",
+     * in="query",
+     * description="end_visa_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *     @OA\Parameter(
+     * name="visa_expires_in_day",
+     * in="query",
+     * description="visa_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+     * * @OA\Parameter(
+     * name="start_right_to_work_check_date",
+     * in="query",
+     * description="start_right_to_work_check_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="end_right_to_work_check_date",
+     * in="query",
+     * description="end_right_to_work_check_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="start_right_to_work_expiry_date",
+     * in="query",
+     * description="start_right_to_work_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     *
+     * @OA\Parameter(
+     * name="end_right_to_work_expiry_date",
+     * in="query",
+     * description="end_right_to_work_expiry_date",
+     * required=true,
+     * example="2024-01-21"
+     * ),
+     * @OA\Parameter(
+     * name="right_to_work_expires_in_day",
+     * in="query",
+     * description="right_to_work_expires_in_day",
+     * required=true,
+     * example="50"
+     * ),
+
+     *
+     *
+     *  *      *     @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="1"
+     * ),
+     *     * @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     * *      *   * *  @OA\Parameter(
+     * name="doesnt_have_payrun",
+     * in="query",
+     * description="doesnt_have_payrun",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *      *   * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *    * *  @OA\Parameter(
+     * name="role",
+     * in="query",
+     * description="role",
+     * required=true,
+     * example="admin,manager"
+     * ),
+     *
+     *  @OA\Parameter(
+     * name="is_on_holiday",
+     * in="query",
+     * description="is_on_holiday",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *  *  @OA\Parameter(
+     * name="upcoming_expiries",
+     * in="query",
+     * description="upcoming_expiries",
+     * required=true,
+     * example="passport"
+     * ),
+     *    *
+     *    *    *   *  * *  @OA\Parameter(
+     * name="not_in_rota",
+     * in="query",
+     * description="not_in_rota",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *
+     *
+     *      summary="This method is to get user",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUsersV6(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+             $usersQuery = User::query();
+
+             $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+             $usersQuery = $usersQuery->select(
+                 "users.id",
+                 "users.first_Name",
+                 "users.middle_Name",
+                 "users.last_Name",
+                 "users.email",
+             );
+             $users = $this->retrieveData($usersQuery, "users.first_Name")->map(function($user) {
+
+                $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+
+
+                return $user;
+
+             });
+
+
+
+             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                 if (strtoupper($request->response_type) == 'PDF') {
+                     $pdf = PDF::loadView('pdf.users', ["users" => $users]);
+                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                 } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                 }
+             } else {
+                 return response()->json($users, 200);
+             }
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**

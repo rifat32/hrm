@@ -459,6 +459,8 @@ Route::get('/v3.0/users', [UserManagementController::class, "getUsersV3"]);
 Route::get('/v4.0/users', [UserManagementController::class, "getUsersV4"]);
 Route::get('/v5.0/users', [UserManagementController::class, "getUsersV5"]);
 
+Route::get('/v6.0/users', [UserManagementController::class, "getUsersV6"]);
+
 
 
 
