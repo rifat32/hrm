@@ -137,6 +137,15 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             })
 
 
+            ->when(!empty(request()->salary_per_annum), function ($query)  {
+                return   $query->where(
+                    "salary_per_annum" , request()->salary_per_annum
+                );
+            })
+
+
+
+
             ->when(!empty(request()->designation_id), function ($query)  {
                 $idsArray = explode(',', request()->designation_id);
                 return $query->whereIn('designation_id', $idsArray);
@@ -154,6 +163,12 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     "<=" , request()->end_weekly_contractual_hours
                 );
             })
+            ->when(!empty(request()->weekly_contractual_hours), function ($query)  {
+                return   $query->where(
+                    "weekly_contractual_hours"  , request()->weekly_contractual_hours
+                );
+            })
+
 
             ->when(!empty(request()->employment_status_id), function ($query)  {
                 $idsArray = explode(',', request()->employment_status_id);
@@ -177,7 +192,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
 
             ->when(isset(request()->is_on_holiday), function ($query) use ($today, $total_departments) {
                 if (intval(request()->is_on_holiday) == 1) {
-                    $query
+                    return   $query
                         ->where("business_id", auth()->user()->business_id)
 
                         ->where(function ($query) use ($today, $total_departments) {
@@ -218,7 +233,7 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
 
                 } else {
                     // Inverted logic for when employees are not on holiday
-                    $query->where(function ($query) use ($today, $total_departments) {
+                    return   $query->where(function ($query) use ($today, $total_departments) {
                         $query->whereDoesntHave('holidays')
                             ->orWhere(function ($query) use ($today, $total_departments) {
                                 $query->whereDoesntHave('departments')
@@ -234,23 +249,23 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             ->when(!empty(request()->upcoming_expiries), function ($query)  {
 
                 if (request()->upcoming_expiries == "passport") {
-                    $query->whereHas("passport_detail", function ($query) {
+                    return  $query->whereHas("passport_detail", function ($query) {
                         $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", today());
                     });
                 } else if (request()->upcoming_expiries == "visa") {
-                    $query->whereHas("visa_detail", function ($query) {
+                    return $query->whereHas("visa_detail", function ($query) {
                         $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", today());
                     });
                 } else if (request()->upcoming_expiries == "right_to_work") {
-                    $query->whereHas("right_to_work", function ($query) {
+                    return  $query->whereHas("right_to_work", function ($query) {
                         $query->where("employee_right_to_work_histories.right_to_work_expiry_date", ">=", today());
                     });
                 } else if (request()->upcoming_expiries == "sponsorship") {
-                    $query->whereHas("sponsorship_details", function ($query) {
+                    return  $query->whereHas("sponsorship_details", function ($query) {
                         $query->where("employee_sponsorship_histories.expiry_date", ">=", today());
                     });
                 } else if (request()->upcoming_expiries == "pension") {
-                    $query->whereHas("pension_details", function ($query) {
+                    return $query->whereHas("pension_details", function ($query) {
                         $query->where("employee_pensions.pension_re_enrollment_due_date", ">=", today());
                     });
                 }
@@ -330,6 +345,23 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             ->when(!empty(request()->end_joining_date), function ($query)  {
                 return $query->where('joining_date', "<=", (request()->end_joining_date .  ' 23:59:59'));
             })
+
+            ->when(!empty(request()->joining_date), function ($query)  {
+                $data_pairs = explode(',', request()->joining_date);
+
+                $start_joining_date = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $end_joining_date = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                return $query ->when(!empty($start_joining_date), function ($query) use($start_joining_date)  {
+                    return $query->where('joining_date', ">=", $start_joining_date);
+                })
+                ->when(!empty($end_joining_date), function ($query) use($end_joining_date)  {
+                    return $query->where('joining_date', "<=", ($end_joining_date .  ' 23:59:59'));
+                });
+            })
+
+
+
             ->when(!empty(request()->start_sponsorship_date_assigned), function ($query)  {
                 return $query->whereHas("sponsorship_details", function ($query)  {
                     $query->where("employee_sponsorship_histories.date_assigned", ">=", (request()->start_sponsorship_date_assigned));
@@ -340,6 +372,43 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     $query->where("employee_sponsorship_histories.date_assigned", "<=", (request()->end_sponsorship_date_assigned . ' 23:59:59'));
                 });
             })
+
+            ->when(!empty(request()->sponsorship_date_assigned), function ($query)  {
+                $data_pairs = explode(',', request()->sponsorship_date_assigned);
+
+                $start_sponsorship_date_assigned = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $end_sponsorship_date_assigned = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                return $query ->when(!empty($start_sponsorship_date_assigned), function ($query) use($start_sponsorship_date_assigned,$end_sponsorship_date_assigned)  {
+                    return $query->whereHas("sponsorship_details", function ($query)  use($start_sponsorship_date_assigned) {
+                        $query->where("employee_sponsorship_histories.date_assigned", ">=", ($start_sponsorship_date_assigned));
+                    });
+                })
+                ->when(!empty($end_sponsorship_date_assigned), function ($query) use($end_sponsorship_date_assigned)  {
+                    return $query->whereHas("sponsorship_details", function ($query)  use($end_sponsorship_date_assigned) {
+                        $query->where("employee_sponsorship_histories.date_assigned", "<=", ($end_sponsorship_date_assigned . ' 23:59:59'));
+                    });
+                });
+            })
+
+            ->when(!empty(request()->sponsorship_expiry_date), function ($query)  {
+                $data_pairs = explode(',', request()->sponsorship_expiry_date);
+
+                $start_sponsorship_expiry_date = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $end_sponsorship_expiry_date = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                return $query ->when(!empty($start_sponsorship_date_assigned), function ($query) use($start_sponsorship_expiry_date)  {
+                    return $query->whereHas("sponsorship_details", function ($query)  use($start_sponsorship_expiry_date) {
+                        $query->where("employee_sponsorship_histories.expiry_date", ">=", ($start_sponsorship_expiry_date));
+                    });
+                })
+                ->when(!empty($end_sponsorship_date_assigned), function ($query) use($end_sponsorship_expiry_date)  {
+                    return $query->whereHas("sponsorship_details", function ($query)  use($end_sponsorship_expiry_date) {
+                        $query->where("employee_sponsorship_histories.expiry_date", "<=", ($end_sponsorship_expiry_date . ' 23:59:59'));
+                    });
+                });
+            })
+
 
 
             ->when(!empty(request()->start_sponsorship_expiry_date), function ($query)  {
@@ -424,6 +493,27 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     $query->where("employee_passport_detail_histories.passport_expiry_date", "<=", request()->end_passport_expiry_date . ' 23:59:59');
                 });
             })
+
+            ->when(!empty(request()->passport_expiry_date), function ($query)  {
+                $data_pairs = explode(',', request()->passport_expiry_date);
+
+                $start_date = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $end_date = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                return $query ->when(!empty($start_date), function ($query) use($start_date,$end_date)  {
+                    return $query->whereHas("passport_details", function ($query)  use($start_date) {
+                        $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", ($start_date));
+                    });
+                })
+                ->when(!empty($end_date), function ($query) use($end_date)  {
+                    return $query->whereHas("passport_details", function ($query)  use($end_date) {
+                        $query->where("employee_passport_detail_histories.passport_expiry_date", "<=", ($end_date . ' 23:59:59'));
+                    });
+                });
+            })
+
+
+
             ->when(!empty(request()->passport_expires_in_day), function ($query) use ( $today) {
                 return $query->whereHas("passport_details", function ($query) use ( $today) {
                     $query_day = Carbon::now()->addDays(request()->passport_expires_in_day);
@@ -455,6 +545,29 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                     $query->where("employee_visa_detail_histories.visa_expiry_date", "<=", request()->end_visa_expiry_date . ' 23:59:59');
                 });
             })
+
+
+            ->when(!empty(request()->visa_expiry_date), function ($query)  {
+                $data_pairs = explode(',', request()->visa_expiry_date);
+
+                $start_date = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $end_date = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                return $query ->when(!empty($start_date), function ($query) use($start_date,$end_date)  {
+                    return $query->whereHas("visa_details", function ($query)  use($start_date) {
+                        $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", ($start_date));
+                    });
+                })
+                ->when(!empty($end_date), function ($query) use($end_date)  {
+                    return $query->whereHas("visa_details", function ($query)  use($end_date) {
+                        $query->where("employee_visa_detail_histories.visa_expiry_date", "<=", ($end_date . ' 23:59:59'));
+                    });
+                });
+            })
+
+
+
+
             ->when(!empty(request()->visa_expires_in_day), function ($query) use ( $today) {
                 return $query->whereHas("visa_details", function ($query) use ( $today) {
                     $query_day = Carbon::now()->addDays(request()->visa_expires_in_day);
@@ -520,6 +633,22 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                 });
             })
 
+              ->when(!empty(request()->leave_date), function ($query)  {
+                $data_pairs = explode(',', request()->leave_date);
+
+                $start_leave_date = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $end_leave_date = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                return $query->whereHas("leaves.records", function ($query) use($start_leave_date,$end_leave_date)  {
+                return  $query
+
+                ->where('leave_records.date', '>=', $start_leave_date)
+                ->where('leave_records.date', '<=', $end_leave_date . ' 23:59:59');
+
+                });
+            })
+
+
 
 
             ->when(!empty(request()->holiday_status), function ($query)  {
@@ -532,8 +661,8 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
 
             ->when(!empty(request()->start_holiday_date) && !empty(request()->end_holiday_date), function ($query) use($total_departments) {
 
-                $startDate = request()->start_holiday_date;
-                $endDate = request()->end_holiday_date;
+                $startDate = Carbon::parse(request()->start_holiday_date);
+                $endDate = Carbon::parse(request()->end_holiday_date);
 
                 $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
                     $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
@@ -565,8 +694,59 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
                         });
                     });
                 });
-            })
 
+
+            })
+   ->when(!empty(request()->holiday_date), function ($query) use($total_departments) {
+
+             $data_pairs = explode(',', request()->holiday_date);
+
+
+
+                $startDate = !empty($data_pairs[0])?$data_pairs[0]:"";
+                $endDate = !empty($data_pairs[1])?$data_pairs[1]:"";
+
+                if(empty($startDate) || empty($endDate)){
+                return  $query;
+                }
+
+              $startDate = Carbon::parse($startDate);
+              $endDate = Carbon::parse($endDate);
+
+                $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
+
+                  return  $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
+                        $query->where(function ($query) use ($startDate, $endDate, $total_departments) {
+                            $query->whereHas('holidays', function ($query) use ($startDate, $endDate) {
+                                $query->where('holidays.start_date', '<=', $startDate->copy()->startOfDay())
+                                      ->where('holidays.end_date', '>=', $endDate->copy()->endOfDay());
+                            })
+                            ->orWhere(function ($query) use ($startDate, $endDate, $total_departments) {
+                                $query->scopeWhereHasRecursiveHolidaysByDateRange($startDate, $endDate, $total_departments);
+                            });
+                        })
+                        ->where(function ($query) use ($startDate) {
+                            $query->orWhereDoesntHave('holidays', function ($query) use ($startDate) {
+                                $query->where('holidays.start_date', '<=', $startDate->copy()->startOfDay())
+                                      ->where('holidays.end_date', '>=', $startDate->copy()->endOfDay())
+                                      ->orWhere(function ($query) {
+                                          $query->whereDoesntHave("users")
+                                                ->whereDoesntHave("departments");
+                                      });
+                            });
+                        });
+                    })
+                    ->orWhere(function ($query) use ($startDate) {
+                        $query->orWhereDoesntHave('holidays', function ($query) use ($startDate) {
+                            $query->where('holidays.start_date', '<=', $startDate->copy()->startOfDay())
+                                  ->where('holidays.end_date', '>=', $startDate->copy()->endOfDay())
+                                  ->doesntHave('users');
+                        });
+                    });
+
+                });
+
+            })
 
 
 

@@ -6274,7 +6274,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *
      * @OA\Get(
      *      path="/v4.0/users/{id}",
-     *      operationId="getUserByIdV2",
+     *      operationId="getUserByIdV4",
      *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
