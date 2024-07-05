@@ -283,7 +283,7 @@ class UserAssetController extends Controller
                    $user_asset  =  tap(UserAsset::where($user_asset_query_params))->update(
                        collect($request_data)->only([
                             'user_id',
-
+"status"
 
                        ])->toArray()
                    )

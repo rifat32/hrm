@@ -768,6 +768,14 @@ class DepartmentController extends Controller
      *  example="employee"
      *      ),
      *
+     *      *      *   *              @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
      *
      *      summary="This method is to get departments  ",
      *      description="This method is to get departments ",
@@ -826,6 +834,11 @@ class DepartmentController extends Controller
                 'business_id' => $business_id,
                 'manager_id' => auth()->user()->id,
             ])
+            ->when($request->filled("id"), function($query) {
+                 $query->where([
+                    "id" => request()->input("id")
+                 ]);
+            })
 
             ->orderBy('id', 'ASC')
             ->get();

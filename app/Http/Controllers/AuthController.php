@@ -530,6 +530,18 @@ $datediff = $now - $user_created_date;
             $user->save();
 
 
+
+
+            $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business']);
+
+                // Creating token only once
+    $token = $user->createToken('authToken')->accessToken;
+             // Transforming manager departments and roles
+    $user->manager_departments = $user->manager_departments->map(fn($department) => [
+        'id' => $department->id,
+        'name' => $department->name,
+    ]);
+
             $user->roles = $user->roles->map(function ($role) {
                 return [
                     'name' => $role->name,
@@ -541,7 +553,8 @@ $datediff = $now - $user_created_date;
 // Extracting only the required data
 $responseData = [
     'id' => $user->id,
-    "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
+    "manager_departments" => $user->manager_departments,
+    "token" =>  $token,
     'business_id' => $user->business_id,
     'first_Name' => $user->first_Name,
     'middle_Name' => $user->middle_Name,
@@ -1314,23 +1327,29 @@ public function getUser (Request $request) {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
 
-            $user = $request->user();
-            $user->token = auth()->user()->createToken('authToken')->accessToken;
+          // Eager load relationships
+          $user = $request->user();
+    $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business']);
 
+    // Creating token only once
+    $token = $user->createToken('authToken')->accessToken;
 
-            $user->roles = $user->roles->map(function ($role) {
-                return [
-                    'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name'),
-                ];
-            });
+    // Transforming manager departments and roles
+    $user->manager_departments = $user->manager_departments->map(fn($department) => [
+        'id' => $department->id,
+        'name' => $department->name,
+    ]);
 
-            $user->permissions = $user->permissions->pluck("name");
+    $user->roles = $user->roles->map(fn($role) => [
+        'name' => $role->name,
+        'permissions' => $role->permissions->pluck('name'),
+    ]);
 
             // Extracting only the required data
 $responseData = [
     'id' => $user->id,
-    "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
+    "manager_departments" => $user->manager_departments,
+    "token" =>  $token,
     'business_id' => $user->business_id,
     'first_Name' => $user->first_Name,
     'middle_Name' => $user->middle_Name,

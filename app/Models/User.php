@@ -171,6 +171,10 @@ return count($all_departments) > 0;
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
     }
 
+    public function manager_departments() {
+        return $this->hasMany(Department::class,'manager_id', 'id');
+    }
+
     public function department_user() {
         return $this->belongsTo(DepartmentUser::class,  'id', 'user_id');
     }
