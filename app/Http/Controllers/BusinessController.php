@@ -2860,6 +2860,13 @@ class BusinessController extends Controller
      *         required=true,
      *  example="1"
      *      ),
+     *      *              @OA\Parameter(
+     *         name="per_page",
+     *         in="path",
+     *         description="per_page",
+     *         required=true,
+     *  example="1"
+     *      ),
      *      summary="This method is to get business pension information by id",
      *      description="This method is to get business pension information by id",
      *

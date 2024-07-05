@@ -264,7 +264,7 @@ class UserAssetController extends Controller
 
                    $request_data = $request->validated();
 
-
+                   $request_data["status"] = "assigned";
 
 
                    $user_asset_query_params = [

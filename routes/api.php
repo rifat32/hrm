@@ -841,6 +841,7 @@ Route::get('/v1.0/businesses-pension-information/{id}', [BusinessController::cla
 
 
 Route::get('/v1.0/businesses-pension-information-history/{id}', [BusinessController::class, "getBusinessPensionInformationHistoryByBusinessId"]);
+
 Route::delete('/v1.0/businesses-pension-information-history/{ids}', [BusinessController::class, "deleteBusinessPensionInformationHistoryByIds"]);
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

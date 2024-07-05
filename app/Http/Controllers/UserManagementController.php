@@ -1666,8 +1666,6 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                     'phone',
                     'image'
 
-
-
                 ])->toArray());
 
                 $user->save();
@@ -1718,6 +1716,8 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
             $this->update_work_shift($request_data, $user);
 
+
+            $user->work_locations = $user->work_locations;
 
 
             DB::commit();
