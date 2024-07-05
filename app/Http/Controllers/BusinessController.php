@@ -2579,6 +2579,7 @@ class BusinessController extends Controller
             }
 
             $businesses = Business::with("owner")
+            ->withCount('users')
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                        $query->where(function ($query) {
                            $query
@@ -2651,7 +2652,7 @@ class BusinessController extends Controller
                 });
 
             return response()->json($businesses, 200);
-            return response()->json($businesses, 200);
+
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

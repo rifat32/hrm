@@ -86,7 +86,10 @@ class Business extends Model
     {
         return $this->belongsTo(User::class, 'owner_id', 'id');
     }
-
+    public function users()
+    {
+        return $this->hasMany(User::class, 'business_id', 'id');
+    }
 
     public function service_plan()
     {
