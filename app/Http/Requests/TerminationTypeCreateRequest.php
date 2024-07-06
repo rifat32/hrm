@@ -2,11 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Designation;
-use App\Rules\ValidateDesignationName;
+use App\Rules\ValidateTerminationTypeName;
 use Illuminate\Foundation\Http\FormRequest;
 
-class DesignationCreateRequest extends BaseFormRequest
+class TerminationTypeCreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,7 +30,7 @@ class DesignationCreateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-             new   ValidateDesignationName(NULL)
+             new   ValidateTerminationTypeName(NULL)
             ],
         ];
 
@@ -44,12 +43,5 @@ class DesignationCreateRequest extends BaseFormRequest
 return $rules;
 
     }
-
-
-
-
-
-
-
 
 }

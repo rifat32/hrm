@@ -54,6 +54,7 @@ use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TerminationTypeController;
 use App\Http\Controllers\UserAddressHistoryController;
 use App\Http\Controllers\UserAssetController;
 use App\Http\Controllers\UserDocumentController;
@@ -1076,6 +1077,25 @@ Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "delete
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end designation management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// designation  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/termination-types', [TerminationTypeController::class, "createTerminationType"]);
+Route::put('/v1.0/termination-types', [TerminationTypeController::class, "updateTerminationType"]);
+Route::put('/v1.0/termination-types/toggle-active', [TerminationTypeController::class, "toggleActiveTerminationType"]);
+Route::get('/v1.0/termination-types', [TerminationTypeController::class, "getTerminationTypes"]);
+Route::get('/v1.0/termination-types/{id}', [TerminationTypeController::class, "getTerminationTypeById"]);
+Route::delete('/v1.0/termination-types/{ids}', [TerminationTypeController::class, "deleteTerminationTypesByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end designation management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // bank  management section

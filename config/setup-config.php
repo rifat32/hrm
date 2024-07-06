@@ -96,6 +96,12 @@ return [
                 "designation_view",
                 // "designation_delete",
 
+
+                "termination_type_create",
+                "termination_type_update",
+                "termination_type_view",
+                // "termination_type_delete",
+
                 "bank_create",
                 "bank_update",
                 "bank_view",
@@ -160,6 +166,11 @@ return [
                 "designation_update",
                 "designation_view",
                 // "designation_delete",
+
+                "termination_type_create",
+                "termination_type_update",
+                "termination_type_view",
+                // "termination_type_delete",
 
                  "bank_create",
                 // "bank_update",
@@ -421,6 +432,15 @@ return [
                 "designation_activate",
                 "designation_delete",
 
+
+                "termination_type_create",
+                "termination_type_update",
+                "termination_type_view",
+                "termination_type_activate",
+                "termination_type_delete",
+
+
+
                 // "bank_create",
                 // "bank_update",
                 "bank_activate",
@@ -670,6 +690,15 @@ return [
                 "designation_activate",
                 "designation_delete",
 
+
+                "termination_type_create",
+                "termination_type_update",
+                "termination_type_view",
+                "termination_type_activate",
+                "termination_type_delete",
+
+
+
                 // "bank_create",
                 // "bank_update",
                 "bank_activate",
@@ -894,6 +923,12 @@ return [
                 "designation_activate",
                 "designation_delete",
 
+                "termination_type_create",
+                "termination_type_update",
+                "termination_type_view",
+                "termination_type_activate",
+                "termination_type_delete",
+
 
                 // "bank_create",
                 // "bank_update",
@@ -1001,6 +1036,12 @@ return [
                 "employee_rota_view",
                 "announcement_view",
                 "designation_view",
+                "termination_type_view",
+
+
+
+
+
                 "bank_view",
                 "job_type_view",
                 "work_location_view",
@@ -1301,6 +1342,13 @@ return [
         "designation_view",
         "designation_activate",
         "designation_delete",
+
+
+        "termination_type_create",
+        "termination_type_update",
+        "termination_type_view",
+        "termination_type_activate",
+        "termination_type_delete",
 
         "bank_create",
         "bank_update",
@@ -1603,6 +1651,19 @@ return [
         "designation_view" => "Can view designation",
         "designation_delete" => "Can delete designation",
         "designation_activate" => "",
+
+
+
+
+        "termination_type_create" => "",
+        "termination_type_update" => "",
+        "termination_type_view" => "",
+        "termination_type_activate" => "",
+        "termination_type_delete" => "",
+
+
+
+
 
         "bank_create" => "",
         "bank_update" => "",
@@ -1935,6 +1996,14 @@ return [
         "designation_activate" => "activate",
         "designation_view" => "view",
         "designation_delete" => "delete",
+
+
+        "termination_type_create" => "create",
+        "termination_type_update" => "update",
+        "termination_type_activate" => "activate",
+        "termination_type_view" => "view",
+        "termination_type_delete" => "delete",
+
 
 
         "bank_create" => "create",
@@ -2561,6 +2630,17 @@ return [
                 "designation_activate",
                 "designation_view",
                 "designation_delete",
+            ],
+        ],
+
+        [
+            "header" => "termination_type",
+            "permissions" => [
+                "termination_type_create",
+                "termination_type_update",
+                "termination_type_activate",
+                "termination_type_view",
+                "termination_type_delete",
             ],
         ],
 
