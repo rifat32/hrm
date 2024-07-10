@@ -18,7 +18,7 @@ class CreateCommentsTable extends Migration
 
             $table->text('description');
             $table->json('attachments')->nullable();
-            
+
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
             $table->enum('visibility', ['public', 'private'])->default('public');
@@ -35,6 +35,10 @@ class CreateCommentsTable extends Migration
             $table->foreign('related_task_id')->references('id')->on('tasks');
             $table->unsignedBigInteger('task_id');
             $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
+
+
+
+            $table->enum('type', ['comment', 'history'])->default("comment");
 
             $table->unsignedBigInteger("created_by")->nullable();
             $table->foreign('created_by')

@@ -1585,6 +1585,24 @@ Route::delete('/v1.0/comments/{ids}', [CommentController::class, "deleteComments
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // product category management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

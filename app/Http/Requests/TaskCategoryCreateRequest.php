@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\ValidateJobPlatformName;
+use App\Rules\ValidateTaskCategoryName;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TaskCategoryCreateRequest extends FormRequest
@@ -28,7 +29,7 @@ class TaskCategoryCreateRequest extends FormRequest
             'name' => [
                 "required",
                 'string',
-                new ValidateJobPlatformName(NULL)
+                new ValidateTaskCategoryName(NULL)
             ],
             'description' => 'nullable|string',
             'color' => 'nullable|string',

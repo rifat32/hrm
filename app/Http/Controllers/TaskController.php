@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Comment;
 use App\Models\Task;
 use Carbon\Carbon;
 use Exception;
@@ -122,6 +123,17 @@ class TaskController extends Controller
                 $task =  Task::create($request_data);
                 $task->assignees()->sync($request_data['assignees']);
                 $task->labels()->sync($request_data['labels']);
+
+
+                // Create the task entry
+Comment::create([
+    'description' => ("Added this card to ". $task->name),
+    // 'attachments' => $attachments,
+    'type' => 'history',
+
+    'task_id' => $task->id, // Assuming you have a $taskId variable
+    'created_by' => auth()->user()->id, // Assuming you have a $userId variable
+]);
 
                 DB::commit();
                 return response($task, 201);
