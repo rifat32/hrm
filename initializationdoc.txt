@@ -83,18 +83,6 @@ UPDATE `holidays` SET `status` = 'approved' WHERE `status` IS NULL;
 
 
 
-15. Route::get("/run",function() {
-
-
-    $attendances = Attendance::whereNotNull("project_id")->get();
-    foreach($attendances as $attendance){
-        AttendanceProject::create([
-            "attendance_id" => $attendance->id,
-            "project_id" => $attendance->project_id
-        ]);
-    }
-            return "ok";
-        });
 
 
 16. ALTER TABLE attendance_projects
@@ -320,12 +308,14 @@ FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NU
 
 
 44. ALTER TABLE `recruitment_processes` ADD `use_in_employee` BOOLEAN NOT NULL DEFAULT TRUE AFTER `updated_at`, ADD `use_in_on_boarding` BOOLEAN NOT NULL DEFAULT TRUE AFTER `use_in_employee`;
+
 45. ALTER TABLE comments
 ADD COLUMN type ENUM('comment', 'history') DEFAULT 'comment' NOT NULL;
 
 
 
-hr compliance 14 ->
+hr compliance -> 45
 
 
-hrm, hrm-produ 31 ->
+hrm-> 31
+hrm-produ-> 31
