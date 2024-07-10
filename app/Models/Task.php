@@ -26,6 +26,9 @@ class Task extends Model
         'project_id',
         'parent_task_id',
         "task_category_id",
+
+        'order_no',
+
         'assigned_by',
 
         "is_active",

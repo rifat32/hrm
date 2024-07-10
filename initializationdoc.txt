@@ -312,9 +312,12 @@ FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NU
 45. ALTER TABLE comments
 ADD COLUMN type ENUM('comment', 'history') DEFAULT 'comment' NOT NULL;
 
+46 ALTER TABLE task_categories ADD COLUMN order_no INT DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN order_no INT DEFAULT 0;
 
 
-hr compliance -> 45
+
+hr compliance -> 46
 
 
 hrm-> 31

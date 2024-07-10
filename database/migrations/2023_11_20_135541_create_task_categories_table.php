@@ -31,6 +31,8 @@ class CreateTaskCategoriesTable extends Migration
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
 
 
+            $table->integer('order_no')->default(0);
+
 
 
             $table->unsignedBigInteger("business_id")->nullable();

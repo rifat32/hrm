@@ -75,6 +75,7 @@ class TaskCategoryUpdateRequest extends FormRequest
             ],
 
             'description' => 'nullable|string',
+            'order_no' => 'nullable|numeric'
         ];
 
         // if (!empty(auth()->user()->business_id)) {

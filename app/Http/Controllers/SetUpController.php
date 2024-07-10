@@ -606,13 +606,14 @@ return "swagger generated";
         ];
 
          // Iterate through the array and create records
-         foreach ($default_task_categories as $data) {
+         foreach ($default_task_categories as $index => $data) {
             TaskCategory::create([
                 'name' => $data['name'],
                 'description' => $data['description'],
                 "is_active" => 1,
                 "is_default" => 1,
                 "business_id" => NULL,
+                "order_no" => $index,
                 "created_by" => $admin->id
             ]);
         }

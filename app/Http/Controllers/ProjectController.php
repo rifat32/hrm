@@ -159,7 +159,7 @@ class ProjectController extends Controller
                 })
         ->get();
 
-        foreach($default_task_categories as $default_task_category){
+        foreach($default_task_categories as $index => $default_task_category){
 
             $default_task_category->project_id =  $project->id;
             $default_task_category->business_id =  auth()->user()->business_id;
@@ -168,7 +168,16 @@ class ProjectController extends Controller
             $default_task_category->created_by =  auth()->user()->id;
 
 
-            TaskCategory::create($default_task_category->toArray());
+            $default_task_category->order_no = $index;
+
+
+
+         $task_category =   TaskCategory::create($default_task_category->toArray());
+
+
+
+
+
         }
 
 

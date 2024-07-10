@@ -26,7 +26,7 @@ class CreateTasksTable extends Migration
 
 
             $table->json("assets");
-       
+
             $table->string("cover")->nullable();
 
             $table->date("start_date");
@@ -39,7 +39,7 @@ class CreateTasksTable extends Migration
 
 
 
-
+            $table->integer('order_no')->default(0);
 
 
 

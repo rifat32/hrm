@@ -88,6 +88,8 @@ class TaskUpdateRequest extends BaseFormRequest
 
             'cover' => "nullable|string",
 
+            "order_no" => "nullable|numeric"
+
 
         ];
     }

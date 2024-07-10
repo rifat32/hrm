@@ -106,6 +106,17 @@ class TaskCategoryController extends Controller
 
                 $task_category =  TaskCategory::create($request_data);
 
+              $task_category->order_no = TaskCategory::where(
+                collect($request_data)->only(
+                    "is_active",
+                    "is_default",
+                    "business_id"
+                )
+                )->count();
+
+                $task_category->save();
+
+
 
                 DB::commit();
                 return response($task_category, 201);
@@ -135,7 +146,9 @@ class TaskCategoryController extends Controller
 *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
  * @OA\Property(property="name", type="string", format="string", example="tttttt"),
  *  * * @OA\Property(property="color", type="string", format="string", example="tttttt"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+ * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
+ *  * @OA\Property(property="order_no", type="string", format="string", example="erg ear ga&nbsp;"),
+ *
 
 
      *
@@ -219,6 +232,7 @@ class TaskCategoryController extends Controller
                         'name',
                         "color",
                         'description',
+                        'order_no'
                          // "is_default",
                         // "is_active",
                         // "business_id",

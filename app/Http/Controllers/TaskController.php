@@ -121,6 +121,13 @@ class TaskController extends Controller
 
 
                 $task =  Task::create($request_data);
+                $task->order_no = Task::where(collect($request_data)->only(
+                    "business_id",
+                    "is_active",
+
+                    ))->count();
+$task->save();
+
                 $task->assignees()->sync($request_data['assignees']);
                 $task->labels()->sync($request_data['labels']);
 
@@ -174,6 +181,7 @@ Comment::create([
  * *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
  *      @OA\Property(property="labels", type="string", format="array", example={1,2,3}),
  *      @OA\Property(property="assets", type="string", format="array", example={1,2,3}),
+ *     @OA\Property(property="order_no", type="integer", format="integer", example="2"),
  *
  *
 
@@ -263,6 +271,8 @@ Comment::create([
                         'project_id',
                         'parent_task_id',
                         "task_category_id",
+
+                        "order_no",
                         'assigned_by',
 
                         // "is_active",

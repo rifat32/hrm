@@ -187,11 +187,13 @@ class DashboardManagementControllerV2 extends Controller
 
         $data["individual_total"] = $this->getLeaveData($data_query);
 
-        if (!request()->input("year")) {
-            throw new Exception("year is required", 400);
-        }
+        $year = request()->input('year', Carbon::now()->year);
 
-        $last12MonthsDates = $this->getLast12MonthsDates(request()->input("year"));
+        // if (!request()->input("year")) {
+        //     throw new Exception("year is required", 400);
+        // }
+
+        $last12MonthsDates = $this->getLast12MonthsDates($year);
 
         foreach ($last12MonthsDates as $month) {
             $leaveData =  $this->getLeaveData($data_query, $month['start_date'], $month['end_date']);
