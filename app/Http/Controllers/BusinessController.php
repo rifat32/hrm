@@ -148,22 +148,10 @@ class BusinessController extends Controller
                 }
                 $request_data = $request->validated();
 
-                if (!empty($request_data["business"]["images"])) {
-                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
-                    $this->makeFilePermanent($request_data["business"]["images"],"");
-                }
-                if (!empty($request_data["business"]["image"])) {
-                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
-                }
-                if (!empty($request_data["business"]["logo"])) {
-                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
-                }
-                if (!empty($request_data["business"]["background_image"])) {
-                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
-                }
+                $request_data["business"] = $this->businessImageStore($request_data["business"]);
+
+
+
 
                 $user = User::where([
                     "id" =>  $request_data['business']['owner_id']
@@ -513,119 +501,26 @@ class BusinessController extends Controller
                 }
                 $request_data = $request->validated();
 
-                if (!empty($request_data["business"]["images"])) {
-                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
-                    $this->makeFilePermanent($request_data["business"]["images"],"");
-                }
-                if (!empty($request_data["business"]["image"])) {
-                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
-                }
-                if (!empty($request_data["business"]["logo"])) {
-                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
-                }
-                if (!empty($request_data["business"]["background_image"])) {
-                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
-                }
+
+
+           $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
 
 
-                // user info starts ##############
-
-                $password = $request_data['user']['password'];
-                $request_data['user']['password'] = Hash::make($password);
-
-
-                //    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
-                //     $password = Str::random(10);
-                //     $request_data['user']['password'] = Hash::make($password);
-                //     }
-
-
-                $request_data['user']['remember_token'] = Str::random(10);
-                $request_data['user']['is_active'] = true;
-                $request_data['user']['created_by'] = $request->user()->id;
-
-                $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
-                $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
-                $request_data['user']['country'] = $request_data['business']['country'];
-                $request_data['user']['city'] = $request_data['business']['city'];
-                $request_data['user']['postcode'] = $request_data['business']['postcode'];
-                $request_data['user']['lat'] = $request_data['business']['lat'];
-                $request_data['user']['long'] = $request_data['business']['long'];
-
-                $user =  User::create($request_data['user']);
-
-                $user->assignRole('business_owner');
-                // end user info ##############
-
-
-                //  business info ##############
-
-                $request_data['business']['status'] = "pending";
-                $request_data['business']['owner_id'] = $user->id;
-                $request_data['business']['created_by'] = $request->user()->id;
-                $request_data['business']['is_active'] = true;
-                $request_data['business']['is_self_registered_businesses'] = false;
-
-                $request_data['business']["pension_scheme_letters"] = [];
-
-                $business =  Business::create($request_data['business']);
-
-                $user->email_verified_at = now();
-                $user->business_id = $business->id;
-
-
-                $token = Str::random(30);
-                $user->resetPasswordToken = $token;
-                $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-
-                $user->save();
-
-                BusinessTime::where([
-                    "business_id" => $business->id
-                ])
-                    ->delete();
-                $timesArray = collect($request_data["times"])->unique("day");
-                foreach ($timesArray as $business_time) {
-                    BusinessTime::create([
-                        "business_id" => $business->id,
-                        "day" => $business_time["day"],
-                        "start_at" => $business_time["start_at"],
-                        "end_at" => $business_time["end_at"],
-                        "is_weekend" => $business_time["is_weekend"],
-                    ]);
-                }
-
-                $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
-
-
-
-                //  if($request_data['user']['send_password']) {
-
-
-
-                if (env("SEND_EMAIL") == true) {
-                    $this->checkEmailSender($user->id,0);
-
-                    Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
-
-                    $this->storeEmailSender($user->id,0);
-
-                }
-
+            $data = $this->createUserWithBusiness($request_data);
 
 
 
                 DB::commit();
 
-                return response([
-                    "user" => $user,
-                    "business" => $business
-                ], 201);
+                return response(
+                    [
+                    "user" => $data["user"],
+                    "business" => $data["business"]
+                ],
+                 201
+                );
 
         } catch (Exception $e) {
             if(!empty($request_data["business"]["images"])) {
@@ -805,22 +700,8 @@ class BusinessController extends Controller
 
                 $request_data = $request->validated();
 
-                if (!empty($request_data["business"]["images"])) {
-                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
-                    $this->makeFilePermanent($request_data["business"]["images"],"");
-                }
-                if (!empty($request_data["business"]["image"])) {
-                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
-                }
-                if (!empty($request_data["business"]["logo"])) {
-                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
-                }
-                if (!empty($request_data["business"]["background_image"])) {
-                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
-                }
+                $request_data["business"] = $this->businessImageStore($request_data["business"]);
+
 
 
                 // user info starts ##############
@@ -834,10 +715,8 @@ class BusinessController extends Controller
                 //     $request_data['user']['password'] = Hash::make($password);
                 //     }
 
-
                 $request_data['user']['remember_token'] = Str::random(10);
                 $request_data['user']['is_active'] = true;
-
 
                 $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
                 $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
@@ -859,11 +738,16 @@ class BusinessController extends Controller
                 $request_data['business']['owner_id'] = $user->id;
                 $request_data['business']['created_by'] = $user->id;
                 $request_data['business']['is_active'] = true;
-                $request_data['business']['is_self_registered_businesses'] = true;
+                $request_data['business']["pension_scheme_letters"] = [];
+
 
                 $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
-                $request_data['business']["pension_scheme_letters"] = [];
+
+
                 $business =  Business::create($request_data['business']);
+
+
+
 
                 $user->email_verified_at = now();
                 $user->business_id = $business->id;
@@ -875,8 +759,6 @@ class BusinessController extends Controller
                 $user->created_by = $user->id;
 
                 $user->save();
-
-
 
                 BusinessTime::where([
                     "business_id" => $business->id
@@ -1085,22 +967,8 @@ class BusinessController extends Controller
 
                 $request_data = $request->validated();
 
-                if (!empty($request_data["business"]["images"])) {
-                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
-                    $this->makeFilePermanent($request_data["business"]["images"],"");
-                }
-                if (!empty($request_data["business"]["image"])) {
-                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
-                }
-                if (!empty($request_data["business"]["logo"])) {
-                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
-                }
-                if (!empty($request_data["business"]["background_image"])) {
-                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
-                }
+                $request_data["business"] = $this->businessImageStore($request_data["business"]);
+
 
                 $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
@@ -2578,7 +2446,18 @@ class BusinessController extends Controller
                 ], 401);
             }
 
-            $businesses = Business::with("owner")
+            $businesses = Business::
+            with([
+                "owner" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+
+            ])
             ->withCount('users')
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                        $query->where(function ($query) {
@@ -2640,6 +2519,14 @@ class BusinessController extends Controller
                 ->when(!empty($request->city), function ($query) use ($request) {
                     return $query->orWhere("city", "like", "%" . $request->city . "%");
                 })
+
+
+
+                ->when(!empty($request->created_by), function ($query) use ($request) {
+                    return $query->where("created_by",$request->created_by);
+                })
+
+
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("businesses.id", $request->order_by);
                 }, function ($query) {

@@ -25,7 +25,8 @@ class User extends Authenticatable
     protected $connection = 'mysql';
 
 
-    protected $appends = ['has_this_project',"manages_department"];
+    protected $appends = ['has_this_project',"manages_department","resold_businesses_count"];
+
     protected $guard_name = "api";
     protected $fillable = [
         'first_Name',
@@ -160,6 +161,17 @@ return count($all_departments) > 0;
     public function business() {
         return $this->belongsTo(Business::class, 'business_id', 'id');
     }
+
+
+    public function resold_businesses() {
+        return $this->hasMany(Business::class, 'created_by', 'id');
+    }
+
+
+    public function getResoldBusinessesCountAttribute() {
+        return $this->resold_businesses()->count();
+    }
+
 
 
     public function all_users() {

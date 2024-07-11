@@ -124,8 +124,8 @@ class TaskController extends Controller
                 $task->order_no = Task::where(collect($request_data)->only(
                     "business_id",
                     "is_active",
-
-                    ))->count();
+                    )->toArray()
+                    )->count();
 $task->save();
 
                 $task->assignees()->sync($request_data['assignees']);

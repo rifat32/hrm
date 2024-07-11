@@ -90,6 +90,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
             'business.pension_scheme_name' => 'nullable|required_if:business.pension_scheme_registered,1|string',
             'business.pension_scheme_letters' => 'present|array',
 
+            'business.is_self_registered_businesses' => 'required|boolean',
 
 
 
@@ -173,11 +174,10 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
         ];
 
-        if(!auth()->user()) {
+
+        if (request()->input('business.is_self_registered_businesses')) {
             $rules['business.service_plan_id'] = 'required|numeric|exists:service_plans,id';
             $rules['business.service_plan_discount_code'] = 'nullable|string';
-
-
         }
 
 
@@ -238,7 +238,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
             'work_shift.end_date.date' => 'The work shift end date must be a valid date.',
             'work_shift.end_date.after_or_equal' => 'The work shift end date must be equal to or after the start date.',
             'work_shift.departments.present' => 'The work shift departments must be present and in array format.',
-           
+
             'work_shift.users.array' => 'The work shift users must be in array format.',
             'work_shift.users.*.numeric' => 'Each user ID must be a numeric value.',
             'work_shift.details.required' => 'The work shift details field is required.',

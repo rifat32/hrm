@@ -112,6 +112,7 @@ class TaskCategoryController extends Controller
                     "is_default",
                     "business_id"
                 )
+                ->toArray()
                 )->count();
 
                 $task_category->save();

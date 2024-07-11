@@ -2,7 +2,7 @@
 
 namespace App\Http\Utils;
 
-
+use App\Mail\SendPassword;
 use App\Models\Business;
 use App\Models\BusinessTime;
 use App\Models\Department;
@@ -23,11 +23,16 @@ use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Log\Logger;
+
 use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 trait BusinessUtil
 {
+    use BasicUtil, DiscountUtil;
     // this function do all the task and returns transaction id or -1
 
 
@@ -66,498 +71,18 @@ trait BusinessUtil
         }
         return $business;
     }
-    public function checkLeaveType($id)
-    {
-        $setting_leave_type  = SettingLeaveType::where(["id" => $id])->first();
-        if (!$setting_leave_type) {
-            return [
-                "ok" => false,
-                "status" => 400,
-                "message" => "Leave type does not exists."
-            ];
-        }
 
-        if ($setting_leave_type->business_id != auth()->user()->business_id) {
-            return [
-                "ok" => false,
-                "status" => 403,
-                "message" => "Leave type belongs to another business."
-            ];
-        }
 
-        return [
-            "ok" => true,
-        ];
-    }
 
-    public function checkUser($id)
-    {
-        $user  = User::where(["id" => $id])->first();
-        if (!$user) {
-            return [
-                "ok" => false,
-                "status" => 400,
-                "message" => "User does not exists."
-            ];
-        }
 
-        if ($user->business_id != auth()->user()->business_id) {
-            return [
-                "ok" => false,
-                "status" => 403,
-                "message" => "User belongs to another business."
-            ];
-        }
 
-        return [
-            "ok" => true,
-        ];
-    }
-    public function checkRole($role)
-    {
 
-        // if(!empty(auth()->user()->business_id)) {
-        //     $role = $role . "#" . auth()->user()->business_id;
-        // }
 
 
-        $role  = Role::where(["name" => $role])->first();
 
 
-        if (!$role) {
-            return [
-                "ok" => false,
-                "status" => 400,
-                "message" => "Role does not exists."
-            ];
-        }
 
-        if (!empty(auth()->user()->business_id)) {
-            if ($role->business_id != auth()->user()->business_id) {
-                return [
-                    "ok" => false,
-                    "status" => 400,
-                    "message" => "You don't have this role"
-                ];
-            }
-        }
 
-
-        return [
-            "ok" => true,
-        ];
-    }
-    public function checkManager($id)
-    {
-        $user  = User::where(["id" => $id])->first();
-        if (!$user) {
-            return [
-                "ok" => false,
-                "status" => 400,
-                "message" => "Manager does not exists."
-            ];
-        }
-
-        if ($user->business_id != auth()->user()->business_id) {
-            return [
-                "ok" => false,
-                "status" => 403,
-                "message" => "Manager belongs to another business."
-            ];
-        }
-        if (!$user->hasRole(("business_admin" . "#" . auth()->user()->business_id))) {
-            return [
-                "ok" => false,
-                "status" => 403,
-                "message" => "The user is not a manager"
-            ];
-        }
-        return [
-            "ok" => true,
-        ];
-    }
-
-    public function checkEmployees($ids)
-    {
-        $users = User::whereIn("id", $ids)->get();
-        foreach ($users as $user) {
-            if (!$user) {
-                return [
-                    "ok" => false,
-                    "status" => 400,
-                    "message" => "Employee does not exists."
-                ];
-            }
-
-            if ($user->business_id != auth()->user()->business_id) {
-                return [
-                    "ok" => false,
-                    "status" => 403,
-                    "message" => "Employee belongs to another business."
-                ];
-            }
-
-            if (!$user->hasRole(("business_owner" . "#" . auth()->user()->business_id)) && !$user->hasRole(("business_admin" . "#" . auth()->user()->business_id)) &&  !$user->hasRole(("business_employee" . "#" . auth()->user()->business_id))) {
-                return [
-                    "ok" => false,
-                    "status" => 403,
-                    "message" => "The user is not a employee"
-                ];
-            }
-        }
-
-        return [
-            "ok" => true,
-        ];
-    }
-
-
-    public function checkDepartment($id)
-    {
-        $department  = Department::where(["id" => $id])->first();
-        if (!$department) {
-            return [
-                "ok" => false,
-                "status" => 400,
-                "message" => "Department does not exists."
-            ];
-        }
-
-        if ($department->business_id != auth()->user()->business_id) {
-            return [
-                "ok" => false,
-                "status" => 403,
-                "message" => "Department belongs to another business."
-            ];
-        }
-        return [
-            "ok" => true,
-        ];
-    }
-    public function checkDepartments($ids)
-    {
-        $departments = Department::whereIn("id", $ids)->get();
-
-        foreach ($departments as $department) {
-            if (!$department) {
-                return [
-                    "ok" => false,
-                    "status" => 400,
-                    "message" => "Department does not exists."
-                ];
-            }
-
-            if ($department->business_id != auth()->user()->business_id) {
-                return [
-                    "ok" => false,
-                    "status" => 403,
-                    "message" => "Department belongs to another business."
-                ];
-            }
-        }
-
-        return [
-            "ok" => true,
-        ];
-    }
-
-    public function checkUsers($ids)
-    {
-
-
-        foreach ($ids as $id) {
-            $user = User::where("id", $id)
-                ->first();
-            if (!$user) {
-                return [
-                    "ok" => false,
-                    "status" => 400,
-                    "message" => "User does not exists."
-                ];
-            }
-
-            if (empty(auth()->user()->business_id)) {
-                if (!empty($user->business_id)) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "User belongs to another business."
-                    ];
-                }
-            } else {
-                if ($user->business_id != auth()->user()->business_id) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "User belongs to another business."
-                    ];
-                }
-            }
-        }
-
-        return [
-            "ok" => true,
-        ];
-    }
-
-    public function checkRoles($ids)
-    {
-
-
-        foreach ($ids as $id) {
-            $role = Role::where("id", $id)
-                ->first();
-            if (!$role) {
-                return [
-                    "ok" => false,
-                    "status" => 400,
-                    "message" => "Department does not exists."
-                ];
-            }
-
-            if (empty(auth()->user()->business_id)) {
-                if (!(empty($role->business_id) || $role->is_default == 1)) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "Role belongs to another business."
-                    ];
-                }
-            } else {
-                if ($role->business_id != auth()->user()->business_id) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "Role belongs to another business."
-                    ];
-                }
-            }
-        }
-
-        return [
-            "ok" => true,
-        ];
-    }
-    public function checkEmploymentStatuses($ids)
-    {
-        $employment_statuses = EmploymentStatus::whereIn("id", $ids)
-            ->get();
-
-        foreach ($employment_statuses as $employment_status) {
-            if (!$employment_status) {
-                return [
-                    "ok" => false,
-                    "status" => 400,
-                    "message" => "Employment status does not exists."
-                ];
-            }
-
-            if (auth()->user()->hasRole('superadmin')) {
-                if (!(($employment_status->business_id == NULL) && ($employment_status->is_default == 1) && ($employment_status->is_active == 1))) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "Employment status belongs to another business."
-                    ];
-                }
-            }
-            if (!auth()->user()->hasRole('superadmin')) {
-                if (!(($employment_status->business_id == auth()->user()->business_id) && ($employment_status->is_default == 0) && ($employment_status->is_active == 1))) {
-                    return [
-                        "ok" => false,
-                        "status" => 403,
-                        "message" => "Employment status belongs to another business."
-                    ];
-                }
-            }
-        }
-
-        return [
-            "ok" => true,
-        ];
-    }
-
-    //     public function storeDefaultsToBusiness($business_id,$business_name,$owner_id,$address_line_1) {
-
-
-    //         Department::create([
-    //             "name" => $business_name,
-    //             "location" => $address_line_1,
-    //             "is_active" => 1,
-    //             "manager_id" => $owner_id,
-    //             "business_id" => $business_id,
-    //             "created_by" => $owner_id
-    //         ]);
-
-
-    //         $attached_defaults = [];
-    //         $defaultRoles = Role::where([
-    //             "business_id" => NULL,
-    //             "is_default" => 1,
-    //             "is_default_for_business" => 1,
-    //             "guard_name" => "api",
-    //           ])->get();
-
-    //           foreach($defaultRoles as $defaultRole) {
-    //               $insertableData = [
-    //                 'name'  => ($defaultRole->name . "#" . $business_id),
-    //                 "is_default" => 1,
-    //                 "business_id" => $business_id,
-    //                 "is_default_for_business" => 0,
-    //                 "guard_name" => "api",
-    //               ];
-    //            $role  = Role::create($insertableData);
-    //            $attached_defaults["roles"][$defaultRole->id] = $role->id;
-
-    //            $permissions = $defaultRole->permissions;
-    //            foreach ($permissions as $permission) {
-    //                if(!$role->hasPermissionTo($permission)){
-    //                    $role->givePermissionTo($permission);
-    //                }
-    //            }
-    //           }
-
-
-
-
-    //         $defaultDesignations = Designation::where([
-    //             "business_id" => NULL,
-    //             "is_default" => 1,
-    //             "is_active" => 1
-    //           ])->get();
-
-    //           foreach($defaultDesignations as $defaultDesignation) {
-    //               $insertableData = [
-    //                 'name'  => $defaultDesignation->name,
-    //                 'description'  => $defaultDesignation->description,
-    //                 "is_active" => 1,
-    //                 "is_default" => 1,
-    //                 "business_id" => $business_id,
-    //               ];
-    //            $designation  = Designation::create($insertableData);
-    //            $attached_defaults["designations"][$defaultDesignation->id] = $designation->id;
-    //           }
-
-    //           $defaultEmploymentStatuses = EmploymentStatus::where([
-    //             "business_id" => NULL,
-    //             "is_active" => 1,
-    //             "is_default" => 1
-    //           ])->get();
-
-    //           foreach($defaultEmploymentStatuses as $defaultEmploymentStatus) {
-    //               $insertableData = [
-    //                 'name'  => $defaultEmploymentStatus->name,
-    //                 'color'  => $defaultEmploymentStatus->color,
-    //                 'description'  => $defaultEmploymentStatus->description,
-    //                 "is_active" => 1,
-    //                 "is_default" => 1,
-    //                 "business_id" => $business_id,
-    //               ];
-    //            $employment_status  = EmploymentStatus::create($insertableData);
-    //            $attached_defaults["employment_statuses"][$defaultEmploymentStatus->id] = $employment_status->id;
-    //           }
-
-    // // load setting leave
-    //           $defaultSettingLeaves = SettingLeave::where([
-    //             "business_id" => NULL,
-    //             "is_active" => 1,
-    //             "is_default" => 1
-    //           ])->get();
-
-    //           foreach($defaultSettingLeaves as $defaultSettingLeave) {
-    //               $insertableData = [
-    //                 'start_month' => $defaultSettingLeave->start_month,
-    //                 'approval_level' => $defaultSettingLeave->approval_level,
-    //                 'allow_bypass' => $defaultSettingLeave->allow_bypass,
-    //                 "created_by" => auth()->user()->id,
-    //                 "is_active" => 1,
-    //                 "is_default" => 0,
-    //                 "business_id" => $business_id,
-    //               ];
-
-    //            $setting_leave  = SettingLeave::create($insertableData);
-    //            $attached_defaults["setting_leaves"][$defaultSettingLeave->id] = $setting_leave->id;
-
-
-    //            $default_special_roles = $defaultSettingLeave->special_roles()->pluck("role_id");
-    //            $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
-    //             return $attached_defaults["roles"][$id];
-    // });
-    //            $setting_leave->special_roles()->sync($special_roles_for_business,[]);
-
-
-    //     $default_paid_leave_employment_statuses = $defaultSettingLeave->paid_leave_employment_statuses()->pluck("employment_status_id");
-    //            $paid_leave_employment_statuses_for_business = $default_paid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
-    //             return $attached_defaults["employment_statuses"][$id];
-    // });
-    //            $setting_leave->paid_leave_employment_statuses()->sync($paid_leave_employment_statuses_for_business,[]);
-
-
-
-    //            $default_unpaid_leave_employment_statuses = $defaultSettingLeave->unpaid_leave_employment_statuses()->pluck("employment_status_id");
-    //            $unpaid_leave_employment_statuses_for_business = $default_unpaid_leave_employment_statuses->map(function ($id) use ($attached_defaults) {
-    //             return $attached_defaults["employment_statuses"][$id];
-    //  });
-    //            $setting_leave->unpaid_leave_employment_statuses()->sync($unpaid_leave_employment_statuses_for_business,[]);
-
-
-
-
-    //           }
-
-    // // end load setting leave
-
-
-
-    // // load setting attendance
-    // $defaultSettingAttendances = SettingAttendance::where([
-    //     "business_id" => NULL,
-    //     "is_active" => 1,
-    //     "is_default" => 1
-    //   ])->get();
-
-
-
-    //   foreach($defaultSettingAttendances as $defaultSettingAttendance) {
-    //       $insertableData = [
-    //         'punch_in_time_tolerance' => $defaultSettingAttendance->punch_in_time_tolerance,
-    //         'work_availability_definition'=> $defaultSettingAttendance->work_availability_definition,
-    //         'punch_in_out_alert'=> $defaultSettingAttendance->punch_in_out_alert,
-    //         'punch_in_out_interval'=> $defaultSettingAttendance->punch_in_out_interval,
-    //         'alert_area'=> $defaultSettingAttendance->alert_area,
-    //         'auto_approval'=> $defaultSettingAttendance->auto_approval,
-
-    //         "created_by" => auth()->user()->id,
-    //         "is_active" => 1,
-    //         "is_default" => 0,
-    //         "business_id" => $business_id,
-    //       ];
-
-    //    $setting_attendance  = SettingAttendance::create($insertableData);
-    //    $attached_defaults["setting_attendances"][$defaultSettingAttendance->id] = $setting_attendance->id;
-
-
-    //    $default_special_roles = $defaultSettingAttendance->special_roles()->pluck("role_id");
-    //    $special_roles_for_business = $default_special_roles->map(function ($id) use ($attached_defaults) {
-    //     return $attached_defaults["roles"][$id];
-    // });
-    //    $setting_attendance->special_roles()->sync($special_roles_for_business,[]);
-
-
-
-
-
-    //   }
-
-    // // end load setting attendance
-
-
-
-
-
-
-
-    //     }
 
 
 
@@ -1163,4 +688,140 @@ trait BusinessUtil
             "ok" => true,
         ];
     }
+
+
+public function businessImageStore($business) {
+    if (!empty($business["images"])) {
+        $business["images"] = $this->storeUploadedFiles($business["images"],"","business_images");
+        $this->makeFilePermanent($business["images"],"");
+    }
+    if (!empty($business["image"])) {
+        $business["image"] = $this->storeUploadedFiles([$business["image"]],"","business_images")[0];
+        $this->makeFilePermanent([$business["image"]],"");
+    }
+    if (!empty($business["logo"])) {
+        $business["logo"] = $this->storeUploadedFiles([$business["logo"]],"","business_images")[0];
+        $this->makeFilePermanent([$business["logo"]],"");
+    }
+    if (!empty($business["background_image"])) {
+        $business["background_image"] = $this->storeUploadedFiles([$business["background_image"]],"","business_images")[0];
+        $this->makeFilePermanent([$business["background_image"]],"");
+    }
+
+    return $business;
+
+}
+
+
+
+
+public function createUserWithBusiness($request_data) {
+   // user info starts ##############
+
+   $password = $request_data['user']['password'];
+
+
+   $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+    //    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
+    //     $password = Str::random(10);
+    //     $request_data['user']['password'] = Hash::make($password);
+    //     }
+    $request_data['user']['remember_token'] = Str::random(10);
+    $request_data['user']['is_active'] = true;
+    $request_data['user']['created_by'] = auth()->user()->id;
+
+    $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+    $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
+    $request_data['user']['country'] = $request_data['business']['country'];
+    $request_data['user']['city'] = $request_data['business']['city'];
+    $request_data['user']['postcode'] = $request_data['business']['postcode'];
+    $request_data['user']['lat'] = $request_data['business']['lat'];
+    $request_data['user']['long'] = $request_data['business']['long'];
+
+
+
+
+   $user =  User::create($request_data['user']);
+
+   $user->assignRole('business_owner');
+   // end user info ##############
+
+
+   //  business info ##############
+
+   $request_data['business']['status'] = "pending";
+   $request_data['business']['owner_id'] = $user->id;
+   $request_data['business']['created_by'] = auth()->user()->id;
+   $request_data['business']['is_active'] = true;
+   $request_data['business']["pension_scheme_letters"] = [];
+
+
+   if($request_data["business"]["is_self_registered_businesses"]) {
+    $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
+   }
+
+
+   $business =  Business::create($request_data['business']);
+
+   $user->email_verified_at = now();
+   $user->business_id = $business->id;
+   $token = Str::random(30);
+   $user->resetPasswordToken = $token;
+   $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+
+   $user->save();
+
+   BusinessTime::where([
+       "business_id" => $business->id
+   ])
+       ->delete();
+   $timesArray = collect($request_data["times"])->unique("day");
+   foreach ($timesArray as $business_time) {
+       BusinessTime::create([
+           "business_id" => $business->id,
+           "day" => $business_time["day"],
+           "start_at" => $business_time["start_at"],
+           "end_at" => $business_time["end_at"],
+           "is_weekend" => $business_time["is_weekend"],
+       ]);
+   }
+
+   $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
+
+
+
+   //  if($request_data['user']['send_password']) {
+
+
+
+   if (env("SEND_EMAIL") == true) {
+       $this->checkEmailSender($user->id,0);
+
+       Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
+
+       $this->storeEmailSender($user->id,0);
+
+   }
+
+   
+
+   return [
+    "user" => $user,
+    "business" => $business
+   ];
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 }
