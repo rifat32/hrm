@@ -1047,6 +1047,10 @@ class BusinessController extends Controller
                 // $user->syncRoles(["business_owner"]);
 
 
+                if(!empty($request_data["business"]["is_self_registered_businesses"])) {
+                    $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
+                   }
+
 
                 $business->fill(collect($request_data['business'])->only([
                     "name",
@@ -1068,7 +1072,11 @@ class BusinessController extends Controller
                     "status",
                     "background_image",
                     "currency",
-                    "flexible_rota_enabled"
+                    "flexible_rota_enabled",
+                    "is_self_registered_businesses",
+                    "service_plan_id",
+                    "service_plan_discount_code",
+                    "service_plan_discount_amount",
                 ])->toArray());
 
                 $business->save();
@@ -2454,7 +2462,7 @@ class BusinessController extends Controller
                 },
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
+                    'users.last_Name', "users.email");
                 },
 
             ])

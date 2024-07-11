@@ -756,7 +756,7 @@ public function createUserWithBusiness($request_data) {
    $request_data['business']["pension_scheme_letters"] = [];
 
 
-   if($request_data["business"]["is_self_registered_businesses"]) {
+   if(!empty($request_data["business"]["is_self_registered_businesses"])) {
     $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
    }
 
@@ -803,7 +803,7 @@ public function createUserWithBusiness($request_data) {
 
    }
 
-   
+
 
    return [
     "user" => $user,

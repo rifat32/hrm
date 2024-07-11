@@ -5245,9 +5245,49 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                  "users.middle_Name",
                  "users.last_Name",
                  "users.image",
+                 "users.email",
                  "users.is_active",
              );
+
+
              $users = $this->retrieveData($usersQuery, "users.first_Name");
+
+             if (request()->input("per_page")) {
+
+
+                  // Modify the paginated items
+    $modifiedUsers = $users->getCollection()->each(function ($user) {
+        $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+        return $user;
+    });
+
+    // Recreate the paginator with modified items
+    $users = new \Illuminate\Pagination\LengthAwarePaginator(
+        $modifiedUsers,
+        $users->total(),
+        $users->perPage(),
+        $users->currentPage(),
+        [
+            'path' => $users->path(),
+            'query' => $users->appends(request()->query())->toArray(),
+        ]
+    );
+
+
+
+
+
+            } else {
+                $users = $users->each(function($user) {
+
+                    $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+
+                    
+
+                    return $user;
+
+                 });
+            }
 
 
 

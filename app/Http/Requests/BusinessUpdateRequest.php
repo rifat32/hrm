@@ -77,7 +77,7 @@ class BusinessUpdateRequest extends BaseFormRequest
             'business.images' => 'nullable|array',
             'business.images.*' => 'nullable|string',
 
-
+            'business.is_self_registered_businesses' => 'required|boolean',
 
             "times" => "present|array",
             "times.*.day" => 'required|numeric',
@@ -114,6 +114,11 @@ class BusinessUpdateRequest extends BaseFormRequest
 
         if(auth()->user()->hasRole("superadmin")) {
             $rules['business.flexible_rota_enabled'] = 'required|boolean';
+        }
+
+        if (request()->input('business.is_self_registered_businesses')) {
+            $rules['business.service_plan_id'] = 'required|numeric|exists:service_plans,id';
+            $rules['business.service_plan_discount_code'] = 'nullable|string';
         }
 
         return $rules;
