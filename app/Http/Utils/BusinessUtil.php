@@ -23,7 +23,7 @@ use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Hash;
@@ -707,9 +707,58 @@ public function businessImageStore($business) {
         $business["background_image"] = $this->storeUploadedFiles([$business["background_image"]],"","business_images")[0];
         $this->makeFilePermanent([$business["background_image"]],"");
     }
-
     return $business;
+}
 
+
+
+public function businessImageRollBack($request_data) {
+    if(!empty($request_data["business"]["images"])) {
+        try {
+
+                $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
+
+
+
+        } catch (Exception $innerException) {
+            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        }
+    }
+
+    if(!empty($request_data["business"]["image"])) {
+        try {
+
+                $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
+
+
+
+        } catch (Exception $innerException) {
+            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        }
+    }
+    if(!empty($request_data["business"]["logo"])) {
+        try {
+
+                $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
+
+
+
+        } catch (Exception $innerException) {
+            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        }
+    }
+
+    if(!empty($request_data["business"]["background_image"])) {
+        try {
+
+                $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
+
+
+
+        } catch (Exception $innerException) {
+            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        }
+    }
 }
 
 
@@ -728,7 +777,7 @@ public function createUserWithBusiness($request_data) {
     //     }
     $request_data['user']['remember_token'] = Str::random(10);
     $request_data['user']['is_active'] = true;
-    $request_data['user']['created_by'] = auth()->user()->id;
+
 
     $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
     $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
@@ -742,6 +791,12 @@ public function createUserWithBusiness($request_data) {
 
 
    $user =  User::create($request_data['user']);
+
+   if(empty(auth()->user())){
+    Auth::login($user);
+   }
+
+
 
    $user->assignRole('business_owner');
    // end user info ##############
@@ -768,7 +823,7 @@ public function createUserWithBusiness($request_data) {
    $token = Str::random(30);
    $user->resetPasswordToken = $token;
    $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-
+   $user->created_by = auth()->user()->id;
    $user->save();
 
    BusinessTime::where([

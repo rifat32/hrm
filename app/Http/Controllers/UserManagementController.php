@@ -5240,13 +5240,31 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
              $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
              $usersQuery = $usersQuery->select(
-                 "users.id",
-                 "users.first_Name",
-                 "users.middle_Name",
-                 "users.last_Name",
-                 "users.image",
-                 "users.email",
-                 "users.is_active",
+                "users.id",
+        "users.first_Name",
+        "users.middle_Name",
+        "users.last_Name",
+        "users.image",
+        "users.email",
+        "users.is_active",
+        DB::raw('(SELECT COUNT(*) FROM businesses WHERE businesses.created_by = users.id) as resold_businesses_count'),
+        DB::raw('(SELECT COUNT(*) FROM businesses
+                  WHERE businesses.created_by = users.id
+                  AND businesses.is_active = 1
+                  AND (
+                      !businesses.is_self_registered_businesses OR
+                      EXISTS (
+                        SELECT 1 FROM business_subscriptions
+                        WHERE business_subscriptions.business_id = businesses.id
+                        AND (
+                            business_subscriptions.end_date > NOW()
+                            AND
+                            business_subscriptions.start_date <= NOW()
+                            OR
+                            businesses.trail_end_date >= NOW()  -- Check if trail end date is in the future or today
+                        )
+                    )
+                  )) as active_subscribed_businesses_count')
              );
 
 
@@ -5279,30 +5297,15 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
             } else {
                 $users = $users->each(function($user) {
-
                     $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
-
-                    
-
                     return $user;
 
                  });
             }
 
+            return response()->json($users, 200);
 
 
-
-             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                 //  if (strtoupper($request->response_type) == 'PDF') {
-                 //      $pdf = PDF::loadView('pdf.users', ["users" => $users]);
-                 //      return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                 //  } elseif (strtoupper($request->response_type) === 'CSV') {
-
-                 //      return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-                 //  }
-             } else {
-                 return response()->json($users, 200);
-             }
          } catch (Exception $e) {
 
              return $this->sendError($e, 500, $request);

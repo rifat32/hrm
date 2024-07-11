@@ -17,6 +17,11 @@ class CreateBusinessesTable extends Migration
             $table->id();
             $table->string("name");
             $table->date("start_date");
+            $table->date("trail_end_date")->nullable();
+
+
+
+
             $table->text("about")->nullable();
             $table->string("web_page")->nullable();
             $table->string("phone")->nullable();

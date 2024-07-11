@@ -16,6 +16,7 @@ class Business extends Model
     protected $fillable = [
         "name",
         "start_date",
+        "trail_end_date",
         "about",
         "web_page",
         "phone",

@@ -315,6 +315,8 @@ ADD COLUMN type ENUM('comment', 'history') DEFAULT 'comment' NOT NULL;
 46 ALTER TABLE task_categories ADD COLUMN order_no INT DEFAULT 0;
 ALTER TABLE tasks ADD COLUMN order_no INT DEFAULT 0;
 
+47. ALTER TABLE businesses ADD COLUMN trail_end_date DATE NULL;
+
 
 
 hr compliance -> 46

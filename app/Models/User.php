@@ -25,7 +25,7 @@ class User extends Authenticatable
     protected $connection = 'mysql';
 
 
-    protected $appends = ['has_this_project',"manages_department","resold_businesses_count"];
+    protected $appends = ['has_this_project',"manages_department"];
 
     protected $guard_name = "api";
     protected $fillable = [
@@ -168,9 +168,7 @@ return count($all_departments) > 0;
     }
 
 
-    public function getResoldBusinessesCountAttribute() {
-        return $this->resold_businesses()->count();
-    }
+
 
 
 

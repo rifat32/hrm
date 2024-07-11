@@ -131,54 +131,54 @@ class ProjectController extends Controller
 
 
 
-                $business_created_by  = NULL;
-                if(auth()->user()->business) {
-                    $business_created_by = auth()->user()->business->created_by;
-                }
+                // $business_created_by  = NULL;
+                // if(auth()->user()->business) {
+                //     $business_created_by = auth()->user()->business->created_by;
+                // }
 
 
-                $default_task_categories = TaskCategory::where('task_categories.business_id', NULL)
-                ->where('task_categories.is_default', 1)
-                ->where('task_categories.is_active', 1)
-                ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-                    $q->whereIn("disabled_task_categories.created_by", [$business_created_by])
-                    ->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
+        //         $default_task_categories = TaskCategory::where('task_categories.business_id', NULL)
+        //         ->where('task_categories.is_default', 1)
+        //         ->where('task_categories.is_active', 1)
+        //         ->whereDoesntHave("disabled", function($q) use($business_created_by) {
+        //             $q->whereIn("disabled_task_categories.created_by", [$business_created_by])
+        //             ->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
 
-                })
-                 ->orWhere(function ($query) use( $business_created_by){
-                    $query->where('task_categories.business_id', NULL)
-                        ->where('task_categories.is_default', 0)
-                        ->where('task_categories.created_by', $business_created_by)
-                        ->where('task_categories.is_active', 1)
-                        ;
-                })
-                ->orWhere(function ($query) {
-                    $query->where('task_categories.business_id', auth()->user()->business_id)
-                        ->where('task_categories.is_default', 0)
-                        ->where('task_categories.is_active', 1);
-                })
-        ->get();
+        //         })
+        //          ->orWhere(function ($query) use( $business_created_by){
+        //             $query->where('task_categories.business_id', NULL)
+        //                 ->where('task_categories.is_default', 0)
+        //                 ->where('task_categories.created_by', $business_created_by)
+        //                 ->where('task_categories.is_active', 1)
+        //                 ;
+        //         })
+        //         ->orWhere(function ($query) {
+        //             $query->where('task_categories.business_id', auth()->user()->business_id)
+        //                 ->where('task_categories.is_default', 0)
+        //                 ->where('task_categories.is_active', 1);
+        //         })
+        // ->get();
 
-        foreach($default_task_categories as $index => $default_task_category){
+        // foreach($default_task_categories as $index => $default_task_category){
 
-            $default_task_category->project_id =  $project->id;
-            $default_task_category->business_id =  auth()->user()->business_id;
-            $default_task_category->is_default =  0;
-            $default_task_category->is_active =  0;
-            $default_task_category->created_by =  auth()->user()->id;
-
-
-            $default_task_category->order_no = $index;
+        //     $default_task_category->project_id =  $project->id;
+        //     $default_task_category->business_id =  auth()->user()->business_id;
+        //     $default_task_category->is_default =  0;
+        //     $default_task_category->is_active =  0;
+        //     $default_task_category->created_by =  auth()->user()->id;
 
 
-
-         $task_category =   TaskCategory::create($default_task_category->toArray());
+        //     $default_task_category->order_no = $index;
 
 
 
+        //  $task_category =   TaskCategory::create($default_task_category->toArray());
 
 
-        }
+
+
+
+        // }
 
 
 

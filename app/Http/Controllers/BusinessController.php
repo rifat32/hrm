@@ -194,52 +194,7 @@ class BusinessController extends Controller
                 ], 201);
 
         } catch (Exception $e) {
-            if(!empty($request_data["business"]["images"])) {
-            try {
-
-                    $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
-
-
-
-            } catch (Exception $innerException) {
-                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-            }
-        }
-
-        if(!empty($request_data["business"]["image"])) {
-            try {
-
-                    $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
-
-
-
-            } catch (Exception $innerException) {
-                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-            }
-        }
-        if(!empty($request_data["business"]["logo"])) {
-            try {
-
-                    $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
-
-
-
-            } catch (Exception $innerException) {
-                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-            }
-        }
-
-        if(!empty($request_data["business"]["background_image"])) {
-            try {
-
-                    $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
-
-
-
-            } catch (Exception $innerException) {
-                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-            }
-        }
+            $this->businessImageRollBack($request_data);
 
     DB::rollBack();
             return $this->sendError($e, 500, $request);
@@ -506,11 +461,7 @@ class BusinessController extends Controller
            $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
-
-
             $data = $this->createUserWithBusiness($request_data);
-
-
 
                 DB::commit();
 
@@ -523,52 +474,7 @@ class BusinessController extends Controller
                 );
 
         } catch (Exception $e) {
-            if(!empty($request_data["business"]["images"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
-
-            if(!empty($request_data["business"]["image"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
-            if(!empty($request_data["business"]["logo"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
-
-            if(!empty($request_data["business"]["background_image"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
+            $this->businessImageRollBack($request_data);
             DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
@@ -698,154 +604,31 @@ class BusinessController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-                $request_data = $request->validated();
-
-                $request_data["business"] = $this->businessImageStore($request_data["business"]);
+            $request_data = $request->validated();
 
 
 
-                // user info starts ##############
-
-                $password = $request_data['user']['password'];
+            $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
-                $request_data['user']['password'] = Hash::make($password);
-                //    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
-                //     $password = Str::random(10);
-                //     $request_data['user']['password'] = Hash::make($password);
-                //     }
+             $data = $this->createUserWithBusiness($request_data);
 
-                $request_data['user']['remember_token'] = Str::random(10);
-                $request_data['user']['is_active'] = true;
+                 DB::commit();
 
-                $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
-                $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
-                $request_data['user']['country'] = $request_data['business']['country'];
-                $request_data['user']['city'] = $request_data['business']['city'];
-                $request_data['user']['postcode'] = $request_data['business']['postcode'];
-                $request_data['user']['lat'] = $request_data['business']['lat'];
-                $request_data['user']['long'] = $request_data['business']['long'];
+                 return response(
+                     [
+                     "user" => $data["user"],
+                     "business" => $data["business"]
+                 ],
+                  201
+                 );
 
-                $user =  User::create($request_data['user']);
-                Auth::login($user);
-
-                $user->assignRole('business_owner');
-                // end user info ##############
-
-
-                //  business info ##############
-                $request_data['business']['status'] = "pending";
-                $request_data['business']['owner_id'] = $user->id;
-                $request_data['business']['created_by'] = $user->id;
-                $request_data['business']['is_active'] = true;
-                $request_data['business']["pension_scheme_letters"] = [];
-
-
-                $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
-
-
-                $business =  Business::create($request_data['business']);
-
-
-
-
-                $user->email_verified_at = now();
-                $user->business_id = $business->id;
-
-
-                $token = Str::random(30);
-                $user->resetPasswordToken = $token;
-                $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-                $user->created_by = $user->id;
-
-                $user->save();
-
-                BusinessTime::where([
-                    "business_id" => $business->id
-                ])
-                    ->delete();
-                $timesArray = collect($request_data["times"])->unique("day");
-                foreach ($timesArray as $business_time) {
-                    BusinessTime::create([
-                        "business_id" => $business->id,
-                        "day" => $business_time["day"],
-                        "start_at" => $business_time["start_at"],
-                        "end_at" => $business_time["end_at"],
-                        "is_weekend" => $business_time["is_weekend"],
-                    ]);
-                }
-
-                $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
-
-
-
-                if (env("SEND_EMAIL") == true) {
-                    $this->checkEmailSender($user->id,0);
-
-                    Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
-
-                    $this->storeEmailSender($user->id,0);
-
-                }
-
-
-                $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
-                $user->permissions = $user->getAllPermissions()->pluck('name');
-                $user->roles = $user->roles->pluck('name');
-
-                DB::commit();
-                return response([
-                    "user" => $user,
-                    "business" => $business
-                ], 201);
 
         } catch (Exception $e) {
-            if(!empty($request_data["business"]["images"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
 
 
+            $this->businessImageRollBack($request_data);
 
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
-
-            if(!empty($request_data["business"]["image"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
-            if(!empty($request_data["business"]["logo"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
-
-            if(!empty($request_data["business"]["background_image"])) {
-                try {
-
-                        $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
-
-
-
-                } catch (Exception $innerException) {
-                    error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-                }
-            }
             DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
@@ -1077,6 +860,7 @@ class BusinessController extends Controller
                     "service_plan_id",
                     "service_plan_discount_code",
                     "service_plan_discount_amount",
+                    "trail_end_date"
                 ])->toArray());
 
                 $business->save();
