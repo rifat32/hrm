@@ -43,7 +43,9 @@ class CommentController extends Controller
  *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
  *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
  *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
+ *
  *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
+ * *     @OA\Property(property="project_id", type="integer", format="int64", example=456),
  *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
  *
 
@@ -168,8 +170,7 @@ class CommentController extends Controller
  *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
  *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
  *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
- *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
- *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
+
      *
      *
 
@@ -254,8 +255,8 @@ class CommentController extends Controller
                         'resolution',
                         'feedback',
                         // 'hidden_note',
-                        'related_task_id',
-                        'task_id',
+                        // 'related_task_id',
+                        // 'task_id',
 
                     ])->toArray()
                 )
@@ -305,6 +306,14 @@ DB::commit();
      *         required=true,
      *  example="1"
      *      ),
+     *      *    @OA\Parameter(
+     *         name="project_id",
+     *         in="query",
+     *         description="project_id",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *
      *      *    @OA\Parameter(
      *         name="status",
      *         in="query",
@@ -415,6 +424,10 @@ DB::commit();
                 ->when(!empty($request->task_id), function ($query) use ($request) {
                     return $query->where('task_id', $request->task_id);
                 })
+                ->when(!empty($request->project_id), function ($query) use ($request) {
+                    return $query->where('project_id', $request->project_id);
+                })
+
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('status', $request->status);
                 })

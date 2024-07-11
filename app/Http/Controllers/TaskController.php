@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskCreateRequest;
+use App\Http\Requests\TaskPositionUpdateRequest;
 use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
@@ -306,7 +307,199 @@ Comment::create([
         }
     }
 
+ /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/tasks/position",
+     *      operationId="updateTaskPosition",
+     *      tags={"task"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update task listing ",
+     *      description="This method is to update task listing",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *    @OA\Property(property="id", type="number", format="number",example="1"),
+ *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
+ *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
+ * *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
 
+ *     @OA\Property(property="order_no", type="integer", format="integer", example="2"),
+ *
+ *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateTaskPosition(TaskPositionUpdateRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("task_management");
+
+                 if (!$request->user()->hasPermissionTo('task_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+
+                 $task_query_params = [
+                     "id" => $request_data["id"],
+                     "business_id" => $business_id
+                 ];
+
+
+
+                 $task_prev = Task::where($task_query_params)
+                     ->first();
+
+
+                 if (!$task_prev) {
+                     return response()->json([
+                         "message" => "no task listing found"
+                     ], 404);
+                 }
+
+                 $task  =  tap(Task::where($task_query_params))->update(
+                     collect($request_data)->only([
+                         'project_id',
+                         'parent_task_id',
+                         "task_category_id",
+                         "order_no",
+
+                     ])->toArray()
+                 )
+                     // ->with("somthing")
+
+                     ->first();
+
+                 if (!$task) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+
+                 if($task_prev->project_id !== $task->project_id) {
+       // Create the task entry
+       Comment::create([
+        'description' => ("Transferred this card from ". $task_prev->name),
+        // 'attachments' => $attachments,
+        'type' => 'history',
+
+        'task_id' => $task->id, // Assuming you have a $taskId variable
+        'project_id' => $task->project_id, // Assuming you have a $taskId variable
+        'created_by' => auth()->user()->id, // Assuming you have a $userId variable
+    ]);
+
+
+        Comment::create([
+            'description' => ("Transferred this card to ". $task->name),
+            // 'attachments' => $attachments,
+            'type' => 'history',
+
+            'task_id' => $task_prev->id, // Assuming you have a $taskId variable
+
+            'project_id' => $task_prev->project_id, // Assuming you have a $taskId variable
+
+            'created_by' => auth()->user()->id, // Assuming you have a $userId variable
+        ]);
+
+
+                 } else if ($task->task_category_id !== $task->task_category_id) {
+
+
+                    Comment::create([
+
+                        'description' => ("moved this card from ". $task_prev->name . " to " . $task->name ),
+                        // 'attachments' => $attachments,
+                        'type' => 'history',
+
+                        'task_id' => $task->id, // Assuming you have a $taskId variable
+
+                        'project_id' => $task->project_id, // Assuming you have a $taskId variable
+
+                        'created_by' => auth()->user()->id, // Assuming you have a $userId variable
+                    ]);
+
+                 }
+
+
+
+                 $order_no_overlapped = Task::where([
+                    'project_id' => $task->project_id,
+                    'parent_task_id' => $task->parent_task_id,
+                    'task_category_id' => $task->task_category_id,
+                    'order_no' => $task->order_no,
+                ])
+                ->whereNotIn('id', [$task->id])
+                ->exists();
+
+                if ($order_no_overlapped) {
+                    Task::where([
+                        'project_id' => $task->project_id,
+                        'parent_task_id' => $task->parent_task_id,
+                        'task_category_id' => $task->task_category_id,
+                    ])
+                    ->where('order_no', '>=', $task->order_no)
+                    ->whereNotIn('id', [$task->id])
+                    ->increment('order_no');
+                }
+
+
+
+                 DB::commit();
+                 return response($task, 201);
+
+         } catch (Exception $e) {
+            DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      * @OA\Get(

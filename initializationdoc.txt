@@ -317,6 +317,14 @@ ALTER TABLE tasks ADD COLUMN order_no INT DEFAULT 0;
 
 47. ALTER TABLE businesses ADD COLUMN trail_end_date DATE NULL;
 
+48. ALTER TABLE comments
+ADD COLUMN project_id BIGINT UNSIGNED NULL;
+
+ALTER TABLE comments
+ADD CONSTRAINT comments_project_id_foreign
+FOREIGN KEY (project_id) REFERENCES projects(id)
+ON DELETE CASCADE;
+
 
 
 hr compliance -> 46

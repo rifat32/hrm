@@ -1200,7 +1200,96 @@ class TaskCategoryController extends Controller
              return $this->sendError($e, 500, $request);
          }
      }
+/**
+     *
+     * @OA\Get(
+     *      path="/v1.0/task-categories-by-project-id/{project_id}",
+     *      operationId="getTaskCategoryByProjectId",
+     *      tags={"task_categories"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="project_id",
+     *         in="path",
+     *         description="project_id",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      summary="This method is to get task category by id",
+     *      description="This method is to get task category by id",
+     *
 
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getTaskCategoryByProjectIdV2($project_id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("task_management");
+
+             if (!$request->user()->hasPermissionTo('task_category_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $task_categories =  TaskCategory::where([
+                 "project_id" => $project_id,
+                 "business_id" => auth()->user()->business_id
+
+             ])
+
+                 ->get();
+
+                $tasks = Task::whereIn("task_category_id",$task_categories->pluck("id")->toArray())->get();
+
+                $responseData = [
+                  "task_categories"  => $task_categories,
+                  "tasks"  => $tasks
+                ];
+
+
+
+             return response()->json($responseData, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
     /**
      *
      *     @OA\Delete(

@@ -37,6 +37,8 @@ class CommentCreateRequest extends BaseFormRequest
                     'hidden_note' => 'nullable|string',
                     'related_task_id' => 'nullable|exists:tasks,id',
                     'task_id' => 'required|exists:tasks,id',
+                    'project_id' => 'required|exists:projects,id',
+
                 ];
             }
 

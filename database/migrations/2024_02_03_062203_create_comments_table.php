@@ -31,6 +31,10 @@ class CreateCommentsTable extends Migration
             $table->text('hidden_note')->nullable();
               $table->json('history')->nullable();
 
+
+              $table->unsignedBigInteger('project_id')->nullable();
+              $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+
             $table->unsignedBigInteger('related_task_id')->nullable();
             $table->foreign('related_task_id')->references('id')->on('tasks');
             $table->unsignedBigInteger('task_id');

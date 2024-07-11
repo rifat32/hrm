@@ -1508,7 +1508,7 @@ Route::get('/v1.0/task-categories/{id}', [TaskCategoryController::class, "getTas
 
 Route::get('/v1.0/task-categories-by-project-id/{project_id}', [TaskCategoryController::class, "getTaskCategoryByProjectId"]);
 
-
+Route::get('/v2.0/task-categories-by-project-id/{project_id}', [TaskCategoryController::class, "getTaskCategoryByProjectId"]);
 
 
 Route::delete('/v1.0/task-categories/{ids}', [TaskCategoryController::class, "deleteTaskCategoriesByIds"]);
@@ -1559,6 +1559,7 @@ Route::delete('/v1.0/labels/{ids}', [LabelController::class, "deleteLabelsByIds"
 
 Route::post('/v1.0/tasks', [TaskController::class, "createTask"]);
 Route::put('/v1.0/tasks', [TaskController::class, "updateTask"]);
+Route::put('/v1.0/tasks/position', [TaskController::class, "updateTaskPosition"]);
 Route::get('/v1.0/tasks', [TaskController::class, "getTasks"]);
 Route::get('/v1.0/tasks/{id}', [TaskController::class, "getTaskById"]);
 Route::delete('/v1.0/tasks/{ids}', [TaskController::class, "deleteTasksByIds"]);

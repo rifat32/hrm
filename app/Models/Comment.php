@@ -21,6 +21,7 @@ class Comment extends Model
         'hidden_note',
         'related_task_id',
         'task_id',
+        'project_id',
         'type',
         'created_by',
 
