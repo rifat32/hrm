@@ -36,7 +36,7 @@ if (!$business->is_active) {
 
 
                     if(!empty($business->trail_end_date)) {
-                        if(Carbon::parse($business->trail_end_date)->isPast()){
+                        if(Carbon::parse($business->trail_end_date)->isPast() && !Carbon::parse($business->trail_end_date)->isToday()){
                             $latest_subscription = BusinessSubscription::where('business_id', $business->id)
                             ->where('service_plan_id', $business->service_plan_id)
                             ->latest() // Get the latest subscription
@@ -56,7 +56,7 @@ if (Carbon::parse($latest_subscription->start_date)->isFuture()) {
 
 // Check if the subscription has expired
 if(!empty($latest_subscription->end_date)) {
-    if (Carbon::parse($latest_subscription->end_date)->isPast()) {
+    if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($latest_subscription->end_date)->isToday()) {
         return response()->json(["message" => "Your subscription has expired."], 401);
     }
 }

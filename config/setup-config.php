@@ -106,6 +106,15 @@ return [
                 "termination_type_view",
                 // "termination_type_delete",
 
+
+                "termination_reason_create",
+                "termination_reason_update",
+                "termination_reason_view",
+                // "termination_reason_delete",
+
+
+
+
                 "bank_create",
                 "bank_update",
                 "bank_view",
@@ -175,6 +184,12 @@ return [
                 "termination_type_update",
                 "termination_type_view",
                 // "termination_type_delete",
+
+
+                "termination_reason_create",
+                "termination_reason_update",
+                "termination_reason_view",
+                // "termination_reason_delete",
 
                  "bank_create",
                 // "bank_update",
@@ -444,6 +459,13 @@ return [
                 "termination_type_delete",
 
 
+                "termination_reason_create",
+                "termination_reason_update",
+                "termination_reason_view",
+                "termination_reason_activate",
+                "termination_reason_delete",
+
+
 
                 // "bank_create",
                 // "bank_update",
@@ -701,6 +723,12 @@ return [
                 "termination_type_activate",
                 "termination_type_delete",
 
+                "termination_reason_create",
+                "termination_reason_update",
+                "termination_reason_view",
+                "termination_reason_activate",
+                "termination_reason_delete",
+
 
 
                 // "bank_create",
@@ -933,6 +961,12 @@ return [
                 "termination_type_activate",
                 "termination_type_delete",
 
+                "termination_reason_create",
+                "termination_reason_update",
+                "termination_reason_view",
+                "termination_reason_activate",
+                "termination_reason_delete",
+
 
                 // "bank_create",
                 // "bank_update",
@@ -1040,7 +1074,11 @@ return [
                 "employee_rota_view",
                 "announcement_view",
                 "designation_view",
+
                 "termination_type_view",
+                "termination_reason_view",
+
+
 
 
 
@@ -1354,6 +1392,12 @@ return [
         "termination_type_activate",
         "termination_type_delete",
 
+        "termination_reason_create",
+        "termination_reason_update",
+        "termination_reason_view",
+        "termination_reason_activate",
+        "termination_reason_delete",
+
         "bank_create",
         "bank_update",
         "bank_activate",
@@ -1664,6 +1708,12 @@ return [
         "termination_type_view" => "",
         "termination_type_activate" => "",
         "termination_type_delete" => "",
+
+        "termination_reason_create" => "",
+        "termination_reason_update" => "",
+        "termination_reason_view" => "",
+        "termination_reason_activate" => "",
+        "termination_reason_delete" => "",
 
 
 
@@ -2008,6 +2058,12 @@ return [
         "termination_type_view" => "view",
         "termination_type_delete" => "delete",
 
+
+        "termination_reason_create" => "create",
+        "termination_reason_update" => "update",
+        "termination_reason_activate" => "activate",
+        "termination_reason_view" => "view",
+        "termination_reason_delete" => "delete",
 
 
         "bank_create" => "create",
@@ -2645,6 +2701,17 @@ return [
                 "termination_type_activate",
                 "termination_type_view",
                 "termination_type_delete",
+            ],
+        ],
+
+        [
+            "header" => "termination_reason",
+            "permissions" => [
+                "termination_reason_create",
+                "termination_reason_update",
+                "termination_reason_activate",
+                "termination_reason_view",
+                "termination_reason_delete",
             ],
         ],
 

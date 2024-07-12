@@ -3,32 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GetIdRequest;
-use App\Http\Requests\TerminationTypeCreateRequest;
-use App\Http\Requests\TerminationTypeUpdateRequest;
+use App\Http\Requests\TerminationReasonCreateRequest;
+use App\Http\Requests\TerminationReasonUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
-use App\Models\DisabledTerminationType;
-use App\Models\TerminationType;
-use App\Models\User;
+use App\Models\DisabledTerminationReason;
+use App\Models\TerminationReason;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class TerminationTypeController extends Controller
+class TerminationReasonController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil;
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/termination-types",
-     *      operationId="createTerminationType",
-     *      tags={"termination_types"},
+     *      path="/v1.0/termination-reasons",
+     *      operationId="createTerminationReason",
+     *      tags={"termination_reasons"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to store termination type",
-     *      description="This method is to store termination type",
+     *      summary="This method is to store termination reason",
+     *      description="This method is to store termination reason",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -74,13 +73,13 @@ class TerminationTypeController extends Controller
      *     )
      */
 
-    public function createTerminationType(TerminationTypeCreateRequest $request)
+    public function createTerminationReason(TerminationReasonCreateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('termination_type_create')) {
+                if (!$request->user()->hasPermissionTo('termination_reason_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -103,12 +102,12 @@ class TerminationTypeController extends Controller
 
 
 
-                $termination_type =  TerminationType::create($request_data);
+                $termination_reason =  TerminationReason::create($request_data);
 
 
 
 
-                return response($termination_type, 201);
+                return response($termination_reason, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -119,14 +118,14 @@ class TerminationTypeController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/termination-types",
-     *      operationId="updateTerminationType",
-     *      tags={"termination_types"},
+     *      path="/v1.0/termination-reasons",
+     *      operationId="updateTerminationReason",
+     *      tags={"termination_reasons"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update termination type ",
-     *      description="This method is to update termination type",
+     *      summary="This method is to update termination reason ",
+     *      description="This method is to update termination reason",
      *
      *  @OA\RequestBody(
      *         required=true,
@@ -173,13 +172,13 @@ class TerminationTypeController extends Controller
      *     )
      */
 
-    public function updateTerminationType(TerminationTypeUpdateRequest $request)
+    public function updateTerminationReason(TerminationReasonUpdateRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('termination_type_update')) {
+                if (!$request->user()->hasPermissionTo('termination_reason_update')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -188,11 +187,11 @@ class TerminationTypeController extends Controller
 
 
 
-                $termination_type_query_params = [
+                $termination_reason_query_params = [
                     "id" => $request_data["id"],
                 ];
 
-                $termination_type  =  tap(TerminationType::where($termination_type_query_params))->update(
+                $termination_reason  =  tap(TerminationReason::where($termination_reason_query_params))->update(
                     collect($request_data)->only([
                         'name',
                         'description',
@@ -206,7 +205,7 @@ class TerminationTypeController extends Controller
                     // ->with("somthing")
 
                     ->first();
-                if (!$termination_type) {
+                if (!$termination_reason) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
@@ -215,7 +214,7 @@ class TerminationTypeController extends Controller
 
 
 
-                return response($termination_type, 201);
+                return response($termination_reason, 201);
             });
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -225,9 +224,9 @@ class TerminationTypeController extends Controller
     /**
      *
      * @OA\Put(
-     *      path="/v1.0/termination-types/toggle-active",
-     *      operationId="toggleActiveTerminationType",
-     *      tags={"termination_types"},
+     *      path="/v1.0/termination-reasons/toggle-active",
+     *      operationId="toggleActiveTerminationReason",
+     *      tags={"termination_reasons"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -276,23 +275,23 @@ class TerminationTypeController extends Controller
      *     )
      */
 
-    public function toggleActiveTerminationType(GetIdRequest $request)
+    public function toggleActiveTerminationReason(GetIdRequest $request)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('termination_type_activate')) {
+            if (!$request->user()->hasPermissionTo('termination_reason_activate')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $request_data = $request->validated();
 
-            $termination_type =  TerminationType::where([
+            $termination_reason =  TerminationReason::where([
                 "id" => $request_data["id"],
             ])
                 ->first();
-            if (!$termination_type) {
+            if (!$termination_reason) {
 
                 return response()->json([
                     "message" => "no data found"
@@ -303,26 +302,26 @@ class TerminationTypeController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($termination_type->business_id != NULL || $termination_type->is_default != 1)) {
+                    if (($termination_reason->business_id != NULL || $termination_reason->is_default != 1)) {
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
                     } else {
                         $should_update = 1;
                     }
                 } else {
-                    if ($termination_type->business_id != NULL) {
+                    if ($termination_reason->business_id != NULL) {
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
-                    } else if ($termination_type->is_default == 0) {
+                    } else if ($termination_reason->is_default == 0) {
 
-                        if ($termination_type->created_by != auth()->user()->id) {
+                        if ($termination_reason->created_by != auth()->user()->id) {
 
                             return response()->json([
-                                "message" => "You do not have permission to update this termination type due to role restrictions."
+                                "message" => "You do not have permission to update this termination reason due to role restrictions."
                             ], 403);
                         } else {
                             $should_update = 1;
@@ -332,21 +331,21 @@ class TerminationTypeController extends Controller
                     }
                 }
             } else {
-                if ($termination_type->business_id != NULL) {
-                    if (($termination_type->business_id != auth()->user()->business_id)) {
+                if ($termination_reason->business_id != NULL) {
+                    if (($termination_reason->business_id != auth()->user()->business_id)) {
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
                     } else {
                         $should_update = 1;
                     }
                 } else {
-                    if ($termination_type->is_default == 0) {
-                        if ($termination_type->created_by != auth()->user()->created_by) {
+                    if ($termination_reason->is_default == 0) {
+                        if ($termination_reason->created_by != auth()->user()->created_by) {
 
                             return response()->json([
-                                "message" => "You do not have permission to update this termination type due to role restrictions."
+                                "message" => "You do not have permission to update this termination reason due to role restrictions."
                             ], 403);
                         } else {
                             $should_disable = 1;
@@ -358,31 +357,31 @@ class TerminationTypeController extends Controller
             }
 
             if ($should_update) {
-                $termination_type->update([
-                    'is_active' => !$termination_type->is_active
+                $termination_reason->update([
+                    'is_active' => !$termination_reason->is_active
                 ]);
             }
 
             if ($should_disable) {
 
-                $disabled_termination_type =    DisabledTerminationType::where([
-                    'termination_type_id' => $termination_type->id,
+                $disabled_termination_reason =    DisabledTerminationReason::where([
+                    'termination_reason_id' => $termination_reason->id,
                     'business_id' => auth()->user()->business_id,
                     'created_by' => auth()->user()->id,
                 ])->first();
-                if (!$disabled_termination_type) {
-                    DisabledTerminationType::create([
-                        'termination_type_id' => $termination_type->id,
+                if (!$disabled_termination_reason) {
+                    DisabledTerminationReason::create([
+                        'termination_reason_id' => $termination_reason->id,
                         'business_id' => auth()->user()->business_id,
                         'created_by' => auth()->user()->id,
                     ]);
                 } else {
-                    $disabled_termination_type->delete();
+                    $disabled_termination_reason->delete();
                 }
             }
 
 
-            return response()->json(['message' => 'Termination Type status updated successfully'], 200);
+            return response()->json(['message' => 'termination reason status updated successfully'], 200);
         } catch (Exception $e) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
@@ -392,9 +391,9 @@ class TerminationTypeController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/termination-types",
-     *      operationId="getTerminationTypes",
-     *      tags={"termination_types"},
+     *      path="/v1.0/termination-reasons",
+     *      operationId="getTerminationReasons",
+     *      tags={"termination_reasons"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -442,8 +441,8 @@ class TerminationTypeController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get termination types  ",
-     *      description="This method is to get termination types ",
+     *      summary="This method is to get termination reasons  ",
+     *      description="This method is to get termination reasons ",
      *
 
      *      @OA\Response(
@@ -480,11 +479,11 @@ class TerminationTypeController extends Controller
      *     )
      */
 
-    public function getTerminationTypes(Request $request)
+    public function getTerminationReasons(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('termination_type_view')) {
+            if (!$request->user()->hasPermissionTo('termination_reason_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -496,33 +495,33 @@ class TerminationTypeController extends Controller
 
 
 
-            $termination_types = TerminationType::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $termination_reasons = TerminationReason::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('termination_types.business_id', NULL)
-                        ->where('termination_types.is_default', 1)
+                    return $query->where('termination_reasons.business_id', NULL)
+                        ->where('termination_reasons.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('termination_types.is_active', intval($request->is_active));
+                            return $query->where('termination_reasons.is_active', intval($request->is_active));
                         });
                 } else {
                     return $query
 
                         ->where(function ($query) use ($request) {
-                            $query->where('termination_types.business_id', NULL)
-                                ->where('termination_types.is_default', 1)
-                                ->where('termination_types.is_active', 1)
+                            $query->where('termination_reasons.business_id', NULL)
+                                ->where('termination_reasons.is_default', 1)
+                                ->where('termination_reasons.is_active', 1)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     if (intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function ($q) {
-                                            $q->whereIn("disabled_termination_types.created_by", [auth()->user()->id]);
+                                            $q->whereIn("disabled_termination_reason.created_by", [auth()->user()->id]);
                                         });
                                     }
                                 })
                                 ->orWhere(function ($query) use ($request) {
-                                    $query->where('termination_types.business_id', NULL)
-                                        ->where('termination_types.is_default', 0)
-                                        ->where('termination_types.created_by', auth()->user()->id)
+                                    $query->where('termination_reasons.business_id', NULL)
+                                        ->where('termination_reasons.is_default', 0)
+                                        ->where('termination_reasons.created_by', auth()->user()->id)
                                         ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('termination_types.is_active', intval($request->is_active));
+                                            return $query->where('termination_reasons.is_active', intval($request->is_active));
                                         });
                                 });
                         });
@@ -533,40 +532,40 @@ class TerminationTypeController extends Controller
                         ->where(function ($query) use ($request, $created_by) {
 
 
-                            $query->where('termination_types.business_id', NULL)
-                                ->where('termination_types.is_default', 1)
-                                ->where('termination_types.is_active', 1)
+                            $query->where('termination_reasons.business_id', NULL)
+                                ->where('termination_reasons.is_default', 1)
+                                ->where('termination_reasons.is_active', 1)
                                 ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                    $q->whereIn("disabled_termination_types.created_by", [$created_by]);
+                                    $q->whereIn("disabled_termination_reason.created_by", [$created_by]);
                                 })
                                 ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
                                     if (intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                            $q->whereIn("disabled_termination_types.business_id", [auth()->user()->business_id]);
+                                            $q->whereIn("disabled_termination_reason.business_id", [auth()->user()->business_id]);
                                         });
                                     }
                                 })
 
 
                                 ->orWhere(function ($query) use ($request, $created_by) {
-                                    $query->where('termination_types.business_id', NULL)
-                                        ->where('termination_types.is_default', 0)
-                                        ->where('termination_types.created_by', $created_by)
-                                        ->where('termination_types.is_active', 1)
+                                    $query->where('termination_reasons.business_id', NULL)
+                                        ->where('termination_reasons.is_default', 0)
+                                        ->where('termination_reasons.created_by', $created_by)
+                                        ->where('termination_reasons.is_active', 1)
 
                                         ->when(isset($request->is_active), function ($query) use ($request) {
                                             if (intval($request->is_active)) {
                                                 return $query->whereDoesntHave("disabled", function ($q) {
-                                                    $q->whereIn("disabled_termination_types.business_id", [auth()->user()->business_id]);
+                                                    $q->whereIn("disabled_termination_reason.business_id", [auth()->user()->business_id]);
                                                 });
                                             }
                                         });
                                 })
                                 ->orWhere(function ($query) use ($request) {
-                                    $query->where('termination_types.business_id', auth()->user()->business_id)
-                                        ->where('termination_types.is_default', 0)
+                                    $query->where('termination_reasons.business_id', auth()->user()->business_id)
+                                        ->where('termination_reasons.is_default', 0)
                                         ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('termination_types.is_active', intval($request->is_active));
+                                            return $query->where('termination_reasons.is_active', intval($request->is_active));
                                         });;
                                 });
                         });
@@ -574,23 +573,23 @@ class TerminationTypeController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        $query->where("termination_types.name", "like", "%" . $term . "%")
-                            ->orWhere("termination_types.description", "like", "%" . $term . "%");
+                        $query->where("termination_reasons.name", "like", "%" . $term . "%")
+                            ->orWhere("termination_reasons.description", "like", "%" . $term . "%");
                     });
                 })
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('termination_types.created_at', ">=", $request->start_date);
+                    return $query->where('termination_reasons.created_at', ">=", $request->start_date);
                 })
                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('termination_types.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                    return $query->where('termination_reasons.created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                    return $query->orderBy("termination_types.id", $request->order_by);
+                    return $query->orderBy("termination_reasons.id", $request->order_by);
                 }, function ($query) {
-                    return $query->orderBy("termination_types.id", "DESC");
+                    return $query->orderBy("termination_reasons.id", "DESC");
                 })
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
@@ -600,7 +599,7 @@ class TerminationTypeController extends Controller
 
 
 
-            return response()->json($termination_types, 200);
+            return response()->json($termination_reasons, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -610,9 +609,9 @@ class TerminationTypeController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/termination-types/{id}",
-     *      operationId="getTerminationTypeById",
-     *      tags={"termination_types"},
+     *      path="/v1.0/termination-reasons/{id}",
+     *      operationId="getTerminationReasonById",
+     *      tags={"termination_reasons"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -623,8 +622,8 @@ class TerminationTypeController extends Controller
      *         required=true,
      *  example="6"
      *      ),
-     *      summary="This method is to get termination type by id",
-     *      description="This method is to get termination type by id",
+     *      summary="This method is to get termination reason by id",
+     *      description="This method is to get termination reason by id",
      *
 
      *      @OA\Response(
@@ -662,23 +661,23 @@ class TerminationTypeController extends Controller
      */
 
 
-    public function getTerminationTypeById($id, Request $request)
+    public function getTerminationReasonById($id, Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('termination_type_view')) {
+            if (!$request->user()->hasPermissionTo('termination_reason_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            $termination_type =  TerminationType::where([
-                "termination_types.id" => $id,
+            $termination_reason =  TerminationReason::where([
+                "termination_reasons.id" => $id,
             ])
 
                 ->first();
 
-            if (!$termination_type) {
+            if (!$termination_reason) {
 
                 return response()->json([
                     "message" => "no data found"
@@ -688,40 +687,40 @@ class TerminationTypeController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($termination_type->business_id != NULL || $termination_type->is_default != 1)) {
+                    if (($termination_reason->business_id != NULL || $termination_reason->is_default != 1)) {
 
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
                     }
                 } else {
-                    if ($termination_type->business_id != NULL) {
+                    if ($termination_reason->business_id != NULL) {
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
-                    } else if ($termination_type->is_default == 0 && $termination_type->created_by != auth()->user()->id) {
+                    } else if ($termination_reason->is_default == 0 && $termination_reason->created_by != auth()->user()->id) {
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
                     }
                 }
             } else {
-                if ($termination_type->business_id != NULL) {
-                    if (($termination_type->business_id != auth()->user()->business_id)) {
+                if ($termination_reason->business_id != NULL) {
+                    if (($termination_reason->business_id != auth()->user()->business_id)) {
 
                         return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
+                            "message" => "You do not have permission to update this termination reason due to role restrictions."
                         ], 403);
                     }
                 } else {
-                    if ($termination_type->is_default == 0) {
-                        if ($termination_type->created_by != auth()->user()->created_by) {
+                    if ($termination_reason->is_default == 0) {
+                        if ($termination_reason->created_by != auth()->user()->created_by) {
 
                             return response()->json([
-                                "message" => "You do not have permission to update this termination type due to role restrictions."
+                                "message" => "You do not have permission to update this termination reason due to role restrictions."
                             ], 403);
                         }
                     }
@@ -730,7 +729,7 @@ class TerminationTypeController extends Controller
 
 
 
-            return response()->json($termination_type, 200);
+            return response()->json($termination_reason, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -741,9 +740,9 @@ class TerminationTypeController extends Controller
     /**
      *
      *     @OA\Delete(
-     *      path="/v1.0/termination-types/{ids}",
-     *      operationId="deleteTerminationTypesByIds",
-     *      tags={"termination_types"},
+     *      path="/v1.0/termination-reasons/{ids}",
+     *      operationId="deleteTerminationReasonsByIds",
+     *      tags={"termination_reasons"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -754,8 +753,8 @@ class TerminationTypeController extends Controller
      *         required=true,
      *  example="1,2,3"
      *      ),
-     *      summary="This method is to delete termination type by id",
-     *      description="This method is to delete termination type by id",
+     *      summary="This method is to delete termination reason by id",
+     *      description="This method is to delete termination reason by id",
      *
 
      *      @OA\Response(
@@ -792,32 +791,32 @@ class TerminationTypeController extends Controller
      *     )
      */
 
-    public function deleteTerminationTypesByIds(Request $request, $ids)
+    public function deleteTerminationReasonsByIds(Request $request, $ids)
     {
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('termination_type_delete')) {
+            if (!$request->user()->hasPermissionTo('termination_reason_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
             $idsArray = explode(',', $ids);
-            $existingIds = TerminationType::whereIn('id', $idsArray)
+            $existingIds = TerminationReason::whereIn('id', $idsArray)
                 ->when(empty($request->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
-                        return $query->where('termination_types.business_id', NULL)
-                            ->where('termination_types.is_default', 1);
+                        return $query->where('termination_reasons.business_id', NULL)
+                            ->where('termination_reasons.is_default', 1);
                     } else {
-                        return $query->where('termination_types.business_id', NULL)
-                            ->where('termination_types.is_default', 0)
-                            ->where('termination_types.created_by', $request->user()->id);
+                        return $query->where('termination_reasons.business_id', NULL)
+                            ->where('termination_reasons.is_default', 0)
+                            ->where('termination_reasons.created_by', $request->user()->id);
                     }
                 })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('termination_types.business_id', $request->user()->business_id)
-                        ->where('termination_types.is_default', 0);
+                    return $query->where('termination_reasons.business_id', $request->user()->business_id)
+                        ->where('termination_reasons.is_default', 0);
                 })
                 ->select('id')
                 ->get()
@@ -833,21 +832,21 @@ class TerminationTypeController extends Controller
             }
 
 
-            $conflictingUsers = User::whereIn("termination_type_id", $existingIds)->get([
+            $conflictingUsers = User::whereIn("termination_reason_id", $existingIds)->get([
                 'id', 'first_Name',
                 'last_Name',
             ]);
 
             if ($conflictingUsers->isNotEmpty()) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified termination types",
+                    "message" => "Some users are associated with the specified termination reasons",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
 
 
 
-            TerminationType::destroy($existingIds);
+            TerminationReason::destroy($existingIds);
 
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);

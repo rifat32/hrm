@@ -63,17 +63,39 @@ class Business extends Model
 
         if ($user && $user->business) {
             $business = $user->business;
-
+            if (!$business->is_active) {
+                return 0;
+            }
             if ($business->is_self_registered_businesses) {
-                $latest_subscription = BusinessSubscription::where('business_id', $business->id)
-                    ->where('service_plan_id', $business->service_plan_id)
-                    ->latest() // Get the latest subscription
-                    ->first();
+
+                if(!empty($business->trail_end_date)) {
+                    if(Carbon::parse($business->trail_end_date)->isPast() && !Carbon::parse($business->trail_end_date)->isToday()){
+                        $latest_subscription = BusinessSubscription::where('business_id', $business->id)
+                        ->where('service_plan_id', $business->service_plan_id)
+                        ->latest() // Get the latest subscription
+                        ->first();
 
 
-                // Check if there's no subscription
-                if (!$latest_subscription || Carbon::parse($latest_subscription->end_date)->isPast() || Carbon::parse($latest_subscription->start_date)->isFuture()) {
-                    return 0;
+// Check if there's no subscription
+if (!$latest_subscription) {
+return 0;
+}
+
+// Check if the subscription has not yet started
+if (Carbon::parse($latest_subscription->start_date)->isFuture()) {
+return 0;
+}
+
+
+// Check if the subscription has expired
+if(!empty($latest_subscription->end_date)) {
+if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($business->trail_end_date)->isToday()) {
+    return 0;
+}
+}
+
+                    }
+
                 }
             }
         }

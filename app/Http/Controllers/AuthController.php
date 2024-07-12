@@ -1344,7 +1344,7 @@ public function getUser (Request $request) {
         'name' => $role->name,
         'permissions' => $role->permissions->pluck('name'),
     ]);
-
+    $user->permissions = $user->permissions->pluck("name");
             // Extracting only the required data
 $responseData = [
     'id' => $user->id,

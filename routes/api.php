@@ -54,6 +54,7 @@ use App\Http\Controllers\SocialSiteController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TerminationReasonController;
 use App\Http\Controllers\TerminationTypeController;
 use App\Http\Controllers\UserAddressHistoryController;
 use App\Http\Controllers\UserAssetController;
@@ -1080,7 +1081,7 @@ Route::delete('/v1.0/designations/{ids}', [DesignationController::class, "delete
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// designation  management section
+// termination types  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/termination-types', [TerminationTypeController::class, "createTerminationType"]);
@@ -1093,6 +1094,24 @@ Route::delete('/v1.0/termination-types/{ids}', [TerminationTypeController::class
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end designation management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// termination reasons  management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/termination-reasons', [TerminationReasonController::class, "createTerminationReason"]);
+Route::put('/v1.0/termination-reasons', [TerminationReasonController::class, "updateTerminationReason"]);
+Route::put('/v1.0/termination-reasons/toggle-active', [TerminationReasonController::class, "toggleActiveTerminationReason"]);
+Route::get('/v1.0/termination-reasons', [TerminationReasonController::class, "getTerminationReasons"]);
+Route::get('/v1.0/termination-reasons/{id}', [TerminationReasonController::class, "getTerminationReasonById"]);
+Route::delete('/v1.0/termination-reasons/{ids}', [TerminationReasonController::class, "deleteTerminationReasonsByIds"]);
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end designation management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
 
 
 

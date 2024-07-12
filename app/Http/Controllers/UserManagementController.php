@@ -5252,14 +5252,17 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                   WHERE businesses.created_by = users.id
                   AND businesses.is_active = 1
                   AND (
-                      !businesses.is_self_registered_businesses OR
+                    businesses.is_self_registered_businesses = 0
+                      OR
                       EXISTS (
                         SELECT 1 FROM business_subscriptions
                         WHERE business_subscriptions.business_id = businesses.id
                         AND (
-                            business_subscriptions.end_date > NOW()
+                            (
+                                business_subscriptions.end_date >= NOW()
                             AND
                             business_subscriptions.start_date <= NOW()
+                            )
                             OR
                             businesses.trail_end_date >= NOW()  -- Check if trail end date is in the future or today
                         )
