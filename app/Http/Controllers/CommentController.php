@@ -113,9 +113,17 @@ class CommentController extends Controller
 
                 $comment_text = $request_data["description"];
 
+                $pattern = '/@\[.*?\]\((.*?)\)/';
+                // $pattern = '/@(\w+)/';
                 // Parse comment for mentions
-                preg_match_all('/@(\w+)/', $comment_text, $mentions);
-                $mentioned_users = $mentions[1];
+                preg_match_all($pattern, $comment_text, $mentions);
+
+
+
+                $mentioned_users = array_map('trim', $mentions[1]); ;
+
+
+
                 $mentioned_users = User::where('business_id', $request->user()->business_id)
                     ->whereIn('user_name', $mentioned_users)
                     ->get();
@@ -272,6 +280,30 @@ class CommentController extends Controller
                     $comment->hidden_note = $request_data["hidden_note"];
                     $comment->save();
                 }
+
+                $comment_text = $comment->description;
+                $pattern = '/@\[.*?\]\((.*?)\)/';
+                // $pattern = '/@(\w+)/';
+                // Parse comment for mentions
+                preg_match_all($pattern, $comment_text, $mentions);
+
+
+
+                $mentioned_users = array_map('trim', $mentions[1]); ;
+
+
+                $mentioned_users = User::where('business_id', $request->user()->business_id)
+                    ->whereIn('user_name', $mentioned_users)
+                    ->get();
+
+                // Store mentions in user_note_mentions table using createMany
+                $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+                    return [
+                        'user_id' => $mentioned_user->id,
+                    ];
+                });
+
+                $comment->mentions()->sync($mentions_data);
 DB::commit();
                 return response($comment, 201);
 
@@ -401,13 +433,20 @@ DB::commit();
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
-            $comments = Comment::with("assigned_by", "assignees")
 
-                ->where(
-                    [
-                        "business_id" => $business_id
-                    ]
+            $comments = Comment::with([
+                "creator" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+
+
+
+            ])
+
+                ->whereHas("creator", function($query) {
+                   $query->where("users.business_id", auth()->user()->business_id);
+                }
                 )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {

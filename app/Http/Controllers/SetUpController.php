@@ -28,6 +28,8 @@ use App\Models\SettingPaymentDate;
 use App\Models\SettingPayrun;
 use App\Models\SocialSite;
 use App\Models\TaskCategory;
+use App\Models\TerminationReason;
+use App\Models\TerminationType;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
@@ -364,6 +366,109 @@ return "swagger generated";
                 "created_by" => $admin->id
             ]);
         }
+
+
+
+        $default_termination_types = [
+            [
+                'name' => "Voluntary Resignation",
+                'description' => "Employee voluntarily leaves the job.",
+            ],
+            [
+                'name' => "Involuntary Termination",
+                'description' => "Employee is terminated by the employer.",
+            ],
+            [
+                'name' => "Retirement",
+                'description' => "Employee retires from their position.",
+            ],
+            [
+                'name' => "End of Contract",
+                'description' => "Employee's contract comes to an end.",
+            ],
+            [
+                'name' => "Layoff",
+                'description' => "Employee is laid off due to company downsizing.",
+            ],
+            [
+                'name' => "Other",
+                'description' => "Other reasons for termination.",
+            ],
+        ];
+
+        foreach ($default_termination_types as $data) {
+            TerminationType::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'is_active' => 1,
+                'is_default' => 1,
+                'business_id' => NULL,
+                'created_by' => $admin->id,
+            ]);
+        }
+
+
+
+        $default_leave_reasons = [
+            [
+                'name' => "New Job Opportunity",
+                'description' => "Left for a new job opportunity.",
+            ],
+            [
+                'name' => "Career Change",
+                'description' => "Left to pursue a different career.",
+            ],
+            [
+                'name' => "Personal Reasons",
+                'description' => "Left due to personal reasons.",
+            ],
+            [
+                'name' => "Health Reasons",
+                'description' => "Left due to health issues.",
+            ],
+            [
+                'name' => "Relocation",
+                'description' => "Left due to relocation.",
+            ],
+            [
+                'name' => "Retirement",
+                'description' => "Left due to retirement.",
+            ],
+            [
+                'name' => "Dissatisfaction with Job",
+                'description' => "Left due to dissatisfaction with the job.",
+            ],
+            [
+                'name' => "Dissatisfaction with Management",
+                'description' => "Left due to dissatisfaction with management.",
+            ],
+            [
+                'name' => "Company Downsizing",
+                'description' => "Left due to company downsizing.",
+            ],
+            [
+                'name' => "Terminated for Cause",
+                'description' => "Terminated for cause.",
+            ],
+            [
+                'name' => "Other",
+                'description' => "Other reasons for leaving.",
+            ],
+        ];
+
+        foreach ($default_leave_reasons as $data) {
+            TerminationReason::create([
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'is_active' => 1,
+                'is_default' => 1,
+                'business_id' => NULL,
+                'created_by' => $admin->id,
+            ]);
+        }
+
+
+
         $default_job_type = [
             [
                 'name' => "Full Time Employee",

@@ -4524,6 +4524,8 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                  "users.middle_Name",
                  "users.last_Name",
                  "users.joining_date",
+                 "users.user_name",
+
              );
              $users = $this->retrieveData($usersQuery, "users.first_Name");
 

@@ -17,6 +17,11 @@ class TerminationType extends Model
         "created_by"
     ];
 
+    public function terminations()
+    {
+        return $this->hasMany(Termination::class);
+    }
+
     public function disabled()
     {
         return $this->hasMany(DisabledTerminationType::class, 'termination_type_id', 'id');

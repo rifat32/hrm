@@ -86,6 +86,25 @@ class User extends Authenticatable
          'is_active'
     ];
 
+// Relationships
+public function accessRevocations()
+{
+    return $this->hasMany(AccessRevocation::class);
+}
+
+    public function terminations()
+    {
+        return $this->hasMany(Termination::class);
+    }
+
+ // Relationships
+ public function exitInterviews()
+ {
+     return $this->hasMany(ExitInterview::class);
+ }
+
+
+
   public function getHasThisProjectAttribute($value) {
     $request = request();
     // You can now use $currentRequest as the request object

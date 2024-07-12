@@ -17,6 +17,11 @@ class TerminationReason extends Model
         "created_by"
     ];
 
+    public function terminations()
+    {
+        return $this->hasMany(Termination::class);
+    }
+
     public function disabled()
     {
         return $this->hasMany(DisabledTerminationReason::class, 'termination_reason_id', 'id');
