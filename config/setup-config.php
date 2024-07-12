@@ -77,11 +77,15 @@ return [
                 "job_platform_view",
                 // "job_platform_delete",
 
+
                 "task_category_create",
                 "task_category_update",
-                // "task_category_activate",
+                "task_category_activate",
                 "task_category_view",
-                // "task_category_delete",
+                "task_category_delete",
+
+
+
 
                 "social_site_create",
                 "social_site_update",
@@ -375,11 +379,11 @@ return [
                 "job_platform_view",
                 // "job_platform_delete",
 
-                // "task_category_create",
+                "task_category_create",
                 "task_category_update",
                 "task_category_activate",
                 "task_category_view",
-                // "task_category_delete",
+               "task_category_delete",
 
                 "project_create",
                 "project_update",

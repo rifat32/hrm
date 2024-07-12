@@ -29,10 +29,11 @@ class TaskCategoryCreateRequest extends FormRequest
             'name' => [
                 "required",
                 'string',
-                new ValidateTaskCategoryName(NULL)
+                // new ValidateTaskCategoryName(NULL)
             ],
             'description' => 'nullable|string',
             'color' => 'nullable|string',
+            'project_id' => 'required|numeric|exists:projects,id',
         ];
 
 return $rules;

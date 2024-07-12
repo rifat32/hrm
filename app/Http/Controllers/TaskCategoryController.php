@@ -37,7 +37,8 @@ class TaskCategoryController extends Controller
      *         @OA\JsonContent(
  * @OA\Property(property="name", type="string", format="string", example="tttttt"),
  * * @OA\Property(property="color", type="string", format="string", example="tttttt"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+ * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
+ *  *  * @OA\Property(property="project_id", type="string", format="string", example="erg ear ga&nbsp;"),
  *
  *
      *
@@ -457,6 +458,13 @@ class TaskCategoryController extends Controller
      * required=true,
      * example="1"
      * ),
+     *     *   *    *      * *  @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="1"
+     * ),
 
 
      *      * *  @OA\Parameter(
@@ -541,90 +549,94 @@ class TaskCategoryController extends Controller
                 $created_by = auth()->user()->business->created_by;
             }
 
-            $task_categories = TaskCategory::with("tasks")->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('task_categories.business_id', NULL)
-                        ->where('task_categories.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('task_categories.is_active', intval($request->is_active));
-                        });
-                } else {
-                    return $query
-
-                    ->where(function($query) use($request) {
-                        $query->where('task_categories.business_id', NULL)
-                        ->where('task_categories.is_default', 1)
-                        ->where('task_categories.is_active', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(intval($request->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_task_categories.created_by", [auth()->user()->id]);
-                                });
-                            }
-
-                        })
-                        ->orWhere(function ($query) use ($request) {
-                            $query->where('task_categories.business_id', NULL)
-                                ->where('task_categories.is_default', 0)
-                                ->where('task_categories.created_by', auth()->user()->id)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('task_categories.is_active', intval($request->is_active));
-                                });
-                        });
-
-                    });
-                }
-            })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query
-                    ->where(function($query) use($request, $created_by) {
+            $task_categories = TaskCategory::with("tasks")
+            ->where("task_categories.business_id", auth()->user()->business_id)
 
 
-                        $query->where('task_categories.business_id', NULL)
-                        ->where('task_categories.is_default', 1)
-                        ->where('task_categories.is_active', 1)
-                        ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_task_categories.created_by", [$created_by]);
-                        })
-                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(intval($request->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
-                                });
-                            }
+            // ->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            //     if (auth()->user()->hasRole('superadmin')) {
+            //         return $query->where('task_categories.business_id', NULL)
+            //             ->where('task_categories.is_default', 1)
+            //             ->when(isset($request->is_active), function ($query) use ($request) {
+            //                 return $query->where('task_categories.is_active', intval($request->is_active));
+            //             });
+            //     } else {
+            //         return $query
 
-                        })
+            //         ->where(function($query) use($request) {
+            //             $query->where('task_categories.business_id', NULL)
+            //             ->where('task_categories.is_default', 1)
+            //             ->where('task_categories.is_active', 1)
+            //             ->when(isset($request->is_active), function ($query) use ($request) {
+            //                 if(intval($request->is_active)) {
+            //                     return $query->whereDoesntHave("disabled", function($q) {
+            //                         $q->whereIn("disabled_task_categories.created_by", [auth()->user()->id]);
+            //                     });
+            //                 }
 
+            //             })
+            //             ->orWhere(function ($query) use ($request) {
+            //                 $query->where('task_categories.business_id', NULL)
+            //                     ->where('task_categories.is_default', 0)
+            //                     ->where('task_categories.created_by', auth()->user()->id)
+            //                     ->when(isset($request->is_active), function ($query) use ($request) {
+            //                         return $query->where('task_categories.is_active', intval($request->is_active));
+            //                     });
+            //             });
 
-                        ->orWhere(function ($query) use($request, $created_by){
-                            $query->where('task_categories.business_id', NULL)
-                                ->where('task_categories.is_default', 0)
-                                ->where('task_categories.created_by', $created_by)
-                                ->where('task_categories.is_active', 1)
-
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(intval($request->is_active)) {
-                                        return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
-                                        });
-                                    }
-
-                                })
-
-
-                                ;
-                        })
-                        ->orWhere(function ($query) use($request) {
-                            $query->where('task_categories.business_id', auth()->user()->business_id)
-                                ->where('task_categories.is_default', 0)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('task_categories.is_active', intval($request->is_active));
-                                });;
-                        });
-                    });
+            //         });
+            //     }
+            // })
+            //     ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            //         return $query
+            //         ->where(function($query) use($request, $created_by) {
 
 
-                })
+            //             $query->where('task_categories.business_id', NULL)
+            //             ->where('task_categories.is_default', 1)
+            //             ->where('task_categories.is_active', 1)
+            //             ->whereDoesntHave("disabled", function($q) use($created_by) {
+            //                 $q->whereIn("disabled_task_categories.created_by", [$created_by]);
+            //             })
+            //             ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+            //                 if(intval($request->is_active)) {
+            //                     return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+            //                         $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
+            //                     });
+            //                 }
+
+            //             })
+
+
+            //             ->orWhere(function ($query) use($request, $created_by){
+            //                 $query->where('task_categories.business_id', NULL)
+            //                     ->where('task_categories.is_default', 0)
+            //                     ->where('task_categories.created_by', $created_by)
+            //                     ->where('task_categories.is_active', 1)
+
+            //                     ->when(isset($request->is_active), function ($query) use ($request) {
+            //                         if(intval($request->is_active)) {
+            //                             return $query->whereDoesntHave("disabled", function($q) {
+            //                                 $q->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
+            //                             });
+            //                         }
+
+            //                     })
+
+
+            //                     ;
+            //             })
+            //             ->orWhere(function ($query) use($request) {
+            //                 $query->where('task_categories.business_id', auth()->user()->business_id)
+            //                     ->where('task_categories.is_default', 0)
+            //                     ->when(isset($request->is_active), function ($query) use ($request) {
+            //                         return $query->where('task_categories.is_active', intval($request->is_active));
+            //                     });;
+            //             });
+            //         });
+
+
+            //     })
 
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -647,11 +659,17 @@ class TaskCategoryController extends Controller
                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
+
+                
                 ->when(!empty($request->task_id), function ($query) use ($request) {
                     return $query->whereHas('tasks',function($query) use($request) {
                         $query->where('tasks.id',$request->task_id);
                     });
                 })
+                ->when(!empty($request->project_id), function ($query) use ($request) {
+                    $query->where('task_categories.project_id',$request->project_id);
+                })
+
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('task_categories.created_at', ">=", $request->start_date);
                 })
@@ -1203,8 +1221,8 @@ class TaskCategoryController extends Controller
 /**
      *
      * @OA\Get(
-     *      path="/v1.0/task-categories-by-project-id/{project_id}",
-     *      operationId="getTaskCategoryByProjectId",
+     *      path="/v2.0/task-categories-by-project-id/{project_id}",
+     *      operationId="getTaskCategoryByProjectIdV2",
      *      tags={"task_categories"},
      *       security={
      *           {"bearerAuth": {}}

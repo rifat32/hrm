@@ -71,7 +71,7 @@ class TaskCategoryUpdateRequest extends FormRequest
             'name' => [
                 "required",
                 'string',
-                new ValidateTaskCategoryName($this->id)
+                // new ValidateTaskCategoryName($this->id)
             ],
 
             'description' => 'nullable|string',

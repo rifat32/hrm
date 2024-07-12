@@ -5130,7 +5130,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *
      * @OA\Get(
      *      path="/v7.0/users",
-     *      operationId="getUsersV5",
+     *      operationId="getUsersV7",
      *      tags={"user_management"},
      *       security={
      *           {"bearerAuth": {}}
