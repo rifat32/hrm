@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\TaskCategoryCreateRequest;
+use App\Http\Requests\TaskCategoryPositionUpdateRequest;
 use App\Http\Requests\TaskCategoryUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
@@ -129,8 +130,7 @@ class TaskCategoryController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-
-    /**
+  /**
      *
      * @OA\Put(
      *      path="/v1.0/task-categories",
@@ -190,7 +190,133 @@ class TaskCategoryController extends Controller
      *     )
      */
 
-    public function updateTaskCategory(TaskCategoryUpdateRequest $request)
+     public function updateTaskCategory(TaskCategoryUpdateRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("task_management");
+
+                 if (!$request->user()->hasPermissionTo('task_category_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 // $business_id =  $request->user()->business_id;
+                 $request_data = $request->validated();
+
+
+
+                 $task_category_query_params = [
+                     "id" => $request_data["id"],
+                     // "business_id" => $business_id
+                 ];
+
+
+                 // if ($request->user()->hasRole('superadmin')) {
+                 //     if(!($task_category_prev->business_id == NULL && $task_category_prev->is_default == 1)) {
+                 //         return response()->json([
+                 //             "message" => "You do not have permission to update this task category due to role restrictions."
+                 //         ], 403);
+                 //     }
+
+                 // }
+                 // else {
+                 //     if(!($task_category_prev->business_id == $request->user()->business_id)) {
+                 //         return response()->json([
+                 //             "message" => "You do not have permission to update this task category due to role restrictions."
+                 //         ], 403);
+                 //     }
+                 // }
+                 $task_category  =  tap(TaskCategory::where($task_category_query_params))->update(
+                     collect($request_data)->only([
+                         'name',
+                         "color",
+                         'description',
+                         'order_no'
+                          // "is_default",
+                         // "is_active",
+                         // "business_id",
+
+                     ])->toArray()
+                 )
+                     // ->with("somthing")
+
+                     ->first();
+                 if (!$task_category) {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+                 DB::commit();
+                 return response($task_category, 201);
+
+         } catch (Exception $e) {
+             DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/task-categories/position",
+     *      operationId="updateTaskCategoryPosition",
+     *      tags={"task_categories"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update task category ",
+     *      description="This method is to update task category",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+ * @OA\Property(property="project_id", type="string", format="string", example="tttttt"),
+
+ *
+
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function updateTaskCategoryPosition(TaskCategoryPositionUpdateRequest $request)
     {
 
         DB::beginTransaction();
@@ -214,30 +340,22 @@ class TaskCategoryController extends Controller
                 ];
 
 
-                // if ($request->user()->hasRole('superadmin')) {
-                //     if(!($task_category_prev->business_id == NULL && $task_category_prev->is_default == 1)) {
-                //         return response()->json([
-                //             "message" => "You do not have permission to update this task category due to role restrictions."
-                //         ], 403);
-                //     }
+                $task_category_prev = Task::where($task_category_query_params)
+                     ->first();
 
-                // }
-                // else {
-                //     if(!($task_category_prev->business_id == $request->user()->business_id)) {
-                //         return response()->json([
-                //             "message" => "You do not have permission to update this task category due to role restrictions."
-                //         ], 403);
-                //     }
-                // }
+
+                 if (!$task_category_prev) {
+                     return response()->json([
+                         "message" => "no task category found"
+                     ], 404);
+                 }
+
+
+
                 $task_category  =  tap(TaskCategory::where($task_category_query_params))->update(
                     collect($request_data)->only([
-                        'name',
-                        "color",
-                        'description',
-                        'order_no'
-                         // "is_default",
-                        // "is_active",
-                        // "business_id",
+                        'project_id',
+
 
                     ])->toArray()
                 )
@@ -249,6 +367,27 @@ class TaskCategoryController extends Controller
                         "message" => "something went wrong."
                     ], 500);
                 }
+
+
+                $order_no_overlapped = Task::where([
+                    'project_id' => $task_category->project_id,
+                    'order_no' => $task_category->order_no,
+                ])
+                ->whereNotIn('id', [$task_category->id])
+                ->exists();
+
+                if ($order_no_overlapped) {
+                    Task::where([
+                        'project_id' => $task_category->project_id,
+                    ])
+                    ->where('order_no', '>=', $task_category->order_no)
+                    ->whereNotIn('id', [$task_category->id])
+                    ->increment('order_no');
+                }
+
+
+
+
 
                 DB::commit();
                 return response($task_category, 201);
@@ -660,7 +799,7 @@ class TaskCategoryController extends Controller
                 //        return $query->where('product_category_id', $request->product_category_id);
                 //    })
 
-                
+
                 ->when(!empty($request->task_id), function ($query) use ($request) {
                     return $query->whereHas('tasks',function($query) use($request) {
                         $query->where('tasks.id',$request->task_id);
