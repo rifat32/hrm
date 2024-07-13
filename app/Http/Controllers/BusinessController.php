@@ -25,6 +25,7 @@ use App\Mail\SendPassword;
 
 use App\Models\Business;
 use App\Models\BusinessPensionHistory;
+use App\Models\BusinessSubscription;
 use App\Models\BusinessTime;
 use App\Models\User;
 use App\Models\WorkShift;
@@ -2417,6 +2418,127 @@ class BusinessController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+   /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/business-subscriptions/{id}",
+     *      operationId="getSubscriptionsByBusinessId",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *      *              @OA\Parameter(
+     *         name="per_page",
+     *         in="path",
+     *         description="per_page",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *      summary="This method is to get subscriptions by id",
+     *      description="This method is to get subscriptions by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getSubscriptionsByBusinessId($id, Request $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('business_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $business = $this->businessOwnerCheck($id);
+
+             $subscriptionsQuery = BusinessSubscription::where([
+                "business_id" => $business->id
+             ]);
+
+
+             $subscriptions = $this->retrieveData($subscriptionsQuery,"business_subscription.id");
+
+
+             $last_subscription = $subscriptionsQuery->latest()->first();
+
+
+             $subscription_end_date = Carbon::parse($last_subscription->end_date);
+
+             $upcoming_subscription_start_date = Carbon::parse($subscription_end_date->addDays($last_subscription->service_plan->duration_months));
+
+
+
+             $upcoming_subscription = [
+                'service_plan_id' => $$last_subscription->service_plan_id,
+                'start_date' => $upcoming_subscription_start_date,  // Start date of the subscription
+                'end_date' => $upcoming_subscription_start_date->addDays($last_subscription->service_plan->duration_months),  // End date based on plan duration
+                'amount' => $last_subscription->amount,
+             ];
+
+
+
+             $responseData = [
+                "subscriptions" => $subscriptions,
+                "upcoming_subscription" => $upcoming_subscription
+             ];
+
+
+
+
+
+
+             return response()->json($responseData, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
 
        /**
      *
