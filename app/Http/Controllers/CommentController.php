@@ -686,7 +686,6 @@ DB::commit();
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
-
             return $this->sendError($e, 500, $request);
         }
     }

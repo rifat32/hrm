@@ -261,10 +261,32 @@ class AuthController extends Controller
 
 
 
-            if(!$user->is_active) {
+            if(empty($user->is_active)) {
 
                 return response(['message' => 'User not active'], 403);
             }
+
+            $accessRevocation = $user->accessRevocation;
+
+            if(!empty($accessRevocation)) {
+
+                if(!empty($accessRevocation->system_access_revoked_date)) {
+                    if(Carbon::parse($accessRevocation->system_access_revoked_date)) {
+      return response(['message' => 'User access revoked active'], 403);
+                    }
+                }
+
+                if(!empty($accessRevocation->email_access_revoked)) {
+                    return response(['message' => 'User access revoked active'], 403);
+                }
+
+
+
+            }
+
+
+
+
 
             if($user->business_id) {
                  $business = Business::where([
@@ -460,10 +482,31 @@ $datediff = $now - $user_created_date;
 
 
 
-            if(!$user->is_active) {
 
+            if(empty($user->is_active)) {
                 return response(['message' => 'User not active'], 403);
             }
+
+             $accessRevocation = $user->accessRevocation;
+
+            if(!empty($accessRevocation)) {
+
+                if(!empty($accessRevocation->system_access_revoked_date)) {
+                    if(Carbon::parse($accessRevocation->system_access_revoked_date)) {
+      return response(['message' => 'User access revoked active'], 403);
+                    }
+                }
+
+                if(!empty($accessRevocation->email_access_revoked)) {
+                    return response(['message' => 'User access revoked active'], 403);
+                }
+
+
+
+            }
+
+
+
 
             if($user->business_id) {
                  $business = Business::where([

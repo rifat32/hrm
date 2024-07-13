@@ -15,7 +15,11 @@ class CreateTerminationsTable extends Migration
     {
         Schema::create('terminations', function (Blueprint $table) {
             $table->id();
+
+
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+
+
             $table->foreignId('termination_type_id')->constrained('termination_types')->onDelete('cascade');
             $table->foreignId('termination_reason_id')->constrained('termination_reasons')->onDelete('cascade');
             $table->date('date_of_termination');

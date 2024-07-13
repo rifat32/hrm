@@ -87,9 +87,9 @@ class User extends Authenticatable
     ];
 
 // Relationships
-public function accessRevocations()
+public function accessRevocation()
 {
-    return $this->hasMany(AccessRevocation::class);
+    return $this->hasOne(AccessRevocation::class);
 }
 
     public function terminations()

@@ -7,6 +7,10 @@ return [
         [
             "role" => "superadmin",
             "permissions" => [
+
+
+
+
                 "global_business_background_image_create",
                 "global_business_background_image_view",
 
@@ -49,6 +53,22 @@ return [
                 "business_update",
                 "business_view",
                 "business_delete",
+
+
+                "task_category_create",
+                "task_category_update",
+                "task_category_activate",
+                "task_category_view",
+                "task_category_delete",
+
+
+
+
+
+
+
+
+
 
                 "template_create",
                 "template_update",
@@ -184,6 +204,21 @@ return [
                 "termination_type_update",
                 "termination_type_view",
                 // "termination_type_delete",
+
+
+                "task_category_create",
+                "task_category_update",
+                "task_category_activate",
+                "task_category_view",
+                "task_category_delete",
+
+
+
+
+
+
+
+
 
 
                 "termination_reason_create",
@@ -398,7 +433,8 @@ return [
                 "task_category_update",
                 "task_category_activate",
                 "task_category_view",
-               "task_category_delete",
+                "task_category_delete",
+
 
                 "project_create",
                 "project_update",

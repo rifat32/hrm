@@ -327,6 +327,17 @@ ON DELETE CASCADE;
 
 49. import termination_types, disabled_termination_types, termination_reasons, disabled_termination_reasons table, terminations, exit_interviews, access_revocations
 
+50. -- Delete existing task categories created by the admin
+DELETE FROM task_categories WHERE created_by = 1;
+
+-- Insert new task categories
+INSERT INTO task_categories (name, description, is_active, is_default, business_id, order_no, created_by) VALUES
+('To Do', 'Tasks that are yet to be started.', 1, 1, NULL, 0, 1),
+('In Progress', 'Tasks that are currently being worked on.', 1, 1, NULL, 1, 1),
+('Resolved', 'Tasks that have been completed.', 1, 1, NULL, 2, 1),
+('Closed', 'Tasks that have been completed and formally closed.', 1, 1, NULL, 3, 1);
+
+
 
 
 hr compliance -> 46

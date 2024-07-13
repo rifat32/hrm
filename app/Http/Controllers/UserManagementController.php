@@ -22,6 +22,7 @@ use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Requests\SingleFileUploadRequest;
 use App\Http\Requests\UserCreateRecruitmentProcessRequest;
 use App\Http\Requests\UserCreateV2Request;
+use App\Http\Requests\UserExitRequest;
 use App\Http\Requests\UserPasswordUpdateRequest;
 use App\Http\Requests\UserStoreDetailsRequest;
 use App\Http\Requests\UserUpdateAddressRequest;
@@ -44,15 +45,17 @@ use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Http\Utils\UserDetailsUtil;
 use App\Mail\SendOriginalPassword;
+use App\Models\AccessRevocation;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\EmployeeAddressHistory;
+use App\Models\ExitInterview;
 use App\Models\LeaveRecord;
 use App\Models\Role;
-
+use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserAssetHistory;
 use Carbon\Carbon;
@@ -355,13 +358,6 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *  *    "current_certificate_status": "pending",
      * *  *    "is_sponsorship_withdrawn": 1
      * }),
-     *
-     * *
-     * *
-     * *
-     * *
-     * *
-     * *
      *
      *
      *       @OA\Property(property="visa_details", type="string", format="array", example={
@@ -973,6 +969,168 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
              return $this->sendError($e, 500, $request);
          }
      }
+
+
+   /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/exit",
+     *      operationId="exitUser",
+     *      tags={"user_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to exit user",
+     *      description="This method is to exit user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+  *     type="object",
+ *     @OA\Property(property="id", type="string", format="number", example="1"),
+ *     @OA\Property(
+ *         property="termination",
+ *         type="object",
+ *         @OA\Property(property="termination_type_id", type="integer", format="int64", example="1"),
+ *         @OA\Property(property="termination_reason_id", type="integer", format="int64", example="2"),
+ *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
+ *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
+ *     ),
+ *     @OA\Property(
+ *         property="exit_interview",
+ *         type="object",
+ *         @OA\Property(property="exit_interview_conducted", type="boolean", example=true),
+ *         @OA\Property(property="date_of_exit_interview", type="string", format="date", example="2024-07-10"),
+ *         @OA\Property(property="interviewer_name", type="string", example="John Doe"),
+ *         @OA\Property(property="key_feedback_points", type="string", example="Some key feedback points."),
+ *         @OA\Property(property="assets_returned", type="boolean", example=true),
+ *         @OA\Property(
+ *             property="attachments",
+ *             type="array",
+ *             @OA\Items(type="string", example="attachment1.jpg")
+ *         ),
+ *     ),
+ *     @OA\Property(
+ *         property="access_revocations",
+ *         type="object",
+ *         @OA\Property(property="email_access_revoked", type="boolean", example=true),
+ *         @OA\Property(property="system_access_revoked_date", type="string", format="date", example="2024-07-12"),
+ *     )
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function exitUser(UserExitRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+
+             $userQueryTerms = [
+                 "id" => $request_data["id"],
+             ];
+
+
+             $user = User::where($userQueryTerms)->first();
+             if (empty($user)) {
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
+
+
+             $request_data["termination"]["joining_date"] = !empty($user->joining_date)?$user->joining_date:$request_data["date_of_termination"]["joining_date"] ;
+
+
+
+ Termination::create($request_data["termination"]);
+ExitInterview::create($request_data["exit_interview"]);
+
+if(empty($user->accessRevocation)) {
+    AccessRevocation::create($request_data["access_revocation"]);
+} else {
+    $user->accessRevocation()->update(collect($request_data["access_revocation"])->only(
+        "email_access_revoked",
+        "system_access_revoked_date"
+        )->toArray());
+}
+
+
+
+
+
+
+
+
+             return response($user, 201);
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
     /**
      *
      * @OA\Put(

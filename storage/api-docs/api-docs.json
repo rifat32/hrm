@@ -38326,6 +38326,175 @@
                 ]
             }
         },
+        "/v1.0/users/exit": {
+            "put": {
+                "tags": [
+                    "user_management"
+                ],
+                "summary": "This method is to exit user",
+                "description": "This method is to exit user",
+                "operationId": "exitUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "first_Name",
+                                    "last_Name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "address_line_1",
+                                    "address_line_2",
+                                    "country",
+                                    "city",
+                                    "postcode",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "termination": {
+                                        "properties": {
+                                            "termination_type_id": {
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "example": "1"
+                                            },
+                                            "termination_reason_id": {
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "example": "2"
+                                            },
+                                            "date_of_termination": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2024-07-13"
+                                            },
+                                            "joining_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2022-01-01"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "exit_interview": {
+                                        "properties": {
+                                            "exit_interview_conducted": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "date_of_exit_interview": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2024-07-10"
+                                            },
+                                            "interviewer_name": {
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "key_feedback_points": {
+                                                "type": "string",
+                                                "example": "Some key feedback points."
+                                            },
+                                            "assets_returned": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "attachments": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "example": "attachment1.jpg"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "access_revocations": {
+                                        "properties": {
+                                            "email_access_revoked": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "system_access_revoked_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2024-07-12"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/users/assign-roles": {
             "put": {
                 "tags": [

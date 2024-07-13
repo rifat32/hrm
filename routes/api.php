@@ -332,7 +332,7 @@ Route::put('/v1.0/clients/announcements/change-status', [AnnouncementController:
 
 
 
-Route::middleware(['auth:api',"business.subscription.check"])->group(function () {
+Route::middleware(['auth:api',"business.subscription.check","authorization.check"])->group(function () {
 
 
 
@@ -444,6 +444,7 @@ Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"])
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
 Route::put('/v1.0/users/update-password', [UserManagementController::class, "updatePassword"]);
 
+
 Route::put('/v1.0/users/assign-roles', [UserManagementController::class, "assignUserRole"]);
 Route::put('/v1.0/users/assign-permissions', [UserManagementController::class, "assignUserPermission"]);
 
@@ -454,6 +455,8 @@ Route::put('/v1.0/users/profile-picture', [UserManagementController::class, "upd
 
 
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
+
+Route::put('/v1.0/users/exit', [UserManagementController::class, "exitUser"]);
 
 Route::get('/v1.0/users', [UserManagementController::class, "getUsers"]);
 Route::get('/v2.0/users', [UserManagementController::class, "getUsersV2"]);

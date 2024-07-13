@@ -121,11 +121,20 @@ class ProjectController extends Controller
                 $request_data = $request->validated();
 
 
-                $request_data["business_id"] = $request->user()->business_id;
-                $request_data["is_active"] = true;
-                $request_data["is_default"] = false;
 
-                $request_data["created_by"] = auth()->user()->id;
+
+                $request_data["is_active"] = 1;
+                $request_data["is_default"] = 0;
+                $request_data["created_by"] = $request->user()->id;
+                $request_data["business_id"] = $request->user()->business_id;
+
+                if (empty($request->user()->business_id)) {
+                    $request_data["business_id"] = NULL;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
+                }
+
 
                 $project =  Project::create($request_data);
 
