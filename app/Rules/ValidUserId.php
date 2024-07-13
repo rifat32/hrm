@@ -38,6 +38,10 @@ class ValidUserId implements Rule
             'users.business_id' => auth()->user()->business_id,
             "is_active" => 1
         ])
+        ->whereDoesntHave("lastTermination", function($query) {
+            $query->where('terminations.date_of_termination', "<" , today())
+            ->whereRaw('terminations.date_of_termination > users.joining_date');
+        })
         ->whereHas('departments', function($query) {
             $query->whereIn('departments.id', $this->all_manager_department_ids);
         })

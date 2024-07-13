@@ -271,7 +271,7 @@ class AuthController extends Controller
             if(!empty($accessRevocation)) {
 
                 if(!empty($accessRevocation->system_access_revoked_date)) {
-                    if(Carbon::parse($accessRevocation->system_access_revoked_date)) {
+                    if(Carbon::parse($accessRevocation->system_access_revoked_date)->isPast() && !Carbon::parse($accessRevocation->system_access_revoked_date)->today()) {
       return response(['message' => 'User access revoked active'], 403);
                     }
                 }
@@ -487,12 +487,13 @@ $datediff = $now - $user_created_date;
                 return response(['message' => 'User not active'], 403);
             }
 
-             $accessRevocation = $user->accessRevocation;
+
+            $accessRevocation = $user->accessRevocation;
 
             if(!empty($accessRevocation)) {
 
                 if(!empty($accessRevocation->system_access_revoked_date)) {
-                    if(Carbon::parse($accessRevocation->system_access_revoked_date)) {
+                    if(Carbon::parse($accessRevocation->system_access_revoked_date)->isPast() && !Carbon::parse($accessRevocation->system_access_revoked_date)->today()) {
       return response(['message' => 'User access revoked active'], 403);
                     }
                 }

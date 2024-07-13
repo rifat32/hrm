@@ -19,6 +19,7 @@ use App\Models\EmployeeVisaDetailHistory;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\Project;
+use App\Models\Termination;
 use App\Models\UserAssetHistory;
 use App\Models\UserRecruitmentProcess;
 use App\Models\UserWorkShift;
@@ -631,6 +632,25 @@ if(!empty($joining_date)) {
 
                       }
 }
+
+
+     $termination =  Termination::where([
+        "user_id" => $user_id
+       ])
+
+       ->where("date_of_termination", ">=", $joining_date)
+       ->first();
+
+
+       if (!empty($termination)) {
+        throw new Exception("The employee has been terminated on " . $termination->date_of_termination, 401);
+    }
+
+
+
+
+
+
 }
 }
 

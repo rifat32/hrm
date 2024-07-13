@@ -1097,12 +1097,30 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                 ], 404);
             }
 
+            if(empty($user->joining_date)) {
+   throw new Exception("The employee does not have a joining date",401);
+            }
 
-             $request_data["termination"]["joining_date"] = !empty($user->joining_date)?$user->joining_date:$request_data["date_of_termination"]["joining_date"] ;
+
+
+            $date_of_termination = Carbon::parse($request_data["termination"]["date_of_termination"]);
+            $joining_date = Carbon::parse($user->joining_date);
+
+            if ($joining_date->gt($date_of_termination)) {
+                throw new Exception("Date of termination can not be before the joining date of the employee.",401);
+            }
+            
 
 
 
- Termination::create($request_data["termination"]);
+
+             $request_data["termination"]["joining_date"] = $user->joining_date ;
+
+
+
+
+
+Termination::create($request_data["termination"]);
 ExitInterview::create($request_data["exit_interview"]);
 
 if(empty($user->accessRevocation)) {
@@ -3986,8 +4004,17 @@ if(empty($user->accessRevocation)) {
             $data["data_highlights"] = [];
 
             $data["data_highlights"]["total_active_users"] = $users->filter(function ($user) {
+
+
+
+
+
                 return $user->is_active == 1;
+
             })->count();
+
+
+
             $data["data_highlights"]["total_users"] = $users->count();
 
             return response()->json($data, 200);

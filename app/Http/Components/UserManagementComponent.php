@@ -337,7 +337,30 @@ public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent
             })
             ->when(isset(request()->is_active), function ($query)  {
                 return $query->where('is_active', intval(request()->is_active));
+
             })
+            ->when(request()->boolean("is_terminated"), function ($query)  {
+
+                    return $query
+                    ->whereHas("lastTermination", function($query) {
+                        $query->where('terminations.date_of_termination', "<" , today())
+                        ->whereRaw('terminations.date_of_termination > users.joining_date');
+                    });
+
+
+            },
+            function ($query)  {
+
+                return $query
+                ->whereDoesntHave("lastTermination", function($query) {
+                    $query->where('terminations.date_of_termination', "<" , today())
+                    ->whereRaw('terminations.date_of_termination > users.joining_date');
+                });
+
+
+        },
+
+            )
 
             ->when(!empty(request()->start_joining_date), function ($query)  {
                 return $query->where('joining_date', ">=", request()->start_joining_date);

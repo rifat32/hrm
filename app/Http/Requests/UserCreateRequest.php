@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\WorkShift;
 use App\Rules\ValidateDesignationId;
 use App\Rules\ValidateDesignationName;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserCreateRequest extends BaseFormRequest
@@ -101,7 +102,20 @@ class UserCreateRequest extends BaseFormRequest
 
         ],
 
-        'joining_date' => "nullable|date",
+        'joining_date' => [
+            "nullable",
+            'date',
+            function ($attribute, $value, $fail) {
+
+               $joining_date = Carbon::parse($value);
+               $start_date = Carbon::parse(auth()->user()->business->start_date);
+
+               if ($joining_date->lessThan($start_date)) {
+                   $fail("The $attribute must not be after the start date of the business.");
+               }
+
+            },
+        ],
         'salary_per_annum' => "nullable|numeric",
         'weekly_contractual_hours' => 'nullable|numeric',
         "minimum_working_days_per_week" => 'nullable|numeric|max:7',

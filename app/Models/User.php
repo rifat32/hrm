@@ -97,6 +97,11 @@ public function accessRevocation()
         return $this->hasMany(Termination::class);
     }
 
+    public function lastTermination()
+    {
+        return $this->hasOne(Termination::class)->orderByDesc("id");
+    }
+
  // Relationships
  public function exitInterviews()
  {

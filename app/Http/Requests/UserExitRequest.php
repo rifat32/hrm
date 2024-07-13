@@ -48,7 +48,7 @@ class UserExitRequest extends FormRequest
                 new ValidateTerminationReasonId()
             ],
 
-            'termination.date_of_termination' => 'required|date|after_or_equal:termination.joining_date',
+            'termination.date_of_termination' => 'required|date',
 
             'exit_interview.exit_interview_conducted' => 'required|boolean',
             'exit_interview.date_of_exit_interview' => 'nullable|date',
@@ -78,8 +78,7 @@ class UserExitRequest extends FormRequest
             'termination.date_of_termination.required' => 'The date of termination is required.',
             'termination.date_of_termination.date' => 'The date of termination must be a valid date.',
             'termination.date_of_termination.after_or_equal' => 'The date of termination must be after or equal to the joining date.',
-            'termination.joining_date.required' => 'The joining date is required.',
-            'termination.joining_date.date' => 'The joining date must be a valid date.',
+
             'exit_interview.exit_interview_conducted.required' => 'The exit interview conducted field is required.',
             'exit_interview.exit_interview_conducted.boolean' => 'The exit interview conducted field must be true or false.',
             'exit_interview.date_of_exit_interview.date' => 'The date of exit interview must be a valid date.',
