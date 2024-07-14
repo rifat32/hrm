@@ -52,6 +52,7 @@ use App\Models\Business;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\EmployeeAddressHistory;
+use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\ExitInterview;
 use App\Models\LeaveRecord;
 use App\Models\Role;
@@ -1135,6 +1136,8 @@ if(empty($user->accessRevocation)) {
 
 
       $this->checkInformationsBasedOnExitDate($user->id,$date_of_termination);
+
+
 
 
 

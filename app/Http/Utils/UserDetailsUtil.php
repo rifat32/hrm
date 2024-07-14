@@ -20,6 +20,7 @@ use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\Project;
+use App\Models\SalaryHistory;
 use App\Models\Termination;
 use App\Models\UserAssetHistory;
 use App\Models\UserHoliday;
@@ -690,6 +691,24 @@ public function checkInformationsBasedOnExitDate($user_id,$date_of_termination){
 
 
 
+
+    EmployeeUserWorkShiftHistory::where([
+        "user_id" => $user_id
+      ])
+      ->whereNull("to_date")
+      ->update([
+        "to_date" => now()
+      ]);
+
+
+
+    SalaryHistory::where([
+        "user_id" => $user_id
+      ])
+      ->whereNull("to_date")
+      ->update([
+        "to_date" => now()
+      ]);
 
 }
 

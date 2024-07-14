@@ -2494,7 +2494,8 @@ class BusinessController extends Controller
 
              $business = $this->businessOwnerCheck($id);
 
-             $subscriptionsQuery = BusinessSubscription::where([
+             $subscriptionsQuery = BusinessSubscription::with("service_plan")
+             ->where([
                 "business_id" => $business->id
              ]);
 
@@ -2512,12 +2513,14 @@ class BusinessController extends Controller
                 $upcoming_subscription_start_date = Carbon::parse($subscription_end_date->addDays($last_subscription->service_plan->duration_months));
 
 
+                $upcoming_service_plan = $last_subscription->service_plan;
 
                 $upcoming_subscription = [
-                   'service_plan_id' => $last_subscription->service_plan_id,
+                   'service_plan_id' => $upcoming_service_plan->id,
                    'start_date' => $upcoming_subscription_start_date,  // Start date of the subscription
                    'end_date' => $upcoming_subscription_start_date->addDays($last_subscription->service_plan->duration_months),  // End date based on plan duration
-                   'amount' => $last_subscription->amount,
+                   'amount' => $upcoming_service_plan->price,
+                   "service_plan" => $upcoming_service_plan
                 ];
 
              }

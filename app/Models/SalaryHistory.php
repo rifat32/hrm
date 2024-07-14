@@ -23,8 +23,15 @@ class SalaryHistory extends Model
         'to_date' => 'date',
     ];
 
+
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
+
+
+
+
 }
