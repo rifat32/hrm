@@ -199,7 +199,7 @@ class AttendanceController extends Controller
 
 
             // Process attendance data for update
-            $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $user,$termination);
+            $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $user, $termination);
 
 
 
@@ -2730,7 +2730,7 @@ class AttendanceController extends Controller
 
  // check termination
  $terminationCheck = $this->checkJoinAndTerminationDate($user->joining_date,$item["in_date"],$user->lastTermination);
- if(!$terminationCheck["success"]) {
+ if(empty($terminationCheck["success"])) {
     return false;
  }
 
@@ -3180,7 +3180,7 @@ class AttendanceController extends Controller
 
                     // check termination
                  $terminationCheck = $this->checkJoinAndTerminationDate($user->joining_date,$item["in_date"],$user->lastTermination);
-                 if(!$terminationCheck["success"]) {
+                 if(empty($terminationCheck["success"])) {
                     return false;
                  }
 

@@ -7,6 +7,7 @@ use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 
@@ -67,7 +68,7 @@ class LeaveComponent
     }
 
 
-
+// it will give empty for multiday leave and throw error for single day.
     public function getLeaveRecordDataItem(
         $work_shift_details,
         $holiday,
@@ -78,10 +79,19 @@ class LeaveComponent
         $day_type = "",
         $start_time="",
         $end_time="",
-        $leave_data
+        $leave_data,
+        $user_joining_date,
+        $termination
+
         ) {
+
+              // check termination
+  $terminationCheck = $this->checkJoinAndTerminationDate($user_joining_date,$date,$termination);
+
+
+
              // Check if it's feasible to take leave
-        if ((empty($work_shift_details->is_weekend) && (empty($holiday)|| empty($holiday->is_active)) && empty($previous_leave) && empty($previous_attendance))) {
+        if (!empty($terminationCheck["success"]) &&(empty($work_shift_details->is_weekend) && (empty($holiday)|| empty($holiday->is_active)) && empty($previous_leave) && empty($previous_attendance))) {
               // Convert shift times to Carbon instances
         $leave_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
         $leave_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
@@ -122,6 +132,10 @@ class LeaveComponent
         }
 // Check for conditions preventing leave
         if($leave_duration != "multiple_day") {
+            if(empty($terminationCheck)) {
+                throw new Exception(("there is a termination date mismatch on date " . $date),400);
+            }
+
             if($work_shift_details->is_weekend) {
                  throw new Exception(("there is a weekend on date " . $date),400);
             }
@@ -178,7 +192,8 @@ public function generateLeaveDates ($start_date,$end_date) {
 
 
 
-public function processLeave($leave_data,$leave_date,$all_parent_department_ids,&$leave_record_data_list) {
+public function processLeave($leave_data,$leave_date,$all_parent_department_ids,&$leave_record_data_list,$user_joining_date,
+$termination) {
   // Retrieve work shift history for the user and date
   $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($leave_date, $leave_data["user_id"]);
 
@@ -215,7 +230,9 @@ if($leave_data["leave_duration"] == "hours") {
       $leave_data["day_type"],
       !empty($leave_data["start_time"])?$leave_data["start_time"]:$work_shift_details->start_at,
       !empty($leave_data["end_time"])?$leave_data["end_time"]:$work_shift_details->end_at,
-      $leave_data
+      $leave_data,
+      $user_joining_date,
+      $termination
   );
   if (!empty($leave_record_data_item)) {
       array_push($leave_record_data_list, $leave_record_data_item);
@@ -229,11 +246,18 @@ public function processLeaveRequest($raw_data) {
     $leave_record_data_list = [];
     $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user($leave_data["user_id"]);
 
+    $user = User::with("lastTermination")->where([
+        "id" => $raw_data["user_id"]
+    ])
+    ->select("id","joining_date")
+    ->first();
+
+
     switch ($leave_data["leave_duration"]) {
         case "multiple_day":
             $leave_dates = $this->generateLeaveDates($leave_data["start_date"],$leave_data["end_date"]);
             foreach ($leave_dates as $leave_date) {
-                $this->processLeave($leave_data,$leave_date,$all_parent_department_ids,$leave_record_data_list);
+                $this->processLeave($leave_data,$leave_date,$all_parent_department_ids,$leave_record_data_list,$user->joining_date,$user->lastTermination);
             }
             break;
 
@@ -242,7 +266,7 @@ public function processLeaveRequest($raw_data) {
         case "hours":
         $leave_data["start_date"] = Carbon::parse($leave_data["date"]);
         $leave_data["end_date"] = Carbon::parse($leave_data["date"]);
-        $this->processLeave($leave_data,$leave_data["date"],$all_parent_department_ids,$leave_record_data_list);
+        $this->processLeave($leave_data,$leave_data["date"],$all_parent_department_ids,$leave_record_data_list,$user->joining_date,$user->lastTermination);
             break;
 
         default:
@@ -357,18 +381,18 @@ where([
 
     $startOfMonth = Carbon::create(null, $setting_leave->start_month, 1, 0, 0, 0)->subYear();
 
-    $already_taken_hours = LeaveRecord::whereHas('leave', function ($query) use ($leave, $leave_type) {
-        $query->where([
-            "user_id" => $leave->user_id,
-            "leave_type_id" => $leave_type->id
+    // $already_taken_hours = LeaveRecord::whereHas('leave', function ($query) use ($leave, $leave_type) {
+    //     $query->where([
+    //         "user_id" => $leave->user_id,
+    //         "leave_type_id" => $leave_type->id
 
-        ]);
-    })
-        ->where("leave_records.date", ">=", $startOfMonth)
-        ->get()
-        ->sum(function ($record) {
-            return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
-        });
+    //     ]);
+    // })
+    //     ->where("leave_records.date", ">=", $startOfMonth)
+    //     ->get()
+    //     ->sum(function ($record) {
+    //         return Carbon::parse($record->end_time)->diffInHours(Carbon::parse($record->start_time));
+    //     });
 
 //         if($already_taken_hours > $leave_type->amount) {
 //    throw new Exception(("You can not take leave hours mor than available. Currently ".$leave_type->amount." hours available"),403);

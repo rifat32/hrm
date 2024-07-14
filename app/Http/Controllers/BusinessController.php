@@ -2499,24 +2499,30 @@ class BusinessController extends Controller
              ]);
 
 
-             $subscriptions = $this->retrieveData($subscriptionsQuery,"business_subscription.id");
+             $subscriptions = $this->retrieveData($subscriptionsQuery,"business_subscriptions.id");
+             $upcoming_subscription = [];
 
 
              $last_subscription = $subscriptionsQuery->latest()->first();
 
+             if(!empty($last_subscription)) {
 
-             $subscription_end_date = Carbon::parse($last_subscription->end_date);
+                $subscription_end_date = Carbon::parse($last_subscription->end_date);
 
-             $upcoming_subscription_start_date = Carbon::parse($subscription_end_date->addDays($last_subscription->service_plan->duration_months));
+                $upcoming_subscription_start_date = Carbon::parse($subscription_end_date->addDays($last_subscription->service_plan->duration_months));
 
 
 
-             $upcoming_subscription = [
-                'service_plan_id' => $$last_subscription->service_plan_id,
-                'start_date' => $upcoming_subscription_start_date,  // Start date of the subscription
-                'end_date' => $upcoming_subscription_start_date->addDays($last_subscription->service_plan->duration_months),  // End date based on plan duration
-                'amount' => $last_subscription->amount,
-             ];
+                $upcoming_subscription = [
+                   'service_plan_id' => $last_subscription->service_plan_id,
+                   'start_date' => $upcoming_subscription_start_date,  // Start date of the subscription
+                   'end_date' => $upcoming_subscription_start_date->addDays($last_subscription->service_plan->duration_months),  // End date based on plan duration
+                   'amount' => $last_subscription->amount,
+                ];
+
+             }
+
+
 
 
 
