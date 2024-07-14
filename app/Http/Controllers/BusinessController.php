@@ -138,6 +138,7 @@ class BusinessController extends Controller
      */
     public function createBusiness(BusinessCreateRequest $request)
     {
+
            DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
@@ -150,8 +151,6 @@ class BusinessController extends Controller
                 $request_data = $request->validated();
 
                 $request_data["business"] = $this->businessImageStore($request_data["business"]);
-
-
 
 
                 $user = User::where([
@@ -610,6 +609,8 @@ class BusinessController extends Controller
 
 
             $request_data["business"] = $this->businessImageStore($request_data["business"]);
+
+            $request_data['business']["active_module_ids"] = [];
 
 
              $data = $this->createUserWithBusiness($request_data);

@@ -4,6 +4,7 @@ namespace App\Http\Utils;
 
 use App\Mail\SendPassword;
 use App\Models\Business;
+use App\Models\BusinessModule;
 use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\DepartmentUser;
@@ -817,6 +818,17 @@ public function createUserWithBusiness($request_data) {
 
 
    $business =  Business::create($request_data['business']);
+
+
+   foreach($request_data['business']["active_module_ids"] as $active_module_id){
+    BusinessModule::create([
+     "is_enabled" => 1,
+     "business_id" => $business->id,
+     "module_id" => $active_module_id,
+     'created_by' => auth()->user()->id
+    ]);
+ }
+
 
    $user->email_verified_at = now();
    $user->business_id = $business->id;

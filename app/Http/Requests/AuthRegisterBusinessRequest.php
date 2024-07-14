@@ -8,6 +8,7 @@ use App\Rules\DayValidation;
 use App\Rules\SomeTimes;
 use App\Rules\TimeOrderRule;
 use App\Rules\TimeValidation;
+use App\Rules\ValidateModuleIds;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator;
 
@@ -103,7 +104,11 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
 
 
-
+            "business.active_module_ids" => "present|array",
+            "business.active_module_ids.*" => [
+                "numeric",
+                new ValidateModuleIds()
+            ],
 
 
 
