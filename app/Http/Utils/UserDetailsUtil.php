@@ -16,11 +16,13 @@ use App\Models\EmployeeRightToWorkHistory;
 use App\Models\EmployeeSponsorshipHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\EmployeeVisaDetailHistory;
+use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\Project;
 use App\Models\Termination;
 use App\Models\UserAssetHistory;
+use App\Models\UserHoliday;
 use App\Models\UserRecruitmentProcess;
 use App\Models\UserWorkShift;
 use App\Models\WorkShift;
@@ -656,6 +658,39 @@ if(!empty($joining_date)) {
 
 
 
+public function checkInformationsBasedOnExitDate($user_id,$date_of_termination){
+
+  $attendance_exists =  Attendance::where([
+        "user_id" => $user_id
+    ])
+    ->where("in_date",">",$date_of_termination)
+    ->exists();
+
+    if($attendance_exists) {
+        throw new Exception(("Attendance exists after date " . $date_of_termination), 401);
+    }
+
+
+    UserHoliday::where([
+        "user_id" => $user_id
+    ])
+    ->whereHas("holiday", function($query) use($date_of_termination) {
+        $query->where("holidays.start_date",">", $date_of_termination);
+
+    })
+    ->delete();
+
+
+    LeaveRecord::whereHas("leave",function($query) use($user_id) {
+        $query->where("leaves.user_id",$user_id);
+    })
+    ->where("leave_records.date", ">" , $date_of_termination)
+    ->delete();
+
+
+
+
+}
 
 
 

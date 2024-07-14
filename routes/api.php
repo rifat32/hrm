@@ -379,6 +379,10 @@ Route::put('/v1.0/modules/toggle-active', [ModuleController::class, "toggleActiv
 
 Route::put('/v1.0/business-modules/enable', [ModuleController::class, "enableBusinessModule"]);
 
+Route::put('/v1.0/service-plan-modules/enable', [ModuleController::class, "enableServicePlanModule"]);
+
+
+
 Route::get('/v1.0/business-modules/{business_id}', [ModuleController::class, "getBusinessModules"]);
 
 

@@ -1109,7 +1109,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             if ($joining_date->gt($date_of_termination)) {
                 throw new Exception("Date of termination can not be before the joining date of the employee.",401);
             }
-            
+
 
 
 
@@ -1131,6 +1131,10 @@ if(empty($user->accessRevocation)) {
         "system_access_revoked_date"
         )->toArray());
 }
+
+
+
+      $this->checkInformationsBasedOnExitDate($user->id,$date_of_termination);
 
 
 

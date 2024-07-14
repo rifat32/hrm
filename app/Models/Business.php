@@ -56,6 +56,9 @@ class Business extends Model
         'pension_scheme_letters' => 'array',
     ];
 
+
+
+    
     public function getIsSubscribedAttribute($value)
     {
         $user = auth()->user();

@@ -19,9 +19,24 @@ class ServicePlan extends Model
         "created_by"
     ];
 
+
+
+    public function active_modules()
+    {
+        return $this->hasMany(ServicePlanModule::class, 'service_plan_id', 'id');
+    }
+
+
+
+
+
     public function business_tier(){
         return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
     }
+
+
+
+
 
 
     public function discount_codes()
@@ -115,5 +130,5 @@ class ServicePlan extends Model
 
 
 
-    
+
 }

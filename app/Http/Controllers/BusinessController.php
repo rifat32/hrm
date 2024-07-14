@@ -610,7 +610,7 @@ class BusinessController extends Controller
 
             $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
-            $request_data['business']["active_module_ids"] = [];
+            // $request_data['business']["active_module_ids"] = [];
 
 
              $data = $this->createUserWithBusiness($request_data);

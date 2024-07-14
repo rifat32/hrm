@@ -104,11 +104,11 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
 
 
-            "business.active_module_ids" => "present|array",
-            "business.active_module_ids.*" => [
-                "numeric",
-                new ValidateModuleIds()
-            ],
+            // "business.active_module_ids" => "present|array",
+            // "business.active_module_ids.*" => [
+            //     "numeric",
+            //     new ValidateModuleIds()
+            // ],
 
 
 

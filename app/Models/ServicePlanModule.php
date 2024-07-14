@@ -5,20 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BusinessModule extends Model
+class ServicePlanModule extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         "is_enabled",
-        "business_id",
+        "service_plan_id",
         "module_id",
         'created_by'
     ];
 
 
-    public function business(){
-        return $this->belongsTo(Business::class,'business_id', 'id');
+    public function service_plan(){
+        return $this->belongsTo(ServicePlan::class,'service_plan_id', 'id');
     }
+
+
 
 }

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EnableBusinessModuleRequest;
+use App\Http\Requests\EnableServicePlanModuleRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
 use App\Models\BusinessModule;
 use App\Models\Module;
+use App\Models\ServicePlanModule;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -205,7 +207,104 @@ class ModuleController extends Controller
          }
      }
 
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/service-plan-modules/enable",
+     *      operationId="enableServicePlanModule",
+     *      tags={"modules"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to toggle module active",
+     *      description="This method is to toggle module active",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *
+     *
+     *
+     *           @OA\Property(property="service_plan_id", type="string", format="number",example="1"),
+     *           @OA\Property(property="active_module_ids", type="string", format="array",example="{1,2,3}"),
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
 
+     public function enableServicePlanModule(EnableServicePlanModuleRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('module_update') || !$request->user()->hasPermissionTo('service_plan_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $request_data = $request->validated();
+
+             ServicePlanModule::where([
+                "service_plan_id" => $request_data["service_plan_id"]
+             ])
+             ->delete();
+
+
+        foreach($request_data["active_module_ids"] as $active_module_id){
+            ServicePlanModule::create([
+            "is_enabled" => 1,
+            "service_plan_id" => $request_data["service_plan_id"],
+            "module_id" => $active_module_id,
+            'created_by' => auth()->user()->id
+           ]);
+        }
+
+
+
+             return response()->json(['message' => 'Module status updated successfully'], 200);
+
+
+
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
  /**
