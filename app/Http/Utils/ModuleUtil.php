@@ -57,6 +57,19 @@ trait ModuleUtil
 
 
 
+        $servicePlanModule =    BusinessModule::where([
+            "service_plan_id" => $business->service_plan ? $business->service_plan->id : 0,
+            "module_id" => $module->id
+        ])
+            ->first();
+
+
+        if (!empty($servicePlanModule)) {
+            $is_enabled = $servicePlanModule->is_enabled;
+        }
+
+
+
         $businessModule =    BusinessModule::where([
             "business_id" => $business->id,
             "module_id" => $module->id

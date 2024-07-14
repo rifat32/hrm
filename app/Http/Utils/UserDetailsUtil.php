@@ -641,6 +641,7 @@ if(!empty($joining_date)) {
        ])
 
        ->where("date_of_termination", ">=", $joining_date)
+       ->latest()
        ->first();
 
 
