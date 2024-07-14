@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeePensionHistory;
+use App\Models\Termination;
 use App\Models\UploadedFile;
 use App\Models\User;
 use App\Models\UserAnnouncement;
@@ -573,6 +574,60 @@ public function get_all_parent_department_manager_ids($all_parent_department_ids
 }
 
 
+public function checkJoinAndTerminationDate($user_joining_date,$date,$termination,$throwError=false){
+
+    $joining_date = Carbon::parse($user_joining_date);
+    $in_date = Carbon::parse($date);
+
+
+       if (empty($termination)) {
+
+        if($joining_date->gt($in_date)) {
+            $failureMessage = 'Employee joined later after this date.';
+            if($throwError) {
+              throw new Exception($failureMessage,403);
+            }
+            return [
+                "failure_message" => $failureMessage,
+                "success" => false
+            ];
+        }
+
+    } else {
+        $last_termination_date = Carbon::parse($termination->date_of_termination);
+        $last_joining_date =  Carbon::parse($termination->joining_date);
+
+        if(
+
+    !$last_termination_date->lt($user_joining_date)
+        ||
+    !($last_joining_date->lte($in_date) && $last_joining_date->gte($in_date))
+
+        )
+        {
+            $failureMessage = 'User was termination date and attendance date mismatch.';
+            if($throwError) {
+                throw new Exception($failureMessage,403);
+              }
+              return [
+                  "failure_message" => $failureMessage,
+                  "success" => false
+              ];
+        }
+
+    }
+
+
+
+      return [
+          "failure_message",
+          "success" => true
+      ];
+
+
+
+
+}
 
 
 

@@ -374,8 +374,11 @@ trait AttendanceUtil
 
 
 
-    public function process_attendance_data($raw_data, $setting_attendance, $user_id)
+    public function process_attendance_data($raw_data, $setting_attendance, $user, $termination)
     {
+
+
+
         if(isset($raw_data["is_present"])) {
             if(!$raw_data["is_present"]) {
                 $raw_data["in_time"] = "";
@@ -386,7 +389,10 @@ trait AttendanceUtil
 
 
         // Prepare data for attendance creation
-        $attendance_data = $this->prepare_data_on_attendance_create($raw_data, $user_id);
+        $attendance_data = $this->prepare_data_on_attendance_create($raw_data, $user->id);
+
+       $this->checkJoinAndTerminationDate($user->joining_date, $attendance_data["in_date"], $termination, true);
+
 
         // Automatically approve attendance if auto-approval is enabled in settings
         if (
@@ -401,23 +407,22 @@ trait AttendanceUtil
         }
 
         // Retrieve salary information for the user and date
-        $user_salary_info = $this->get_salary_info($user_id, $attendance_data["in_date"]);
+        $user_salary_info = $this->get_salary_info($user->id, $attendance_data["in_date"]);
 
         // Retrieve work shift history for the user and date
-        $work_shift_history =  $this->get_work_shift_history($attendance_data["in_date"], $user_id);
+        $work_shift_history =  $this->get_work_shift_history($attendance_data["in_date"], $user->id);
 
         // Retrieve work shift details based on work shift history and date
         $work_shift_details =  $this->get_work_shift_details($work_shift_history, $attendance_data["in_date"]);
 
         // Retrieve holiday details for the user and date
-        $all_parent_departments_of_user = $this->all_parent_departments_of_user($user_id);
+        $all_parent_departments_of_user = $this->all_parent_departments_of_user($user->id);
 
-        $holiday = $this->get_holiday_details($attendance_data["in_date"], $user_id, $all_parent_departments_of_user);
+        $holiday = $this->get_holiday_details($attendance_data["in_date"], $user->id, $all_parent_departments_of_user);
 
         // Retrieve leave record details for the user and date
 
-
-        $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user_id, $attendance_data["attendance_records"]);
+        $leave_record = $this->get_leave_record_details($attendance_data["in_date"], $user->id, $attendance_data["attendance_records"]);
 
 
         // Calculate capacity hours based on work shift details

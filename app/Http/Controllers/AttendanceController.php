@@ -25,8 +25,6 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
 use App\Models\AttendanceArrear;
 use App\Models\AttendanceHistory;
-use App\Models\AttendanceHistoryProject;
-use App\Models\AttendanceProject;
 use App\Models\LeaveRecord;
 use App\Models\Payroll;
 use App\Models\PayrollAttendance;
@@ -192,8 +190,16 @@ class AttendanceController extends Controller
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
 
+
+
+
+
+
+            $termination = $user->lastTermination;
+
+
             // Process attendance data for update
-            $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $request_data_update["user_id"]);
+            $attendance_data = $this->process_attendance_data($request_data_update, $setting_attendance, $user,$termination);
 
 
 
@@ -342,7 +348,13 @@ class AttendanceController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             $request_data = $request->validated();
-            $request_data["user_id"] = auth()->user()->id;
+                        // Ensure the authenticated user exists and has a business_id
+                        $user = auth()->user();
+                        if (!$user || !$user->business_id) {
+                            // Handle the error as needed, e.g., throw an exception or return an error response
+                            throw new Exception("User or business ID not found.");
+                        }
+            $request_data["user_id"] = $user->id;
             $request_data["does_break_taken"] = 0;
 
 
@@ -361,7 +373,10 @@ class AttendanceController extends Controller
             $setting_attendance = $this->get_attendance_setting();
 
 
-            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+
+            $termination = $user->lastTermination;
+
+            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $user,$termination);
 
 
             // Assign additional data to request data for attendance creation
@@ -514,7 +529,16 @@ class AttendanceController extends Controller
             $setting_attendance = $this->get_attendance_setting();
 
 
-            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+            $user = User::with("lastTermination")->where([
+                "id" => $request_data["user_id"]
+            ])
+            ->first();
+
+            $termination = $user->lastTermination;
+
+
+
+            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $user,$termination);
 
 
 
@@ -631,7 +655,7 @@ class AttendanceController extends Controller
             $request_data = $request->validated();
             $setting_attendance = $this->get_attendance_setting();
 
-            $user = User::where([
+            $user = User::with("lastTermination")->where([
                 "id" =>   $request_data["user_id"]
             ])
                 ->first();
@@ -665,7 +689,10 @@ class AttendanceController extends Controller
                     ];
                 }
 
-                $item = $this->process_attendance_data($item, $setting_attendance, $request_data["user_id"]);
+
+
+                $termination = $user->lastTermination;
+                $item = $this->process_attendance_data($item, $setting_attendance, $user,$termination);
 
                 return  $item;
             });
@@ -822,8 +849,19 @@ class AttendanceController extends Controller
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
 
+
+            $user = User::with("lastTermination")->where([
+                "id" => $request_data["user_id"]
+            ])
+            ->first();
+
+            $termination = $user->lastTermination;
+
+
+
+
             // Process attendance data for update
-            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $request_data["user_id"]);
+            $attendance_data = $this->process_attendance_data($request_data, $setting_attendance, $user,$termination);
 
 
             $attendance_query_params = [
@@ -2541,7 +2579,7 @@ class AttendanceController extends Controller
 
             // Retrieve users based on request data
             if (empty($request_data["user_ids"])) {
-                $users  =  User::where([
+                $users  =  User::with("lastTermination")->where([
                     "business_id" => auth()->user()->business_id
                 ])
                     ->select(
@@ -2553,7 +2591,7 @@ class AttendanceController extends Controller
                     )
                     ->get();
             } else {
-                $users  =  User::where([
+                $users  =  User::with("lastTermination")->where([
                     "business_id" => auth()->user()->business_id
                 ])
                     ->whereIn("id", $request_data["user_ids"])
@@ -2689,6 +2727,12 @@ class AttendanceController extends Controller
                         return false;
                     }
 
+
+ // check termination
+ $terminationCheck = $this->checkJoinAndTerminationDate($user->joining_date,$item["in_date"],$user->lastTermination);
+ if(!$terminationCheck["success"]) {
+    return false;
+ }
 
                     // flexible error
 
@@ -3006,17 +3050,17 @@ class AttendanceController extends Controller
 
 
 
-            // Retrieve attendance setting
+            // // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
 
             // Retrieve users based on request data
             if (empty($request_data["user_ids"])) {
-                $users  =  User::where([
+                $users  =  User::with("lastTermination")->where([
                     "business_id" => auth()->user()->business_id
                 ])
                     ->get();
             } else {
-                $users  =  User::where([
+                $users  =  User::with("lastTermination")->where([
                     "business_id" => auth()->user()->business_id
                 ])
                     ->whereIn("id", $request_data["user_ids"])
@@ -3025,6 +3069,8 @@ class AttendanceController extends Controller
 
             // Iterate over each user
             foreach ($users as $user) {
+
+
 
                 // Parse start and end dates
                 $start_date = Carbon::parse($request_data["start_date"]);
@@ -3129,6 +3175,16 @@ class AttendanceController extends Controller
                     if (empty($work_shift_details)) {
                         return false;
                     }
+
+
+
+                    // check termination
+                 $terminationCheck = $this->checkJoinAndTerminationDate($user->joining_date,$item["in_date"],$user->lastTermination);
+                 if(!$terminationCheck["success"]) {
+                    return false;
+                 }
+
+
 
 
                     // flexible error

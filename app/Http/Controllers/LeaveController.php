@@ -35,7 +35,6 @@ use App\Models\PayrollLeaveRecord;
 use App\Models\SettingLeave;
 use App\Models\User;
 
-use App\Observers\LeaveObserver;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
