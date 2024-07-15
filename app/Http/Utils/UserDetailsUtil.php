@@ -692,23 +692,23 @@ public function checkInformationsBasedOnExitDate($user_id,$date_of_termination){
 
 
 
-    EmployeeUserWorkShiftHistory::where([
-        "user_id" => $user_id
-      ])
-      ->whereNull("to_date")
-      ->update([
-        "to_date" => now()
-      ]);
+    // EmployeeUserWorkShiftHistory::where([
+    //     "user_id" => $user_id
+    //   ])
+    //   ->whereNull("to_date")
+    //   ->update([
+    //     "to_date" => now()
+    //   ]);
 
 
 
-    SalaryHistory::where([
-        "user_id" => $user_id
-      ])
-      ->whereNull("to_date")
-      ->update([
-        "to_date" => now()
-      ]);
+    // SalaryHistory::where([
+    //     "user_id" => $user_id
+    //   ])
+    //   ->whereNull("to_date")
+    //   ->update([
+    //     "to_date" => now()
+    //   ]);
 
 }
 

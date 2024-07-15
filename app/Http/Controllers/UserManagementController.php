@@ -24,6 +24,7 @@ use App\Http\Requests\UserCreateRecruitmentProcessRequest;
 use App\Http\Requests\UserCreateV2Request;
 use App\Http\Requests\UserExitRequest;
 use App\Http\Requests\UserPasswordUpdateRequest;
+use App\Http\Requests\UserRejoinRequest;
 use App\Http\Requests\UserStoreDetailsRequest;
 use App\Http\Requests\UserUpdateAddressRequest;
 use App\Http\Requests\UserUpdateBankDetailsRequest;
@@ -568,6 +569,8 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
             $this->store_work_shift($request_data, $user);
+
+
             $this->store_project($request_data, $user);
             $this->store_pension($request_data, $user);
             $this->store_recruitment_processes($request_data, $user);
@@ -1537,7 +1540,7 @@ if(empty($user->accessRevocation)) {
 
 
 
-            $request_data['is_active'] = true;
+
             $request_data['remember_token'] = Str::random(10);
 
 
@@ -1701,6 +1704,179 @@ if(empty($user->accessRevocation)) {
         }
     }
 
+
+   /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/rejoin",
+     *      operationId="rejoinUser",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user",
+     *      description="This method is to update user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *      * *            @OA\Property(property="user_id", type="string", format="string",example="045674"),
+     *               @OA\Property(property="designation_id", type="number", format="number",example="1"),
+     *              @OA\Property(property="employment_status_id", type="number", format="number",example="1"),
+     *               @OA\Property(property="salary_per_annum", type="string", format="string",example="10"),
+     *           @OA\Property(property="weekly_contractual_hours", type="string", format="string",example="10"),
+     *      *           @OA\Property(property="minimum_working_days_per_week", type="string", format="string",example="5"),
+     *   *     @OA\Property(property="overtime_rate", type="string", format="string",example="5"),
+     *
+     *     @OA\Property(property="joining_date", type="string", format="date", example="2023-11-16"),
+     *  *  * *  @OA\Property(property="role", type="boolean", format="boolean",example="customer"),
+     *      *      *  *  * *  @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *  *     @OA\Property(property="work_location_ids", type="integer", format="int", example="1"),
+
+     *      *  * @OA\Property(property="departments", type="string", format="array", example={1,2,3}),
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function rejoinUser(UserRejoinRequest $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+             $request_data['remember_token'] = Str::random(10);
+
+
+             $userQueryTerms = [
+                 "id" => $request_data["id"],
+             ];
+
+
+             if(!empty($request_data["joining_date"])) {
+                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+             }
+
+             $user = User::where($userQueryTerms)->first();
+
+             if ($user) {
+                 $user->fill(collect($request_data)->only([
+
+                     'designation_id',
+                     'employment_status_id',
+                     'joining_date',
+                     "date_of_birth",
+                     'salary_per_annum',
+                     'weekly_contractual_hours',
+                     'minimum_working_days_per_week',
+                     'overtime_rate',
+
+                 ])->toArray());
+
+                 $user->save();
+             }
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+             $this->delete_old_histories();
+
+
+             if (!empty($request_data['departments'])) {
+                 $user->departments()->sync($request_data['departments']);
+                 }
+
+
+
+             $user->work_locations()->sync($request_data["work_location_ids"]);
+
+             $user->syncRoles([$request_data['role']]);
+
+             $this->update_work_shift($request_data, $user);
+
+
+
+
+
+
+             $user->roles = $user->roles->pluck('name');
+
+
+
+
+
+             DB::commit();
+             return response($user, 201);
+         } catch (Exception $e) {
+             DB::rollBack();
+
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
     /**
      *
      * @OA\Put(
@@ -1817,7 +1993,7 @@ if(empty($user->accessRevocation)) {
             } else {
                 unset($request_data['password']);
             }
-            $request_data['is_active'] = true;
+
             $request_data['remember_token'] = Str::random(10);
 
 
@@ -2024,7 +2200,7 @@ if(empty($user->accessRevocation)) {
              } else {
                  unset($request_data['password']);
              }
-             $request_data['is_active'] = true;
+
              $request_data['remember_token'] = Str::random(10);
 
 

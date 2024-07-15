@@ -157,8 +157,10 @@ class UserAssetController extends Controller
                   ]
                   );
 
+                  
                   if($user_asset->status == "returned") {
                     $user_asset->user_id = NULL;
+                    $user_asset->status = "";
                     $user_asset->save();
                   }
 
