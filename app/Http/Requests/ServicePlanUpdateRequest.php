@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\ValidateDiscountCode;
+use App\Rules\ValidateModuleIds;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ServicePlanUpdateRequest extends BaseFormRequest
@@ -39,6 +40,13 @@ class ServicePlanUpdateRequest extends BaseFormRequest
                 new ValidateDiscountCode()
                             ],
             "discount_codes.*.discount_amount" => "required|numeric",
+
+            "active_module_ids" => "present|array",
+            "active_module_ids.*" => [
+                "numeric",
+                new ValidateModuleIds()
+            ],
+
         ];
 
     }

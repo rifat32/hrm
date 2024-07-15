@@ -10,6 +10,7 @@ use App\Http\Utils\DiscountUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ServicePlan;
+use App\Models\ServicePlanModule;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -106,6 +107,19 @@ class ServicePlanController extends Controller
                 $service_plan =  ServicePlan::create($request_data);
 
                 $service_plan->discount_codes()->createMany($request_data['discount_codes']);
+
+
+
+            foreach($request_data["active_module_ids"] as $active_module_id){
+                ServicePlanModule::create([
+                "is_enabled" => 1,
+                "service_plan_id" => $service_plan->id,
+                "module_id" => $active_module_id,
+                'created_by' => auth()->user()->id
+               ]);
+            }
+
+
 
                 return response($service_plan, 201);
             });
@@ -235,6 +249,21 @@ class ServicePlanController extends Controller
                         $discountCode
                     );
                 }
+
+                ServicePlanModule::where([
+                    "service_plan_id" => $service_plan->id
+                 ])
+                 ->delete();
+
+
+            foreach($request_data["active_module_ids"] as $active_module_id){
+                ServicePlanModule::create([
+                "is_enabled" => 1,
+                "service_plan_id" => $service_plan->id,
+                "module_id" => $active_module_id,
+                'created_by' => auth()->user()->id
+               ]);
+            }
 
                 return response($service_plan, 201);
             });
@@ -697,7 +726,7 @@ class ServicePlanController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-            
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

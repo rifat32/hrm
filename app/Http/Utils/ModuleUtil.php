@@ -6,6 +6,8 @@ use App\Models\Business;
 use App\Models\BusinessModule;
 use App\Models\BusinessTierModule;
 use App\Models\Module;
+use App\Models\ServicePlan;
+use App\Models\ServicePlanModule;
 use Exception;
 
 trait ModuleUtil
@@ -57,7 +59,7 @@ trait ModuleUtil
 
 
 
-        $servicePlanModule =    BusinessModule::where([
+        $servicePlanModule =    ServicePlanModule::where([
             "service_plan_id" => $business->service_plan ? $business->service_plan->id : 0,
             "module_id" => $module->id
         ])
