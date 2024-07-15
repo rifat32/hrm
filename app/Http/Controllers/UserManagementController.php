@@ -813,8 +813,8 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                  }
              },
          ],
-         'departments' => 'required|array|size:1',
-         'departments.*' => [
+
+         'department' => [
              'numeric',
              new ValidateDepartment($all_manager_department_ids),
          ],
@@ -829,11 +829,8 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
              'numeric',
              new ValidEmploymentStatus(),
          ],
-         'work_location_ids' => [
-             'present',
-             'array',
-         ],
-         'work_location_ids.*' => [
+
+         'work_location_id' => [
              'numeric',
              new ValidWorkLocationId(),
          ],
@@ -854,7 +851,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
          'weekly_contractual_hours' => 'required|numeric',
          'minimum_working_days_per_week' => 'required|numeric|max:7',
          'overtime_rate' => 'required|numeric',
-         'emergency_contact_details' => 'present|array',
+         'emergency_contact_details' => 'required|string',
          'immigration_status' => 'required|in:british_citizen,ilr,immigrant,sponsored',
      ]);
 
@@ -876,8 +873,9 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
  $usersData->each(function($userData) use(&$createdUsers) {
     $userData->user_id =   $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
     $userData->role = "business_employee#" . auth()->user()->business_id;
-
-
+    $userData['departments'] = [$userData['department']];
+    $userData['work_location_ids'] = [$userData['work_location_id']];
+    $userData['emergency_contact_details'] = json_decode($userData["emergency_contact_details"]);
 
 
 
@@ -956,27 +954,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
              DB::rollBack();
 
-             try {
-                 $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
-             } catch (Exception $innerException) {
-                 error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
-             }
 
-             try {
-                 $this->moveUploadedFilesBack($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
-             } catch (Exception $innerException) {
-                 error_log("Failed to move right to work docs back: " . $innerException->getMessage());
-             }
-
-             try {
-                 $this->moveUploadedFilesBack($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
-             } catch (Exception $innerException) {
-                 error_log("Failed to move visa docs back: " . $innerException->getMessage());
-             }
-
-
-
-             error_log($e->getMessage());
              return $this->sendError($e, 500, $request);
          }
 

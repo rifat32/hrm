@@ -14,7 +14,14 @@
   <div class="container">
     <div class="row mt-5">
         <div class="col-md-3">
+            <a href="{{env('APP_URL')}}/swagger-refresh" class="btn btn-primary" target="_blank">Error Log</a>
+
+        </div>
+
+
+        <div class="col-md-3">
             <a href="{{env('APP_URL')}}/api/documentation#/" class="btn btn-primary" target="_blank">Api Doc</a>
+
         </div>
         {{-- <div class="col-md-3">
             <a href="{{env('APP_URL')}}/setup" class="btn btn-primary" target="_blank">Clear Every Thing</a>
