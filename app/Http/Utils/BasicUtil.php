@@ -314,6 +314,11 @@ public function retrieveData($query,$orderByField){
     return $data;
 }
 
+// Function to split, trim, and join each part of the header with "_"
+ public function split_trim_join($string) {
+    return implode("_", array_map('trim', explode(" ", $string)));
+}
+
 
 
 public function generateUniqueId($relationModel,$relationModelId,$mainModel,$unique_identifier_column = ""){

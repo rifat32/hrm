@@ -220,9 +220,9 @@ trait UserDetailsUtil
 
     }
 
-    public function store_project($request_data,$user) {
+    public function store_project($user) {
         $project = Project::where([
-            "business_id" => $user->business_id,
+            "business_id" => auth()->user()->business_id,
             "is_default" => 1
           ])
           ->first();

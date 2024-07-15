@@ -578,7 +578,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             $this->store_work_shift($request_data, $user);
 
 
-            $this->store_project($request_data, $user);
+            $this->store_project($user);
             $this->store_pension($user);
             $this->store_recruitment_processes($request_data, $user);
 
@@ -719,31 +719,37 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $business_id = $request->user()->business_id;
+
 
              $request_data = $request->validated();
 
 
         $file = $request->file('file');
         $path = $file->getRealPath();
-        $data = array_map('str_getcsv', file($path));
+        $data = collect(array_map('str_getcsv', file($path)));
 
 
-        // Assuming the first row contains the headers
-        $header = array_shift($data);
-        $csv_data = array_map(function($row) use ($header) {
-            return array_combine($header, $row);
-        }, $data);
 
+        $header = $data->shift();
+
+        // Split, trim, and join each header using collection
+        $new_headers = collect($header)->map(function($h) {
+            return $this->split_trim_join($h);
+        });
+
+        // Update the data array to reflect the new headers
+        $csv_data = $data->map(function($row) use ($new_headers) {
+            return $new_headers->combine($row);
+        });
 
 
         $usersData = collect();
         $createdUsers = collect();
  // Validate and insert the CSV data
  $errors = [];
- foreach ($csv_data as $index => $employeeData) {
+ foreach ($csv_data->toArray() as $index => $employeeData) {
      $validator = Validator::make($employeeData, [
-         'first_Name' => 'required|string|max:255',
+         'First_Name' => 'required|string|max:255',
          'middle_Name' => 'nullable|string|max:255',
          'last_Name' => 'required|string|max:255',
          'NI_number' => 'required|string',
@@ -866,13 +872,14 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
  }
 
  if (!empty($errors)) {
-     return response()->json(['errors' => $errors], 422);
+     return response()->json(['errors' => $errors,"csv_data" => $csv_data], 422);
  }
 
 
  $usersData->each(function($userData) use(&$createdUsers) {
-    $userData->user_id =   $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
-    $userData->role = "business_employee#" . auth()->user()->business_id;
+    $userData["user_id"] = $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
+
+    $userData["role"] = "business_employee#" . auth()->user()->business_id;
     $userData['departments'] = [$userData['department']];
     $userData['work_location_ids'] = [$userData['work_location_id']];
     $userData['emergency_contact_details'] = json_decode($userData["emergency_contact_details"]);
@@ -890,11 +897,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
              $userData['is_active'] = true;
              $userData['remember_token'] = Str::random(10);
 
-
-             if (!empty($business_id)) {
-                 $userData['business_id'] = $business_id;
-             }
-
+             $userData['business_id'] = auth()->user()->business_id;
 
              $user =  User::create($userData);
              $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
@@ -919,7 +922,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
              $this->store_work_shift($userData, $user);
-             $this->store_project($userData, $user);
+             $this->store_project( $user);
              $this->store_pension($user);
 
 
