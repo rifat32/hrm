@@ -337,6 +337,7 @@ INSERT INTO task_categories (name, description, is_active, is_default, business_
 ('Resolved', 'Tasks that have been completed.', 1, 1, NULL, 2, 1),
 ('Closed', 'Tasks that have been completed and formally closed.', 1, 1, NULL, 3, 1);
 
+51. import service_plan_modules
 
 
 

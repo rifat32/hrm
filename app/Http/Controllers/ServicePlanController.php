@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\DiscountUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Module;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
 use Exception;
@@ -635,6 +636,32 @@ class ServicePlanController extends Controller
                     "message" => "no data found"
                 ], 404);
             }
+
+            $modules = Module::where('modules.is_enabled', 1)
+            ->orderBy("modules.name", "ASC")
+
+            ->select("id","name")
+           ->get()
+
+           ->map(function($item) use($service_plan) {
+               $item->is_enabled = 0;
+
+           $servicePlanModule =    ServicePlanModule::where([
+               "service_plan_id" => $service_plan->id,
+               "module_id" => $item->id
+           ])
+           ->first();
+
+           if(!empty($servicePlanModule)) {
+               if($servicePlanModule->is_enabled) {
+                   $item->is_enabled = 1;
+               }
+           }
+
+               return $item;
+           });
+
+           $service_plan->modules = $modules;
 
             return response()->json($service_plan, 200);
         } catch (Exception $e) {

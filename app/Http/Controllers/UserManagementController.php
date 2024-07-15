@@ -50,6 +50,7 @@ use App\Models\AccessRevocation;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Business;
+use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\EmployeeAddressHistory;
@@ -60,6 +61,11 @@ use App\Models\Role;
 use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserAssetHistory;
+use App\Models\WorkShift;
+use App\Rules\ValidateDepartment;
+use App\Rules\ValidateDesignationId;
+use App\Rules\ValidEmploymentStatus;
+use App\Rules\ValidWorkLocationId;
 use Carbon\Carbon;
 
 use Exception;
@@ -76,6 +82,7 @@ use Spatie\Permission\Models\Permission;
 
 
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 // eeeeee
 class UserManagementController extends Controller
@@ -572,7 +579,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
             $this->store_project($request_data, $user);
-            $this->store_pension($request_data, $user);
+            $this->store_pension($user);
             $this->store_recruitment_processes($request_data, $user);
 
             if (in_array($request["immigration_status"], ['sponsored'])) {
@@ -595,10 +602,6 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                 $this->storeEmailSender($user->id,0);
 
             }
-
-
-
-
 
             DB::commit();
             return response($user, 201);
@@ -635,6 +638,349 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
     }
+
+
+
+
+
+        /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/users/import",
+     *      operationId="importUsers",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user ",
+     *      description="This method is to store user",
+      *
+     *  @OA\RequestBody(
+     *   * @OA\MediaType(
+     *     mediaType="multipart/form-data",
+     *     @OA\Schema(
+     *         required={"file"},
+     *         @OA\Property(
+     *             description="file to upload",
+     *             property="file",
+     *             type="file",
+     *             collectionFormat="multi",
+     *         )
+     *     )
+     * )
+
+
+
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function importUsers(SingleFileUploadRequest $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             if (!$request->user()->hasPermissionTo('user_create')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id = $request->user()->business_id;
+
+             $request_data = $request->validated();
+
+
+        $file = $request->file('file');
+        $path = $file->getRealPath();
+        $data = array_map('str_getcsv', file($path));
+
+
+        // Assuming the first row contains the headers
+        $header = array_shift($data);
+        $csv_data = array_map(function($row) use ($header) {
+            return array_combine($header, $row);
+        }, $data);
+
+
+
+        $usersData = collect();
+        $createdUsers = collect();
+ // Validate and insert the CSV data
+ $errors = [];
+ foreach ($csv_data as $index => $employeeData) {
+     $validator = Validator::make($employeeData, [
+         'first_Name' => 'required|string|max:255',
+         'middle_Name' => 'nullable|string|max:255',
+         'last_Name' => 'required|string|max:255',
+         'NI_number' => 'required|string',
+         'email' => 'required|string|email|max:255|unique:users',
+         'phone' => 'required|string',
+         'image' => 'nullable|string',
+         'address_line_1' => 'required|string',
+         'address_line_2' => 'nullable',
+         'country' => 'required|string',
+         'city' => 'required|string',
+         'postcode' => 'nullable|string',
+         'lat' => 'nullable|string',
+         'long' => 'nullable|string',
+        //  'role' => [
+        //      'required',
+        //      'string',
+        //      function ($attribute, $value, $fail) {
+        //          $role = Role::where('name', $value)->first();
+        //          if (!$role) {
+        //              $fail("Role does not exist.");
+        //              return;
+        //          }
+
+        //          if (!empty(auth()->user()->business_id)) {
+        //              if (empty($role->business_id)) {
+        //                  $fail("You don't have this role.");
+        //                  return;
+        //              }
+        //              if ($role->business_id != auth()->user()->business_id) {
+        //                  $fail("You don't have this role.");
+        //                  return;
+        //              }
+        //          } else {
+        //              if (!empty($role->business_id)) {
+        //                  $fail("You don't have this role.");
+        //                  return;
+        //              }
+        //          }
+        //      },
+        //  ],
+         'work_shift_id' => [
+             'nullable',
+             'numeric',
+             function ($attribute, $value, $fail) {
+                 if (!empty($value)) {
+                     $business_times = BusinessTime::where([
+                         'is_weekend' => 1,
+                         'business_id' => auth()->user()->business_id,
+                     ])->get();
+
+                     $exists = WorkShift::where('id', $value)
+                         ->where([
+                             'work_shifts.business_id' => auth()->user()->business_id,
+                         ])
+                         ->orWhere(function($query) use ($business_times) {
+                             $query->where([
+                                 'is_active' => 1,
+                                 'business_id' => null,
+                                 'is_default' => 1,
+                             ]);
+                         })
+                         ->exists();
+
+                     if (!$exists) {
+                         $fail($attribute . " is invalid.");
+                     }
+                 }
+             },
+         ],
+         'departments' => 'required|array|size:1',
+         'departments.*' => [
+             'numeric',
+             new ValidateDepartment($all_manager_department_ids),
+         ],
+         'gender' => 'nullable|string|in:male,female,other',
+         'designation_id' => [
+             'required',
+             'numeric',
+             new ValidateDesignationId(),
+         ],
+         'employment_status_id' => [
+             'required',
+             'numeric',
+             new ValidEmploymentStatus(),
+         ],
+         'work_location_ids' => [
+             'present',
+             'array',
+         ],
+         'work_location_ids.*' => [
+             'numeric',
+             new ValidWorkLocationId(),
+         ],
+         'joining_date' => [
+             'required',
+             'date',
+             function ($attribute, $value, $fail) {
+                 $joining_date = Carbon::parse($value);
+                 $start_date = Carbon::parse(auth()->user()->business->start_date);
+
+                 if ($joining_date->lessThan($start_date)) {
+                     $fail("The $attribute must not be after the start date of the business.");
+                 }
+             },
+         ],
+         'date_of_birth' => 'required|date',
+         'salary_per_annum' => 'required|numeric',
+         'weekly_contractual_hours' => 'required|numeric',
+         'minimum_working_days_per_week' => 'required|numeric|max:7',
+         'overtime_rate' => 'required|numeric',
+         'emergency_contact_details' => 'present|array',
+         'immigration_status' => 'required|in:british_citizen,ilr,immigrant,sponsored',
+     ]);
+
+     if ($validator->fails()) {
+         $errors[$index] = $validator->errors();
+         continue; // Skip invalid rows
+     }
+
+     $usersData->push($employeeData);
+
+
+ }
+
+ if (!empty($errors)) {
+     return response()->json(['errors' => $errors], 422);
+ }
+
+
+ $usersData->each(function($userData) use(&$createdUsers) {
+    $userData->user_id =   $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
+    $userData->role = "business_employee#" . auth()->user()->business_id;
+
+
+
+
+
+             // $request_data['password'] = Hash::make($request['password']);
+
+             $password = Str::random(11);
+             $userData['password'] = Hash::make($password);
+
+
+
+
+             $userData['is_active'] = true;
+             $userData['remember_token'] = Str::random(10);
+
+
+             if (!empty($business_id)) {
+                 $userData['business_id'] = $business_id;
+             }
+
+
+             $user =  User::create($userData);
+             $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+             $user->user_name = $username;
+             $token = Str::random(30);
+             $user->resetPasswordToken = $token;
+             $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+             $user->pension_eligible = 0;
+             $user->save();
+             $this->delete_old_histories();
+
+
+
+             if (!empty($userData['departments'])) {
+                 $user->departments()->sync($userData['departments']);
+                 }
+
+
+             $user->work_locations()->sync($userData["work_location_ids"]);
+
+             $user->assignRole($userData['role']);
+
+
+             $this->store_work_shift($userData, $user);
+             $this->store_project($userData, $user);
+             $this->store_pension($user);
+
+
+
+             $user->roles = $user->roles->pluck('name');
+
+             if (env("SEND_EMAIL") == true) {
+                 $this->checkEmailSender($user->id,0);
+
+                 Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
+
+                 $this->storeEmailSender($user->id,0);
+
+             }
+
+             $createdUsers->push($user);
+
+
+ });
+
+
+
+
+
+
+
+
+
+             DB::commit();
+             return response($createdUsers->toArray(), 201);
+         } catch (Exception $e) {
+
+             DB::rollBack();
+
+             try {
+                 $this->moveUploadedFilesBack($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+             } catch (Exception $innerException) {
+                 error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+             }
+
+             try {
+                 $this->moveUploadedFilesBack($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
+             } catch (Exception $innerException) {
+                 error_log("Failed to move right to work docs back: " . $innerException->getMessage());
+             }
+
+             try {
+                 $this->moveUploadedFilesBack($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
+             } catch (Exception $innerException) {
+                 error_log("Failed to move visa docs back: " . $innerException->getMessage());
+             }
+
+
+
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+
+     }
 
 
 

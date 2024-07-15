@@ -199,7 +199,7 @@ trait UserDetailsUtil
         }
     }
 
-    public function store_pension($request_data,$user) {
+    public function store_pension($user) {
 
 
         EmployeePensionHistory::create([
