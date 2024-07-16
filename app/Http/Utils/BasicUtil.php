@@ -5,7 +5,9 @@ namespace App\Http\Utils;
 use App\Models\Announcement;
 use App\Models\Business;
 use App\Models\Department;
+use App\Models\Designation;
 use App\Models\EmployeePensionHistory;
+use App\Models\EmploymentStatus;
 use App\Models\Termination;
 use App\Models\UploadedFile;
 use App\Models\User;
@@ -680,5 +682,65 @@ public function getDefaultWorkLocation(){
         }
 return $work_location;
 }
+
+public function getDefaultDesignation() {
+
+    $designation_name = "Office Worker";
+
+    $designation = Designation::where([
+        "name" => $designation_name,
+        "is_active" => 1,
+        "is_default" => 1,
+        "business_id" => NULL,
+        "created_by" => 1
+    ])
+    ->first();
+
+    if(empty($designation)) {
+     $designation =  Designation::create([
+            "name" => $designation_name,
+            "description" => $designation_name,
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => NULL,
+            "created_by" => 1
+     ]);
+    }
+return $designation;
+
+}
+
+
+public function getDefaultEmploymentStatus() {
+
+    $employment_status_name = "Full-Time";
+    $employment_status_description =  "Employee works the standard number of hours for a full-time position.";
+
+    $employment_status = EmploymentStatus::where([
+        "name" => $employment_status_name,
+        "is_active" => 1,
+        "is_default" => 1,
+        "business_id" => NULL,
+        "created_by" => 1
+    ])
+    ->first();
+
+    if(empty($employment_status)) {
+     $employment_status =  EmploymentStatus::create([
+            "name" => $employment_status_name,
+            "description" => $employment_status_description,
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => NULL,
+            "created_by" => 1
+     ]);
+    }
+return $employment_status;
+
+}
+
+
+
+
 
 }

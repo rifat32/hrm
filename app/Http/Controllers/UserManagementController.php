@@ -719,9 +719,13 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             }
 
              $all_manager_department_ids = $this->get_all_departments_of_manager();
+
              $work_shift = $this->getDefaultWorkShift();
              $department = $this->getDefaultDepartment();
              $work_location = $this->getDefaultWorkLocation();
+             $employment_status = $this->getDefaultEmploymentStatus();
+             $designation = $this->getDefaultDesignation();
+
 
 
         $request_data = $request->validated();
@@ -764,17 +768,6 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
          'Postcode' => 'nullable|string',
 
          'Gender' => 'nullable|string|in:male,female,other',
-         'Designation_Id' => [
-             'required',
-             'numeric',
-             new ValidateDesignationId(),
-         ],
-         'Employment_Status_Id' => [
-             'required',
-             'numeric',
-             new ValidEmploymentStatus(),
-         ],
-
 
          'Joining_Date' => [
              'required',
@@ -827,12 +820,16 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
 
- $usersData->each(function($userData) use(&$createdUsers, $work_location,$department,$work_shift) {
+ $usersData->each(function($userData) use(&$createdUsers, $work_location,$department,$work_shift,$employment_status,$designation) {
     $userData["user_id"] = $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
     $userData["role"] = "business_employee#" . auth()->user()->business_id;
     $userData['departments'] = [$department->id];
     $userData['Work_Shift_Id'] = $work_shift->id;
-    $userData['Work_Shift_Id'] =[$work_location->id] ;
+    $userData['Work_Location_Ids'] =[$work_location->id] ;
+
+    $userData['Employment_Status_Id'] = $employment_status->id;
+    $userData['Designation_id'] = $designation->id;
+
 
 
     $userData['emergency_contact_details'] = [

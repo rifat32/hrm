@@ -352,6 +352,11 @@ REFERENCES projects(id)
 ON DELETE CASCADE;
 
 
+52. ALTER TABLE labels
+ADD COLUMN unique_identifier VARCHAR(255);
+
+
+
 
 hr compliance -> 46
 

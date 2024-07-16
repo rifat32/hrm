@@ -13,6 +13,7 @@ class Label extends Model
 
         'name',
         'color',
+        "unique_identifier",
         'project_id',
 
         "is_active",

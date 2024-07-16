@@ -573,7 +573,7 @@ class LabelController extends Controller
                 })
 
                 ->when(!empty($request->project_id), function ($query) use ($request) {
-                    return $query->orderBy("labels.project_id", $request->project_id);
+                    return $query->where("labels.project_id", $request->project_id);
                 })
 
 
