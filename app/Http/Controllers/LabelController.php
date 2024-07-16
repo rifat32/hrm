@@ -37,6 +37,7 @@ class LabelController extends Controller
 
  *     @OA\Property(property="name", type="string", format="string", example="Label X"),
  *     @OA\Property(property="color", type="string", format="string", example="A brief overview of Label X's objectives and scope."),
+ *     @OA\Property(property="project_id", type="string", format="string", example=""),
  *
  *
      *
@@ -83,8 +84,6 @@ class LabelController extends Controller
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
             $this->isModuleEnabled("project_and_label_management");
-
-
 
 
 
@@ -491,6 +490,14 @@ class LabelController extends Controller
      * required=true,
      * example="search_key"
      * ),
+     *     * *  @OA\Parameter(
+     * name="project_id",
+     * in="query",
+     * description="project_id",
+     * required=true,
+     * example="project_id"
+     * ),
+     *
      * *  @OA\Parameter(
      * name="order_by",
      * in="query",
@@ -565,7 +572,9 @@ class LabelController extends Controller
                     });
                 })
 
-
+                ->when(!empty($request->project_id), function ($query) use ($request) {
+                    return $query->orderBy("labels.project_id", $request->project_id);
+                })
 
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {

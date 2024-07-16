@@ -10,6 +10,8 @@ use App\Models\Termination;
 use App\Models\UploadedFile;
 use App\Models\User;
 use App\Models\UserAnnouncement;
+use App\Models\WorkLocation;
+use App\Models\WorkShift;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -635,5 +637,48 @@ public function checkJoinAndTerminationDate($user_joining_date,$date,$terminatio
 }
 
 
+public function getDefaultWorkShift() {
+    $work_shift = WorkShift::where([
+        "is_business_default" => 1,
+        "is_active",
+        "is_default" => 1,
+        "business_id" => auth()->user()->business_id,
+    ])
+    ->first();
+
+    if(empty($work_shift)) {
+    throw new Exception("No default work shift found for the business",500);
+    }
+    return $work_shift;
+}
+
+public function getDefaultDepartment() {
+    $department = Department::where([
+        "is_active" => 1,
+        "business_id" => auth()->user()->business_id,
+    ]
+    )
+    ->whereNull("parent_id")
+    ->first();
+
+    if(empty($department)) {
+        throw new Exception("No default department found for the business",500);
+        }
+        return $department;
+}
+
+public function getDefaultWorkLocation(){
+    $work_location = WorkLocation::where([
+        "is_active" => 1,
+        "is_default" => 1,
+        "business_id" => auth()->user()->business_id,
+    ])
+    ->first();
+
+    if(empty($work_location)) {
+        throw new Exception("No default work location found for the business",500);
+        }
+return $work_location;
+}
 
 }

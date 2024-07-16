@@ -366,10 +366,10 @@ trait BusinessUtil
             "work_location_id" => $work_location->id,
             "created_by" => $owner_id
         ]);
-        DepartmentUser::create([
-            "user_id" => $owner_id,
-            "department_id" => $department->id
-        ]);
+        // DepartmentUser::create([
+        //     "user_id" => $owner_id,
+        //     "department_id" => $department->id
+        // ]);
 
         $project =  Project::create([
             'name' => $business_name,

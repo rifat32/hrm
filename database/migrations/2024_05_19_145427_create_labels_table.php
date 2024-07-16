@@ -20,6 +20,10 @@ class CreateLabelsTable extends Migration
             $table->text("color")->nullable();
 
             $table->boolean("is_active")->default(true);
+
+            $table->unsignedBigInteger("project_id");
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 

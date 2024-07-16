@@ -833,9 +833,14 @@ class TerminationTypeController extends Controller
             }
 
 
-            $conflictingUsers = User::whereIn("termination_type_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
+            $conflictingUsers = User::
+            whereHas("terminations",function($query) use($existingIds) {
+                $query->whereIn("terminations.termination_reason_id", $existingIds);
+            })
+
+            ->get([
+                'users.id', 'users.first_Name',
+                'users.last_Name',
             ]);
 
             if ($conflictingUsers->isNotEmpty()) {

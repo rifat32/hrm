@@ -61,6 +61,7 @@ use App\Models\Role;
 use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserAssetHistory;
+use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
@@ -711,20 +712,20 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
          DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
              $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-             if (!$request->user()->hasPermissionTo('user_create')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+             $work_shift = $this->getDefaultWorkShift();
+             $department = $this->getDefaultDepartment();
+             $work_location = $this->getDefaultWorkLocation();
 
 
-             $request_data = $request->validated();
-
-
-        $file = $request->file('file');
+        $request_data = $request->validated();
+        $file = $request_data["file"];
         $path = $file->getRealPath();
         $data = collect(array_map('str_getcsv', file($path)));
 
@@ -750,97 +751,32 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
  foreach ($csv_data->toArray() as $index => $employeeData) {
      $validator = Validator::make($employeeData, [
          'First_Name' => 'required|string|max:255',
-         'middle_Name' => 'nullable|string|max:255',
-         'last_Name' => 'required|string|max:255',
-         'NI_number' => 'required|string',
-         'email' => 'required|string|email|max:255|unique:users',
-         'phone' => 'required|string',
-         'image' => 'nullable|string',
-         'address_line_1' => 'required|string',
-         'address_line_2' => 'nullable',
-         'country' => 'required|string',
-         'city' => 'required|string',
-         'postcode' => 'nullable|string',
-         'lat' => 'nullable|string',
-         'long' => 'nullable|string',
-        //  'role' => [
-        //      'required',
-        //      'string',
-        //      function ($attribute, $value, $fail) {
-        //          $role = Role::where('name', $value)->first();
-        //          if (!$role) {
-        //              $fail("Role does not exist.");
-        //              return;
-        //          }
+         'Middle_Name' => 'nullable|string|max:255',
+         'Last_Name' => 'required|string|max:255',
+         'NI_Number' => 'required|string',
+         'Email' => 'required|string|email|max:255|unique:users',
+         'Phone' => 'required|string',
+         'Image' => 'nullable|string',
+         'Address_Line_1' => 'required|string',
+         'Address_Line_2' => 'nullable',
+         'Country' => 'required|string',
+         'City' => 'required|string',
+         'Postcode' => 'nullable|string',
 
-        //          if (!empty(auth()->user()->business_id)) {
-        //              if (empty($role->business_id)) {
-        //                  $fail("You don't have this role.");
-        //                  return;
-        //              }
-        //              if ($role->business_id != auth()->user()->business_id) {
-        //                  $fail("You don't have this role.");
-        //                  return;
-        //              }
-        //          } else {
-        //              if (!empty($role->business_id)) {
-        //                  $fail("You don't have this role.");
-        //                  return;
-        //              }
-        //          }
-        //      },
-        //  ],
-         'work_shift_id' => [
-             'nullable',
-             'numeric',
-             function ($attribute, $value, $fail) {
-                 if (!empty($value)) {
-                     $business_times = BusinessTime::where([
-                         'is_weekend' => 1,
-                         'business_id' => auth()->user()->business_id,
-                     ])->get();
-
-                     $exists = WorkShift::where('id', $value)
-                         ->where([
-                             'work_shifts.business_id' => auth()->user()->business_id,
-                         ])
-                         ->orWhere(function($query) use ($business_times) {
-                             $query->where([
-                                 'is_active' => 1,
-                                 'business_id' => null,
-                                 'is_default' => 1,
-                             ]);
-                         })
-                         ->exists();
-
-                     if (!$exists) {
-                         $fail($attribute . " is invalid.");
-                     }
-                 }
-             },
-         ],
-
-         'department' => [
-             'numeric',
-             new ValidateDepartment($all_manager_department_ids),
-         ],
-         'gender' => 'nullable|string|in:male,female,other',
-         'designation_id' => [
+         'Gender' => 'nullable|string|in:male,female,other',
+         'Designation_Id' => [
              'required',
              'numeric',
              new ValidateDesignationId(),
          ],
-         'employment_status_id' => [
+         'Employment_Status_Id' => [
              'required',
              'numeric',
              new ValidEmploymentStatus(),
          ],
 
-         'work_location_id' => [
-             'numeric',
-             new ValidWorkLocationId(),
-         ],
-         'joining_date' => [
+
+         'Joining_Date' => [
              'required',
              'date',
              function ($attribute, $value, $fail) {
@@ -852,13 +788,24 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                  }
              },
          ],
-         'date_of_birth' => 'required|date',
-         'salary_per_annum' => 'required|numeric',
-         'weekly_contractual_hours' => 'required|numeric',
-         'minimum_working_days_per_week' => 'required|numeric|max:7',
-         'overtime_rate' => 'required|numeric',
-         'emergency_contact_details' => 'required|string',
-         'immigration_status' => 'required|in:british_citizen,ilr,immigrant,sponsored',
+         'Date_Of_Birth' => 'required|date',
+         'Salary_Per_Annum' => 'required|numeric',
+         'Weekly_Contractual_Hours' => 'required|numeric',
+         'Minimum_Working_Days_Per_Week' => 'required|numeric|max:7',
+         'Overtime_Rate' => 'required|numeric',
+         'Immigration_Status' => 'required|in:british_citizen,ilr,immigrant,sponsored',
+
+            'Emergency_Contact_First_Name' => 'required|string|max:255',
+            'Emergency_Contact_Last_Name' => 'required|string|max:255',
+            'Relationship' => 'required|string|max:255',
+            'Emergency_Contact_Address_line_1' => 'required|string|max:255',
+            'Emergency_Contact_Postcode' => 'required|string|max:10',
+            'Emergency_Contact_Mobile_Number' => 'required|string|max:15',
+            // Optional fields can have their validation here
+            'Emergency_Contact_Name' => 'nullable|string|max:255',
+            'Emergency_Contact_Daytime_Tel_Number' => 'nullable|string|max:15',
+            'Emergency_Contact_Evening_Tel_Number' => 'nullable|string|max:15',
+
      ]);
 
      if ($validator->fails()) {
@@ -876,14 +823,31 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
  }
 
 
- $usersData->each(function($userData) use(&$createdUsers) {
+
+
+
+
+ $usersData->each(function($userData) use(&$createdUsers, $work_location,$department,$work_shift) {
     $userData["user_id"] = $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
-
     $userData["role"] = "business_employee#" . auth()->user()->business_id;
-    $userData['departments'] = [$userData['department']];
-    $userData['work_location_ids'] = [$userData['work_location_id']];
-    $userData['emergency_contact_details'] = json_decode($userData["emergency_contact_details"]);
+    $userData['departments'] = [$department->id];
+    $userData['Work_Shift_Id'] = $work_shift->id;
+    $userData['Work_Shift_Id'] =[$work_location->id] ;
 
+
+    $userData['emergency_contact_details'] = [
+        [
+            'first_Name' => $userData['Emergency_Contact_First_Name'],
+            'last_Name' => $userData['Emergency_Contact_Last_Name'],
+            'emergency_contact_name' => $userData['Emergency_Contact_Name'] ?? '',
+            'relationship_of_above_to_you' => $userData['Relationship'],
+            'address_line_1' => $userData['Emergency_Contact_Address_line_1'],
+            'postcode' => $userData['Emergency_Contact_Postcode'],
+            'daytime_tel_number' => $userData['Emergency_Contact_Daytime_Tel_Number'] ?? '',
+            'eveningtime_tel_number' => $userData['Emergency_Contact_Evening_Tel_Number'] ?? '',
+            'mobile_tel_number' => $userData['Emergency_Contact_Mobile_Number']
+        ]
+    ];
 
 
              // $request_data['password'] = Hash::make($request['password']);
@@ -8891,6 +8855,7 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
 
             return response()->json($activity, 200);
         } catch (Exception $e) {
+
 
             return $this->sendError($e, 500, $request);
         }

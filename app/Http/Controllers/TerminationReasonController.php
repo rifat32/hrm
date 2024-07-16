@@ -10,6 +10,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledTerminationReason;
 use App\Models\TerminationReason;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -512,7 +513,7 @@ class TerminationReasonController extends Controller
                                 ->when(isset($request->is_active), function ($query) use ($request) {
                                     if (intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function ($q) {
-                                            $q->whereIn("disabled_termination_reason.created_by", [auth()->user()->id]);
+                                            $q->whereIn("disabled_termination_reasons.created_by", [auth()->user()->id]);
                                         });
                                     }
                                 })
@@ -536,12 +537,12 @@ class TerminationReasonController extends Controller
                                 ->where('termination_reasons.is_default', 1)
                                 ->where('termination_reasons.is_active', 1)
                                 ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                    $q->whereIn("disabled_termination_reason.created_by", [$created_by]);
+                                    $q->whereIn("disabled_termination_reasons.created_by", [$created_by]);
                                 })
                                 ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
                                     if (intval($request->is_active)) {
                                         return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                            $q->whereIn("disabled_termination_reason.business_id", [auth()->user()->business_id]);
+                                            $q->whereIn("disabled_termination_reasons.business_id", [auth()->user()->business_id]);
                                         });
                                     }
                                 })
@@ -556,7 +557,7 @@ class TerminationReasonController extends Controller
                                         ->when(isset($request->is_active), function ($query) use ($request) {
                                             if (intval($request->is_active)) {
                                                 return $query->whereDoesntHave("disabled", function ($q) {
-                                                    $q->whereIn("disabled_termination_reason.business_id", [auth()->user()->business_id]);
+                                                    $q->whereIn("disabled_termination_reasons.business_id", [auth()->user()->business_id]);
                                                 });
                                             }
                                         });
@@ -832,9 +833,15 @@ class TerminationReasonController extends Controller
             }
 
 
-            $conflictingUsers = User::whereIn("termination_reason_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
+            $conflictingUsers = User::
+            whereHas("terminations",function($query) use($existingIds) {
+                $query->whereIn("terminations.termination_reason_id", $existingIds);
+            })
+
+
+            ->get([
+                'users.id', 'users.first_Name',
+                'users.last_Name',
             ]);
 
             if ($conflictingUsers->isNotEmpty()) {

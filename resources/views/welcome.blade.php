@@ -14,7 +14,7 @@
   <div class="container">
     <div class="row mt-5">
         <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/swagger-refresh" class="btn btn-primary" target="_blank">Error Log</a>
+            <a href="{{env('APP_URL')}}/error-log" class="btn btn-primary" target="_blank">Error Log</a>
 
         </div>
 
