@@ -355,6 +355,14 @@ ON DELETE CASCADE;
 52. ALTER TABLE labels
 ADD COLUMN unique_identifier VARCHAR(255);
 
+53. ALTER TABLE service_plans
+ADD COLUMN number_of_employees_allowed INT DEFAULT 10;
+
+54. ALTER TABLE businesses
+ADD COLUMN service_plan_discount_code VARCHAR(255) DEFAULT NULL;
+
+
+
 
 
 

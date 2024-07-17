@@ -30,6 +30,7 @@ class ServicePlanUpdateRequest extends BaseFormRequest
             "name" => "required|string",
             "description" => "nullable|string",
             'set_up_amount' => 'required|numeric',
+            'number_of_employees_allowed' => 'required|numeric',
             'duration_months' => 'required|numeric',
             'price' => 'required|numeric',
             'business_tier_id' => 'required|exists:business_tiers,id',

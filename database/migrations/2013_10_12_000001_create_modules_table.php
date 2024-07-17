@@ -19,19 +19,12 @@ class CreateModulesTable extends Migration
             $table->string("name");
             $table->boolean('is_enabled')->default(false);
 
-
-
-
-
-
-
             $table->unsignedBigInteger("created_by")->nullable();
 
 
 
             $table->timestamps();
         });
-
 
 
 
@@ -44,8 +37,26 @@ class CreateModulesTable extends Migration
 
            [
             "name" => "user_activity",
+            "is_enabled" => 0,
+           ],
+           [
+            "name" => "employee_login",
             "is_enabled" => 1,
            ],
+
+           [
+            "name" => "employee_location_attendance",
+            "is_enabled" => 1,
+           ],
+           [
+            "name" => "flexible_shifts",
+            "is_enabled" => 1,
+           ],
+           [
+            "name" => "rota",
+            "is_enabled" => 1,
+           ],
+
         ));
 
 

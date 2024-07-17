@@ -870,7 +870,7 @@ public function createUserWithBusiness($request_data) {
 
    }
 
-
+$business->service_plan = $business->service_plan;
 
    return [
     "user" => $user,

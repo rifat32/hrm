@@ -1002,6 +1002,7 @@ return "swagger generated";
                     "name" => "Standard Plan",
                     "description" => "",
                       'set_up_amount' => 100,
+                      "number_of_employees_allowed" => 100,
                       'duration_months' => 1,
                       'price' => 20,
                       'business_tier_id' => 1,

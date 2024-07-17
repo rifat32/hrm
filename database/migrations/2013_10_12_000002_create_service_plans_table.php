@@ -24,6 +24,7 @@ class CreateServicePlansTable extends Migration
             $table->double('price');
             $table->unsignedBigInteger('business_tier_id');
             $table->foreign('business_tier_id')->references('id')->on('business_tiers')->onDelete('cascade');
+            $table->integer('number_of_employees_allowed')->default(10);
 
 
 

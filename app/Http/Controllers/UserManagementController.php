@@ -1304,7 +1304,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
  *         ),
  *     ),
  *     @OA\Property(
- *         property="access_revocations",
+ *         property="access_revocation",
  *         type="object",
  *         @OA\Property(property="email_access_revoked", type="boolean", example=true),
  *         @OA\Property(property="system_access_revoked_date", type="string", format="date", example="2024-07-12"),

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     use HasFactory;
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     protected $fillable = [
         'description',

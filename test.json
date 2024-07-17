@@ -1,60 +1,24 @@
-
-
-
-[{"first_Name":"cc","last_Name":"vv","emergency_contact_name":"j","relationship_of_above_to_you":"Daughter","address_line_1":"Dhaka, Bangladesh","postcode":"1330","daytime_tel_number":"","eveningtime_tel_number":"22222222222","mobile_tel_number":"0"}]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[
-    {
-        "id": 213,
-
-        "payroll": {
-            "user_id": 213,
-            "status": "pending_approval",
-            "is_active": true,
-            "business_id": 64,
-            "start_date": "01-05-2024",
-            "end_date": "31-05-2024",
-            "updated_at": "26-06-2024",
-            "created_at": "26-06-2024",
-            "id": 1497,
-            "total_holiday_hours": 0,
-            "total_holiday_hours_salary": 0,
-            "total_paid_leave_hours": 0,
-            "leave_hours_salary": 0,
-            "total_regular_attendance_hours": 0,
-            "overtime_hours": 0,
-            "regular_hours": 0,
-            "regular_hours_salary": 0,
-            "overtime_hours_salary": 0,
-            "regular_attendance_hours_salary": 0,
-            "overtime_attendance_hours_salary": 0,
-            "payroll_holidays": [],
-            "payroll_leave_records": [],
-            "payroll_attendances": []
-        },
-        "has_this_project": null,
-        "manages_department": true
+{
+    "id": 7256,
+    "termination": {
+        "termination_type_id": 7,
+        "termination_reason_id": 10,
+        "date_of_termination": "2024-07-14",
+        "joining_date": "2024-07-01"
+    },
+    "exit_interview": {
+        "exit_interview_conducted": true,
+        "date_of_exit_interview": "2024-07-03",
+        "interviewer_name": "test",
+        "key_feedback_points": "aaa",
+        "assets_returned": true,
+        "attachments": [
+            "\/temporary_files\/1721150202_Screenshot_2024-07-14_234750.png"
+        ]
+    },
+    "access_revocations": {
+        "email_access_revoked": true,
+        "system_access_revoked_date": "2024-07-10"
     }
-
-]
+    access_revocation.email_access_revoked
+}

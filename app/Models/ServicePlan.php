@@ -13,6 +13,7 @@ class ServicePlan extends Model
       "name",
       "description",
         'set_up_amount',
+        'number_of_employees_allowed',
         'duration_months',
         'price',
         'business_tier_id',

@@ -463,6 +463,8 @@ class BusinessController extends Controller
 
             $data = $this->createUserWithBusiness($request_data);
 
+
+
                 DB::commit();
 
                 return response(
@@ -938,7 +940,7 @@ class BusinessController extends Controller
                     }
                 }
 
-
+$business->service_plan = $business->service_plan;
 
                 DB::commit();
 
@@ -2407,7 +2409,7 @@ class BusinessController extends Controller
 
             $business = $this->businessOwnerCheck($id);
 
-            $business->load('owner', 'times');
+            $business->load('owner', 'times','service_plan');
 
 
 

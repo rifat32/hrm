@@ -454,13 +454,7 @@ class LabelController extends Controller
      *  example="6"
      *      ),
      *
-     *    @OA\Parameter(
-     *         name="project_id",
-     *         in="query",
-     *         description="project_id",
-     *         required=true,
-     *  example="1"
-     *      ),
+
      *      *    @OA\Parameter(
      *         name="status",
      *         in="query",
@@ -560,7 +554,7 @@ class LabelController extends Controller
 
             $labels = Label::where(
                 [
-                    "business_id" => auth()->user()->id
+                    "business_id" => auth()->user()->business_id
                 ]
             )
 

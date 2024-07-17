@@ -38,6 +38,8 @@ class ServicePlanController extends Controller
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
  * @OA\Property(property="set_up_amount", type="number", format="number", example="10"),
  * @OA\Property(property="duration_months", type="number", format="number", example="12"),
+ *  * @OA\Property(property="number_of_employees_allowed", type="number", format="number", example="12"),
+ *
  *  * @OA\Property(property="price", type="number", format="number", example="50"),
  * @OA\Property(property="business_tier_id", type="number", format="number", example="1"),
  *
@@ -149,6 +151,7 @@ class ServicePlanController extends Controller
 * @OA\Property(property="name", type="string", format="string", example="tttttt"),
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
 * @OA\Property(property="set_up_amount", type="number", format="number", example="10"),
+ *  * @OA\Property(property="number_of_employees_allowed", type="number", format="number", example="12"),
  * @OA\Property(property="duration_months", type="number", format="number", example="30"),
  *  *  * @OA\Property(property="price", type="number", format="number", example="50"),
  * @OA\Property(property="business_tier_id", type="number", format="number", example="1"),
@@ -229,6 +232,7 @@ class ServicePlanController extends Controller
                         "name",
                         "description",
                         'set_up_amount',
+                        "number_of_employees_allowed",
                         'duration_months',
                         "price",
                         'business_tier_id',
