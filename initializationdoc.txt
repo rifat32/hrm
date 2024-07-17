@@ -362,6 +362,14 @@ ADD COLUMN number_of_employees_allowed INT DEFAULT 10;
 ADD COLUMN service_plan_discount_code VARCHAR(255) DEFAULT NULL;
 
 
+55. ALTER TABLE tasks
+ADD COLUMN assigned_to BIGINT UNSIGNED,
+ADD CONSTRAINT fk_assigned_to
+FOREIGN KEY (assigned_to) REFERENCES users(id)
+ON DELETE CASCADE;
+
+
+
 
 
 

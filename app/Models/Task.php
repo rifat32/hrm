@@ -30,6 +30,7 @@ class Task extends Model
         'order_no',
 
         'assigned_by',
+        "assigned_to",
 
         "is_active",
         "business_id",
@@ -68,6 +69,13 @@ class Task extends Model
     {
         return $this->belongsTo(User::class, 'assigned_by','id');
     }
+    
+    public function assigned_to()
+    {
+        return $this->belongsTo(User::class, 'assigned_to','id');
+    }
+
+
 
     public function assignees() {
         return $this->belongsToMany(User::class, 'task_assignees', 'task_id', 'assignee_id');

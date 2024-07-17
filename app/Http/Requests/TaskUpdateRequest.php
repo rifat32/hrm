@@ -64,6 +64,13 @@ class TaskUpdateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateTaskCategory(),
             ],
+
+            "assigned_to" => [
+                'numeric',
+              new ValidUserId($all_manager_department_ids)
+            ],
+
+
             "assignees" => "present|array",
             "assignees.*" => [
                 'numeric',

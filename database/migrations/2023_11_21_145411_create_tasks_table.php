@@ -42,10 +42,13 @@ class CreateTasksTable extends Migration
             $table->integer('order_no')->default(0);
 
 
-
+            $table->unsignedBigInteger("assigned_to");
+            $table->foreign('assigned_to')->references('id')->on('users')->onDelete('cascade');
 
             $table->unsignedBigInteger("project_id");
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+
+
             $table->unsignedBigInteger("parent_task_id")->nullable();
             $table->foreign('parent_task_id')->references('id')->on('tasks')->onDelete('cascade');
 

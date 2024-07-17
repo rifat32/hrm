@@ -45,6 +45,8 @@ class TaskController extends Controller
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
  *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
+ *  *  *     @OA\Property(property="assigned_to", type="integer", format="integer", example="2"),
+ *
  *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3}),
  *
  *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
@@ -113,8 +115,8 @@ class TaskController extends Controller
                 $request_data["business_id"] = $request->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["assigned_by"] = $request->user()->id;
-
+                $request_data["assigned_by"] = auth()->user()->id;
+                $request_data["assigned_to"] = $request_data["assigned_to"];
 
 
 
@@ -127,7 +129,7 @@ class TaskController extends Controller
                     "is_active",
                     )->toArray()
                     )->count();
-$task->save();
+                $task->save();
 
                 $task->assignees()->sync($request_data['assignees']);
                 $task->labels()->sync($request_data['labels']);
@@ -178,6 +180,10 @@ Comment::create([
  *     @OA\Property(property="project_id", type="integer", format="integer", example="1"),
  *     @OA\Property(property="parent_task_id", type="integer", format="integer", example="2"),
  * *  *     @OA\Property(property="task_category_id", type="integer", format="integer", example="2"),
+ *
+ *  *  *  *     @OA\Property(property="assigned_to", type="integer", format="integer", example="2"),
+ *
+ *  *     @OA\Property(property="assignees", type="string", format="array", example={1,2,3}),
  *
  * *      @OA\Property(property="cover", type="string", format="string", example="in_progress"),
  *      @OA\Property(property="labels", type="string", format="array", example={1,2,3}),
@@ -258,13 +264,8 @@ Comment::create([
                     collect($request_data)->only([
                         'name',
                         'description',
-
-
-                      'assets',
-
-                      'cover',
-
-
+                        'assets',
+                        'cover',
                         'start_date',
                         'due_date',
                         'end_date',
@@ -274,7 +275,8 @@ Comment::create([
                         "task_category_id",
 
                         "order_no",
-                        'assigned_by',
+                        // 'assigned_by',
+                        'assigned_to',
 
                         // "is_active",
                         // "business_id",
@@ -292,10 +294,8 @@ Comment::create([
                 }
 
 
+
                 $task->labels()->sync($request_data['labels']);
-
-
-
                 $task->assignees()->sync($request_data['assignees']);
 
                 DB::commit();
@@ -613,7 +613,34 @@ Comment::create([
                 ], 401);
             }
             $business_id =  $request->user()->business_id;
-            $tasks = Task::with("assigned_by","assignees","labels")
+            $tasks = Task::with(
+                [
+                    "assigned_by" => function ($query) {
+                        $query->select('users.id', 'users.first_Name','users.middle_Name',
+                        'users.last_Name');
+                    },
+                    "assignees" => function ($query) {
+                        $query->select('users.id', 'users.first_Name','users.middle_Name',
+                        'users.last_Name');
+                    },
+                    "assigned_to" => function ($query) {
+                        $query->select('users.id', 'users.first_Name','users.middle_Name',
+                        'users.last_Name');
+                    },
+                    "labels" => function ($query) {
+                        $query->select(
+                        'labels.id',
+                        'labels.name',
+                        'labels.color',
+                        "labels.unique_identifier",
+                        'labels.project_id',
+                    );
+                    },
+
+                ]
+
+
+                )
 
             ->where(
                 [
@@ -741,7 +768,34 @@ Comment::create([
             }
             $business_id =  $request->user()->business_id;
 
-            $task =  Task::with("assigned_by","assignees","labels")
+            $task =  Task::with(
+            [
+                "assigned_by" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "assignees" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "assigned_to" => function ($query) {
+                    $query->select('users.id', 'users.first_Name','users.middle_Name',
+                    'users.last_Name');
+                },
+                "labels" => function ($query) {
+                    $query->select(
+                    'labels.id',
+                    'labels.name',
+                    'labels.color',
+                    "labels.unique_identifier",
+                    'labels.project_id',
+                );
+                },
+
+            ]
+
+
+            )
             ->where([
                 "id" => $id,
                 "business_id" => $business_id
