@@ -13,9 +13,13 @@ class ValidateUniqueBankName implements Rule
      * @return void
      */
     protected $id;
+    protected $errMessage;
+
     public function __construct($id)
     {
         $this->id = $id;
+        $this->errMessage = "";
+
     }
 
     /**
@@ -32,7 +36,7 @@ class ValidateUniqueBankName implements Rule
             $created_by = auth()->user()->business->created_by;
         }
 
-        $exists = Bank::where("banks.name",$value)
+        $data = Bank::where("banks.name",$value)
         ->when(!empty($this->id),function($query) {
             $query->whereNotIn("id",[$this->id]);
         })
@@ -42,22 +46,22 @@ class ValidateUniqueBankName implements Rule
             $query->where(function($query) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('banks.business_id', NULL)
-                        ->where('banks.is_default', 1)
-                        ->where('banks.is_active', 1);
+                        ->where('banks.is_default', 1);
+                        // ->where('banks.is_active', 1);
 
                 } else {
                     return $query->where('banks.business_id', NULL)
                         ->where('banks.is_default', 1)
                         ->where('banks.is_active', 1)
-                        ->whereDoesntHave("disabled", function($q) {
-                            $q->whereIn("disabled_banks.created_by", [auth()->user()->id]);
-                        })
+                        // ->whereDoesntHave("disabled", function($q) {
+                        //     $q->whereIn("disabled_banks.created_by", [auth()->user()->id]);
+                        // })
 
                         ->orWhere(function ($query)   {
                             $query->where('banks.business_id', NULL)
                                 ->where('banks.is_default', 0)
-                                ->where('banks.created_by', auth()->user()->id)
-                                ->where('banks.is_active', 1);
+                                ->where('banks.created_by', auth()->user()->id);
+                                // ->where('banks.is_active', 1);
 
 
                         });
@@ -76,32 +80,44 @@ class ValidateUniqueBankName implements Rule
                 ->whereDoesntHave("disabled", function($q) use($created_by) {
                     $q->whereIn("disabled_banks.created_by", [$created_by]);
                 })
-                ->whereDoesntHave("disabled", function($q)  {
-                    $q->whereIn("disabled_banks.business_id",[auth()->user()->business_id]);
-                })
+                // ->whereDoesntHave("disabled", function($q)  {
+                //     $q->whereIn("disabled_banks.business_id",[auth()->user()->business_id]);
+                // })
 
                 ->orWhere(function ($query) use( $created_by){
                     $query->where('banks.business_id', NULL)
                         ->where('banks.is_default', 0)
                         ->where('banks.created_by', $created_by)
-                        ->where('banks.is_active', 1)
-                        ->whereDoesntHave("disabled", function($q) {
-                            $q->whereIn("disabled_banks.business_id",[auth()->user()->business_id]);
-                        });
+                        ->where('banks.is_active', 1);
+                        // ->whereDoesntHave("disabled", function($q) {
+                        //     $q->whereIn("disabled_banks.business_id",[auth()->user()->business_id]);
+                        // });
                 })
                 ->orWhere(function ($query)   {
                     $query->where('banks.business_id', auth()->user()->business_id)
-                        ->where('banks.is_default', 0)
-                        ->where('banks.is_active', 1);
+                        ->where('banks.is_default', 0);
+                        // ->where('banks.is_active', 1);
 
                 });
             });
 
 
             })
-        ->exists();
-        return !$exists;
+        ->first();
+        if(!empty($data)){
 
+
+            if ($data->is_active) {
+                $this->errMessage = "A bank with the same name already exists.";
+            } else {
+                $this->errMessage = "A bank with the same name exists but is deactivated. Please activate it to use.";
+            }
+
+
+            return 0;
+
+        }
+     return 1;
     }
 
     /**
@@ -111,6 +127,10 @@ class ValidateUniqueBankName implements Rule
      */
     public function message()
     {
-        return 'The :attribute is already taken.';
+        return $this->errMessage;
     }
+
+
+
+
 }

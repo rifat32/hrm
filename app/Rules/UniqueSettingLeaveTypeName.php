@@ -30,7 +30,10 @@ class UniqueSettingLeaveTypeName implements Rule
      */
     public function passes($attribute, $value)
     {
-
+        $created_by  = NULL;
+        if(auth()->user()->business) {
+            $created_by = auth()->user()->business->created_by;
+        }
 
         $data = SettingLeaveType::where("setting_leave_types.name",$value)
         ->when(!empty($this->id), function($query) {
@@ -48,6 +51,7 @@ class UniqueSettingLeaveTypeName implements Rule
                 } else {
                     return $query->where('setting_leave_types.business_id', NULL)
                         ->where('setting_leave_types.is_default', 1)
+                        ->where('setting_leave_types.is_active', 1)
                         // ->whereDoesntHave("disabled", function($q) {
                         //     $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
                         // })
@@ -81,7 +85,7 @@ class UniqueSettingLeaveTypeName implements Rule
         ->first();
 
 
-        if($data){
+        if(!empty($data)){
 
 
             if ($data->is_active) {
