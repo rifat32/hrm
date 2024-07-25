@@ -60,6 +60,7 @@ class TaskCreateRequest extends BaseFormRequest
             ],
 
             "assigned_to" => [
+                "required",
                 'numeric',
               new ValidUserId($all_manager_department_ids)
             ],

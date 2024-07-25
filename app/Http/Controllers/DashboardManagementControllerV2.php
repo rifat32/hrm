@@ -942,34 +942,41 @@ class DashboardManagementControllerV2 extends Controller
 
 
         if ($duration == "today") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if ($duration == "next_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "this_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "previous_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "next_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "this_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "previous_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -1054,34 +1061,41 @@ class DashboardManagementControllerV2 extends Controller
 
 
         if ($duration == "today") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if ($duration == "next_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "this_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "previous_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "next_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "this_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "previous_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -1163,34 +1177,41 @@ class DashboardManagementControllerV2 extends Controller
 
 
         if ($duration == "today") {
-            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data_query_clone = clone $data_query;
+            $data["today"] = $data_query_clone->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if ($duration == "next_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "this_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "previous_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "next_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "this_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "previous_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -1274,34 +1295,41 @@ class DashboardManagementControllerV2 extends Controller
 
 
         if ($duration == "today") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if ($duration == "next_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "this_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "previous_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "next_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "this_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "previous_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 
@@ -1376,38 +1404,45 @@ class DashboardManagementControllerV2 extends Controller
 
         $data_query  = EmployeeSponsorshipHistory::whereIn('id', $employee_sponsorship_history_ids)
             ->where($expiry_date_column, ">=", today());
-
+// @@@crw
 
 
         if ($duration == "today") {
-            $data["today"] = $data_query->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
+            $data_query_clone = clone $data_query;
+            $data["today"] = $data_query_clone->whereBetween($expiry_date_column, [today()->startOfDay(), today()->endOfDay()])->count();
         }
 
         if ($duration == "next_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_week, ($end_date_of_next_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "this_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_week, ($end_date_of_this_week . ' 23:59:59')])->count();
         }
 
         if ($duration == "previous_week") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_week, ($end_date_of_previous_week . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "next_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_next_month, ($end_date_of_next_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "this_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_this_month, ($end_date_of_this_month . ' 23:59:59')])->count();
         }
 
 
         if ($duration == "previous_month") {
-            $data["total"] = $data_query->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
+            $data_query_clone = clone $data_query;
+            $data["total"] = $data_query_clone->whereBetween($expiry_date_column, [$start_date_of_previous_month, ($end_date_of_previous_month . ' 23:59:59')])->count();
         }
 
 

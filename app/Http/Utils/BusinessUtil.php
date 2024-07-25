@@ -793,8 +793,10 @@ public function createUserWithBusiness($request_data) {
 
    $user =  User::create($request_data['user']);
 
-   if(empty(auth()->user())){
-    Auth::login($user);
+   $created_by_user = auth()->user();
+
+   if(empty($created_by_user)){
+    $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
    }
 
 
@@ -807,14 +809,10 @@ public function createUserWithBusiness($request_data) {
 
    $request_data['business']['status'] = "pending";
    $request_data['business']['owner_id'] = $user->id;
-   $request_data['business']['created_by'] = auth()->user()->id;
+   $request_data['business']['created_by'] = $created_by_user->id;
    $request_data['business']['is_active'] = true;
    $request_data['business']["pension_scheme_letters"] = [];
-
-
-   if(!empty($request_data["business"]["is_self_registered_businesses"])) {
-    $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
-   }
+ $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
 
 
    $business =  Business::create($request_data['business']);

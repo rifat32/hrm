@@ -2257,18 +2257,11 @@ $business->service_plan = $business->service_plan;
             ->withCount('users')
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                        $query->where(function ($query) {
-                           $query
-                           ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                            $query->where('id', auth()->user()->business_id)
-                            ->orWhere('created_by', auth()->user()->id)
-                            ->orWhere('owner_id', auth()->user()->id);
-                           },
-                           function($query) {
-                            $query->where('is_self_registered_businesses', 1)
-                            ->orWhere('created_by', auth()->user()->id);
-                           }
+                           $query->where('id', auth()->user()->business_id)
+                           ->orWhere('created_by', auth()->user()->id)
+                           ->orWhere('owner_id', auth()->user()->id);
 
-                        );
+
 
                     });
                 },

@@ -299,6 +299,15 @@ class DesignationController extends Controller
                     "message" => "no data found"
                 ], 404);
             }
+
+            
+
+
+
+
+
+
+
             $should_update = 0;
             $should_disable = 0;
             if (empty(auth()->user()->business_id)) {
@@ -373,7 +382,6 @@ class DesignationController extends Controller
             }
 
             if($should_disable) {
-
                 $disabled_designation =    DisabledDesignation::where([
                     'designation_id' => $designation->id,
                     'business_id' => auth()->user()->business_id,
