@@ -127,7 +127,6 @@ class ValidateRecruitmentProcessName implements Rule
                 $this->errMessage = "A recruitment process with the same name exists but is deactivated. Please activate it to use.";
             }
 
-
             return 0;
 
         }

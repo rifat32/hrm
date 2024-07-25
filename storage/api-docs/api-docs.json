@@ -19280,13 +19280,6 @@
                         "example": "6"
                     },
                     {
-                        "name": "project_id",
-                        "in": "query",
-                        "description": "project_id",
-                        "required": true,
-                        "example": "1"
-                    },
-                    {
                         "name": "status",
                         "in": "query",
                         "description": "status",
@@ -19313,6 +19306,13 @@
                         "description": "search_key",
                         "required": true,
                         "example": "search_key"
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "description": "project_id",
+                        "required": true,
+                        "example": "project_id"
                     },
                     {
                         "name": "order_by",
@@ -19490,6 +19490,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "A brief overview of Label X's objectives and scope."
+                                    },
+                                    "project_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"
@@ -28321,6 +28326,11 @@
                                         "format": "number",
                                         "example": "10"
                                     },
+                                    "number_of_employees_allowed": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "12"
+                                    },
                                     "duration_months": {
                                         "type": "number",
                                         "format": "number",
@@ -28443,6 +28453,11 @@
                                         "example": "10"
                                     },
                                     "duration_months": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "12"
+                                    },
+                                    "number_of_employees_allowed": {
                                         "type": "number",
                                         "format": "number",
                                         "example": "12"
@@ -32311,6 +32326,20 @@
                                         "format": "integer",
                                         "example": "2"
                                     },
+                                    "assigned_to": {
+                                        "type": "integer",
+                                        "format": "integer",
+                                        "example": "2"
+                                    },
+                                    "assignees": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
                                     "cover": {
                                         "type": "string",
                                         "format": "string",
@@ -32455,6 +32484,11 @@
                                         "example": "2"
                                     },
                                     "task_category_id": {
+                                        "type": "integer",
+                                        "format": "integer",
+                                        "example": "2"
+                                    },
+                                    "assigned_to": {
                                         "type": "integer",
                                         "format": "integer",
                                         "example": "2"
@@ -38670,7 +38704,7 @@
                                         },
                                         "type": "object"
                                     },
-                                    "access_revocations": {
+                                    "access_revocation": {
                                         "properties": {
                                             "email_access_revoked": {
                                                 "type": "boolean",
