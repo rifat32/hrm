@@ -104,7 +104,7 @@ class ValidateJobPlatformName implements Rule
                 });
 
             })
-        ->exists();
+        ->first();
 
         if(!empty($data)){
 

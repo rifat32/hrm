@@ -104,7 +104,7 @@ class ValidateJobTypeName implements Rule
                 });
 
             })
-        ->exists();
+        ->first();
 
         if(!empty($data)){
 

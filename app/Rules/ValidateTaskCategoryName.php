@@ -103,7 +103,7 @@ class ValidateTaskCategoryName implements Rule
                 });
 
             })
-        ->exists();
+        ->first();
 
         if(!empty($data)){
 

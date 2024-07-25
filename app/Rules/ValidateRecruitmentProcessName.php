@@ -117,7 +117,7 @@ class ValidateRecruitmentProcessName implements Rule
 
 
             })
-        ->exists();
+        ->first();
         if(!empty($data)){
 
 
