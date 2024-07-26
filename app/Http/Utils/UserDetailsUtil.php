@@ -4,6 +4,7 @@ namespace App\Http\Utils;
 
 use App\Models\ActivityLog;
 use App\Models\Attendance;
+use App\Models\Business;
 use App\Models\EmployeeAddressHistory;
 
 use App\Models\EmployeePassportDetailHistory;
@@ -22,6 +23,7 @@ use App\Models\LeaveRecord;
 use App\Models\Project;
 use App\Models\SalaryHistory;
 use App\Models\Termination;
+use App\Models\User;
 use App\Models\UserAssetHistory;
 use App\Models\UserHoliday;
 use App\Models\UserRecruitmentProcess;
@@ -37,7 +39,50 @@ trait UserDetailsUtil
     use BasicUtil;
 
 
+public function checkEmployeeCreationLimit($throwErr = false, $employeeInserting = 1)  {
+$user = auth()->user();
+// Early return if user or business is missing
+if(empty($user) || empty($user->business_id)) {
+return true;
+}
 
+ // Eager load service plan for efficiency
+$business = Business::with("service_plan")->where([
+    "owner_id" => $user->id
+])
+->first();
+
+$service_plan = $business->service_plan;
+
+  // Early return if business or service plan is missing
+if(empty($service_plan)) {
+return true;
+}
+
+$total_employees = User::where(["business_id" => $business->id])->count() - 1;
+
+if(($total_employees + $employeeInserting) <= $service_plan->number_of_employees_allowed){
+    return true;
+
+}
+
+if($throwErr) {
+    throw new Exception("You have reached your employees limit including in the current package " . $total_employees . " please contact customer services to upgrade",409);
+}
+
+
+
+
+return false;
+
+
+
+
+
+
+
+
+}
 
 
     public function store_work_shift($request_data,$user) {

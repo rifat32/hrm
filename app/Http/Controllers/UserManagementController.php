@@ -233,7 +233,8 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id = $request->user()->business_id;
+            $this->checkEmployeeCreationLimit(true);
+
 
             $request_data = $request->validated();
 
@@ -480,6 +481,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                     "message" => "You can not perform this action"
                 ], 401);
             }
+            $this->checkEmployeeCreationLimit(true);
             $business_id = $request->user()->business_id;
 
             $request_data = $request->validated();
@@ -712,13 +714,17 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
          DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+
+
              if (!$request->user()->hasPermissionTo('user_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            //  $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $work_shift = $this->getDefaultWorkShift();
              $department = $this->getDefaultDepartment();
@@ -817,7 +823,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
 
-
+ $this->checkEmployeeCreationLimit(true,$usersData->count());
 
 
  $usersData->each(function($userData) use(&$createdUsers, $work_location,$department,$work_shift,$employment_status,$designation) {

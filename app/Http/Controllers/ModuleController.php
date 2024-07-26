@@ -411,12 +411,12 @@ class ModuleController extends Controller
              $modules = Module::when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
                 return $query->where('modules.is_active', 1);
             })
-             ->when(!empty($request->business_tier_id), function ($query) use ($request) {
-                 return $query->where('modules.business_tier_id', $request->business_tier_id);
-             })
-             ->when(empty($request->business_tier_id), function ($query) use ($request) {
-                return $query->where('modules.business_tier_id', NULL);
-            })
+            //  ->when(!empty($request->business_tier_id), function ($query) use ($request) {
+            //      return $query->where('modules.business_tier_id', $request->business_tier_id);
+            //  })
+            //  ->when(empty($request->business_tier_id), function ($query) use ($request) {
+            //     return $query->where('modules.business_tier_id', NULL);
+            // })
                  ->when(!empty($request->search_key), function ($query) use ($request) {
                      return $query->where(function ($query) use ($request) {
                          $term = $request->search_key;

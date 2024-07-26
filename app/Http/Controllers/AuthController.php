@@ -16,6 +16,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Http\Utils\UserDetailsUtil;
 use App\Mail\ForgetPasswordMail;
 use App\Mail\VerifyMail;
 use App\Models\Business;
@@ -33,7 +34,7 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil, UserDetailsUtil;
     /**
      *
      * @OA\Post(
@@ -105,11 +106,15 @@ class AuthController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->checkEmployeeCreationLimit(true);
+
+            
             $request_data = $request->validated();
 
             $request_data['password'] = Hash::make($request['password']);
             $request_data['remember_token'] = Str::random(10);
             $request_data['is_active'] = true;
+
 
 
 
