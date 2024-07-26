@@ -39,38 +39,29 @@ class EmploymentStatusUpdateRequest extends BaseFormRequest
                     $employment_status = EmploymentStatus::where($employment_status_query_params)
                         ->first();
                     if (!$employment_status) {
-                            // $fail($attribute . " is invalid.");
-                            $fail("no employment statuses found");
-                            return 0;
-
+                        // $fail($attribute . " is invalid.");
+                        $fail("no employment statuses found");
+                        return 0;
                     }
                     if (empty(auth()->user()->business_id)) {
 
-                        if(auth()->user()->hasRole('superadmin')) {
-                            if(($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                        if (auth()->user()->hasRole('superadmin')) {
+                            if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this employment statuses due to role restrictions.");
-
-                          }
-
+                            }
                         } else {
-                            if(($employment_status->business_id != NULL || $employment_status->is_default != 0 || $employment_status->created_by != auth()->user()->id)) {
+                            if (($employment_status->business_id != NULL || $employment_status->is_default != 0 || $employment_status->created_by != auth()->user()->id)) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this employment statuses due to role restrictions.");
-
-                          }
+                            }
                         }
-
                     } else {
-                        if(($employment_status->business_id != auth()->user()->business_id || $employment_status->is_default != 0)) {
-                               // $fail($attribute . " is invalid.");
+                        if (($employment_status->business_id != auth()->user()->business_id || $employment_status->is_default != 0)) {
+                            // $fail($attribute . " is invalid.");
                             $fail("You do not have permission to update this employment status due to role restrictions.");
                         }
                     }
-
-
-
-
                 },
             ],
 
@@ -96,14 +87,6 @@ class EmploymentStatusUpdateRequest extends BaseFormRequest
 
         // }
 
-return $rules;
+        return $rules;
     }
-
-
-
-
-
-
-
-
 }

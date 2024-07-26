@@ -19,6 +19,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Str;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +38,28 @@ Route::get("/developer-login",[DeveloperLoginController::class,"login"])->name("
 Route::post("/developer-login",[DeveloperLoginController::class,"passUser"]);
 
 
+
+
+Route::get('/code-generator', function () {
+   $names=[];
+    return view('code_generator.code-generator', compact("names"));
+});
+
+Route::post('/code-generator', function (Request $request) {
+    $names["table_name"] = $request->table_name;
+    $names["singular_table_name"] = Str::singular($names["table_name"]);
+
+    $names["singular_model_name"] = Str::studly($names["singular_table_name"]);
+    $names["plural_model_name"] = Str::plural($names["singular_model_name"]);
+
+    $names["api_name"] = str_replace('_', '-', $names["table_name"]);
+    $names["controller_name"] = $names["singular_model_name"] . 'Controller';
+
+    $names["singular_comment_name"] = Str::singular(str_replace('_', ' ', $names["table_name"]));
+    $names["plural_comment_name"] = str_replace('_', ' ', $names["table_name"]);
+
+    return view('code_generator.code-generator',compact("names"));
+})->name("code-generator");
 
 
 // Grouping the routes and applying middleware to the entire group

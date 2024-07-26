@@ -36,11 +36,11 @@ class EmploymentStatusController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- *  * @OA\Property(property="color", type="string", format="string", example="red"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
- *
- *
+     * @OA\Property(property="name", type="string", format="string", example="tttttt"),
+     *  * @OA\Property(property="color", type="string", format="string", example="red"),
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     *
+     *
      *
      *         ),
      *      ),
@@ -81,7 +81,7 @@ class EmploymentStatusController extends Controller
     public function createEmploymentStatus(EmploymentStatusCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('employment_status_create')) {
                     return response()->json([
@@ -134,10 +134,10 @@ class EmploymentStatusController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-*      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
- * @OA\Property(property="name", type="string", format="string", example="tttttt"),
- *  *  * @OA\Property(property="color", type="string", format="string", example="red"),
- * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     * @OA\Property(property="name", type="string", format="string", example="tttttt"),
+     *  *  * @OA\Property(property="color", type="string", format="string", example="red"),
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;")
 
 
      *
@@ -181,7 +181,7 @@ class EmploymentStatusController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('employment_status_update')) {
                     return response()->json([
@@ -225,7 +225,7 @@ class EmploymentStatusController extends Controller
         }
     }
 
-  /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/employment-statuses/toggle-active",
@@ -279,127 +279,119 @@ class EmploymentStatusController extends Controller
      *     )
      */
 
-     public function toggleActiveEmploymentStatus(GetIdRequest $request)
-     {
+    public function toggleActiveEmploymentStatus(GetIdRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('employment_status_activate')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('employment_status_activate')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
-             $employment_status =  EmploymentStatus::where([
-                 "id" => $request_data["id"],
-             ])
-                 ->first();
-             if (!$employment_status) {
+            $employment_status =  EmploymentStatus::where([
+                "id" => $request_data["id"],
+            ])
+                ->first();
+            if (!$employment_status) {
 
-                 return response()->json([
-                     "message" => "no data found"
-                 ], 404);
-             }
-             $should_update = 0;
-             $should_disable = 0;
-             if (empty(auth()->user()->business_id)) {
+                return response()->json([
+                    "message" => "no data found"
+                ], 404);
+            }
+            $should_update = 0;
+            $should_disable = 0;
+            if (empty(auth()->user()->business_id)) {
 
-                 if (auth()->user()->hasRole('superadmin')) {
-                     if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
 
-                         return response()->json([
-                             "message" => "You do not have permission to update this employment status due to role restrictions."
-                         ], 403);
-                     } else {
-                         $should_update = 1;
-                     }
-                 } else {
-                     if ($employment_status->business_id != NULL) {
-
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this employment status due to role restrictions."
-                         ], 403);
-                     } else if ($employment_status->is_default == 0) {
-
-                         if($employment_status->created_by != auth()->user()->id) {
-
-                             return response()->json([
-                                 "message" => "You do not have permission to update this employment status due to role restrictions."
-                             ], 403);
-                         }
-                         else {
-                             $should_update = 1;
-                         }
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
+                    } else {
+                        $should_update = 1;
+                    }
+                } else {
+                    if ($employment_status->business_id != NULL) {
 
 
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
+                    } else if ($employment_status->is_default == 0) {
 
-                     }
-                     else {
-                      $should_disable = 1;
+                        if ($employment_status->created_by != auth()->user()->id) {
 
-                     }
-                 }
-             } else {
-                 if ($employment_status->business_id != NULL) {
-                     if (($employment_status->business_id != auth()->user()->business_id)) {
+                            return response()->json([
+                                "message" => "You do not have permission to update this employment status due to role restrictions."
+                            ], 403);
+                        } else {
+                            $should_update = 1;
+                        }
+                    } else {
+                        $should_disable = 1;
+                    }
+                }
+            } else {
+                if ($employment_status->business_id != NULL) {
+                    if (($employment_status->business_id != auth()->user()->business_id)) {
 
-                         return response()->json([
-                             "message" => "You do not have permission to update this employment status due to role restrictions."
-                         ], 403);
-                     } else {
-                         $should_update = 1;
-                     }
-                 } else {
-                     if ($employment_status->is_default == 0) {
-                         if ($employment_status->created_by != auth()->user()->created_by) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
+                    } else {
+                        $should_update = 1;
+                    }
+                } else {
+                    if ($employment_status->is_default == 0) {
+                        if ($employment_status->created_by != auth()->user()->created_by) {
 
-                             return response()->json([
-                                 "message" => "You do not have permission to update this employment status due to role restrictions."
-                             ], 403);
-                         } else {
-                             $should_disable = 1;
+                            return response()->json([
+                                "message" => "You do not have permission to update this employment status due to role restrictions."
+                            ], 403);
+                        } else {
+                            $should_disable = 1;
+                        }
+                    } else {
+                        $should_disable = 1;
+                    }
+                }
+            }
 
-                         }
-                     } else {
-                         $should_disable = 1;
+            if ($should_update) {
+                $employment_status->update([
+                    'is_active' => !$employment_status->is_active
+                ]);
+            }
 
-                     }
-                 }
-             }
+            if ($should_disable) {
 
-             if ($should_update) {
-                 $employment_status->update([
-                     'is_active' => !$employment_status->is_active
-                 ]);
-             }
-
-             if($should_disable) {
-
-                 $disabled_employment_status =    DisabledEmploymentStatus::where([
-                     'employment_status_id' => $employment_status->id,
-                     'business_id' => auth()->user()->business_id,
-                     'created_by' => auth()->user()->id,
-                 ])->first();
-                 if(!$disabled_employment_status) {
+                $disabled_employment_status =    DisabledEmploymentStatus::where([
+                    'employment_status_id' => $employment_status->id,
+                    'business_id' => auth()->user()->business_id,
+                    'created_by' => auth()->user()->id,
+                ])->first();
+                if (!$disabled_employment_status) {
                     DisabledEmploymentStatus::create([
-                         'employment_status_id' => $employment_status->id,
-                         'business_id' => auth()->user()->business_id,
-                         'created_by' => auth()->user()->id,
-                     ]);
-                 } else {
-                     $disabled_employment_status->delete();
-                 }
-             }
+                        'employment_status_id' => $employment_status->id,
+                        'business_id' => auth()->user()->business_id,
+                        'created_by' => auth()->user()->id,
+                    ]);
+                } else {
+                    $disabled_employment_status->delete();
+                }
+            }
 
 
-             return response()->json(['message' => 'employment status status updated successfully'], 200);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response()->json(['message' => 'employment status status updated successfully'], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Get(
@@ -524,7 +516,7 @@ class EmploymentStatusController extends Controller
     public function getEmploymentStatuses(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('employment_status_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -532,7 +524,7 @@ class EmploymentStatusController extends Controller
             }
 
             $created_by  = NULL;
-            if(auth()->user()->business) {
+            if (auth()->user()->business) {
                 $created_by = auth()->user()->business->created_by;
             }
 
@@ -547,79 +539,70 @@ class EmploymentStatusController extends Controller
                 } else {
                     return $query
 
-                    ->where(function($query) use($request) {
-                        $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 1)
-                        ->where('employment_statuses.is_active', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(intval($request->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
-                                });
-                            }
-
-                        })
-                        ->orWhere(function ($query) use ($request) {
+                        ->where(function ($query) use ($request) {
                             $query->where('employment_statuses.business_id', NULL)
-                                ->where('employment_statuses.is_default', 0)
-                                ->where('employment_statuses.created_by', auth()->user()->id)
+                                ->where('employment_statuses.is_default', 1)
+                                ->where('employment_statuses.is_active', 1)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('employment_statuses.is_active', intval($request->is_active));
+                                    if (intval($request->is_active)) {
+                                        return $query->whereDoesntHave("disabled", function ($q) {
+                                            $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
+                                        });
+                                    }
+                                })
+                                ->orWhere(function ($query) use ($request) {
+                                    $query->where('employment_statuses.business_id', NULL)
+                                        ->where('employment_statuses.is_default', 0)
+                                        ->where('employment_statuses.created_by', auth()->user()->id)
+                                        ->when(isset($request->is_active), function ($query) use ($request) {
+                                            return $query->where('employment_statuses.is_active', intval($request->is_active));
+                                        });
                                 });
                         });
-
-                    });
                 }
             })
                 ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
-                    ->where(function($query) use($request, $created_by) {
+                        ->where(function ($query) use ($request, $created_by) {
 
 
-                        $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 1)
-                        ->where('employment_statuses.is_active', 1)
-                        ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_employment_statuses.created_by", [$created_by]);
-                        })
-                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(intval($request->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-                                });
-                            }
-
-                        })
-
-
-                        ->orWhere(function ($query) use($request, $created_by){
                             $query->where('employment_statuses.business_id', NULL)
-                                ->where('employment_statuses.is_default', 0)
-                                ->where('employment_statuses.created_by', $created_by)
+                                ->where('employment_statuses.is_default', 1)
                                 ->where('employment_statuses.is_active', 1)
-
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(intval($request->is_active)) {
-                                        return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
+                                ->whereDoesntHave("disabled", function ($q) use ($created_by) {
+                                    $q->whereIn("disabled_employment_statuses.created_by", [$created_by]);
+                                })
+                                ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
+                                    if (intval($request->is_active)) {
+                                        return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
+                                            $q->whereIn("disabled_employment_statuses.business_id", [auth()->user()->business_id]);
                                         });
                                     }
-
                                 })
 
 
-                                ;
-                        })
-                        ->orWhere(function ($query) use($request) {
-                            $query->where('employment_statuses.business_id', auth()->user()->business_id)
-                                ->where('employment_statuses.is_default', 0)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('employment_statuses.is_active', intval($request->is_active));
-                                });;
+                                ->orWhere(function ($query) use ($request, $created_by) {
+                                    $query->where('employment_statuses.business_id', NULL)
+                                        ->where('employment_statuses.is_default', 0)
+                                        ->where('employment_statuses.created_by', $created_by)
+                                        ->where('employment_statuses.is_active', 1)
+
+                                        ->when(isset($request->is_active), function ($query) use ($request) {
+                                            if (intval($request->is_active)) {
+                                                return $query->whereDoesntHave("disabled", function ($q) {
+                                                    $q->whereIn("disabled_employment_statuses.business_id", [auth()->user()->business_id]);
+                                                });
+                                            }
+                                        });
+                                })
+                                ->orWhere(function ($query) use ($request) {
+                                    $query->where('employment_statuses.business_id', auth()->user()->business_id)
+                                        ->where('employment_statuses.is_default', 0)
+                                        ->when(isset($request->is_active), function ($query) use ($request) {
+                                            return $query->where('employment_statuses.is_active', intval($request->is_active));
+                                        });;
+                                });
                         });
-                    });
-
-
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -640,10 +623,10 @@ class EmploymentStatusController extends Controller
 
 
                 ->when(!empty($request->name), function ($query) use ($request) {
-                    return $query->where('employment_statuses.name', $request->name );
+                    return $query->where('employment_statuses.name', $request->name);
                 })
                 ->when(!empty($request->description), function ($query) use ($request) {
-                    return $query->where('employment_statuses.description', $request->description );
+                    return $query->where('employment_statuses.description', $request->description);
                 })
 
 
@@ -726,7 +709,7 @@ class EmploymentStatusController extends Controller
     public function getEmploymentStatusById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('employment_status_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -738,55 +721,54 @@ class EmploymentStatusController extends Controller
 
             ])
                 ->first();
-                if (!$employment_status) {
+            if (!$employment_status) {
 
-                    return response()->json([
-                        "message" => "no data found"
-                    ], 404);
-                }
+                return response()->json([
+                    "message" => "no data found"
+                ], 404);
+            }
 
-                if (empty(auth()->user()->business_id)) {
+            if (empty(auth()->user()->business_id)) {
 
-                    if (auth()->user()->hasRole('superadmin')) {
-                        if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                if (auth()->user()->hasRole('superadmin')) {
+                    if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
 
-                            return response()->json([
-                                "message" => "You do not have permission to update this employment status due to role restrictions."
-                            ], 403);
-                        }
-                    } else {
-                        if ($employment_status->business_id != NULL) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this employment status due to role restrictions."
-                            ], 403);
-                        } else if ($employment_status->is_default == 0 && $employment_status->created_by != auth()->user()->id) {
-
-                                return response()->json([
-                                    "message" => "You do not have permission to update this employment status due to role restrictions."
-                                ], 403);
-
-                        }
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
                     }
                 } else {
                     if ($employment_status->business_id != NULL) {
-                        if (($employment_status->business_id != auth()->user()->business_id)) {
+
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
+                    } else if ($employment_status->is_default == 0 && $employment_status->created_by != auth()->user()->id) {
+
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
+                    }
+                }
+            } else {
+                if ($employment_status->business_id != NULL) {
+                    if (($employment_status->business_id != auth()->user()->business_id)) {
+
+                        return response()->json([
+                            "message" => "You do not have permission to update this employment status due to role restrictions."
+                        ], 403);
+                    }
+                } else {
+                    if ($employment_status->is_default == 0) {
+                        if ($employment_status->created_by != auth()->user()->created_by) {
 
                             return response()->json([
                                 "message" => "You do not have permission to update this employment status due to role restrictions."
                             ], 403);
                         }
-                    } else {
-                        if ($employment_status->is_default == 0) {
-                            if ($employment_status->created_by != auth()->user()->created_by) {
-
-                                return response()->json([
-                                    "message" => "You do not have permission to update this employment status due to role restrictions."
-                                ], 403);
-                            }
-                        }
                     }
                 }
+            }
 
 
             return response()->json($employment_status, 200);
@@ -855,7 +837,7 @@ class EmploymentStatusController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('employment_status_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -864,20 +846,20 @@ class EmploymentStatusController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = EmploymentStatus::whereIn('id', $idsArray)
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
-                if ($request->user()->hasRole("superadmin")) {
-                    return $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 1);
-                } else {
-                    return $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 0)
-                        ->where('employment_statuses.created_by', $request->user()->id);
-                }
-            })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('employment_statuses.business_id', $request->user()->business_id)
-                    ->where('employment_statuses.is_default', 0);
-            })
+                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                    if ($request->user()->hasRole("superadmin")) {
+                        return $query->where('employment_statuses.business_id', NULL)
+                            ->where('employment_statuses.is_default', 1);
+                    } else {
+                        return $query->where('employment_statuses.business_id', NULL)
+                            ->where('employment_statuses.is_default', 0)
+                            ->where('employment_statuses.created_by', $request->user()->id);
+                    }
+                })
+                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                    return $query->where('employment_statuses.business_id', $request->user()->business_id)
+                        ->where('employment_statuses.is_default', 0);
+                })
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -892,8 +874,10 @@ class EmploymentStatusController extends Controller
             }
 
 
-            $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get(['id', 'first_Name',
-            'last_Name',]);
+            $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get([
+                'id', 'first_Name',
+                'last_Name',
+            ]);
 
             if ($conflictingUsers->isNotEmpty()) {
                 return response()->json([
@@ -902,32 +886,30 @@ class EmploymentStatusController extends Controller
                 ], 409);
             }
 
-          
 
-            $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
-            if($paid_employment_status_exists) {
+
+            $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($paid_employment_status_exists) {
                 $conflictingPaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
 
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
                     "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatus
                 ], 409);
-
             }
-            $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id",$existingIds)->exists();
-            if($unpaid_employment_status_exists) {
+            $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($unpaid_employment_status_exists) {
                 $conflictingUnpaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
 
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
                     "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatus
                 ], 409);
-
             }
             EmploymentStatus::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

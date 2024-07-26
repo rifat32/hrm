@@ -375,6 +375,12 @@ ADD CONSTRAINT fk_business_id FOREIGN KEY (business_id) REFERENCES businesses(id
 
 
 
+57. -- Drop the existing foreign key constraint
+ALTER TABLE disabled_designations DROP FOREIGN KEY business_id_foreign;
+
+-- Add the new foreign key constraint
+ALTER TABLE disabled_designations ADD CONSTRAINT business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE;
+
 
 
 

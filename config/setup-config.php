@@ -162,6 +162,17 @@ return [
                 "employment_status_view",
                 // "employment_status_delete",
 
+
+
+                "letter_template_create",
+                "letter_template_update",
+                // "letter_template_activate",
+                "letter_template_view",
+                // "letter_template_delete",
+
+
+
+
                 "setting_leave_type_create",
                 "setting_leave_type_update",
                 "setting_leave_type_view",
@@ -293,6 +304,12 @@ return [
                 // "employment_status_activate",
                 "employment_status_view",
                 // "employment_status_delete",
+
+                "letter_template_create",
+                "letter_template_update",
+                // "letter_template_activate",
+                "letter_template_view",
+                // "letter_template_delete",
 
 
 
@@ -543,6 +560,12 @@ return [
                 "employment_status_activate",
                 "employment_status_view",
                 "employment_status_delete",
+
+                "letter_template_create",
+                "letter_template_update",
+                "letter_template_activate",
+                "letter_template_view",
+                "letter_template_delete",
 
                 "setting_leave_type_create",
                 "setting_leave_type_update",
@@ -805,6 +828,12 @@ return [
                 "employment_status_view",
                 "employment_status_delete",
 
+                "letter_template_create",
+                "letter_template_update",
+                "letter_template_activate",
+                "letter_template_view",
+                "letter_template_delete",
+
                 "setting_leave_type_create",
                 "setting_leave_type_update",
                 "setting_leave_type_activate",
@@ -1043,6 +1072,12 @@ return [
                 "employment_status_view",
                 // "employment_status_delete",
 
+                // "letter_template_create",
+                // "letter_template_update",
+                // "letter_template_activate",
+                "letter_template_view",
+                // "letter_template_delete",
+
                 // "setting_leave_type_create",
                 // "setting_leave_type_update",
                 // "setting_leave_type_activate",
@@ -1133,6 +1168,8 @@ return [
                 "work_location_view",
                 "recruitment_process_view",
                 "employment_status_view",
+                "letter_template_view",
+
                 "leave_view",
                 "attendance_view",
 
@@ -1475,6 +1512,12 @@ return [
         "employment_status_view",
         "employment_status_delete",
 
+        "letter_template_create",
+        "letter_template_update",
+        "letter_template_activate",
+        "letter_template_view",
+        "letter_template_delete",
+
         "setting_leave_type_create",
         "setting_leave_type_update",
         "setting_leave_type_activate",
@@ -1793,6 +1836,12 @@ return [
         "employment_status_activate" => "",
         "employment_status_view" => "Can view employment status",
         "employment_status_delete" => "Can delete employment status",
+
+        "letter_template_create" => "",
+        "letter_template_update" => "",
+        "letter_template_activate" => "",
+        "letter_template_view" => "",
+        "letter_template_delete" => "",
 
         "setting_leave_type_create" => "Can create setting leave type",
         "setting_leave_type_update" => "Can update setting leave type",
@@ -2145,6 +2194,14 @@ return [
         "employment_status_activate" => "activate",
         "employment_status_view" => "view",
         "employment_status_delete" => "delete",
+
+        "letter_template_create" => "create",
+        "letter_template_update" => "update",
+        "letter_template_activate" => "activate",
+        "letter_template_view" => "view",
+        "letter_template_delete" => "delete",
+
+     
 
         "setting_leave_type_create" => "create",
         "setting_leave_type_update" => "update",

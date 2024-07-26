@@ -29,7 +29,7 @@ use App\Http\Controllers\JobPlatformController;
 use App\Http\Controllers\JobTypeController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LeaveController;
-
+use App\Http\Controllers\LetterTemplateController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NotificationController;
 
@@ -1197,6 +1197,24 @@ Route::delete('/v1.0/recruitment-processes/{ids}', [RecruitmentProcessController
 
 
 
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// letter templates management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/letter-templates', [LetterTemplateController::class, "createLetterTemplate"]);
+Route::put('/v1.0/letter-templates', [LetterTemplateController::class, "updateLetterTemplate"]);
+Route::put('/v1.0/letter-templates/toggle-active', [LetterTemplateController::class, "toggleActiveLetterTemplate"]);
+Route::get('/v1.0/letter-templates', [LetterTemplateController::class, "getLetterTemplates"]);
+Route::get('/v1.0/letter-templates/{id}', [LetterTemplateController::class, "getLetterTemplateById"]);
+Route::delete('/v1.0/letter-templates/{ids}', [LetterTemplateController::class, "deleteLetterTemplatesByIds"]);
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end letter templates management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

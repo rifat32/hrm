@@ -1,17 +1,19 @@
 <?php
 
+
+
 namespace App\Http\Requests;
 
 
-use App\Rules\ValidEmploymentStatusName;
+use App\Rules\ValidateLetterTemplateName;
 use Illuminate\Foundation\Http\FormRequest;
 
-class EmploymentStatusCreateRequest extends BaseFormRequest
+class LetterTemplateCreateRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      *
-     * @return bool
+     * @return  bool
      */
     public function authorize()
     {
@@ -21,7 +23,7 @@ class EmploymentStatusCreateRequest extends BaseFormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return  array
      */
     public function rules()
     {
@@ -30,19 +32,16 @@ class EmploymentStatusCreateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-                new ValidEmploymentStatusName(NULL)
+                new ValidateLetterTemplateName(NULL)
             ],
             'description' => 'nullable|string',
             'color' => 'required|string',
         ];
 
-        // if (!empty(auth()->user()->business_id)) {
-        //     $rules['name'] .= '|unique:employment_statuses,name,NULL,id,business_id,' . auth()->user()->business_id;
-        // } else {
-        //     $rules['name'] .= '|unique:employment_statuses,name,NULL,id,is_default,' . (auth()->user()->hasRole('superadmin') ? 1 : 0);
-        // }
 
 
         return $rules;
     }
 }
+
+

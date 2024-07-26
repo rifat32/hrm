@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,34 +31,29 @@ class Designation extends Model
         $is_active = $value;
         $user = auth()->user();
 
-        if(empty($user->business_id)) {
-            if(empty($this->business_id) && $this->is_default == 1) {
-                if(!$user->hasRole("superadmin")) {
+        if (empty($user->business_id)) {
+            if (empty($this->business_id) && $this->is_default == 1) {
+                if (!$user->hasRole("superadmin")) {
                     $disabled = $this->disabled()->where([
                         "created_by" => $user->id
-                   ])
-                   ->first();
-                   if($disabled) {
-                      $is_active = 0;
-                   }
+                    ])
+                        ->first();
+                    if ($disabled) {
+                        $is_active = 0;
+                    }
                 }
-               }
-
-
+            }
         } else {
 
-            if(empty($this->business_id)) {
-             $disabled = $this->disabled()->where([
-                  "business_id" => $user->business_id
-             ])
-             ->first();
-             if($disabled) {
-                $is_active = 0;
-             }
-
+            if (empty($this->business_id)) {
+                $disabled = $this->disabled()->where([
+                    "business_id" => $user->business_id
+                ])
+                    ->first();
+                if ($disabled) {
+                    $is_active = 0;
+                }
             }
-
-
         }
 
 
@@ -72,21 +68,14 @@ class Designation extends Model
         $is_default = $value;
         $user = auth()->user();
 
-        if(!empty($user->business_id)) {
-            if(empty($this->business_id) || $user->business_id !=  $this->business_id) {
-                  $is_default = 1;
-
-               }
-
+        if (!empty($user->business_id)) {
+            if (empty($this->business_id) || $user->business_id !=  $this->business_id) {
+                $is_default = 1;
+            }
         }
 
 
 
         return $is_default;
     }
-
-
-
-    
-
 }
