@@ -28,6 +28,10 @@ class ServicePlan extends Model
     }
 
 
+    public function modules() {
+        return $this->belongsToMany(Module::class, 'service_plan_modules', 'service_plan_id', 'module_id');
+    }
+
 
 
 

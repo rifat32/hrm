@@ -368,6 +368,10 @@ ADD CONSTRAINT fk_assigned_to
 FOREIGN KEY (assigned_to) REFERENCES users(id)
 ON DELETE CASCADE;
 
+56. ALTER TABLE email_templates
+ADD COLUMN is_default BOOLEAN NOT NULL,
+ADD COLUMN business_id BIGINT UNSIGNED,
+ADD CONSTRAINT fk_business_id FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE;
 
 
 

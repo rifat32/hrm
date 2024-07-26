@@ -24,8 +24,20 @@ class CreateEmailTemplatesTable extends Migration
 
             $table->unsignedBigInteger("wrapper_id");
             $table->foreign('wrapper_id')->references('id')->on('email_template_wrappers')->onDelete('restrict');
+
+
+            $table->boolean("is_default");
+            $table->unsignedBigInteger("business_id")->nullable();
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
+
+
+
+
             $table->timestamps();
         });
+
         DB::table('email_templates')->insert(
             array(
                 [

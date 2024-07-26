@@ -89,22 +89,39 @@ class EmailTemplateController extends Controller
                     ], 401);
                 }
 
-                $insertableData = $request->validated();
-                $insertableData["wrapper_id"]  = !empty($insertableData["wrapper_id"])?$insertableData["wrapper_id"]:1;
-                $template =  EmailTemplate::create($insertableData);
+                $request_data = $request->validated();
+                $request_data["wrapper_id"]  = !empty($request_data["wrapper_id"])?$request_data["wrapper_id"]:1;
+                $request_data["template"] = json_encode($request_data["template"]);
+
+                $request_data["is_active"] = 1;
+                $request_data["is_default"] = 0;
+                $request_data["created_by"] = auth()->user()->id;
+                $request_data["business_id"] = auth()->user()->business_id;
+
+                if (empty(auth()->user()->business_id)) {
+                    $request_data["business_id"] = NULL;
+                    if ($request->user()->hasRole('superadmin')) {
+                        $request_data["is_default"] = 1;
+                    }
+                }
+
+
+
+
+                $template =  EmailTemplate::create($request_data);
 
 
 
 //  if the template is active then other templates of this type will deactive
-                if ($template->is_active) {
-                    EmailTemplate::where("id", "!=", $template->id)
-                        ->where([
-                            "type" => $template->type
-                        ])
-                        ->update([
-                            "is_active" => false
-                        ]);
-                }
+                // if ($template->is_active) {
+                //     EmailTemplate::where("id", "!=", $template->id)
+                //         ->where([
+                //             "type" => $template->type
+                //         ])
+                //         ->update([
+                //             "is_active" => false
+                //         ]);
+                // }
 
 
                 return response($template, 201);
@@ -185,20 +202,36 @@ class EmailTemplateController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $updatableData = $request->validated();
-                $updatableData["wrapper_id"]  = !empty($updatableData["wrapper_id"])?$updatableData["wrapper_id"]:1;
-                $template  =  tap(EmailTemplate::where(["id" => $updatableData["id"]]))->update(
-                    collect($updatableData)->only([
+                $request_data = $request->validated();
+                $request_data["wrapper_id"]  = !empty($request_data["wrapper_id"])?$request_data["wrapper_id"]:1;
+                $request_data["template"] = json_encode($request_data["template"]);
+
+$query = [
+    "id" => $request_data["id"],
+];
+
+         if(!empty(auth()->user()->business_id)) {
+           $query["business_id"] = auth()->user()->business_id;
+           $query["is_default"] = 0;
+         } else {
+            $query["business_id"] = NULL;
+            $query["is_default"] = 1;
+         }
+
+
+
+
+                $template  =  tap(EmailTemplate::where($query))->update(
+                    collect($request_data)->only([
                         "name",
                         "template",
                         "wrapper_id"
                     ])->toArray()
                 )
-
-
                     ->first();
-                    if(!$template) {
 
+
+                    if(!$template) {
                         return response()->json([
                             "message" => "no template found"
                             ],404);
@@ -206,15 +239,15 @@ class EmailTemplateController extends Controller
                 }
 
                 //    if the template is active then other templates of this type will deactive
-                if ($template->is_active) {
-                    EmailTemplate::where("id", "!=", $template->id)
-                        ->where([
-                            "type" => $template->type
-                        ])
-                        ->update([
-                            "is_active" => false
-                        ]);
-                }
+                // if ($template->is_active) {
+                //     EmailTemplate::where("id", "!=", $template->id)
+                //         ->where([
+                //             "type" => $template->type
+                //         ])
+                //         ->update([
+                //             "is_active" => false
+                //         ]);
+                // }
                 return response($template, 201);
             });
         } catch (Exception $e) {
@@ -319,6 +352,25 @@ class EmailTemplateController extends Controller
                 });
             }
 
+            if (!empty($request->user()->business_id)) {
+                $templateQuery = $templateQuery
+                ->where([
+                    'business_id'=>$request->user()->business_id,
+                    "is_default" => 0
+
+                ])
+
+
+                ;
+            } else {
+                $templateQuery = $templateQuery
+                ->where([
+                    'business_id'=> NULL,
+                    "is_default" => 1
+
+                ]);
+            }
+
             if (!empty($request->start_date)) {
                 $templateQuery = $templateQuery->where('created_at', ">=", $request->start_date);
             }
@@ -326,7 +378,13 @@ class EmailTemplateController extends Controller
                 $templateQuery = $templateQuery->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
             }
 
-            $templates = $templateQuery->orderByDesc("id")->paginate($perPage);
+            $templates = $templateQuery
+            ->orderByDesc("id")
+            ->paginate($perPage);
+
+
+
+
             return response()->json($templates, 200);
         } catch (Exception $e) {
 
@@ -406,7 +464,7 @@ class EmailTemplateController extends Controller
             ])
             ->first();
             if(!$template){
-           
+
                 return response()->json([
                      "message" => "no email template found"
                 ], 404);

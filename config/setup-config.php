@@ -14,8 +14,8 @@ return [
                 "global_business_background_image_create",
                 "global_business_background_image_view",
 
-        "system_setting_update",
-        "system_setting_view",
+                "system_setting_update",
+                "system_setting_view",
 
 
                 "module_update",
@@ -70,10 +70,11 @@ return [
 
 
 
-                "template_create",
+                // "template_create",
                 "template_update",
                 "template_view",
                 "template_delete",
+
 
                 "payment_type_create",
                 "payment_type_update",
@@ -226,9 +227,9 @@ return [
                 "termination_reason_view",
                 // "termination_reason_delete",
 
-                 "bank_create",
+                "bank_create",
                 // "bank_update",
-                 "bank_view",
+                "bank_view",
                 // "bank_delete",
 
 
@@ -303,7 +304,14 @@ return [
             "role" => "business_owner",
             "permissions" => [
 
+
+
                 'business_owner',
+
+
+                "template_update",
+                "template_view",
+                "template_delete",
 
                 "reminder_create",
                 "reminder_update",
@@ -697,11 +705,11 @@ return [
                 "job_platform_view",
                 // "job_platform_delete",
 
-                  // "task_category_create",
+                // "task_category_create",
                 //   "task_category_update",
-                  "task_category_activate",
-                  "task_category_view",
-                  // "task_category_delete",
+                "task_category_activate",
+                "task_category_view",
+                // "task_category_delete",
 
                 "project_create",
                 "project_update",
@@ -921,23 +929,23 @@ return [
                 "department_view",
                 // "department_delete",
 
-                 "asset_type_create",
-                 "asset_type_update",
-                 "asset_type_view",
+                "asset_type_create",
+                "asset_type_update",
+                "asset_type_view",
                 "asset_type_delete",
 
-            "job_listing_create",
+                "job_listing_create",
                 "job_listing_update",
                 "job_listing_view",
-            "job_listing_delete",
+                "job_listing_delete",
 
                 // "job_platform_create",
                 // "job_platform_update",
                 // "job_platform_activate",
-            "job_platform_view",
+                "job_platform_view",
                 // "job_platform_delete",
 
-                     // "task_category_create",
+                // "task_category_create",
                 //   "task_category_update",
                 // "task_category_activate",
                 "task_category_view",
@@ -966,7 +974,7 @@ return [
 
                 "holiday_create",
                 "holiday_update",
-             "holiday_view",
+                "holiday_view",
                 "holiday_delete",
 
                 "work_shift_create",
@@ -1014,31 +1022,31 @@ return [
                 // "job_type_create",
                 // "job_type_update",
                 // "job_type_activate",
-             "job_type_view",
+                "job_type_view",
                 // "job_type_delete",
 
                 // "work_location_create",
                 // "work_location_update",
                 // "work_location_activate",
-            "work_location_view",
+                "work_location_view",
                 // "work_location_delete",
 
                 // "recruitment_process_create",
                 // "recruitment_process_update",
                 // "recruitment_process_activate",
-            "recruitment_process_view",
+                "recruitment_process_view",
                 // "recruitment_process_delete",
 
                 // "employment_status_create",
                 // "employment_status_update",
                 // "employment_status_activate",
-             "employment_status_view",
+                "employment_status_view",
                 // "employment_status_delete",
 
                 // "setting_leave_type_create",
                 // "setting_leave_type_update",
                 // "setting_leave_type_activate",
-            "setting_leave_type_view",
+                "setting_leave_type_view",
                 // "setting_leave_type_delete",
                 // "setting_leave_create",
 
@@ -1280,9 +1288,9 @@ return [
         "employee_sponsorship_history_delete",
 
         "employee_pension_history_create",
-                "employee_pension_history_update",
-                "employee_pension_history_view",
-                "employee_pension_history_delete",
+        "employee_pension_history_update",
+        "employee_pension_history_view",
+        "employee_pension_history_delete",
 
 
         "employee_asset_create",
@@ -1357,11 +1365,11 @@ return [
         "job_platform_view",
         "job_platform_delete",
 
-            "task_category_create",
-            "task_category_update",
-            "task_category_activate",
-            "task_category_view",
-            "task_category_delete",
+        "task_category_create",
+        "task_category_update",
+        "task_category_activate",
+        "task_category_view",
+        "task_category_delete",
 
 
         "project_create",
@@ -1590,10 +1598,10 @@ return [
         "employee_sponsorship_history_view" => "",
         "employee_sponsorship_history_delete" => "",
 
-                "employee_pension_history_create" => "",
-                "employee_pension_history_update" => "",
-                "employee_pension_history_view" => "",
-                "employee_pension_history_delete" => "",
+        "employee_pension_history_create" => "",
+        "employee_pension_history_update" => "",
+        "employee_pension_history_view" => "",
+        "employee_pension_history_delete" => "",
 
 
 
@@ -1717,11 +1725,11 @@ return [
         "job_platform_delete" => "Can delete job platform",
 
 
-              "task_category_create" => "",
-              "task_category_update" => "",
-              "task_category_activate" => "",
-              "task_category_view" => "",
-              "task_category_delete" => "",
+        "task_category_create" => "",
+        "task_category_update" => "",
+        "task_category_activate" => "",
+        "task_category_view" => "",
+        "task_category_delete" => "",
 
         "social_site_create" => "Can create social site",
         "social_site_update"  => "Can update social site",
@@ -2254,10 +2262,10 @@ return [
         [
             "header" => "user",
             "permissions" => [
-        "employee_create",
-        "employee_update",
-        "employee_view",
-        "employee_delete",
+                "employee_create",
+                "employee_update",
+                "employee_view",
+                "employee_delete",
 
             ],
         ],
@@ -2639,10 +2647,10 @@ return [
         [
             "header" => "employee_rota",
             "permissions" => [
-        "employee_rota_create",
-        "employee_rota_update",
-        "employee_rota_view",
-        "employee_rota_delete",
+                "employee_rota_create",
+                "employee_rota_update",
+                "employee_rota_view",
+                "employee_rota_delete",
 
 
 
@@ -2926,7 +2934,7 @@ return [
 
 
 
-    "folder_locations" => ["pension_scheme_letters","recruitment_processes","candidate_files","leave_attachments","assets","documents","education_docs","right_to_work_docs","visa_docs","payment_record_file","pension_letters","payslip_logo","business_images","user_images"],
+    "folder_locations" => ["pension_scheme_letters", "recruitment_processes", "candidate_files", "leave_attachments", "assets", "documents", "education_docs", "right_to_work_docs", "visa_docs", "payment_record_file", "pension_letters", "payslip_logo", "business_images", "user_images"],
 
 
 
@@ -2990,7 +2998,7 @@ return [
 
 
 
-        ]
+    ]
 
 
 

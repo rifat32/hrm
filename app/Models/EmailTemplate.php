@@ -9,12 +9,23 @@ use Illuminate\Database\Eloquent\Model;
 class EmailTemplate extends Model
 {
     use HasFactory;
+
     protected $fillable = [
+
         "name",
         "type",
         "template",
         "is_active",
-        'wrapper_id'
+        "is_default",
+        "business_id",
+        'wrapper_id',
+
     ];
-  
+
+    public function getTemplateAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+
 }

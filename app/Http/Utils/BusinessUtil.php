@@ -9,6 +9,7 @@ use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\Designation;
+use App\Models\EmailTemplate;
 use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
 use App\Models\Project;
@@ -341,6 +342,39 @@ trait BusinessUtil
     }
 }
 
+
+public function loadDefaultEmailTemplate($business_id = null)
+{
+    // Load default payment date settings
+
+    $default_email_template_query = [
+        'business_id' => null,
+        'is_active' => 1,
+        'is_default' =>  1,
+    ];
+
+
+
+    $defaultEmailTemplates = EmailTemplate::where($default_email_template_query)->get();
+
+
+    foreach ($defaultEmailTemplates as $defaultEmailTemplate) {
+        $insertableData = [
+            "name" => $defaultEmailTemplate->name,
+            "type" => $defaultEmailTemplate->name,
+            "template" => $defaultEmailTemplate->name,
+            "is_active" => 1,
+            "is_default" => 0,
+            "business_id" => $business_id,
+            'wrapper_id' => $defaultEmailTemplate->wrapper_id,
+        ];
+
+        $emailTemplate = EmailTemplate::create($insertableData);
+
+        // Additional logic can be added here if needed
+    }
+}
+
     // end load setting attendance
 
     public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1, $business)
@@ -458,6 +492,10 @@ trait BusinessUtil
         $this->loadDefaultPayrunSetting($business_id);
 
         $this->loadDefaultPaymentDateSetting($business_id);
+
+        $this->loadDefaultEmailTemplate($business_id);
+
+
 
 
 

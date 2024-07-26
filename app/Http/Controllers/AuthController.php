@@ -108,7 +108,7 @@ class AuthController extends Controller
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $this->checkEmployeeCreationLimit(true);
 
-            
+
             $request_data = $request->validated();
 
             $request_data['password'] = Hash::make($request['password']);
@@ -544,8 +544,6 @@ $datediff = $now - $user_created_date;
 
 
 
-
-
             $now = time(); // or your date as well
 $user_created_date = strtotime($user->created_at);
 $datediff = $now - $user_created_date;
@@ -581,7 +579,7 @@ $datediff = $now - $user_created_date;
 
 
 
-            $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business']);
+            $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business.service_plan.modules']);
 
                 // Creating token only once
     $token = $user->createToken('authToken')->accessToken;
@@ -599,6 +597,9 @@ $datediff = $now - $user_created_date;
             });
             $user->permissions = $user->permissions->pluck("name");
 
+
+            $business = $user->business;
+
 // Extracting only the required data
 $responseData = [
     'id' => $user->id,
@@ -614,13 +615,13 @@ $responseData = [
     'manages_department' => $user->manages_department,
     'color_theme_name' => $user->color_theme_name,
     'business' => [
-        'is_subscribed' => $user->business ? $user->business->is_subscribed : null,
-        'name' => $user->business ? $user->business->name : null,
-        'logo' => $user->business ? $user->business->logo : null,
-        'start_date' => $user->business ? $user->business->start_date : null,
-        'currency' => $user->business ? $user->business->currency : null,
-        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null,
-
+        'is_subscribed' => $business ? $business->is_subscribed : null,
+        'name' => $business ? $business->name : null,
+        'logo' => $business ? $business->logo : null,
+        'start_date' => $business ? $business->start_date : null,
+        'currency' => $business ? $business->currency : null,
+        'flexible_rota_enabled' => $business ? $business->flexible_rota_enabled : null,
+        'service_plan' => $business ? $business->service_plan : null,
 
     ]
 ];
@@ -1378,7 +1379,7 @@ public function getUser (Request $request) {
 
           // Eager load relationships
           $user = $request->user();
-    $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business']);
+    $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business.service_plan.modules']);
 
     // Creating token only once
     $token = $user->createToken('authToken')->accessToken;
@@ -1395,6 +1396,9 @@ public function getUser (Request $request) {
     ]);
     $user->permissions = $user->permissions->pluck("name");
             // Extracting only the required data
+
+$business = $user->business;
+// Extracting only the required data
 $responseData = [
     'id' => $user->id,
     "manager_departments" => $user->manager_departments,
@@ -1409,12 +1413,13 @@ $responseData = [
     'manages_department' => $user->manages_department,
     'color_theme_name' => $user->color_theme_name,
     'business' => [
-        'is_subscribed' => $user->business ? $user->business->is_subscribed : null,
-        'name' => $user->business ? $user->business->name : null,
-        'logo' => $user->business ? $user->business->logo : null,
-        'start_date' => $user->business ? $user->business->start_date : null,
-        'currency' => $user->business ? $user->business->currency : null,
-        'flexible_rota_enabled' => $user->business ? $user->business->flexible_rota_enabled : null,
+        'is_subscribed' => $business ? $business->is_subscribed : null,
+        'name' => $business ? $business->name : null,
+        'logo' => $business ? $business->logo : null,
+        'start_date' => $business ? $business->start_date : null,
+        'currency' => $business ? $business->currency : null,
+        'flexible_rota_enabled' => $business ? $business->flexible_rota_enabled : null,
+        'service_plan' => $business ? $business->service_plan : null,
 
     ]
 ];
