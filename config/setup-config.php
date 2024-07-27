@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\EmployeePensionHistory;
+
 
 return [
     "roles_permission" => [
@@ -2201,7 +2201,7 @@ return [
         "letter_template_view" => "view",
         "letter_template_delete" => "delete",
 
-     
+
 
         "setting_leave_type_create" => "create",
         "setting_leave_type_update" => "update",

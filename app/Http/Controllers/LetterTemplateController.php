@@ -108,7 +108,7 @@ class LetterTemplateController extends Controller
 
 
 
-                $request_data["template"] = json_encode($request_data["template"]);
+                // $request_data["template"] = json_encode($request_data["template"]);
                 $letter_template =  LetterTemplate::create($request_data);
 
 
@@ -201,7 +201,7 @@ class LetterTemplateController extends Controller
                 $letter_template = LetterTemplate::where($letter_template_query_params)->first();
 
 if ($letter_template) {
-    $request_data["template"] = json_encode($request_data["template"]);
+    // $request_data["template"] = json_encode($request_data["template"]);
 $letter_template->fill(collect($request_data)->only([
 'name',
 'description',

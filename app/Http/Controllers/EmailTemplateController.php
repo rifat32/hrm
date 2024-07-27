@@ -91,7 +91,7 @@ class EmailTemplateController extends Controller
 
                 $request_data = $request->validated();
                 $request_data["wrapper_id"]  = !empty($request_data["wrapper_id"])?$request_data["wrapper_id"]:1;
-                $request_data["template"] = json_encode($request_data["template"]);
+                // $request_data["template"] = json_encode($request_data["template"]);
 
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 0;
@@ -204,7 +204,7 @@ class EmailTemplateController extends Controller
                 }
                 $request_data = $request->validated();
                 $request_data["wrapper_id"]  = !empty($request_data["wrapper_id"])?$request_data["wrapper_id"]:1;
-                $request_data["template"] = json_encode($request_data["template"]);
+                // $request_data["template"] = json_encode($request_data["template"]);
 
 $query = [
     "id" => $request_data["id"],

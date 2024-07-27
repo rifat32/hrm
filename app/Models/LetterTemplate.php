@@ -27,12 +27,12 @@ class LetterTemplate extends Model
         return $this->hasMany(DisabledLetterTemplate::class, 'letter_template_id', 'id');
     }
 
-    public function getTemplateAttribute($value)
-    {
-        return json_decode($value);
-    }
+    // public function getTemplateAttribute($value)
+    // {
+    //     return json_decode($value);
+    // }
 
-    
+
     public function getIsActiveAttribute($value)
     {
 

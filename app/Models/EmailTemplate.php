@@ -22,10 +22,10 @@ class EmailTemplate extends Model
 
     ];
 
-    public function getTemplateAttribute($value)
-    {
-        return json_decode($value);
-    }
+    // public function getTemplateAttribute($value)
+    // {
+    //     return json_decode($value);
+    // }
 
 
 }

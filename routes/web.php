@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\CodeGeneratorController;
 use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\SetUpController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\DeveloperLoginController;
+use App\Http\Controllers\EmailSetupController;
 use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\AttendanceProject;
@@ -19,7 +21,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Str;
+
 
 
 /*
@@ -37,106 +39,11 @@ use Illuminate\Support\Str;
 Route::get("/developer-login",[DeveloperLoginController::class,"login"])->name("login.view");
 Route::post("/developer-login",[DeveloperLoginController::class,"passUser"]);
 
+Route::get('/email-template-generator',[EmailSetupController::class,"generateEmailTemplate"] )->name("code-generator");
 
 
-
-Route::get('/code-generator', function () {
-   $names=[];
-
-   $validationRules = [
-    'Basic Validation Rules' => [
-      'required',
-      'optional',
-      'present',
-      'filled',
-      'nullable',
-    ],
-    'String Validation Rules' => [
-      'string',
-      'text',
-      'email',
-      'url',
-      'date'
-    ],
-    'Numeric Validation Rules' => [
-      'integer',
-      'numeric',
-    ],
-  ];
-
-    return view('code_generator.code-generator', compact("names","validationRules"));
-})->name("code-generator-form");
-
-Route::post('/code-generator', function (Request $request) {
-
-    $names["table_name"] = $request->table_name;
-    $names["singular_table_name"] = Str::singular($names["table_name"]);
-
-    $names["singular_model_name"] = Str::studly($names["singular_table_name"]);
-    $names["plural_model_name"] = Str::plural($names["singular_model_name"]);
-
-    $names["api_name"] = str_replace('_', '-', $names["table_name"]);
-    $names["controller_name"] = $names["singular_model_name"] . 'Controller';
-
-    $names["singular_comment_name"] = Str::singular(str_replace('_', ' ', $names["table_name"]));
-    $names["plural_comment_name"] = str_replace('_', ' ', $names["table_name"]);
-
-
-
-    $fields = collect();
-    $field_names = $request->field_name;
-    $field_validation_type = $request->validation_type;
-    $field_string_validation_rules = $request->string_validation_rules;
-    $field_number_validation_rules = $request->number_validation_rules;
-
-    foreach($field_names as $index=>$value) {
-
-        $field["name"] = $value;
-        $field["type"] = $field_validation_type[$index];
-
-        if($field["type"] == "string") {
-            $field["request_validation_type"] = $field_string_validation_rules[$index];
-        }
-        else if($field["type"] == "number") {
-            $field["request_validation_type"] = $field_number_validation_rules[$index];
-        }
-        else {
-            $field["request_validation_type"] = $field["type"];
-        }
-
-        $fields->push($field);
-
-    }
-
-
-
-
-
-    $validationRules = [
-        'Basic Validation Rules' => [
-          'required',
-          'optional',
-          'present',
-          'filled',
-          'nullable',
-        ],
-        'String Validation Rules' => [
-          'string',
-          'email',
-          'url',
-          'date'
-        ],
-        'Numeric Validation Rules' => [
-          'integer',
-          'numeric',
-        ],
-
-      ];
-
-    return view('code_generator.code-generator',compact("names","fields","validationRules"));
-
-
-})->name("code-generator");
+Route::get('/code-generator', [CodeGeneratorController::class,"getCodeGeneratorForm"])->name("code-generator-form");
+Route::post('/code-generator',[CodeGeneratorController::class,"generateCode"] )->name("code-generator");
 
 
 // Grouping the routes and applying middleware to the entire group

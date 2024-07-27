@@ -2,7 +2,7 @@
 
 namespace App\Http\Utils;
 
-use App\Mail\SendPassword;
+use App\Mail\BusinessWelcomeMessage;
 use App\Models\Business;
 use App\Models\BusinessModule;
 use App\Models\BusinessTime;
@@ -900,7 +900,7 @@ public function createUserWithBusiness($request_data) {
    if (env("SEND_EMAIL") == true) {
        $this->checkEmailSender($user->id,0);
 
-       Mail::to($request_data['user']['email'])->send(new SendPassword($user, $password));
+       Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMessage($user, $password));
 
        $this->storeEmailSender($user->id,0);
 
