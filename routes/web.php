@@ -5,7 +5,6 @@ use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\SetUpController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\DeveloperLoginController;
-use App\Http\Controllers\EmailSetupController;
 use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\AttendanceProject;
