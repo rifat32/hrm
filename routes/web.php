@@ -42,6 +42,7 @@ Route::post("/developer-login",[DeveloperLoginController::class,"passUser"]);
 
 Route::get('/code-generator', function () {
    $names=[];
+
    $validationRules = [
     'Basic Validation Rules' => [
       'required',
@@ -52,23 +53,22 @@ Route::get('/code-generator', function () {
     ],
     'String Validation Rules' => [
       'string',
+      'text',
       'email',
       'url',
+      'date'
     ],
     'Numeric Validation Rules' => [
       'integer',
       'numeric',
     ],
-    'Other Validation Rules' => [
-      'array',
-      'boolean',
-    ],
   ];
 
     return view('code_generator.code-generator', compact("names","validationRules"));
-});
+})->name("code-generator-form");
 
 Route::post('/code-generator', function (Request $request) {
+
     $names["table_name"] = $request->table_name;
     $names["singular_table_name"] = Str::singular($names["table_name"]);
 
@@ -108,7 +108,8 @@ Route::post('/code-generator', function (Request $request) {
 
     }
 
-    $allFields = $fields->toArray();
+
+
 
 
     $validationRules = [
@@ -123,18 +124,18 @@ Route::post('/code-generator', function (Request $request) {
           'string',
           'email',
           'url',
+          'date'
         ],
         'Numeric Validation Rules' => [
           'integer',
           'numeric',
         ],
-        'Other Validation Rules' => [
-          'array',
-          'boolean',
-        ],
+
       ];
 
-    return view('code_generator.code-generator',compact("names","validationRules"));
+    return view('code_generator.code-generator',compact("names","fields","validationRules"));
+
+
 })->name("code-generator");
 
 

@@ -64,23 +64,36 @@
   margin-top: -2px;
   width: 0;
 }
+
+.navbar-fixed-top {
+  top: 0;
+  position: fixed;
+}
     </style>
 </head>
 
 <body>
 
-    @include("code_generator.code-generator-form")
+
 
 
 
     @if (!empty($names))
+
+@include("code_generator.navbar")
+
     @include("code_generator.routes")
-    @include("code_generator.controller")
+    @include("code_generator.controller.controller")
     @include("code_generator.models_migrations")
     @include("code_generator.requests")
     @include("code_generator.custom_rules")
-
     @include("code_generator.permissions")
+
+    @else
+
+    @include("code_generator.code-generator-form")
+
+
     @endif
 
 
