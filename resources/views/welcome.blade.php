@@ -13,6 +13,12 @@
   <body>
   <div class="container">
     <div class="row mt-5">
+
+        <div class="col-md-3">
+            <a href="{{env('APP_URL')}}/code-generator" class="btn btn-primary" target="_blank">Code Generator</a>
+        </div>
+
+
         <div class="col-md-3">
             <a href="{{env('APP_URL')}}/error-log" class="btn btn-primary" target="_blank">Error Log</a>
 

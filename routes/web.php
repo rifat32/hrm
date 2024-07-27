@@ -42,7 +42,30 @@ Route::post("/developer-login",[DeveloperLoginController::class,"passUser"]);
 
 Route::get('/code-generator', function () {
    $names=[];
-    return view('code_generator.code-generator', compact("names"));
+   $validationRules = [
+    'Basic Validation Rules' => [
+      'required',
+      'optional',
+      'present',
+      'filled',
+      'nullable',
+    ],
+    'String Validation Rules' => [
+      'string',
+      'email',
+      'url',
+    ],
+    'Numeric Validation Rules' => [
+      'integer',
+      'numeric',
+    ],
+    'Other Validation Rules' => [
+      'array',
+      'boolean',
+    ],
+  ];
+
+    return view('code_generator.code-generator', compact("names","validationRules"));
 });
 
 Route::post('/code-generator', function (Request $request) {
@@ -58,7 +81,60 @@ Route::post('/code-generator', function (Request $request) {
     $names["singular_comment_name"] = Str::singular(str_replace('_', ' ', $names["table_name"]));
     $names["plural_comment_name"] = str_replace('_', ' ', $names["table_name"]);
 
-    return view('code_generator.code-generator',compact("names"));
+
+
+    $fields = collect();
+    $field_names = $request->field_name;
+    $field_validation_type = $request->validation_type;
+    $field_string_validation_rules = $request->string_validation_rules;
+    $field_number_validation_rules = $request->number_validation_rules;
+
+    foreach($field_names as $index=>$value) {
+
+        $field["name"] = $value;
+        $field["type"] = $field_validation_type[$index];
+
+        if($field["type"] == "string") {
+            $field["request_validation_type"] = $field_string_validation_rules[$index];
+        }
+        else if($field["type"] == "number") {
+            $field["request_validation_type"] = $field_number_validation_rules[$index];
+        }
+        else {
+            $field["request_validation_type"] = $field["type"];
+        }
+
+        $fields->push($field);
+
+    }
+
+    $allFields = $fields->toArray();
+
+
+    $validationRules = [
+        'Basic Validation Rules' => [
+          'required',
+          'optional',
+          'present',
+          'filled',
+          'nullable',
+        ],
+        'String Validation Rules' => [
+          'string',
+          'email',
+          'url',
+        ],
+        'Numeric Validation Rules' => [
+          'integer',
+          'numeric',
+        ],
+        'Other Validation Rules' => [
+          'array',
+          'boolean',
+        ],
+      ];
+
+    return view('code_generator.code-generator',compact("names","validationRules"));
 })->name("code-generator");
 
 

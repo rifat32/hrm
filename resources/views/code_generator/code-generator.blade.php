@@ -35,24 +35,41 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+
+        .select2-container {
+  width: 100%!important;
+}
+
+.select2-selection {
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+}
+
+.select2-selection__rendered {
+  padding-left: 12px;
+}
+
+.select2-selection__arrow {
+  border-color: #ccc transparent transparent transparent;
+  border-style: solid;
+  border-width: 5px 5px 0 5px;
+  height: 0;
+  margin-top: -2px;
+  width: 0;
+}
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <h1 class="text-center mt-5">Code Generation Form</h1>
-        <form method="POST" action="{{ route('code-generator') }}">
-            @csrf <div class="mb-3">
-                <label for="table_name" class="form-label">Database Table Name</label>
-                <input type="text" class="form-control" id="table_name"
- name="table_name" value="{{!empty($names["table_name"])?$names["table_name"]:''}}">
-            </div>
-            <button type="submit" class="btn btn-primary">Generate Code</button>
-        </form>
-   </div>
-
-
+    @include("code_generator.code-generator-form")
 
 
 
