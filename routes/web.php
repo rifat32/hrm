@@ -39,7 +39,7 @@ use Spatie\Permission\Models\Permission;
 Route::get("/developer-login",[DeveloperLoginController::class,"login"])->name("login.view");
 Route::post("/developer-login",[DeveloperLoginController::class,"passUser"]);
 
-Route::get('/email-template-generator',[EmailSetupController::class,"generateEmailTemplate"] )->name("code-generator");
+
 
 
 Route::get('/code-generator', [CodeGeneratorController::class,"getCodeGeneratorForm"])->name("code-generator-form");
