@@ -39,7 +39,8 @@ class LetterTemplateController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga ")
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga "),
+     * @OA\Property(property="template", type="string", format="string", example="template"),
      *
      *
      *
@@ -107,7 +108,7 @@ class LetterTemplateController extends Controller
 
 
 
-
+                $request_data["template"] = json_encode($request_data["template"]);
                 $letter_template =  LetterTemplate::create($request_data);
 
 
@@ -138,7 +139,8 @@ class LetterTemplateController extends Controller
      *         @OA\JsonContent(
      *      @OA\Property(property="id", type="number", format="number", example="1"),
      * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga ")
+     * @OA\Property(property="description", type="string", format="string", example="erg ear ga "),
+     *      * @OA\Property(property="template", type="string", format="string", example="template")
 
      *
      *         ),
@@ -196,12 +198,14 @@ class LetterTemplateController extends Controller
                     "id" => $request_data["id"],
                 ];
 
-                $letter_template = $model_name::where($singular_table_name_query_params)->first();
+                $letter_template = LetterTemplate::where($letter_template_query_params)->first();
 
 if ($letter_template) {
+    $request_data["template"] = json_encode($request_data["template"]);
 $letter_template->fill(collect($request_data)->only([
 'name',
 'description',
+'template'
 // "is_default",
 // "is_active",
 // "business_id",
@@ -209,7 +213,7 @@ $letter_template->fill(collect($request_data)->only([
 ])->toArray());
 $letter_template->save();
 } else {
-                    return response()->json([
+    return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }

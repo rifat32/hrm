@@ -6,7 +6,7 @@ namespace App\Rules;
 use App\Models\LetterTemplate;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidLetterTemplateName implements Rule
+class ValidateLetterTemplateName implements Rule
 {
     /**
      * Create a new rule instance.

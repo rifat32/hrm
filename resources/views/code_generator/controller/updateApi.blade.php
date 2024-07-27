@@ -69,11 +69,11 @@ public function update{{ $names["singular_model_name"] }}({{ $names["singular_mo
 
 
 
-           ${{ $names["singular_table_name"] }}_query_params = [
+           ${{$names["singular_table_name"]}}_query_params = [
                "id" => $request_data["id"],
            ];
 
-           ${{ $names["singular_table_name"] }} = $names["singular_model_name"]::where($names["singular_table_name"]_query_params)->first();
+           ${{ $names["singular_table_name"] }} = {{$names["singular_model_name"]}}::where(${{$names["singular_table_name"]}}_query_params)->first();
 
 if (${{ $names["singular_table_name"] }}) {
 ${{ $names["singular_table_name"] }}->fill(collect($request_data)->only([

@@ -74,7 +74,7 @@ class LetterTemplateUpdateRequest extends BaseFormRequest
 
           ],
           'description' => 'nullable|string',
-          'color' => 'required|string',
+          'template' => 'required|string',
       ];
 
 

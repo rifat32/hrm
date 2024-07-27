@@ -35,7 +35,7 @@ class LetterTemplateCreateRequest extends BaseFormRequest
                 new ValidateLetterTemplateName(NULL)
             ],
             'description' => 'nullable|string',
-            'color' => 'required|string',
+            'template' => 'required|string',
         ];
 
 

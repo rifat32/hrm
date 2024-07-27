@@ -15,7 +15,7 @@ class CreateDisabledLetterTemplatesTable extends Migration
      */
     public function up()
     {
-        Schema::create('disabled_LetterTemplates', function (Blueprint $table) {
+        Schema::create('disabled_letter_templates', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('letter_template_id')

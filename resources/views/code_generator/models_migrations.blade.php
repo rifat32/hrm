@@ -90,7 +90,7 @@
                    */
                   public function up()
                   {
-                      Schema::create('disabled_{{ $names["plural_model_name"] }}', function (Blueprint $table) {
+                      Schema::create('disabled_{{ $names["table_name"] }}', function (Blueprint $table) {
                           $table->id();
 
                           $table->foreignId('{{ $names["singular_table_name"] }}_id')
@@ -220,7 +220,7 @@
 
 
           <div class="code-snippet">
-            <h3>App/Models/Disabled{{$names["singular_model_name"]}}.php</h3>
+            <h3>App/Models/Disabled{{$names["singular_table_name"]}}.php</h3>
             <pre id="disabled_model"><code>
               namespace App\Models;
 

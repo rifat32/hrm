@@ -22,7 +22,7 @@ php artisan make:rule Validate{{$names["singular_model_name"]}}Name
                 use App\Models\{{$names["singular_model_name"]}};
                 use Illuminate\Contracts\Validation\Rule;
 
-                class Valid{{$names["singular_model_name"]}}Name implements Rule
+                class Validate{{$names["singular_model_name"]}}Name implements Rule
                 {
                     /**
                      * Create a new rule instance.
