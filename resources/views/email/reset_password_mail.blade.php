@@ -23,13 +23,13 @@
                 </tr>
                 <tr>
                     <td style="padding: 20px 30px; text-align: center;">
-                        <a href="{{$url}}" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px;">Reset Password</a>
+                        <a href="[RESET_PASSWORD_LINK]" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px;">Reset Password</a>
                     </td>
                 </tr>
                 <tr>
                     <td style="padding: 0 30px;">
                         <p style="color: #666666; line-height: 1.6;">Alternatively, you can copy and paste the following link into your browser:</p>
-                        <p style="color: #666666; line-height: 1.6;">{{$url}}</p>
+                        <p style="color: #666666; line-height: 1.6;">[RESET_PASSWORD_LINK]</p>
                     </td>
                 </tr>
                 <tr>

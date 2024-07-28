@@ -218,9 +218,6 @@ $query = [
             $query["is_default"] = 1;
          }
 
-
-
-
                 $template  =  tap(EmailTemplate::where($query))->update(
                     collect($request_data)->only([
                         "name",

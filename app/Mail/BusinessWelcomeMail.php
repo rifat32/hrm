@@ -11,7 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class BusinessWelcomeMessage extends Mailable
+class BusinessWelcomeMail extends Mailable
 {
     use Queueable, SerializesModels, BasicEmailUtil;
 
@@ -41,24 +41,29 @@ class BusinessWelcomeMessage extends Mailable
 
 
         $email_content = EmailTemplate::where([
-            "type" => "welcome_business_message",
+            "type" => "business_welcome_mail",
             "is_active" => 1
 
         ])->first();
 
         if(empty($email_content)){
-            $templateString = view('email.business-welcome-mail')->render();
+
+            $templateString = view('email.business_welcome_mail')->render();
             // Now you can use the convertBladeToString method I provided earlier
-            $business_welcome_mail = $this->convertBladeToString($templateString);
+            $template = $this->convertBladeToString($templateString);
+            $templateVariables = $this->extractVariables($template);
+
 
             $email_content = EmailTemplate::create([
                 "name" => "",
-                "type" => "welcome_business_message",
+                "type" => "business_welcome_mail",
                 "is_active" => 1,
                 "wrapper_id" => 1,
                 "is_default" => 1,
                 "business_id" => NULL,
-                "template" => $business_welcome_mail,
+                "template" => $template,
+                "template_variables" => implode(',', $templateVariables)
+
             ]
         );
 

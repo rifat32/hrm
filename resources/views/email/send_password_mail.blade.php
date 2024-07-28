@@ -31,7 +31,7 @@
                                     <td style="padding:0 35px;">
                                         <h1
                                             style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                            Dear {{ $user->first_Name . ' ' . $user->middle_Name  . " " . $user->last_Name }} ,</h1>
+                                            Dear [FULL_NAME] ,</h1>
                                         <span
                                             style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
 
@@ -40,14 +40,14 @@
                                 <tr>
                                     <td style="padding:0 35px;">
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            Congratulations on your newly created account with {{ env('APP_NAME') }}! We're excited to have you on board.
+                                            Congratulations on your newly created account with [APP_NAME]! We're excited to have you on board.
                                         </p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            Your current password: <strong>{{$password}}</strong>
+                                            Your current password: <strong>[PASSWORD]</strong>
                                         </p>
                                     </td>
                                 </tr>
@@ -62,7 +62,7 @@
                                 <tr>
                                     <td style="padding:0 35px;">
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            {{$password_reset_link}}
+                                           [PASSWORD_RESET_LINK]
                                         </p>
                                     </td>
                                 </tr>
@@ -90,7 +90,7 @@
                                 <tr>
                                     <td style="padding:0 35px;">
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            {{ env('APP_NAME') }} Team
+                                            [APP_NAME] Team
                                         </p>
                                     </td>
                                 </tr>

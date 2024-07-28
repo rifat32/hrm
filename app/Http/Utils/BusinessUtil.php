@@ -2,7 +2,7 @@
 
 namespace App\Http\Utils;
 
-use App\Mail\BusinessWelcomeMessage;
+use App\Mail\BusinessWelcomeMail;
 use App\Models\Business;
 use App\Models\BusinessModule;
 use App\Models\BusinessTime;
@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use PharIo\Manifest\Email;
 
 trait BusinessUtil
 {
@@ -84,7 +85,35 @@ trait BusinessUtil
 
 
 
+    public function storeDefaultEmailTemplates($business_id) {
+       // Fetch active, default email templates without a business_id
+$email_templates = EmailTemplate::where([
+    "is_active" => 1,
+    "is_default" => 1,
+    "business_id" => NULL
+])->get();
 
+// Transform the collection to include only the necessary fields for insertion
+$transformed_templates = $email_templates->map(function ($template) {
+    return [
+        "name" => $template->name,
+        "type" => $template->type,
+        "is_active" => $template->is_active,
+        "wrapper_id" => $template->wrapper_id,
+        "is_default" => $template->is_default,
+        "business_id" => $template->business_id,
+        "template" => $template->template,
+        "template_variables" => $template->template_variables,
+        "created_at" => $template->created_at,
+        "updated_at" => $template->updated_at,
+    ];
+});
+
+// Insert the transformed templates
+EmailTemplate::insert($transformed_templates->toArray());
+
+
+    }
 
 
 
@@ -481,6 +510,7 @@ public function loadDefaultEmailTemplate($business_id = null)
         }
 
 
+        $this->storeDefaultEmailTemplates($business_id);
 
         $this->loadDefaultSettingLeaveType($business_id);
 
@@ -900,7 +930,7 @@ public function createUserWithBusiness($request_data) {
    if (env("SEND_EMAIL") == true) {
        $this->checkEmailSender($user->id,0);
 
-       Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMessage($user, $password));
+       Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMail($user, $password));
 
        $this->storeEmailSender($user->id,0);
 

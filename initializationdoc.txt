@@ -382,6 +382,9 @@ ALTER TABLE disabled_designations DROP FOREIGN KEY business_id_foreign;
 ALTER TABLE disabled_designations ADD CONSTRAINT business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE;
 
 
+58. ALTER TABLE email_templates
+ADD COLUMN template_variables VARCHAR(255) NULL;
+
 
 
 hr compliance -> 46

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\SetupUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\ActivityLog;
 use App\Models\Bank;
@@ -37,7 +38,7 @@ use Illuminate\Support\Facades\Log;
 
 class SetUpController extends Controller
 {
-    use ErrorUtil, UserActivityUtil;
+    use ErrorUtil, UserActivityUtil, SetupUtil;
 
     public function getFrontEndErrorLogs(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
@@ -263,6 +264,9 @@ return "swagger generated";
         $reseller->assignRole("reseller");
         $admin->assignRole("superadmin");
 
+
+
+        $this->storeEmailTemplates();
 
         $social_media_platforms = [
             ['id' => 1, 'name' => 'Linkedin', 'icon' => 'FaLinkedin', 'link' => 'https://www.linkedin.com/'],
@@ -1257,5 +1261,7 @@ foreach ($role_permissions as $role_permission) {
 
                                                 return response()->json("done",200);
     }
+
+
 
 }

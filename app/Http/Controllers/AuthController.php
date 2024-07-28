@@ -17,8 +17,8 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Http\Utils\UserDetailsUtil;
-use App\Mail\ForgetPasswordMail;
-use App\Mail\VerifyMail;
+use App\Mail\ResetPasswordMail;
+use App\Mail\EmailVerificationMail;
 use App\Models\Business;
 use App\Models\User;
 use Exception;
@@ -140,7 +140,7 @@ class AuthController extends Controller
 
                 $this->checkEmailSender($user->id,0);
 
-                Mail::to($user->email)->send(new VerifyMail($user));
+                Mail::to($user->email)->send(new EmailVerificationMail($user));
 
                 $this->storeEmailSender($user->id,0);
             }
@@ -333,7 +333,7 @@ $datediff = $now - $user_created_date;
 
                     $this->checkEmailSender($user->id,0);
 
-                    Mail::to($user->email)->send(new VerifyMail($user));
+                    Mail::to($user->email)->send(new EmailVerificationMail($user));
 
                     $this->storeEmailSender($user->id,0);
                 }
@@ -556,7 +556,7 @@ $datediff = $now - $user_created_date;
 
                     $this->checkEmailSender($user->id,0);
 
-                    Mail::to($user->email)->send(new VerifyMail($user));
+                    Mail::to($user->email)->send(new EmailVerificationMail($user));
 
                     $this->storeEmailSender($user->id,0);
                 }
@@ -893,7 +893,7 @@ $responseData = [
             if(env("SEND_EMAIL") == true) {
             $this->checkEmailSender($user->id,1);
 
-            $result = Mail::to($request_data["email"])->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+            $result = Mail::to($request_data["email"])->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
             $this->storeEmailSender($user->id,1);
             }
@@ -1003,7 +1003,7 @@ $responseData = [
 
                 $this->checkEmailSender($user->id,1);
 
-                $result = Mail::to($user->email)->send(new ForgetPasswordMail($user, $request_data["client_site"]));
+                $result = Mail::to($user->email)->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
                 $this->storeEmailSender($user->id,1);
 
@@ -1113,7 +1113,7 @@ $responseData = [
 
                 $this->checkEmailSender($user->id,0);
 
-                Mail::to($user->email)->send(new VerifyMail($user));
+                Mail::to($user->email)->send(new EmailVerificationMail($user));
 
                 $this->storeEmailSender($user->id,0);
 

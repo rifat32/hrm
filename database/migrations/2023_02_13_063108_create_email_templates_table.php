@@ -19,6 +19,8 @@ class CreateEmailTemplatesTable extends Migration
             $table->string("name")->nullable();
             $table->string("type");
             $table->text("template");
+            $table->string("template_variables")->nullable();
+
             $table->boolean("is_active");
 
 

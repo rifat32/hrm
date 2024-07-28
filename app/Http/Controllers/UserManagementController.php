@@ -45,7 +45,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Http\Utils\UserDetailsUtil;
-use App\Mail\SendOriginalPassword;
+use App\Mail\SendPasswordMail;
 use App\Models\AccessRevocation;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
@@ -600,7 +600,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             if (env("SEND_EMAIL") == true) {
                 $this->checkEmailSender($user->id,0);
 
-                Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
+                Mail::to($user->email)->send(new SendPasswordMail($user, $password));
 
                 $this->storeEmailSender($user->id,0);
 
@@ -899,7 +899,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
              if (env("SEND_EMAIL") == true) {
                  $this->checkEmailSender($user->id,0);
 
-                 Mail::to($user->email)->send(new SendOriginalPassword($user, $password));
+                 Mail::to($user->email)->send(new SendPasswordMail($user, $password));
 
                  $this->storeEmailSender($user->id,0);
 

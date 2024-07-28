@@ -19,6 +19,7 @@ class EmailTemplate extends Model
         "is_default",
         "business_id",
         'wrapper_id',
+        "template_variables"
 
     ];
 
@@ -27,5 +28,9 @@ class EmailTemplate extends Model
     //     return json_decode($value);
     // }
 
+    public function getTemplateVariablesAttribute($value)
+    {
+        return explode(',', $value);
+    }
 
 }

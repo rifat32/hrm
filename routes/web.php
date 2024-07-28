@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\SetUpController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\DeveloperLoginController;
+use App\Http\Controllers\UpdateDatabaseController;
 use App\Models\Attendance;
 use App\Models\AttendanceHistory;
 use App\Models\AttendanceProject;
@@ -90,7 +91,7 @@ Route::get("/subscriptions/get-failed-payment",[SubscriptionController::class,"s
 
 
 
-
+Route::get("/database-update",[UpdateDatabaseController::class,"updateDatabase"]);
 
 
 
@@ -138,6 +139,11 @@ Route::get("/activate/{token}",function(Request $request,$token) {
 
     return view("dynamic-welcome-message",["html_content" => $html_final]);
 });
+
+
+
+
+
 
 
 
