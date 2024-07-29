@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CandidateCreateRequest;
+use App\Http\Requests\CandidateCreateRequestClient;
 use App\Http\Requests\CandidateUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BasicUtil;
@@ -235,19 +236,18 @@ class CandidateController extends Controller
      *     )
      */
 
-     public function createCandidateClient(CandidateCreateRequest $request)
+     public function createCandidateClient(CandidateCreateRequestClient $request)
      {
         DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-                 if (!$request->user()->hasPermissionTo('candidate_create')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
+
 
                  $request_data = $request->validated();
+
+
+
 
 
        $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
@@ -259,7 +259,7 @@ class CandidateController extends Controller
                 }
 
 
-                 $request_data["business_id"] = $request->user()->business_id;
+                 $request_data["business_id"] = $request_data["business_id"];
                  $request_data["is_active"] = true;
                  $request_data["created_by"] = $request->user()->id;
 

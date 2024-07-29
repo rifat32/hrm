@@ -2,10 +2,11 @@
 
 namespace App\Rules;
 
+use App\Models\Business;
 use App\Models\JobListing;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateJobListing implements Rule
+class ValidateJobListingClient implements Rule
 {
     /**
      * Create a new rule instance.
@@ -26,11 +27,12 @@ class ValidateJobListing implements Rule
      */
     public function passes($attribute, $value)
     {
+
                          $exists = JobListing::where('id', $value)
-                        ->where('job_listings.business_id', '=', auth()->user()->business_id)
+                        ->where('job_listings.business_id', '=', request()->business_id)
                         ->exists();
 
-return $exists;
+                        return $exists;
     }
 
     /**

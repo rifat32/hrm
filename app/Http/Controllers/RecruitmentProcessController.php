@@ -8,6 +8,7 @@ use App\Http\Requests\RecruitmentProcessUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Business;
 use App\Models\DisabledRecruitmentProcess;
 use App\Models\RecruitmentProcess;
 use App\Models\User;
@@ -404,6 +405,8 @@ class RecruitmentProcessController extends Controller
         }
     }
 
+
+
     /**
      *
      * @OA\Get(
@@ -510,106 +513,322 @@ class RecruitmentProcessController extends Controller
      *     )
      */
 
-    public function getRecruitmentProcesses(Request $request)
+     public function getRecruitmentProcesses(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('recruitment_process_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $created_by  = NULL;
+             if(auth()->user()->business) {
+                 $created_by = auth()->user()->business->created_by;
+             }
+
+
+
+             $recruitment_processes = RecruitmentProcess::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                 if (auth()->user()->hasRole('superadmin')) {
+                     return $query->where('recruitment_processes.business_id', NULL)
+                         ->where('recruitment_processes.is_default', 1)
+                         ->when(isset($request->is_active), function ($query) use ($request) {
+                             return $query->where('recruitment_processes.is_active', intval($request->is_active));
+                         });
+                 } else {
+                     return $query
+
+                     ->where(function($query) use($request) {
+                         $query->where('recruitment_processes.business_id', NULL)
+                         ->where('recruitment_processes.is_default', 1)
+                         ->where('recruitment_processes.is_active', 1)
+                         ->when(isset($request->is_active), function ($query) use ($request) {
+                             if(intval($request->is_active)) {
+                                 return $query->whereDoesntHave("disabled", function($q) {
+                                     $q->whereIn("disabled_recruitment_processes.created_by", [auth()->user()->id]);
+                                 });
+                             }
+
+                         })
+                         ->orWhere(function ($query) use ($request) {
+                             $query->where('recruitment_processes.business_id', NULL)
+                                 ->where('recruitment_processes.is_default', 0)
+                                 ->where('recruitment_processes.created_by', auth()->user()->id)
+                                 ->when(isset($request->is_active), function ($query) use ($request) {
+                                     return $query->where('recruitment_processes.is_active', intval($request->is_active));
+                                 });
+                         });
+
+                     });
+                 }
+             })
+                 ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                     return $query
+                     ->where(function($query) use($request, $created_by) {
+
+
+                         $query->where('recruitment_processes.business_id', NULL)
+                         ->where('recruitment_processes.is_default', 1)
+                         ->where('recruitment_processes.is_active', 1)
+                         ->whereDoesntHave("disabled", function($q) use($created_by) {
+                             $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
+                         })
+                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+                             if(intval($request->is_active)) {
+                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                                     $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
+                                 });
+                             }
+
+                         })
+
+
+                         ->orWhere(function ($query) use($request, $created_by){
+                             $query->where('recruitment_processes.business_id', NULL)
+                                 ->where('recruitment_processes.is_default', 0)
+                                 ->where('recruitment_processes.created_by', $created_by)
+                                 ->where('recruitment_processes.is_active', 1)
+
+                                 ->when(isset($request->is_active), function ($query) use ($request) {
+                                     if(intval($request->is_active)) {
+                                         return $query->whereDoesntHave("disabled", function($q) {
+                                             $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
+                                         });
+                                     }
+
+                                 })
+
+
+                                 ;
+                         })
+                         ->orWhere(function ($query) use($request) {
+                             $query->where('recruitment_processes.business_id', auth()->user()->business_id)
+                                 ->where('recruitment_processes.is_default', 0)
+                                 ->when(isset($request->is_active), function ($query) use ($request) {
+                                     return $query->where('recruitment_processes.is_active', intval($request->is_active));
+                                 });
+                         });
+                     });
+
+
+                 })
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         $query->where("recruitment_processes.name", "like", "%" . $term . "%")
+                             ->orWhere("recruitment_processes.description", "like", "%" . $term . "%");
+                     });
+                 })
+                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                 //        return $query->where('product_category_id', $request->product_category_id);
+                 //    })
+
+
+                 ->when(!empty($request->use_in_employee), function ($query) use ($request) {
+                     // Convert the request parameter to boolean
+                     $useInEmployee = filter_var($request->use_in_employee, FILTER_VALIDATE_BOOLEAN);
+                     return $query->where('recruitment_processes.use_in_employee', $useInEmployee);
+                 })
+                 ->when(!empty($request->use_in_on_boarding), function ($query) use ($request) {
+                     // Convert the request parameter to boolean
+                     $useInOnBoarding = filter_var($request->use_in_on_boarding, FILTER_VALIDATE_BOOLEAN);
+                     return $query->where('recruitment_processes.use_in_on_boarding', $useInOnBoarding);
+                 })
+
+
+                     ->when(!empty($request->start_date), function ($query) use ($request) {
+                         return $query->where('recruitment_processes.created_at', ">=", $request->start_date);
+                     })
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('recruitment_processes.created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('recruitment_processes.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("recruitment_processes.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("recruitment_processes.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });;
+
+
+
+             return response()->json($recruitment_processes, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/client/recruitment-processes",
+     *      operationId="getRecruitmentProcessesClient",
+     *      tags={"recruitment_processes"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+        *              @OA\Parameter(
+     *         name="business_id",
+     *         in="query",
+     *         description="business_id",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+*      * *  @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *   @OA\Parameter(
+     * name="use_in_employee",
+     * in="query",
+     * description="use_in_employee",
+     * required=true,
+     * example="1"
+     * ),
+     *   @OA\Parameter(
+     * name="use_in_on_boarding",
+     * in="query",
+     * description="use_in_on_boarding",
+     * required=true,
+     * example="1"
+     * ),
+     *
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get recruitment process s  ",
+     *      description="This method is to get recruitment process s ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getRecruitmentProcessesClient(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('recruitment_process_view')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
+
+            $business_id =  $request->business_id;
+            if(!$business_id) {
+               $error = [ "message" => "The given data was invalid.",
+               "errors" => ["business_id"=>["The business id field is required."]]
+               ];
+                   throw new Exception(json_encode($error),422);
             }
-            $created_by  = NULL;
-            if(auth()->user()->business) {
-                $created_by = auth()->user()->business->created_by;
-            }
 
+            $business = Business::where([
+                "id" => $business_id
+            ])
+            ->first();
 
+            $created_by = $business->created_by;
 
-            $recruitment_processes = RecruitmentProcess::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('recruitment_processes.business_id', NULL)
-                        ->where('recruitment_processes.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('recruitment_processes.is_active', intval($request->is_active));
-                        });
-                } else {
-                    return $query
-
-                    ->where(function($query) use($request) {
-                        $query->where('recruitment_processes.business_id', NULL)
-                        ->where('recruitment_processes.is_default', 1)
-                        ->where('recruitment_processes.is_active', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(intval($request->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_recruitment_processes.created_by", [auth()->user()->id]);
-                                });
-                            }
-
-                        })
-                        ->orWhere(function ($query) use ($request) {
-                            $query->where('recruitment_processes.business_id', NULL)
-                                ->where('recruitment_processes.is_default', 0)
-                                ->where('recruitment_processes.created_by', auth()->user()->id)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('recruitment_processes.is_active', intval($request->is_active));
-                                });
-                        });
-
-                    });
-                }
-            })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query
-                    ->where(function($query) use($request, $created_by) {
-
-
+            $recruitment_processes = RecruitmentProcess::where(function($query) use($request, $created_by, $business) {
                         $query->where('recruitment_processes.business_id', NULL)
                         ->where('recruitment_processes.is_default', 1)
                         ->where('recruitment_processes.is_active', 1)
                         ->whereDoesntHave("disabled", function($q) use($created_by) {
                             $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
                         })
-                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(intval($request->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
-                                });
-                            }
-
-                        })
-
-
-                        ->orWhere(function ($query) use($request, $created_by){
+                        ->whereDoesntHave("disabled", function($q) use($created_by, $business) {
+                                    $q->whereIn("disabled_recruitment_processes.business_id",[$business->id]);
+                                })
+                        ->orWhere(function ($query) use($request, $created_by, $business){
                             $query->where('recruitment_processes.business_id', NULL)
                                 ->where('recruitment_processes.is_default', 0)
                                 ->where('recruitment_processes.created_by', $created_by)
                                 ->where('recruitment_processes.is_active', 1)
 
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(intval($request->is_active)) {
-                                        return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
-                                        });
-                                    }
+                                ->whereIn("disabled_recruitment_processes.business_id",[$business->id]);
 
-                                })
-
-
-                                ;
                         })
-                        ->orWhere(function ($query) use($request) {
-                            $query->where('recruitment_processes.business_id', auth()->user()->business_id)
+                        ->orWhere(function ($query) use($request, $business) {
+                            $query->where('recruitment_processes.business_id', $business->id)
                                 ->where('recruitment_processes.is_default', 0)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('recruitment_processes.is_active', intval($request->is_active));
-                                });
+
+                                ->where('recruitment_processes.is_active', intval($request->is_active));
+
                         });
-                    });
+                    })
 
 
-                })
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -617,9 +836,7 @@ class RecruitmentProcessController extends Controller
                             ->orWhere("recruitment_processes.description", "like", "%" . $term . "%");
                     });
                 })
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
+
 
 
                 ->when(!empty($request->use_in_employee), function ($query) use ($request) {

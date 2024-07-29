@@ -49,28 +49,26 @@ trait BusinessUtil
 
                 $query->where(function ($query) {
                     return   $query
-                       ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                        $query->where('id', auth()->user()->business_id)
-                        ->orWhere('created_by', auth()->user()->id)
-                        ->orWhere('owner_id', auth()->user()->id);
-                       },
-                       function($query) {
-                        $query->where('is_self_registered_businesses', 1)
-                        ->orWhere('created_by', auth()->user()->id);
-                       }
+                        ->when(
+                            !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
+                            function ($query) {
+                                $query->where('id', auth()->user()->business_id)
+                                    ->orWhere('created_by', auth()->user()->id)
+                                    ->orWhere('owner_id', auth()->user()->id);
+                            },
+                            function ($query) {
+                                $query->where('is_self_registered_businesses', 1)
+                                    ->orWhere('created_by', auth()->user()->id);
+                            }
 
-                    );
-
+                        );
                 });
-
-
-
             });
         }
 
         $business =  $businessQuery->first();
         if (empty($business)) {
-           throw new Exception("you are not the owner of the business or the requested business does not exist.",401);
+            throw new Exception("you are not the owner of the business or the requested business does not exist.", 401);
         }
         return $business;
     }
@@ -85,57 +83,56 @@ trait BusinessUtil
 
 
 
-    public function storeDefaultEmailTemplates($business_id) {
-       // Fetch active, default email templates without a business_id
-$email_templates = EmailTemplate::where([
-    "is_active" => 1,
-    "is_default" => 1,
-    "business_id" => NULL
-])->get();
+    public function storeDefaultEmailTemplates($business_id)
+    {
+        // Fetch active, default email templates without a business_id
+        $email_templates = EmailTemplate::where([
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => NULL
+        ])->get();
 
-// Transform the collection to include only the necessary fields for insertion
-$transformed_templates = $email_templates->map(function ($template) {
-    return [
-        "name" => $template->name,
-        "type" => $template->type,
-        "is_active" => $template->is_active,
-        "wrapper_id" => $template->wrapper_id,
-        "is_default" => $template->is_default,
-        "business_id" => $template->business_id,
-        "template" => $template->template,
-        "template_variables" => $template->template_variables,
-        "created_at" => $template->created_at,
-        "updated_at" => $template->updated_at,
-    ];
-});
+        // Transform the collection to include only the necessary fields for insertion
+        $transformed_templates = $email_templates->map(function ($template) {
+            return [
+                "name" => $template->name,
+                "type" => $template->type,
+                "is_active" => $template->is_active,
+                "wrapper_id" => $template->wrapper_id,
+                "is_default" => $template->is_default,
+                "business_id" => $template->business_id,
+                "template" => $template->template,
+                "template_variables" => $template->template_variables,
+                "created_at" => $template->created_at,
+                "updated_at" => $template->updated_at,
+            ];
+        });
 
-// Insert the transformed templates
-EmailTemplate::insert($transformed_templates->toArray());
-
-
+        // Insert the transformed templates
+        EmailTemplate::insert($transformed_templates->toArray());
     }
 
 
 
     public function loadDefaultSettingLeaveType($business_id = NULL)
     {
-        $defaultSettingLeaveTypes = SettingLeaveType::where(function($query)  {
-            $query->where(function($query)  {
+        $defaultSettingLeaveTypes = SettingLeaveType::where(function ($query) {
+            $query->where(function ($query) {
                 $query->where('setting_leave_types.business_id', NULL)
-                ->where('setting_leave_types.is_default', 1)
-                ->where('setting_leave_types.is_active', 1)
-                ->whereDoesntHave("disabled", function($q)  {
-                    $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
-                });
+                    ->where('setting_leave_types.is_default', 1)
+                    ->where('setting_leave_types.is_active', 1)
+                    ->whereDoesntHave("disabled", function ($q) {
+                        $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
+                    });
             })
-            ->orWhere(function ($query) {
-                $query->where('setting_leave_types.business_id', NULL)
-                    ->where('setting_leave_types.is_default', 0)
-                    ->where('setting_leave_types.created_by', auth()->user()->id)
-                    ->where('setting_leave_types.is_active', 1);
-            });
+                ->orWhere(function ($query) {
+                    $query->where('setting_leave_types.business_id', NULL)
+                        ->where('setting_leave_types.is_default', 0)
+                        ->where('setting_leave_types.created_by', auth()->user()->id)
+                        ->where('setting_leave_types.is_active', 1);
+                });
         })
-        ->get();
+            ->get();
 
 
 
@@ -143,13 +140,13 @@ EmailTemplate::insert($transformed_templates->toArray());
         foreach ($defaultSettingLeaveTypes as $defaultSettingLeave) {
             error_log($defaultSettingLeave);
             $insertableData = [
-        'name'=> $defaultSettingLeave->name,
-        'type'=> $defaultSettingLeave->type,
-        'amount'=> $defaultSettingLeave->amount,
-        'is_earning_enabled'=> $defaultSettingLeave->is_earning_enabled,
-        "is_active"=> 1,
-        "is_default"=> 0,
-        "business_id" => $business_id,
+                'name' => $defaultSettingLeave->name,
+                'type' => $defaultSettingLeave->type,
+                'amount' => $defaultSettingLeave->amount,
+                'is_earning_enabled' => $defaultSettingLeave->is_earning_enabled,
+                "is_active" => 1,
+                "is_default" => 0,
+                "business_id" => $business_id,
             ];
 
             $setting_leave_type  = SettingLeaveType::create($insertableData);
@@ -255,7 +252,7 @@ EmailTemplate::insert($transformed_templates->toArray());
 
 
                 'service_name' => $defaultSettingAttendance->service_name,
-                'api_key'=> $defaultSettingAttendance->api_key,
+                'api_key' => $defaultSettingAttendance->api_key,
 
                 "created_by" => auth()->user()->id,
                 "is_active" => 1,
@@ -331,78 +328,78 @@ EmailTemplate::insert($transformed_templates->toArray());
     }
 
     public function loadDefaultPaymentDateSetting($business_id = null)
-{
-    // Load default payment date settings
+    {
+        // Load default payment date settings
 
-    $default_setting_payment_date_query = [
-        'business_id' => null,
-        'is_active' => 1,
-        'is_default' =>  1,
-    ];
-
-
-
-    $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
-
-    // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
-    if ($defaultSettingPaymentDates->isEmpty() && !auth()->user()->hasRole('superadmin')) {
-        unset($default_setting_payment_date_query['created_by']);
-        $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
-    }
-
-    foreach ($defaultSettingPaymentDates as $defaultSettingPaymentDate) {
-        $insertableData = [
-            'payment_type' => $defaultSettingPaymentDate->payment_type,
-            'day_of_week' => $defaultSettingPaymentDate->day_of_week,
-            'day_of_month' => $defaultSettingPaymentDate->day_of_month,
-            'custom_frequency_interval' => $defaultSettingPaymentDate->custom_frequency_interval,
-            'custom_frequency_unit' => $defaultSettingPaymentDate->custom_frequency_unit,
-            'notification_delivery_status' => $defaultSettingPaymentDate->notification_delivery_status,
+        $default_setting_payment_date_query = [
+            'business_id' => null,
             'is_active' => 1,
-            'is_default' => 0,
-            'business_id' => $business_id,
-            'created_by' => auth()->user()->id,
-            'role_specific_settings' => $defaultSettingPaymentDate->role_specific_settings,
+            'is_default' =>  1,
         ];
 
-        $settingPaymentDate = SettingPaymentDate::create($insertableData);
 
-        // Additional logic can be added here if needed
+
+        $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
+
+        // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
+        if ($defaultSettingPaymentDates->isEmpty() && !auth()->user()->hasRole('superadmin')) {
+            unset($default_setting_payment_date_query['created_by']);
+            $defaultSettingPaymentDates = SettingPaymentDate::where($default_setting_payment_date_query)->get();
+        }
+
+        foreach ($defaultSettingPaymentDates as $defaultSettingPaymentDate) {
+            $insertableData = [
+                'payment_type' => $defaultSettingPaymentDate->payment_type,
+                'day_of_week' => $defaultSettingPaymentDate->day_of_week,
+                'day_of_month' => $defaultSettingPaymentDate->day_of_month,
+                'custom_frequency_interval' => $defaultSettingPaymentDate->custom_frequency_interval,
+                'custom_frequency_unit' => $defaultSettingPaymentDate->custom_frequency_unit,
+                'notification_delivery_status' => $defaultSettingPaymentDate->notification_delivery_status,
+                'is_active' => 1,
+                'is_default' => 0,
+                'business_id' => $business_id,
+                'created_by' => auth()->user()->id,
+                'role_specific_settings' => $defaultSettingPaymentDate->role_specific_settings,
+            ];
+
+            $settingPaymentDate = SettingPaymentDate::create($insertableData);
+
+            // Additional logic can be added here if needed
+        }
     }
-}
 
 
-public function loadDefaultEmailTemplate($business_id = null)
-{
-    // Load default payment date settings
+    public function loadDefaultEmailTemplate($business_id = null)
+    {
+        // Load default payment date settings
 
-    $default_email_template_query = [
-        'business_id' => null,
-        'is_active' => 1,
-        'is_default' =>  1,
-    ];
-
-
-
-    $defaultEmailTemplates = EmailTemplate::where($default_email_template_query)->get();
-
-
-    foreach ($defaultEmailTemplates as $defaultEmailTemplate) {
-        $insertableData = [
-            "name" => $defaultEmailTemplate->name,
-            "type" => $defaultEmailTemplate->name,
-            "template" => $defaultEmailTemplate->name,
-            "is_active" => 1,
-            "is_default" => 0,
-            "business_id" => $business_id,
-            'wrapper_id' => $defaultEmailTemplate->wrapper_id,
+        $default_email_template_query = [
+            'business_id' => null,
+            'is_active' => 1,
+            'is_default' =>  1,
         ];
 
-        $emailTemplate = EmailTemplate::create($insertableData);
 
-        // Additional logic can be added here if needed
+
+        $defaultEmailTemplates = EmailTemplate::where($default_email_template_query)->get();
+
+
+        foreach ($defaultEmailTemplates as $defaultEmailTemplate) {
+            $insertableData = [
+                "name" => $defaultEmailTemplate->name,
+                "type" => $defaultEmailTemplate->name,
+                "template" => $defaultEmailTemplate->name,
+                "is_active" => 1,
+                "is_default" => 0,
+                "business_id" => $business_id,
+                'wrapper_id' => $defaultEmailTemplate->wrapper_id,
+            ];
+
+            $emailTemplate = EmailTemplate::create($insertableData);
+
+            // Additional logic can be added here if needed
+        }
     }
-}
 
     // end load setting attendance
 
@@ -471,9 +468,9 @@ public function loadDefaultEmailTemplate($business_id = null)
         $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
         $employee_work_shift_history_data["from_date"] = $business->start_date;
         $employee_work_shift_history_data["to_date"] = NULL;
-         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
-         $employee_work_shift_history->departments()->sync([$department->id]);
+        $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+        $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
+        $employee_work_shift_history->departments()->sync([$department->id]);
 
 
 
@@ -524,13 +521,6 @@ public function loadDefaultEmailTemplate($business_id = null)
         $this->loadDefaultPaymentDateSetting($business_id);
 
         $this->loadDefaultEmailTemplate($business_id);
-
-
-
-
-
-
-
     }
 
 
@@ -657,8 +647,6 @@ public function loadDefaultEmailTemplate($business_id = null)
                         "error" => $error
                     ];
                 }
-
-
             }
         }
 
@@ -759,202 +747,178 @@ public function loadDefaultEmailTemplate($business_id = null)
     }
 
 
-public function businessImageStore($business) {
-    if (!empty($business["images"])) {
-        $business["images"] = $this->storeUploadedFiles($business["images"],"","business_images");
-        $this->makeFilePermanent($business["images"],"");
+    public function businessImageStore($business)
+    {
+        if (!empty($business["images"])) {
+            $business["images"] = $this->storeUploadedFiles($business["images"], "", "business_images");
+            $this->makeFilePermanent($business["images"], "");
+        }
+        if (!empty($business["image"])) {
+            $business["image"] = $this->storeUploadedFiles([$business["image"]], "", "business_images")[0];
+            $this->makeFilePermanent([$business["image"]], "");
+        }
+        if (!empty($business["logo"])) {
+            $business["logo"] = $this->storeUploadedFiles([$business["logo"]], "", "business_images")[0];
+            $this->makeFilePermanent([$business["logo"]], "");
+        }
+        if (!empty($business["background_image"])) {
+            $business["background_image"] = $this->storeUploadedFiles([$business["background_image"]], "", "business_images")[0];
+            $this->makeFilePermanent([$business["background_image"]], "");
+        }
+        return $business;
     }
-    if (!empty($business["image"])) {
-        $business["image"] = $this->storeUploadedFiles([$business["image"]],"","business_images")[0];
-        $this->makeFilePermanent([$business["image"]],"");
-    }
-    if (!empty($business["logo"])) {
-        $business["logo"] = $this->storeUploadedFiles([$business["logo"]],"","business_images")[0];
-        $this->makeFilePermanent([$business["logo"]],"");
-    }
-    if (!empty($business["background_image"])) {
-        $business["background_image"] = $this->storeUploadedFiles([$business["background_image"]],"","business_images")[0];
-        $this->makeFilePermanent([$business["background_image"]],"");
-    }
-    return $business;
-}
 
 
 
-public function businessImageRollBack($request_data) {
-    if(!empty($request_data["business"]["images"])) {
-        try {
+    public function businessImageRollBack($request_data)
+    {
+        if (!empty($request_data["business"]["images"])) {
+            try {
 
-                $this->moveUploadedFilesBack($request_data["business"]["images"],"","business_images");
+                $this->moveUploadedFilesBack($request_data["business"]["images"], "", "business_images");
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
 
+        if (!empty($request_data["business"]["image"])) {
+            try {
 
+                $this->moveUploadedFilesBack($request_data["business"]["image"], "", "business_images");
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
+        if (!empty($request_data["business"]["logo"])) {
+            try {
 
-        } catch (Exception $innerException) {
-            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+                $this->moveUploadedFilesBack($request_data["business"]["logo"], "", "business_images");
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
+        }
+
+        if (!empty($request_data["business"]["background_image"])) {
+            try {
+
+                $this->moveUploadedFilesBack($request_data["business"]["background_image"], "", "business_images");
+            } catch (Exception $innerException) {
+                error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+            }
         }
     }
 
-    if(!empty($request_data["business"]["image"])) {
-        try {
-
-                $this->moveUploadedFilesBack($request_data["business"]["image"],"","business_images");
 
 
 
-        } catch (Exception $innerException) {
-            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+    public function createUserWithBusiness($request_data)
+    {
+        // user info starts ##############
+
+        $password = $request_data['user']['password'];
+
+
+        $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+        //    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
+        //     $password = Str::random(10);
+        //     $request_data['user']['password'] = Hash::make($password);
+        //     }
+        $request_data['user']['remember_token'] = Str::random(10);
+        $request_data['user']['is_active'] = true;
+
+
+        $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+        $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
+        $request_data['user']['country'] = $request_data['business']['country'];
+        $request_data['user']['city'] = $request_data['business']['city'];
+        $request_data['user']['postcode'] = $request_data['business']['postcode'];
+        $request_data['user']['lat'] = $request_data['business']['lat'];
+        $request_data['user']['long'] = $request_data['business']['long'];
+
+
+
+
+        $user =  User::create($request_data['user']);
+
+        $created_by_user = auth()->user();
+
+        if (empty($created_by_user)) {
+            $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
         }
-    }
-    if(!empty($request_data["business"]["logo"])) {
-        try {
-
-                $this->moveUploadedFilesBack($request_data["business"]["logo"],"","business_images");
 
 
 
-        } catch (Exception $innerException) {
-            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        $user->assignRole('business_owner');
+        // end user info ##############
+
+
+        //  business info ##############
+
+        $request_data['business']['status'] = "pending";
+        $request_data['business']['owner_id'] = $user->id;
+        $request_data['business']['created_by'] = $created_by_user->id;
+        $request_data['business']['is_active'] = true;
+        $request_data['business']["pension_scheme_letters"] = [];
+        $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
+
+
+        $business =  Business::create($request_data['business']);
+
+
+        //    foreach($request_data['business']["active_module_ids"] as $active_module_id){
+        //     BusinessModule::create([
+        //      "is_enabled" => 1,
+        //      "business_id" => $business->id,
+        //      "module_id" => $active_module_id,
+        //      'created_by' => auth()->user()->id
+        //     ]);
+        //  }
+
+
+        $user->email_verified_at = now();
+        $user->business_id = $business->id;
+        $token = Str::random(30);
+        $user->resetPasswordToken = $token;
+        $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+        $user->created_by = auth()->user()->id;
+        $user->save();
+
+        BusinessTime::where([
+            "business_id" => $business->id
+        ])
+            ->delete();
+        $timesArray = collect($request_data["times"])->unique("day");
+        foreach ($timesArray as $business_time) {
+            BusinessTime::create([
+                "business_id" => $business->id,
+                "day" => $business_time["day"],
+                "start_at" => $business_time["start_at"],
+                "end_at" => $business_time["end_at"],
+                "is_weekend" => $business_time["is_weekend"],
+            ]);
         }
-    }
 
-    if(!empty($request_data["business"]["background_image"])) {
-        try {
-
-                $this->moveUploadedFilesBack($request_data["business"]["background_image"],"","business_images");
+        $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
 
 
 
-        } catch (Exception $innerException) {
-            error_log("Failed to move recruitment processes files back: " . $innerException->getMessage());
+        //  if($request_data['user']['send_password']) {
+
+
+
+        if (env("SEND_EMAIL") == true) {
+            $this->checkEmailSender($user->id, 0);
+
+            Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMail($user, $password));
+
+            $this->storeEmailSender($user->id, 0);
         }
+
+        $business->service_plan = $business->service_plan;
+
+        return [
+            "user" => $user,
+            "business" => $business
+        ];
     }
-}
-
-
-
-
-public function createUserWithBusiness($request_data) {
-   // user info starts ##############
-
-   $password = $request_data['user']['password'];
-
-
-   $request_data['user']['password'] = Hash::make($request_data['user']['password']);
-    //    if(!$request->user()->hasRole('superadmin') || empty($request_data['user']['password'])) {
-    //     $password = Str::random(10);
-    //     $request_data['user']['password'] = Hash::make($password);
-    //     }
-    $request_data['user']['remember_token'] = Str::random(10);
-    $request_data['user']['is_active'] = true;
-
-
-    $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
-    $request_data['user']['address_line_2'] = (!empty($request_data['business']['address_line_2']) ? $request_data['business']['address_line_2'] : "");
-    $request_data['user']['country'] = $request_data['business']['country'];
-    $request_data['user']['city'] = $request_data['business']['city'];
-    $request_data['user']['postcode'] = $request_data['business']['postcode'];
-    $request_data['user']['lat'] = $request_data['business']['lat'];
-    $request_data['user']['long'] = $request_data['business']['long'];
-
-
-
-
-   $user =  User::create($request_data['user']);
-
-   $created_by_user = auth()->user();
-
-   if(empty($created_by_user)){
-    $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
-   }
-
-
-
-   $user->assignRole('business_owner');
-   // end user info ##############
-
-
-   //  business info ##############
-
-   $request_data['business']['status'] = "pending";
-   $request_data['business']['owner_id'] = $user->id;
-   $request_data['business']['created_by'] = $created_by_user->id;
-   $request_data['business']['is_active'] = true;
-   $request_data['business']["pension_scheme_letters"] = [];
- $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
-
-
-   $business =  Business::create($request_data['business']);
-
-
-//    foreach($request_data['business']["active_module_ids"] as $active_module_id){
-//     BusinessModule::create([
-//      "is_enabled" => 1,
-//      "business_id" => $business->id,
-//      "module_id" => $active_module_id,
-//      'created_by' => auth()->user()->id
-//     ]);
-//  }
-
-
-   $user->email_verified_at = now();
-   $user->business_id = $business->id;
-   $token = Str::random(30);
-   $user->resetPasswordToken = $token;
-   $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-   $user->created_by = auth()->user()->id;
-   $user->save();
-
-   BusinessTime::where([
-       "business_id" => $business->id
-   ])
-       ->delete();
-   $timesArray = collect($request_data["times"])->unique("day");
-   foreach ($timesArray as $business_time) {
-       BusinessTime::create([
-           "business_id" => $business->id,
-           "day" => $business_time["day"],
-           "start_at" => $business_time["start_at"],
-           "end_at" => $business_time["end_at"],
-           "is_weekend" => $business_time["is_weekend"],
-       ]);
-   }
-
-   $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
-
-
-
-   //  if($request_data['user']['send_password']) {
-
-
-
-   if (env("SEND_EMAIL") == true) {
-       $this->checkEmailSender($user->id,0);
-
-       Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMail($user, $password));
-
-       $this->storeEmailSender($user->id,0);
-
-   }
-
-$business->service_plan = $business->service_plan;
-
-   return [
-    "user" => $user,
-    "business" => $business
-   ];
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
 }
