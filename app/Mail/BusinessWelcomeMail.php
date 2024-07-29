@@ -46,31 +46,14 @@ class BusinessWelcomeMail extends Mailable
 
         ])->first();
 
-        if(empty($email_content)){
-
-            $templateString = view('email.business_welcome_mail')->render();
-            // Now you can use the convertBladeToString method I provided earlier
-            $template = $this->convertBladeToString($templateString);
-            $templateVariables = $this->extractVariables($template);
 
 
-            $email_content = EmailTemplate::create([
-                "name" => "",
-                "type" => "business_welcome_mail",
-                "is_active" => 1,
-                "wrapper_id" => 1,
-                "is_default" => 1,
-                "business_id" => NULL,
-                "template" => $template,
-                "template_variables" => implode(',', $templateVariables)
-
-            ]
-        );
+            if (empty($email_content)) {
+                $email_content = $this->storeEmailTemplateIfNotExists("business_welcome_mail",NULL,0,FALSE);
+               }
 
 
 
-
-        }
 
 
         $html_content = $email_content->template;

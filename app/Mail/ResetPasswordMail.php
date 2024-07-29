@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Http\Utils\BasicEmailUtil;
 use App\Models\Business;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateWrapper;
@@ -12,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ResetPasswordMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, BasicEmailUtil;
 
     /**
      * Create a new message instance.
@@ -64,51 +65,8 @@ class ResetPasswordMail extends Mailable
         ])->first();
 
         if (empty($email_content)) {
-            $templateString = view('email.reset_password_mail')->render();
-            // Now you can use the convertBladeToString method I provided earlier
-            $template = $this->convertBladeToString($templateString);
-            $templateVariables = $this->extractVariables($template);
-
-
-            $email_content = EmailTemplate::create(
-                [
-                    "name" => "",
-                    "type" => "reset_password_mail",
-                    "is_active" => 1,
-                    "wrapper_id" => 1,
-                    "business_id" => $business_id,
-                    "is_default" => $is_default,
-
-                    "template" => $template,
-                    "template_variables" => implode(',', $templateVariables)
-
-                ]
-            );
-
-            if (empty($business_id)) {
-
-                $business_ids = Business::pluck("id");
-
-                $email_templates = $business_ids->map(function ($business_id) use ($is_default, $template, $templateVariables) {
-                    return [
-                        "name" => "",
-                        "type" => "reset_password_mail",
-                        "is_active" => 1,
-                        "wrapper_id" => 1,
-                        "business_id" => $business_id,
-                        "is_default" => $is_default,
-
-                        "template" => $template,
-                        "template_variables" => implode(',', $templateVariables),
-                        "created_at" => now(),
-                        "updated_at" => now(),
-                    ];
-                });
-
-                EmailTemplate::insert($email_templates->toArray());
-            }
-        }
-
+            $email_content = $this->storeEmailTemplateIfNotExists("reset_password_mail",$business_id,$is_default,TRUE);
+           }
 
         if ($this->client_site == "client") {
             $front_end_url = env('FRONT_END_URL_CLIENT');

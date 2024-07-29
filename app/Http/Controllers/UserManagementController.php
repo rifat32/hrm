@@ -598,11 +598,11 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             $user->roles = $user->roles->pluck('name');
 
             if (env("SEND_EMAIL") == true) {
-                $this->checkEmailSender($user->id,0);
+                $this->checkEmailSender(auth()->user()->id,0);
 
                 Mail::to($user->email)->send(new SendPasswordMail($user, $password));
 
-                $this->storeEmailSender($user->id,0);
+                $this->storeEmailSender(auth()->user()->id,0);
 
             }
 

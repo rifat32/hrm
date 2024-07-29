@@ -10,11 +10,13 @@ use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Mail\JobApplicationReceivedMail;
 use App\Models\Candidate;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class CandidateController extends Controller
 {
@@ -140,6 +142,14 @@ class CandidateController extends Controller
 
 
 
+                if (env("SEND_EMAIL") == true) {
+                    $this->checkEmailSender(auth()->user()->id,0);
+
+                    Mail::to($candidate->email)->send(new JobApplicationReceivedMail($candidate));
+
+                    $this->storeEmailSender(auth()->user()->id,0);
+
+                }
 
                 // $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
 
@@ -280,6 +290,16 @@ class CandidateController extends Controller
                 }
 
                 //  $this->moveUploadedFiles($request_data["attachments"],"candidate_files");
+
+                if (env("SEND_EMAIL") == true) {
+                    $this->checkEmailSender(auth()->user()->id,0);
+
+                    Mail::to($candidate->email)->send(new JobApplicationReceivedMail($candidate));
+
+                    $this->storeEmailSender(auth()->user()->id,0);
+
+                }
+
 
                 DB::commit();
                  return response($candidate, 201);

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Http\Utils\BasicEmailUtil;
 use App\Models\Business;
 use App\Models\EmailTemplate;
 use Illuminate\Bus\Queueable;
@@ -11,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class SendPasswordMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, BasicEmailUtil;
 
     /**
      * Create a new message instance.
@@ -36,16 +37,16 @@ class SendPasswordMail extends Mailable
     {
 
         $user = $this->user;
-        $contact_email = "";
+ 
         $business_id = null;
         $is_default = 1;
 
         if (!empty($user)) {
             $business_id = $user->business_id ?? null;
             $is_default = empty($business_id) ? 1 : 0;
-            $contact_email = $user->business->email ?? $user->email ?? "asjadtariq@gmail.com";
+
         } else {
-            $contact_email = "asjadtariq@gmail.com";
+
         }
 
 
@@ -57,54 +58,10 @@ class SendPasswordMail extends Mailable
 
         ])->first();
 
-        if(empty($email_content)){
-            $templateString = view('email.send_password_mail')->render();
-            // Now you can use the convertBladeToString method I provided earlier
-            $template = $this->convertBladeToString($templateString);
-            $templateVariables = $this->extractVariables($template);
 
-
-            $email_content = EmailTemplate::create([
-                "name" => "",
-                "type" => "send_password_mail",
-                "is_active" => 1,
-                "wrapper_id" => 1,
-                "business_id" => $business_id,
-                "is_default" => $is_default,
-
-                "template" => $template,
-                "template_variables" => implode(',', $templateVariables)
-
-            ]
-        );
-
-        if(empty($business_id)){
-
-           $business_ids = Business::pluck("id");
-
-
-
-           $email_templates = $business_ids->map(function($business_id) use($is_default, $template, $templateVariables) {
-return [
-                "name" => "",
-                "type" => "send_password_mail",
-                "is_active" => 1,
-                "wrapper_id" => 1,
-                "business_id" => $business_id,
-                "is_default" => $is_default,
-
-                "template" => $template,
-                "template_variables" => implode(',', $templateVariables),
-                "created_at" => now(),
-                "updated_at" => now(),
-];
-           });
-
-           EmailTemplate::insert($email_templates->toArray());
-
-        }
-
-        }
+        if (empty($email_content)) {
+            $email_content = $this->storeEmailTemplateIfNotExists("send_password_mail",$business_id,$is_default,TRUE);
+           }
 
         $front_end_url = env('FRONT_END_URL_DASHBOARD');
         $password_reset_link =  ($front_end_url.'/auth/change-password?token='.$this->user->resetPasswordToken);

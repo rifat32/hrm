@@ -56,28 +56,8 @@ class EmailVerificationMail extends Mailable
         ])->first();
 
         if (empty($email_content)) {
-            $templateString = view('email.email_verification_mail')->render();
-            // Now you can use the convertBladeToString method I provided earlier
-            $template = $this->convertBladeToString($templateString);
-            $templateVariables = $this->extractVariables($template);
-
-
-            $email_content = EmailTemplate::create(
-                [
-                    "name" => "",
-                    "type" => "email_verification_mail",
-                    "is_active" => 1,
-                    "wrapper_id" => 1,
-                    "business_id" => $business_id,
-                    "is_default" => $is_default,
-
-                    "template" => $template,
-                    "template_variables" => implode(',', $templateVariables)
-
-                ]
-            );
-
-        }
+            $email_content = $this->storeEmailTemplateIfNotExists("email_verification_mail",NULL,0,FALSE);
+           }
 
 
         $html_content = $email_content->template;

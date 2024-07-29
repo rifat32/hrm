@@ -42,7 +42,10 @@ class Candidate extends Model
     }
 
 
-
+    public function business()
+    {
+        return $this->belongsTo(JobListing::class, "business_id",'id');
+    }
 
 
     public function job_listing()
