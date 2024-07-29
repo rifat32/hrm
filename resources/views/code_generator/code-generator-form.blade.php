@@ -8,65 +8,41 @@
                name="table_name" value="{{!empty($names["table_name"])?$names["table_name"]:''}}">
         </div>
 
+        <div class="row mb-5">
+            <h3>Default Fields</h3>
+            <div class="row"  >
+                <div class="col-md-2" id="is-active"  >
+                    <div class="form-group">
+                        <label for="is_active" class="control-label">Is Default:</label>
+                        <select name="is_active" id="is_active">
+                            <option value="1" selected>Yes</option>
+                            <option value="0" >No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2" id="is-default"  >
+                    <div class="form-group">
+                        <label for="is_default" class="control-label">Is Active:</label>
+                        <select name="is_default" id="is_default">
+                            <option value="1" selected>Yes</option>
+                            <option value="0" >No</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
 
         <div class="row">
-            <div class="row" id="field-container">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="field_name" class="form-label">Field Name</label>
-                        <input type="text" class="form-control" id="table_name" name="field_name[]">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="basic_validation_rules" class="control-label">Basic Validation Rules:</label>
-                        <select class="form-control select2" id="basic_validation_rules" name="basic_validation_rules[]">
-                            <optgroup label="Basic Validation Rules">
-                                @foreach($validationRules['Basic Validation Rules'] as $rule)
-                                    <option value="{{ $rule }}">{{ $rule }}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="validation_type" class="control-label">Validation Type:</label>
-                        <select class="form-control select2" id="validation_type" name="validation_type[]" onchange="showValidationRules(this.value, this)">
-                            <option value="">Select Type</option>
-                            <option value="string">String</option>
-                            <option value="number">Number</option>
-                            
-                            <option value="array">Array</option>
-                            <option value="boolean">Boolean</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3" id="string-validation-rules" style="display: none;">
-                    <div class="form-group">
-                        <label for="string_validation_rules" class="control-label">String Validation Rules:</label>
-                        <select class="form-control select2" id="string_validation_rules" name="string_validation_rules[]">
-                            <optgroup label="String Validation Rules">
-                                @foreach($validationRules['String Validation Rules'] as $rule)
-                                    <option value="{{ $rule }}">{{ $rule }}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-3" id="number-validation-rules" style="display: none;">
-                    <div class="form-group">
-                        <label for="number_validation_rules" class="control-label">Number Validation Rules:</label>
-                        <select class="form-control select2" id="number_validation_rules" name="number_validation_rules[]">
-                            <optgroup label="Number Validation Rules">
-                                @foreach($validationRules['Numeric Validation Rules'] as $rule)
-                                    <option value="{{ $rule }}">{{ $rule }}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
+            <h3>Other Fields</h3>
+            <div class="row mb-5" id="default-field-container" style="display: none;">
+                @include('code_generator.field_container')
+            </div>
+            <div class="row mb-5" id="field-container">
+                @include('code_generator.field_container')
             </div>
         </div>
 
@@ -111,7 +87,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var fieldContainer = document.getElementById('field-container');
+        var fieldContainer = document.getElementById('default-field-container');
         var addMoreButton = document.getElementById('add-more');
 
         addMoreButton.addEventListener('click', function() {
@@ -129,15 +105,57 @@
         var stringValidationRules = element.parentNode.parentNode.parentNode.querySelector('#string-validation-rules');
         var numberValidationRules = element.parentNode.parentNode.parentNode.querySelector('#number-validation-rules');
 
+        var isForeignKey = element.parentNode.parentNode.parentNode.querySelector('#is-foreign-key');
+
+        var isUnique = element.parentNode.parentNode.parentNode.querySelector('#is-unique');
+
+        var relationshipTableName = element.parentNode.parentNode.parentNode.querySelector('#relationship-table-name');
+
+
+
+
         if (validationType =='string') {
             stringValidationRules.style.display = 'block';
             numberValidationRules.style.display = 'none';
+            isUnique.style.display = 'block';
+            isForeignKey.style.display = 'none';
+            relationshipTableName.style.display = 'none';
+
         } else if (validationType == 'number') {
             stringValidationRules.style.display = 'none';
             numberValidationRules.style.display = 'block';
+            isUnique.style.display = 'none';
+            isForeignKey.style.display = 'block';
+
+
+
+
+
         } else {
             stringValidationRules.style.display = 'none';
             numberValidationRules.style.display = 'none';
+            isUnique.style.display = 'none';
+            isForeignKey.style.display = 'none';
+            relationshipTableName.style.display = 'none';
+
         }
     }
+
+    function showRelationshipTable(value, element) {
+        console.log(element.parentNode.parentNode.parentNode.parentNode.parentNode)
+
+        var isForeignKey = value;
+
+        var relationshipTableName = element.parentNode.parentNode.parentNode.querySelector('#relationship-table-name');
+
+        console.log(relationshipTableName)
+
+            if(isForeignKey == 1) {
+                relationshipTableName.style.display = 'block';
+            }
+         else {
+            relationshipTableName.style.display = 'none';
+        }
+    }
+
 </script>

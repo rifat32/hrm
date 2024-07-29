@@ -31,8 +31,11 @@ class CodeGeneratorController extends Controller
          ],
        ];
 
-         return view('code_generator.code-generator', compact("names","validationRules"));
+       $is_active = 0;
+       $is_default = 0;
+         return view('code_generator.code-generator', compact("names","validationRules",  "is_active", "is_default"));
      }
+
 
 
    public   function generateCode(Request $request) {
@@ -49,32 +52,103 @@ class CodeGeneratorController extends Controller
         $names["singular_comment_name"] = Str::singular(str_replace('_', ' ', $names["table_name"]));
         $names["plural_comment_name"] = str_replace('_', ' ', $names["table_name"]);
 
+        $is_active = $request->is_active;
+        $is_default = $request->is_default;
 
 
-        $fields = collect();
-        $field_names = $request->field_name;
-        $field_validation_type = $request->validation_type;
-        $field_string_validation_rules = $request->string_validation_rules;
-        $field_number_validation_rules = $request->number_validation_rules;
+
+        $fields = collect([]);
+
+
+
+
+// Get inputs from the request
+$field_names = $request->input('field_names', []);
+$validation_types = $request->input('validation_types', []);
+$string_validation_rules = $request->input('string_validation_rules', []);
+$number_validation_rules = $request->input('number_validation_rules', []);
+$is_unique_values = $request->input('is_unique_values', []);
+$is_foreign_key_values = $request->input('is_foreign_key_values', []);
+$basic_validation_rules = $request->input('basic_validation_rules', []);
+$relationship_table_names = $request->input('relationship_table_names', []);
+
+// Remove the first item from each array
+array_shift($field_names);
+array_shift($validation_types);
+array_shift($string_validation_rules);
+array_shift($number_validation_rules);
+array_shift($is_unique_values);
+array_shift($is_foreign_key_values);
+array_shift($basic_validation_rules);
+array_shift($relationship_table_names);
+
+// Now $validation_types, $string_validation_rules, etc. contain the remaining items
+
+
+
+
 
         foreach($field_names as $index=>$value) {
 
+
             $field["name"] = $value;
-            $field["type"] = $field_validation_type[$index];
+
+            $field["type"] = $validation_types[$index];
+
+            $field["basic_validation_rule"] = $basic_validation_rules[$index];
+
+            $field["relationship_table_name"] = $relationship_table_names[$index];
+
+
+
+            $field["is_unique"] = 0;
+            $field["is_foreign_key"] = 0;
+
 
             if($field["type"] == "string") {
-                $field["request_validation_type"] = $field_string_validation_rules[$index];
+                $field["request_validation_type"] = $string_validation_rules[$index];
+                $field["is_unique"] = $is_unique_values[$index];
+
+                $field["db_validation_type"] = $field["request_validation_type"];
+
+                if($field["request_validation_type"] == "text"){
+                    $field["request_validation_type"] == "string";
+                    $field["db_validation_type"] == "text";
+                }
+
+                if($field["request_validation_type"] == "email" || $field["request_validation_type"] == "url" ){
+                    $field["db_validation_type"] == "string";
+                }
+
+
             }
             else if($field["type"] == "number") {
-                $field["request_validation_type"] = $field_number_validation_rules[$index];
+                $field["request_validation_type"] = $number_validation_rules[$index];
+                $field["is_foreign_key"] = $is_foreign_key_values[$index];
+                $field["db_validation_type"] ==  $field["request_validation_type"];
+
+                if($field["is_foreign_key"] == 1) {
+                    $field["request_validation_type"] == "numeric";
+                    $field["db_validation_type"] == "unsignedBigInteger";
+                } else if($field["request_validation_type"] == "numeric") {
+                    $field["db_validation_type"] == "double";
+                }
+            }
+            else if ($field["type"] == "array"){
+                $field["request_validation_type"] = $field["type"];
+                $field["db_validation_type"] == "json";
             }
             else {
                 $field["request_validation_type"] = $field["type"];
+                $field["db_validation_type"] = $field["type"];
             }
+
 
             $fields->push($field);
 
         }
+
+
 
 
 
@@ -101,7 +175,7 @@ class CodeGeneratorController extends Controller
 
           ];
 
-        return view('code_generator.code-generator',compact("names","fields","validationRules"));
+        return view('code_generator.code-generator',compact("names","fields","validationRules", "is_active", "is_default"));
 
 
     }

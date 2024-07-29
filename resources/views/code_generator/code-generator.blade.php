@@ -84,7 +84,7 @@
 
     @include("code_generator.routes")
     @include("code_generator.controller.controller")
-    @include("code_generator.models_migrations")
+    @include("code_generator.models_migrations.models_migrations")
     @include("code_generator.requests")
     @include("code_generator.custom_rules")
     @include("code_generator.permissions")

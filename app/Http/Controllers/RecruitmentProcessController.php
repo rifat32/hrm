@@ -815,7 +815,9 @@ class RecruitmentProcessController extends Controller
                                 ->where('recruitment_processes.created_by', $created_by)
                                 ->where('recruitment_processes.is_active', 1)
 
-                                ->whereIn("disabled_recruitment_processes.business_id",[$business->id]);
+                                ->whereDoesntHave("disabled", function($q) use($created_by, $business) {
+                                    $q->whereIn("disabled_recruitment_processes.business_id",[$business->id]);
+                                });
 
                         })
                         ->orWhere(function ($query) use($request, $business) {
