@@ -14,19 +14,12 @@ use BasicEmailUtil;
             $this->prepareEmailTemplateData("email_verification_mail",NULL),
             $this->prepareEmailTemplateData("reset_password_mail",NULL),
             $this->prepareEmailTemplateData("send_password_mail",NULL),
+            $this->prepareEmailTemplateData("job_application_received_mail", NULL),
         ];
 
         EmailTemplate::insert($email_templates);
 
 
-
-
-        $email_templates = [
-            $this->prepareEmailTemplateData("reset_password_mail",$business_id),
-            $this->prepareEmailTemplateData("send_password_mail",$business_id),
-        ];
-
-        EmailTemplate::insert($email_templates);
 
     }
 
