@@ -13,7 +13,6 @@ Before you begin, ensure you have the following installed on your local machine:
 
 - **PHP** (version 7.3 or higher)
 - **Composer**
-- **Node.js** and **NPM**
 - **MySQL** or your preferred database
 - **Git**
 
@@ -24,8 +23,8 @@ Before you begin, ensure you have the following installed on your local machine:
 First, clone the repository to your local machine:
 
 ```sh
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
+git clone https://github.com/rifat32/hrm
+cd hrm
 ```
 
 ### 2. Install Dependencies
@@ -36,11 +35,7 @@ Use Composer to install PHP dependencies:
 composer install
 ```
 
-Install NPM dependencies:
 
-```sh
-npm install
-```
 
 ### 3. Environment Configuration
 
@@ -75,33 +70,15 @@ Generate the application key:
 php artisan key:generate
 ```
 
-### 5. Migrate and Seed the Database
+### 5. Project data setup
 
 Run the migrations to create the database tables:
 
 ```sh
-php artisan migrate
+php artisan setup
 ```
 
-(Optional) Seed the database with sample data:
 
-```sh
-php artisan db:seed
-```
-
-### 6. Compile Assets
-
-Compile the assets using Laravel Mix:
-
-```sh
-npm run dev
-```
-
-For production:
-
-```sh
-npm run prod
-```
 
 ### 7. Serve the Application
 
@@ -113,13 +90,7 @@ php artisan serve
 
 Your application should now be running at [http://localhost:8000](http://localhost:8000).
 
-## Testing
 
-To run the tests, use the following command:
-
-```sh
-php artisan test
-```
 
 ## Useful Commands
 
@@ -138,21 +109,17 @@ php artisan test
   php artisan optimize
   ```
 
-## Contributing
 
-We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for more details.
 
-## License
 
-This project is open-sourced software licensed under the [MIT license](LICENSE).
 
 ## Contact
 
-For any inquiries or support, please contact [your-email@example.com](mailto:your-email@example.com).
+For any inquiries or support, please contact [drrifatalashwad0@gmail.com](drrifatalashwad0@gmail.com).
 
 ---
 
 Thank you for using our Laravel project. Happy coding!
 ```
 
-Make sure to customize the placeholders (like `https://github.com/your-username/your-repository.git`, `your_database_name`, `your_database_user`, and `your_database_password`) with the actual details of your project.
+
