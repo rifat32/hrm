@@ -33,7 +33,7 @@ class SpammerFoundMail extends Mailable
 
 
 
-     $front_end_url = env('FRONT_END_URL_DASHBOARD');
+     $front_end_url = env('FRONT_END_URL');
 
      $password_reset_link =  ($front_end_url.'/auth/change-password?token='.$this->user->resetPasswordToken);
 

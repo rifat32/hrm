@@ -125,8 +125,8 @@ $webhookEndpoint = WebhookEndpoint::create([
             'customer' => $user->stripe_id  ?? null,
 
             'mode' => 'subscription',
-            'success_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business",
-            'cancel_url' => env("FRONT_END_URL_DASHBOARD")."/verify/business",
+            'success_url' => env("FRONT_END_URL")."/verify/business",
+            'cancel_url' => env("FRONT_END_URL")."/verify/business",
         ];
 
 

@@ -69,9 +69,9 @@ class ResetPasswordMail extends Mailable
            }
 
         if ($this->client_site == "client") {
-            $front_end_url = env('FRONT_END_URL_CLIENT');
+            $front_end_url = env('FRONT_END_URL');
         } else if ($this->client_site == "dashboard") {
-            $front_end_url = env('FRONT_END_URL_DASHBOARD');
+            $front_end_url = env('FRONT_END_URL');
         }
 
 

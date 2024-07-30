@@ -37,7 +37,7 @@ class SendPasswordMail extends Mailable
     {
 
         $user = $this->user;
- 
+
         $business_id = null;
         $is_default = 1;
 
@@ -63,7 +63,7 @@ class SendPasswordMail extends Mailable
             $email_content = $this->storeEmailTemplateIfNotExists("send_password_mail",$business_id,$is_default,TRUE);
            }
 
-        $front_end_url = env('FRONT_END_URL_DASHBOARD');
+        $front_end_url = env('FRONT_END_URL');
         $password_reset_link =  ($front_end_url.'/auth/change-password?token='.$this->user->resetPasswordToken);
 
 
