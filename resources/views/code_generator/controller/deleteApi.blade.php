@@ -65,20 +65,25 @@ public function delete{{ $names["plural_model_name"] }}ByIds(Request $request, $
 
        $idsArray = explode(',', $ids);
        $existingIds = {{ $names["singular_model_name"] }}::whereIn('id', $idsArray)
-           ->when(empty($request->user()->business_id), function ($query) use ($request) {
-               if ($request->user()->hasRole("superadmin")) {
-                   return $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                       ->where('{{ $names["table_name"] }}.is_default', 1);
-               } else {
-                   return $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                       ->where('{{ $names["table_name"] }}.is_default', 0)
-                       ->where('{{ $names["table_name"] }}.created_by', $request->user()->id);
-               }
-           })
-           ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-               return $query->where('{{ $names["table_name"] }}.business_id', $request->user()->business_id)
-                   ->where('{{ $names["table_name"] }}.is_default', 0);
-           })
+       @if ($is_active && $is_default)
+       ->when(empty($request->user()->business_id), function ($query) use ($request) {
+        if ($request->user()->hasRole("superadmin")) {
+            return $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                ->where('{{ $names["table_name"] }}.is_default', 1);
+        } else {
+            return $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                ->where('{{ $names["table_name"] }}.is_default', 0)
+                ->where('{{ $names["table_name"] }}.created_by', $request->user()->id);
+        }
+    })
+    ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+        return $query->where('{{ $names["table_name"] }}.business_id', $request->user()->business_id)
+            ->where('{{ $names["table_name"] }}.is_default', 0);
+    })
+    @else
+    ->where('{{ $names["table_name"] }}.business_id', auth()->user()->business_id)
+       @endif
+
            ->select('id')
            ->get()
            ->pluck('id')

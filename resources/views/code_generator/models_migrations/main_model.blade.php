@@ -32,6 +32,7 @@
         $relation["singular_table_name"] = Str::singular($relation["table_name"]);
 
         $relation["singular_model_name"] = Str::studly($relation["singular_table_name"]);
+
         $relation["plural_model_name"] = Str::plural($relation["singular_model_name"]);
 
         $relation["api_name"] = str_replace('_', '-', $relation["table_name"]);

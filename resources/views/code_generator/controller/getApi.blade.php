@@ -156,89 +156,97 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
 
 
 
-       ${{ $names["table_name"] }} = {{ $names["singular_model_name"] }}::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-           if (auth()->user()->hasRole('superadmin')) {
-               return $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                   ->where('{{ $names["table_name"] }}.is_default', 1)
-                   ->when(isset($request->is_active), function ($query) use ($request) {
-                       return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
-                   });
-           } else {
-               return $query
+       ${{ $names["table_name"] }} = {{ $names["singular_model_name"] }}::
+       @if ($is_active && $is_default)
+       when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+        if (auth()->user()->hasRole('superadmin')) {
+            return $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                ->where('{{ $names["table_name"] }}.is_default', 1)
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
+                });
+        } else {
+            return $query
 
-               ->where(function($query) use($request) {
-                   $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                   ->where('{{ $names["table_name"] }}.is_default', 1)
-                   ->where('{{ $names["table_name"] }}.is_active', 1)
-                   ->when(isset($request->is_active), function ($query) use ($request) {
-                       if(intval($request->is_active)) {
-                           return $query->whereDoesntHave("disabled", function($q) {
-                               $q->whereIn("disabled_{{ $names["table_name"] }}.created_by", [auth()->user()->id]);
-                           });
-                       }
+            ->where(function($query) use($request) {
+                $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                ->where('{{ $names["table_name"] }}.is_default', 1)
+                ->where('{{ $names["table_name"] }}.is_active', 1)
+                ->when(isset($request->is_active), function ($query) use ($request) {
+                    if(intval($request->is_active)) {
+                        return $query->whereDoesntHave("disabled", function($q) {
+                            $q->whereIn("disabled_{{ $names["table_name"] }}.created_by", [auth()->user()->id]);
+                        });
+                    }
 
-                   })
-                   ->orWhere(function ($query) use ($request) {
-                       $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                           ->where('{{ $names["table_name"] }}.is_default', 0)
-                           ->where('{{ $names["table_name"] }}.created_by', auth()->user()->id)
-                           ->when(isset($request->is_active), function ($query) use ($request) {
-                               return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
-                           });
-                   });
+                })
+                ->orWhere(function ($query) use ($request) {
+                    $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                        ->where('{{ $names["table_name"] }}.is_default', 0)
+                        ->where('{{ $names["table_name"] }}.created_by', auth()->user()->id)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
+                        });
+                });
 
-               });
-           }
-       })
-           ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
-               return $query
-               ->where(function($query) use($request, $created_by) {
-
-
-                   $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                   ->where('{{ $names["table_name"] }}.is_default', 1)
-                   ->where('{{ $names["table_name"] }}.is_active', 1)
-                   ->whereDoesntHave("disabled", function($q) use($created_by) {
-                       $q->whereIn("disabled_{{ $names["table_name"] }}.created_by", [$created_by]);
-                   })
-                   ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                       if(intval($request->is_active)) {
-                           return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                               $q->whereIn("disabled_{{ $names["table_name"] }}.business_id",[auth()->user()->business_id]);
-                           });
-                       }
-
-                   })
+            });
+        }
+    })
+        ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            return $query
+            ->where(function($query) use($request, $created_by) {
 
 
-                   ->orWhere(function ($query) use($request, $created_by){
-                       $query->where('{{ $names["table_name"] }}.business_id', NULL)
-                           ->where('{{ $names["table_name"] }}.is_default', 0)
-                           ->where('{{ $names["table_name"] }}.created_by', $created_by)
-                           ->where('{{ $names["table_name"] }}.is_active', 1)
+                $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                ->where('{{ $names["table_name"] }}.is_default', 1)
+                ->where('{{ $names["table_name"] }}.is_active', 1)
+                ->whereDoesntHave("disabled", function($q) use($created_by) {
+                    $q->whereIn("disabled_{{ $names["table_name"] }}.created_by", [$created_by]);
+                })
+                ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+                    if(intval($request->is_active)) {
+                        return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                            $q->whereIn("disabled_{{ $names["table_name"] }}.business_id",[auth()->user()->business_id]);
+                        });
+                    }
 
-                           ->when(isset($request->is_active), function ($query) use ($request) {
-                               if(intval($request->is_active)) {
-                                   return $query->whereDoesntHave("disabled", function($q) {
-                                       $q->whereIn("disabled_{{ $names["table_name"] }}.business_id",[auth()->user()->business_id]);
-                                   });
-                               }
-
-                           })
+                })
 
 
-                           ;
-                   })
-                   ->orWhere(function ($query) use($request) {
-                       $query->where('{{ $names["table_name"] }}.business_id', auth()->user()->business_id)
-                           ->where('{{ $names["table_name"] }}.is_default', 0)
-                           ->when(isset($request->is_active), function ($query) use ($request) {
-                               return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
-                           });
-                   });
-               });
+                ->orWhere(function ($query) use($request, $created_by){
+                    $query->where('{{ $names["table_name"] }}.business_id', NULL)
+                        ->where('{{ $names["table_name"] }}.is_default', 0)
+                        ->where('{{ $names["table_name"] }}.created_by', $created_by)
+                        ->where('{{ $names["table_name"] }}.is_active', 1)
 
-           })
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            if(intval($request->is_active)) {
+                                return $query->whereDoesntHave("disabled", function($q) {
+                                    $q->whereIn("disabled_{{ $names["table_name"] }}.business_id",[auth()->user()->business_id]);
+                                });
+                            }
+
+                        })
+
+
+                        ;
+                })
+                ->orWhere(function ($query) use($request) {
+                    $query->where('{{ $names["table_name"] }}.business_id', auth()->user()->business_id)
+                        ->where('{{ $names["table_name"] }}.is_default', 0)
+                        ->when(isset($request->is_active), function ($query) use ($request) {
+                            return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
+                        });
+                });
+            });
+
+        })
+        @else
+        ->where('{{ $names["table_name"] }}.business_id', $request->business_id)
+       @endif
+
+
+
            ->when(!empty($request->id), function ($query) use ($request) {
              return $query->where('{{ $names["table_name"] }}.id', $request->id);
          })

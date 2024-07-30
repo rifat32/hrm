@@ -69,8 +69,17 @@ public function create{{ $names["singular_model_name"] }}({{ $names["singular_mo
 
            $request_data = $request->validated();
 
+           @if ($is_active)
            $request_data["is_active"] = 1;
+           @endif
+
+           @if ($is_default)
            $request_data["is_default"] = 0;
+           @endif
+
+
+
+
            $request_data["created_by"] = $request->user()->id;
            $request_data["business_id"] = $request->user()->business_id;
 
