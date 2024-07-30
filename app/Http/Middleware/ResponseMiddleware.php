@@ -91,14 +91,19 @@ class ResponseMiddleware
                 // Check if the value resembles a date but not in the format G-0001
                 if (is_string($value) && (Carbon::hasFormat($value, 'Y-m-d') || Carbon::hasFormat($value, 'Y-m-d\TH:i:s.u\Z') || Carbon::hasFormat($value, 'Y-m-d\TH:i:s'))) {
                     // Parse the date and format it as 'd-m-Y'
-                    $date = Carbon::parse($value);
 
-                    $formatted_date = $date->format('d-m-Y');
+                 $date = Carbon::parse($value);
 
-                    if($formatted_date == "30-11--0001") {
+                    // If the date is in the far past, it's likely invalid
+                    if ($date->year <= 0) {
                         $value = "";
                     } else {
-                        $value = $formatted_date;
+                       // Format the date as 'd-m-Y' if no time is present, otherwise 'd-m-Y H:i:s'
+                       if ($date->hour == 0 && $date->minute == 0 && $date->second == 0) {
+                        $value = $date->format('d-m-Y');
+                    } else {
+                        $value = $date->format('d-m-Y H:i:s');
+                    }
                     }
 
                 }

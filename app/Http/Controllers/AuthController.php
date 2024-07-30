@@ -622,8 +622,9 @@ $responseData = [
         'currency' => $business ? $business->currency : null,
         'flexible_rota_enabled' => $business ? $business->flexible_rota_enabled : null,
         'service_plan' => $business ? $business->service_plan : null,
-
     ]
+
+
 ];
 
             Auth::login($user);

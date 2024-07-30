@@ -243,7 +243,7 @@ return "swagger generated";
         $role_permissions = config("setup-config.roles_permission");
         foreach ($role_permissions as $role_permission) {
             $role = Role::where(["name" => $role_permission["role"]])->first();
-            error_log($role_permission["role"]);
+            // error_log($role_permission["role"]);
             $permissions = $role_permission["permissions"];
             $role->syncPermissions($permissions);
             // foreach ($permissions as $permission) {
