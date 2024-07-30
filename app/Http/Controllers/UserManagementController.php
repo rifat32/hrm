@@ -77,6 +77,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Permission;
@@ -88,7 +89,7 @@ use Illuminate\Support\Facades\Validator;
 // eeeeee
 class UserManagementController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil,BasicUtil, EmailLogUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, UserDetailsUtil, BasicUtil, EmailLogUtil;
 
     protected $workShiftHistoryComponent;
     protected $holidayComponent;
@@ -108,8 +109,6 @@ class UserManagementController extends Controller
         $this->userManagementComponent = $userManagementComponent;
         $this->workLocationComponent = $workLocationComponent;
         $this->projectComponent = $projectComponent;
-
-
     }
 
 
@@ -268,10 +267,10 @@ class UserManagementController extends Controller
                 $user->roles = $user->roles->pluck('name');
 
 
-if(!empty($request_data["handle_self_registered_businesses"])) {
-    $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update","system_setting_view"])->get();
-    $user->givePermissionTo($permissions);
-}
+                if (!empty($request_data["handle_self_registered_businesses"])) {
+                    $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
+                    $user->givePermissionTo($permissions);
+                }
 
 
                 return response($user, 201);
@@ -497,16 +496,16 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
 
-            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
-          $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+            $this->makeFilePermanent($request_data["recruitment_processes"], "attachments", []);
 
 
 
-            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
-            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"],"file_name");
+            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
+            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"], "file_name");
 
-            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
-            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"],"file_name");
+            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
+            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"], "file_name");
 
 
 
@@ -550,7 +549,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
             if (!empty($request_data['departments'])) {
                 $user->departments()->sync($request_data['departments']);
-                }
+            }
 
 
 
@@ -598,12 +597,11 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             $user->roles = $user->roles->pluck('name');
 
             if (env("SEND_EMAIL") == true) {
-                $this->checkEmailSender(auth()->user()->id,0);
+                $this->checkEmailSender(auth()->user()->id, 0);
 
                 Mail::to($user->email)->send(new SendPasswordMail($user, $password));
 
-                $this->storeEmailSender(auth()->user()->id,0);
-
+                $this->storeEmailSender(auth()->user()->id, 0);
             }
 
             DB::commit();
@@ -635,18 +633,206 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
+    }
+
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/users",
+     *      operationId="createUserTest",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user",
+     *      description="This method is to store user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function createUserTest(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
 
 
+            $employeeFormData = $this->getEmployeeFormData(request()->bearerToken());
 
+            $workLocations = $this->extractIdsFromJson($employeeFormData, 'work_locations');
+            $designations = $this->extractIdsFromJson($employeeFormData, 'designations');
+            $employmentStatuses = $this->extractIdsFromJson($employeeFormData, 'employment_statuses');
+            $workShifts = $this->extractIdsFromJson($employeeFormData, 'work_shifts');
+            $departments = $this->extractIdsFromJson($employeeFormData, 'departments');
+
+
+            $data = [
+                'first_Name' => 'John',
+                'middle_Name' => 'A.',
+                'last_Name' => 'Doe',
+                'NI_number' => 'AB123456C',
+                'user_id' => 'user_' . uniqid(),
+                'email' => 'user' . uniqid() . '@example.com',
+                'password' => 'secret123',
+                'phone' => '1234567890',
+                'image' => 'http://example.com/image.jpg',
+                'address_line_1' => '123 Main St',
+                'address_line_2' => 'Apt 4B',
+                'country' => 'USA',
+                'city' => 'New York',
+                'postcode' => '10001',
+                'lat' => '40.712776',
+                'long' => '-74.005974',
+                'role' => ("business_employee#" . auth()->user()->business_id),
+                'work_shift_id' => $workShifts[0],
+                'departments' => [$departments[0]],
+                'gender' => 'male',
+                'is_in_employee' => true,
+                'designation_id' => $designations[0],
+                'employment_status_id' => $employmentStatuses[0],
+                'recruitment_processes' => [
+                    [
+                        'recruitment_process_id' => 1,
+                        'description' => 'Initial interview',
+                        'attachments' => []
+                    ]
+                ],
+                'work_location_ids' => [$workLocations[0]],
+                'joining_date' => '2024-08-01',
+                'date_of_birth' => '1990-01-01',
+                'salary_per_annum' => 60000,
+                'weekly_contractual_hours' => 40,
+                'minimum_working_days_per_week' => 5,
+                'overtime_rate' => 1.5,
+                'emergency_contact_details' => [],
+                'immigration_status' => 'british_citizen',
+                'is_sponsorship_offered' => null,
+                'date' => null,
+                'is_active_visa_details' => true,
+                'is_active_right_to_works' => true,
+                'is_active_visa_details' => true,
+                'is_active_right_to_works' => true,
+                'sponsorship_details' => [
+                    'date_assigned' => '2024-07-01',
+                    'expiry_date' => '2026-07-01',
+                    'note' => 'Sponsorship details note',
+                    'certificate_number' => 'CERT123456',
+                    'current_certificate_status' => 'assigned',
+                    'is_sponsorship_withdrawn' => false,
+                ],
+                'passport_details' => [
+                    'passport_number' => 'P1234567',
+                    'passport_issue_date' => '2020-01-01',
+                    'passport_expiry_date' => '2030-01-01',
+                    'place_of_issue' => 'New York',
+                ],
+                'visa_details' => [
+                    'BRP_number' => 'BRP123456',
+                    'visa_issue_date' => '2020-01-01',
+                    'visa_expiry_date' => '2030-01-01',
+                    'place_of_issue' => 'New York',
+                    'visa_docs' => [
+                        [
+                            'file_name' => 'visa_doc1.pdf',
+                            'description' => 'Visa document description'
+                        ]
+                    ],
+                ],
+                'right_to_works' => [
+                    'right_to_work_code' => 'RTW123456',
+                    'right_to_work_check_date' => '2024-07-01',
+                    'right_to_work_expiry_date' => '2026-07-01',
+                    'right_to_work_docs' => [
+                        [
+                            'file_name' => 'rtw_doc1.pdf',
+                            'description' => 'Right to work document description'
+                        ]
+                    ],
+                ],
+            ];
+
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(env('APP_URL') . '/setup', $data);
+
+            // Check the response status code
+            if ($response->successful()) {
+                // Handle successful response
+                dd($response->json());
+            } else {
+                // Handle failed response
+                dd($response->status());
+            }
+
+
+
+            DB::commit();
+            return response(["ok" => true], 201);
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+
+
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
     }
 
 
 
 
-
-        /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/users/import",
@@ -657,7 +843,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *       },
      *      summary="This method is to store user ",
      *      description="This method is to store user",
-      *
+     *
      *  @OA\RequestBody(
      *   * @OA\MediaType(
      *     mediaType="multipart/form-data",
@@ -709,16 +895,16 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *     )
      */
 
-     public function importUsers(SingleFileUploadRequest $request)
-     {
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function importUsers(SingleFileUploadRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
 
 
-             if (!$request->user()->hasPermissionTo('user_create')) {
+            if (!$request->user()->hasPermissionTo('user_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -726,209 +912,203 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
             //  $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $work_shift = $this->getDefaultWorkShift();
-             $department = $this->getDefaultDepartment();
-             $work_location = $this->getDefaultWorkLocation();
-             $employment_status = $this->getDefaultEmploymentStatus();
-             $designation = $this->getDefaultDesignation();
-
-
-
-        $request_data = $request->validated();
-        $file = $request_data["file"];
-        $path = $file->getRealPath();
-        $data = collect(array_map('str_getcsv', file($path)));
+            $work_shift = $this->getDefaultWorkShift();
+            $department = $this->getDefaultDepartment();
+            $work_location = $this->getDefaultWorkLocation();
+            $employment_status = $this->getDefaultEmploymentStatus();
+            $designation = $this->getDefaultDesignation();
+
+
+
+            $request_data = $request->validated();
+            $file = $request_data["file"];
+            $path = $file->getRealPath();
+            $data = collect(array_map('str_getcsv', file($path)));
+
+
+
+            $header = $data->shift();
+
+            // Split, trim, and join each header using collection
+            $new_headers = collect($header)->map(function ($h) {
+                return $this->split_trim_join($h);
+            });
+
+            // Update the data array to reflect the new headers
+            $csv_data = $data->map(function ($row) use ($new_headers) {
+                return $new_headers->combine($row);
+            });
+
+
+            $usersData = collect();
+            $createdUsers = collect();
+            // Validate and insert the CSV data
+            $errors = [];
+            foreach ($csv_data->toArray() as $index => $employeeData) {
+                $validator = Validator::make($employeeData, [
+                    'First_Name' => 'required|string|max:255',
+                    'Middle_Name' => 'nullable|string|max:255',
+                    'Last_Name' => 'required|string|max:255',
+                    'NI_Number' => 'required|string',
+                    'Email' => 'required|string|email|max:255|unique:users',
+                    'Phone' => 'required|string',
+                    'Image' => 'nullable|string',
+                    'Address_Line_1' => 'required|string',
+                    'Address_Line_2' => 'nullable',
+                    'Country' => 'required|string',
+                    'City' => 'required|string',
+                    'Postcode' => 'nullable|string',
+
+                    'Gender' => 'nullable|string|in:male,female,other',
 
+                    'Joining_Date' => [
+                        'required',
+                        'date',
+                        function ($attribute, $value, $fail) {
+                            $joining_date = Carbon::parse($value);
+                            $start_date = Carbon::parse(auth()->user()->business->start_date);
 
+                            if ($joining_date->lessThan($start_date)) {
+                                $fail("The $attribute must not be after the start date of the business.");
+                            }
+                        },
+                    ],
+                    'Date_Of_Birth' => 'required|date',
+                    'Salary_Per_Annum' => 'required|numeric',
+                    'Weekly_Contractual_Hours' => 'required|numeric',
+                    'Minimum_Working_Days_Per_Week' => 'required|numeric|max:7',
+                    'Overtime_Rate' => 'required|numeric',
+                    'Immigration_Status' => 'required|in:british_citizen,ilr,immigrant,sponsored',
 
-        $header = $data->shift();
+                    'Emergency_Contact_First_Name' => 'required|string|max:255',
+                    'Emergency_Contact_Last_Name' => 'required|string|max:255',
+                    'Relationship' => 'required|string|max:255',
+                    'Emergency_Contact_Address_line_1' => 'required|string|max:255',
+                    'Emergency_Contact_Postcode' => 'required|string|max:10',
+                    'Emergency_Contact_Mobile_Number' => 'required|string|max:15',
+                    // Optional fields can have their validation here
+                    'Emergency_Contact_Name' => 'nullable|string|max:255',
+                    'Emergency_Contact_Daytime_Tel_Number' => 'nullable|string|max:15',
+                    'Emergency_Contact_Evening_Tel_Number' => 'nullable|string|max:15',
 
-        // Split, trim, and join each header using collection
-        $new_headers = collect($header)->map(function($h) {
-            return $this->split_trim_join($h);
-        });
-
-        // Update the data array to reflect the new headers
-        $csv_data = $data->map(function($row) use ($new_headers) {
-            return $new_headers->combine($row);
-        });
-
-
-        $usersData = collect();
-        $createdUsers = collect();
- // Validate and insert the CSV data
- $errors = [];
- foreach ($csv_data->toArray() as $index => $employeeData) {
-     $validator = Validator::make($employeeData, [
-         'First_Name' => 'required|string|max:255',
-         'Middle_Name' => 'nullable|string|max:255',
-         'Last_Name' => 'required|string|max:255',
-         'NI_Number' => 'required|string',
-         'Email' => 'required|string|email|max:255|unique:users',
-         'Phone' => 'required|string',
-         'Image' => 'nullable|string',
-         'Address_Line_1' => 'required|string',
-         'Address_Line_2' => 'nullable',
-         'Country' => 'required|string',
-         'City' => 'required|string',
-         'Postcode' => 'nullable|string',
+                ]);
 
-         'Gender' => 'nullable|string|in:male,female,other',
+                if ($validator->fails()) {
+                    $errors[$index] = $validator->errors();
+                    continue; // Skip invalid rows
+                }
 
-         'Joining_Date' => [
-             'required',
-             'date',
-             function ($attribute, $value, $fail) {
-                 $joining_date = Carbon::parse($value);
-                 $start_date = Carbon::parse(auth()->user()->business->start_date);
+                $usersData->push($employeeData);
+            }
 
-                 if ($joining_date->lessThan($start_date)) {
-                     $fail("The $attribute must not be after the start date of the business.");
-                 }
-             },
-         ],
-         'Date_Of_Birth' => 'required|date',
-         'Salary_Per_Annum' => 'required|numeric',
-         'Weekly_Contractual_Hours' => 'required|numeric',
-         'Minimum_Working_Days_Per_Week' => 'required|numeric|max:7',
-         'Overtime_Rate' => 'required|numeric',
-         'Immigration_Status' => 'required|in:british_citizen,ilr,immigrant,sponsored',
+            if (!empty($errors)) {
+                return response()->json(['errors' => $errors, "csv_data" => $csv_data], 422);
+            }
 
-            'Emergency_Contact_First_Name' => 'required|string|max:255',
-            'Emergency_Contact_Last_Name' => 'required|string|max:255',
-            'Relationship' => 'required|string|max:255',
-            'Emergency_Contact_Address_line_1' => 'required|string|max:255',
-            'Emergency_Contact_Postcode' => 'required|string|max:10',
-            'Emergency_Contact_Mobile_Number' => 'required|string|max:15',
-            // Optional fields can have their validation here
-            'Emergency_Contact_Name' => 'nullable|string|max:255',
-            'Emergency_Contact_Daytime_Tel_Number' => 'nullable|string|max:15',
-            'Emergency_Contact_Evening_Tel_Number' => 'nullable|string|max:15',
 
-     ]);
 
-     if ($validator->fails()) {
-         $errors[$index] = $validator->errors();
-         continue; // Skip invalid rows
-     }
+            $this->checkEmployeeCreationLimit(true, $usersData->count());
 
-     $usersData->push($employeeData);
 
+            $usersData->each(function ($userData) use (&$createdUsers, $work_location, $department, $work_shift, $employment_status, $designation) {
+                $userData["user_id"] = $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
+                $userData["role"] = "business_employee#" . auth()->user()->business_id;
+                $userData['departments'] = [$department->id];
+                $userData['Work_Shift_Id'] = $work_shift->id;
+                $userData['Work_Location_Ids'] = [$work_location->id];
 
- }
+                $userData['Employment_Status_Id'] = $employment_status->id;
+                $userData['Designation_id'] = $designation->id;
 
- if (!empty($errors)) {
-     return response()->json(['errors' => $errors,"csv_data" => $csv_data], 422);
- }
 
 
+                $userData['emergency_contact_details'] = [
+                    [
+                        'first_Name' => $userData['Emergency_Contact_First_Name'],
+                        'last_Name' => $userData['Emergency_Contact_Last_Name'],
+                        'emergency_contact_name' => $userData['Emergency_Contact_Name'] ?? '',
+                        'relationship_of_above_to_you' => $userData['Relationship'],
+                        'address_line_1' => $userData['Emergency_Contact_Address_line_1'],
+                        'postcode' => $userData['Emergency_Contact_Postcode'],
+                        'daytime_tel_number' => $userData['Emergency_Contact_Daytime_Tel_Number'] ?? '',
+                        'eveningtime_tel_number' => $userData['Emergency_Contact_Evening_Tel_Number'] ?? '',
+                        'mobile_tel_number' => $userData['Emergency_Contact_Mobile_Number']
+                    ]
+                ];
 
- $this->checkEmployeeCreationLimit(true,$usersData->count());
 
+                // $request_data['password'] = Hash::make($request['password']);
 
- $usersData->each(function($userData) use(&$createdUsers, $work_location,$department,$work_shift,$employment_status,$designation) {
-    $userData["user_id"] = $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
-    $userData["role"] = "business_employee#" . auth()->user()->business_id;
-    $userData['departments'] = [$department->id];
-    $userData['Work_Shift_Id'] = $work_shift->id;
-    $userData['Work_Location_Ids'] =[$work_location->id] ;
+                $password = Str::random(11);
+                $userData['password'] = Hash::make($password);
 
-    $userData['Employment_Status_Id'] = $employment_status->id;
-    $userData['Designation_id'] = $designation->id;
 
 
 
-    $userData['emergency_contact_details'] = [
-        [
-            'first_Name' => $userData['Emergency_Contact_First_Name'],
-            'last_Name' => $userData['Emergency_Contact_Last_Name'],
-            'emergency_contact_name' => $userData['Emergency_Contact_Name'] ?? '',
-            'relationship_of_above_to_you' => $userData['Relationship'],
-            'address_line_1' => $userData['Emergency_Contact_Address_line_1'],
-            'postcode' => $userData['Emergency_Contact_Postcode'],
-            'daytime_tel_number' => $userData['Emergency_Contact_Daytime_Tel_Number'] ?? '',
-            'eveningtime_tel_number' => $userData['Emergency_Contact_Evening_Tel_Number'] ?? '',
-            'mobile_tel_number' => $userData['Emergency_Contact_Mobile_Number']
-        ]
-    ];
+                $userData['is_active'] = true;
+                $userData['remember_token'] = Str::random(10);
 
+                $userData['business_id'] = auth()->user()->business_id;
 
-             // $request_data['password'] = Hash::make($request['password']);
+                $user =  User::create($userData);
+                $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
+                $user->user_name = $username;
+                $token = Str::random(30);
+                $user->resetPasswordToken = $token;
+                $user->resetPasswordExpires = Carbon::now()->subDays(-1);
+                $user->pension_eligible = 0;
+                $user->save();
+                $this->delete_old_histories();
 
-             $password = Str::random(11);
-             $userData['password'] = Hash::make($password);
 
 
+                if (!empty($userData['departments'])) {
+                    $user->departments()->sync($userData['departments']);
+                }
 
 
-             $userData['is_active'] = true;
-             $userData['remember_token'] = Str::random(10);
+                $user->work_locations()->sync($userData["work_location_ids"]);
 
-             $userData['business_id'] = auth()->user()->business_id;
+                $user->assignRole($userData['role']);
 
-             $user =  User::create($userData);
-             $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
-             $user->user_name = $username;
-             $token = Str::random(30);
-             $user->resetPasswordToken = $token;
-             $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-             $user->pension_eligible = 0;
-             $user->save();
-             $this->delete_old_histories();
 
+                $this->store_work_shift($userData, $user);
+                $this->store_project($user);
+                $this->store_pension($user);
 
 
-             if (!empty($userData['departments'])) {
-                 $user->departments()->sync($userData['departments']);
-                 }
 
+                $user->roles = $user->roles->pluck('name');
 
-             $user->work_locations()->sync($userData["work_location_ids"]);
+                if (env("SEND_EMAIL") == true) {
+                    $this->checkEmailSender($user->id, 0);
 
-             $user->assignRole($userData['role']);
+                    Mail::to($user->email)->send(new SendPasswordMail($user, $password));
 
+                    $this->storeEmailSender($user->id, 0);
+                }
 
-             $this->store_work_shift($userData, $user);
-             $this->store_project( $user);
-             $this->store_pension($user);
+                $createdUsers->push($user);
+            });
 
 
 
-             $user->roles = $user->roles->pluck('name');
 
-             if (env("SEND_EMAIL") == true) {
-                 $this->checkEmailSender($user->id,0);
 
-                 Mail::to($user->email)->send(new SendPasswordMail($user, $password));
 
-                 $this->storeEmailSender($user->id,0);
 
-             }
 
-             $createdUsers->push($user);
 
+            DB::commit();
+            return response($createdUsers->toArray(), 201);
+        } catch (Exception $e) {
 
- });
+            DB::rollBack();
 
 
-
-
-
-
-
-
-
-             DB::commit();
-             return response($createdUsers->toArray(), 201);
-         } catch (Exception $e) {
-
-             DB::rollBack();
-
-
-             return $this->sendError($e, 500, $request);
-         }
-
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -1061,7 +1241,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
                 "id" => $request_data["id"],
             ];
 
-            if(!empty($request_data["joining_date"])) {
+            if (!empty($request_data["joining_date"])) {
                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
             }
 
@@ -1118,10 +1298,10 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
 
 
 
-if(!empty($request_data["handle_self_registered_businesses"])) {
-    $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update","system_setting_view"])->get();
-    $user->givePermissionTo($permissions);
-}
+            if (!empty($request_data["handle_self_registered_businesses"])) {
+                $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
+                $user->givePermissionTo($permissions);
+            }
 
 
 
@@ -1141,7 +1321,7 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
     }
 
 
-      /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/update-password",
@@ -1198,78 +1378,78 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *     )
      */
 
-     public function updatePassword(UserPasswordUpdateRequest $request)
-     {
+    public function updatePassword(UserPasswordUpdateRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-
-
-
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
-
-
-             if (!empty($request_data['password'])) {
-                 $request_data['password'] = Hash::make($request_data['password']);
-             } else {
-                 unset($request_data['password']);
-             }
-
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
-
-
-             $user = User::where($userQueryTerms)->first();
-
-             if ($user) {
-                 $user->fill(collect($request_data)->only([
-                     'password',
-                 ])->toArray());
-
-                 $user->save();
-             }
-             if (!$user) {
-
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
-             $user->roles = $user->roles->pluck('name');
+
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
+            } else {
+                unset($request_data['password']);
+            }
+
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            $user = User::where($userQueryTerms)->first();
+
+            if ($user) {
+                $user->fill(collect($request_data)->only([
+                    'password',
+                ])->toArray());
+
+                $user->save();
+            }
+            if (!$user) {
+
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
-   /**
+
+
+            $user->roles = $user->roles->pluck('name');
+
+
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/exit",
@@ -1285,36 +1465,36 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *         required=true,
      *         @OA\JsonContent(
      *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
-  *     type="object",
- *     @OA\Property(property="id", type="string", format="number", example="1"),
- *     @OA\Property(
- *         property="termination",
- *         type="object",
- *         @OA\Property(property="termination_type_id", type="integer", format="int64", example="1"),
- *         @OA\Property(property="termination_reason_id", type="integer", format="int64", example="2"),
- *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
- *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
- *     ),
- *     @OA\Property(
- *         property="exit_interview",
- *         type="object",
- *         @OA\Property(property="exit_interview_conducted", type="boolean", example=true),
- *         @OA\Property(property="date_of_exit_interview", type="string", format="date", example="2024-07-10"),
- *         @OA\Property(property="interviewer_name", type="string", example="John Doe"),
- *         @OA\Property(property="key_feedback_points", type="string", example="Some key feedback points."),
- *         @OA\Property(property="assets_returned", type="boolean", example=true),
- *         @OA\Property(
- *             property="attachments",
- *             type="array",
- *             @OA\Items(type="string", example="attachment1.jpg")
- *         ),
- *     ),
- *     @OA\Property(
- *         property="access_revocation",
- *         type="object",
- *         @OA\Property(property="email_access_revoked", type="boolean", example=true),
- *         @OA\Property(property="system_access_revoked_date", type="string", format="date", example="2024-07-12"),
- *     )
+     *     type="object",
+     *     @OA\Property(property="id", type="string", format="number", example="1"),
+     *     @OA\Property(
+     *         property="termination",
+     *         type="object",
+     *         @OA\Property(property="termination_type_id", type="integer", format="int64", example="1"),
+     *         @OA\Property(property="termination_reason_id", type="integer", format="int64", example="2"),
+     *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
+     *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
+     *     ),
+     *     @OA\Property(
+     *         property="exit_interview",
+     *         type="object",
+     *         @OA\Property(property="exit_interview_conducted", type="boolean", example=true),
+     *         @OA\Property(property="date_of_exit_interview", type="string", format="date", example="2024-07-10"),
+     *         @OA\Property(property="interviewer_name", type="string", example="John Doe"),
+     *         @OA\Property(property="key_feedback_points", type="string", example="Some key feedback points."),
+     *         @OA\Property(property="assets_returned", type="boolean", example=true),
+     *         @OA\Property(
+     *             property="attachments",
+     *             type="array",
+     *             @OA\Items(type="string", example="attachment1.jpg")
+     *         ),
+     *     ),
+     *     @OA\Property(
+     *         property="access_revocation",
+     *         type="object",
+     *         @OA\Property(property="email_access_revoked", type="boolean", example=true),
+     *         @OA\Property(property="system_access_revoked_date", type="string", format="date", example="2024-07-12"),
+     *     )
      *
      *         ),
      *      ),
@@ -1352,51 +1532,51 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
      *     )
      */
 
-     public function exitUser(UserExitRequest $request)
-     {
+    public function exitUser(UserExitRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-
-
-
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
 
-             $user = User::where($userQueryTerms)->first();
-             if (empty($user)) {
+
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
+
+
+            $user = User::where($userQueryTerms)->first();
+            if (empty($user)) {
                 return response()->json([
                     "message" => "no user found"
                 ], 404);
             }
 
-            if(empty($user->joining_date)) {
-   throw new Exception("The employee does not have a joining date",401);
+            if (empty($user->joining_date)) {
+                throw new Exception("The employee does not have a joining date", 401);
             }
 
 
@@ -1405,36 +1585,34 @@ if(!empty($request_data["handle_self_registered_businesses"])) {
             $joining_date = Carbon::parse($user->joining_date);
 
             if ($joining_date->gt($date_of_termination)) {
-                throw new Exception("Date of termination can not be before the joining date of the employee.",401);
+                throw new Exception("Date of termination can not be before the joining date of the employee.", 401);
             }
 
 
 
 
 
-             $request_data["termination"]["joining_date"] = $user->joining_date ;
+            $request_data["termination"]["joining_date"] = $user->joining_date;
 
 
 
 
 
-Termination::create($request_data["termination"]);
-ExitInterview::create($request_data["exit_interview"]);
+            Termination::create($request_data["termination"]);
+            ExitInterview::create($request_data["exit_interview"]);
 
-if(empty($user->accessRevocation)) {
-    AccessRevocation::create($request_data["access_revocation"]);
-} else {
-    $user->accessRevocation()->update(collect($request_data["access_revocation"])->only(
-        "email_access_revoked",
-        "system_access_revoked_date"
-        )->toArray());
-}
-
-
-
-      $this->checkInformationsBasedOnExitDate($user->id,$date_of_termination);
+            if (empty($user->accessRevocation)) {
+                AccessRevocation::create($request_data["access_revocation"]);
+            } else {
+                $user->accessRevocation()->update(collect($request_data["access_revocation"])->only(
+                    "email_access_revoked",
+                    "system_access_revoked_date"
+                )->toArray());
+            }
 
 
+
+            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
 
 
 
@@ -1443,12 +1621,14 @@ if(empty($user->accessRevocation)) {
 
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -1822,15 +2002,15 @@ if(empty($user->accessRevocation)) {
 
 
 
-            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
-            $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+            $this->makeFilePermanent($request_data["recruitment_processes"], "attachments", []);
 
 
-            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"],"file_name","right_to_work_docs");
-            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"],"file_name");
+            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
+            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"], "file_name");
 
-            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"],"file_name","visa_docs");
-            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"],"file_name");
+            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
+            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"], "file_name");
 
 
 
@@ -1846,7 +2026,7 @@ if(empty($user->accessRevocation)) {
             ];
 
 
-            if(!empty($request_data["joining_date"])) {
+            if (!empty($request_data["joining_date"])) {
                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
             }
 
@@ -1905,7 +2085,7 @@ if(empty($user->accessRevocation)) {
 
             if (!empty($request_data['departments'])) {
                 $user->departments()->sync($request_data['departments']);
-                }
+            }
 
 
             // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
@@ -1999,7 +2179,7 @@ if(empty($user->accessRevocation)) {
     }
 
 
-   /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/rejoin",
@@ -2068,107 +2248,107 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function rejoinUser(UserRejoinRequest $request)
-     {
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function rejoinUser(UserRejoinRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
 
-             $request_data['remember_token'] = Str::random(10);
+            $request_data['remember_token'] = Str::random(10);
 
 
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
 
 
-             if(!empty($request_data["joining_date"])) {
-                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
-             }
+            if (!empty($request_data["joining_date"])) {
+                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            }
 
-             $user = User::where($userQueryTerms)->first();
+            $user = User::where($userQueryTerms)->first();
 
-             if ($user) {
-                 $user->fill(collect($request_data)->only([
+            if ($user) {
+                $user->fill(collect($request_data)->only([
 
-                     'designation_id',
-                     'employment_status_id',
-                     'joining_date',
-                     "date_of_birth",
-                     'salary_per_annum',
-                     'weekly_contractual_hours',
-                     'minimum_working_days_per_week',
-                     'overtime_rate',
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    "date_of_birth",
+                    'salary_per_annum',
+                    'weekly_contractual_hours',
+                    'minimum_working_days_per_week',
+                    'overtime_rate',
 
-                 ])->toArray());
+                ])->toArray());
 
-                 $user->save();
-             }
-             if (!$user) {
+                $user->save();
+            }
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
-             $this->delete_old_histories();
-
-
-             if (!empty($request_data['departments'])) {
-                 $user->departments()->sync($request_data['departments']);
-                 }
+            $this->delete_old_histories();
 
 
-
-             $user->work_locations()->sync($request_data["work_location_ids"]);
-
-             $user->syncRoles([$request_data['role']]);
-
-             $this->update_work_shift($request_data, $user);
+            if (!empty($request_data['departments'])) {
+                $user->departments()->sync($request_data['departments']);
+            }
 
 
 
+            $user->work_locations()->sync($request_data["work_location_ids"]);
 
+            $user->syncRoles([$request_data['role']]);
 
-
-             $user->roles = $user->roles->pluck('name');
+            $this->update_work_shift($request_data, $user);
 
 
 
 
 
-             DB::commit();
-             return response($user, 201);
-         } catch (Exception $e) {
-             DB::rollBack();
+
+            $user->roles = $user->roles->pluck('name');
 
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+
+
+            DB::commit();
+            return response($user, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -2300,7 +2480,7 @@ if(empty($user->accessRevocation)) {
 
 
 
-            if(!empty($request_data["joining_date"])) {
+            if (!empty($request_data["joining_date"])) {
                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
             }
 
@@ -2341,7 +2521,7 @@ if(empty($user->accessRevocation)) {
 
 
             if (!empty($request_data['departments'])) {
-            $user->departments()->sync($request_data['departments']);
+                $user->departments()->sync($request_data['departments']);
             }
 
 
@@ -2349,17 +2529,17 @@ if(empty($user->accessRevocation)) {
 
             // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
 
-                // // Fetch the first department ID and user ID
-                // $departmentUser = DepartmentUser::where([
-                //     'department_id' => $user->departments[0]->id,
-                //     'user_id'       => $user->id
-                // ])->first();
+            // // Fetch the first department ID and user ID
+            // $departmentUser = DepartmentUser::where([
+            //     'department_id' => $user->departments[0]->id,
+            //     'user_id'       => $user->id
+            // ])->first();
 
-                // // Check if the DepartmentUser relationship exists
-                // if (!empty($departmentUser)) {
-                //     // Update the department_id to the new department ID from the request data
-                //     $departmentUser->update(['department_id' => $request_data['departments'][0]]);
-                // }
+            // // Check if the DepartmentUser relationship exists
+            // if (!empty($departmentUser)) {
+            //     // Update the department_id to the new department ID from the request data
+            //     $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+            // }
             // }
             // // Get the user's departments
             // $departments = $user->departments->pluck("id");
@@ -2392,7 +2572,7 @@ if(empty($user->accessRevocation)) {
         }
     }
 
-      /**
+    /**
      *
      * @OA\Put(
      *      path="/v4.0/users",
@@ -2460,89 +2640,89 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function updateUserV4(UserUpdateV4Request $request)
-     {
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function updateUserV4(UserUpdateV4Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
 
-             if (!empty($request_data['password'])) {
-                 $request_data['password'] = Hash::make($request_data['password']);
-             } else {
-                 unset($request_data['password']);
-             }
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
+            } else {
+                unset($request_data['password']);
+            }
 
-             $request_data['remember_token'] = Str::random(10);
-
-
-
-
-
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $request_data['remember_token'] = Str::random(10);
 
 
 
 
 
-
-             $user = User::where($userQueryTerms)->first();
-
-             if ($user) {
-                 $user->fill(collect($request_data)->only([
-                     'first_Name',
-                     'last_Name',
-                     'middle_Name',
-                     "NI_number",
-                     "email",
-                     'gender',
-
-                     'designation_id',
-                     'employment_status_id',
-                     'joining_date',
-                     "date_of_birth",
-                     'salary_per_annum',
-                     'weekly_contractual_hours',
-                     'minimum_working_days_per_week',
-                     'overtime_rate',
-                     'phone',
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
 
 
 
-                 ])->toArray());
 
-                 $user->save();
-             }
-             if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+
+            $user = User::where($userQueryTerms)->first();
+
+            if ($user) {
+                $user->fill(collect($request_data)->only([
+                    'first_Name',
+                    'last_Name',
+                    'middle_Name',
+                    "NI_number",
+                    "email",
+                    'gender',
+
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    "date_of_birth",
+                    'salary_per_annum',
+                    'weekly_contractual_hours',
+                    'minimum_working_days_per_week',
+                    'overtime_rate',
+                    'phone',
+
+
+
+                ])->toArray());
+
+                $user->save();
+            }
+            if (!$user) {
+
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
@@ -2581,15 +2761,15 @@ if(empty($user->accessRevocation)) {
 
 
 
-             DB::commit();
-             return response($user, 201);
-         } catch (Exception $e) {
-             DB::rollBack();
+            DB::commit();
+            return response($user, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
 
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -2888,7 +3068,7 @@ if(empty($user->accessRevocation)) {
                     'account_name',
                 ])->toArray()
             )
-                 ->with("bank")
+                ->with("bank")
                 ->first();
             if (!$user) {
 
@@ -3000,7 +3180,7 @@ if(empty($user->accessRevocation)) {
 
 
 
-            if(!empty($request_data["joining_date"])) {
+            if (!empty($request_data["joining_date"])) {
                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
             }
 
@@ -3384,7 +3564,7 @@ if(empty($user->accessRevocation)) {
             return $this->sendError($e, 500, $request);
         }
     }
-      /**
+    /**
      *
      * @OA\Put(
      *      path="/v2.0/users/profile",
@@ -3454,63 +3634,63 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function updateUserProfileV2(UserUpdateProfileRequestV2 $request)
-     {
+    public function updateUserProfileV2(UserUpdateProfileRequestV2 $request)
+    {
 
-         try {
+        try {
 
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $request_data = $request->validated();
-
-
-             if (!empty($request_data['password'])) {
-                 $request_data['password'] = Hash::make($request_data['password']);
-             } else {
-                 unset($request_data['password']);
-             }
+            $request_data = $request->validated();
 
 
-
-
-             //  $request_data['is_active'] = true;
-             //  $request_data['remember_token'] = Str::random(10);
-             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
-                 collect($request_data)->only([
-                     'first_Name',
-                     'middle_Name',
-
-                     'last_Name',
-
-                     "email"
-
-                 ])->toArray()
-             )
-                 // ->with("somthing")
-
-                 ->first();
-
-             if (!$user) {
-
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
+            } else {
+                unset($request_data['password']);
+            }
 
 
 
 
+            //  $request_data['is_active'] = true;
+            //  $request_data['remember_token'] = Str::random(10);
+            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+                collect($request_data)->only([
+                    'first_Name',
+                    'middle_Name',
 
-             $user->roles = $user->roles->pluck('name');
+                    'last_Name',
+
+                    "email"
+
+                ])->toArray()
+            )
+                // ->with("somthing")
+
+                ->first();
+
+            if (!$user) {
+
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
-  /**
+
+
+
+            $user->roles = $user->roles->pluck('name');
+
+
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/users/profile-picture",
@@ -3580,52 +3760,52 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function updateUserProfilePicture(UserUpdateProfilePictureRequest $request)
-     {
+    public function updateUserProfilePicture(UserUpdateProfilePictureRequest $request)
+    {
 
-         try {
+        try {
 
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $request_data = $request->validated();
-
-
+            $request_data = $request->validated();
 
 
 
 
 
-             //  $request_data['is_active'] = true;
-             //  $request_data['remember_token'] = Str::random(10);
-             $user  =  tap(User::where(["id" => $request->user()->id]))->update(
-                 collect($request_data)->only([
-                     "image",
-                 ])->toArray()
-             )
-                 // ->with("somthing")
-
-                 ->first();
-
-             if (!$user) {
-
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
 
 
+            //  $request_data['is_active'] = true;
+            //  $request_data['remember_token'] = Str::random(10);
+            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+                collect($request_data)->only([
+                    "image",
+                ])->toArray()
+            )
+                // ->with("somthing")
+
+                ->first();
+
+            if (!$user) {
+
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
-             $user->roles = $user->roles->pluck('name');
 
 
-             return response($user, 201);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            $user->roles = $user->roles->pluck('name');
+
+
+            return response($user, 201);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -4487,7 +4667,6 @@ if(empty($user->accessRevocation)) {
 
 
                 return $user->is_active == 1;
-
             })->count();
 
 
@@ -5163,57 +5342,57 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function getUsersV5(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function getUsersV5(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-
-
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-             $usersQuery = User::query();
-
-             $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
-             $usersQuery = $usersQuery->select(
-                 "users.id",
-                 "users.first_Name",
-                 "users.middle_Name",
-                 "users.last_Name",
-                 "users.joining_date",
-                 "users.user_name",
-
-             );
-             $users = $this->retrieveData($usersQuery, "users.first_Name");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
+            $usersQuery = User::query();
 
-             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                 //  if (strtoupper($request->response_type) == 'PDF') {
-                 //      $pdf = PDF::loadView('pdf.users', ["users" => $users]);
-                 //      return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                 //  } elseif (strtoupper($request->response_type) === 'CSV') {
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->select(
+                "users.id",
+                "users.first_Name",
+                "users.middle_Name",
+                "users.last_Name",
+                "users.joining_date",
+                "users.user_name",
 
-                 //      return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-                 //  }
-             } else {
-                 return response()->json($users, 200);
-             }
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            );
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
 
 
- /**
+
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                //  if (strtoupper($request->response_type) == 'PDF') {
+                //      $pdf = PDF::loadView('pdf.users', ["users" => $users]);
+                //      return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                //  } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                //      return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                //  }
+            } else {
+                return response()->json($users, 200);
+            }
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+
+    /**
      *
      * @OA\Get(
      *      path="/v6.0/users",
@@ -5717,22 +5896,22 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function getUsersV6(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function getUsersV6(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-
-
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $usersQuery = User::with(
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+
+            $usersQuery = User::with(
                 [
 
                     "roles" => function ($query) {
@@ -5745,49 +5924,48 @@ if(empty($user->accessRevocation)) {
                 ]
             );
 
-             $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
-             $usersQuery = $usersQuery->select(
-                 "users.id",
-                 "users.first_Name",
-                 "users.middle_Name",
-                 "users.last_Name",
-                 "users.email",
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->select(
+                "users.id",
+                "users.first_Name",
+                "users.middle_Name",
+                "users.last_Name",
+                "users.email",
 
-                 'users.address_line_1',
-                 'users.address_line_2',
-                 'users.country',
-                 'users.city',
-                 'users.postcode',
-                 'users.gender',
-                 'users.phone',
-             );
-             $users = $this->retrieveData($usersQuery, "users.first_Name")->map(function($user) {
+                'users.address_line_1',
+                'users.address_line_2',
+                'users.country',
+                'users.city',
+                'users.postcode',
+                'users.gender',
+                'users.phone',
+            );
+            $users = $this->retrieveData($usersQuery, "users.first_Name")->map(function ($user) {
 
                 $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
 
 
                 return $user;
-
-             });
-
+            });
 
 
-             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                 if (strtoupper($request->response_type) == 'PDF') {
-                     $pdf = PDF::loadView('pdf.users', ["users" => $users]);
-                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                 } elseif (strtoupper($request->response_type) === 'CSV') {
 
-                     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-                 }
-             } else {
-                 return response()->json($users, 200);
-             }
-         } catch (Exception $e) {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.users', ["users" => $users]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+                    return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                }
+            } else {
+                return response()->json($users, 200);
+            }
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -5886,33 +6064,33 @@ if(empty($user->accessRevocation)) {
      *     )
      */
 
-     public function getUsersV7(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function getUsersV7(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $usersQuery = User::query();
+            $usersQuery = User::query();
 
-             $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
-             $usersQuery = $usersQuery->select(
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $usersQuery->select(
                 "users.id",
-        "users.first_Name",
-        "users.middle_Name",
-        "users.last_Name",
-        "users.image",
-        "users.email",
-        "users.is_active",
-        DB::raw('(SELECT COUNT(*) FROM businesses WHERE businesses.created_by = users.id) as resold_businesses_count'),
-        DB::raw('(SELECT COUNT(*) FROM businesses
+                "users.first_Name",
+                "users.middle_Name",
+                "users.last_Name",
+                "users.image",
+                "users.email",
+                "users.is_active",
+                DB::raw('(SELECT COUNT(*) FROM businesses WHERE businesses.created_by = users.id) as resold_businesses_count'),
+                DB::raw('(SELECT COUNT(*) FROM businesses
                   WHERE businesses.created_by = users.id
                   AND businesses.is_active = 1
                   AND (
@@ -5932,52 +6110,44 @@ if(empty($user->accessRevocation)) {
                         )
                     )
                   )) as active_subscribed_businesses_count')
-             );
+            );
 
 
-             $users = $this->retrieveData($usersQuery, "users.first_Name");
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
-             if (request()->input("per_page")) {
-
-
-                  // Modify the paginated items
-    $modifiedUsers = $users->getCollection()->each(function ($user) {
-        $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
-        return $user;
-    });
-
-    // Recreate the paginator with modified items
-    $users = new \Illuminate\Pagination\LengthAwarePaginator(
-        $modifiedUsers,
-        $users->total(),
-        $users->perPage(),
-        $users->currentPage(),
-        [
-            'path' => $users->path(),
-            'query' => $users->appends(request()->query())->toArray(),
-        ]
-    );
+            if (request()->input("per_page")) {
 
 
-
-
-
-            } else {
-                $users = $users->each(function($user) {
+                // Modify the paginated items
+                $modifiedUsers = $users->getCollection()->each(function ($user) {
                     $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
                     return $user;
+                });
 
-                 });
+                // Recreate the paginator with modified items
+                $users = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $modifiedUsers,
+                    $users->total(),
+                    $users->perPage(),
+                    $users->currentPage(),
+                    [
+                        'path' => $users->path(),
+                        'query' => $users->appends(request()->query())->toArray(),
+                    ]
+                );
+            } else {
+                $users = $users->each(function ($user) {
+                    $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+                    return $user;
+                });
             }
 
             return response()->json($users, 200);
+        } catch (Exception $e) {
 
-
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -7078,7 +7248,7 @@ if(empty($user->accessRevocation)) {
             $data["leaves_data"] = $this->leaveComponent->getLeaveV4Func();
 
 
-             $data["rota_data"] = $this->userManagementComponent->getRotaData($user->id,$user->joining_date);
+            $data["rota_data"] = $this->userManagementComponent->getRotaData($user->id, $user->joining_date);
 
 
 
@@ -7088,40 +7258,39 @@ if(empty($user->accessRevocation)) {
 
 
             $lastAttendanceDate =  Attendance::where([
-                  "user_id" => $user->id
-              ])->orderBy("in_date")->first();
+                "user_id" => $user->id
+            ])->orderBy("in_date")->first();
 
 
-              $lastLeaveDate =    LeaveRecord::
-              whereHas("leave",function($query) use($user) {
-                $query->where("leaves.user_id",$user->id);
-              })->orderBy("leave_records.date")->first();
+            $lastLeaveDate =    LeaveRecord::whereHas("leave", function ($query) use ($user) {
+                    $query->where("leaves.user_id", $user->id);
+                })->orderBy("leave_records.date")->first();
 
-              $lastAssetAssignDate = UserAssetHistory::where([
-                  "user_id" => $user->id
-              ])->orderBy("from_date")->first();
+            $lastAssetAssignDate = UserAssetHistory::where([
+                "user_id" => $user->id
+            ])->orderBy("from_date")->first();
 
-// Convert the dates to Carbon instances for comparison
-$lastAttendanceDate = $lastAttendanceDate ? Carbon::parse($lastAttendanceDate->in_date) : null;
-$lastLeaveDate = $lastLeaveDate ? Carbon::parse($lastLeaveDate->date) : null;
-$lastAssetAssignDate = $lastAssetAssignDate ? Carbon::parse($lastAssetAssignDate->from_date) : null;
+            // Convert the dates to Carbon instances for comparison
+            $lastAttendanceDate = $lastAttendanceDate ? Carbon::parse($lastAttendanceDate->in_date) : null;
+            $lastLeaveDate = $lastLeaveDate ? Carbon::parse($lastLeaveDate->date) : null;
+            $lastAssetAssignDate = $lastAssetAssignDate ? Carbon::parse($lastAssetAssignDate->from_date) : null;
 
-// Find the oldest date
-$oldestDate = null;
+            // Find the oldest date
+            $oldestDate = null;
 
-if ($lastAttendanceDate && (!$oldestDate || $lastAttendanceDate->lt($oldestDate))) {
-    $oldestDate = $lastAttendanceDate;
-}
+            if ($lastAttendanceDate && (!$oldestDate || $lastAttendanceDate->lt($oldestDate))) {
+                $oldestDate = $lastAttendanceDate;
+            }
 
-if ($lastLeaveDate && (!$oldestDate || $lastLeaveDate->lt($oldestDate))) {
-    $oldestDate = $lastLeaveDate;
-}
+            if ($lastLeaveDate && (!$oldestDate || $lastLeaveDate->lt($oldestDate))) {
+                $oldestDate = $lastLeaveDate;
+            }
 
-if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDate))) {
-    $oldestDate = $lastAssetAssignDate;
-}
+            if ($lastAssetAssignDate && (!$oldestDate || $lastAssetAssignDate->lt($oldestDate))) {
+                $oldestDate = $lastAssetAssignDate;
+            }
 
-$data["user_data"]["last_activity_date"] = $oldestDate;
+            $data["user_data"]["last_activity_date"] = $oldestDate;
 
 
 
@@ -7136,7 +7305,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         }
     }
 
- /**
+    /**
      *
      * @OA\Get(
      *      path="/v4.0/users/{id}",
@@ -7191,37 +7360,37 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *     )
      */
 
-     public function getUserByIdV4($id, Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-             $user = User::with(
-                 [
-                     "roles",
-                 ]
+    public function getUserByIdV4($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user = User::with(
+                [
+                    "roles",
+                ]
 
-             )
+            )
 
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
-                     return $query->where(function ($query) use ($all_manager_department_ids) {
-                         return  $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id)
-                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
-                                 $query->whereIn("departments.id", $all_manager_department_ids);
-                             });
-                     });
-                 })
-                 ->select(
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
+                        return  $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id)
+                            ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });
+                    });
+                })
+                ->select(
                     "users.id",
                     "users.first_Name",
                     "users.middle_Name",
@@ -7235,26 +7404,26 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
                     'users.postcode',
                     'users.gender',
                     'users.phone',
-                 )
-                 ->first();
-             if (!$user) {
+                )
+                ->first();
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-
-
-             $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
+            $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
 
-             return response()->json($user, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            return response()->json($user, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -7332,7 +7501,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
         }
     }
 
-           /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/load-data-for-leaves/{id}",
@@ -7349,7 +7518,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *  example="6"
      *      ),
 
-         *     *     *              @OA\Parameter(
+     *     *     *              @OA\Parameter(
      *         name="start_date",
      *         in="path",
      *         description="start_date",
@@ -7403,33 +7572,33 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *     )
      */
 
-     public function getLoadDataForLeaveByUserId($id, Request $request)
-     {
+    public function getLoadDataForLeaveByUserId($id, Request $request)
+    {
 
-         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-         //     File::delete($file);
-         // }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
-             $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+        // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+        //     File::delete($file);
+        // }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
 
-             $user_id = intval($id);
-             $request_user_id = auth()->user()->id;
-             if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            $user_id = intval($id);
+            $request_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
 
@@ -7445,26 +7614,26 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
             $blocked_dates_collection = $unique_blocked_dates_collection->values()->all();
 
 
-            $colored_dates =  $this->userManagementComponent->getHolodayDetailsV2($user->id,$start_date,$end_date,false);
+            $colored_dates =  $this->userManagementComponent->getHolodayDetailsV2($user->id, $start_date, $end_date, false);
 
 
 
             // $workShiftHistories =  $this->get_work_shift_histories($start_date, $end_date, $user->id, ["flexible"]);
 
-        $responseArray = [
-            "blocked_dates" => $blocked_dates_collection,
-            "colored_dates" => $colored_dates,
-        ];
+            $responseArray = [
+                "blocked_dates" => $blocked_dates_collection,
+                "colored_dates" => $colored_dates,
+            ];
 
-             return response()->json($responseArray, 200);
-         } catch (Exception $e) {
+            return response()->json($responseArray, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
-       /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/users/load-data-for-attendances/{id}",
@@ -7481,7 +7650,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *  example="6"
      *      ),
 
-         *     *     *              @OA\Parameter(
+     *     *     *              @OA\Parameter(
      *         name="start_date",
      *         in="path",
      *         description="start_date",
@@ -7535,55 +7704,55 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *     )
      */
 
-     public function getLoadDataForAttendanceByUserId($id, Request $request)
-     {
+    public function getLoadDataForAttendanceByUserId($id, Request $request)
+    {
 
-         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-         //     File::delete($file);
-         // }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
-             $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
-
-
-             $user_id = intval($id);
-             $request_user_id = auth()->user()->id;
-             if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-             $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
-
-        $disabled_days_for_attendance = $this->userManagementComponent->getDisableDatesForAttendance($user->id,$start_date,$end_date);
-
-        $holiday_details =  $this->userManagementComponent->getHolodayDetails($id,$start_date,$end_date,true);
-
-        $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
+        // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+        //     File::delete($file);
+        // }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
+            $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 
 
-        $responseArray = [
-            "disabled_days_for_attendance" => $disabled_days_for_attendance,
-            "holiday_details" => $holiday_details,
-            "work_shift" => $work_shift
-        ];
-             return response()->json($responseArray, 200);
-         } catch (Exception $e) {
+            $user_id = intval($id);
+            $request_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('user_view') && ($request_user_id !== $user_id)) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-       /**
+            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
+
+            $disabled_days_for_attendance = $this->userManagementComponent->getDisableDatesForAttendance($user->id, $start_date, $end_date);
+
+            $holiday_details =  $this->userManagementComponent->getHolodayDetails($id, $start_date, $end_date, true);
+
+            $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
+
+
+            $responseArray = [
+                "disabled_days_for_attendance" => $disabled_days_for_attendance,
+                "holiday_details" => $holiday_details,
+                "work_shift" => $work_shift
+            ];
+            return response()->json($responseArray, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/load-global-data-for-attendances",
@@ -7593,7 +7762,7 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *           {"bearerAuth": {}}
      *       },
 
-         *     *     *              @OA\Parameter(
+     *     *     *              @OA\Parameter(
      *         name="start_date",
      *         in="path",
      *         description="start_date",
@@ -7647,60 +7816,60 @@ $data["user_data"]["last_activity_date"] = $oldestDate;
      *     )
      */
 
-     public function getLoadGlobalDataForAttendance($id, Request $request)
-     {
+    public function getLoadGlobalDataForAttendance($id, Request $request)
+    {
 
-         // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
-         //     File::delete($file);
-         // }
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        // foreach (File::glob(storage_path('logs') . '/*.log') as $file) {
+        //     File::delete($file);
+        // }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-// @@@@@@@@@@@@@@@@
+            // @@@@@@@@@@@@@@@@
 
-$all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-$usersQuery = User::with(
-    [
-        "designation" => function ($query) {
-            $query->select(
-                'designations.id',
-                'designations.name',
+            $usersQuery = User::with(
+                [
+                    "designation" => function ($query) {
+                        $query->select(
+                            'designations.id',
+                            'designations.name',
+                        );
+                    },
+                    "roles",
+                    "work_locations"
+                ]
             );
-        },
-        "roles",
-        "work_locations"
-    ]
-);
 
-$usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
+            $usersQuery = $this->userManagementComponent->updateUsersQuery($all_manager_department_ids, $usersQuery);
 
-$users = $this->retrieveData($usersQuery, "users.first_Name");
+            $users = $this->retrieveData($usersQuery, "users.first_Name");
 
 
-        $work_locations = $this->workLocationComponent->getWorkLocations();
+            $work_locations = $this->workLocationComponent->getWorkLocations();
 
 
 
-        $projects =   $this->projectComponent->getProjects();
+            $projects =   $this->projectComponent->getProjects();
 
 
-        $responseArray = [
-            "work_locations" => $work_locations,
-            "users" => $users,
-            "projects" => $projects
-        ];
-             return response()->json($responseArray, 200);
-         } catch (Exception $e) {
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            $responseArray = [
+                "work_locations" => $work_locations,
+                "users" => $users,
+                "projects" => $projects
+            ];
+            return response()->json($responseArray, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -7786,10 +7955,10 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
-            $result_array = $this->userManagementComponent->getDisableDatesForAttendance($user->id,$start_date,$end_date);
+            $result_array = $this->userManagementComponent->getDisableDatesForAttendance($user->id, $start_date, $end_date);
 
 
             return response()->json($result_array, 200);
@@ -7892,7 +8061,7 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
@@ -8005,7 +8174,7 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id,$all_manager_department_ids);
+            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
@@ -8131,9 +8300,9 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $this->validateUserQuery($user_id,$all_manager_department_ids);
+            $this->validateUserQuery($user_id, $all_manager_department_ids);
 
-        $result_array =  $this->userManagementComponent->getHolodayDetails($id,$start_date,$end_date,true);
+            $result_array =  $this->userManagementComponent->getHolodayDetails($id, $start_date, $end_date, true);
 
 
 
@@ -8270,7 +8439,7 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
 
             $employees =    $employees->map(function ($employee) use ($start_date, $end_date) {
 
-   $data = $this->userManagementComponent->getScheduleInformationData($employee->id,$start_date,$end_date);
+                $data = $this->userManagementComponent->getScheduleInformationData($employee->id, $start_date, $end_date);
 
 
                 $employee->schedule_data = $data["schedule_data"];
@@ -8576,7 +8745,7 @@ $users = $this->retrieveData($usersQuery, "users.first_Name");
     public function generateEmployeeId(Request $request)
     {
 
-     $user_id =   $this->generateUniqueId("Business",auth()->user()->business_id,"User","user_id");
+        $user_id =   $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
 
         return response()->json(["user_id" => $user_id], 200);
     }

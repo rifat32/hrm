@@ -33,6 +33,7 @@ use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 trait UserDetailsUtil
 {
@@ -759,6 +760,37 @@ public function checkInformationsBasedOnExitDate($user_id,$date_of_termination){
 
 
 
+public function getEmployeeFormData($businessOwnerToken)
+{
+    $url = env('APP_URL') . '/api/v1.0/dropdown-options/employee-form';
+
+    // Perform the API request
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $businessOwnerToken,
+    ])->get($url);
+
+    if ($response->successful()) {
+        return $response->json();
+    } else {
+        // Handle error response
+        throw new \Exception('Failed to fetch employee form data');
+    }
+}
+
+public function extractIdsFromJson(array $jsonData, string $nodeName)
+{
+    $idList = [];
+
+    if (isset($jsonData[$nodeName])) {
+        foreach ($jsonData[$nodeName] as $item) {
+            if (isset($item['id'])) {
+                $idList[] = $item['id'];
+            }
+        }
+    }
+
+    return $idList;
+}
 
 
 
