@@ -31,6 +31,20 @@
 
         class Validate{{$relation['singular_field_name']}} implements Rule
         {
+            /**
+            * Create a new rule instance.
+            *
+            * @return void
+            */
+
+            protected $id;
+           protected $errMessage;
+
+           public function __construct($id)
+           {
+               $this->id = $id;
+               $this->errMessage = "";
+           }
 
 
         }

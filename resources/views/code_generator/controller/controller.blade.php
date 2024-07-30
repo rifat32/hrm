@@ -44,7 +44,17 @@
 
                     @include("code_generator.controller.createApi")
                     @include("code_generator.controller.updateApi")
-                    @include("code_generator.controller.toggleApi")
+
+@if ($is_active)
+    @if ($is_default)
+    @include("code_generator.controller.toggleApi")
+    @else
+    @include("code_generator.controller.toggleApi2")
+    @endif
+@endif
+
+
+
                     @include("code_generator.controller.getApi")
                     @include("code_generator.controller.deleteApi")
 
