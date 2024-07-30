@@ -60,8 +60,8 @@ class ValidateJobPlatformClient implements Rule
                                 $q->whereIn("disabled_job_platforms.business_id",[$business->id]);
                             });
                     })
-                    ->orWhere(function ($query)   {
-                        $query->where('job_platforms.business_id', auth()->user()->business_id)
+                    ->orWhere(function ($query) use($business)  {
+                        $query->where('job_platforms.business_id', $business->id)
                             ->where('job_platforms.is_default', 0)
                             ->where('job_platforms.is_active', 1);
 

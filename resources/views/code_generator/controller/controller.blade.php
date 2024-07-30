@@ -3,14 +3,16 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
 
+          
+
             <div class="code-snippet">
                 <h3>Create Controller Using CLI</h3>
-                <pre id="create_controller">
-                <code>
-               php artisan make:controller {{ $names["controller_name"] }}
-               </code></pre>
-                <button class="copy-button" onclick="copyToClipboard('create_controller')">Copy</button>
-            </div>
+                <pre id="create_controller_command"><code>
+                    php artisan make:controller {{ $names["controller_name"] }}
+              </code></pre>
+                <button class="copy-button" onclick="copyToClipboard('create_controller_command')">Copy</button>
+              </div>
+
 
 
 

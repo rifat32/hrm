@@ -23,7 +23,11 @@
 
 Route::post('/v1.0/{{ $names["api_name"] }}', [{{ $names["controller_name"] }}::class, "create{{ $names["singular_model_name"] }}"]);
 Route::put('/v1.0/{{ $names["api_name"] }}', [{{ $names["controller_name"] }}::class, "update{{ $names["singular_model_name"] }}"]);
+
+@if ($is_active)
 Route::put('/v1.0/{{ $names["api_name"] }}/toggle-active', [{{ $names["controller_name"] }}::class, "toggleActive{{ $names["singular_model_name"] }}"]);
+@endif
+
 Route::get('/v1.0/{{ $names["api_name"] }}', [{{ $names["controller_name"] }}::class, "get{{ $names["plural_model_name"] }}"]);
 Route::delete('/v1.0/{{ $names["api_name"] }}/{ids}', [{{ $names["controller_name"] }}::class, "delete{{ $names["plural_model_name"] }}ByIds"]);
 

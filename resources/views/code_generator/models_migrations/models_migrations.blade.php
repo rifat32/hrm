@@ -9,14 +9,18 @@
 
             @include("code_generator.models_migrations.main_migration")
 
-
-            @include("code_generator.models_migrations.disabled_migration")
-
-
             @include("code_generator.models_migrations.main_model")
 
 
+
+            @if ($is_active && $is_default)
+
+            @include("code_generator.models_migrations.disabled_migration")
+
             @include("code_generator.models_migrations.disabled_model")
+            
+            @endif
+
 
 
 

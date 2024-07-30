@@ -10,7 +10,10 @@
                 <pre id="permissions"><code>
                     "{{$names['singular_table_name']}}_create",
                     "{{$names['singular_table_name']}}_update",
+                    @if ($is_active)
                     "{{$names['singular_table_name']}}_activate",
+                    @endif
+
                     "{{$names['singular_table_name']}}_view",
                     "{{$names['singular_table_name']}}_delete",
 

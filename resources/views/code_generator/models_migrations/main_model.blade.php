@@ -17,8 +17,16 @@
               '{{$field['name']}}',
             @endforeach
 
-              "is_active",
-              "is_default",
+            @if ($is_active)
+            "is_active",
+            @if ($is_default)
+
+            "is_default",
+            @endif
+            @endif
+
+
+
               "business_id",
               "created_by"
           ];
@@ -56,66 +64,76 @@
 
 
 
+            @if ($is_active && $is_default)
+            public function disabled()
+            {
+                return $this->hasMany(Disabled{{$names["singular_model_name"]}}::class, '{{$names["singular_table_name"]}}_id', 'id');
+            }
+            public function getIsActiveAttribute($value)
+            {
 
-          public function disabled()
-          {
-              return $this->hasMany(Disabled{{$names["singular_model_name"]}}::class, '{{$names["singular_table_name"]}}_id', 'id');
-          }
+                $is_active = $value;
+                $user = auth()->user();
 
+                if (empty($user->business_id)) {
+                    if (empty($this->business_id) && $this->is_default == 1) {
+                        if (!$user->hasRole("superadmin")) {
+                            $disabled = $this->disabled()->where([
+                                "created_by" => $user->id
+                            ])
+                                ->first();
+                            if ($disabled) {
+                                $is_active = 0;
+                            }
+                        }
+                    }
+                } else {
 
-          public function getIsActiveAttribute($value)
-          {
-
-              $is_active = $value;
-              $user = auth()->user();
-
-              if (empty($user->business_id)) {
-                  if (empty($this->business_id) && $this->is_default == 1) {
-                      if (!$user->hasRole("superadmin")) {
-                          $disabled = $this->disabled()->where([
-                              "created_by" => $user->id
-                          ])
-                              ->first();
-                          if ($disabled) {
-                              $is_active = 0;
-                          }
-                      }
-                  }
-              } else {
-
-                  if (empty($this->business_id)) {
-                      $disabled = $this->disabled()->where([
-                          "business_id" => $user->business_id
-                      ])
-                          ->first();
-                      if ($disabled) {
-                          $is_active = 0;
-                      }
-                  }
-              }
+                    if (empty($this->business_id)) {
+                        $disabled = $this->disabled()->where([
+                            "business_id" => $user->business_id
+                        ])
+                            ->first();
+                        if ($disabled) {
+                            $is_active = 0;
+                        }
+                    }
+                }
 
 
 
 
-              return $is_active;
-          }
-
-          public function getIsDefaultAttribute($value)
-          {
-
-              $is_default = $value;
-              $user = auth()->user();
-
-              if (!empty($user->business_id)) {
-                  if (empty($this->business_id) || $user->business_id !=  $this->business_id) {
-                      $is_default = 1;
-                  }
-              }
+                return $is_active;
+            }
 
 
 
-              return $is_default;
-          }
+            public function getIsDefaultAttribute($value)
+            {
+
+                $is_default = $value;
+                $user = auth()->user();
+
+                if (!empty($user->business_id)) {
+                    if (empty($this->business_id) || $user->business_id !=  $this->business_id) {
+                        $is_default = 1;
+                    }
+                }
+
+
+
+                return $is_default;
+            }
+            @endif
+
+
+
+
+
+
+
+
+
       }
 
 </code></pre>

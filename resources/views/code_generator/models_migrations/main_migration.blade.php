@@ -29,7 +29,7 @@
 
                 @else
 
-                $table->{{$field["db_validation_type"]}}('{{$field['name']}}')->nullable({{($field["basic_validation_rule"] == "required" || $field["basic_validation_rule"] == "filled")? FALSE:TRUE}});
+                $table->{{$field["db_validation_type"]}}('{{$field['name']}}'){{($field["basic_validation_rule"] == "required" || $field["basic_validation_rule"] == "filled")? "":"->nullable()"}};
                 @endif
 
 
@@ -38,9 +38,17 @@
 
 
 
-
+                @if ($is_active)
                 $table->boolean('is_active')->default(false);
+
+                @if ($is_default)
                 $table->boolean('is_default')->default(false);
+                @endif
+
+                @endif
+
+
+
 
                 $table->foreignId('business_id')
                 ->constrained('businesses')

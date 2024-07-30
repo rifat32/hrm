@@ -44,6 +44,7 @@ class UserEducationHistoryUpdateRequest extends BaseFormRequest
                     }
                 },
             ],
+
             'user_id' => [
                 'required',
                 'numeric',
@@ -64,5 +65,6 @@ class UserEducationHistoryUpdateRequest extends BaseFormRequest
             'attachments' => 'present|array',
             'attachments.*' => 'string',
         ];
+
     }
 }

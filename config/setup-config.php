@@ -360,6 +360,14 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+
+                "user_letter_create",
+                "user_letter_update",
+                "user_letter_view",
+                "user_letter_delete",
+
+
+
                 "employee_payslip_create",
                 "employee_payslip_update",
                 "employee_payslip_view",
@@ -638,6 +646,15 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+
+                "user_letter_create",
+                "user_letter_update",
+
+                "user_letter_view",
+                "user_letter_delete",
+
+
+
                 "employee_payslip_create",
                 "employee_payslip_update",
                 "employee_payslip_view",
@@ -890,6 +907,15 @@ return [
                 "employee_education_history_view",
                 "employee_education_history_delete",
 
+
+                "user_letter_create",
+                "user_letter_update",
+
+                "user_letter_view",
+                "user_letter_delete",
+
+
+
                 "employee_payslip_create",
                 "employee_payslip_update",
                 "employee_payslip_view",
@@ -1125,6 +1151,13 @@ return [
                 "employee_document_view",
                 "employee_job_history_view",
                 "employee_education_history_view",
+                "user_letter_view",
+
+
+
+
+
+
                 "employee_payslip_view",
                 "employee_note_view",
                 "employee_address_history_view",
@@ -1287,6 +1320,15 @@ return [
         "employee_education_history_update",
         "employee_education_history_view",
         "employee_education_history_delete",
+
+
+        "user_letter_create",
+        "user_letter_update",
+
+        "user_letter_view",
+        "user_letter_delete",
+
+
 
         "employee_payslip_create",
         "employee_payslip_update",
@@ -1601,6 +1643,14 @@ return [
         "employee_education_history_update" => "",
         "employee_education_history_view" => "",
         "employee_education_history_delete" => "",
+
+
+        "user_letter_create" => "",
+        "user_letter_update" => "",
+        "user_letter_view" => "",
+        "user_letter_delete" => "",
+
+
 
 
         "employee_payslip_create" => "",
@@ -1955,6 +2005,14 @@ return [
         "employee_education_history_update"  => "update",
         "employee_education_history_view"  => "view",
         "employee_education_history_delete"  => "delete",
+
+
+        "user_letter_create" => "create",
+        "user_letter_update" => "update",
+        "user_letter_view" => "view",
+        "user_letter_delete" => "delete",
+
+
 
         "employee_payslip_create" => "create",
         "employee_payslip_update"  => "update",

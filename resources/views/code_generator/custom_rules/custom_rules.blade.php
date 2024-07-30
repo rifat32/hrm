@@ -6,7 +6,7 @@
 
             @include("code_generator.custom_rules.unique_rule")
 
-            @include("code_generator.custom_rules.unique_rule")
+            @include("code_generator.custom_rules.foreign_id_rule")
 
 
         </div>

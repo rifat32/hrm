@@ -75,6 +75,9 @@ use App\Http\Controllers\WorkLocationController;
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\UserLetterController;
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -635,6 +638,26 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end user education history management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// user letters management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::post('/v1.0/user-letters', [UserLetterController::class, "createUserLetter"]);
+Route::put('/v1.0/user-letters', [UserLetterController::class, "updateUserLetter"]);
+Route::get('/v1.0/user-letters', [UserLetterController::class, "getUserLetters"]);
+Route::delete('/v1.0/user-letters/{ids}', [UserLetterController::class, "deleteUserLettersByIds"]);
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// end user letters management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

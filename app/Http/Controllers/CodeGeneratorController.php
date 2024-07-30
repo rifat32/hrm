@@ -136,7 +136,7 @@ array_shift($relationship_table_names);
             }
             else if ($field["type"] == "array"){
                 $field["request_validation_type"] = $field["type"];
-                $field["db_validation_type"] == "json";
+                $field["db_validation_type"] = "json";
             }
             else {
                 $field["request_validation_type"] = $field["type"];
@@ -174,6 +174,8 @@ array_shift($relationship_table_names);
             ],
 
           ];
+
+  
 
         return view('code_generator.code-generator',compact("names","fields","validationRules", "is_active", "is_default"));
 

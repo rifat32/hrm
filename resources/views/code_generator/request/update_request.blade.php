@@ -78,7 +78,9 @@ $rules = [
     $relation["singular_model_name"] = Str::replaceLast('_id', '', $relation["field_name"]);
 
     // Remove the last underscore if it exists
-    $relation["singular_model_name"] = Str::rtrim($string, '_');
+    $relation["singular_model_name"] = rtrim($relation["singular_model_name"], '_');
+
+$relation["singular_model_name"] = Str::studly($relation["singular_model_name"]);
 @endphp
 
     '{{$field['name']}}' => [

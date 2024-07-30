@@ -11,6 +11,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\JobApplicationReceivedMail;
+use App\Models\Business;
 use App\Models\Candidate;
 use Carbon\Carbon;
 use Exception;
@@ -254,7 +255,18 @@ class CandidateController extends Controller
 
 
 
+
                  $request_data = $request->validated();
+
+
+                 $business = Business::where([
+                    "id" => $request_data["business_id"]
+                 ])
+                 ->first();
+
+                 if(empty($business)) {
+      throw new Exception("No Business found",401);
+                 }
 
 
 
@@ -271,7 +283,7 @@ class CandidateController extends Controller
 
                  $request_data["business_id"] = $request_data["business_id"];
                  $request_data["is_active"] = true;
-                 $request_data["created_by"] = $request->user()->id;
+
 
                  $candidate =  Candidate::create($request_data);
 

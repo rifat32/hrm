@@ -242,7 +242,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
 
         })
         @else
-        ->where('{{ $names["table_name"] }}.business_id', $request->business_id)
+        where('{{ $names["table_name"] }}.business_id', $request->business_id)
        @endif
 
 
@@ -288,8 +288,10 @@ $query
  @endforeach
 ;
 });
-});
+
+
 })
+
 
            ->when(!empty($request->start_date), function ($query) use ($request) {
                return $query->where('{{ $names["table_name"] }}.created_at', ">=", $request->start_date);
