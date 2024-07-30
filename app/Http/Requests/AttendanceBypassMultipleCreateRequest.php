@@ -8,8 +8,8 @@ use App\Models\Department;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceBypassMultipleCreateRequest extends BaseFormRequest
@@ -46,7 +46,7 @@ class AttendanceBypassMultipleCreateRequest extends BaseFormRequest
             'work_location_id' => [
                 "required",
                 'numeric',
-                new ValidWorkLocationId
+                new ValidateWorkLocation
             ],
 
 

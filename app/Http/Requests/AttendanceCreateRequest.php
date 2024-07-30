@@ -9,10 +9,10 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Rules\UniqueAttendanceDate;
-use App\Rules\ValidProjectId;
-use App\Rules\ValidUserId;
-use App\Rules\ValidUserIdAllowSelf;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateProject;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateUserAllowSelf;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceCreateRequest extends BaseFormRequest
@@ -44,7 +44,7 @@ class AttendanceCreateRequest extends BaseFormRequest
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserIdAllowSelf($all_manager_department_ids),
+                new ValidateUserAllowSelf($all_manager_department_ids),
             ],
 
 
@@ -92,14 +92,14 @@ class AttendanceCreateRequest extends BaseFormRequest
 
             'project_ids.*' => [
                 'numeric',
-                new ValidProjectId,
+                new ValidateProject,
             ],
 
 
             'work_location_id' => [
                 "required",
                 'numeric',
-                new ValidWorkLocationId
+                new ValidateWorkLocation
             ],
         ];
 

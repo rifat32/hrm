@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Rules\ValidateTerminationReasonId;
 use App\Rules\ValidateTerminationTypeId;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 
@@ -35,7 +35,7 @@ class UserExitRequest extends FormRequest
             'id' => [
                 'required',
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
             ],
             'termination.termination_type_id' => [
                 'required',

@@ -8,9 +8,9 @@ use App\Models\Role;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
-use App\Rules\ValidEmploymentStatus;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -41,7 +41,7 @@ class UserRejoinRequest extends FormRequest
             'id' => [
                 "required",
                 "numeric",
-                new ValidUserId($all_manager_department_ids),
+                new ValidateUser($all_manager_department_ids),
             ],
 
 
@@ -160,7 +160,7 @@ class UserRejoinRequest extends FormRequest
 
         "work_location_ids.*" =>[
             "numeric",
-        new ValidWorkLocationId()],
+        new ValidateWorkLocation()],
 
 
 
@@ -174,7 +174,7 @@ class UserRejoinRequest extends FormRequest
             'employment_status_id' => [
                 "required",
                 'numeric',
-                new ValidEmploymentStatus()
+                new ValidateEmploymentStatus()
             ],
 
             'joining_date' => [

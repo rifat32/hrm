@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ValidSettingLeaveType;
+use App\Rules\ValidateSettingLeaveType;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveSelfCreateRequest extends FormRequest
@@ -24,7 +24,7 @@ class LeaveSelfCreateRequest extends FormRequest
             'leave_type_id' => [
                 'required',
                 'numeric',
-                new ValidSettingLeaveType($this->user_id,NULL),
+                new ValidateSettingLeaveType($this->user_id,NULL),
             ],
 
 

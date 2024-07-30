@@ -5,8 +5,8 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\RecruitmentProcess;
 use App\Rules\ValidateRecruitmentProcessId;
-use App\Rules\ValidUserId;
-use App\Rules\ValidUserRecruitmentProcessesId;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateUserRecruitmentProcesses;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateRecruitmentProcessRequest extends FormRequest
@@ -34,13 +34,13 @@ class UserUpdateRecruitmentProcessRequest extends FormRequest
             'user_id' => [
                 "required",
                 "numeric",
-                new ValidUserId($all_manager_department_ids),
+                new ValidateUser($all_manager_department_ids),
             ],
             'recruitment_processes' => "present|array",
             'recruitment_processes.*.id' => [
                 "required",
                 "numeric",
-                new ValidUserRecruitmentProcessesId($this->user_id),
+                new ValidateUserRecruitmentProcesses($this->user_id),
             ],
             'recruitment_processes.*.recruitment_process_id' => [
                 "required",

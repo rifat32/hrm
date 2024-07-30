@@ -9,8 +9,8 @@ use App\Models\WorkLocation;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDepartmentName;
 use App\Rules\ValidateParentDepartmentId;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -53,14 +53,14 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'work_location_id' => [
                 "nullable",
                 'numeric',
-                new ValidWorkLocationId()
+                new ValidateWorkLocation()
             ],
             'description' => 'nullable|string',
             'manager_id' => 'nullable|numeric',
             'manager_id' => [
                 'nullable',
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
             ],
             'parent_id' => [
                 'required',

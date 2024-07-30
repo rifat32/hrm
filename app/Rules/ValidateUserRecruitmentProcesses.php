@@ -6,7 +6,7 @@ use App\Models\UserRecruitmentProcess;
 use Exception;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidUserRecruitmentProcessesId implements Rule
+class ValidateUserRecruitmentProcesses implements Rule
 {
     /**
      * Create a new rule instance.

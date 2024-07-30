@@ -9,9 +9,9 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\WorkLocation;
 use App\Rules\UniqueAttendanceDate;
-use App\Rules\ValidProjectId;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateProject;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceUpdateRequest extends BaseFormRequest
@@ -55,7 +55,7 @@ class AttendanceUpdateRequest extends BaseFormRequest
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserId($all_manager_department_ids),
+                new ValidateUser($all_manager_department_ids),
             ],
             'attendance_records' => 'required|array',
             'attendance_records.*.in_time' => 'required|date_format:H:i:s',
@@ -86,14 +86,14 @@ class AttendanceUpdateRequest extends BaseFormRequest
 
             'project_ids.*' => [
                 'numeric',
-                new ValidProjectId,
+                new ValidateProject,
             ],
 
 
             'work_location_id' => [
                 "required",
                 'numeric',
-                new ValidWorkLocationId
+                new ValidateWorkLocation
             ],
         ];
     }

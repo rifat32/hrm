@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\EmploymentStatus;
-use App\Rules\ValidEmploymentStatusName;
+use App\Rules\ValidateEmploymentStatusName;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmploymentStatusUpdateRequest extends BaseFormRequest
@@ -68,7 +68,7 @@ class EmploymentStatusUpdateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-                new ValidEmploymentStatusName($this->id)
+                new ValidateEmploymentStatusName($this->id)
 
             ],
             'description' => 'nullable|string',

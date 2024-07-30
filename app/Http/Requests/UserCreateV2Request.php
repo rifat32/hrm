@@ -15,8 +15,8 @@ use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
 use App\Rules\ValidateRecruitmentProcessId;
-use App\Rules\ValidEmploymentStatus;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -201,7 +201,7 @@ class UserCreateV2Request extends BaseFormRequest
         'employment_status_id' => [
             "required",
             'numeric',
-            new ValidEmploymentStatus()
+            new ValidateEmploymentStatus()
         ],
 
 
@@ -227,7 +227,7 @@ class UserCreateV2Request extends BaseFormRequest
 
         "work_location_ids.*" =>[
             "numeric",
-        new ValidWorkLocationId()],
+        new ValidateWorkLocation()],
 
 
 

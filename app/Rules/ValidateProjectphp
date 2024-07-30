@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\Project;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidProjectId implements Rule
+class ValidateProject implements Rule
 {
     /**
      * Create a new rule instance.

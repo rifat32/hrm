@@ -10,7 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidSettingLeaveType implements Rule
+class ValidateSettingLeaveType implements Rule
 {
     /**
      * Create a new rule instance.

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\ValidateTaskCategory;
 use App\Rules\ValidateTaskId;
-use App\Rules\ValidProjectId;
+use App\Rules\ValidateProject;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TaskPositionUpdateRequest extends FormRequest
@@ -37,7 +37,7 @@ class TaskPositionUpdateRequest extends FormRequest
             'project_id' => [
                 'required',
                 'numeric',
-                new ValidProjectId()
+                new ValidateProject()
             ],
 
             'parent_task_id' => [

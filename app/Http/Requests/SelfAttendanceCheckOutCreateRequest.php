@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\Attendance;
 use App\Rules\UniqueAttendanceDate;
-use App\Rules\ValidProjectId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateProject;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SelfAttendanceCheckOutCreateRequest extends FormRequest
@@ -46,7 +46,7 @@ class SelfAttendanceCheckOutCreateRequest extends FormRequest
 
             'project_ids.*' => [
                 'numeric',
-                new ValidProjectId,
+                new ValidateProject,
             ],
 
             'note' => 'nullable|string',

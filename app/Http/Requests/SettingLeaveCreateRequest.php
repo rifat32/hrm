@@ -7,8 +7,8 @@ use App\Models\Department;
 use App\Models\EmploymentStatus;
 use App\Models\Role;
 use App\Models\User;
-use App\Rules\ValidEmploymentStatus;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingLeaveCreateRequest extends BaseFormRequest
@@ -39,7 +39,7 @@ class SettingLeaveCreateRequest extends BaseFormRequest
             'special_users' => 'present|array',
             'special_users.*' => [
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
 
             ],
 
@@ -74,13 +74,13 @@ class SettingLeaveCreateRequest extends BaseFormRequest
 
             'paid_leave_employment_statuses.*' => [
                 'numeric',
-                new ValidEmploymentStatus()
+                new ValidateEmploymentStatus()
 
             ],
             'unpaid_leave_employment_statuses' => 'present|array',
             'unpaid_leave_employment_statuses.*' => [
                 'numeric',
-                new ValidEmploymentStatus()
+                new ValidateEmploymentStatus()
             ],
 
         ];

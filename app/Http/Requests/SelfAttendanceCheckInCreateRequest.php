@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\Attendance;
 use App\Rules\UniqueAttendanceDate;
-use App\Rules\ValidProjectId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateProject;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SelfAttendanceCheckInCreateRequest extends FormRequest
@@ -58,7 +58,7 @@ class SelfAttendanceCheckInCreateRequest extends FormRequest
 
             'project_ids.*' => [
                 'numeric',
-                new ValidProjectId,
+                new ValidateProject,
             ],
 
 
@@ -66,7 +66,7 @@ class SelfAttendanceCheckInCreateRequest extends FormRequest
             'work_location_id' => [
                 "required",
                 'numeric',
-                new ValidWorkLocationId
+                new ValidateWorkLocation
             ],
         ];
     }

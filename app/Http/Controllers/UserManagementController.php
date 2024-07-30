@@ -65,8 +65,8 @@ use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
-use App\Rules\ValidEmploymentStatus;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 
 use Exception;

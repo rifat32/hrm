@@ -6,8 +6,8 @@ use App\Http\Utils\BasicUtil;
 
 use App\Rules\ValidateDepartmentName;
 use App\Rules\ValidateParentDepartmentId;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 
 
 class DepartmentCreateRequest extends BaseFormRequest
@@ -42,14 +42,14 @@ class DepartmentCreateRequest extends BaseFormRequest
             'work_location_id' => [
                 "nullable",
                 'numeric',
-                new ValidWorkLocationId()
+                new ValidateWorkLocation()
             ],
             'description' => 'nullable|string',
 
             'manager_id' => [
                 'nullable',
                 'numeric',
-                  new ValidUserId($all_manager_department_ids)
+                  new ValidateUser($all_manager_department_ids)
 
             ],
 

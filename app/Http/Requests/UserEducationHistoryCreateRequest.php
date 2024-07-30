@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 
 
 class UserEducationHistoryCreateRequest extends BaseFormRequest
@@ -31,7 +31,7 @@ class UserEducationHistoryCreateRequest extends BaseFormRequest
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
             ],
             'degree' => 'required|string',
             'major' => 'required|string',

@@ -6,7 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingAttendanceCreateRequest extends BaseFormRequest
@@ -46,7 +46,7 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
             'special_users' => 'present|array',
             'special_users.*' => [
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
 
 
             ],
@@ -88,7 +88,7 @@ class SettingAttendanceCreateRequest extends BaseFormRequest
             'alert_area.array' => 'The :attribute field must be an array.',
             'alert_area.*.string' => 'Each item in :attribute must be a string.',
             'auto_approval.boolean' => 'The :attribute field must be a boolean.',
-            
+
         ];
     }
 }

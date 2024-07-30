@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\EmploymentStatus;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidEmploymentStatus implements Rule
+class ValidateEmploymentStatus implements Rule
 {
     /**
      * Create a new rule instance.
@@ -34,7 +34,7 @@ class ValidEmploymentStatus implements Rule
         $exists = EmploymentStatus::where("employment_statuses.id",$value)
         ->when(empty(auth()->user()->business_id), function ($query)  {
 
-            
+
 
             $query->where(function($query) {
                 $query->where(function($query) {

@@ -10,7 +10,7 @@ use App\Models\WorkLocation;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateJobPlatform;
 use App\Rules\ValidateJobType;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
@@ -73,7 +73,7 @@ class JobListingCreateRequest extends BaseFormRequest
             'work_location_id' => [
                 "required",
                 'numeric',
-                new ValidWorkLocationId()
+                new ValidateWorkLocation()
             ],
 
 

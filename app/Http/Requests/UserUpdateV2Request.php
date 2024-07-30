@@ -15,9 +15,9 @@ use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
 use App\Rules\ValidateRecruitmentProcessId;
-use App\Rules\ValidEmploymentStatus;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -48,7 +48,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'id' => [
                 "required",
                 "numeric",
-                new ValidUserId($all_manager_department_ids),
+                new ValidateUser($all_manager_department_ids),
             ],
             'first_Name' => 'required|string|max:255',
             'middle_Name' => 'nullable|string|max:255',
@@ -211,7 +211,7 @@ class UserUpdateV2Request extends BaseFormRequest
 
         "work_location_ids.*" =>[
             "numeric",
-        new ValidWorkLocationId()],
+        new ValidateWorkLocation()],
 
 
 
@@ -226,7 +226,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'employment_status_id' => [
                 "required",
                 'numeric',
-                new ValidEmploymentStatus()
+                new ValidateEmploymentStatus()
             ],
 
             'joining_date' => [

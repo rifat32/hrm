@@ -7,7 +7,7 @@ use App\Models\EmployeeRota;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDuplicateRotaDepartment;
 use App\Rules\ValidateDuplicateRotaUser;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmployeeRotaUpdateRequest extends FormRequest

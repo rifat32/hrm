@@ -6,7 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Payrun;
 use App\Models\User;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PayrollCreateRequest extends BaseFormRequest
@@ -55,7 +55,7 @@ class PayrollCreateRequest extends BaseFormRequest
             'users' => 'present|array',
             'users.*' => [
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
 
             ],
             "start_date" => "nullable|date",

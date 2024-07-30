@@ -6,7 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserNote;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserNoteUpdateRequest extends BaseFormRequest
@@ -55,7 +55,7 @@ class UserNoteUpdateRequest extends BaseFormRequest
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
             ],
             'title' => 'required|string',
             'description' => 'required|string',

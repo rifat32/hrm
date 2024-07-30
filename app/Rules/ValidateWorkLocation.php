@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\WorkLocation;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidWorkLocationId implements Rule
+class ValidateWorkLocation implements Rule
 {
     /**
      * Create a new rule instance.

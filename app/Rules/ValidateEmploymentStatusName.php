@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\EmploymentStatus;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidEmploymentStatusName implements Rule
+class ValidateEmploymentStatusName implements Rule
 {
     /**
      * Create a new rule instance.

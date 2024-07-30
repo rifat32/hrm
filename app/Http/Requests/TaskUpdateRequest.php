@@ -7,8 +7,8 @@ use App\Models\Task;
 use App\Rules\ValidateLabelId;
 use App\Rules\ValidateTaskCategory;
 use App\Rules\ValidateTaskId;
-use App\Rules\ValidProjectId;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateProject;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
@@ -48,7 +48,7 @@ class TaskUpdateRequest extends BaseFormRequest
             'project_id' => [
                 'required',
                 'numeric',
-                new ValidProjectId()
+                new ValidateProject()
             ],
             'parent_task_id' => [
                 'nullable',
@@ -68,14 +68,14 @@ class TaskUpdateRequest extends BaseFormRequest
             "assigned_to" => [
                 "required",
                 'numeric',
-              new ValidUserId($all_manager_department_ids)
+              new ValidateUser($all_manager_department_ids)
             ],
 
 
             "assignees" => "present|array",
             "assignees.*" => [
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
 
             ],
 

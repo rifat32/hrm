@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 
-use App\Rules\ValidEmploymentStatusName;
+use App\Rules\ValidateEmploymentStatusName;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmploymentStatusCreateRequest extends BaseFormRequest
@@ -30,7 +30,7 @@ class EmploymentStatusCreateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-                new ValidEmploymentStatusName(NULL)
+                new ValidateEmploymentStatusName(NULL)
             ],
             'description' => 'nullable|string',
             'color' => 'required|string',

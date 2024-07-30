@@ -6,7 +6,7 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\User;
 use App\Rules\ValidateDepartment;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SettingPayrunCreateRequest extends BaseFormRequest
@@ -39,7 +39,7 @@ class SettingPayrunCreateRequest extends BaseFormRequest
 
             'restricted_users.*' => [
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
 
             ],
 

@@ -6,9 +6,9 @@ use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\SettingLeaveType;
 use App\Models\User;
-use App\Rules\ValidSettingLeaveType;
-use App\Rules\ValidUserId;
-use App\Rules\ValidUserIdAllowSelf;
+use App\Rules\ValidateSettingLeaveType;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateUserAllowSelf;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveCreateRequest extends BaseFormRequest
@@ -39,14 +39,14 @@ class LeaveCreateRequest extends BaseFormRequest
             'leave_type_id' => [
                 'required',
                 'numeric',
-                new ValidSettingLeaveType($this->user_id,NULL),
+                new ValidateSettingLeaveType($this->user_id,NULL),
             ],
 
 
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserIdAllowSelf($all_manager_department_ids)
+                new ValidateUserAllowSelf($all_manager_department_ids)
             ],
 
             'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',

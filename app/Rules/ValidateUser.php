@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\User;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidUserId implements Rule
+class ValidateUser implements Rule
 {
 
     /**

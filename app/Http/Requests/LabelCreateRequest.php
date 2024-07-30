@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ValidProjectId;
+use App\Rules\ValidateProject;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LabelCreateRequest extends FormRequest
@@ -32,7 +32,7 @@ class LabelCreateRequest extends FormRequest
             'project_id' => [
                 "required",
                 "numeric",
-                new ValidProjectId()
+                new ValidateProject()
             ],
           ];
     }

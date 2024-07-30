@@ -8,8 +8,8 @@ use App\Models\Leave;
 use App\Models\SettingLeaveType;
 use App\Models\User;
 use App\Rules\ValidateLeaveId;
-use App\Rules\ValidSettingLeaveType;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateSettingLeaveType;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveUpdateRequest extends BaseFormRequest
@@ -45,12 +45,12 @@ class LeaveUpdateRequest extends BaseFormRequest
             'leave_type_id' => [
                 'required',
                 'numeric',
-                new ValidSettingLeaveType($this->user_id,$this->id),
+                new ValidateSettingLeaveType($this->user_id,$this->id),
             ],
             'user_id' => [
                 'required',
                 'numeric',
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
             ],
             'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
             'note' => 'required|string',

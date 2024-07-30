@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
-use App\Rules\ValidUserId;
+use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SingleFileUploadRequestV2 extends FormRequest
@@ -35,7 +35,7 @@ class SingleFileUploadRequestV2 extends FormRequest
             "user_id" => [
                 "nullable",
                 "numeric",
-                new ValidUserId($all_manager_department_ids)
+                new ValidateUser($all_manager_department_ids)
             ],
             "folder_location" => "required|string",
             "is_public" => "required|boolean",

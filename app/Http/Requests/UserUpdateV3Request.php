@@ -8,9 +8,9 @@ use App\Models\User;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
-use App\Rules\ValidEmploymentStatus;
-use App\Rules\ValidUserId;
-use App\Rules\ValidWorkLocationId;
+use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateUser;
+use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -48,7 +48,7 @@ class UserUpdateV3Request extends FormRequest
             'id' => [
                 "required",
                 "numeric",
-                new ValidUserId($all_manager_department_ids),
+                new ValidateUser($all_manager_department_ids),
             ],
             'first_Name' => 'required|string|max:255',
             'middle_Name' => 'nullable|string|max:255',
@@ -87,7 +87,7 @@ class UserUpdateV3Request extends FormRequest
 
             "work_location_ids.*" =>[
                 "present",
-            new ValidWorkLocationId()],
+            new ValidateWorkLocation()],
 
             'designation_id' => [
                 "required",
@@ -122,7 +122,7 @@ class UserUpdateV3Request extends FormRequest
              }
 
              if($user->employment_status_id != $this->employment_status_id){
-                $rule["employment_status_id"][] =  new ValidEmploymentStatus();
+                $rule["employment_status_id"][] =  new ValidateEmploymentStatus();
              }
 
              if($user->work_shift_id != $this->work_shift_id){
