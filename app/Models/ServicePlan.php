@@ -22,6 +22,24 @@ class ServicePlan extends Model
 
 
 
+    public function getNumberOfEmployeesAllowedAttribute($value)
+    {
+
+        $auth_user = auth()->user();
+        if($auth_user) {
+            $business = $auth_user->business;
+            if(!empty($business)){
+               if($value < $business->number_of_employees_allowed) {
+
+               }
+            }
+        }
+
+
+      return $value;
+
+    }
+
     public function active_modules()
     {
         return $this->hasMany(ServicePlanModule::class, 'service_plan_id', 'id');
