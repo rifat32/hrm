@@ -61,6 +61,12 @@ Route::middleware(['developer'])->group(function () {
     Route::get('/activity-log/{id}', [SetUpController::class, "testApi"])->name("api-test");
 
 
+    Route::get('/custom-test-api', function() {
+        return view("test_api");
+    })->name("custom_api_test");
+
+
+
 
     Route::get('/activity-log', [SetUpController::class, "getActivityLogs"])->name("activity-log");
 

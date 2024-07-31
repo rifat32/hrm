@@ -496,7 +496,7 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 
-Route::post('/v1.0/users', [UserManagementController::class, "createUserTest"]);
+Route::post('/v1.0/user-test', [UserManagementController::class, "createUserTest"]);
 
 Route::post('/v1.0/users/import', [UserManagementController::class, 'importUsers']);
 

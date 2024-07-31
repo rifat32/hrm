@@ -639,7 +639,7 @@ class UserManagementController extends Controller
     /**
      *
      * @OA\Post(
-     *      path="/v1.0/users",
+     *      path="/v1.0/user-test",
      *      operationId="createUserTest",
      *      tags={"user_management.employee"},
      *       security={
@@ -746,7 +746,7 @@ class UserManagementController extends Controller
                     ]
                 ],
                 'work_location_ids' => [$workLocations[0]],
-                'joining_date' => '2024-08-01',
+                'joining_date' => '2024-06-01',
                 'date_of_birth' => '1990-01-01',
                 'salary_per_annum' => 60000,
                 'weekly_contractual_hours' => 40,
@@ -803,21 +803,183 @@ class UserManagementController extends Controller
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
-                ->post(env('APP_URL') . '/setup', $data);
+                ->post(env('APP_URL') . '/api/v2.0/users', $data);
 
-            // Check the response status code
-            if ($response->successful()) {
-                // Handle successful response
-                dd($response->json());
-            } else {
-                // Handle failed response
-                dd($response->status());
-            }
+
+$responseData = $response->json();
+
+
+
+
+ $employeeId = $response->json()["id"];
+
+$previousMonth = Carbon::now()->subMonth();
+$start = $previousMonth->startOfMonth();
+$end = $previousMonth->endOfMonth();
+
+
+
+
+
+$createAttendance = Http::withHeaders([
+    'Authorization' => 'Bearer ' . request()->bearerToken(),
+])
+    ->post(env('APP_URL') . '/api/v1.0/attendances/bypass/multiple',
+    [
+        "user_ids" => [$employeeId],
+        "work_location_id" => 113,
+        "project_id" => null,
+        "start_date" => $start,
+        "end_date" => $end
+    ]
+);
+$getAssetType =  Http::withHeaders([
+    'Authorization' => 'Bearer ' . request()->bearerToken(),
+])
+    ->get(env('APP_URL') . '/api/v1.0/asset-types');
+
+  $asset_type =  $getAssetType->json()[0]["name"];
+
+$createAsset = Http::withHeaders([
+    'Authorization' => 'Bearer ' . request()->bearerToken(),
+])
+    ->post(env('APP_URL') . '/api/v1.0/user-assets', [
+        "user_id" => $employeeId,
+        "name" => "dyj",
+        "code" => "dyj",
+        "serial_number" => "45",
+        "type" => $asset_type ,
+        "date" => "04-07-2024",
+        "note" => "hh dd hh uu gg hh ",
+        "image" => "/temporary_files/1722420046_Screenshot_from_2024-07-31_15-48-17.png",
+        "status" => "available",
+        "is_working" => 0
+    ]);
+
+    $createDoc = Http::withHeaders([
+        'Authorization' => 'Bearer ' . request()->bearerToken(),
+    ])
+        ->post(env('APP_URL') . '/api/v1.0/user-documents', [
+            "user_id" => $employeeId,
+            "name" => "fgjf",
+            "file_name" => "/temporary_files/1722419797_Screenshot_from_2024-07-30_20-28-53.png"
+        ]);
+
+
+
+        $educationHistory = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->post(env('APP_URL') . '/api/v1.0/user-education-histories',
+            [
+                "user_id" => 7245,
+                "degree" => "Primary education",
+                "major" => "jhk",
+                "school_name" => "dd",
+                "address" => "",
+                "country" => "Afghanistan",
+                "city" => "",
+                "postcode" => "",
+                "start_date" => "03-07-2024",
+                "graduation_date" => "03-07-2024",
+                "achievements" => "jj",
+                "description" => "jj",
+                "is_current" => false,
+                "attachments" => [
+                    "/temporary_files/1722427457_Screenshot_from_2024-07-30_23-53-00.png"
+                ]
+            ]
+
+        );
+
+
+        $jobHistory = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->post(env('APP_URL') . '/api/v1.0/user-job-histories',
+            [
+                "user_id" => $employeeId,
+                "company_name" => "c",
+                "job_title" => "c",
+                "employment_start_date" => "03-07-2024",
+                "employment_end_date" => "03-07-2024",
+                "responsibilities" => "<p>c</p>",
+                "supervisor_name" => "c",
+                "contact_information" => "c",
+                "country" => "Albania",
+                "work_location" => "",
+                "achievements" => "c"
+            ]
+
+        );
+
+
+
+        $getPension =  Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' .$employeeId);
+
+          $pensionId =  $getPension->json()[0]["id"];
+
+
+
+          $pension = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->put(env('APP_URL') . '/api/v1.0/user-pension-histories',
+            [
+                "pension_eligible" => 1,
+                "pension_enrollment_issue_date" => "01-07-2024",
+                "pension_scheme_opt_out_date" => null,
+                "pension_re_enrollment_due_date" => null,
+                "pension_letters" => [
+                    [
+                        "file_name" => "/temporary_files/1722428337_Screenshot_from_2024-07-31_18-15-34.png",
+                        "description" => "qqq"
+                    ]
+                ],
+                "pension_scheme_status" => "opt_in",
+                "from_date" => "31-07-2024",
+                "user_id" => $employeeId,
+                "id" => $pensionId
+            ]
+
+        );
+
+
+
+
+        $payslip = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->post(env('APP_URL') . '/api/v1.0/user-payslips',
+            [
+                "user_id" => $employeeId,
+                "payroll_id" => null,
+                "month" => 6,
+                "year" => 2024,
+                "payment_amount" => 16,
+                "payment_date" => "02-07-2024",
+                "payslip_file" => "/temporary_files/1722428945_Screenshot_from_2024-07-31_18-15-34.png",
+                "payment_record_file" => [
+                    "/temporary_files/1722428946_Screenshot_from_2024-07-31_18-15-34.png"
+                ],
+                "gross_pay" => 20,
+                "tax" => 2,
+                "employee_ni_deduction" => 2,
+                "employer_ni" => 2,
+                "payment_notes" => "ff",
+                "payment_method" => "cash"
+            ]
+
+        );
+
 
 
 
             DB::commit();
-            return response(["ok" => true], 201);
+            return response()->json(["ok" => $payslip->json()], 201);
         } catch (Exception $e) {
 
             DB::rollBack();

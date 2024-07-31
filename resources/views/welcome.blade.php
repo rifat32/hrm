@@ -11,44 +11,45 @@
     <title>Hello, world!</title>
   </head>
   <body>
-  <div class="container">
-    <div class="row mt-5">
-
-        <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/code-generator" class="btn btn-primary" target="_blank">Code Generator</a>
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/custom-test-api" class="btn btn-primary" target="_blank">
+                    Test Api
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/code-generator" class="btn btn-primary" target="_blank">
+                    Code Generator
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/error-log" class="btn btn-primary" target="_blank">
+                    Error Log
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/api/documentation#/" class="btn btn-primary" target="_blank">
+                    API Documentation
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/swagger-refresh" class="btn btn-primary" target="_blank">
+                    Swagger Refresh
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/migrate" class="btn btn-primary" target="_blank">
+                    Migrate
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ env('APP_URL') }}/roleRefresh" class="btn btn-primary" target="_blank">
+                    Role Refresh
+                </a>
+            </div>
         </div>
-
-
-        <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/error-log" class="btn btn-primary" target="_blank">Error Log</a>
-
-        </div>
-
-
-        <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/api/documentation#/" class="btn btn-primary" target="_blank">Api Doc</a>
-
-        </div>
-        {{-- <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/setup" class="btn btn-primary" target="_blank">Clear Every Thing</a>
-        </div> --}}
-        <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/swagger-refresh" class="btn btn-primary" target="_blank">Swagger Refresh</a>
-        </div>
-
-
-        <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/migrate" class="btn btn-primary" target="_blank">migrate</a>
-        </div>
-
-
-             <div class="col-md-3">
-            <a href="{{env('APP_URL')}}/roleRefresh" class="btn btn-primary" target="_blank">Role Refresh </a>
-        </div>
-
-
     </div>
-  </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
 
