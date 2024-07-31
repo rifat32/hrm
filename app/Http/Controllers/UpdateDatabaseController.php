@@ -46,5 +46,6 @@ class UpdateDatabaseController extends Controller
     {
         // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
         $this->storeEmailTemplates();
+        return "ok";
     }
 }
