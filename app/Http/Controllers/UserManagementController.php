@@ -714,6 +714,16 @@ class UserManagementController extends Controller
             $departments = $this->extractIdsFromJson($employeeFormData, 'departments');
 
 
+            $getrecruitmentProcess =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/recruitment-processes?is_active=1');
+
+              $recruitmentProcessId =  $getrecruitmentProcess->json()[0]["id"];
+
+
+
+
             $data = [
                 'first_Name' => 'John',
                 'middle_Name' => 'A.',
@@ -740,10 +750,10 @@ class UserManagementController extends Controller
                 'employment_status_id' => $employmentStatuses[0],
                 'recruitment_processes' => [
                     [
-                        'recruitment_process_id' => 1,
-                        'description' => 'Initial interview',
-                        'attachments' => []
-                    ]
+                        "recruitment_process_id" => $recruitmentProcessId,
+                        "description" => "bb",
+                        "attachments" => ["/temporary_files/1722429603_Screenshot_from_2024-07-31_18-15-34.png"]
+                    ],
                 ],
                 'work_location_ids' => [$workLocations[0]],
                 'joining_date' => '2024-06-01',
@@ -752,7 +762,17 @@ class UserManagementController extends Controller
                 'weekly_contractual_hours' => 40,
                 'minimum_working_days_per_week' => 5,
                 'overtime_rate' => 1.5,
-                'emergency_contact_details' => [],
+                "emergency_contact_details" => [
+                    [
+                        "first_Name" => "Muzibur",
+                        "last_Name" => "Rahman",
+                        "relationship_of_above_to_you" => "Child",
+                        "address_line_1" => "v",
+                        "postcode" => "b",
+                        "daytime_tel_number" => "01555555555",
+                        "mobile_tel_number" => "01222222222"
+                    ]
+                ],
                 'immigration_status' => 'british_citizen',
                 'is_sponsorship_offered' => null,
                 'date' => null,
@@ -811,7 +831,7 @@ $responseData = $response->json();
 
 
 
- $employeeId = $response->json()["id"];
+ $employeeId = $responseData["id"];
 
 $previousMonth = Carbon::now()->subMonth();
 $start = $previousMonth->startOfMonth();
