@@ -10,8 +10,8 @@ class ServicePlan extends Model
     use HasFactory;
 
     protected $fillable = [
-      "name",
-      "description",
+        "name",
+        "description",
         'set_up_amount',
         'number_of_employees_allowed',
         'duration_months',
@@ -26,18 +26,17 @@ class ServicePlan extends Model
     {
 
         $auth_user = auth()->user();
-        if($auth_user) {
+        if ($auth_user) {
             $business = $auth_user->business;
-            if(!empty($business)){
-               if($value < $business->number_of_employees_allowed) {
-
-               }
+            if (!empty($business)) {
+                if ($business->number_of_employees_allowed) {
+                    return $business->number_of_employees_allowed;
+                }
             }
         }
 
 
-      return $value;
-
+        return $value;
     }
 
     public function active_modules()
@@ -46,15 +45,17 @@ class ServicePlan extends Model
     }
 
 
-    public function modules() {
+    public function modules()
+    {
         return $this->belongsToMany(Module::class, 'service_plan_modules', 'service_plan_id', 'module_id');
     }
 
 
 
 
-    public function business_tier(){
-        return $this->belongsTo(BusinessTier::class,'business_tier_id', 'id');
+    public function business_tier()
+    {
+        return $this->belongsTo(BusinessTier::class, 'business_tier_id', 'id');
     }
 
 
@@ -64,94 +65,6 @@ class ServicePlan extends Model
 
     public function discount_codes()
     {
-        return $this->hasMany(ServicePlanDiscountCode::class,"service_plan_id","id");
+        return $this->hasMany(ServicePlanDiscountCode::class, "service_plan_id", "id");
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
