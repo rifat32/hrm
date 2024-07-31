@@ -996,10 +996,68 @@ $createAsset = Http::withHeaders([
         );
 
 
+        $note = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->post(env('APP_URL') . '/api/v1.0/user-notes',
+            [
+                "user_id" => $employeeId,
+                "title" => "tt",
+                "description" => "dd"
+            ]
+
+        );
+
+
+
+        $userSocialSites =  Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' .$employeeId);
+
+          $userSocialSitesId =  $userSocialSites->json()[0]["id"];
+
+
+          $userSocialSites = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->post(env('APP_URL') . '/api/v1.0/user-social-sites',
+            [
+                "social_site_id" => $userSocialSitesId,
+                "user_id" => $employeeId,
+                "profile_link" => "https://hg.com"
+            ]
+        );
+
+        $banks =  Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->get(env('APP_URL') . '/api/v1.0/banks');
+
+          $bankId =  $banks->json()[0]["id"];
+
+
+          $bank = Http::withHeaders([
+            'Authorization' => 'Bearer ' . request()->bearerToken(),
+        ])
+            ->put(env('APP_URL') . '/api/v1.0/users/update-bank-details',
+            [
+                "id" => $employeeId,
+                "bank_id" => $bankId,
+                "sort_code" => "02-22-23",
+                "account_number" => "12345678",
+                "account_name" => "Name"
+            ]
+        );
+
+
+
+
+
 
 
             DB::commit();
-            return response()->json(["ok" => $payslip->json()], 201);
+            return response()->json(["ok" => $bank->json()], 201);
         } catch (Exception $e) {
 
             DB::rollBack();
