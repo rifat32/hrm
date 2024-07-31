@@ -45,6 +45,7 @@ class Business extends Model
         "pension_scheme_registered",
         "pension_scheme_name",
         "pension_scheme_letters",
+        "number_of_employees_allowed",
 
 
         "owner_id",
@@ -58,10 +59,14 @@ class Business extends Model
 
 
 
-    
+
     public function getIsSubscribedAttribute($value)
     {
         $user = auth()->user();
+        if(empty($user)) {
+return 0;
+        }
+
         $business = $user->business;
 
         if ($user && $user->business) {

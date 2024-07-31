@@ -102,7 +102,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
             'business.is_self_registered_businesses' => 'required|boolean',
 
 
-
+            'business.number_of_employees_allowed' => 'nullable|integer',
 
             // "business.active_module_ids" => "present|array",
             // "business.active_module_ids.*" => [
@@ -191,6 +191,8 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
         if (request()->input('business.is_self_registered_businesses')) {
             $rules['business.service_plan_id'] = 'required|numeric|exists:service_plans,id';
             $rules['business.service_plan_discount_code'] = 'nullable|string';
+
+
         }
 
 

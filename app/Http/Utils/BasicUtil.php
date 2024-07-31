@@ -190,6 +190,10 @@ trait BasicUtil
 
 
     public function get_all_departments_of_manager() {
+        $auth_user = auth()->user();
+        if(empty($auth_user)){
+            return [];
+        }
         $all_manager_department_ids = [];
         $manager_departments = Department::where("manager_id", auth()->user()->id)->get();
         foreach ($manager_departments as $manager_department) {

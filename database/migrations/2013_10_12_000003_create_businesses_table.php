@@ -65,6 +65,8 @@ class CreateBusinessesTable extends Migration
 
 
             $table->boolean("flexible_rota_enabled")->nullable()->default(false);
+            $table->integer("number_of_employees_allowed")->nullable()->default(0);
+
 
 
 

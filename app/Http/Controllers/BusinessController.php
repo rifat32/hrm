@@ -184,12 +184,12 @@ class BusinessController extends Controller
                 $request_data['business']["pension_scheme_letters"] = [];
                 $business =  Business::create($request_data['business']);
 
-                $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
+                $this->storeDefaultsToBusiness($business);
+
 
                 DB::commit();
 
                 return response([
-
                     "business" => $business
                 ], 201);
 
@@ -374,6 +374,8 @@ class BusinessController extends Controller
      *
      *
      *  @OA\Property(property="business", type="string", format="array",example={
+     *   "number_of_employees_allowed" : 1,
+     *
      *   "pension_scheme_registered" : 1,
      *   "pension_scheme_name" : "hh",
      *   "pension_scheme_letters" : {{"file" :"vv.jpg"}},
@@ -529,6 +531,7 @@ class BusinessController extends Controller
      *
      *
      *  @OA\Property(property="business", type="string", format="array",example={
+     *   * "number_of_employees_allowed" : 0,
      * "service_plan_id" : 0,
      * "service_plan_discount_code" : 0,
      *   "pension_scheme_registered" : 1,
@@ -695,7 +698,8 @@ class BusinessController extends Controller
      *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      *  "images":{"/a","/b","/c"},
      *  "currency":"BDT",
-     * "flexible_rota_enabled":1
+     * "flexible_rota_enabled":1,
+     * "number_of_employees_allowed":20
      *
      * }),
      *
@@ -860,6 +864,7 @@ class BusinessController extends Controller
                     "background_image",
                     "currency",
                     "flexible_rota_enabled",
+                    "number_of_employees_allowed",
                     "is_self_registered_businesses",
                     "service_plan_id",
                     "service_plan_discount_code",
@@ -1178,7 +1183,8 @@ $business->service_plan = $business->service_plan;
      *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      *  "images":{"/a","/b","/c"},
      *  "currency":"BDT",
-     * "flexible_rota_enabled":1
+     * "flexible_rota_enabled":1,
+     * "number_of_employees_allowed":1
      *
      * }),
      *
@@ -1279,7 +1285,8 @@ $business->service_plan = $business->service_plan;
                     "status",
                     "background_image",
                     "currency",
-                    "flexible_rota_enabled"
+                    "flexible_rota_enabled",
+                    "number_of_employees_allowed"
                 ])->toArray());
 
                 $business->save();
@@ -1350,7 +1357,8 @@ $business->service_plan = $business->service_plan;
      *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      *  "images":{"/a","/b","/c"},
      *  "currency":"BDT",
-     * "flexible_rota_enabled":1
+     * "flexible_rota_enabled":1,
+     * "number_of_employees_allowed":1
      *
      * }),
      *
@@ -1517,7 +1525,8 @@ $business->service_plan = $business->service_plan;
      *      *  *  "image":"https://images.unsplash.com/photo-1671410714831-969877d103b1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
      *  "images":{"/a","/b","/c"},
      *  "currency":"BDT",
-     * "flexible_rota_enabled":1
+     * "flexible_rota_enabled":1,
+     * "number_of_employees_allowed":10
      *
      * }),
      *
@@ -2065,7 +2074,9 @@ $business->service_plan = $business->service_plan;
                     "status",
                     "background_image",
                     "currency",
-                    "flexible_rota_enabled"
+                    "flexible_rota_enabled",
+
+                    "number_of_employees_allowed"
                 ])->toArray());
 
                 $business->save();

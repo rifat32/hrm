@@ -46,6 +46,22 @@ class UpdateDatabaseController extends Controller
     {
         // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
         $this->storeEmailTemplates();
+
+
+      // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+        DB::statement('
+    DO $$
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = \'businesses\'
+            AND column_name = \'number_of_employees_allowed\'
+        ) THEN
+            ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0;
+        END IF;
+    END $$;
+');
         return "ok";
     }
 }

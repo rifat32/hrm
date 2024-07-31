@@ -102,7 +102,7 @@ trait BusinessUtil
                 "is_default" => $template->is_default,
                 "business_id" => $template->business_id,
                 "template" => $template->template,
-                "template_variables" => $template->template_variables,
+                "template_variables" =>  implode(',', $template->template_variables),
                 "created_at" => $template->created_at,
                 "updated_at" => $template->updated_at,
             ];
@@ -114,21 +114,21 @@ trait BusinessUtil
 
 
 
-    public function loadDefaultSettingLeaveType($business_id = NULL)
+    public function loadDefaultSettingLeaveType($business = NULL)
     {
-        $defaultSettingLeaveTypes = SettingLeaveType::where(function ($query) {
-            $query->where(function ($query) {
+        $defaultSettingLeaveTypes = SettingLeaveType::where(function ($query) use($business) {
+            $query->where(function ($query) use($business) {
                 $query->where('setting_leave_types.business_id', NULL)
                     ->where('setting_leave_types.is_default', 1)
                     ->where('setting_leave_types.is_active', 1)
-                    ->whereDoesntHave("disabled", function ($q) {
-                        $q->whereIn("disabled_setting_leave_types.created_by", [auth()->user()->id]);
+                    ->whereDoesntHave("disabled", function ($q) use($business) {
+                        $q->whereIn("disabled_setting_leave_types.created_by", [$business->created_by]);
                     });
             })
-                ->orWhere(function ($query) {
+                ->orWhere(function ($query) use($business) {
                     $query->where('setting_leave_types.business_id', NULL)
                         ->where('setting_leave_types.is_default', 0)
-                        ->where('setting_leave_types.created_by', auth()->user()->id)
+                        ->where('setting_leave_types.created_by', $business->created_by)
                         ->where('setting_leave_types.is_active', 1);
                 });
         })
@@ -146,7 +146,7 @@ trait BusinessUtil
                 'is_earning_enabled' => $defaultSettingLeave->is_earning_enabled,
                 "is_active" => 1,
                 "is_default" => 0,
-                "business_id" => $business_id,
+                "business_id" => $business->id,
             ];
 
             $setting_leave_type  = SettingLeaveType::create($insertableData);
@@ -155,7 +155,7 @@ trait BusinessUtil
 
 
 
-    public function loadDefaultSettingLeave($business_id = NULL)
+    public function loadDefaultSettingLeave($business = NULL)
     {
         // load setting leave
 
@@ -169,12 +169,13 @@ trait BusinessUtil
 
         $defaultSettingLeaves = SettingLeave::where($default_setting_leave_query)->get();
 
+        $auth_user = auth()->user();
+
         // If no records are found and the user is not a superadmin, retry without the 'created_by' condition
-        if ($defaultSettingLeaves->isEmpty() && !auth()->user()->hasRole("superadmin")) {
+        if ($defaultSettingLeaves->isEmpty() && !empty($auth_user) && !auth()->user()->hasRole("superadmin")) {
             unset($default_setting_leave_query['created_by']);
             $defaultSettingLeaves = SettingLeave::where($default_setting_leave_query)->get();
         }
-
 
 
 
@@ -185,16 +186,17 @@ trait BusinessUtil
                 'start_month' => $defaultSettingLeave->start_month,
                 'approval_level' => $defaultSettingLeave->approval_level,
                 'allow_bypass' => $defaultSettingLeave->allow_bypass,
-                "created_by" => auth()->user()->id,
+                "created_by" => $business->created_by,
                 "is_active" => 1,
                 "is_default" => 0,
-                "business_id" => $business_id,
+                "business_id" => $business->id,
             ];
+
 
             $setting_leave  = SettingLeave::create($insertableData);
 
             $business_owner_role_id = Role::where([
-                "name" => ("business_owner#" . $business_id)
+                "name" => ("business_owner#" . $business->id)
             ])
                 ->pluck("id");
 
@@ -212,7 +214,7 @@ trait BusinessUtil
     }
 
 
-    public function loadDefaultAttendanceSetting($business_id = NULL)
+    public function loadDefaultAttendanceSetting($business = NULL)
     {
         // load setting attendance
 
@@ -254,10 +256,10 @@ trait BusinessUtil
                 'service_name' => $defaultSettingAttendance->service_name,
                 'api_key' => $defaultSettingAttendance->api_key,
 
-                "created_by" => auth()->user()->id,
+                "created_by" => $business->created_by,
                 "is_active" => 1,
                 "is_default" => 0,
-                "business_id" => $business_id,
+                "business_id" => $business->id,
 
 
 
@@ -273,7 +275,7 @@ trait BusinessUtil
 
 
             $business_owner_role_id = Role::where([
-                "name" => ("business_owner#" . $business_id)
+                "name" => ("business_owner#" . $business->id)
             ])
                 ->pluck("id");
             $setting_attendance->special_roles()->sync($business_owner_role_id);
@@ -282,7 +284,7 @@ trait BusinessUtil
         // end load setting attendance
 
     }
-    public function loadDefaultPayrunSetting($business_id = NULL)
+    public function loadDefaultPayrunSetting($business = NULL)
     {
         // load setting attendance
 
@@ -308,10 +310,10 @@ trait BusinessUtil
                 'consider_type' => $defaultSettingPayrun->consider_type,
                 'consider_overtime' => $defaultSettingPayrun->consider_overtime,
 
-                "created_by" => auth()->user()->id,
+                "created_by" => $business->created_by,
                 "is_active" => 1,
                 "is_default" => 0,
-                "business_id" => $business_id,
+                "business_id" => $business->id,
             ];
 
             $setting_payrun  = SettingPayrun::create($insertableData);
@@ -327,7 +329,7 @@ trait BusinessUtil
         }
     }
 
-    public function loadDefaultPaymentDateSetting($business_id = null)
+    public function loadDefaultPaymentDateSetting($business = null)
     {
         // Load default payment date settings
 
@@ -357,8 +359,8 @@ trait BusinessUtil
                 'notification_delivery_status' => $defaultSettingPaymentDate->notification_delivery_status,
                 'is_active' => 1,
                 'is_default' => 0,
-                'business_id' => $business_id,
-                'created_by' => auth()->user()->id,
+                'business_id' => $business->id,
+                'created_by' => $business->created_by,
                 'role_specific_settings' => $defaultSettingPaymentDate->role_specific_settings,
             ];
 
@@ -369,8 +371,9 @@ trait BusinessUtil
     }
 
 
-    public function loadDefaultEmailTemplate($business_id = null)
+    public function loadDefaultEmailTemplate($business = null)
     {
+
         // Load default payment date settings
 
         $default_email_template_query = [
@@ -391,7 +394,7 @@ trait BusinessUtil
                 "template" => $defaultEmailTemplate->name,
                 "is_active" => 1,
                 "is_default" => 0,
-                "business_id" => $business_id,
+                "business_id" => $business->id,
                 'wrapper_id' => $defaultEmailTemplate->wrapper_id,
             ];
 
@@ -403,28 +406,29 @@ trait BusinessUtil
 
     // end load setting attendance
 
-    public function storeDefaultsToBusiness($business_id, $business_name, $owner_id, $address_line_1, $business)
+    public function storeDefaultsToBusiness($business)
     {
 
+
         $work_location =  WorkLocation::create([
-            'name' => ($business_name . " " . "Office"),
+            'name' => ($business->name . " " . "Office"),
             "is_active" => 1,
             "is_default" => 1,
-            "business_id" => $business_id,
-            "created_by" => $owner_id
+            "business_id" => $business->id,
+            "created_by" => $business->owner_id
         ]);
 
 
 
 
         $department =  Department::create([
-            "name" => $business_name,
-            "location" => $address_line_1,
+            "name" => $business->name,
+            "location" => $business->address_line_1,
             "is_active" => 1,
-            "manager_id" => $owner_id,
-            "business_id" => $business_id,
+            "manager_id" => $business->owner_id,
+            "business_id" => $business->id,
             "work_location_id" => $work_location->id,
-            "created_by" => $owner_id
+            "created_by" => $business->owner_id
         ]);
         // DepartmentUser::create([
         //     "user_id" => $owner_id,
@@ -432,15 +436,15 @@ trait BusinessUtil
         // ]);
 
         $project =  Project::create([
-            'name' => $business_name,
+            'name' => $business->name,
             'description',
             'start_date' => $business->start_date,
             'end_date' => NULL,
             'status' => "in_progress",
             "is_active" => 1,
             "is_default" => 1,
-            "business_id" => $business_id,
-            "created_by" => $owner_id
+            "business_id" => $business->id,
+            "created_by" => $business->owner_id
         ]);
 
         $default_work_shift_data = [
@@ -455,7 +459,7 @@ trait BusinessUtil
             "is_business_default" => 1,
             "is_active",
             "is_default" => 1,
-            "business_id" => $business_id,
+            "business_id" => $business->id,
         ];
 
         $default_work_shift = WorkShift::create($default_work_shift_data);
@@ -489,9 +493,9 @@ trait BusinessUtil
 
         foreach ($defaultRoles as $defaultRole) {
             $insertableData = [
-                'name'  => ($defaultRole->name . "#" . $business_id),
+                'name'  => ($defaultRole->name . "#" . $business->id),
                 "is_default" => 1,
-                "business_id" => $business_id,
+                "business_id" => $business->id,
                 "is_default_for_business" => 0,
                 "guard_name" => "api",
             ];
@@ -507,20 +511,21 @@ trait BusinessUtil
         }
 
 
-        $this->storeDefaultEmailTemplates($business_id);
-
-        $this->loadDefaultSettingLeaveType($business_id);
+        $this->storeDefaultEmailTemplates($business->id);
 
 
-        $this->loadDefaultSettingLeave($business_id);
+        $this->loadDefaultSettingLeaveType($business);
 
-        $this->loadDefaultAttendanceSetting($business_id);
 
-        $this->loadDefaultPayrunSetting($business_id);
+        $this->loadDefaultSettingLeave($business);
 
-        $this->loadDefaultPaymentDateSetting($business_id);
+        $this->loadDefaultAttendanceSetting($business);
 
-        $this->loadDefaultEmailTemplate($business_id);
+        $this->loadDefaultPayrunSetting($business);
+
+        $this->loadDefaultPaymentDateSetting($business);
+
+        $this->loadDefaultEmailTemplate($business);
     }
 
 
@@ -840,15 +845,23 @@ trait BusinessUtil
 
         $user =  User::create($request_data['user']);
 
+
+        $user->assignRole('business_owner');
+
         $created_by_user = auth()->user();
 
         if (empty($created_by_user)) {
             $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
+            $request_data["business"]["number_of_employees_allowed"] = 0;
+        }
+
+
+        if(empty($request_data["business"]["number_of_employees_allowed"])){
+            $request_data["business"]["number_of_employees_allowed"] = 0;
         }
 
 
 
-        $user->assignRole('business_owner');
         // end user info ##############
 
 
@@ -861,8 +874,47 @@ trait BusinessUtil
         $request_data['business']["pension_scheme_letters"] = [];
         $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
 
+        $business_data = (collect($request_data['business'])->only(
+            "name",
+            "start_date",
+            "trail_end_date",
+            "about",
+            "web_page",
+            "phone",
+            "email",
+            "additional_information",
+            "address_line_1",
+            "address_line_2",
+            "lat",
+            "long",
+            "country",
+            "city",
+            "currency",
+            "postcode",
+            "logo",
+            "image",
+            "background_image",
+            "status",
+            "is_active",
+            "is_self_registered_businesses",
 
-        $business =  Business::create($request_data['business']);
+            "service_plan_id",
+            "service_plan_discount_code",
+            "service_plan_discount_amount",
+
+
+            "pension_scheme_registered",
+            "pension_scheme_name",
+            "pension_scheme_letters",
+
+
+            "owner_id",
+            'created_by'
+        )->toArray());
+
+
+
+        $business =  Business::create($business_data);
 
 
         //    foreach($request_data['business']["active_module_ids"] as $active_module_id){
@@ -880,7 +932,7 @@ trait BusinessUtil
         $token = Str::random(30);
         $user->resetPasswordToken = $token;
         $user->resetPasswordExpires = Carbon::now()->subDays(-1);
-        $user->created_by = auth()->user()->id;
+        $user->created_by = $created_by_user->id;
         $user->save();
 
         BusinessTime::where([
@@ -898,7 +950,7 @@ trait BusinessUtil
             ]);
         }
 
-        $this->storeDefaultsToBusiness($business->id, $business->name, $business->owner_id, $business->address_line_1, $business);
+        $this->storeDefaultsToBusiness($business);
 
 
 
