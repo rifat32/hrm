@@ -114,7 +114,7 @@ class SetUpController extends Controller
 
     public function migrate(Request $request) {
         $this->storeActivity($request, "DUMMY activity","DUMMY description");
-        Artisan::call('migrate');
+        Artisan::call('check:migrate');
         return "migrated";
             }
 

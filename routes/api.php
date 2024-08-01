@@ -1608,12 +1608,8 @@ Route::delete('/v1.0/task-categories/{ids}', [TaskCategoryController::class, "de
 
 Route::post('/v1.0/labels', [LabelController::class, "createLabel"]);
 Route::put('/v1.0/labels', [LabelController::class, "updateLabel"]);
-
-
 Route::put('/v1.0/labels/assign', [LabelController::class, "assignLabel"]);
 Route::put('/v1.0/labels/discharge', [LabelController::class, "dischargeLabel"]);
-
-
 
 
 Route::get('/v1.0/labels', [LabelController::class, "getLabels"]);
@@ -1752,8 +1748,6 @@ Route::delete('/v1.0/reminders/{ids}', [ReminderController::class, "deleteRemind
 
 Route::get('/v1.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownData"]);
 Route::get('/v2.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownDataV2"]);
-
-
 Route::get('/v1.0/dropdown-options/employee-filter', [DropdownOptionsController::class, "getEmployeeFilterDropdownData"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

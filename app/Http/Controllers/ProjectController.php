@@ -30,16 +30,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil,ModuleUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, ModuleUtil, BasicUtil;
 
 
-     protected $projectComponent;
+    protected $projectComponent;
 
 
     public function __construct(ProjectComponent $projectComponent)
     {
         $this->projectComponent = $projectComponent;
-
     }
 
 
@@ -60,13 +59,13 @@ class ProjectController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 
- *     @OA\Property(property="name", type="string", format="string", example="Project X"),
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Project X's objectives and scope."),
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
- *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
- *
+     *     @OA\Property(property="name", type="string", format="string", example="Project X"),
+     *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Project X's objectives and scope."),
+     *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
+     *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
+     *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
+     *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
+     *
      *
      *         ),
      *      ),
@@ -108,86 +107,85 @@ class ProjectController extends Controller
     {
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("task_management");
+
+            if (!$request->user()->hasPermissionTo('project_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            $request_data = $request->validated();
 
 
 
-                if (!$request->user()->hasPermissionTo('project_create')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
+
+            $request_data["is_active"] = 1;
+            $request_data["is_default"] = 0;
+            $request_data["created_by"] = $request->user()->id;
+            $request_data["business_id"] = $request->user()->business_id;
+
+            if (empty($request->user()->business_id)) {
+                $request_data["business_id"] = NULL;
+                if ($request->user()->hasRole('superadmin')) {
+                    $request_data["is_default"] = 1;
                 }
-
-                $request_data = $request->validated();
-
+            }
 
 
-
-                $request_data["is_active"] = 1;
-                $request_data["is_default"] = 0;
-                $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
-
-                if (empty($request->user()->business_id)) {
-                    $request_data["business_id"] = NULL;
-                    if ($request->user()->hasRole('superadmin')) {
-                        $request_data["is_default"] = 1;
-                    }
-                }
-
-
-                $project =  Project::create($request_data);
+            $project =  Project::create($request_data);
 
 
 
-                // $business_created_by  = NULL;
-                // if(auth()->user()->business) {
-                //     $business_created_by = auth()->user()->business->created_by;
-                // }
+            // $business_created_by  = NULL;
+            // if(auth()->user()->business) {
+            //     $business_created_by = auth()->user()->business->created_by;
+            // }
 
 
-        //         $default_task_categories = TaskCategory::where('task_categories.business_id', NULL)
-        //         ->where('task_categories.is_default', 1)
-        //         ->where('task_categories.is_active', 1)
-        //         ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-        //             $q->whereIn("disabled_task_categories.created_by", [$business_created_by])
-        //             ->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
+            //         $default_task_categories = TaskCategory::where('task_categories.business_id', NULL)
+            //         ->where('task_categories.is_default', 1)
+            //         ->where('task_categories.is_active', 1)
+            //         ->whereDoesntHave("disabled", function($q) use($business_created_by) {
+            //             $q->whereIn("disabled_task_categories.created_by", [$business_created_by])
+            //             ->whereIn("disabled_task_categories.business_id",[auth()->user()->business_id]);
 
-        //         })
-        //          ->orWhere(function ($query) use( $business_created_by){
-        //             $query->where('task_categories.business_id', NULL)
-        //                 ->where('task_categories.is_default', 0)
-        //                 ->where('task_categories.created_by', $business_created_by)
-        //                 ->where('task_categories.is_active', 1)
-        //                 ;
-        //         })
-        //         ->orWhere(function ($query) {
-        //             $query->where('task_categories.business_id', auth()->user()->business_id)
-        //                 ->where('task_categories.is_default', 0)
-        //                 ->where('task_categories.is_active', 1);
-        //         })
-        // ->get();
+            //         })
+            //          ->orWhere(function ($query) use( $business_created_by){
+            //             $query->where('task_categories.business_id', NULL)
+            //                 ->where('task_categories.is_default', 0)
+            //                 ->where('task_categories.created_by', $business_created_by)
+            //                 ->where('task_categories.is_active', 1)
+            //                 ;
+            //         })
+            //         ->orWhere(function ($query) {
+            //             $query->where('task_categories.business_id', auth()->user()->business_id)
+            //                 ->where('task_categories.is_default', 0)
+            //                 ->where('task_categories.is_active', 1);
+            //         })
+            // ->get();
 
-        // foreach($default_task_categories as $index => $default_task_category){
+            // foreach($default_task_categories as $index => $default_task_category){
 
-        //     $default_task_category->project_id =  $project->id;
-        //     $default_task_category->business_id =  auth()->user()->business_id;
-        //     $default_task_category->is_default =  0;
-        //     $default_task_category->is_active =  0;
-        //     $default_task_category->created_by =  auth()->user()->id;
-
-
-        //     $default_task_category->order_no = $index;
+            //     $default_task_category->project_id =  $project->id;
+            //     $default_task_category->business_id =  auth()->user()->business_id;
+            //     $default_task_category->is_default =  0;
+            //     $default_task_category->is_active =  0;
+            //     $default_task_category->created_by =  auth()->user()->id;
 
 
+            //     $default_task_category->order_no = $index;
 
-        //  $task_category =   TaskCategory::create($default_task_category->toArray());
+
+
+            //  $task_category =   TaskCategory::create($default_task_category->toArray());
 
 
 
 
 
-        // }
+            // }
 
 
 
@@ -196,19 +194,18 @@ class ProjectController extends Controller
 
 
 
-                if(empty($request_data['departments'])) {
-                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
-                }
+            if (empty($request_data['departments'])) {
+                $request_data['departments'] = [Department::where("business_id", auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+            }
 
 
-                $project->departments()->sync($request_data['departments']);
+            $project->departments()->sync($request_data['departments']);
 
 
 
 
-                DB::commit();
-                return response($project, 201);
-
+            DB::commit();
+            return response($project, 201);
         } catch (Exception $e) {
             DB::rollBack();
             error_log($e->getMessage());
@@ -216,7 +213,7 @@ class ProjectController extends Controller
         }
     }
 
-     /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/projects/assign-user",
@@ -233,8 +230,8 @@ class ProjectController extends Controller
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
- *
- *
+     *
+     *
 
      *
      *         ),
@@ -273,131 +270,122 @@ class ProjectController extends Controller
      *     )
      */
 
-     public function assignUser(UserAssignToProjectRequest $request)
-     {
+    public function assignUser(UserAssignToProjectRequest $request)
+    {
 
         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
+            $this->isModuleEnabled("task_management");
 
-
-                 if (!$request->user()->hasPermissionTo('project_update')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
-                 $business_id =  $request->user()->business_id;
-                 $request_data = $request->validated();
-
-
-
-
-                 $project_query_params = [
-                     "id" => $request_data["id"],
-                     "business_id" => $business_id
-                 ];
-
-
-                 $project  =  Project::where($project_query_params)
-                     ->first();
-
-
-                 if (!$project) {
-                     return response()->json([
-                         "message" => "something went wrong."
-                     ], 500);
-                 }
+            if (!$request->user()->hasPermissionTo('project_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $request_data = $request->validated();
 
 
 
 
-                //  $discharged_users =  User::whereHas("projects",function($query) use($project){
-                //     $query->where("users.id",$project->id);
-                //  })
-                //  ->whereIn("id",$request_data['users'])
-                //  ->get();
+            $project_query_params = [
+                "id" => $request_data["id"],
+                "business_id" => $business_id
+            ];
+
+
+            $project  =  Project::where($project_query_params)
+                ->first();
+
+
+            if (!$project) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
 
 
 
-                //  EmployeeProjectHistory::where([
-                //     "project_id" => $project->id,
-                //     "to_date" => NULL
-                //  ])
-                //  ->whereIn("project_id",$discharged_users->pluck("id"))
-                //  ->update([
-                //     "to_date" => now()
-                //  ])
-                //  ;
+
+            //  $discharged_users =  User::whereHas("projects",function($query) use($project){
+            //     $query->where("users.id",$project->id);
+            //  })
+            //  ->whereIn("id",$request_data['users'])
+            //  ->get();
 
 
-                 foreach($request_data['users'] as $index=>$user_id) {
-                  $user = User::
-                  whereHas("projects",function($query) use($project){
-                    $query->where("projects.id",$project->id);
-                 })
-                   ->where([
-                    "id" => $user_id
-                   ])
+
+            //  EmployeeProjectHistory::where([
+            //     "project_id" => $project->id,
+            //     "to_date" => NULL
+            //  ])
+            //  ->whereIn("project_id",$discharged_users->pluck("id"))
+            //  ->update([
+            //     "to_date" => now()
+            //  ])
+            //  ;
+
+
+            foreach ($request_data['users'] as $index => $user_id) {
+                $user = User::whereHas("projects", function ($query) use ($project) {
+                        $query->where("projects.id", $project->id);
+                    })
+                    ->where([
+                        "id" => $user_id
+                    ])
                     ->first();
 
-                    if($user) {
+                if ($user) {
 
-                            $error = [ "message" => "The given data was invalid.",
-                                       "errors" => [("users.".$index)=>["The project is already belongs to that user."]]
-                                       ];
-                                           throw new Exception(json_encode($error),422);
-
-
-                    }
-
-
-
-
-                        $user = User::where([
-                           "id" => $user_id
-                        ])
-                        ->first();
-
-                        if(!$user) {
-                            throw new Exception("some thing went wrong");
-                        }
-
-                        // UserProject::create([
-                        //     "user_id" => $user->id,
-                        //     "project_id" => $project->id
-                        // ]);
-
-
-
-          $employee_project_history_data = $project->toArray();
-          $employee_project_history_data["user_id"] = $user->id;
-          $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
-          $employee_project_history_data["from_date"] = now();
-          $employee_project_history_data["to_date"] = NULL;
-
-          EmployeeProjectHistory::create($employee_project_history_data);
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("users." . $index) => ["The project is already belongs to that user."]]
+                    ];
+                    throw new Exception(json_encode($error), 422);
+                }
 
 
 
 
+                $user = User::where([
+                    "id" => $user_id
+                ])
+                    ->first();
 
-                 }
+                if (!$user) {
+                    throw new Exception("some thing went wrong");
+                }
+
+                // UserProject::create([
+                //     "user_id" => $user->id,
+                //     "project_id" => $project->id
+                // ]);
 
 
-                 $project->users()->attach($request_data['users']);
 
-                 DB::commit();
-                 return response($project, 201);
+                $employee_project_history_data = $project->toArray();
+                $employee_project_history_data["user_id"] = $user->id;
+                $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
+                $employee_project_history_data["from_date"] = now();
+                $employee_project_history_data["to_date"] = NULL;
+
+                EmployeeProjectHistory::create($employee_project_history_data);
+            }
 
 
-         } catch (Exception $e) {
+            $project->users()->attach($request_data['users']);
+
+            DB::commit();
+            return response($project, 201);
+        } catch (Exception $e) {
             DB::rollBack();
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-       /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/projects/discharge-user",
@@ -414,8 +402,8 @@ class ProjectController extends Controller
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
      *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
- *
- *
+     *
+     *
 
      *
      *         ),
@@ -454,101 +442,95 @@ class ProjectController extends Controller
      *     )
      */
 
-     public function dischargeUser(UserAssignToProjectRequest $request)
-     {
+    public function dischargeUser(UserAssignToProjectRequest $request)
+    {
 
         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            $this->isModuleEnabled("task_management");
 
 
-
-                 if (!$request->user()->hasPermissionTo('project_update')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
-                 $business_id =  $request->user()->business_id;
-                 $request_data = $request->validated();
-
-
-
-
-                 $project_query_params = [
-                     "id" => $request_data["id"],
-                     "business_id" => $business_id
-                 ];
-
-
-                 $project  =  Project::where($project_query_params)
-                     ->first();
-
-
-                 if (!$project) {
-                     return response()->json([
-                         "message" => "something went wrong."
-                     ], 500);
-                 }
+            if (!$request->user()->hasPermissionTo('project_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $request_data = $request->validated();
 
 
 
 
-                 $discharged_users =  User::whereHas("projects",function($query) use($project){
-                    $query->where("users.id",$project->id);
-                 })
-                 ->whereIn("id",$request_data['users'])
-                 ->get();
+            $project_query_params = [
+                "id" => $request_data["id"],
+                "business_id" => $business_id
+            ];
+
+
+            $project  =  Project::where($project_query_params)
+                ->first();
+
+
+            if (!$project) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
 
 
 
-                 EmployeeProjectHistory::where([
-                    "project_id" => $project->id,
-                    "to_date" => NULL
-                 ])
-                 ->whereIn("project_id",$discharged_users->pluck("id"))
-                 ->update([
+
+            $discharged_users =  User::whereHas("projects", function ($query) use ($project) {
+                $query->where("users.id", $project->id);
+            })
+                ->whereIn("id", $request_data['users'])
+                ->get();
+
+
+
+            EmployeeProjectHistory::where([
+                "project_id" => $project->id,
+                "to_date" => NULL
+            ])
+                ->whereIn("project_id", $discharged_users->pluck("id"))
+                ->update([
                     "to_date" => now()
-                 ])
-                 ;
+                ]);
 
 
-                 foreach($request_data['users'] as $index=>$user_id) {
-                  $user = User::
-                  whereHas("projects",function($query) use($project){
-                    $query->where("projects.id",$project->id);
-                 })
-                   ->where([
-                    "id" => $user_id
-                   ])
+            foreach ($request_data['users'] as $index => $user_id) {
+                $user = User::whereHas("projects", function ($query) use ($project) {
+                        $query->where("projects.id", $project->id);
+                    })
+                    ->where([
+                        "id" => $user_id
+                    ])
                     ->first();
 
-                    if(!$user) {
+                if (!$user) {
 
-                        $error = [ "message" => "The given data was invalid.",
-                                   "errors" => [("projects.".$index)=>["The project is already belongs to that user."]]
-                                   ];
-                                       throw new Exception(json_encode($error),422);
-
-                           }
-
-
-
-                 }
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("projects." . $index) => ["The project is already belongs to that user."]]
+                    ];
+                    throw new Exception(json_encode($error), 422);
+                }
+            }
 
 
-                 $project->users()->detach($request_data['users']);
+            $project->users()->detach($request_data['users']);
 
-                 DB::commit();
-                 return response($project, 201);
+            DB::commit();
+            return response($project, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-
-         } catch (Exception $e) {
-          DB::rollBack();
-             return $this->sendError($e, 500, $request);
-         }
-     }
-
-  /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/projects/assign-project",
@@ -565,8 +547,8 @@ class ProjectController extends Controller
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
      *     @OA\Property(property="projects", type="string", format="array", example={1,2,3}),
- *
- *
+     *
+     *
 
      *
      *         ),
@@ -605,122 +587,120 @@ class ProjectController extends Controller
      *     )
      */
 
-     public function assignProject(ProjectAssignToUserRequest $request)
-     {
+    public function assignProject(ProjectAssignToUserRequest $request)
+    {
 
         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            $this->isModuleEnabled("task_management");
 
 
-                 if (!$request->user()->hasPermissionTo('project_update')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
-                 $business_id =  $request->user()->business_id;
-                 $request_data = $request->validated();
+            if (!$request->user()->hasPermissionTo('project_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $request_data = $request->validated();
 
-                 $user_query_params = [
-                     "id" => $request_data["id"],
-                 ];
-
-
-                 $user  =  User::where($user_query_params)
-                     ->first();
+            $user_query_params = [
+                "id" => $request_data["id"],
+            ];
 
 
-                 if (!$user) {
-                     return response()->json([
-                         "message" => "something went wrong."
-                     ], 500);
-                 }
-
-              // need this in remove api
-                //  $discharged_projects =  Project::whereHas("users",function($query) use($user){
-                //     $query->where("users.id",$user->id);
-                //  })
-                //  ->whereNotIn("id",$request_data['projects'])
-                //  ->get();
-                //  EmployeeProjectHistory::where([
-                //     "user_id" => $user->id,
-                //     "to_date" => NULL
-                //  ])
-                //  ->whereIn("project_id",$discharged_projects->pluck("id"))
-                //  ->update([
-                //     "to_date" => now()
-                //  ])
-                //  ;
+            $user  =  User::where($user_query_params)
+                ->first();
 
 
-                 foreach($request_data['projects'] as $index=>$project_id) {
-                  $project = Project::
-                  whereHas("users",function($query) use($user){
-                    $query->where("users.id",$user->id);
-                 })
-                   ->where([
-                    "id" => $project_id
-                   ])
+            if (!$user) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
+
+            // need this in remove api
+            //  $discharged_projects =  Project::whereHas("users",function($query) use($user){
+            //     $query->where("users.id",$user->id);
+            //  })
+            //  ->whereNotIn("id",$request_data['projects'])
+            //  ->get();
+            //  EmployeeProjectHistory::where([
+            //     "user_id" => $user->id,
+            //     "to_date" => NULL
+            //  ])
+            //  ->whereIn("project_id",$discharged_projects->pluck("id"))
+            //  ->update([
+            //     "to_date" => now()
+            //  ])
+            //  ;
+
+
+            foreach ($request_data['projects'] as $index => $project_id) {
+                $project = Project::whereHas("users", function ($query) use ($user) {
+                        $query->where("users.id", $user->id);
+                    })
+                    ->where([
+                        "id" => $project_id
+                    ])
                     ->first();
 
-                    if($project) {
-                            $error = [ "message" => "The given data was invalid.",
-                                       "errors" => [("projects.".$index)=>["The project is already belongs to that user."]]
-                                       ];
-                                           throw new Exception(json_encode($error),422);
-
-                    }
-
-
-
-
-                        $project = Project::where([
-                           "id" => $project_id
-                        ])
-                        ->first();
-
-                        if(!$project) {
-                            throw new Exception("some thing went wrong");
-                        }
-
-                        // UserProject::create([
-                        //     "user_id" => $user->id,
-                        //     "project_id" => $project->id
-                        // ]);
-
-
-
-          $employee_project_history_data = $project->toArray();
-          $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
-          $employee_project_history_data["user_id"] = $user->id;
-          $employee_project_history_data["from_date"] = now();
-          $employee_project_history_data["to_date"] = NULL;
-
-          EmployeeProjectHistory::create($employee_project_history_data);
-
-                 }
+                if ($project) {
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("projects." . $index) => ["The project is already belongs to that user."]]
+                    ];
+                    throw new Exception(json_encode($error), 422);
+                }
 
 
 
 
-                 $user->projects()->attach($request_data['projects']);
+                $project = Project::where([
+                    "id" => $project_id
+                ])
+                    ->first();
+
+                if (!$project) {
+                    throw new Exception("some thing went wrong");
+                }
+
+                // UserProject::create([
+                //     "user_id" => $user->id,
+                //     "project_id" => $project->id
+                // ]);
 
 
 
-                 DB::commit();
+                $employee_project_history_data = $project->toArray();
+                $employee_project_history_data["project_id"] = $employee_project_history_data["id"];
+                $employee_project_history_data["user_id"] = $user->id;
+                $employee_project_history_data["from_date"] = now();
+                $employee_project_history_data["to_date"] = NULL;
 
-                 return response($user, 201);
+                EmployeeProjectHistory::create($employee_project_history_data);
+            }
 
 
-         } catch (Exception $e) {
+
+
+            $user->projects()->attach($request_data['projects']);
+
+
+
+            DB::commit();
+
+            return response($user, 201);
+        } catch (Exception $e) {
 
 
             DB::rollBack();
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
- /**
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/projects/discharge-project",
@@ -737,8 +717,8 @@ class ProjectController extends Controller
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
      *     @OA\Property(property="projects", type="string", format="array", example={1,2,3}),
- *
- *
+     *
+     *
 
      *
      *         ),
@@ -777,81 +757,76 @@ class ProjectController extends Controller
      *     )
      */
 
-     public function dischargeProject(ProjectAssignToUserRequest $request)
-     {
+    public function dischargeProject(ProjectAssignToUserRequest $request)
+    {
 
         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("task_management");
 
 
-
-                 if (!$request->user()->hasPermissionTo('project_update')) {
-                     return response()->json([
-                         "message" => "You can not perform this action"
-                     ], 401);
-                 }
-                 $request_data = $request->validated();
-                 $user_query_params = [
-                     "id" => $request_data["id"],
-                 ];
-                 $user  =  User::where($user_query_params)
-                     ->first();
-                 if (!$user) {
-                     return response()->json([
-                         "message" => "something went wrong."
-                     ], 500);
-                 }
-                 $discharged_projects =  Project::whereHas("users",function($query) use($user){
-                    $query->where("users.id",$user->id);
-                 })
-                 ->whereIn("id",$request_data['projects'])
-                 ->get();
-                 EmployeeProjectHistory::where([
-                    "user_id" => $user->id,
-                    "to_date" => NULL
-                 ])
-                 ->whereIn("project_id",$discharged_projects->pluck("id"))
-                 ->update([
+            if (!$request->user()->hasPermissionTo('project_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+            $user_query_params = [
+                "id" => $request_data["id"],
+            ];
+            $user  =  User::where($user_query_params)
+                ->first();
+            if (!$user) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
+            $discharged_projects =  Project::whereHas("users", function ($query) use ($user) {
+                $query->where("users.id", $user->id);
+            })
+                ->whereIn("id", $request_data['projects'])
+                ->get();
+            EmployeeProjectHistory::where([
+                "user_id" => $user->id,
+                "to_date" => NULL
+            ])
+                ->whereIn("project_id", $discharged_projects->pluck("id"))
+                ->update([
                     "to_date" => now()
-                 ])
-                 ;
+                ]);
 
 
-                 foreach($request_data['projects'] as $index=>$project_id) {
-                  $project = Project::
-                  whereHas("users",function($query) use($user){
-                    $query->where("users.id",$user->id);
-                 })
-                   ->where([
-                    "id" => $project_id
-                   ])
+            foreach ($request_data['projects'] as $index => $project_id) {
+                $project = Project::whereHas("users", function ($query) use ($user) {
+                        $query->where("users.id", $user->id);
+                    })
+                    ->where([
+                        "id" => $project_id
+                    ])
                     ->first();
 
 
-                    if(!$project) {
+                if (!$project) {
 
-                 $error = [ "message" => "The given data was invalid.",
-                            "errors" => [("projects.".$index)=>["The project is not belongs to that user."]]
-                            ];
-                                throw new Exception(json_encode($error),422);
-
-                    }
-
-                 }
-
-
-      $user->projects()->detach($request_data['projects']);
-       DB::commit();
-
-                 return response($user, 201);
+                    $error = [
+                        "message" => "The given data was invalid.",
+                        "errors" => [("projects." . $index) => ["The project is not belongs to that user."]]
+                    ];
+                    throw new Exception(json_encode($error), 422);
+                }
+            }
 
 
-         } catch (Exception $e) {
-             DB::rollBack();
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            $user->projects()->detach($request_data['projects']);
+            DB::commit();
+
+            return response($user, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -870,14 +845,14 @@ class ProjectController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
- *     @OA\Property(property="name", type="string", format="string", example="Project X"),
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Project X's objectives and scope."),
- *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
- *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
- *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3})
- *
- *
+     *     @OA\Property(property="name", type="string", format="string", example="Project X"),
+     *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Project X's objectives and scope."),
+     *     @OA\Property(property="start_date", type="string", format="date", example="2023-01-01"),
+     *     @OA\Property(property="end_date", type="string", format="date", example="2023-12-31"),
+     *     @OA\Property(property="status", type="string", format="string", example="in_progress"),
+     *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3})
+     *
+     *
 
      *
      *         ),
@@ -921,73 +896,72 @@ class ProjectController extends Controller
 
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("task_management");
 
 
-
-                if (!$request->user()->hasPermissionTo('project_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
-                $business_id =  $request->user()->business_id;
-                $request_data = $request->validated();
-
-
-
-
-                $project_query_params = [
-                    "id" => $request_data["id"],
-                    "business_id" => $business_id
-                ];
-                // $project_prev = Project::where($project_query_params)
-                //     ->first();
-                // if (!$project_prev) {
-                //     return response()->json([
-                //         "message" => "no project listing found"
-                //     ], 404);
-                // }
-
-                $project = Project::where($project_query_params)->first();
-
-                if (!$project) {
-                    return response()->json([
-                        "message" => "something went wrong."
-                    ], 500);
-                }
-
-                if($project->is_default) {
-                    $request_data["end_date"] = NULL;
-                }
-
-
-                $project->fill(collect($request_data)->only([
-                    'name',
-                    'description',
-                    'start_date',
-                    'end_date',
-                    'status',
-                    // "is_active",
-                    // "business_id",
-                    // "created_by"
-
-                ])->toArray());
-                $project->save( );
+            if (!$request->user()->hasPermissionTo('project_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $request_data = $request->validated();
 
 
 
 
-                if(empty($request_data['departments'])) {
-                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
-                }
-                $project->departments()->sync($request_data['departments']);
+            $project_query_params = [
+                "id" => $request_data["id"],
+                "business_id" => $business_id
+            ];
+            // $project_prev = Project::where($project_query_params)
+            //     ->first();
+            // if (!$project_prev) {
+            //     return response()->json([
+            //         "message" => "no project listing found"
+            //     ], 404);
+            // }
 
-                DB::commit();
+            $project = Project::where($project_query_params)->first();
 
-                return response($project, 201);
+            if (!$project) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
 
+            if ($project->is_default) {
+                $request_data["end_date"] = NULL;
+            }
+
+
+            $project->fill(collect($request_data)->only([
+                'name',
+                'description',
+                'start_date',
+                'end_date',
+                'status',
+                // "is_active",
+                // "business_id",
+                // "created_by"
+
+            ])->toArray());
+            $project->save();
+
+
+
+
+            if (empty($request_data['departments'])) {
+                $request_data['departments'] = [Department::where("business_id", auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+            }
+            $project->departments()->sync($request_data['departments']);
+
+            DB::commit();
+
+            return response($project, 201);
         } catch (Exception $e) {
-          DB::rollBack();
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -1143,8 +1117,8 @@ class ProjectController extends Controller
     public function getProjects(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("task_management");
 
             if (!$request->user()->hasPermissionTo('project_view')) {
                 return response()->json([
@@ -1154,20 +1128,20 @@ class ProjectController extends Controller
 
 
 
-$projects = $this->projectComponent->getProjects();
+            $projects = $this->projectComponent->getProjects();
 
-                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                    if (strtoupper($request->response_type) == 'PDF') {
-                        $pdf = PDF::loadView('pdf.projects', ["projects" => $projects]);
-                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                    } elseif (strtoupper($request->response_type) === 'CSV') {
-                        return Excel::download(new ProjectsExport($projects), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-                    }
-                } else {
-                    return response()->json($projects, 200);
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.projects', ["projects" => $projects]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
+                    return Excel::download(new ProjectsExport($projects), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
                 }
+            } else {
+                return response()->json($projects, 200);
+            }
 
-// @@@@@@@@@@@@@@@@
+            // @@@@@@@@@@@@@@@@
 
             return response()->json($projects, 200);
         } catch (Exception $e) {
@@ -1234,8 +1208,8 @@ $projects = $this->projectComponent->getProjects();
     public function getProjectById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('project_view')) {
@@ -1245,14 +1219,15 @@ $projects = $this->projectComponent->getProjects();
             }
 
             $business_id =  $request->user()->business_id;
-            $project =  Project::with("departments","users")
-            ->where([
-                "id" => $id,
-                "business_id" => $business_id
-            ])
+            $project =  Project::with("departments", "users")
+                ->where([
+                    "id" => $id,
+                    "business_id" => $business_id
+                ])
 
-            ->select('projects.*'
-             )
+                ->select(
+                    'projects.*'
+                )
                 ->first();
 
             if (!$project) {
@@ -1330,8 +1305,8 @@ $projects = $this->projectComponent->getProjects();
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
-
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("task_management");
 
             if (!$request->user()->hasPermissionTo('project_delete')) {
                 return response()->json([
@@ -1347,10 +1322,10 @@ $projects = $this->projectComponent->getProjects();
                 ->select('id')
                 ->get();
 
-                $canDeleteProjectIds = $projects->filter(function ($asset) {
-                    return $asset->can_delete;
-                })->pluck('id')->toArray();
-              $nonExistingIds = array_diff($idsArray, $canDeleteProjectIds);
+            $canDeleteProjectIds = $projects->filter(function ($asset) {
+                return $asset->can_delete;
+            })->pluck('id')->toArray();
+            $nonExistingIds = array_diff($idsArray, $canDeleteProjectIds);
 
 
             if (!empty($nonExistingIds)) {
@@ -1359,7 +1334,7 @@ $projects = $this->projectComponent->getProjects();
                 ], 404);
             }
 
-            $attendanceExists = AttendanceProject::whereIn("project_id",$idsArray)->exists();
+            $attendanceExists = AttendanceProject::whereIn("project_id", $idsArray)->exists();
 
             if (!empty($nonExistingIds)) {
                 return response()->json([
@@ -1371,7 +1346,7 @@ $projects = $this->projectComponent->getProjects();
             Project::destroy($idsArray);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $canDeleteProjectIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $canDeleteProjectIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

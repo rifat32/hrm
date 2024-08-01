@@ -10,6 +10,7 @@ use App\Http\Requests\WorkShiftUpdateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessTime;
 use App\Models\Department;
@@ -26,7 +27,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class WorkShiftController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, ModuleUtil;
 
 
     protected $workShiftHistoryComponent;
@@ -189,6 +190,9 @@ if($request_data["type"] !== "flexible") {
 
         throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
     }
+
+} else {
+    $this->isModuleEnabled("flexible_shifts");
 
 }
 
@@ -385,6 +389,8 @@ if($el["is_weekend"]) {
                         throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
                     }
 
+                } else {
+                    $this->isModuleEnabled("flexible_shifts");
                 }
 
 
@@ -670,6 +676,8 @@ if($work_shift->type !== "flexible") {
 
         throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
     }
+} else {
+    $this->isModuleEnabled("flexible_shifts");
 }
 
 
@@ -1454,7 +1462,7 @@ if($work_shift->type !== "flexible") {
                 ], 404);
             }
 
-       
+
             WorkShift::destroy($existingIds);
 
 

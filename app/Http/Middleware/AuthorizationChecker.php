@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Utils\ModuleUtil;
 use App\Models\BusinessSubscription;
 use Carbon\Carbon;
 use Closure;
@@ -9,6 +10,7 @@ use Illuminate\Http\Request;
 
 class AuthorizationChecker
 {
+    use ModuleUtil;
     /**
      * Handle an incoming request.
      *
@@ -20,6 +22,14 @@ class AuthorizationChecker
     {
 
         $user = auth()->user();
+
+        $business = $user->business;
+
+        if(!empty($business) && $business->owner_id != $user->id){
+            if($user->hasRole(("business_employee#" . $business->id))) {
+                $this->isModuleEnabled("employee_login");
+            }
+        }
 
 
         if(empty($user->is_active)) {

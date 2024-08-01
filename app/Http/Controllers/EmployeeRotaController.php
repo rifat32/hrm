@@ -8,6 +8,7 @@ use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\EmployeeRota;
@@ -22,7 +23,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeRotaController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, ModuleUtil;
     /**
      *
      * @OA\Post(
@@ -146,6 +147,7 @@ class EmployeeRotaController extends Controller
         try {
 
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("rota");
 
 
             return DB::transaction(function () use ($request) {
@@ -452,6 +454,7 @@ if ($processedDetails->isNotEmpty()) {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("rota");
 
             return DB::transaction(function () use ($request) {
 
@@ -574,6 +577,8 @@ if ($processedDetails->isNotEmpty()) {
 
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("rota");
+
              if (!$request->user()->hasPermissionTo('user_update')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -742,6 +747,7 @@ if ($processedDetails->isNotEmpty()) {
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("rota");
 
             if (!$request->user()->hasPermissionTo('employee_rota_view')) {
                 return response()->json([
@@ -905,6 +911,9 @@ if ($processedDetails->isNotEmpty()) {
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("rota");
+
+
             if (!$request->user()->hasPermissionTo('employee_rota_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1009,6 +1018,8 @@ if ($processedDetails->isNotEmpty()) {
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             $this->isModuleEnabled("rota");
+
              if (!$request->user()->hasPermissionTo('employee_rota_view')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -1116,6 +1127,8 @@ if ($processedDetails->isNotEmpty()) {
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->isModuleEnabled("rota");
+
             if (!$request->user()->hasPermissionTo('employee_rota_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

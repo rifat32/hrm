@@ -93,8 +93,7 @@ class CommentController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-
-            $this->isModuleEnabled("project_and_comment_management");
+            $this->isModuleEnabled("task_management");
 
 
 
@@ -225,8 +224,7 @@ class CommentController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            $this->isModuleEnabled("project_and_comment_management");
-
+            $this->isModuleEnabled("task_management");
 
 
                 if (!$request->user()->hasPermissionTo('comment_update')) {
@@ -425,7 +423,7 @@ DB::commit();
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             $this->isModuleEnabled("project_and_comment_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('comment_view')) {
@@ -560,7 +558,7 @@ DB::commit();
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            $this->isModuleEnabled("project_and_comment_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('comment_view')) {
@@ -653,7 +651,7 @@ DB::commit();
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             $this->isModuleEnabled("project_and_comment_management");
+            $this->isModuleEnabled("task_management");
 
             if (!$request->user()->hasPermissionTo('comment_delete')) {
                 return response()->json([

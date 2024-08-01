@@ -385,6 +385,7 @@ ALTER TABLE disabled_designations ADD CONSTRAINT business_id_foreign FOREIGN KEY
 58. ALTER TABLE email_templates
 ADD COLUMN template_variables VARCHAR(255) NULL;
 
+59. Import letter_templates db table and import disabled_letter_templates
 
 
 hr compliance -> 46

@@ -83,7 +83,7 @@ class LabelController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-            $this->isModuleEnabled("project_and_label_management");
+            $this->isModuleEnabled("task_management");
 
 
 
@@ -184,7 +184,7 @@ class LabelController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_label_management");
+            $this->isModuleEnabled("task_management");
 
                 if (!$request->user()->hasPermissionTo('label_update')) {
                     return response()->json([
@@ -304,7 +304,7 @@ class LabelController extends Controller
          DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             $this->isModuleEnabled("project_and_label_management");
+             $this->isModuleEnabled("task_management");
 
                  if (!$request->user()->hasPermissionTo('label_update')) {
                      return response()->json([
@@ -402,7 +402,7 @@ class LabelController extends Controller
          DB::beginTransaction();
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             $this->isModuleEnabled("project_and_label_management");
+             $this->isModuleEnabled("task_management");
 
                  if (!$request->user()->hasPermissionTo('label_update')) {
                      return response()->json([
@@ -542,7 +542,7 @@ class LabelController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_label_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('label_view')) {
@@ -653,7 +653,7 @@ class LabelController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-               $this->isModuleEnabled("project_and_label_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('label_view')) {
@@ -744,7 +744,7 @@ class LabelController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            $this->isModuleEnabled("project_and_label_management");
+            $this->isModuleEnabled("task_management");
 
 
             if (!$request->user()->hasPermissionTo('label_delete')) {

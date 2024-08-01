@@ -15,6 +15,7 @@ use App\Http\Requests\UserInfoUpdateRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Http\Utils\UserDetailsUtil;
 use App\Mail\ResetPasswordMail;
@@ -34,7 +35,7 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil, UserDetailsUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil, UserDetailsUtil, ModuleUtil;
     /**
      *
      * @OA\Post(
@@ -299,8 +300,6 @@ class AuthController extends Controller
                  ])
                  ->first();
                  if(empty($business)) {
-
-
                     return response(['message' => 'Your business not found'], 403);
                  }
                  if(!$business->is_active) {
@@ -308,6 +307,12 @@ class AuthController extends Controller
                     return response(['message' => 'Business not active'], 403);
                 }
 
+                if($business->owner_id != $user->id){
+                    if($user->hasRole(("business_employee#" . $business->id))) {
+                        $this->isModuleEnabled("employee_login");
+                    }
+
+                }
 
                 // if(!$user->manages_department) {
                 //     return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
@@ -528,6 +533,15 @@ $datediff = $now - $user_created_date;
 
                     return response(['message' => 'Business not active'], 403);
                 }
+
+
+                if($business->owner_id != $user->id){
+
+                    if($user->hasRole(("business_employee#" . $business->id))) {
+                        $this->isModuleEnabled("employee_login");
+                    }
+                }
+
 
 
                 // if(!$user->manages_department) {

@@ -2441,15 +2441,7 @@ $payslipData
             }
 
 
-
             $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
-
-
-
-
-
-
-
 
 
 
