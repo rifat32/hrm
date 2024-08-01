@@ -449,6 +449,7 @@ Route::delete('/v1.0/service-plans/{ids}', [ServicePlanController::class, "delet
 Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
 Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
 Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
+
 Route::put('/v1.0/users/update-password', [UserManagementController::class, "updatePassword"]);
 
 
@@ -491,12 +492,16 @@ Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "g
 
 Route::post('/v2.0/users', [UserManagementController::class, "createUserV2"]);
 
+
+Route::get('/v1.0/user-test', [UserManagementController::class, "getUserTest"]);
 Route::post('/v1.0/user-test', [UserManagementController::class, "createUserTest"]);
+Route::post('/v2.0/user-test', [UserManagementController::class, "createUserTestV2"]);
+
 
 Route::post('/v1.0/users/import', [UserManagementController::class, 'importUsers']);
 
 Route::put('/v2.0/users', [UserManagementController::class, "updateUserV2"]);
-
+Route::put('/v2.0/users/update-work-shift', [UserManagementController::class, "updateUserWorkShift"]);
 
 Route::put('/v3.0/users', [UserManagementController::class, "updateUserV3"]);
 Route::put('/v4.0/users', [UserManagementController::class, "updateUserV4"]);

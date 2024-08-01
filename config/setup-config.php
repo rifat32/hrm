@@ -2601,8 +2601,6 @@ return [
                 "template_view",
                 "template_delete",
 
-
-
             ],
         ],
 

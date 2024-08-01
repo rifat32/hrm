@@ -38,6 +38,7 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateV2Request;
 use App\Http\Requests\UserUpdateV3Request;
 use App\Http\Requests\UserUpdateV4Request;
+use App\Http\Requests\UserUpdateWorkShiftRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
@@ -635,7 +636,6 @@ class UserManagementController extends Controller
         }
     }
 
-
     /**
      *
      * @OA\Post(
@@ -690,7 +690,458 @@ class UserManagementController extends Controller
      *     )
      */
 
-    public function createUserTest(Request $request)
+     public function createUserTest(Request $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+             if (!$request->user()->hasPermissionTo('user_create')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+
+
+             $employeeData =  $request->employeeData;
+             $attendanceData =  $request->attendanceData;
+
+             $assetData =  $request->assetData;
+             $documentData =  $request->documentData;
+             $educationHistoryData =  $request->educationHistoryData;
+             $jobHistoryData =  $request->jobHistoryData;
+             $pensionData =  $request->pensionData;
+             $payslipData =  $request->payslipData;
+             $noteData =  $request->noteData;
+             $bankData =  $request->bankData;
+
+
+
+
+
+            //  $data = [
+            //      'first_Name' => 'John',
+            //      'middle_Name' => 'A.',
+            //      'last_Name' => 'Doe',
+            //      'NI_number' => 'AB123456C',
+            //      'user_id' => 'user_' . uniqid(),
+            //      'email' => 'user' . uniqid() . '@example.com',
+            //      'password' => 'secret123',
+            //      'phone' => '1234567890',
+            //      'image' => 'http://example.com/image.jpg',
+            //      'address_line_1' => '123 Main St',
+            //      'address_line_2' => 'Apt 4B',
+            //      'country' => 'USA',
+            //      'city' => 'New York',
+            //      'postcode' => '10001',
+            //      'lat' => '40.712776',
+            //      'long' => '-74.005974',
+            //      'role' => ("business_employee#" . auth()->user()->business_id),
+            //      'work_shift_id' => $workShifts[0],
+            //      'departments' => [$departments[0]],
+            //      'gender' => 'male',
+            //      'is_in_employee' => true,
+            //      'designation_id' => $designations[0],
+            //      'employment_status_id' => $employmentStatuses[0],
+            //      'recruitment_processes' => [
+            //          [
+            //              "recruitment_process_id" => $recruitmentProcessId,
+            //              "description" => "bb",
+            //              "attachments" => ["/temporary_files/1722429603_Screenshot_from_2024-07-31_18-15-34.png"]
+            //          ],
+            //      ],
+            //      'work_location_ids' => [$workLocations[0]],
+            //      'joining_date' => '2024-06-01',
+            //      'date_of_birth' => '1990-01-01',
+            //      'salary_per_annum' => 60000,
+            //      'weekly_contractual_hours' => 40,
+            //      'minimum_working_days_per_week' => 5,
+            //      'overtime_rate' => 1.5,
+            //      "emergency_contact_details" => [
+            //          [
+            //              "first_Name" => "Muzibur",
+            //              "last_Name" => "Rahman",
+            //              "relationship_of_above_to_you" => "Child",
+            //              "address_line_1" => "v",
+            //              "postcode" => "b",
+            //              "daytime_tel_number" => "01555555555",
+            //              "mobile_tel_number" => "01222222222"
+            //          ]
+            //      ],
+            //      'immigration_status' => 'british_citizen',
+            //      'is_sponsorship_offered' => null,
+            //      'date' => null,
+            //      'is_active_visa_details' => true,
+            //      'is_active_right_to_works' => true,
+            //      'is_active_visa_details' => true,
+            //      'is_active_right_to_works' => true,
+            //      'sponsorship_details' => [
+            //          'date_assigned' => '2024-07-01',
+            //          'expiry_date' => '2026-07-01',
+            //          'note' => 'Sponsorship details note',
+            //          'certificate_number' => 'CERT123456',
+            //          'current_certificate_status' => 'assigned',
+            //          'is_sponsorship_withdrawn' => false,
+            //      ],
+            //      'passport_details' => [
+            //          'passport_number' => 'P1234567',
+            //          'passport_issue_date' => '2020-01-01',
+            //          'passport_expiry_date' => '2030-01-01',
+            //          'place_of_issue' => 'New York',
+            //      ],
+            //      'visa_details' => [
+            //          'BRP_number' => 'BRP123456',
+            //          'visa_issue_date' => '2020-01-01',
+            //          'visa_expiry_date' => '2030-01-01',
+            //          'place_of_issue' => 'New York',
+            //          'visa_docs' => [
+            //              [
+            //                  'file_name' => 'visa_doc1.pdf',
+            //                  'description' => 'Visa document description'
+            //              ]
+            //          ],
+            //      ],
+            //      'right_to_works' => [
+            //          'right_to_work_code' => 'RTW123456',
+            //          'right_to_work_check_date' => '2024-07-01',
+            //          'right_to_work_expiry_date' => '2026-07-01',
+            //          'right_to_work_docs' => [
+            //              [
+            //                  'file_name' => 'rtw_doc1.pdf',
+            //                  'description' => 'Right to work document description'
+            //              ]
+            //          ],
+            //      ],
+            //  ];
+
+
+
+             $response = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(env('APP_URL') . '/api/v2.0/users', $employeeData);
+
+
+             $responseData = $response->json();
+
+
+
+
+             $employeeId = $responseData["id"];
+
+
+
+
+
+
+            $attendanceData["user_ids"] = [$employeeId];
+
+             $createAttendance = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(
+                     env('APP_URL') . '/api/v1.0/attendances/bypass/multiple',
+                     $attendanceData
+                    //  [
+                    //      "user_ids" => [$employeeId],
+                    //      "work_location_id" => 113,
+                    //      "project_id" => null,
+                    //      "start_date" => $start,
+                    //      "end_date" => $end
+                    //  ]
+                 );
+
+
+                 $assetData["user_id"] = $employeeId;
+
+             $createAsset = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(env('APP_URL') . '/api/v1.0/user-assets',
+                //   [
+                //      "user_id" => $employeeId,
+                //      "name" => "dyj",
+                //      "code" => "dyj",
+                //      "serial_number" => "45",
+                //      "type" => $asset_type,
+                //      "date" => "04-07-2024",
+                //      "note" => "hh dd hh uu gg hh ",
+                //      "image" => "/temporary_files/1722420046_Screenshot_from_2024-07-31_15-48-17.png",
+                //      "status" => "available",
+                //      "is_working" => 0
+                //  ]
+
+                $assetData
+
+                );
+                $documentData["user_id"] = $employeeId;
+
+
+             $createDoc = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(env('APP_URL') . '/api/v1.0/user-documents',
+                //  [
+                //      "user_id" => $employeeId,
+                //      "name" => "fgjf",
+                //      "file_name" => "/temporary_files/1722419797_Screenshot_from_2024-07-30_20-28-53.png"
+                //  ]
+$documentData
+
+
+            );
+
+
+            $educationHistoryData["user_id"] = $employeeId;
+
+             $educationHistory = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(
+                     env('APP_URL') . '/api/v1.0/user-education-histories',
+                    //  [
+                    //      "user_id" => $employeeId,
+                    //      "degree" => "Primary education",
+                    //      "major" => "jhk",
+                    //      "school_name" => "dd",
+                    //      "address" => "",
+                    //      "country" => "Afghanistan",
+                    //      "city" => "",
+                    //      "postcode" => "",
+                    //      "start_date" => "03-07-2024",
+                    //      "graduation_date" => "03-07-2024",
+                    //      "achievements" => "jj",
+                    //      "description" => "jj",
+                    //      "is_current" => false,
+                    //      "attachments" => [
+                    //          "/temporary_files/1722427457_Screenshot_from_2024-07-30_23-53-00.png"
+                    //      ]
+                    //  ]
+
+                    $educationHistoryData
+                 );
+
+                 $jobHistoryData["user_id"] = $employeeId;
+
+
+             $jobHistory = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(
+                     env('APP_URL') . '/api/v1.0/user-job-histories',
+                    //  [
+                    //      "user_id" => $employeeId,
+                    //      "company_name" => "c",
+                    //      "job_title" => "c",
+                    //      "employment_start_date" => "03-07-2024",
+                    //      "employment_end_date" => "03-07-2024",
+                    //      "responsibilities" => "<p>c</p>",
+                    //      "supervisor_name" => "c",
+                    //      "contact_information" => "c",
+                    //      "country" => "Albania",
+                    //      "work_location" => "",
+                    //      "achievements" => "c"
+                    //  ]
+                    $jobHistoryData
+
+                 );
+
+
+
+
+             $getPension =  Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' . $employeeId);
+
+             $pensionId =  $getPension->json()[0]["id"];
+
+             $pensionData["user_id"] = $employeeId;
+             $pensionData["id"] = $pensionId;
+
+             $pension = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->put(
+                     env('APP_URL') . '/api/v1.0/user-pension-histories',
+                    //  [
+                    //      "pension_eligible" => 1,
+                    //      "pension_enrollment_issue_date" => "01-07-2024",
+                    //      "pension_scheme_opt_out_date" => null,
+                    //      "pension_re_enrollment_due_date" => null,
+                    //      "pension_letters" => [
+                    //          [
+                    //              "file_name" => "/temporary_files/1722428337_Screenshot_from_2024-07-31_18-15-34.png",
+                    //              "description" => "qqq"
+                    //          ]
+                    //      ],
+                    //      "pension_scheme_status" => "opt_in",
+                    //      "from_date" => "31-07-2024",
+                    //      "user_id" => $employeeId,
+                    //      "id" => $pensionId
+                    //  ]
+$pensionData
+                 );
+
+
+                 $payslipData["user_id"] = $employeeId;
+
+             $payslip = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(
+                     env('APP_URL') . '/api/v1.0/user-payslips',
+                    //  [
+                    //      "user_id" => $employeeId,
+                    //      "payroll_id" => null,
+                    //      "month" => 6,
+                    //      "year" => 2024,
+                    //      "payment_amount" => 16,
+                    //      "payment_date" => "02-07-2024",
+                    //      "payslip_file" => "/temporary_files/1722428945_Screenshot_from_2024-07-31_18-15-34.png",
+                    //      "payment_record_file" => [
+                    //          "/temporary_files/1722428946_Screenshot_from_2024-07-31_18-15-34.png"
+                    //      ],
+                    //      "gross_pay" => 20,
+                    //      "tax" => 2,
+                    //      "employee_ni_deduction" => 2,
+                    //      "employer_ni" => 2,
+                    //      "payment_notes" => "ff",
+                    //      "payment_method" => "cash"
+                    //  ]
+$payslipData
+                 );
+
+                 $noteData["user_id"] = $employeeId;
+             $note = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(
+                     env('APP_URL') . '/api/v1.0/user-notes',
+                    //  [
+                    //      "user_id" => $employeeId,
+                    //      "title" => "tt",
+                    //      "description" => "dd"
+                    //  ]
+
+                    $noteData
+
+                 );
+
+
+
+             $userSocialSites =  Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' . $employeeId);
+
+             $userSocialSitesId =  $userSocialSites->json()[0]["id"];
+
+
+             $userSocialSites = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->post(
+                     env('APP_URL') . '/api/v1.0/user-social-sites',
+                     [
+                         "social_site_id" => $userSocialSitesId,
+                         "user_id" => $employeeId,
+                         "profile_link" => "https://hg.com"
+                     ]
+                 );
+
+
+
+                 $bankData["user_id"] = $employeeId;
+             $bank = Http::withHeaders([
+                 'Authorization' => 'Bearer ' . request()->bearerToken(),
+             ])
+                 ->put(
+                     env('APP_URL') . '/api/v1.0/users/update-bank-details',
+                    //  [
+                    //      "id" => $employeeId,
+                    //      "bank_id" => $bankId,
+                    //      "sort_code" => "02-22-23",
+                    //      "account_number" => "12345678",
+                    //      "account_name" => "Name"
+                    //  ]
+                    $bankData
+                 );
+
+
+
+
+
+
+
+             DB::commit();
+             return response()->json(["ok" => $bank->json()], 201);
+         } catch (Exception $e) {
+
+             DB::rollBack();
+
+
+
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+    /**
+     *
+     * @OA\Post(
+     *      path="/v2.0/user-test",
+     *      operationId="createUserTestV2",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user",
+     *      description="This method is to store user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function createUserTestV2(Request $request)
     {
         DB::beginTransaction();
         try {
@@ -719,7 +1170,7 @@ class UserManagementController extends Controller
             ])
                 ->get(env('APP_URL') . '/api/v1.0/recruitment-processes?is_active=1');
 
-              $recruitmentProcessId =  $getrecruitmentProcess->json()[0]["id"];
+            $recruitmentProcessId =  $getrecruitmentProcess->json()[0]["id"];
 
 
 
@@ -826,229 +1277,237 @@ class UserManagementController extends Controller
                 ->post(env('APP_URL') . '/api/v2.0/users', $data);
 
 
-$responseData = $response->json();
+            $responseData = $response->json();
 
 
 
 
- $employeeId = $responseData["id"];
+            $employeeId = $responseData["id"];
 
-$previousMonth = Carbon::now()->subMonth();
-$start = $previousMonth->startOfMonth();
-$end = $previousMonth->endOfMonth();
-
-
+            $previousMonth = Carbon::now()->subMonth();
+            $start = $previousMonth->startOfMonth();
+            $end = $previousMonth->endOfMonth();
 
 
 
-$createAttendance = Http::withHeaders([
-    'Authorization' => 'Bearer ' . request()->bearerToken(),
-])
-    ->post(env('APP_URL') . '/api/v1.0/attendances/bypass/multiple',
-    [
-        "user_ids" => [$employeeId],
-        "work_location_id" => 113,
-        "project_id" => null,
-        "start_date" => $start,
-        "end_date" => $end
-    ]
-);
-$getAssetType =  Http::withHeaders([
-    'Authorization' => 'Bearer ' . request()->bearerToken(),
-])
-    ->get(env('APP_URL') . '/api/v1.0/asset-types');
-
-  $asset_type =  $getAssetType->json()[0]["name"];
-
-$createAsset = Http::withHeaders([
-    'Authorization' => 'Bearer ' . request()->bearerToken(),
-])
-    ->post(env('APP_URL') . '/api/v1.0/user-assets', [
-        "user_id" => $employeeId,
-        "name" => "dyj",
-        "code" => "dyj",
-        "serial_number" => "45",
-        "type" => $asset_type ,
-        "date" => "04-07-2024",
-        "note" => "hh dd hh uu gg hh ",
-        "image" => "/temporary_files/1722420046_Screenshot_from_2024-07-31_15-48-17.png",
-        "status" => "available",
-        "is_working" => 0
-    ]);
-
-    $createDoc = Http::withHeaders([
-        'Authorization' => 'Bearer ' . request()->bearerToken(),
-    ])
-        ->post(env('APP_URL') . '/api/v1.0/user-documents', [
-            "user_id" => $employeeId,
-            "name" => "fgjf",
-            "file_name" => "/temporary_files/1722419797_Screenshot_from_2024-07-30_20-28-53.png"
-        ]);
 
 
-
-        $educationHistory = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->post(env('APP_URL') . '/api/v1.0/user-education-histories',
-            [
-                "user_id" => 7245,
-                "degree" => "Primary education",
-                "major" => "jhk",
-                "school_name" => "dd",
-                "address" => "",
-                "country" => "Afghanistan",
-                "city" => "",
-                "postcode" => "",
-                "start_date" => "03-07-2024",
-                "graduation_date" => "03-07-2024",
-                "achievements" => "jj",
-                "description" => "jj",
-                "is_current" => false,
-                "attachments" => [
-                    "/temporary_files/1722427457_Screenshot_from_2024-07-30_23-53-00.png"
-                ]
-            ]
-
-        );
-
-
-        $jobHistory = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->post(env('APP_URL') . '/api/v1.0/user-job-histories',
-            [
-                "user_id" => $employeeId,
-                "company_name" => "c",
-                "job_title" => "c",
-                "employment_start_date" => "03-07-2024",
-                "employment_end_date" => "03-07-2024",
-                "responsibilities" => "<p>c</p>",
-                "supervisor_name" => "c",
-                "contact_information" => "c",
-                "country" => "Albania",
-                "work_location" => "",
-                "achievements" => "c"
-            ]
-
-        );
-
-
-
-        $getPension =  Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' .$employeeId);
-
-          $pensionId =  $getPension->json()[0]["id"];
-
-
-
-          $pension = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->put(env('APP_URL') . '/api/v1.0/user-pension-histories',
-            [
-                "pension_eligible" => 1,
-                "pension_enrollment_issue_date" => "01-07-2024",
-                "pension_scheme_opt_out_date" => null,
-                "pension_re_enrollment_due_date" => null,
-                "pension_letters" => [
+            $createAttendance = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/attendances/bypass/multiple',
                     [
-                        "file_name" => "/temporary_files/1722428337_Screenshot_from_2024-07-31_18-15-34.png",
-                        "description" => "qqq"
+                        "user_ids" => [$employeeId],
+                        "work_location_id" => 113,
+                        "project_id" => null,
+                        "start_date" => $start,
+                        "end_date" => $end
                     ]
-                ],
-                "pension_scheme_status" => "opt_in",
-                "from_date" => "31-07-2024",
-                "user_id" => $employeeId,
-                "id" => $pensionId
-            ]
+                );
+            $getAssetType =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/asset-types');
 
-        );
+            $asset_type =  $getAssetType->json()[0]["name"];
 
+            $createAsset = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(env('APP_URL') . '/api/v1.0/user-assets', [
+                    "user_id" => $employeeId,
+                    "name" => "dyj",
+                    "code" => "dyj",
+                    "serial_number" => "45",
+                    "type" => $asset_type,
+                    "date" => "04-07-2024",
+                    "note" => "hh dd hh uu gg hh ",
+                    "image" => "/temporary_files/1722420046_Screenshot_from_2024-07-31_15-48-17.png",
+                    "status" => "available",
+                    "is_working" => 0
+                ]);
 
-
-
-        $payslip = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->post(env('APP_URL') . '/api/v1.0/user-payslips',
-            [
-                "user_id" => $employeeId,
-                "payroll_id" => null,
-                "month" => 6,
-                "year" => 2024,
-                "payment_amount" => 16,
-                "payment_date" => "02-07-2024",
-                "payslip_file" => "/temporary_files/1722428945_Screenshot_from_2024-07-31_18-15-34.png",
-                "payment_record_file" => [
-                    "/temporary_files/1722428946_Screenshot_from_2024-07-31_18-15-34.png"
-                ],
-                "gross_pay" => 20,
-                "tax" => 2,
-                "employee_ni_deduction" => 2,
-                "employer_ni" => 2,
-                "payment_notes" => "ff",
-                "payment_method" => "cash"
-            ]
-
-        );
-
-
-        $note = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->post(env('APP_URL') . '/api/v1.0/user-notes',
-            [
-                "user_id" => $employeeId,
-                "title" => "tt",
-                "description" => "dd"
-            ]
-
-        );
+            $createDoc = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(env('APP_URL') . '/api/v1.0/user-documents', [
+                    "user_id" => $employeeId,
+                    "name" => "fgjf",
+                    "file_name" => "/temporary_files/1722419797_Screenshot_from_2024-07-30_20-28-53.png"
+                ]);
 
 
 
-        $userSocialSites =  Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' .$employeeId);
+            $educationHistory = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-education-histories',
+                    [
+                        "user_id" => 7245,
+                        "degree" => "Primary education",
+                        "major" => "jhk",
+                        "school_name" => "dd",
+                        "address" => "",
+                        "country" => "Afghanistan",
+                        "city" => "",
+                        "postcode" => "",
+                        "start_date" => "03-07-2024",
+                        "graduation_date" => "03-07-2024",
+                        "achievements" => "jj",
+                        "description" => "jj",
+                        "is_current" => false,
+                        "attachments" => [
+                            "/temporary_files/1722427457_Screenshot_from_2024-07-30_23-53-00.png"
+                        ]
+                    ]
 
-          $userSocialSitesId =  $userSocialSites->json()[0]["id"];
+                );
 
 
-          $userSocialSites = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->post(env('APP_URL') . '/api/v1.0/user-social-sites',
-            [
-                "social_site_id" => $userSocialSitesId,
-                "user_id" => $employeeId,
-                "profile_link" => "https://hg.com"
-            ]
-        );
+            $jobHistory = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-job-histories',
+                    [
+                        "user_id" => $employeeId,
+                        "company_name" => "c",
+                        "job_title" => "c",
+                        "employment_start_date" => "03-07-2024",
+                        "employment_end_date" => "03-07-2024",
+                        "responsibilities" => "<p>c</p>",
+                        "supervisor_name" => "c",
+                        "contact_information" => "c",
+                        "country" => "Albania",
+                        "work_location" => "",
+                        "achievements" => "c"
+                    ]
 
-        $banks =  Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->get(env('APP_URL') . '/api/v1.0/banks');
-
-          $bankId =  $banks->json()[0]["id"];
+                );
 
 
-          $bank = Http::withHeaders([
-            'Authorization' => 'Bearer ' . request()->bearerToken(),
-        ])
-            ->put(env('APP_URL') . '/api/v1.0/users/update-bank-details',
-            [
-                "id" => $employeeId,
-                "bank_id" => $bankId,
-                "sort_code" => "02-22-23",
-                "account_number" => "12345678",
-                "account_name" => "Name"
-            ]
-        );
+
+            $getPension =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' . $employeeId);
+
+            $pensionId =  $getPension->json()[0]["id"];
+
+
+
+            $pension = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->put(
+                    env('APP_URL') . '/api/v1.0/user-pension-histories',
+                    [
+                        "pension_eligible" => 1,
+                        "pension_enrollment_issue_date" => "01-07-2024",
+                        "pension_scheme_opt_out_date" => null,
+                        "pension_re_enrollment_due_date" => null,
+                        "pension_letters" => [
+                            [
+                                "file_name" => "/temporary_files/1722428337_Screenshot_from_2024-07-31_18-15-34.png",
+                                "description" => "qqq"
+                            ]
+                        ],
+                        "pension_scheme_status" => "opt_in",
+                        "from_date" => "31-07-2024",
+                        "user_id" => $employeeId,
+                        "id" => $pensionId
+                    ]
+
+                );
+
+
+
+
+            $payslip = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-payslips',
+                    [
+                        "user_id" => $employeeId,
+                        "payroll_id" => null,
+                        "month" => 6,
+                        "year" => 2024,
+                        "payment_amount" => 16,
+                        "payment_date" => "02-07-2024",
+                        "payslip_file" => "/temporary_files/1722428945_Screenshot_from_2024-07-31_18-15-34.png",
+                        "payment_record_file" => [
+                            "/temporary_files/1722428946_Screenshot_from_2024-07-31_18-15-34.png"
+                        ],
+                        "gross_pay" => 20,
+                        "tax" => 2,
+                        "employee_ni_deduction" => 2,
+                        "employer_ni" => 2,
+                        "payment_notes" => "ff",
+                        "payment_method" => "cash"
+                    ]
+
+                );
+
+
+            $note = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-notes',
+                    [
+                        "user_id" => $employeeId,
+                        "title" => "tt",
+                        "description" => "dd"
+                    ]
+
+                );
+
+
+
+            $userSocialSites =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' . $employeeId);
+
+            $userSocialSitesId =  $userSocialSites->json()[0]["id"];
+
+
+            $userSocialSites = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-social-sites',
+                    [
+                        "social_site_id" => $userSocialSitesId,
+                        "user_id" => $employeeId,
+                        "profile_link" => "https://hg.com"
+                    ]
+                );
+
+            $banks =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/banks');
+
+            $bankId =  $banks->json()[0]["id"];
+
+
+            $bank = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->put(
+                    env('APP_URL') . '/api/v1.0/users/update-bank-details',
+                    [
+                        "id" => $employeeId,
+                        "bank_id" => $bankId,
+                        "sort_code" => "02-22-23",
+                        "account_number" => "12345678",
+                        "account_name" => "Name"
+                    ]
+                );
 
 
 
@@ -1069,6 +1528,133 @@ $createAsset = Http::withHeaders([
         }
     }
 
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/user-test",
+     *      operationId="createUserTest",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store user",
+     *      description="This method is to store user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getUserTestData(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+
+
+
+            $employeeFormData = $this->getEmployeeFormData(request()->bearerToken());
+
+            $work_location_ids = $this->extractIdsFromJson($employeeFormData, 'work_locations');
+            $designation_ids = $this->extractIdsFromJson($employeeFormData, 'designations');
+            $employment_status_ids = $this->extractIdsFromJson($employeeFormData, 'employment_statuses');
+            $work_shift_ids = $this->extractIdsFromJson($employeeFormData, 'work_shifts');
+            $department_ids = $this->extractIdsFromJson($employeeFormData, 'departments');
+
+
+            $getrecruitmentProcess =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/recruitment-processes?is_active=1');
+
+            $recruitment_processids =  collect($getrecruitmentProcess->json())->pluck("id")->toArray();
+
+
+            $getAssetType =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/asset-types');
+
+            $asset_type_names =  collect($getAssetType->json())->pluck("name");
+
+
+
+            $banks =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/banks');
+
+            $bank_ids =  collect($banks->json())->pluck("id");
+
+            $responseData = [
+                "bank_ids" => $bank_ids,
+                "asset_type_names" => $asset_type_names,
+                "recruitment_processids" => $recruitment_processids,
+                "department_ids" => $department_ids,
+                "work_shift_ids" => $work_shift_ids,
+                "work_location_ids" => $work_location_ids,
+                "designation_ids" => $designation_ids,
+                "employment_status_ids" => $employment_status_ids,
+            ];
+
+
+
+            DB::commit();
+            return response()->json(["ok" => $responseData], 201);
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+
+
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -2098,7 +2684,6 @@ $createAsset = Http::withHeaders([
             return $this->sendError($e, 500, $request);
         }
     }
-
     /**
      *
      * @OA\Put(
@@ -2205,7 +2790,274 @@ $createAsset = Http::withHeaders([
      *     )
      */
 
-    public function updateUserV2(UserUpdateV2Request $request)
+     public function updateUserV2(UserUpdateV2Request $request)
+     {
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+             $userQuery = User::where([
+                 "id" => $request["id"]
+             ]);
+             $updatableUser = $userQuery->first();
+             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                 return response()->json([
+                     "message" => "You can not change the role of super admin"
+                 ], 401);
+             }
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                 return response()->json([
+                     "message" => "You can not update this user"
+                 ], 401);
+             }
+
+
+             if (!empty($request_data['password'])) {
+                 $request_data['password'] = Hash::make($request_data['password']);
+             } else {
+                 unset($request_data['password']);
+             }
+
+
+
+             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+             $this->makeFilePermanent($request_data["recruitment_processes"], "attachments", []);
+
+
+             $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
+             $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"], "file_name");
+
+             $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
+             $this->makeFilePermanent($request_data["visa_details"]["visa_docs"], "file_name");
+
+
+
+
+             $request_data['remember_token'] = Str::random(10);
+
+
+
+
+
+             $userQueryTerms = [
+                 "id" => $request_data["id"],
+             ];
+
+
+             if (!empty($request_data["joining_date"])) {
+                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+             }
+
+             $user = User::where($userQueryTerms)->first();
+
+             if ($user) {
+                 $user->fill(collect($request_data)->only([
+                     'first_Name',
+                     'last_Name',
+                     'middle_Name',
+                     "NI_number",
+
+                     "email",
+                     "color_theme_name",
+                     'emergency_contact_details',
+                     'gender',
+
+                     // 'is_in_employee',
+
+                     'designation_id',
+                     'employment_status_id',
+                     'joining_date',
+                     "date_of_birth",
+                     'salary_per_annum',
+                     'weekly_contractual_hours',
+                     'minimum_working_days_per_week',
+                     'overtime_rate',
+                     'phone',
+                     'image',
+                     'address_line_1',
+                     'address_line_2',
+                     'country',
+                     'city',
+                     'postcode',
+                     "lat",
+                     "long",
+                     'is_active_visa_details',
+                     "is_active_right_to_works",
+                     'is_sponsorship_offered',
+                     "immigration_status",
+
+
+                 ])->toArray());
+
+                 $user->save();
+             }
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+             $this->delete_old_histories();
+
+
+             if (!empty($request_data['departments'])) {
+                 $user->departments()->sync($request_data['departments']);
+             }
+
+
+             // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
+             //     // Fetch the first department ID and user ID
+             //     $departmentUser = DepartmentUser::where([
+             //         'department_id' => $user->departments[0]->id,
+             //         'user_id'       => $user->id
+             //     ])->first();
+
+             //     // Check if the DepartmentUser relationship exists
+             //     if (!empty($departmentUser)) {
+             //         // Update the department_id to the new department ID from the request data
+             //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+             //     }
+             // }
+
+
+             // // Get the user's departments
+             // $departments = $user->departments->pluck("id");
+
+
+             // // Remove the first department from the collection
+             // $removedDepartment = $departments->shift();
+
+             // // Insert the department from $request_data at the beginning of the collection
+             // $departments->prepend($request_data['departments'][0]);
+
+             // // Update the user's departments
+             // $user->departments()->sync($departments);
+
+             $user->work_locations()->sync($request_data["work_location_ids"]);
+
+             $user->syncRoles([$request_data['role']]);
+
+             $this->update_work_shift($request_data, $user);
+             $this->update_address_history($request_data, $user);
+             $this->update_recruitment_processes($request_data, $user);
+
+
+
+             if (in_array($request["immigration_status"], ['sponsored'])) {
+                 $this->update_sponsorship($request_data, $user);
+             }
+
+
+             if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
+                 $this->update_passport_details($request_data, $user);
+                 $this->update_visa_details($request_data, $user);
+             }
+
+             if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
+                 $this->update_right_to_works($request_data, $user);
+             }
+
+             $user->roles = $user->roles->pluck('name');
+
+
+
+
+
+
+
+
+
+             // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+
+             // $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
+
+             // $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
+
+
+
+
+
+
+
+
+
+
+
+
+
+             DB::commit();
+             return response($user, 201);
+         } catch (Exception $e) {
+             DB::rollBack();
+
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+    /**
+     *
+     * @OA\Put(
+     *      path="/v2.0/users/update-work-shift",
+     *      operationId="updateUserWorkShift",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user",
+     *      description="This method is to update user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *           @OA\Property(property="id", type="string", format="number",example="1"),
+     *      *    @OA\Property(property="work_shift_id", type="number", format="number",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function updateUserWorkShift(UserUpdateWorkShiftRequest $request)
     {
         DB::beginTransaction();
         try {
@@ -2234,175 +3086,16 @@ $createAsset = Http::withHeaders([
             }
 
 
-            if (!empty($request_data['password'])) {
-                $request_data['password'] = Hash::make($request_data['password']);
-            } else {
-                unset($request_data['password']);
-            }
-
-
-
-            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
-            $this->makeFilePermanent($request_data["recruitment_processes"], "attachments", []);
-
-
-            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
-            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"], "file_name");
-
-            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
-            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"], "file_name");
-
-
-
-
-            $request_data['remember_token'] = Str::random(10);
-
-
-
 
 
             $userQueryTerms = [
                 "id" => $request_data["id"],
             ];
 
-
-            if (!empty($request_data["joining_date"])) {
-                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
-            }
-
             $user = User::where($userQueryTerms)->first();
 
-            if ($user) {
-                $user->fill(collect($request_data)->only([
-                    'first_Name',
-                    'last_Name',
-                    'middle_Name',
-                    "NI_number",
-
-                    "email",
-                    "color_theme_name",
-                    'emergency_contact_details',
-                    'gender',
-
-                    // 'is_in_employee',
-
-                    'designation_id',
-                    'employment_status_id',
-                    'joining_date',
-                    "date_of_birth",
-                    'salary_per_annum',
-                    'weekly_contractual_hours',
-                    'minimum_working_days_per_week',
-                    'overtime_rate',
-                    'phone',
-                    'image',
-                    'address_line_1',
-                    'address_line_2',
-                    'country',
-                    'city',
-                    'postcode',
-                    "lat",
-                    "long",
-                    'is_active_visa_details',
-                    "is_active_right_to_works",
-                    'is_sponsorship_offered',
-                    "immigration_status",
-
-
-                ])->toArray());
-
-                $user->save();
-            }
-            if (!$user) {
-
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
-
-            $this->delete_old_histories();
-
-
-            if (!empty($request_data['departments'])) {
-                $user->departments()->sync($request_data['departments']);
-            }
-
-
-            // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
-            //     // Fetch the first department ID and user ID
-            //     $departmentUser = DepartmentUser::where([
-            //         'department_id' => $user->departments[0]->id,
-            //         'user_id'       => $user->id
-            //     ])->first();
-
-            //     // Check if the DepartmentUser relationship exists
-            //     if (!empty($departmentUser)) {
-            //         // Update the department_id to the new department ID from the request data
-            //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
-            //     }
-            // }
-
-
-            // // Get the user's departments
-            // $departments = $user->departments->pluck("id");
-
-
-            // // Remove the first department from the collection
-            // $removedDepartment = $departments->shift();
-
-            // // Insert the department from $request_data at the beginning of the collection
-            // $departments->prepend($request_data['departments'][0]);
-
-            // // Update the user's departments
-            // $user->departments()->sync($departments);
-
-            $user->work_locations()->sync($request_data["work_location_ids"]);
-
-            $user->syncRoles([$request_data['role']]);
 
             $this->update_work_shift($request_data, $user);
-            $this->update_address_history($request_data, $user);
-            $this->update_recruitment_processes($request_data, $user);
-
-
-
-            if (in_array($request["immigration_status"], ['sponsored'])) {
-                $this->update_sponsorship($request_data, $user);
-            }
-
-
-            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
-                $this->update_passport_details($request_data, $user);
-                $this->update_visa_details($request_data, $user);
-            }
-
-            if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
-                $this->update_right_to_works($request_data, $user);
-            }
-
-            $user->roles = $user->roles->pluck('name');
-
-
-
-
-
-
-
-
-
-            // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
-
-            // $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
-
-            // $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
-
-
-
-
-
-
-
-
 
 
 
@@ -7503,8 +8196,8 @@ $createAsset = Http::withHeaders([
 
 
             $lastLeaveDate =    LeaveRecord::whereHas("leave", function ($query) use ($user) {
-                    $query->where("leaves.user_id", $user->id);
-                })->orderBy("leave_records.date")->first();
+                $query->where("leaves.user_id", $user->id);
+            })->orderBy("leave_records.date")->first();
 
             $lastAssetAssignDate = UserAssetHistory::where([
                 "user_id" => $user->id
