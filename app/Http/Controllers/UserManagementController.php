@@ -702,7 +702,18 @@ class UserManagementController extends Controller
                  ], 401);
              }
 
-
+             $validatedData = $request->validate([
+                'employeeData' => 'required|array',
+                'attendanceData' => 'required|array',
+                'assetData' => 'required|array',
+                'documentData' => 'required|array',
+                'educationHistoryData' => 'required|array',
+                'jobHistoryData' => 'required|array',
+                'pensionData' => 'required|array',
+                'payslipData' => 'required|array',
+                'noteData' => 'required|array',
+                'bankData' => 'required|array',
+            ]);
 
              $employeeData =  $request->employeeData;
              $attendanceData =  $request->attendanceData;
@@ -1530,9 +1541,9 @@ $payslipData
 
     /**
      *
-     * @OA\Post(
+     * @OA\Get(
      *      path="/v1.0/user-test",
-     *      operationId="createUserTest",
+     *      operationId="getUserTestData",
      *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
@@ -1540,14 +1551,7 @@ $payslipData
      *      summary="This method is to store user",
      *      description="This method is to store user",
      *
-     *  @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *
-     *
-     *
-     *         ),
-     *      ),
+
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",

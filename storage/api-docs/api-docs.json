@@ -14,7 +14,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000/api",
+            "url": "http://127.0.0.1:8001/api",
             "description": "Demo API Server"
         }
     ],
@@ -5101,7 +5101,8 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1
+                                            "flexible_rota_enabled": 1,
+                                            "number_of_employees_allowed": 20
                                         }
                                     }
                                 },
@@ -5497,6 +5498,7 @@
                                         "type": "string",
                                         "format": "array",
                                         "example": {
+                                            "number_of_employees_allowed": 1,
                                             "pension_scheme_registered": 1,
                                             "pension_scheme_name": "hh",
                                             "pension_scheme_letters": [
@@ -5677,6 +5679,7 @@
                                         "type": "string",
                                         "format": "array",
                                         "example": {
+                                            "number_of_employees_allowed": 0,
                                             "service_plan_id": 0,
                                             "service_plan_discount_code": 0,
                                             "pension_scheme_registered": 1,
@@ -5914,7 +5917,8 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1
+                                            "flexible_rota_enabled": 1,
+                                            "number_of_employees_allowed": 1
                                         }
                                     }
                                 },
@@ -6024,7 +6028,8 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1
+                                            "flexible_rota_enabled": 1,
+                                            "number_of_employees_allowed": 1
                                         }
                                     }
                                 },
@@ -6150,7 +6155,8 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1
+                                            "flexible_rota_enabled": 1,
+                                            "number_of_employees_allowed": 10
                                         }
                                     }
                                 },
@@ -39576,6 +39582,215 @@
                 ]
             }
         },
+        "/v1.0/user-test": {
+            "get": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to store user",
+                "description": "This method is to store user",
+                "operationId": "getUserTestData",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to store user",
+                "description": "This method is to store user",
+                "operationId": "createUserTest",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/user-test": {
+            "post": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to store user",
+                "description": "This method is to store user",
+                "operationId": "createUserTestV2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/users/import": {
             "post": {
                 "tags": [
@@ -40077,6 +40292,108 @@
                                             "business_owner",
                                             "business_admin"
                                         ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v2.0/users/update-work-shift": {
+            "put": {
+                "tags": [
+                    "user_management.employee"
+                ],
+                "summary": "This method is to update user",
+                "description": "This method is to update user",
+                "operationId": "updateUserWorkShift",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "first_Name",
+                                    "last_Name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "address_line_1",
+                                    "address_line_2",
+                                    "country",
+                                    "city",
+                                    "postcode",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "work_shift_id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
                                     }
                                 },
                                 "type": "object"
