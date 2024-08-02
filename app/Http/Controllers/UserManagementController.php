@@ -2433,11 +2433,13 @@ $payslipData
             $request_data["termination"]["joining_date"] = $user->joining_date;
 
 
-
-
+            $request_data["termination"]["user_id"] = $request_data["id"];
+            $request_data["exit_interview"]["user_id"] = $request_data["id"];
+            $request_data["access_revocation"]["user_id"] = $request_data["id"];
 
             Termination::create($request_data["termination"]);
             ExitInterview::create($request_data["exit_interview"]);
+
 
             if (empty($user->accessRevocation)) {
                 AccessRevocation::create($request_data["access_revocation"]);
