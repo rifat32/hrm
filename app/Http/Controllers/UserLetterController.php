@@ -355,6 +355,14 @@ class UserLetterController extends Controller
      * required=true,
      * example="ASC"
      * ),
+     *    * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="ASC"
+     * ),
+     *
 
 
 
@@ -411,12 +419,14 @@ class UserLetterController extends Controller
                 $created_by = auth()->user()->business->created_by;
             }
 
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+            $user_letters = UserLetter::where('user_letters.business_id', auth()->user()->business_id)
 
 
-            $user_letters = UserLetter::where('user_letters.business_id', $request->business_id)
-
-
-
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->when(!empty($request->id), function ($query) use ($request) {
                     return $query->where('user_letters.id', $request->id);
                 })
@@ -428,28 +438,21 @@ class UserLetterController extends Controller
                     return $query->where('user_letters.issue_date', "<=", ($request->end_issue_date . ' 23:59:59'));
                 })
 
-
-
-
-
                 ->when(!empty($request->letter_content), function ($query) use ($request) {
                     return $query->where('user_letters.id', $request->string);
                 })
-
-
-
-
 
                 ->when(!empty($request->status), function ($query) use ($request) {
                     return $query->where('user_letters.id', $request->string);
                 })
 
-
-
-
-
-
-
+                ->when(empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('user_letters.user_id', auth()->user()->id);
+                },
+                function ($query) use ($request) {
+                    return $query->where('user_letters.user_id', $request->user_id);
+                }
+                )
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -460,7 +463,6 @@ class UserLetterController extends Controller
                             ->orWhere("user_letters.status", "like", "%" . $term . "%");
                     });
                 })
-
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('user_letters.created_at', ">=", $request->start_date);

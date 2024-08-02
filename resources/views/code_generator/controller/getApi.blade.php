@@ -242,7 +242,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
 
         })
         @else
-        where('{{ $names["table_name"] }}.business_id', $request->business_id)
+        where('{{ $names["table_name"] }}.business_id', auth()->user()->business_id)
        @endif
 
 
