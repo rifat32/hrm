@@ -718,11 +718,13 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\CheckAndMigrate' => __DIR__ . '/../..' . '/app/Console/Commands/CheckAndMigrate.php',
         'App\\Console\\Commands\\DeleteFilesScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/DeleteFilesScheduler.php',
         'App\\Console\\Commands\\HolidayRepeatScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/HolidayRepeatScheduler.php',
         'App\\Console\\Commands\\PayrunScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/PayrunScheduler.php',
         'App\\Console\\Commands\\ReminderScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/ReminderScheduler.php',
         'App\\Console\\Commands\\SalaryReminderScheduler' => __DIR__ . '/../..' . '/app/Console/Commands/SalaryReminderScheduler.php',
+        'App\\Console\\Commands\\setup' => __DIR__ . '/../..' . '/app/Console/Commands/setup.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
         'App\\Exports\\AttendancesExport' => __DIR__ . '/../..' . '/app/Exports/AttendancesExport.php',
@@ -983,6 +985,8 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Http\\Requests\\UserInfoUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserInfoUpdateRequest.php',
         'App\\Http\\Requests\\UserJobHistoryCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserJobHistoryCreateRequest.php',
         'App\\Http\\Requests\\UserJobHistoryUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserJobHistoryUpdateRequest.php',
+        'App\\Http\\Requests\\UserLetterCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserLetterCreateRequest.php',
+        'App\\Http\\Requests\\UserLetterUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserLetterUpdateRequest.php',
         'App\\Http\\Requests\\UserNoteCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserNoteCreateRequest.php',
         'App\\Http\\Requests\\UserNoteUpdateByBusinessOwnerRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserNoteUpdateByBusinessOwnerRequest.php',
         'App\\Http\\Requests\\UserNoteUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserNoteUpdateRequest.php',
@@ -1013,6 +1017,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Http\\Requests\\UserUpdateV2Request' => __DIR__ . '/../..' . '/app/Http/Requests/UserUpdateV2Request.php',
         'App\\Http\\Requests\\UserUpdateV3Request' => __DIR__ . '/../..' . '/app/Http/Requests/UserUpdateV3Request.php',
         'App\\Http\\Requests\\UserUpdateV4Request' => __DIR__ . '/../..' . '/app/Http/Requests/UserUpdateV4Request.php',
+        'App\\Http\\Requests\\UserUpdateWorkShiftRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserUpdateWorkShiftRequest.php',
         'App\\Http\\Requests\\UserVisaHistoryCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserVisaHistoryCreateRequest.php',
         'App\\Http\\Requests\\UserVisaHistoryUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserVisaHistoryUpdateRequest.php',
         'App\\Http\\Requests\\VideoUploadRequest' => __DIR__ . '/../..' . '/app/Http/Requests/VideoUploadRequest.php',

@@ -61,7 +61,7 @@ public function create{{ $names["singular_model_name"] }}({{ $names["singular_mo
    try {
        $this->storeActivity($request, "DUMMY activity", "DUMMY description");
        return DB::transaction(function () use ($request) {
-           if (!$request->user()->hasPermissionTo('{{ $names["singular_table_name"] }}_create')) {
+           if (!auth()->user()->hasPermissionTo('{{ $names["singular_table_name"] }}_create')) {
                return response()->json([
                    "message" => "You can not perform this action"
                ], 401);
@@ -80,12 +80,12 @@ public function create{{ $names["singular_model_name"] }}({{ $names["singular_mo
 
 
 
-           $request_data["created_by"] = $request->user()->id;
-           $request_data["business_id"] = $request->user()->business_id;
+           $request_data["created_by"] = auth()->user()->id;
+           $request_data["business_id"] = auth()->user()->business_id;
 
-           if (empty($request->user()->business_id)) {
+           if (empty(auth()->user()->business_id)) {
                $request_data["business_id"] = NULL;
-               if ($request->user()->hasRole('superadmin')) {
+               if (auth()->user()->hasRole('superadmin')) {
                    $request_data["is_default"] = 1;
                }
            }

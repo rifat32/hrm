@@ -2304,6 +2304,14 @@ $payslipData
      *         @OA\Property(property="termination_reason_id", type="integer", format="int64", example="2"),
      *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
      *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
+     * * @OA\Property(property="final_paycheck_date", type="string", format="string", example="final_paycheck_date"),
+* @OA\Property(property="final_paycheck_amount", type="string", format="string", example="final_paycheck_amount"),
+* @OA\Property(property="unused_vacation_compensation_amount", type="string", format="string", example="unused_vacation_compensation_amount"),
+* @OA\Property(property="unused_sick_leave_compensation_amount", type="string", format="string", example="unused_sick_leave_compensation_amount"),
+* @OA\Property(property="severance_pay_amount", type="string", format="string", example="severance_pay_amount"),
+* @OA\Property(property="continuation_of_benefits_offered", type="string", format="string", example="continuation_of_benefits_offered"),
+* @OA\Property(property="benefits_termination_date", type="string", format="string", example="benefits_termination_date"),
+*
      *     ),
      *     @OA\Property(
      *         property="exit_interview",

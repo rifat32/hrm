@@ -60,7 +60,7 @@ public function update{{ $names["singular_model_name"] }}({{ $names["singular_mo
    try {
        $this->storeActivity($request, "DUMMY activity", "DUMMY description");
        return DB::transaction(function () use ($request) {
-           if (!$request->user()->hasPermissionTo('{{ $names["singular_table_name"] }}_update')) {
+           if (!auth()->user()->hasPermissionTo('{{ $names["singular_table_name"] }}_update')) {
                return response()->json([
                    "message" => "You can not perform this action"
                ], 401);

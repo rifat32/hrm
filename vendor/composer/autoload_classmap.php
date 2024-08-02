@@ -6,11 +6,13 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\CheckAndMigrate' => $baseDir . '/app/Console/Commands/CheckAndMigrate.php',
     'App\\Console\\Commands\\DeleteFilesScheduler' => $baseDir . '/app/Console/Commands/DeleteFilesScheduler.php',
     'App\\Console\\Commands\\HolidayRepeatScheduler' => $baseDir . '/app/Console/Commands/HolidayRepeatScheduler.php',
     'App\\Console\\Commands\\PayrunScheduler' => $baseDir . '/app/Console/Commands/PayrunScheduler.php',
     'App\\Console\\Commands\\ReminderScheduler' => $baseDir . '/app/Console/Commands/ReminderScheduler.php',
     'App\\Console\\Commands\\SalaryReminderScheduler' => $baseDir . '/app/Console/Commands/SalaryReminderScheduler.php',
+    'App\\Console\\Commands\\setup' => $baseDir . '/app/Console/Commands/setup.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
     'App\\Exports\\AttendancesExport' => $baseDir . '/app/Exports/AttendancesExport.php',
@@ -271,6 +273,8 @@ return array(
     'App\\Http\\Requests\\UserInfoUpdateRequest' => $baseDir . '/app/Http/Requests/UserInfoUpdateRequest.php',
     'App\\Http\\Requests\\UserJobHistoryCreateRequest' => $baseDir . '/app/Http/Requests/UserJobHistoryCreateRequest.php',
     'App\\Http\\Requests\\UserJobHistoryUpdateRequest' => $baseDir . '/app/Http/Requests/UserJobHistoryUpdateRequest.php',
+    'App\\Http\\Requests\\UserLetterCreateRequest' => $baseDir . '/app/Http/Requests/UserLetterCreateRequest.php',
+    'App\\Http\\Requests\\UserLetterUpdateRequest' => $baseDir . '/app/Http/Requests/UserLetterUpdateRequest.php',
     'App\\Http\\Requests\\UserNoteCreateRequest' => $baseDir . '/app/Http/Requests/UserNoteCreateRequest.php',
     'App\\Http\\Requests\\UserNoteUpdateByBusinessOwnerRequest' => $baseDir . '/app/Http/Requests/UserNoteUpdateByBusinessOwnerRequest.php',
     'App\\Http\\Requests\\UserNoteUpdateRequest' => $baseDir . '/app/Http/Requests/UserNoteUpdateRequest.php',
@@ -301,6 +305,7 @@ return array(
     'App\\Http\\Requests\\UserUpdateV2Request' => $baseDir . '/app/Http/Requests/UserUpdateV2Request.php',
     'App\\Http\\Requests\\UserUpdateV3Request' => $baseDir . '/app/Http/Requests/UserUpdateV3Request.php',
     'App\\Http\\Requests\\UserUpdateV4Request' => $baseDir . '/app/Http/Requests/UserUpdateV4Request.php',
+    'App\\Http\\Requests\\UserUpdateWorkShiftRequest' => $baseDir . '/app/Http/Requests/UserUpdateWorkShiftRequest.php',
     'App\\Http\\Requests\\UserVisaHistoryCreateRequest' => $baseDir . '/app/Http/Requests/UserVisaHistoryCreateRequest.php',
     'App\\Http\\Requests\\UserVisaHistoryUpdateRequest' => $baseDir . '/app/Http/Requests/UserVisaHistoryUpdateRequest.php',
     'App\\Http\\Requests\\VideoUploadRequest' => $baseDir . '/app/Http/Requests/VideoUploadRequest.php',

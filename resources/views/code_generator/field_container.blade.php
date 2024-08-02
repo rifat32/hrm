@@ -23,7 +23,7 @@
             <select class="form-control select2" id="validation_type" name="validation_types[]" onchange="showValidationRules(this.value, this)">
                 <option value="">Select Type</option>
                 <option value="string">String</option>
-                <option value="number">Number</option>
+                <option value="numeric">Numeric</option>
 
                 <option value="array">Array</option>
                 <option value="boolean">Boolean</option>

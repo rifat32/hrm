@@ -92,6 +92,20 @@ class LetterTemplateController extends Controller
                     ], 401);
                 }
 
+                if(!empty(auth()->user()->business_id)) {
+                    $letter_template_counts = LetterTemplate::where([
+                        "business_id" => auth()->user()->business_id
+                    ])
+                    ->count();
+
+                    if($letter_template_counts >= 20) {
+                        throw new \Exception("You have exceeded the maximum number of letter templates allowed.", 401);
+                    }
+                }
+
+
+
+
                 $request_data = $request->validated();
 
                 $request_data["is_active"] = 1;
@@ -760,17 +774,7 @@ $letter_template->save();
             }
 
 
-            $conflictingUsers = User::whereIn("letter_template_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
-            ]);
 
-            if ($conflictingUsers->isNotEmpty()) {
-                return response()->json([
-                    "message" => "Some users are associated with the specified letter templates",
-                    "conflicting_users" => $conflictingUsers
-                ], 409);
-            }
 
 
 

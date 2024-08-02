@@ -50,6 +50,43 @@ class UserExitRequest extends FormRequest
 
             'termination.date_of_termination' => 'required|date',
 
+
+
+            'termination.final_paycheck_date' => [
+                'required',
+                'string',
+            ],
+
+                'termination.final_paycheck_amount' => [
+                'required',
+                'numeric',
+            ],
+
+                'termination.unused_vacation_compensation_amount' => [
+                'required',
+                'numeric',
+            ],
+
+                'termination.unused_sick_leave_compensation_amount' => [
+                'required',
+                'numeric',
+            ],
+
+                'termination.severance_pay_amount' => [
+                'required',
+                'numeric',
+            ],
+
+                'termination.continuation_of_benefits_offered' => [
+                'required',
+                'boolean',
+            ],
+
+                'termination.benefits_termination_date' => [
+                'required',
+                'string',
+            ],
+
             'exit_interview.exit_interview_conducted' => 'required|boolean',
             'exit_interview.date_of_exit_interview' => 'nullable|date',
             'exit_interview.interviewer_name' => 'nullable|string|max:255',
@@ -58,6 +95,9 @@ class UserExitRequest extends FormRequest
             'exit_interview.attachments' => 'present|array',
             'access_revocation.email_access_revoked' => 'required|boolean',
             'access_revocation.system_access_revoked_date' => 'nullable|date',
+
+
+
         ];
     }
 
