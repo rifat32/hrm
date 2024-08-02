@@ -31,6 +31,19 @@
               "created_by"
           ];
 
+          protected $casts = [
+            @foreach ($fields->toArray() as $field)
+            @if ({{$field['type']}} == 'array')
+            '{{$field["name"]}}' => 'array',
+            @endif
+
+
+          @endforeach
+
+
+        ];
+
+
 
           @foreach ($fields->toArray() as $field)
           @if ($field['is_foreign_key'])

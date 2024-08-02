@@ -1,24 +1,3 @@
-{
-    "id": 7256,
-    "termination": {
-        "termination_type_id": 7,
-        "termination_reason_id": 10,
-        "date_of_termination": "2024-07-14",
-        "joining_date": "2024-07-01"
-    },
-    "exit_interview": {
-        "exit_interview_conducted": true,
-        "date_of_exit_interview": "2024-07-03",
-        "interviewer_name": "test",
-        "key_feedback_points": "aaa",
-        "assets_returned": true,
-        "attachments": [
-            "\/temporary_files\/1721150202_Screenshot_2024-07-14_234750.png"
-        ]
-    },
-    "access_revocations": {
-        "email_access_revoked": true,
-        "system_access_revoked_date": "2024-07-10"
-    }
-    access_revocation.email_access_revoked
-}
+{"user_id":7255,
+"issue_date":"2024-08-05","letter_content":"<h1>Thank you for applying to [JOB_TITLE]!<\/h1><p>Dear [FULL_NAME],<\/p><p>We appreciate the time you took to apply for the [JOB_TITLE] position at []. We are excited to review your application and consider you for this opportunity.<\/p><p>Your application details are as follows:<\/p><ul><li><strong>Job Title:<\/strong> [JOB_TITLE]<\/li><li><strong>Company:<\/strong> [COMPANY_NAME]<\/li><li><strong>Application Date:<\/strong> [APPLICATION_DATE]<\/li><\/ul><p>We will review your application and be in touch with you soon to discuss the next steps. If you have any questions or concerns, please don't hesitate to reach out to us at [CONTACT_EMAIL].<\/p><p>Thank you again for your interest in joining our team!<\/p><p>Best regards,<\/p><p>[COMPANY_NAME] Team<\/p>","status":"pending_approval","sign_required":1,
+"attachments":["\/temporary_files\/1722622015_Screenshot_2024-07-14_180841.png"]}

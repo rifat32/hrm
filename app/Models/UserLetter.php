@@ -22,9 +22,6 @@ class UserLetter extends Model
                     'attachments',
                     'user_id',
 
-
-
-
         "business_id",
         "created_by"
     ];
@@ -35,7 +32,10 @@ class UserLetter extends Model
 
 
 
+    protected $casts = [
+        'attachments' => 'array',
 
+    ];
 
     public function user()
     {

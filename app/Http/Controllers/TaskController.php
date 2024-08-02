@@ -11,6 +11,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\Task;
 use Carbon\Carbon;
 use Exception;
@@ -145,6 +146,23 @@ Comment::create([
     'created_by' => auth()->user()->id, // Assuming you have a $userId variable
 ]);
 
+
+$notification_description = "A task is pending for your action.";
+$notification_link = "http://example.com/tasks/1"; // Example link
+Notification::create([
+    "entity_id" => $task->id, // Assuming $task is your task object
+    "entity_name" => "Task",
+    'notification_title' => "Task Pending Notification",
+    'notification_description' => $notification_description,
+    'notification_link' => $notification_link,
+    "sender_id" => $task->created_by, // Assuming you have a variable for sender ID
+    "receiver_id" => $task->assigned_to, // Assuming $manager_id is the manager's ID
+    "business_id" => auth()->user()->business_id, // Assuming $business_id is the business ID
+    "is_system_generated" => 1,
+    "status" => "unread",
+]);
+
+
                 DB::commit();
                 return response($task, 201);
 
@@ -246,8 +264,6 @@ Comment::create([
                 $request_data = $request->validated();
 
 
-
-
                 $task_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
@@ -297,6 +313,23 @@ Comment::create([
 
                 $task->labels()->sync($request_data['labels']);
                 $task->assignees()->sync($request_data['assignees']);
+
+                $notification_description = "A task has been updated.";
+                $notification_link = "http://example.com/tasks/{$task->id}"; // Dynamic link based on task ID
+
+                Notification::create([
+                    "entity_id" => $task->id,
+                    "entity_name" => "Task",
+                    'notification_title' => "Task Update Notification",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id, // Assuming you have a variable for the updater's ID
+                    "receiver_id" => $task->assigned_to,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                ]);
+
 
                 DB::commit();
                 return response($task, 201);
@@ -907,6 +940,8 @@ Comment::create([
             }
 
             Task::destroy($existingIds);
+
+            
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

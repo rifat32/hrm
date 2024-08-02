@@ -28,6 +28,7 @@ class Leave extends Model
         "business_id",
         "created_by",
     ];
+
     public function getIsInArrearsAttribute($value)
     {
 $is_in_arrears = false;
@@ -82,7 +83,7 @@ $is_in_arrears = false;
 
             }
 
-            
+
         }
         // If leave status is not approved or it's not a paid leave type, delete arrears if any
 
