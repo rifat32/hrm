@@ -339,12 +339,11 @@ foreach ($letterTemplateVariables as $item) {
           $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $request_data = $request->validated();
 
-          $user_letter =  UserLetter::where([
+            $user_letter =  UserLetter::where([
                 "id" => $request_data["user_letter_id"]
             ])
             ->first();
 
-            
 
             $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
             return $pdf->download(("letter" . '.pdf'));
