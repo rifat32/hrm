@@ -388,6 +388,8 @@ ADD COLUMN template_variables VARCHAR(255) NULL;
 59. Import letter_templates db table and import disabled_letter_templates
 
 
+
+
 hr compliance -> 46
 
 

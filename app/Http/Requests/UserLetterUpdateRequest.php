@@ -46,14 +46,11 @@ $rules = [
             }
         },
     ],
-
     'user_id' => [
         'required',
         'numeric',
             new ValidateUser($all_manager_department_ids)
     ],
-
-
     'issue_date' => [
     'required',
     'string',

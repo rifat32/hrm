@@ -336,7 +336,7 @@ foreach ($letterTemplateVariables as $item) {
      public function downloadUserLetter(DownloadUserLetterPdfRequest $request)
      {
          try {
-            //  $this->storeActivity($request, "DUMMY activity","DUMMY description");
+          $this->storeActivity($request, "DUMMY activity","DUMMY description");
             $request_data = $request->validated();
 
           $user_letter =  UserLetter::where([
@@ -732,6 +732,7 @@ foreach ($letterTemplateVariables as $item) {
             ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);
              })
+
                 ->when(!empty($request->id), function ($query) use ($request) {
                     return $query->where('user_letters.id', $request->id);
                 })
@@ -752,7 +753,7 @@ foreach ($letterTemplateVariables as $item) {
                 })
 
                 ->when(empty($request->user_id), function ($query) use ($request) {
-                    return $query->where('user_letters.user_id', auth()->user()->id);
+                    return $query->whereNotIn('user_letters.user_id', [auth()->user()->id]);
                 },
                 function ($query) use ($request) {
                     return $query->where('user_letters.user_id', $request->user_id);
