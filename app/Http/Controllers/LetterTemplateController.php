@@ -739,7 +739,7 @@ $letter_template->save();
                  ], 401);
              }
 
-$letterTemplateVariables = $this->getLetterTemplateVariables();
+$letterTemplateVariables = $this->getLetterTemplateVariablesFunc();
 
 
             return response()->json($letterTemplateVariables, 200);

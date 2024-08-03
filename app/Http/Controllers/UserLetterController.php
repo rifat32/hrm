@@ -226,7 +226,7 @@ $letter_template = LetterTemplate::where([
 
 $template = $letter_template->template;
 
-$letterTemplateVariables = $this->getLetterTemplateVariables();
+$letterTemplateVariables = $this->getLetterTemplateVariablesFunc();
 
 foreach ($letterTemplateVariables as $item) {
     if (strpos($item, '[') !== false) {
@@ -352,6 +352,8 @@ foreach ($letterTemplateVariables as $item) {
              return $this->sendError($e, 500,$request);
          }
      }
+
+
 /**
  *
  * @OA\Post(

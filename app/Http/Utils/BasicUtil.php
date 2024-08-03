@@ -646,7 +646,7 @@ public function checkJoinAndTerminationDate($user_joining_date,$date,$terminatio
 public function getDefaultWorkShift() {
     $work_shift = WorkShift::where([
         "is_business_default" => 1,
-        "is_active",
+        "is_active" => 1,
         "is_default" => 1,
         "business_id" => auth()->user()->business_id,
     ])
@@ -744,7 +744,7 @@ return $employment_status;
 }
 
 
-public function getLetterTemplateVariables () {
+public function getLetterTemplateVariablesFunc () {
     $letterTemplateVariables = [
         'PERSONAL DETAILS',
         '[FULL_NAME]',
