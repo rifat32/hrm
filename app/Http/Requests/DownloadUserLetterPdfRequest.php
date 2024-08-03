@@ -52,7 +52,7 @@ class DownloadUserLetterPdfRequest extends FormRequest
                         new ValidateUser($all_manager_department_ids)
                 ],
 
-                        "file_name" => "required|string"
+
         ];
 
         return $rules;

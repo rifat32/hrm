@@ -344,6 +344,8 @@ foreach ($letterTemplateVariables as $item) {
             ])
             ->first();
 
+            
+
             $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
             return $pdf->download(("letter" . '.pdf'));
 
