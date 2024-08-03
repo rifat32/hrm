@@ -84,7 +84,7 @@ use App\Http\Controllers\UserLetterController;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider jistoryin a group which
+| routes are loaded by the RouteServiceProvider jistoryin a group which x
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
@@ -125,6 +125,7 @@ Route::patch('/health', function () {
 Route::post('/v1.0/files/single-file-upload', [FileManagementController::class, "createFileSingle"]);
 
 Route::post('/v1.0/files/multiple-file-upload', [FileManagementController::class, "createFileMultiple"]);
+
 
 
 
@@ -171,6 +172,7 @@ Route::post('/auth/check/business/email', [AuthController::class, "checkBusiness
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
 
 Route::middleware(['auth:api'])->group(function () {
+
 
 Route::post('/v2.0/files/single-file-upload', [FileManagementController::class, "createFileSingleV2"]);
 Route::post('/v2.0/files/multiple-file-upload', [FileManagementController::class, "createFileMultipleV2"]);
@@ -653,10 +655,15 @@ Route::delete('/v1.0/user-education-histories/{ids}', [UserEducationHistoryContr
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/user-letters', [UserLetterController::class, "createUserLetter"]);
+Route::post('/v1.0/user-letters/generate', [UserLetterController::class, "generateUserLetter"]);
+
+Route::post('/v1.0/user-letters/download', [UserLetterController::class, "downloadUserLetter"]);
+Route::post('/v1.0/user-letters/send', [UserLetterController::class, "sendUserLetterEmail"]);
+
+
 Route::put('/v1.0/user-letters', [UserLetterController::class, "updateUserLetter"]);
 Route::get('/v1.0/user-letters', [UserLetterController::class, "getUserLetters"]);
 Route::delete('/v1.0/user-letters/{ids}', [UserLetterController::class, "deleteUserLettersByIds"]);
-
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1234,10 +1241,10 @@ Route::post('/v1.0/letter-templates', [LetterTemplateController::class, "createL
 Route::put('/v1.0/letter-templates', [LetterTemplateController::class, "updateLetterTemplate"]);
 Route::put('/v1.0/letter-templates/toggle-active', [LetterTemplateController::class, "toggleActiveLetterTemplate"]);
 Route::get('/v1.0/letter-templates', [LetterTemplateController::class, "getLetterTemplates"]);
-Route::get('/v1.0/letter-templates/{id}', [LetterTemplateController::class, "getLetterTemplateById"]);
+
 Route::delete('/v1.0/letter-templates/{ids}', [LetterTemplateController::class, "deleteLetterTemplatesByIds"]);
 
-
+Route::get('/v1.0/letter-template-variables', [LetterTemplateController::class, "getLetterTemplateVariables"]);
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end letter templates management section

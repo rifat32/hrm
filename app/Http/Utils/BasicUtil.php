@@ -744,7 +744,44 @@ return $employment_status;
 }
 
 
+public function getLetterTemplateVariables () {
+    $letterTemplateVariables = [
+        'PERSONAL DETAILS',
+        '[FULL_NAME]',
+        '[NI_NUMBER]',
+        '[DATE_OF_BIRTH]',
+        '[GENDER]',
+        '[PHONE]',
+        '[EMAIL]',
+        'EMPLOYMENT DETAILS',
+        '[DESIGNATION]',
+        '[EMPLOYMENT_STATUS]',
+        '[JOINING_DATE]',
+        '[SALARY_PER_ANNUM]',
+        '[WEEKLY_CONTRACTUAL_HOURS]',
+        '[MINIMUM_WORKING_DAYS_PER_WEEK]',
+        '[OVERTIME_RATE]',
+        'ADDRESS',
+        '[ADDRESS_LINE_1]',
+        '[ADDRESS_LINE_2]',
+        '[CITY]',
+        '[POSTCODE]',
+        '[COUNTRY]',
+        'BANK DETAILS',
+        '[SORT_CODE]',
+        '[ACCOUNT_NUMBER]',
+        '[ACCOUNT_NAME]',
+        '[BANK_NAME]',
+    ];
 
+
+
+
+
+
+
+    return $letterTemplateVariables;
+}
 
 
 }

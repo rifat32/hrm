@@ -12,24 +12,32 @@
 
 namespace App\Http\Controllers;
 
+
+use App\Http\Requests\DownloadUserLetterPdfRequest;
 use App\Http\Requests\UserLetterCreateRequest;
 use App\Http\Requests\UserLetterUpdateRequest;
 use App\Http\Requests\GetIdRequest;
+use App\Http\Requests\UserLetterGenerateRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Mail\UserLetterMail;
 use App\Models\UserLetter;
 use App\Models\DisabledUserLetter;
+use App\Models\LetterTemplate;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use PDF;
 
 class UserLetterController extends Controller
 {
 
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
 
 
     /**
@@ -133,6 +141,301 @@ class UserLetterController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/user-letters/generate",
+     *      operationId="generateUserLetter",
+     *      tags={"user_letters"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to generate user letters",
+     *      description="This method is to generate user letters",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     * @OA\Property(property="letter_template_id", type="string", format="string", example="sign_required"),
+     * @OA\Property(property="user_id", type="string", format="string", example="user_id"),
+
+     *
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function generateUserLetter(UserLetterGenerateRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('user_letter_create')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+
+
+                 $employee = User::where([
+                    "id" =>$request_data["user_id"]
+                 ])
+                 ->first();
+
+$letter_template = LetterTemplate::where([
+    "id" =>$request_data["letter_template_id"]
+])->first();
+
+$template = $letter_template->template;
+
+$letterTemplateVariables = $this->getLetterTemplateVariables();
+
+foreach ($letterTemplateVariables as $item) {
+    if (strpos($item, '[') !== false) {
+        // Convert the placeholder to lowercase and remove square brackets
+        $variableName = strtolower(str_replace(['[', ']'], '', $item));
+
+        // Replace [FULL_NAME] with the concatenated full name
+    if ($item == "[FULL_NAME]") {
+        $fullName = trim($employee["first_Name"] . ' ' . $employee["middle_Name"] . ' ' . $employee["last_Name"]);
+        $template = str_replace($item, !empty($fullName) ? $fullName : '--', $template);
+    }
+    // Replace [DESIGNATION] with the designation name if it exists; otherwise, use "--"
+    else if ($item == "[DESIGNATION]") {
+        $designation = isset($employee->designation->name) ? $employee->designation->name : '--';
+        $template = str_replace($item, $designation, $template);
+    }
+    // Replace [EMPLOYMENT_STATUS] with the employment status name if it exists; otherwise, use "--"
+    else if ($item == "[EMPLOYMENT_STATUS]") {
+        $employmentStatus = isset($employee->employment_status->name) ? $employee->employment_status->name : '--';
+        $template = str_replace($item, $employmentStatus, $template);
+    }
+    // Replace [BANK_NAME] with the bank name if it exists; otherwise, use "--"
+    else if ($item == "[BANK_NAME]") {
+        $bankName = isset($employee->bank->name) ? $employee->bank->name : '--';
+        $template = str_replace($item, $bankName, $template);
+    }
+    // Replace [JOINING_DATE] with the formatted joining date if it exists; otherwise, use "--"
+    else if ($item == "[JOINING_DATE]") {
+        $joiningDate = isset($employee["joining_date"]) ? Carbon::parse($employee["joining_date"])->format("d-m-Y") : '--';
+        $template = str_replace($item, $joiningDate, $template);
+    }
+
+        else {
+            $template = str_replace($item, $employee[$variableName], $template);
+        }
+
+    }
+}
+
+
+
+                 return response($template, 201);
+             });
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+  /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/user-letters/download",
+     *      operationId="downloadUserLetter",
+     *      tags={"user_letters"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to download pdf",
+     *      description="This method is to download pdf",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"first_Name"},
+     *             @OA\Property(property="user_letter_id", type="string", format="string",example="user_letter_id"),
+*             @OA\Property(property="user_id", type="string", format="string",example="user_id"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function downloadUserLetter(DownloadUserLetterPdfRequest $request)
+     {
+         try {
+            //  $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $request_data = $request->validated();
+
+          $user_letter =  UserLetter::where([
+                "id" => $request_data["user_letter_id"]
+            ])
+            ->first();
+
+            $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
+            return $pdf->download(("letter" . '.pdf'));
+
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500,$request);
+         }
+     }
+/**
+ *
+ * @OA\Post(
+ *      path="/v1.0/user-letters/send",
+ *      operationId="sendUserLetterEmail",
+ *      tags={"user_letters"},
+ *       security={
+ *           {"bearerAuth": {}}
+ *       },
+ *      summary="This method is to send pdf via email",
+ *      description="This method is to send pdf via email",
+ *
+ *  @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *            required={"first_Name"},
+ *             @OA\Property(property="user_letter_id", type="string", format="string",example="user_letter_id"),
+ *             @OA\Property(property="user_id", type="string", format="string",example="user_id"),
+ *         ),
+ *      ),
+ *      @OA\Response(
+ *          response=200,
+ *          description="Successful operation",
+ *       @OA\JsonContent(),
+ *       ),
+ *      @OA\Response(
+ *          response=401,
+ *          description="Unauthenticated",
+ * @OA\JsonContent(),
+ *      ),
+ *        @OA\Response(
+ *          response=422,
+ *          description="Unprocessable Content",
+ *    @OA\JsonContent(),
+ *      ),
+ *      @OA\Response(
+ *          response=403,
+ *          description="Forbidden",
+ *   @OA\JsonContent()
+ * ),
+ *  * @OA\Response(
+ *      response=400,
+ *      description="Bad Request",
+ *   *@OA\JsonContent()
+ *   ),
+ * @OA\Response(
+ *      response=404,
+ *      description="Not found",
+ *   *@OA\JsonContent()
+ *   )
+ *      )
+ *     )
+ */
+
+
+ public function sendUserLetterEmail(DownloadUserLetterPdfRequest $request)
+ {
+     try {
+         $request_data = $request->validated();
+
+         $user_letter = UserLetter::where([
+             "id" => $request_data["user_letter_id"]
+         ])->firstOrFail();
+
+         $employee = User::where([
+            "id" => $request_data["user_id"]
+         ])
+         ->first();
+
+         // Generate the PDF
+         $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
+
+         // Send the email
+         Mail::to($employee->email) // Change this to the actual recipient's email
+             ->send(new UserLetterMail($pdf));
+
+         return response()->json(['message' => 'Email sent successfully.'], 200);
+
+     } catch (Exception $e) {
+         return $this->sendError($e, 500, $request);
+     }
+ }
+
+
     /**
      *
      * @OA\Put(

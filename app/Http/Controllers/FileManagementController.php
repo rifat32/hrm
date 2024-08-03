@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Requests\MultipleFileUploadRequestV2;
 use App\Http\Requests\SingleFileUploadRequest;
@@ -13,6 +14,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+
 
 class FileManagementController extends Controller
 {
@@ -629,9 +631,6 @@ if (!in_array($folder, $locations)) {
         }
 
     }
-
-
-
 
 
 

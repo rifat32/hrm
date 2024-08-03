@@ -9,6 +9,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LetterTemplateCreateRequest;
 use App\Http\Requests\LetterTemplateUpdateRequest;
 use App\Http\Requests\GetIdRequest;
+use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 
 class LetterTemplateController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
     /**
      *
      * @OA\Post(
@@ -675,6 +676,79 @@ $letter_template->save();
             return $this->sendError($e, 500, $request);
         }
     }
+
+  /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/letter-template-variables",
+     *      operationId="getLetterTemplateVariables",
+     *      tags={"letter_templates"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+
+
+
+     *      summary="This method is to get letter templates  ",
+     *      description="This method is to get letter templates ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getLetterTemplateVariables(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('letter_template_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+$letterTemplateVariables = $this->getLetterTemplateVariables();
+
+
+            return response()->json($letterTemplateVariables, 200);
+
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 

@@ -18,14 +18,8 @@ class CreateUsersTable extends Migration
             $table->string('first_Name');
             $table->string('middle_Name')->nullable();
             $table->string('last_Name');
-
-
             $table->string('NI_number')->nullable();
-
             $table->boolean('pension_eligible')->nullable();
-
-
-
             $table->string('user_name')->nullable();
 
             $table->json('emergency_contact_details')->nullable();

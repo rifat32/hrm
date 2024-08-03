@@ -38,7 +38,7 @@ $rules = [
         'numeric',
         function ($attribute, $value, $fail) {
             $exists = UserLetter::where('id', $value)
-                ->where('user_education_histories.user_id', '=', $this->user_id)
+                ->where('user_letters.user_id', '=', $this->user_id)
                 ->exists();
 
             if (!$exists) {
@@ -57,61 +57,26 @@ $rules = [
     'issue_date' => [
     'required',
     'string',
-
-
-
-
-
-
-
 ],
 
     'status' => [
     'required',
     'string',
-
-
-
-
-
-
-
 ],
 
     'letter_content' => [
     'required',
     'string',
-
-
-
-
-
-
-
 ],
 
     'sign_required' => [
     'required',
     'boolean',
-
-
-
-
-
-
-
 ],
 
     'attachments' => [
     'present',
     'array',
-
-
-
-
-
-
-
 ],
 
 
