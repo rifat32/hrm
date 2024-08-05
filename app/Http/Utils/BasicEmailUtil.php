@@ -55,7 +55,7 @@ trait BasicEmailUtil
 
     public function storeEmailTemplateIfNotExists($type,$business_id,$is_default,$customForBusiness) {
 
-        $templateString = view(('email' . $type))->render();
+        $templateString = view(('email.' . $type))->render();
         // Now you can use the convertBladeToString method I provided earlier
         $template = $this->convertBladeToString($templateString);
         $templateVariables = $this->extractVariables($template);

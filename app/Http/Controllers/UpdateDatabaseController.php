@@ -6,6 +6,7 @@ use App\Http\Utils\BasicEmailUtil;
 use App\Models\Business;
 use App\Models\EmailTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UpdateDatabaseController extends Controller
 {

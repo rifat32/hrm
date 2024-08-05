@@ -5,127 +5,71 @@
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
     <title>Reset Password Email Template</title>
     <meta name="description" content="Reset Password Email Template.">
-    <style type="text/css">
-        a:hover {
-            text-decoration: underline !important;
-        }
-    </style>
 </head>
 
-<body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; background-color: #f2f3f8;" leftmargin="0">
-    <table cellspacing="0" border="0" cellpadding="0" width="100%" bgcolor="#f2f3f8"
-        style="@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;">
+<body>
+    <table cellspacing="0" cellpadding="0" width="100%">
         <tr>
             <td>
-                <table style="background-color: #f2f3f8; max-width:670px;  margin:0 auto;" width="100%" border="0"
-                    align="center" cellpadding="0" cellspacing="0">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width:670px; margin:0 auto;">
                     <tr>
                         <td>
-                            <table width="95%" border="0" align="center" cellpadding="0" cellspacing="0"
-                                style="max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);">
+                            <table width="95%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td style="height:40px;">&nbsp;</td>
                                 </tr>
                                 <tr>
-
                                     <td style="padding:0 35px;">
-                                        <h1
-                                            style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                            Dear [FULL_NAME] ,</h1>
-                                        <span
-                                            style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
-
+                                        <h1 style="margin:0; font-size:32px;">
+                                            Dear [FULL_NAME],
+                                        </h1>
                                     </td>
                                 </tr>
                                 <tr>
-
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                        </p>
-
-                                    </td>
-                                </tr>
-                                <tr>
-
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             Congratulations on successfully creating your business account with [APP_NAME]! We're excited to have you on board.
-
                                         </p>
-
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                        </p>
-
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             To ensure the security of your account, please set a password by clicking on the following link:
                                         </p>
-
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                        </p>
-
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             [PASSWORD_RESET_LINK]
                                         </p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                        </p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             If you did not create an account or have any questions, please contact our support team at support@yourbusinessname.com.
                                         </p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                        </p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             Thank you for choosing YourBusinessName. We look forward to serving you.
                                         </p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                        </p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             Best Regards,
                                         </p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                        <p style="font-size:15px; line-height:24px; margin:0;">
                                             [APP_NAME] Team
                                         </p>
                                     </td>
@@ -133,9 +77,9 @@
                                 <tr>
                                     <td style="height:40px;">&nbsp;</td>
                                 </tr>
-
                             </table>
                         </td>
+                    </tr>
                     <tr>
                         <td style="height:20px;">&nbsp;</td>
                     </tr>
@@ -147,4 +91,5 @@
         </tr>
     </table>
 </body>
+
 </html>
