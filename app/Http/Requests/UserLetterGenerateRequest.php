@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Rules\ValidateLetterTemplate;
 use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserLetterGenerateRequest extends FormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
