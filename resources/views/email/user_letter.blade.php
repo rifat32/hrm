@@ -41,11 +41,11 @@
                 Dear User,<br><br>
                 Please find the attached letter. If you have any questions or need further assistance, do not hesitate to contact us.<br><br>
                 Best regards,<br>
-                {{auth()->user()-business->name}}
+                {{auth()->user()->business->name}}
             </p>
         </div>
         <div class="footer">
-            &copy; {{ date('Y') }}  {{auth()->user()-business->name}}. All rights reserved.
+            &copy; {{ date('Y') }}  {{auth()->user()->business->name}}. All rights reserved.
         </div>
     </div>
 </body>

@@ -727,7 +727,12 @@ foreach ($letterTemplateVariables as $item) {
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $user_letters = UserLetter::where('user_letters.business_id', auth()->user()->business_id)
+            $user_letters = UserLetter::with([
+                "user" => function($query) {
+                   $query->select("users.id","users.first_Name","users.middle_Name","users.last_Name");
+                }
+            ])
+            ->where('user_letters.business_id', auth()->user()->business_id)
 
 
             ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
