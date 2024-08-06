@@ -30,9 +30,15 @@ class UserLetterMail extends Mailable
      */
     public function build()
     {
-        return $this->view('email.user_letter')
-                    ->attachData($this->pdf->output(), 'letter.pdf', [
-                        'mime' => 'application/pdf',
-                    ]);
+
+        $subject = "Letter from " . (auth()->user()->business?(auth()->user()->business->name . " HRM"):env("APP_NAME"));
+
+        return $this
+        ->subject($subject)
+        ->view('email.user_letter')
+        ->attachData($this->pdf->output(), 'letter.pdf', [
+        'mime' => 'application/pdf',
+        ]);
+
     }
 }

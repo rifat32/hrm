@@ -91,9 +91,8 @@ class JobApplicationReceivedMail extends Mailable
 
 
 
-
-         return $this->subject(("Thank you for applying to" . $job_listing->title ."!"))->view('email.dynamic_mail', ["html_content" => $html_content]);
-
+         $subject = "Job application received from " . ($business?($business->name . " HRM"):env("APP_NAME"));
+         return $this->subject($subject)->view('email.dynamic_mail', ["html_content" => $html_content]);
 
         }
 

@@ -82,9 +82,8 @@ class ResetPasswordMail extends Mailable
         $html_content =  str_replace("[RESET_PASSWORD_LINK]", ($front_end_url . '/auth/change-password?token=' . $this->user->resetPasswordToken), $html_content);
 
 
-
-
-        return $this->subject(("Reset your password."))->view('email.dynamic_mail', ["html_content" => $html_content]);
+        $subject = "Reset password mail from " . $this->user->business?($this->user->business->name . " HRM"):env("APP_NAME");
+        return $this->subject($subject)->view('email.dynamic_mail', ["html_content" => $html_content]);
 
 
 

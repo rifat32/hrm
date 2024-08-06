@@ -5101,7 +5101,6 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1,
                                             "number_of_employees_allowed": 20
                                         }
                                     }
@@ -5917,7 +5916,6 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1,
                                             "number_of_employees_allowed": 1
                                         }
                                     }
@@ -6028,7 +6026,6 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1,
                                             "number_of_employees_allowed": 1
                                         }
                                     }
@@ -6155,7 +6152,6 @@
                                                 "/c"
                                             ],
                                             "currency": "BDT",
-                                            "flexible_rota_enabled": 1,
                                             "number_of_employees_allowed": 10
                                         }
                                     }
@@ -22059,6 +22055,71 @@
                 ]
             }
         },
+        "/v1.0/letter-template-variables": {
+            "get": {
+                "tags": [
+                    "letter_templates"
+                ],
+                "summary": "This method is to get letter templates  ",
+                "description": "This method is to get letter templates ",
+                "operationId": "getLetterTemplateVariables",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/letter-templates/{ids}": {
             "delete": {
                 "tags": [
@@ -37530,6 +37591,13 @@
                         "description": "is_single_search",
                         "required": true,
                         "example": "ASC"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "user_id",
+                        "required": true,
+                        "example": "ASC"
                     }
                 ],
                 "responses": {
@@ -37790,6 +37858,273 @@
                     },
                     "404": {
                         "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-letters/generate": {
+            "post": {
+                "tags": [
+                    "user_letters"
+                ],
+                "summary": "This method is to generate user letters",
+                "description": "This method is to generate user letters",
+                "operationId": "generateUserLetter",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "letter_template_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "sign_required"
+                                    },
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "user_id"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-letters/download": {
+            "post": {
+                "tags": [
+                    "user_letters"
+                ],
+                "summary": "This method is to download pdf",
+                "description": "This method is to download pdf",
+                "operationId": "downloadUserLetter",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_Name"
+                                ],
+                                "properties": {
+                                    "user_letter_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "user_letter_id"
+                                    },
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "user_id"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-letters/send": {
+            "post": {
+                "tags": [
+                    "user_letters"
+                ],
+                "summary": "This method is to send pdf via email",
+                "description": "This method is to send pdf via email",
+                "operationId": "sendUserLetterEmail",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_Name"
+                                ],
+                                "properties": {
+                                    "user_letter_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "user_letter_id"
+                                    },
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "user_id"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "content": {
                             "application/json": {
                                 "schema": {}
@@ -40032,6 +40367,41 @@
                                                 "type": "string",
                                                 "format": "date",
                                                 "example": "2022-01-01"
+                                            },
+                                            "final_paycheck_date": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "final_paycheck_date"
+                                            },
+                                            "final_paycheck_amount": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "final_paycheck_amount"
+                                            },
+                                            "unused_vacation_compensation_amount": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "unused_vacation_compensation_amount"
+                                            },
+                                            "unused_sick_leave_compensation_amount": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "unused_sick_leave_compensation_amount"
+                                            },
+                                            "severance_pay_amount": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "severance_pay_amount"
+                                            },
+                                            "continuation_of_benefits_offered": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "continuation_of_benefits_offered"
+                                            },
+                                            "benefits_termination_date": {
+                                                "type": "string",
+                                                "format": "string",
+                                                "example": "benefits_termination_date"
                                             }
                                         },
                                         "type": "object"

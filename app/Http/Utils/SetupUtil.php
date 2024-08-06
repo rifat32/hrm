@@ -16,7 +16,7 @@ use BasicEmailUtil;
             $this->prepareEmailTemplateData("send_password_mail",NULL),
             $this->prepareEmailTemplateData("job_application_received_mail", NULL),
         ];
-
+        error_log("template creating 4");
         EmailTemplate::insert($email_templates);
 
 

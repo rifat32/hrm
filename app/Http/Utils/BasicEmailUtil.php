@@ -60,7 +60,7 @@ trait BasicEmailUtil
         $template = $this->convertBladeToString($templateString);
         $templateVariables = $this->extractVariables($template);
 
-
+error_log("template creating");
         $email_content = EmailTemplate::create(
             [
                 "name" => "",
@@ -97,7 +97,7 @@ trait BasicEmailUtil
                         "updated_at" => now(),
                     ];
                 });
-
+                error_log("template creating 2");
                 EmailTemplate::insert($email_templates->toArray());
             }
 

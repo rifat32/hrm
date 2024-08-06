@@ -68,8 +68,10 @@ class EmailVerificationMail extends Mailable
         $html_content =  str_replace("[APP_NAME]", env("APP_NAME"), $html_content);
 
 
+        $subject = "Email verification from " . ($this->user->business?($this->user->business->name . " HRM"):env("APP_NAME"));
+        return $this->subject($subject)->view('email.dynamic_mail', ["html_content" => $html_content]);
 
-        return $this->subject(("Welcome to " . env("APP_NAME") .  " - Please verify your email"))->view('email.dynamic_mail', ["html_content" => $html_content]);
+
 
         // return $this->subject(("Welcome to " . env("APP_NAME") .  " - Please verify your email"))->view('email.verify_mail',["html_content"=>$html_content]);
 

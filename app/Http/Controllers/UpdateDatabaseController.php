@@ -39,6 +39,8 @@ class UpdateDatabaseController extends Controller
         // Combine the two collections
         $email_templates = $email_templates->merge($business_email_templates);
 
+
+        error_log("template creating 1");
         // Insert all email templates at once
         EmailTemplate::insert($email_templates->toArray());
     }

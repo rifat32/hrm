@@ -63,9 +63,10 @@ class BusinessWelcomeMail extends Mailable
 
 
 
+        $subject = "Welcome from " . ($this->user->business?($this->user->business->name . " HRM"):env("APP_NAME"));
+        return $this->subject($subject)->view('email.dynamic_mail', ["html_content" => $html_content]);
 
-        return $this->subject(( "Reset Password email
-        From " . env("APP_NAME") ))->view('email.dynamic_mail',["html_content"=>$html_content]);
+
 
 
 

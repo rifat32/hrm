@@ -93,18 +93,18 @@ trait BusinessUtil
         ])->get();
 
         // Transform the collection to include only the necessary fields for insertion
-        $transformed_templates = $email_templates->map(function ($template) {
+        $transformed_templates = $email_templates->map(function ($template) use($business_id) {
             return [
                 "name" => $template->name,
                 "type" => $template->type,
-                "is_active" => $template->is_active,
-                "wrapper_id" => $template->wrapper_id,
-                "is_default" => $template->is_default,
-                "business_id" => $template->business_id,
+                "is_active" => 1,
+                "wrapper_id" => 1,
+                "is_default" => 0,
+                "business_id" => $business_id,
                 "template" => $template->template,
                 "template_variables" =>  implode(',', $template->template_variables),
-                "created_at" => $template->created_at,
-                "updated_at" => $template->updated_at,
+                "created_at" => now(),
+                "updated_at" => now(),
             ];
         });
 
@@ -525,7 +525,7 @@ trait BusinessUtil
 
         $this->loadDefaultPaymentDateSetting($business);
 
-        $this->loadDefaultEmailTemplate($business);
+        // $this->loadDefaultEmailTemplate($business);
     }
 
 

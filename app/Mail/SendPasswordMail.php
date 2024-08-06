@@ -76,11 +76,9 @@ class SendPasswordMail extends Mailable
 
 
 
-        return $this->subject(("Welcome to " . env("APP_NAME") .  " - Your Password"))->view('email.dynamic_mail',["html_content"=>$html_content]);
 
-        // return $this->subject(("Welcome to " . env("APP_NAME") .  " - Please verify your email"))->view('email.send_password_mail',["html_content"=>$html_content]);
-
-
+        $subject = "Your Password from " . ($this->user->business?($this->user->business->name . " HRM"):env("APP_NAME"));
+        return $this->subject($subject)->view('email.dynamic_mail', ["html_content" => $html_content]);
 
 
 
