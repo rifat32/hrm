@@ -49,67 +49,90 @@ class UpdateDatabaseController extends Controller
     {
 
 
-$i = 3;
+        $i = 5;
 
 
 
-for ($i; $i <= 100; $i++) {
-    // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
-   if ($i==1) {
-    $this->storeEmailTemplates();
-   }
-    // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-    if ($i==2) {
-        DB::statement('
-        DO $$
+        for ($i; $i <= 10; $i++) {
+            // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 1) {
+                $this->storeEmailTemplates();
+            }
+            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 2) {
+                DB::statement("
+        CREATE PROCEDURE AddColumnIfNotExists()
         BEGIN
             IF NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE table_name = \'businesses\'
-                AND column_name = \'number_of_employees_allowed\'
-            ) THEN
+                SELECT *
+                FROM information_schema.COLUMNS
+                WHERE TABLE_NAME = 'businesses'
+                AND COLUMN_NAME = 'number_of_employees_allowed'
+            )
+            THEN
                 ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0;
             END IF;
-        END $$;
-    ');
-       }
-}
-    // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
-    if ($i==3) {
+        END;
+    ");
 
-        DB::statement('ALTER TABLE disabled_employment_statuses DROP FOREIGN KEY disabled_employment_statuses_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_setting_leave_types DROP FOREIGN KEY disabled_setting_leave_types_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_job_platforms DROP FOREIGN KEY disabled_job_platforms_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_job_types DROP FOREIGN KEY disabled_job_types_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_work_locations DROP FOREIGN KEY disabled_work_locations_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_recruitment_processes DROP FOREIGN KEY disabled_recruitment_processes_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_banks DROP FOREIGN KEY disabled_banks_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_termination_types DROP FOREIGN KEY disabled_termination_types_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_termination_types DROP FOREIGN KEY disabled_termination_types_business_id_foreign');
-        DB::statement('ALTER TABLE disabled_termination_reasons DROP FOREIGN KEY disabled_termination_reasons_business_id_foreign');
+                DB::statement("CALL AddColumnIfNotExists();");
+                DB::statement("DROP PROCEDURE AddColumnIfNotExists;");
+            }
+
+               // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
+        if ($i == 3) {
+
+            DB::statement('ALTER TABLE disabled_employment_statuses DROP FOREIGN KEY disabled_employment_statuses_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_setting_leave_types DROP FOREIGN KEY disabled_setting_leave_types_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_job_platforms DROP FOREIGN KEY disabled_job_platforms_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_job_types DROP FOREIGN KEY disabled_job_types_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_work_locations DROP FOREIGN KEY disabled_work_locations_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_recruitment_processes DROP FOREIGN KEY disabled_recruitment_processes_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_banks DROP FOREIGN KEY disabled_banks_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_termination_types DROP FOREIGN KEY disabled_termination_types_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_termination_types DROP FOREIGN KEY disabled_termination_types_business_id_foreign');
+            DB::statement('ALTER TABLE disabled_termination_reasons DROP FOREIGN KEY disabled_termination_reasons_business_id_foreign');
 
 
 
 
-        DB::statement('ALTER TABLE disabled_employment_statuses ADD CONSTRAINT disabled_employment_statuses_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_setting_leave_types ADD CONSTRAINT disabled_setting_leave_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_job_platforms ADD CONSTRAINT disabled_job_platforms_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_job_types ADD CONSTRAINT disabled_job_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_work_locations ADD CONSTRAINT disabled_work_locations_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_recruitment_processes ADD CONSTRAINT disabled_recruitment_processes_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_banks ADD CONSTRAINT disabled_banks_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_termination_types ADD CONSTRAINT disabled_termination_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        DB::statement('ALTER TABLE disabled_termination_reasons ADD CONSTRAINT disabled_termination_reasons_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_employment_statuses ADD CONSTRAINT disabled_employment_statuses_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_setting_leave_types ADD CONSTRAINT disabled_setting_leave_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_job_platforms ADD CONSTRAINT disabled_job_platforms_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_job_types ADD CONSTRAINT disabled_job_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_work_locations ADD CONSTRAINT disabled_work_locations_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_recruitment_processes ADD CONSTRAINT disabled_recruitment_processes_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_banks ADD CONSTRAINT disabled_banks_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_termination_types ADD CONSTRAINT disabled_termination_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+            DB::statement('ALTER TABLE disabled_termination_reasons ADD CONSTRAINT disabled_termination_reasons_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+        }
 
-       }
+        if ($i == 4) {
+
+            // Drop the existing foreign key constraint
+            DB::statement('
+ALTER TABLE letter_templates
+DROP FOREIGN KEY letter_templates_business_id_foreign;
+');
+
+            // Modify the column to be nullable
+            DB::statement('
+ALTER TABLE letter_templates
+MODIFY COLUMN business_id BIGINT UNSIGNED NULL;
+');
+
+            // Re-add the foreign key constraint
+            DB::statement('
+ALTER TABLE letter_templates
+ADD CONSTRAINT letter_templates_business_id_foreign
+FOREIGN KEY (business_id) REFERENCES businesses(id)
+ON DELETE CASCADE;
+');
+        }
+
+        }
 
 
         return "ok";
     }
-
-
-
-
-
 }

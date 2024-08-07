@@ -25,8 +25,10 @@ class CreateLetterTemplatesTable extends Migration
             $table->boolean('is_default')->default(false);
 
             $table->foreignId('business_id')
+            ->nullable() // Make the column nullable
             ->constrained('businesses')
             ->onDelete('cascade');
+
 
             $table->unsignedBigInteger("created_by");
             $table->softDeletes();
