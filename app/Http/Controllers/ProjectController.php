@@ -16,6 +16,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\AttendanceProject;
 use App\Models\Department;
 use App\Models\EmployeeProjectHistory;
+use App\Models\Notification;
 use App\Models\Project;
 use App\Models\TaskCategory;
 use App\Models\User;
@@ -377,6 +378,31 @@ class ProjectController extends Controller
 
             $project->users()->attach($request_data['users']);
 
+
+            $notification_data = collect($request_data['users'])->map(function($user_id) use($project) {
+
+                $notification_description = "You have been assigned to a project.";
+                $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
+                return [
+                    "entity_id" => $project->id,
+                    "entity_name" => "Project",
+                    'notification_title' => "Project Assignment Notification",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id, // Assuming you have a variable for the assigner's ID
+                    "receiver_id" => $user_id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            });
+
+            Notification::insert($notification_data->toArray());
+
+
+
             DB::commit();
             return response($project, 201);
         } catch (Exception $e) {
@@ -521,6 +547,28 @@ class ProjectController extends Controller
 
 
             $project->users()->detach($request_data['users']);
+
+            $notification_data = collect($request_data['users'])->map(function($user_id) use($project) {
+
+                $notification_description = "You have been removed from a project.";
+                $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
+                return [
+                    "entity_id" => $project->id,
+                    "entity_name" => "Project",
+                    'notification_title' => "Project Deassignment Notification",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id, // Assuming you have a variable for the deassigner's ID
+                    "receiver_id" => $user_id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            });
+
+            Notification::insert($notification_data->toArray());
 
             DB::commit();
             return response($project, 201);
@@ -688,6 +736,27 @@ class ProjectController extends Controller
             $user->projects()->attach($request_data['projects']);
 
 
+            $notification_data = collect($request_data['projects'])->map(function($project_id) use($user) {
+
+                $notification_description = "You have been assigned to a project.";
+                $notification_link = "http://example.com/projects/{$project_id->id}"; // Dynamic link based on project ID
+                return [
+                    "entity_id" => $project_id,
+                    "entity_name" => "Project",
+                    'notification_title' => "Project Deassignment Notification",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id, // Assuming you have a variable for the deassigner's ID
+                    "receiver_id" => $user->id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            });
+
+            Notification::insert($notification_data->toArray());
 
             DB::commit();
 
@@ -819,6 +888,28 @@ class ProjectController extends Controller
 
 
             $user->projects()->detach($request_data['projects']);
+
+            $notification_data = collect($request_data['projects'])->map(function($project_id) use($user) {
+
+                $notification_description = "You have been removed from a project.";
+                $notification_link = "http://example.com/projects/{$project_id->id}"; // Dynamic link based on project ID
+                return [
+                    "entity_id" => $project_id,
+                    "entity_name" => "Project",
+                    'notification_title' => "Project Deassignment Notification",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id, // Assuming you have a variable for the deassigner's ID
+                    "receiver_id" => $user->id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            });
+
+            Notification::insert($notification_data->toArray());
             DB::commit();
 
             return response($user, 201);
