@@ -1585,7 +1585,6 @@ Route::post('/v1.0/task-categories', [TaskCategoryController::class, "createTask
 Route::put('/v1.0/task-categories', [TaskCategoryController::class, "updateTaskCategory"]);
 Route::put('/v1.0/task-categories/position', [TaskCategoryController::class, "updateTaskCategory"]);
 
-
 Route::get('/v1.0/task-categories', [TaskCategoryController::class, "getTaskCategories"]);
 Route::get('/v2.0/task-categories', [TaskCategoryController::class, "getTaskCategoriesV2"]);
 
@@ -1664,20 +1663,6 @@ Route::delete('/v1.0/comments/{ids}', [CommentController::class, "deleteComments
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end comment  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

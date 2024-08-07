@@ -9,6 +9,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -34,20 +35,20 @@ class CommentController extends Controller
      *         @OA\JsonContent(
 
 
- *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
- *     @OA\Property(property="attachments", type="array", @OA\Items(type="string")),
- *     @OA\Property(property="status", type="string", format="string", example="open", enum={"open", "closed"}),
- *     @OA\Property(property="priority", type="string", format="string", example="low", enum={"low", "medium", "high"}),
- *     @OA\Property(property="visibility", type="string", format="string", example="public", enum={"public", "private"}),
- *     @OA\Property(property="tags", type="string", format="string", example="tag1,tag2,tag3"),
- *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
- *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
- *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
- *
- *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
- * *     @OA\Property(property="project_id", type="integer", format="int64", example=456),
- *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
- *
+     *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
+     *     @OA\Property(property="attachments", type="array", @OA\Items(type="string")),
+     *     @OA\Property(property="status", type="string", format="string", example="open", enum={"open", "closed"}),
+     *     @OA\Property(property="priority", type="string", format="string", example="low", enum={"low", "medium", "high"}),
+     *     @OA\Property(property="visibility", type="string", format="string", example="public", enum={"public", "private"}),
+     *     @OA\Property(property="tags", type="string", format="string", example="tag1,tag2,tag3"),
+     *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
+     *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
+     *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
+     *
+     *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
+     * *     @OA\Property(property="project_id", type="integer", format="int64", example=456),
+     *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
+     *
 
      *
      *
@@ -97,57 +98,80 @@ class CommentController extends Controller
 
 
 
-                if (!$request->user()->hasPermissionTo('comment_create')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('comment_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-                $request_data = $request->validated();
-
-
-                $request_data["business_id"] = $request->user()->business_id;
-                $request_data["is_active"] = true;
-                $request_data["created_by"] = $request->user()->id;
-
-                $comment_text = $request_data["description"];
-
-                $pattern = '/@\[.*?\]\((.*?)\)/';
-                // $pattern = '/@(\w+)/';
-                // Parse comment for mentions
-                preg_match_all($pattern, $comment_text, $mentions);
+            $request_data = $request->validated();
 
 
+            $request_data["business_id"] = $request->user()->business_id;
+            $request_data["is_active"] = true;
+            $request_data["created_by"] = $request->user()->id;
 
-                $mentioned_users = array_map('trim', $mentions[1]); ;
+            $comment_text = $request_data["description"];
+
+            $pattern = '/@\[.*?\]\((.*?)\)/';
+            // $pattern = '/@(\w+)/';
+            // Parse comment for mentions
+            preg_match_all($pattern, $comment_text, $mentions);
 
 
 
-                $mentioned_users = User::where('business_id', $request->user()->business_id)
-                    ->whereIn('user_name', $mentioned_users)
-                    ->get();
+            $mentioned_users = array_map('trim', $mentions[1]);;
+
+            $mentioned_users = User::where('business_id', $request->user()->business_id)
+                ->whereIn('user_name', $mentioned_users)
+                ->get();
 
 
 
-                $comment =  Comment::create($request_data);
+            $comment =  Comment::create($request_data);
 
 
 
-                // Store mentions in user_note_mentions table using createMany
-                $mentions_data = $mentioned_users->map(function ($mentioned_user) {
-                    return [
-                        'user_id' => $mentioned_user->id,
-                    ];
-                });
+            // Store mentions in user_note_mentions table using createMany
+            $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+                return [
+                    'user_id' => $mentioned_user->id,
+                ];
+            });
 
-                $comment->mentions()->createMany($mentions_data);
+            $comment->mentions()->createMany($mentions_data);
 
-                DB::commit();
 
-                return response($comment, 201);
 
+
+            // Prepare notification data for each mentioned user
+            $notification_data = $mentioned_users->map(function ($mentioned_user) use ($comment) {
+                $notification_description = "You have been mentioned in a comment.";
+                $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
+                return [
+                    "entity_id" => $comment->id,
+                    "entity_name" => "Comment",
+                    'notification_title' => "Comment Mention Notification",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id, // Assuming you have a variable for the mentioner's ID
+                    "receiver_id" => $mentioned_user->id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            })->toArray();
+
+            Notification::insert($notification_data);
+
+
+            DB::commit();
+
+            return response($comment, 201);
         } catch (Exception $e) {
-           DB::rollBack();
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -168,19 +192,17 @@ class CommentController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
-*     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
- *     @OA\Property(property="attachments", type="array", @OA\Items(type="string")),
- *     @OA\Property(property="status", type="string", format="string", example="open", enum={"open", "closed"}),
- *     @OA\Property(property="priority", type="string", format="string", example="low", enum={"low", "medium", "high"}),
- *     @OA\Property(property="visibility", type="string", format="string", example="public", enum={"public", "private"}),
- *     @OA\Property(property="tags", type="string", format="string", example="tag1,tag2,tag3"),
- *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
- *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
- *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
-
+     *     @OA\Property(property="description", type="string", format="string", example="A brief overview of Comment X's objectives and scope."),
+     *     @OA\Property(property="attachments", type="array", @OA\Items(type="string")),
+     *     @OA\Property(property="status", type="string", format="string", example="open", enum={"open", "closed"}),
+     *     @OA\Property(property="priority", type="string", format="string", example="low", enum={"low", "medium", "high"}),
+     *     @OA\Property(property="visibility", type="string", format="string", example="public", enum={"public", "private"}),
+     *     @OA\Property(property="tags", type="string", format="string", example="tag1,tag2,tag3"),
+     *     @OA\Property(property="resolution", type="string", format="string", example="Resolution details"),
+     *     @OA\Property(property="feedback", type="array", @OA\Items(type="string")),
+     *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
      *
      *
-
      *
      *         ),
      *      ),
@@ -227,84 +249,142 @@ class CommentController extends Controller
             $this->isModuleEnabled("task_management");
 
 
-                if (!$request->user()->hasPermissionTo('comment_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
-                $business_id =  $request->user()->business_id;
-                $request_data = $request->validated();
+            if (!$request->user()->hasPermissionTo('comment_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  $request->user()->business_id;
+            $request_data = $request->validated();
 
 
 
 
-                $comment_query_params = [
-                    "id" => $request_data["id"],
-                    "business_id" => $business_id
+            $comment_query_params = [
+                "id" => $request_data["id"],
+                "business_id" => $business_id
+            ];
+            // $comment_prev = Comment::where($comment_query_params)
+            //     ->first();
+            // if (!$comment_prev) {
+            //     return response()->json([
+            //         "message" => "no comment listing found"
+            //     ], 404);
+            // }
+
+            $comment  =  tap(Comment::where($comment_query_params))->update(
+                collect($request_data)->only([
+                    'description',
+                    'attachments',
+                    'status',
+                    'priority',
+                    'visibility',
+                    'tags',
+                    'resolution',
+                    'feedback',
+                    // 'hidden_note',
+                    // 'related_task_id',
+                    // 'task_id',
+
+                ])->toArray()
+            )
+                // ->with("somthing")
+
+                ->first();
+            if (!$comment) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
+            if ($comment->created_by == auth()->user()->created_by) {
+                $comment->hidden_note = $request_data["hidden_note"];
+                $comment->save();
+            }
+
+            $comment_text = $comment->description;
+            $pattern = '/@\[.*?\]\((.*?)\)/';
+            // $pattern = '/@(\w+)/';
+            // Parse comment for mentions
+            preg_match_all($pattern, $comment_text, $mentions);
+
+
+
+            $mentioned_users = array_map('trim', $mentions[1]);;
+
+
+            $mentioned_users = User::where('business_id', $request->user()->business_id)
+                ->whereIn('user_name', $mentioned_users)
+                ->get();
+
+            // Store mentions in user_note_mentions table using createMany
+
+
+
+
+
+            // Fetch current mentions
+            $current_mentions = $comment->mentions()->pluck('user_id')->toArray();
+
+            // Store mentions in user_note_mentions table and sync with new mentions
+            $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+                return [
+                    'user_id' => $mentioned_user->id,
                 ];
-                // $comment_prev = Comment::where($comment_query_params)
-                //     ->first();
-                // if (!$comment_prev) {
-                //     return response()->json([
-                //         "message" => "no comment listing found"
-                //     ], 404);
-                // }
+            });
+            $comment->mentions()->sync($mentions_data);
 
-                $comment  =  tap(Comment::where($comment_query_params))->update(
-                    collect($request_data)->only([
-                        'description',
-                        'attachments',
-                        'status',
-                        'priority',
-                        'visibility',
-                        'tags',
-                        'resolution',
-                        'feedback',
-                        // 'hidden_note',
-                        // 'related_task_id',
-                        // 'task_id',
+            // Determine old and new mentions
+            $new_mentions = array_diff($mentions_data->toArray(), $current_mentions->toArray());
+            $old_mentions = array_intersect($mentions_data->toArray(), $current_mentions->toArray());
 
-                    ])->toArray()
-                )
-                    // ->with("somthing")
+            // Prepare notification data for newly added mentions
+            $new_notification_data = $mentioned_users->whereIn('id', $new_mentions)->map(function ($mentioned_user) use ($comment) {
+                $notification_description = "You have been mentioned. The comment has been updated.";
+                $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
+                return [
+                    "entity_id" => $comment->id,
+                    "entity_name" => "Comment",
+                    'notification_title' => "New Mention in Updated Comment",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id,
+                    "receiver_id" => $mentioned_user->id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            })->toArray();
 
-                    ->first();
-                if (!$comment) {
-                    return response()->json([
-                        "message" => "something went wrong."
-                    ], 500);
-                }
-                if ($comment->created_by == auth()->user()->created_by) {
-                    $comment->hidden_note = $request_data["hidden_note"];
-                    $comment->save();
-                }
+            // Prepare notification data for old mentions
+            $old_notification_data = $mentioned_users->whereIn('id', $old_mentions)->map(function ($mentioned_user) use ($comment) {
+                $notification_description = "You have been mentioned. The comment has been updated.";
+                $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
+                return [
+                    "entity_id" => $comment->id,
+                    "entity_name" => "Comment",
+                    'notification_title' => "Re-mention in Updated Comment",
+                    'notification_description' => $notification_description,
+                    'notification_link' => $notification_link,
+                    "sender_id" => auth()->user()->id,
+                    "receiver_id" => $mentioned_user->id,
+                    "business_id" => auth()->user()->business_id,
+                    "is_system_generated" => 1,
+                    "status" => "unread",
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            })->toArray();
 
-                $comment_text = $comment->description;
-                $pattern = '/@\[.*?\]\((.*?)\)/';
-                // $pattern = '/@(\w+)/';
-                // Parse comment for mentions
-                preg_match_all($pattern, $comment_text, $mentions);
+            // Insert notifications into the database
+            Notification::insert(array_merge($new_notification_data, $old_notification_data));
 
 
 
-                $mentioned_users = array_map('trim', $mentions[1]); ;
 
-
-                $mentioned_users = User::where('business_id', $request->user()->business_id)
-                    ->whereIn('user_name', $mentioned_users)
-                    ->get();
-
-                // Store mentions in user_note_mentions table using createMany
-                $mentions_data = $mentioned_users->map(function ($mentioned_user) {
-                    return [
-                        'user_id' => $mentioned_user->id,
-                    ];
-                });
-
-                $comment->mentions()->sync($mentions_data);
-DB::commit();
-                return response($comment, 201);
-
+            DB::commit();
+            return response($comment, 201);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e, 500, $request);
@@ -434,17 +514,23 @@ DB::commit();
 
             $comments = Comment::with([
                 "creator" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
                 },
 
 
 
             ])
 
-                ->whereHas("creator", function($query) {
-                   $query->where("users.business_id", auth()->user()->business_id);
-                }
+                ->whereHas(
+                    "creator",
+                    function ($query) {
+                        $query->where("users.business_id", auth()->user()->business_id);
+                    }
                 )
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -663,7 +749,7 @@ DB::commit();
             $existingIds = Comment::where([
                 "business_id" => $business_id
             ])
-            ->where("created_by",auth()->user()->id)
+                ->where("created_by", auth()->user()->id)
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

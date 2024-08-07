@@ -739,7 +739,7 @@ class ProjectController extends Controller
             $notification_data = collect($request_data['projects'])->map(function($project_id) use($user) {
 
                 $notification_description = "You have been assigned to a project.";
-                $notification_link = "http://example.com/projects/{$project_id->id}"; // Dynamic link based on project ID
+                $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project_id,
                     "entity_name" => "Project",
@@ -892,7 +892,7 @@ class ProjectController extends Controller
             $notification_data = collect($request_data['projects'])->map(function($project_id) use($user) {
 
                 $notification_description = "You have been removed from a project.";
-                $notification_link = "http://example.com/projects/{$project_id->id}"; // Dynamic link based on project ID
+                $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project_id,
                     "entity_name" => "Project",
@@ -908,8 +908,9 @@ class ProjectController extends Controller
                     "updated_at" => now()
                 ];
             });
-
             Notification::insert($notification_data->toArray());
+
+
             DB::commit();
 
             return response($user, 201);
