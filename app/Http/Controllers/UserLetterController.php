@@ -420,12 +420,19 @@ class UserLetterController extends Controller
             ])
                 ->first();
 
-            // Generate the PDF
-            $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
 
-            // Send the email
-            Mail::to($employee->email) // Change this to the actual recipient's email
-                ->send(new UserLetterMail($pdf));
+            if (env("SEND_EMAIL") == true) {
+                $this->checkEmailSender(auth()->user()->id, 0);
+
+                $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
+
+                // Send the email
+                Mail::to($employee->email) // Change this to the actual recipient's email
+                    ->send(new UserLetterMail($pdf));
+
+                $this->storeEmailSender(auth()->user()->id, 0);
+            }                // Generate the PDF
+
 
             return response()->json(['message' => 'Email sent successfully.'], 200);
         } catch (Exception $e) {
