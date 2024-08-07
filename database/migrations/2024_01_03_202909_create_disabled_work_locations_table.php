@@ -20,7 +20,7 @@ class CreateDisabledWorkLocationsTable extends Migration
             $table->foreign('work_location_id')->references('id')->on('work_locations')->onDelete('cascade');
 
             $table->unsignedBigInteger("business_id")->nullable();
-            $table->foreign('business_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
 
             $table->unsignedBigInteger("created_by")->nullable();

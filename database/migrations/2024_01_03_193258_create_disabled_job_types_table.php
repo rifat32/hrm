@@ -19,7 +19,7 @@ class CreateDisabledJobTypesTable extends Migration
             $table->foreign('job_type_id')->references('id')->on('job_types')->onDelete('cascade');
 
             $table->unsignedBigInteger("business_id")->nullable();
-            $table->foreign('business_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
 
             $table->unsignedBigInteger("created_by")->nullable();
