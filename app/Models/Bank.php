@@ -66,27 +66,30 @@ class Bank extends Model
         return $is_active;
     }
 
+
     public function getIsDefaultAttribute($value)
     {
 
         $is_default = $value;
         $user = auth()->user();
 
-        if(!empty($user->business_id)) {
-            if(empty($this->business_id) || $user->business_id !=  $this->business_id) {
-                  $is_default = 1;
+        if(!empty($user)) {
 
-               }
+            if(!empty($user->business_id)) {
+                if(empty($this->business_id) || $user->business_id !=  $this->business_id) {
+                      $is_default = 1;
+                   }
 
+            } else if($user->hasRole("superadmin")) {
+                $is_default = 0;
+            }
         }
-
-
 
         return $is_default;
     }
 
 
 
-   
+
 
 }
