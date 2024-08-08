@@ -729,15 +729,11 @@ class RolesController extends Controller
                ];
 
                foreach ($permissions["permissions"] as $permission) {
-
-
                    $data["permissions"][] = [
                        "name"  => $permission,
                        "title" => $permissions_titles[$permission] ?? null,
                    ];
                }
-
-
                    array_push($new_permissions, $data);
 
            }

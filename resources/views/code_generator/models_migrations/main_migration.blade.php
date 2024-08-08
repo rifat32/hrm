@@ -67,7 +67,7 @@
          */
         public function down()
         {
-            Schema::dropIfExists('letter_templates');
+            Schema::dropIfExists('{{ $names["table_name"] }}');
         }
     }
 

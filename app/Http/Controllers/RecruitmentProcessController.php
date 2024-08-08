@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
+use App\Models\CandidateRecruitmentProcess;
 use App\Models\DisabledRecruitmentProcess;
 use App\Models\RecruitmentProcess;
 use App\Models\User;
@@ -1121,10 +1122,23 @@ class RecruitmentProcessController extends Controller
                 ], 409);
             }
 
+            $conflictingUserRecruitmentProcessesExists = UserRecruitmentProcess::whereIn("recruitment_process_id", $existingIds)->exists();
 
+            if ($conflictingUserRecruitmentProcessesExists) {
+                return response()->json([
+                    "message" => "Some users are associated with the specified recruitment processes",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
 
+            $conflictingCandidateRecruitmentProcessesExists = CandidateRecruitmentProcess::whereIn("recruitment_process_id", $existingIds)->exists();
 
-
+            if ($conflictingCandidateRecruitmentProcessesExists) {
+                return response()->json([
+                    "message" => "Some users are associated with the specified recruitment processes",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
 
 
             RecruitmentProcess::destroy($existingIds);

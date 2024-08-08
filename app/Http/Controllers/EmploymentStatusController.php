@@ -10,6 +10,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledEmploymentStatus;
 use App\Models\EmploymentStatus;
+use App\Models\LeaveTypeEmploymentStatus;
 use App\Models\SettingPaidLeaveEmploymentStatus;
 use App\Models\SettingUnpaidLeaveEmploymentStatus;
 use App\Models\User;
@@ -888,24 +889,39 @@ class EmploymentStatusController extends Controller
 
 
 
-            $paid_employment_status_exists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
-            if ($paid_employment_status_exists) {
-                $conflictingPaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
+            $conflictingPaidEmploymentStatuses =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
+                'id', 'first_Name',
+                'last_Name',
+            ]);
+            if ($conflictingPaidEmploymentStatuses->isNotEmpty()) {
 
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatus
+                    "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatuses
                 ], 409);
             }
-            $unpaid_employment_status_exists =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
-            if ($unpaid_employment_status_exists) {
-                $conflictingUnpaidEmploymentStatus = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get(['id']);
+
+            $conflictingUnpaidEmploymentStatuses =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($conflictingUnpaidEmploymentStatuses->isNotEmpty()) {
+
 
                 return response()->json([
                     "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatus
+                    "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatuses
                 ], 409);
             }
+
+            $conflictingLeaveTypeEmploymentStatuses =  LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($conflictingLeaveTypeEmploymentStatuses->isNotEmpty()) {
+
+
+                return response()->json([
+                    "message" => "Some leave types are associated with the specified employment statuses",
+                    "conflicting_unpaid_employment_status" => $conflictingLeaveTypeEmploymentStatuses
+                ], 409);
+            }
+
+
             EmploymentStatus::destroy($existingIds);
 
 

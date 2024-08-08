@@ -9,9 +9,14 @@ use App\Http\Requests\WorkLocationUpdateRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Attendance;
+use App\Models\AttendanceHistory;
+use App\Models\Department;
 use App\Models\DisabledWorkLocation;
+use App\Models\JobListing;
 use App\Models\User;
 use App\Models\WorkLocation;
+use App\Models\WorkShiftLocation;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -779,14 +784,57 @@ class WorkLocationController extends Controller
 
             if ($conflictingUsers->isNotEmpty()) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified departments",
+                    "message" => "work locations are in use",
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
 
 
 
+            $conflictingDepartmentExists = Department::whereIn("work_location_id",$existingIds)->exists();
 
+            if ($conflictingDepartmentExists) {
+                return response()->json([
+                    "message" => "work locations are in use",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+
+            $conflictingAttendanceExists = Attendance::whereIn("work_location_id",$existingIds)->exists();
+
+            if ($conflictingAttendanceExists) {
+                return response()->json([
+                    "message" => "work locations are in use",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+
+            $conflictingAttendanceHistoryExists = AttendanceHistory::whereIn("work_location_id",$existingIds)->exists();
+
+            if ($conflictingAttendanceHistoryExists) {
+                return response()->json([
+                    "message" => "work locations are in use",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+
+            $conflictingJobListingExists = JobListing::whereIn("work_location_id",$existingIds)->exists();
+
+            if ($conflictingJobListingExists) {
+                return response()->json([
+                    "message" => "work locations are in use",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+
+            $conflictingWorkShiftExists = WorkShiftLocation::whereIn("work_location_id",$existingIds)->exists();
+
+            if ($conflictingWorkShiftExists) {
+                return response()->json([
+                    "message" => "work locations are in use",
+                    // "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
 
 
 

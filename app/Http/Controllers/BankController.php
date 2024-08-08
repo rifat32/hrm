@@ -10,6 +10,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Bank;
 use App\Models\DisabledBank;
+use App\Models\Payslip;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -858,6 +859,18 @@ class BankController extends Controller
                 return response()->json([
                     "message" => "Some users are associated with the specified banks",
                     "conflicting_users" => $conflictingUsers
+                ], 409);
+            }
+            
+
+            $conflictingPayslip = Payslip::whereIn("bank_id", $existingIds)->get([
+                'id'
+            ]);
+
+            if ($conflictingPayslip->isNotEmpty()) {
+                return response()->json([
+                    "message" => "Some payslips are associated with the specified banks",
+                    "conflicting_users" => $conflictingPayslip
                 ], 409);
             }
 

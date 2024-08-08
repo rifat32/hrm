@@ -43,7 +43,7 @@
        */
       public function down()
       {
-          Schema::dropIfExists('disabled_letter_templates');
+          Schema::dropIfExists('disabled_{{ $names["table_name"] }}');
       }
   }
 

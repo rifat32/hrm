@@ -10,6 +10,8 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledSettingLeaveType;
 use App\Models\Leave;
+use App\Models\LeaveHistory;
+use App\Models\LeaveTypeEmploymentStatus;
 use App\Models\SettingLeaveType;
 use Carbon\Carbon;
 use Exception;
@@ -981,17 +983,38 @@ class SettingLeaveTypeController extends Controller
 
           $leave_exists =  Leave::whereIn("leave_type_id",$existingIds)->exists();
             if($leave_exists) {
-                $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
+                // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
 
 
                 return response()->json([
                     "message" => "Some leaves are associated with the specified setting_leave_types",
-                    "conflicting_leaves" => $conflictingLeaves
+                    // "conflicting_leaves" => $conflictingLeaves
                 ], 409);
 
             }
 
 
+            $leave_history_exists =  LeaveHistory::whereIn("leave_type_id",$existingIds)->exists();
+            if($leave_history_exists) {
+                // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
+
+
+                return response()->json([
+                    "message" => "Some leave histories are associated with the specified setting_leave_types",
+                    // "conflicting_leaves" => $conflictingLeaves
+                ], 409);
+
+            }
+
+            $leave_type_employment_statuses_exists =  LeaveTypeEmploymentStatus::whereIn("leave_type_id",$existingIds)->exists();
+            if($leave_type_employment_statuses_exists) {
+                // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
+                return response()->json([
+                    "message" => "Some users are using some of the specified leave types",
+                    // "conflicting_leaves" => $conflictingLeaves
+                ], 409);
+
+            }
 
 
             SettingLeaveType::destroy($existingIds);

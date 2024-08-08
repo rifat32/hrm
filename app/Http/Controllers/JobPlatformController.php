@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
+use App\Models\CandidateJobPlatform;
 use App\Models\DisabledJobPlatform;
 use App\Models\JobListing;
 use App\Models\JobListingJobPlatforms;
@@ -1103,6 +1104,15 @@ class JobPlatformController extends Controller
 
             $job_post_exists =  JobListingJobPlatforms::whereIn("job_platform_id", $existingIds)->exists();
             if ($job_post_exists) {
+
+                return response()->json([
+                    "message" => "Some user's are using some of these job platforms.",
+                    // "conflicting_users" => $conflictingSocialSites
+                ], 409);
+            }
+
+            $job_candidate_exists =  CandidateJobPlatform::whereIn("job_platform_id", $existingIds)->exists();
+            if ($job_candidate_exists) {
 
                 return response()->json([
                     "message" => "Some user's are using some of these job platforms.",

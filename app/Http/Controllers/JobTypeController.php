@@ -851,10 +851,8 @@ class JobTypeController extends Controller
 
             $job_listing_exists =  JobListing::whereIn("job_type_id", $existingIds)->exists();
             if ($job_listing_exists) {
-
-            
                 return response()->json([
-                    "message" => "Some users are associated with the specified job_types",
+                    "message" => "Some users are using the specified job_types",
 
                 ], 409);
             }

@@ -45,7 +45,7 @@ class CreateUserLettersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('letter_templates');
+        Schema::dropIfExists('user_letters');
     }
 }
 
