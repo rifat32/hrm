@@ -3225,7 +3225,7 @@ $payslipData
 
 
             if (!empty($request_data["joining_date"])) {
-                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+                $this->validateJoiningDateForRejoin($request_data["joining_date"], $request_data["id"]);
             }
 
             $user = User::where($userQueryTerms)->first();
