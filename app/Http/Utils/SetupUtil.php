@@ -4,6 +4,7 @@ namespace App\Http\Utils;
 
 use App\Models\EmailTemplate;
 use App\Models\Role;
+use Exception;
 use Spatie\Permission\Models\Permission;
 trait SetupUtil
 {
@@ -23,6 +24,7 @@ use BasicEmailUtil;
     }
 
     public function setupRoles () {
+
           // setup roles
           $roles = config("setup-config.roles");
           foreach ($roles as $role) {
@@ -112,6 +114,7 @@ foreach ($role_permissions as $role_permission) {
     $role = Role::where(["name" => $role_permission["role"]])->first();
 
     $permissions = $role_permission["permissions"];
+    
 
     // Get current permissions associated with the role
     $currentPermissions = $role->permissions()->pluck('name')->toArray();

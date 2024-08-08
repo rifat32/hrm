@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "permissions" =>[
 
     "business_admin",
 
@@ -262,4 +263,4 @@ return [
 
     "setting_payroll_create",
 
-];
+]];

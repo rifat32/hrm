@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "permissions" => [
 
     'business_owner',
 
@@ -290,4 +291,4 @@ return [
 
     "business_times_update",
     "business_times_view",
-];
+]];

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "permissions" => [
 
 
     "global_business_background_image_create",
@@ -173,4 +174,4 @@ return [
     "business_times_update",
     "business_times_view",
 
-];
+]];

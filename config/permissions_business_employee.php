@@ -1,6 +1,7 @@
 <?php
 
-[
+return [
+    "permissions" => [
 
     "business_employee",
     "user_view",
@@ -76,4 +77,4 @@
 
 
 
-];
+]];

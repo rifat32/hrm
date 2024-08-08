@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "permissions" => [
 
     "role_view",
 
@@ -124,4 +125,4 @@ return [
     "letter_template_delete",
 
 
-];
+]];

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "permissions" => [
 
     "business_manager",
 
@@ -255,4 +256,4 @@ return [
 
 
 
-];
+]];
