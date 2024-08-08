@@ -421,7 +421,7 @@ class UserLetterController extends Controller
             ])
                 ->first();
 
-                $emailSent = false;
+                $emailSent = true;
                 $errorMessage = null;
 
                 if (env('SEND_EMAIL') == true) {
@@ -433,10 +433,11 @@ class UserLetterController extends Controller
                     try {
                         // Send the email
                         Mail::to($employee->email)->send(new UserLetterMail($pdf));
-                        $emailSent = true;
+
                     } catch (\Exception $e) {
                         // Set error message
                         $errorMessage = $e->getMessage();
+                        $emailSent = false;
                     } finally {
                         // Ensure that email sender actions are always logged
                         $this->storeEmailSender(auth()->user()->id, 0);

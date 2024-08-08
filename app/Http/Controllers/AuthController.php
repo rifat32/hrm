@@ -635,6 +635,7 @@ $responseData = [
         'start_date' => $business ? $business->start_date : null,
         'currency' => $business ? $business->currency : null,
         'service_plan' => $business ? $business->service_plan : null,
+        'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
     ]
 
 
@@ -1433,6 +1434,7 @@ $responseData = [
         'start_date' => $business ? $business->start_date : null,
         'currency' => $business ? $business->currency : null,
         'service_plan' => $business ? $business->service_plan : null,
+        'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
 
     ]
 ];
