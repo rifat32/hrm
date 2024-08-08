@@ -661,6 +661,9 @@ Route::post('/v1.0/user-letters/send', [UserLetterController::class, "sendUserLe
 
 Route::put('/v1.0/user-letters', [UserLetterController::class, "updateUserLetter"]);
 Route::get('/v1.0/user-letters', [UserLetterController::class, "getUserLetters"]);
+
+Route::get('/v1.0/user-letters-histories', [UserLetterController::class, "getUserLetterHistories"]);
+
 Route::delete('/v1.0/user-letters/{ids}', [UserLetterController::class, "deleteUserLettersByIds"]);
 
 

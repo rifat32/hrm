@@ -15,13 +15,13 @@ class UserLetter extends Model
 {
     use HasFactory;
     protected $fillable = [
-                    'issue_date',
-                    'status',
-                    'letter_content',
-                    'sign_required',
-                    'attachments',
-                    'user_id',
-
+        'issue_date',
+        'status',
+        'letter_content',
+        'sign_required',
+        'attachments',
+        'user_id',
+        "email_sent",
         "business_id",
         "created_by"
     ];
@@ -39,23 +39,6 @@ class UserLetter extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id','id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-

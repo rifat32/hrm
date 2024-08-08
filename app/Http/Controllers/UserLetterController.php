@@ -27,6 +27,7 @@ use App\Models\UserLetter;
 use App\Models\DisabledUserLetter;
 use App\Models\LetterTemplate;
 use App\Models\User;
+use App\Models\UserLetterEmailHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -413,25 +414,50 @@ class UserLetterController extends Controller
 
             $user_letter = UserLetter::where([
                 "id" => $request_data["user_letter_id"]
-            ])->firstOrFail();
+            ])->first();
 
             $employee = User::where([
                 "id" => $request_data["user_id"]
             ])
                 ->first();
 
+                $emailSent = false;
+                $errorMessage = null;
 
-            if (env("SEND_EMAIL") == true) {
-                $this->checkEmailSender(auth()->user()->id, 0);
+                if (env('SEND_EMAIL') == true) {
+                    // Log email sender actions
+                    $this->checkEmailSender(auth()->user()->id, 0);
 
-                $pdf = PDF::loadView('email.dynamic_mail', ["html_content" => $user_letter->letter_content]);
+                    $pdf = PDF::loadView('email.dynamic_mail', ['html_content' => $user_letter->letter_content]);
 
-                // Send the email
-                Mail::to($employee->email) // Change this to the actual recipient's email
-                    ->send(new UserLetterMail($pdf));
+                    try {
+                        // Send the email
+                        Mail::to($employee->email)->send(new UserLetterMail($pdf));
+                        $emailSent = true;
+                    } catch (\Exception $e) {
+                        // Set error message
+                        $errorMessage = $e->getMessage();
+                    } finally {
+                        // Ensure that email sender actions are always logged
+                        $this->storeEmailSender(auth()->user()->id, 0);
+                    }
+                }
 
-                $this->storeEmailSender(auth()->user()->id, 0);
-            }                // Generate the PDF
+                // Update the user_letter record if email was sent
+                if ($emailSent) {
+                    $user_letter->email_sent = true;
+                    $user_letter->save();
+                }
+
+                // Create a history record
+                UserLetterEmailHistory::create([
+                    'user_letter_id' => $user_letter->id,
+                    'sent_at' => $emailSent ? now() : null,
+                    'recipient_email' => $employee->email,
+                    'email_content' => $user_letter->letter_content,
+                    'status' => $emailSent ? 'sent' : 'failed',
+                    'error_message' => $emailSent ? null : $errorMessage
+                ]);
 
 
             return response()->json(['message' => 'Email sent successfully.'], 200);
@@ -671,10 +697,6 @@ class UserLetterController extends Controller
      * example="ASC"
      * ),
      *
-
-
-
-
      *      summary="This method is to get user letters  ",
      *      description="This method is to get user letters ",
      *
@@ -752,12 +774,10 @@ class UserLetterController extends Controller
                     return $query->where('user_letters.issue_date', "<=", ($request->end_issue_date . ' 23:59:59'));
                 })
 
-                ->when(!empty($request->letter_content), function ($query) use ($request) {
-                    return $query->where('user_letters.id', $request->string);
-                })
+
 
                 ->when(!empty($request->status), function ($query) use ($request) {
-                    return $query->where('user_letters.id', $request->string);
+                    return $query->where('user_letters.status', $request->status);
                 })
 
                 ->when(
@@ -812,6 +832,238 @@ class UserLetterController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+        /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/user-letters-histories",
+     *      operationId="getUserLetterHistories",
+     *      tags={"user_letters"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+*     @OA\Parameter(
+ *         name="user_letter_id",
+ *         in="query",
+ *         description="Filter by user letter ID.",
+ *         required=false,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *  *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         description="Filter by status.",
+ *         required=false,
+ *         @OA\Schema(type="string")
+ *     ),
+ * *     @OA\Parameter(
+ *         name="start_sent_at",
+ *         in="query",
+ *         description="Filter by start sent date. Format: YYYY-MM-DD",
+ *         required=false,
+ *         @OA\Schema(type="string", format="date")
+ *     ),
+ *     @OA\Parameter(
+ *         name="end_sent_at",
+ *         in="query",
+ *         description="Filter by end sent date. Format: YYYY-MM-DD",
+ *         required=false,
+ *         @OA\Schema(type="string", format="date")
+ *     ),
+     *
+     *         @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *     @OA\Parameter(
+     * name="is_active",
+     * in="query",
+     * description="is_active",
+     * required=true,
+     * example="1"
+     * ),
+     *     @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+     * *  @OA\Parameter(
+     * name="id",
+     * in="query",
+     * description="id",
+     * required=true,
+     * example="ASC"
+     * ),
+     * *  @OA\Parameter(
+     * name="is_single_search",
+     * in="query",
+     * description="is_single_search",
+     * required=true,
+     * example="ASC"
+     * ),
+     *    * *  @OA\Parameter(
+     * name="user_id",
+     * in="query",
+     * description="user_id",
+     * required=true,
+     * example="ASC"
+     * ),
+     *
+     *      summary="This method is to get user letters  ",
+     *      description="This method is to get user letters ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserLetterHistories(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_letter_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $user_letter_histories = UserLetterEmailHistory::
+                 whereHas("user_letters.user.department_user.department", function ($query) use ($all_manager_department_ids) {
+                     $query->whereIn("departments.id", $all_manager_department_ids);
+                 })
+
+                 ->when(
+                    empty($request->user_id),
+                    function ($query) use ($request) {
+                        return $query->whereHas("user_letters", function ($query)  {
+                            $query->whereNotIn("users.id", [auth()->user()->id]);
+                        });
+                    },
+                    function ($query) use ($request) {
+                        return $query->whereHas("user_letters", function ($query) use($request) {
+                            $query->whereIn("users.id", [$request->user_id]);
+                        });
+
+                    }
+                )
+                ->when(!empty($request->user_letter_id), function ($query) use ($request) {
+                    return $query->where('user_letter_email_histories.user_letter_id', $request->user_letter_id);
+                })
+                 ->when(!empty($request->id), function ($query) use ($request) {
+                     return $query->where('user_letter_email_histories.id', $request->id);
+                 })
+                 ->when(!empty($request->start_sent_at), function ($query) use ($request) {
+                     return $query->where('user_letter_email_histories.sent_at', ">=", $request->start_sent_at);
+                 })
+                 ->when(!empty($request->end_sent_at), function ($query) use ($request) {
+                     return $query->where('user_letter_email_histories.sent_at', "<=", ($request->end_sent_at . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->status), function ($query) use ($request) {
+                     return $query->where('user_letter_email_histories.status', $request->status);
+                 })
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         $query
+
+                             ->where("user_letter_email_histories.letter_content", "like", "%" . $term . "%")
+                             ->orWhere("user_letter_email_histories.recipient_email", "like", "%" . $term . "%");
+                     });
+                 })
+
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('user_letter_email_histories.created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('user_letter_email_histories.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("user_letter_email_histories.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("user_letter_email_histories.id", "DESC");
+                 })
+                 ->when($request->filled("is_single_search") && $request->boolean("is_single_search"), function ($query) use ($request) {
+                     return $query->first();
+                 }, function ($query) {
+                     return $query->when(!empty(request()->per_page), function ($query) {
+                         return $query->paginate(request()->per_page);
+                     }, function ($query) {
+                         return $query->get();
+                     });
+                 });
+
+             if ($request->filled("is_single_search") && empty($user_letters)) {
+                 throw new Exception("No data found", 404);
+             }
+
+
+             return response()->json($user_letter_histories, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *

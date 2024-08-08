@@ -15,9 +15,6 @@ class EmployeeRota extends Model
 
         "description",
 
-
-
-
         "department_id",
         "user_id",
 
