@@ -19,10 +19,7 @@ return [
     "user_view",
     "user_delete",
 
-    "employee_create",
-    "employee_update",
-    "employee_view",
-    "employee_delete",
+
 
     "employee_document_create",
     "employee_document_update",
