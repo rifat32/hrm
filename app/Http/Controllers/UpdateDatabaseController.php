@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Utils\BasicEmailUtil;
+use App\Http\Utils\SetupUtil;
 use App\Models\Business;
 use App\Models\EmailTemplate;
+use App\Models\Module;
+use App\Models\ServicePlan;
+use App\Models\ServicePlanModule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UpdateDatabaseController extends Controller
 {
-    use BasicEmailUtil;
+    use BasicEmailUtil, SetupUtil;
 
     private function storeEmailTemplates()
     {
@@ -49,7 +53,7 @@ class UpdateDatabaseController extends Controller
     {
 
 
-        $i = 5;
+        $i = 6;
 
 
 
@@ -128,6 +132,38 @@ ADD CONSTRAINT letter_templates_business_id_foreign
 FOREIGN KEY (business_id) REFERENCES businesses(id)
 ON DELETE CASCADE;
 ');
+        }
+
+        if($i == 5) {
+            $modules = Module::where('is_active', 1)->pluck('id');
+
+            $service_plan = ServicePlan::first(); // Retrieve the first service plan
+
+            if($service_plan) {
+                $service_plan->update([
+                    'name' => 'Standard Plan',
+                    'description' => '',
+                    'set_up_amount' => 100,
+                    'number_of_employees_allowed' => 100,
+                    'duration_months' => 1,
+                    'price' => 20,
+                    'business_tier_id' => 1,
+                    'created_by' => auth()->id(),
+                ]);
+
+                $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
+                    return [
+                        'is_enabled' => 1,
+                        'service_plan_id' => $service_plan->id,
+                        'module_id' => $module_id,
+                        'created_by' => auth()->id(),
+                    ];
+                })->toArray();
+
+                ServicePlanModule::insert($service_plan_modules);
+            }
+        } else {
+            $this->setupServicePlan();
         }
 
         }

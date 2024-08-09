@@ -963,19 +963,13 @@ return "swagger generated";
         ];
 
 
+        $this->setupServicePlan();
+
+
                 // $default_work_shift_2 = WorkShift::create($default_work_shift_data_2);
                 // $default_work_shift_2->details()->createMany($default_work_shift_data_2['details']);
 
-                ServicePlan::create([
-                    "name" => "Standard Plan",
-                    "description" => "",
-                      'set_up_amount' => 100,
-                      "number_of_employees_allowed" => 100,
-                      'duration_months' => 1,
-                      'price' => 20,
-                      'business_tier_id' => 1,
-                      "created_by" => 1
-                ]);
+
 
         return "You are done with setup";
     }
