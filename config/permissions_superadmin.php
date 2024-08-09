@@ -4,8 +4,7 @@ return [
     "permissions" => [
 
 
-    "global_business_background_image_create",
-    "global_business_background_image_view",
+
 
     "system_setting_update",
     "system_setting_view",

@@ -197,7 +197,7 @@ class RolesController extends Controller
                     throw new Exception("no role found");
                 }
 
-                if($role->id >= $currentUserRole->id){
+                if($role->id <= $currentUserRole->id){
                     throw new Exception("You can not update this role");
                 }
 
@@ -313,7 +313,12 @@ class RolesController extends Controller
                 ], 401);
             }
 
+            $currentUser = auth()->user();
+
+            $currentUserRole = $currentUser->roles()->orderBy('id', 'asc')->first();
+
             $roles = Role::with('permissions:name,id', "users")
+            ->where("roles.id", ">", $currentUserRole->id)
 
                 ->when((empty($request->user()->business_id)), function ($query) use ($request) {
                     return $query->where('business_id', NULL)->where('is_default', 1)
@@ -720,7 +725,7 @@ class RolesController extends Controller
 
                 foreach ($permissions["permissions"] as $permission) {
 
-                    $hasPermission = $permissions->contains('name', $permission);
+                    $hasPermission = $current_permissions->contains('name', $permission);
                     if ($hasPermission) {
                         $data["permissions"][] = [
                             "name"  => $permission,

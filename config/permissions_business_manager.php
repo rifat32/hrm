@@ -94,7 +94,7 @@ return [
 
     "business_view",
     "product_category_view",
-    "global_business_background_image_view",
+
 
 
     "department_create",

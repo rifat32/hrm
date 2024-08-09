@@ -62,8 +62,7 @@ return [
         "reminder_view",
         "reminder_delete",
 
-        "global_business_background_image_create",
-        "global_business_background_image_view",
+ 
 
 
         "system_setting_update",
@@ -384,8 +383,7 @@ return [
 
     ],
     "permissions_titles" => [
-        "global_business_background_image_create" => "Can create global business background image",
-        "global_business_background_image_view" => "Can view global business background image",
+
 
 
         "system_setting_update" => "",
@@ -732,8 +730,7 @@ return [
     ],
 
     "beautified_permissions_titles" => [
-        "global_business_background_image_create" => "create",
-        "global_business_background_image_view" => "view",
+
 
 
 
@@ -751,7 +748,7 @@ return [
         "user_view" => "view",
         "user_delete" => "delete",
 
-       
+
 
 
 
@@ -1090,13 +1087,7 @@ return [
     ],
 
     "beautified_permissions" => [
-        [
-            "header" => "global_business_background_image",
-            "permissions" => [
-                "global_business_background_image_create",
-                "global_business_background_image_view",
-            ],
-        ],
+
 
         [
             "header" => "system_setting",
