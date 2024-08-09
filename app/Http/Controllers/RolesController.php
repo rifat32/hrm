@@ -6,6 +6,7 @@ use App\Http\Requests\RoleRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ use Carbon\Carbon;
 
 class RolesController extends Controller
 {
-    use ErrorUtil, UserActivityUtil,  BasicUtil;
+    use ErrorUtil, UserActivityUtil,  BasicUtil, ModuleUtil;
     /**
      *
      * @OA\Post(
@@ -722,16 +723,21 @@ class RolesController extends Controller
                     "permissions" => [],
                 ];
 
+                if(!empty($permissions["module"])){
+                     if($this->isModuleEnabled($permissions["module"],false)) {
+                        foreach ($permissions["permissions"] as $permission) {
 
-                foreach ($permissions["permissions"] as $permission) {
+                            $hasPermission = $current_permissions->contains('name', $permission);
 
-                    $hasPermission = $current_permissions->contains('name', $permission);
-                    if ($hasPermission) {
-                        $data["permissions"][] = [
-                            "name"  => $permission,
-                            "title" => $permissions_titles[$permission] ?? null,
-                        ];
-                    }
+
+                            if ($hasPermission) {
+                                $data["permissions"][] = [
+                                    "name"  => $permission,
+                                    "title" => $permissions_titles[$permission] ?? null,
+                                ];
+                            }
+                        }
+                     }
                 }
 
                 if (!empty($data["permissions"])) {

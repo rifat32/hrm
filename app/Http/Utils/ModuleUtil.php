@@ -13,7 +13,7 @@ use Exception;
 trait ModuleUtil
 {
     // this function do all the task and returns transaction id or -1
-    public function isModuleEnabled($module_name)
+    public function isModuleEnabled($module_name,$throwErr = true)
     {
         $user = auth()->user();
         if (empty($user->business_id)) {
@@ -84,7 +84,7 @@ trait ModuleUtil
         }
 
 
-        if (!$is_enabled) {
+        if (!$is_enabled && $throwErr) {
             throw new Exception('Module is not enabled', 401);
         }
 

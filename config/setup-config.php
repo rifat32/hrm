@@ -62,7 +62,7 @@ return [
         "reminder_view",
         "reminder_delete",
 
- 
+
 
 
         "system_setting_update",
@@ -1381,30 +1381,7 @@ return [
             ],
         ],
 
-        [
-            "header" => "product_category",
-            "permissions" => [
-                "product_category_create",
-                "product_category_update",
-                "product_category_view",
-                "product_category_delete",
 
-
-            ],
-        ],
-
-        [
-            "header" => "product",
-            "permissions" => [
-                "product_create",
-                "product_update",
-                "product_view",
-                "product_delete",
-
-
-
-            ],
-        ],
 
 
         [
@@ -1425,9 +1402,6 @@ return [
                 "asset_type_delete",
             ],
         ],
-
-
-
 
 
         [
@@ -1466,10 +1440,11 @@ return [
                 "task_delete",
 
             ],
+            "module" => "task_management"
         ],
 
         [
-            "header" => "task",
+            "header" => "label",
             "permissions" => [
                 "label_create",
                 "label_update",
@@ -1477,6 +1452,7 @@ return [
                 "label_delete",
 
             ],
+            "module" => "task_management"
         ],
 
 
@@ -1489,6 +1465,20 @@ return [
                 "comment_view",
                 "comment_delete"
             ],
+            "module" => "task_management"
+        ],
+
+        [
+            "header" => "task_category",
+            "permissions" => [
+
+                "task_category_create",
+                "task_category_update",
+                "task_category_activate",
+                "task_category_view",
+                "task_category_delete",
+            ],
+            "module" => "task_management"
         ],
 
 
@@ -1529,8 +1519,6 @@ return [
                 "employee_rota_view",
                 "employee_rota_delete",
 
-
-
             ],
         ],
 
@@ -1570,17 +1558,7 @@ return [
             ],
         ],
 
-        [
-            "header" => "task_category",
-            "permissions" => [
 
-                "task_category_create",
-                "task_category_update",
-                "task_category_activate",
-                "task_category_view",
-                "task_category_delete",
-            ],
-        ],
 
 
 
@@ -1873,8 +1851,15 @@ return [
         ]
 
 
+        ],
 
-
+    "system_modules" => [
+        "task_management",
+        "user_activity",
+        "employee_login",
+        "employee_location_attendance",
+        "flexible_shifts",
+        "rota"
     ]
 
 
