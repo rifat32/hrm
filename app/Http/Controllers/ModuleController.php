@@ -409,7 +409,7 @@ class ModuleController extends Controller
              }
 
              $modules = Module::when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
-                return $query->where('modules.is_active', 1);
+                return $query->where('modules.is_enabled', 1);
             })
             //  ->when(!empty($request->business_tier_id), function ($query) use ($request) {
             //      return $query->where('modules.business_tier_id', $request->business_tier_id);

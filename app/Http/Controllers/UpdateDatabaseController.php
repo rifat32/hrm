@@ -83,89 +83,116 @@ class UpdateDatabaseController extends Controller
                 DB::statement("DROP PROCEDURE AddColumnIfNotExists;");
             }
 
-               // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
-        if ($i == 3) {
+            // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 3) {
 
-            DB::statement('ALTER TABLE disabled_employment_statuses DROP FOREIGN KEY disabled_employment_statuses_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_setting_leave_types DROP FOREIGN KEY disabled_setting_leave_types_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_job_platforms DROP FOREIGN KEY disabled_job_platforms_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_job_types DROP FOREIGN KEY disabled_job_types_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_work_locations DROP FOREIGN KEY disabled_work_locations_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_recruitment_processes DROP FOREIGN KEY disabled_recruitment_processes_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_banks DROP FOREIGN KEY disabled_banks_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_termination_types DROP FOREIGN KEY disabled_termination_types_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_termination_types DROP FOREIGN KEY disabled_termination_types_business_id_foreign');
-            DB::statement('ALTER TABLE disabled_termination_reasons DROP FOREIGN KEY disabled_termination_reasons_business_id_foreign');
+                $foreignKeys = [
+                    'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
+                    'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
+                    'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
+                    'disabled_job_types' => 'disabled_job_types_business_id_foreign',
+                    'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
+                    'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
+                    'disabled_banks' => 'disabled_banks_business_id_foreign',
+                    'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
+                    'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
+                ];
 
+                foreach ($foreignKeys as $table => $foreignKey) {
+                    $foreignKeyExists = DB::select(DB::raw("
+                    SELECT CONSTRAINT_NAME
+                    FROM information_schema.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = '{$table}'
+                    AND CONSTRAINT_NAME = '{$foreignKey}'
+                "));
 
+                    if (!empty($foreignKeyExists)) {
+                        try {
+                            DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
+                        } catch (\Exception $e) {
+                            // Log the error or handle it as needed
+                            echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+                        }
+                    } else {
+                        echo "Foreign key '{$foreignKey}' does not exist on table '{$table}'. Skipping...\n";
+                    }
+                }
 
-
-            DB::statement('ALTER TABLE disabled_employment_statuses ADD CONSTRAINT disabled_employment_statuses_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_setting_leave_types ADD CONSTRAINT disabled_setting_leave_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_job_platforms ADD CONSTRAINT disabled_job_platforms_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_job_types ADD CONSTRAINT disabled_job_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_work_locations ADD CONSTRAINT disabled_work_locations_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_recruitment_processes ADD CONSTRAINT disabled_recruitment_processes_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_banks ADD CONSTRAINT disabled_banks_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_termination_types ADD CONSTRAINT disabled_termination_types_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-            DB::statement('ALTER TABLE disabled_termination_reasons ADD CONSTRAINT disabled_termination_reasons_business_id_foreign FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
-        }
-
-        if ($i == 4) {
-
-            // Drop the existing foreign key constraint
-            DB::statement('
-ALTER TABLE letter_templates
-DROP FOREIGN KEY letter_templates_business_id_foreign;
-');
-
-            // Modify the column to be nullable
-            DB::statement('
-ALTER TABLE letter_templates
-MODIFY COLUMN business_id BIGINT UNSIGNED NULL;
-');
-
-            // Re-add the foreign key constraint
-            DB::statement('
-ALTER TABLE letter_templates
-ADD CONSTRAINT letter_templates_business_id_foreign
-FOREIGN KEY (business_id) REFERENCES businesses(id)
-ON DELETE CASCADE;
-');
-        }
-
-        if($i == 5) {
-            $modules = Module::where('is_active', 1)->pluck('id');
-
-            $service_plan = ServicePlan::first(); // Retrieve the first service plan
-
-            if($service_plan) {
-                $service_plan->update([
-                    'name' => 'Standard Plan',
-                    'description' => '',
-                    'set_up_amount' => 100,
-                    'number_of_employees_allowed' => 100,
-                    'duration_months' => 1,
-                    'price' => 20,
-                    'business_tier_id' => 1,
-                    'created_by' => auth()->id(),
-                ]);
-
-                $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
-                    return [
-                        'is_enabled' => 1,
-                        'service_plan_id' => $service_plan->id,
-                        'module_id' => $module_id,
-                        'created_by' => auth()->id(),
-                    ];
-                })->toArray();
-
-                ServicePlanModule::insert($service_plan_modules);
+                foreach ($foreignKeys as $table => $foreignKey) {
+                    try {
+                        DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
+                    } catch (\Exception $e) {
+                        // Log the error or handle it as needed
+                        echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+                    }
+                }
             }
-        } else {
-            $this->setupServicePlan();
-        }
 
+            if ($i == 4) {
+
+                // Define the table and foreign key
+                $table = 'letter_templates';
+                $foreignKey = 'letter_templates_business_id_foreign';
+
+                // Check if the foreign key exists before trying to drop it
+                $foreignKeyExists = DB::select(DB::raw("
+    SELECT CONSTRAINT_NAME
+    FROM information_schema.KEY_COLUMN_USAGE
+    WHERE TABLE_NAME = '{$table}'
+    AND CONSTRAINT_NAME = '{$foreignKey}'
+"));
+
+                if (!empty($foreignKeyExists)) {
+                    // Drop the existing foreign key constraint
+                    DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
+                }
+
+                // Modify the column to be nullable
+                DB::statement("
+    ALTER TABLE {$table}
+    MODIFY COLUMN business_id BIGINT UNSIGNED NULL;
+");
+
+                // Re-add the foreign key constraint
+                DB::statement("
+    ALTER TABLE {$table}
+    ADD CONSTRAINT {$foreignKey}
+    FOREIGN KEY (business_id) REFERENCES businesses(id)
+    ON DELETE CASCADE;
+");
+            }
+
+            if ($i == 5) {
+                $modules = Module::where('is_enabled', 1)->pluck('id');
+
+                $service_plan = ServicePlan::first(); // Retrieve the first service plan
+
+                if ($service_plan) {
+                    $service_plan->update([
+                        'name' => 'Standard Plan',
+                        'description' => '',
+                        'set_up_amount' => 100,
+                        'number_of_employees_allowed' => 100,
+                        'duration_months' => 1,
+                        'price' => 20,
+                        'business_tier_id' => 1,
+                        'created_by' => auth()->id(),
+                    ]);
+
+                    $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
+                        return [
+                            'is_enabled' => 1,
+                            'service_plan_id' => $service_plan->id,
+                            'module_id' => $module_id,
+                            'created_by' => auth()->id(),
+                        ];
+                    })->toArray();
+
+                    ServicePlanModule::insert($service_plan_modules);
+                }
+            } else {
+                $this->setupServicePlan();
+            }
         }
 
 

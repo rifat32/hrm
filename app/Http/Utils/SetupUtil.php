@@ -204,7 +204,7 @@ trait SetupUtil
 
 
     public function setupServicePlan() {
-        $modules = Module::where('is_active', 1)->pluck('id');
+        $modules = Module::where('is_enabled', 1)->pluck('id');
 
         $service_plan = ServicePlan::create([
             'name' => 'Standard Plan',
