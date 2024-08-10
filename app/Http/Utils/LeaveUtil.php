@@ -59,9 +59,6 @@ trait LeaveUtil
 
         if ($setting_leave->approval_level == "single") {
 
-
-
-
             $special_user_ids = $setting_leave->special_users()->pluck("users.id");
             $is_special_user =  $special_user_ids->contains($user->id);
 

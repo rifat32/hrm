@@ -1029,7 +1029,7 @@ class AttendanceController extends Controller
                 ->first();
 
             // Update attendance status based on user's permissions and roles
-            if ($this->is_special_user($user, $setting_attendance) || $this->is_special_role($user, $setting_attendance) || $user->hasRole("business_owner")) {
+            if ($this->is_special_user($user, $setting_attendance) || $this->is_special_role($user, $setting_attendance) || $user->hasRole("business_owner") || $setting_attendance->auto_approval) {
                 $attendance->status = $request_data["is_approved"] ? "approved" : "rejected";
             }
 

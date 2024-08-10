@@ -1136,17 +1136,34 @@ if ($processedDetails->isNotEmpty()) {
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
+
+
+
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeRota::where([
                 "business_id" => auth()->user()->business_id,
             ])
             ->where(function($query) use ($all_manager_department_ids) {
-                $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
-                ->orWhereHas("user.departments", function($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
+                $query
+                ->where( function($query) use($all_manager_department_ids) {
+                    $query->whereIn("employee_rotas.department_id", $all_manager_department_ids)
+                    ->orWhereNull("employee_rotas.department_id");
+                })
+                ->orWhere( function($query) use($all_manager_department_ids) {
+                    $query ->whereHas("user.departments", function($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+
+                    })
+                    ->orWhereNull("employee_rotas.user_id");
                 });
+
+
             })
-            ->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
+            ->where( function($query) {
+                $query->whereNotIn("employee_rotas.user_id", [auth()->user()->id])
+                ->orWhereNull("employee_rotas.user_id");
+            })
+
 
 
                 ->whereIn('id', $idsArray)

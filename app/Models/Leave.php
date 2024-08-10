@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Leave extends Model
 {
     use HasFactory;
-    protected $appends = ['is_in_arrears'];
+    protected $appends = ['is_in_arrears', 'i_approved'];
     protected $fillable = [
         'leave_duration',
         'day_type',
@@ -28,6 +28,24 @@ class Leave extends Model
         "business_id",
         "created_by",
     ];
+
+public function getIApprovedAttribute($value) {
+$leave_approval = LeaveApproval::where([
+    "created_by" => auth()->user()->id
+])
+->first();
+
+
+if(!empty($leave_approval)){
+         return $leave_approval->is_approved;
+
+} else {
+    return -1;
+}
+
+
+}
+
 
     public function getIsInArrearsAttribute($value)
     {

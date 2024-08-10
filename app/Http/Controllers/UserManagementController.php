@@ -8306,7 +8306,7 @@ $payslipData
 
 
 
-            $user->department_ids = [$user->departments->pluck("id")[0]];
+            $user->department_ids = $user->departments->pluck("id");
 
 
 

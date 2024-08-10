@@ -225,7 +225,7 @@ class SettingLeaveController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('setting_leave_create') || !$request->user()->hasPermissionTo('user_view')) {
+            if (!$request->user()->hasPermissionTo('setting_leave_create') && !$request->user()->hasPermissionTo('user_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);

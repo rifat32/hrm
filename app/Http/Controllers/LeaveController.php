@@ -491,7 +491,22 @@ class LeaveController extends Controller
 
             $request_data["created_by"] = $request->user()->id;
 
-            $leave_approval =  LeaveApproval::create($request_data);
+            $leave_approval =  LeaveApproval::where([
+                'leave_id' => $request_data["leave_id"],
+                "created_by" => auth()->user()->id
+            ])
+            ->first();
+
+            if(!empty($leave_approval)){
+                $leave_approval->is_approved = $request_data["is_approved"];
+                $leave_approval->save();
+            } else {
+                $leave_approval =  LeaveApproval::create($request_data);
+            }
+
+
+
+
             if (!$leave_approval) {
                 return response()->json([
                     "message" => "something went wrong."
