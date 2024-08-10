@@ -11,6 +11,7 @@ use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class UpdateDatabaseController extends Controller
 {
@@ -64,23 +65,10 @@ class UpdateDatabaseController extends Controller
             }
             // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
             if ($i == 2) {
-                DB::statement("
-        CREATE PROCEDURE AddColumnIfNotExists()
-        BEGIN
-            IF NOT EXISTS (
-                SELECT *
-                FROM information_schema.COLUMNS
-                WHERE TABLE_NAME = 'businesses'
-                AND COLUMN_NAME = 'number_of_employees_allowed'
-            )
-            THEN
-                ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0;
-            END IF;
-        END;
-    ");
-
-                DB::statement("CALL AddColumnIfNotExists();");
-                DB::statement("DROP PROCEDURE AddColumnIfNotExists;");
+                // Check and add the 'number_of_employees_allowed' column if it doesn't exist
+                if (!Schema::hasColumn('businesses', 'number_of_employees_allowed')) {
+                    DB::statement("ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0");
+                }
             }
 
             // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
@@ -189,9 +177,22 @@ class UpdateDatabaseController extends Controller
                     })->toArray();
 
                     ServicePlanModule::insert($service_plan_modules);
+                } else {
+                    $this->setupServicePlan();
                 }
-            } else {
-                $this->setupServicePlan();
+            }
+
+            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 6) {
+                // Check and add the 'in_geolocation' column if it doesn't exist
+                if (!Schema::hasColumn('attendance_histories', 'in_geolocation')) {
+                    DB::statement("ALTER TABLE attendance_histories ADD COLUMN in_geolocation VARCHAR(255) NULL");
+                }
+
+                // Check and add the 'out_geolocation' column if it doesn't exist
+                if (!Schema::hasColumn('attendance_histories', 'out_geolocation')) {
+                    DB::statement("ALTER TABLE attendance_histories ADD COLUMN out_geolocation VARCHAR(255) NULL");
+                }
             }
         }
 
