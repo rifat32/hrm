@@ -50,7 +50,7 @@ trait UserDetailsUtil
 
         // Eager load service plan for efficiency
         $business = Business::with("service_plan")->where([
-            "owner_id" => $user->id
+            "id" => $user->id
         ])
             ->first();
 

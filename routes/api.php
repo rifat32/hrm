@@ -462,7 +462,6 @@ Route::put('/v1.0/users/profile-picture', [UserManagementController::class, "upd
 
 
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
-
 Route::put('/v1.0/users/exit', [UserManagementController::class, "exitUser"]);
 Route::put('/v1.0/users/update/exit', [UserManagementController::class, "exitUser"]);
 // if current joining date gte last termination throw err (rejoined)

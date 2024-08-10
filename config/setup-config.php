@@ -352,7 +352,9 @@ return [
         "setting_leave_type_activate",
         "setting_leave_type_view",
         "setting_leave_type_delete",
+
         "setting_leave_create",
+        
 
 
 
