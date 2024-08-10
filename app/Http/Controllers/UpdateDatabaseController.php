@@ -196,7 +196,6 @@ class UpdateDatabaseController extends Controller
             }
         }
 
-
         return "ok";
     }
 }

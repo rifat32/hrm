@@ -596,8 +596,26 @@ trait UserDetailsUtil
     public function validateJoiningDate($joining_date, $user_id)
     {
 
+        $termination =  Termination::where([
+            "user_id" => $user_id
+        ])
+            ->latest()
+            ->first();
+
+            if (!empty($termination) && Carbon::parse($termination->date_of_termination)->gte(Carbon::parse($joining_date))) {
+                throw new Exception("The employee has been terminated on " . $termination->date_of_termination . " So you can not update joining date", 401);
+            }
+
         if (!empty($joining_date)) {
-            $attendance_exists = Attendance::where(
+            $attendance_exists = Attendance::
+            when(!empty($termination), function ($query) use($termination) {
+                $query->where(
+                    "in_date",
+                    ">",
+                    $termination->date_of_termination,
+                );
+            })
+            ->where(
                 "in_date",
                 "<",
                 $joining_date,
@@ -610,7 +628,15 @@ trait UserDetailsUtil
                 throw new Exception(("Attendance exists before " . $joining_date), 401);
             }
 
-            $leave_exists = LeaveRecord::where(
+            $leave_exists = LeaveRecord::
+            when(!empty($termination), function ($query) use($termination) {
+                $query->where(
+                    "date",
+                    ">",
+                    $termination->date_of_termination,
+                );
+            })
+            ->where(
                 "date",
                 "<",
                 $joining_date,
@@ -622,11 +648,17 @@ trait UserDetailsUtil
 
             if ($leave_exists) {
                 throw new Exception(($leave_exists . "Leave exists before " . $joining_date), 401);
-
-
-
             }
-            $asset_assigned = UserAssetHistory::where(
+
+            $asset_assigned = UserAssetHistory::
+            when(!empty($termination), function ($query) use($termination) {
+                $query->where(
+                    "from_date",
+                    ">",
+                    $termination->date_of_termination,
+                );
+            })
+            ->where(
                 "from_date",
                 "<",
                 $joining_date,
@@ -639,79 +671,20 @@ trait UserDetailsUtil
                 throw new Exception(("Asset assigned before " . $joining_date), 401);
             }
 
-            $termination =  Termination::where([
-                "user_id" => $user_id
-            ])
-
-                ->where("date_of_termination", ">=", $joining_date)
-                ->latest()
-                ->first();
-
-
-            if (!empty($termination)) {
-                throw new Exception("The employee has been terminated on " . $termination->date_of_termination, 401);
-            }
         }
     }
     public function validateJoiningDateForRejoin($joining_date, $user_id)
     {
-
         if (!empty($joining_date)) {
-            $attendance_exists = Attendance::where(
-                "in_date",
-                ">",
-                $joining_date,
-            )
-                ->where([
-                    "user_id" => $user_id
-                ])->exists();
+            $termination = Termination::where('user_id', $user_id)
+            ->latest()
+            ->first();
 
-            if ($attendance_exists) {
-                throw new Exception(("Attendance exists after " . $joining_date), 401);
-            }
-
-            $leave_exists = LeaveRecord::where(
-                "date",
-                ">",
-                $joining_date,
-            )
-                ->whereHas("leave", function ($query) use ($user_id) {
-                    $query->where("leaves.user_id", $user_id);
-                })
-                ->exists();
-
-            if ($leave_exists) {
-
-                throw new Exception(($leave_exists . "Leave exists after " . $joining_date), 401);
-
-            }
-
-            $asset_assigned = UserAssetHistory::where(
-                "from_date",
-                ">",
-                $joining_date,
-            )
-                ->where([
-                    "user_id" => $user_id
-                ])->exists();
-
-            if ($asset_assigned) {
-                throw new Exception(("Asset assigned after " . $joining_date), 401);
-            }
-
-            $termination =  Termination::where([
-                "user_id" => $user_id
-            ])
-
-                ->where("date_of_termination", ">=", $joining_date)
-                ->latest()
-                ->first();
-
-
-            if (!empty($termination)) {
-                throw new Exception("The employee has been terminated on " . $termination->date_of_termination, 401);
-            }
+        if (!empty($termination) && Carbon::parse($termination->date_of_termination)->gte(Carbon::parse($joining_date))) {
+            throw new Exception("The employee has been terminated on " . $termination->date_of_termination, 401);
         }
+        }
+
     }
 
 

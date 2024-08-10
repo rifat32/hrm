@@ -874,47 +874,9 @@ trait BusinessUtil
         $request_data['business']["pension_scheme_letters"] = [];
         $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
 
-        $business_data = (collect($request_data['business'])->only(
-            "name",
-            "start_date",
-            "trail_end_date",
-            "about",
-            "web_page",
-            "phone",
-            "email",
-            "additional_information",
-            "address_line_1",
-            "address_line_2",
-            "lat",
-            "long",
-            "country",
-            "city",
-            "currency",
-            "postcode",
-            "logo",
-            "image",
-            "background_image",
-            "status",
-            "is_active",
-            "is_self_registered_businesses",
-
-            "service_plan_id",
-            "service_plan_discount_code",
-            "service_plan_discount_amount",
 
 
-            "pension_scheme_registered",
-            "pension_scheme_name",
-            "pension_scheme_letters",
-
-
-            "owner_id",
-            'created_by'
-        )->toArray());
-
-
-
-        $business =  Business::create($business_data);
+        $business =  Business::create($request_data['business']);
 
 
         //    foreach($request_data['business']["active_module_ids"] as $active_module_id){

@@ -2373,6 +2373,7 @@ $payslipData
     public function exitUser(UserExitRequest $request)
     {
 
+        DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('user_update')) {
@@ -2384,34 +2385,10 @@ $payslipData
 
 
 
-            $userQuery = User::where([
-                "id" => $request["id"]
-            ]);
-            $updatableUser = $userQuery->first();
-            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                return response()->json([
-                    "message" => "You can not change the role of super admin"
-                ], 401);
-            }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                return response()->json([
-                    "message" => "You can not update this user"
-                ], 401);
-            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user =    $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
 
 
-
-            $userQueryTerms = [
-                "id" => $request_data["id"],
-            ];
-
-
-            $user = User::where($userQueryTerms)->first();
-            if (empty($user)) {
-                return response()->json([
-                    "message" => "no user found"
-                ], 404);
-            }
 
             if (empty($user->joining_date)) {
                 throw new Exception("The employee does not have a joining date", 401);
@@ -2454,15 +2431,181 @@ $payslipData
             $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
 
 
+            DB::commit();
 
             return response($user, 201);
         } catch (Exception $e) {
-            error_log($e->getMessage());
+      DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
 
 
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/users/exists",
+     *      operationId="getUserExists",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         description="user_id",
+     *         required=true,
+     *  example="1"
+     *      ),
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+    * *  @OA\Parameter(
+     * name="is_single_search",
+     * in="query",
+     * description="is_single_search",
+     * required=true,
+     * example="ASC"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+
+     *      summary="This method is to get user notes  ",
+     *      description="This method is to get user notes ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserExists(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  $request->user()->business_id;
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+             $user_exists = Termination::where(function($query) use($all_manager_department_ids) {
+                $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
+                    $query->whereIn("departments.id",$all_manager_department_ids);
+                 });
+                //  ->orWhereHas("mentions", function($query) {
+                //     $query->where("user_note_mentions.user_id",auth()->user()->id);
+                //  });
+            })
+
+            // ->when(!empty($request->search_key), function ($query) use ($request) {
+            //         return $query->where(function ($query) use ($request) {
+            //             $term = $request->search_key;
+            //             $query->where("user_notes.name", "like", "%" . $term . "%");
+            //             //     ->orWhere("user_notes.description", "like", "%" . $term . "%");
+            //         });
+            //     })
+
+
+                ->when(!empty($request->user_id), function ($query) use ($request) {
+                    return $query->where('terminations.user_id', $request->user_id);
+                })
+
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('terminations.created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('terminations.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("terminations.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("terminations.id", "DESC");
+                })
+
+                ->when($request->filled("is_single_search") && $request->boolean("is_single_search"), function ($query) use ($request) {
+                    return $query->first();
+                }, function ($query) {
+                    return $query->when(!empty(request()->per_page), function ($query) {
+                        return $query->paginate(request()->per_page);
+                    }, function ($query) {
+                        return $query->get();
+                    });
+                });
+
+            if ($request->filled("is_single_search") && empty($user_letters)) {
+                throw new Exception("No data found", 404);
+            }
+
+
+                 return response()->json($user_exists, 200);
+                } catch (Exception $e) {
+
+                    return $this->sendError($e, 500, $request);
+                }
+            }
 
 
     /**
