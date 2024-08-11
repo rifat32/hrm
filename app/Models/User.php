@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Utils\BasicUtil;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -12,9 +13,10 @@ use Laravel\Cashier\Billable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
+
 class User extends Authenticatable
 {
-    use   Billable, HasApiTokens, HasFactory, Notifiable, HasRoles,HasPermissions, BasicUtil;
+    use   Billable, HasApiTokens, HasFactory, Notifiable, HasRoles, HasPermissions, BasicUtil;
 
     /**
      * The attributes that are mass assignable.
@@ -25,7 +27,7 @@ class User extends Authenticatable
     protected $connection = 'mysql';
 
 
-    protected $appends = ['has_this_project',"manages_department"];
+    protected $appends = ['has_this_project', "manages_department","will_exit"];
 
     protected $guard_name = "api";
     protected $fillable = [
@@ -83,14 +85,35 @@ class User extends Authenticatable
         'business_id',
         'user_id',
         "created_by",
-         'is_active'
+        'is_active'
     ];
 
-// Relationships
-public function accessRevocation()
-{
-    return $this->hasOne(AccessRevocation::class);
-}
+    public function getWillExitAttribute($value)
+    {
+
+        $last_termination =  Termination::where([
+            "user_id" => $this->id
+        ])
+            ->latest()
+            ->first();
+        if(!empty($last_termination)) {
+            $date_of_termination = Carbon::parse($last_termination->date_of_termination);
+
+            if($date_of_termination->isFuture() || $date_of_termination->isToday()){
+                return 1;
+            }
+        }
+
+        return 0;
+
+
+    }
+
+    // Relationships
+    public function accessRevocation()
+    {
+        return $this->hasOne(AccessRevocation::class);
+    }
 
     public function terminations()
     {
@@ -102,71 +125,73 @@ public function accessRevocation()
         return $this->hasOne(Termination::class)->orderByDesc("id");
     }
 
- // Relationships
- public function exitInterviews()
- {
-     return $this->hasMany(ExitInterview::class);
- }
-
-
-
-  public function getHasThisProjectAttribute($value) {
-    $request = request();
-    // You can now use $currentRequest as the request object
-    $has_this_project = $request->input('has_this_project');
-
-
-    if(empty($has_this_project)) {
-        return NULL;
-    }
-    $project = Project::
-    whereHas("users",function($query) {
-      $query->where("users.id",$this->id);
-   })
-     ->where([
-      "id" => $has_this_project
-     ])
-      ->first();
-
-      return $project?1:0;
+    // Relationships
+    public function exitInterviews()
+    {
+        return $this->hasMany(ExitInterview::class);
     }
 
 
-    public function getManagesDepartmentAttribute($value) {
 
-$all_departments = $this->get_all_departments_of_manager();
+    public function getHasThisProjectAttribute($value)
+    {
+        $request = request();
+        // You can now use $currentRequest as the request object
+        $has_this_project = $request->input('has_this_project');
 
-return count($all_departments) > 0;
 
+        if (empty($has_this_project)) {
+            return NULL;
         }
+        $project = Project::whereHas("users", function ($query) {
+                $query->where("users.id", $this->id);
+            })
+            ->where([
+                "id" => $has_this_project
+            ])
+            ->first();
+
+        return $project ? 1 : 0;
+    }
 
 
-        public function bank()
-        {
-            return $this->hasOne(Bank::class, "id" ,'bank_id');
-        }
+    public function getManagesDepartmentAttribute($value)
+    {
+
+        $all_departments = $this->get_all_departments_of_manager();
+
+        return count($all_departments) > 0;
+    }
+
+
+    public function bank()
+    {
+        return $this->hasOne(Bank::class, "id", 'bank_id');
+    }
 
 
 
     public function payrun_user()
     {
-        return $this->hasOne(PayrunUser::class, "user_id" ,'id');
+        return $this->hasOne(PayrunUser::class, "user_id", 'id');
     }
 
 
     public function payrolls()
     {
-        return $this->hasMany(Payroll::class, "user_id" ,'id');
+        return $this->hasMany(Payroll::class, "user_id", 'id');
     }
 
 
 
-    public function projects() {
+    public function projects()
+    {
         return $this->belongsToMany(Project::class, 'user_projects', 'user_id', 'project_id');
     }
 
 
-    public function work_locations() {
+    public function work_locations()
+    {
         return $this->belongsToMany(WorkLocation::class, 'user_work_locations', 'user_id', 'work_location_id');
     }
 
@@ -174,7 +199,8 @@ return count($all_departments) > 0;
 
 
 
-    public function holidays() {
+    public function holidays()
+    {
         return $this->belongsToMany(Holiday::class, 'user_holidays', 'user_id', 'holiday_id');
     }
 
@@ -182,12 +208,14 @@ return count($all_departments) > 0;
 
 
 
-    public function business() {
+    public function business()
+    {
         return $this->belongsTo(Business::class, 'business_id', 'id');
     }
 
 
-    public function resold_businesses() {
+    public function resold_businesses()
+    {
         return $this->hasMany(Business::class, 'created_by', 'id');
     }
 
@@ -196,58 +224,71 @@ return count($all_departments) > 0;
 
 
 
-    public function all_users() {
+    public function all_users()
+    {
         return $this->hasMany(User::class, 'business_id', 'business_id');
     }
 
 
-    public function departments() {
+    public function departments()
+    {
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
     }
 
-    public function manager_departments() {
-        return $this->hasMany(Department::class,'manager_id', 'id');
+    public function manager_departments()
+    {
+        return $this->hasMany(Department::class, 'manager_id', 'id');
     }
 
-    public function department_user() {
+    public function department_user()
+    {
         return $this->belongsTo(DepartmentUser::class,  'id', 'user_id');
     }
 
 
-    public function recruitment_processes() {
+    public function recruitment_processes()
+    {
         return $this->hasMany(UserRecruitmentProcess::class, 'user_id', 'id');
     }
 
 
-    public function designation() {
+    public function designation()
+    {
         return $this->belongsTo(Designation::class, 'designation_id', 'id');
     }
 
-    public function employment_status() {
+    public function employment_status()
+    {
         return $this->belongsTo(EmploymentStatus::class, 'employment_status_id', 'id');
     }
 
-    public function work_shifts() {
+    public function work_shifts()
+    {
         return $this->belongsToMany(WorkShift::class, 'user_work_shifts', 'user_id', 'work_shift_id');
     }
 
 
-    public function employee_rota() {
+    public function employee_rota()
+    {
         return $this->hasOne(EmployeeRota::class, 'user_id', 'id');
     }
 
-    public function leaves() {
+    public function leaves()
+    {
         return $this->hasMany(Leave::class, 'user_id', 'id');
     }
-    public function attendances() {
+    public function attendances()
+    {
         return $this->hasMany(Attendance::class, 'user_id', 'id');
     }
 
-    public function attendance_histories() {
+    public function attendance_histories()
+    {
         return $this->hasMany(AttendanceHistory::class, 'user_id', 'id');
     }
 
-    public function sponsorship_detail() {
+    public function sponsorship_detail()
+    {
         $issue_date_column = 'date_assigned';
         $expiry_date_column = 'expiry_date';
         $current_user_id = request()->id;
@@ -255,35 +296,36 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
-            if($latest_expired_record) {
-                $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
         return    $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
 
 
 
-    public function passport_detail() {
+    public function passport_detail()
+    {
         $issue_date_column = 'passport_issue_date';
         $expiry_date_column = 'passport_expiry_date';
         $current_user_id = request()->id;
@@ -291,36 +333,37 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
 
-            if($latest_expired_record) {
-                $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
 
 
 
         return    $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
-    public function visa_detail() {
+    public function visa_detail()
+    {
         $issue_date_column = 'visa_issue_date';
         $expiry_date_column = 'visa_expiry_date';
         $current_user_id = request()->id;
@@ -328,33 +371,34 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
 
-            if($latest_expired_record) {
-                $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
         return    $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
-    public function right_to_work() {
+    public function right_to_work()
+    {
         $issue_date_column = 'right_to_work_check_date';
         $expiry_date_column = 'right_to_work_expiry_date';
         $current_user_id = request()->id;
@@ -362,32 +406,33 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
-            if($latest_expired_record) {
-                $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
         return    $this->hasOne(EmployeeRightToWorkHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
-    public function sponsorship_details() {
+    public function sponsorship_details()
+    {
         $issue_date_column = 'date_assigned';
         $expiry_date_column = 'expiry_date';
         $current_user_id = request()->id;
@@ -395,78 +440,77 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
-            if($latest_expired_record) {
-                $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeeSponsorshipHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
-
-        return    $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
-    }
-
-
-
-
-
-
-    public function pension_details() {
-        $current_user_id = request()->id;
-        if(!$current_user_id){
- return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id');
         }
 
-            $issue_date_column = 'pension_enrollment_issue_date';
-            $expiry_date_column = 'pension_re_enrollment_due_date';
-
-
-            $user = User::where([
-                "id" => $current_user_id
-            ])
-            ->first();
-
-              $current_data = NULL;
-            if(!$user->pension_eligible) {
-                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-                ->where("pension_eligible",0)
-                ->latest()->first();
-            } else {
-
-
-                $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-                ->where("pension_eligible", 1)
-                ->where($issue_date_column, '<', now())
-                    ->orderByDesc("id")
-
-                    ->first();
-            }
-
-
-
-            return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-            ->where("id",$current_data?$current_data->id:NULL);
-
-
-
+        return    $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
 
-    public function pension_detail() {
+
+
+
+
+
+    public function pension_details()
+    {
+        $current_user_id = request()->id;
+        if (!$current_user_id) {
+            return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id');
+        }
+
+        $issue_date_column = 'pension_enrollment_issue_date';
+        $expiry_date_column = 'pension_re_enrollment_due_date';
+
+
+        $user = User::where([
+            "id" => $current_user_id
+        ])
+            ->first();
+
+        $current_data = NULL;
+        if (!$user->pension_eligible) {
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+                ->where("pension_eligible", 0)
+                ->latest()->first();
+        } else {
+
+
+            $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
+                ->where("pension_eligible", 1)
+                ->where($issue_date_column, '<', now())
+                ->orderByDesc("id")
+
+                ->first();
+        }
+
+
+
+        return     $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
+            ->where("id", $current_data ? $current_data->id : NULL);
+    }
+
+    public function pension_detail()
+    {
         $issue_date_column = 'pension_enrollment_issue_date';
         $expiry_date_column = 'pension_re_enrollment_due_date';
         $current_user_id = request()->id;
@@ -474,23 +518,23 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
-        if(!$user) {
-          return NULL;
+            ->first();
+        if (!$user) {
+            return NULL;
         }
 
 
 
         $current_data = NULL;
 
-        if(!$user->pension_eligible) {
+        if (!$user->pension_eligible) {
             $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            ->where("pension_eligible",0)
-            ->latest()->first();
+                ->where("pension_eligible", 0)
+                ->latest()->first();
         } else {
             $current_data = EmployeePensionHistory::where('user_id', $current_user_id)
-            ->where("pension_eligible", 1)
-            ->where($issue_date_column, '<', now())
+                ->where("pension_eligible", 1)
+                ->where($issue_date_column, '<', now())
                 ->orderByDesc("id")
 
                 ->first();
@@ -498,10 +542,11 @@ return count($all_departments) > 0;
 
 
         return    $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
 
-    public function passport_details() {
+    public function passport_details()
+    {
         $issue_date_column = 'passport_issue_date';
         $expiry_date_column = 'passport_expiry_date';
         $current_user_id = request()->id;
@@ -509,36 +554,37 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeePassportDetailHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
 
-            if($latest_expired_record) {
-                $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeePassportDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
 
 
 
         return    $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
-    public function visa_details() {
+    public function visa_details()
+    {
         $issue_date_column = 'visa_issue_date';
         $expiry_date_column = 'visa_expiry_date';
         $current_user_id = request()->id;
@@ -546,33 +592,34 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
 
-            if($latest_expired_record) {
-                $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeeVisaDetailHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
         return    $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
-    public function right_to_works() {
+    public function right_to_works()
+    {
         $issue_date_column = 'right_to_work_check_date';
         $expiry_date_column = 'right_to_work_expiry_date';
         $current_user_id = request()->id;
@@ -580,59 +627,65 @@ return count($all_departments) > 0;
         $user = User::where([
             "id" => $current_user_id
         ])
-        ->first();
+            ->first();
 
-        if(!$user) {
+        if (!$user) {
             return NULL;
-          }
+        }
 
         $current_data = NULL;
 
-           $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+        $latest_expired_record = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
             ->where($issue_date_column, '<', now())
             ->orderBy($expiry_date_column, 'DESC')
             ->first();
 
-            if($latest_expired_record) {
-                $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
+        if ($latest_expired_record) {
+            $current_data = EmployeeRightToWorkHistory::where('user_id', $current_user_id)
                 ->where($issue_date_column, '<', now())
                 ->where($expiry_date_column, $latest_expired_record[$expiry_date_column])
                 // ->orderByDesc($issue_date_column)
                 ->orderByDesc('id')
                 ->first();
-            }
+        }
 
         return    $this->hasOne(EmployeeRightToWorkHistory::class, 'user_id', 'id')
-        ->where("id",$current_data?$current_data->id:NULL);
+            ->where("id", $current_data ? $current_data->id : NULL);
     }
 
 
-    public function assets() {
+    public function assets()
+    {
         return $this->hasMany(UserAsset::class, 'user_id', 'id');
     }
-    public function documents() {
+    public function documents()
+    {
         return $this->hasMany(UserDocument::class, 'user_id', 'id');
     }
-    public function education_histories() {
+    public function education_histories()
+    {
         return $this->hasMany(UserEducationHistory::class, 'user_id', 'id');
     }
-    public function job_histories() {
+    public function job_histories()
+    {
         return $this->hasMany(UserJobHistory::class, 'user_id', 'id');
     }
 
-    public function notes() {
+    public function notes()
+    {
         return $this->hasMany(UserNote::class, 'user_id', 'id');
     }
 
-    public function social_links() {
+    public function social_links()
+    {
         return $this->hasMany(UserSocialSite::class, 'user_id', 'id');
     }
 
 
-    public function scopeWhereHasRecursiveHolidays($query, $today,$depth = 5)
+    public function scopeWhereHasRecursiveHolidays($query, $today, $depth = 5)
     {
-        $query->whereHas('departments', function ($subQuery) use ($today,$depth) {
-            $subQuery->whereHasRecursiveHolidays($today,$depth);
+        $query->whereHas('departments', function ($subQuery) use ($today, $depth) {
+            $subQuery->whereHasRecursiveHolidays($today, $depth);
         });
     }
 
@@ -662,22 +715,4 @@ return count($all_departments) > 0;
         'email_verified_at' => 'datetime',
         'emergency_contact_details' => 'array',
     ];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

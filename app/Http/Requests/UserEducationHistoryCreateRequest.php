@@ -46,9 +46,6 @@ class UserEducationHistoryCreateRequest extends BaseFormRequest
             'city' => 'nullable|string',
             'postcode' => 'nullable|string',
             'is_current' => 'required|boolean',
-
-
-
             'attachments' => 'present|array',
             'attachments.*' => 'string',
         ];

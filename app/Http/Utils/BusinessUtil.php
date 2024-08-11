@@ -851,7 +851,14 @@ trait BusinessUtil
         $created_by_user = auth()->user();
 
         if (empty($created_by_user)) {
-            $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
+
+            if(!empty($request_data['reseller_id'])){
+              $created_by_user = $request_data['reseller_id'];
+            } else {
+              $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
+            }
+
+
             $request_data["business"]["number_of_employees_allowed"] = 0;
         }
 

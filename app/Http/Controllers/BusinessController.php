@@ -845,6 +845,7 @@ class BusinessController extends Controller
                 $business->fill(collect($request_data['business'])->only([
                     "name",
                     "start_date",
+                    "trail_end_date",
                     "about",
                     "web_page",
                     "phone",
@@ -856,19 +857,28 @@ class BusinessController extends Controller
                     "long",
                     "country",
                     "city",
+                    "currency",
                     "postcode",
                     "logo",
                     "image",
-                    "status",
                     "background_image",
-                    "currency",
-
-                    "number_of_employees_allowed",
+                    "status",
+                    "is_active",
                     "is_self_registered_businesses",
+
                     "service_plan_id",
                     "service_plan_discount_code",
                     "service_plan_discount_amount",
-                    "trail_end_date"
+
+
+                    "pension_scheme_registered",
+                    "pension_scheme_name",
+                    "pension_scheme_letters",
+                    "number_of_employees_allowed",
+
+
+                    "owner_id",
+                    'created_by'
                 ])->toArray());
 
                 $business->save();

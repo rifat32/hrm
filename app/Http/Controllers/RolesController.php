@@ -738,6 +738,19 @@ class RolesController extends Controller
                             }
                         }
                      }
+                } else {
+                    foreach ($permissions["permissions"] as $permission) {
+
+                        $hasPermission = $current_permissions->contains('name', $permission);
+
+
+                        if ($hasPermission) {
+                            $data["permissions"][] = [
+                                "name"  => $permission,
+                                "title" => $permissions_titles[$permission] ?? null,
+                            ];
+                        }
+                    }
                 }
 
                 if (!empty($data["permissions"])) {

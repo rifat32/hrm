@@ -45,268 +45,257 @@ class UserCreateV2Request extends BaseFormRequest
 
 
         return [
-        'first_Name' => 'required|string|max:255',
-        'middle_Name' => 'nullable|string|max:255',
 
+            'first_Name' => 'required|string|max:255',
+            'middle_Name' => 'nullable|string|max:255',
+            'last_Name' => 'required|string|max:255',
+            "NI_number" => "required|string",
 
-        'last_Name' => 'required|string|max:255',
-        "NI_number" => "required|string",
-
-        'user_id' => [
-            "required",
-            'string',
-            function ($attribute, $value, $fail) {
-                $user_id_exists =  User::where([
-                    'user_id'=> $value,
-                    "created_by" => auth()->user()->id
-                 ]
-                 )->exists();
-                 if ($user_id_exists){
-                      $fail("The employee id has already been taken.");
-                   }
-
-
-            },
-        ],
-
-        // 'email' => 'required|string|email|indisposable|max:255|unique:users',
-        'email' => 'required|string|email|max:255|unique:users',
-
-        'password' => 'required|string|min:6',
-        'phone' => 'required|string',
-        'image' => 'nullable|string',
-        'address_line_1' => 'required|string',
-        'address_line_2' => 'nullable',
-        'country' => 'required|string',
-        'city' => 'required|string',
-        'postcode' => 'nullable|string',
-        'lat' => 'nullable|string',
-        'long' => 'nullable|string',
-
-        'role' => [
-            "required",
-            'string',
-            function ($attribute, $value, $fail) {
-                $role  = Role::where(["name" => $value])->first();
-
-
-                if (!$role){
-                         // $fail($attribute . " is invalid.")
-                         $fail("Role does not exists.");
-                         return;
-
-                }
-
-                if(!empty(auth()->user()->business_id)) {
-                    if (empty($role->business_id)){
-                        // $fail($attribute . " is invalid.")
-                      $fail("You don't have this role");
-                      return;
-
-                  }
-                    if ($role->business_id != auth()->user()->business_id){
-                          // $fail($attribute . " is invalid.")
-                        $fail("You don't have this role");
-                        return;
-
+            'user_id' => [
+                "required",
+                'string',
+                function ($attribute, $value, $fail) {
+                    $user_id_exists =  User::where(
+                        [
+                            'user_id' => $value,
+                            "created_by" => auth()->user()->id
+                        ]
+                    )->exists();
+                    if ($user_id_exists) {
+                        $fail("The employee id has already been taken.");
                     }
-                } else {
-                    if (!empty($role->business_id)){
+                },
+            ],
+
+            // 'email' => 'required|string|email|indisposable|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users',
+
+            'password' => 'required|string|min:6',
+            'phone' => 'required|string',
+            'image' => 'nullable|string',
+            'address_line_1' => 'required|string',
+            'address_line_2' => 'nullable',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'postcode' => 'nullable|string',
+            'lat' => 'nullable|string',
+            'long' => 'nullable|string',
+
+            'role' => [
+                "required",
+                'string',
+                function ($attribute, $value, $fail) {
+                    $role  = Role::where(["name" => $value])->first();
+
+
+                    if (!$role) {
                         // $fail($attribute . " is invalid.")
-                      $fail("You don't have this role");
-                      return;
+                        $fail("Role does not exists.");
+                        return;
+                    }
+
+                    if (!empty(auth()->user()->business_id)) {
+                        if (empty($role->business_id)) {
+                            // $fail($attribute . " is invalid.")
+                            $fail("You don't have this role");
+                            return;
+                        }
+                        if ($role->business_id != auth()->user()->business_id) {
+                            // $fail($attribute . " is invalid.")
+                            $fail("You don't have this role");
+                            return;
+                        }
+                    } else {
+                        if (!empty($role->business_id)) {
+                            // $fail($attribute . " is invalid.")
+                            $fail("You don't have this role");
+                            return;
+                        }
+                    }
+                },
+            ],
+
+
+            'work_shift_id' => [
+                "nullable",
+                'numeric',
+                function ($attribute, $value, $fail) {
+
+
+                    if (!empty($value)) {
+
+
+                        $business_times =    BusinessTime::where([
+                            "is_weekend" => 1,
+                            "business_id" => auth()->user()->business_id,
+                        ])->get();
+
+
+                        $exists = WorkShift::where('id', $value)
+                            ->where([
+                                "work_shifts.business_id" => auth()->user()->business_id
+                            ])
+                            ->orWhere(function ($query) use ($business_times) {
+                                $query->where([
+                                    "is_active" => 1,
+                                    "business_id" => NULL,
+                                    "is_default" => 1
+                                ])
+                                    //     ->whereHas('details', function($query) use($business_times) {
+
+                                    //     foreach($business_times as $business_time) {
+                                    //         $query->where([
+                                    //             "day" => $business_time->day,
+                                    //         ]);
+                                    //         if($business_time["is_weekend"]) {
+                                    //             $query->where([
+                                    //                 "is_weekend" => 1,
+                                    //             ]);
+                                    //         } else {
+                                    //             $query->where(function($query) use($business_time) {
+                                    //                 $query->whereTime("start_at", ">=", $business_time->start_at);
+                                    //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
+                                    //             });
+                                    //         }
 
-                  }
-                }
+                                    //     }
+                                    // })
+                                ;
+                            })
 
+                            ->exists();
 
-            },
-        ],
+                        if (!$exists) {
+                            $fail($attribute . " is invalid.");
+                        }
+                    }
+                },
+            ],
 
+            'departments' => 'required|array|size:1',
+            'departments.*' =>  [
+                'numeric',
+                new ValidateDepartment($all_manager_department_ids)
+            ],
 
-        'work_shift_id' => [
-            "nullable",
-            'numeric',
-            function ($attribute, $value, $fail) {
 
 
-                if(!empty($value)){
 
+            'gender' => 'nullable|string|in:male,female,other',
+            'is_in_employee' => "required|boolean",
+            'designation_id' => [
+                "required",
+                'numeric',
+                new ValidateDesignationId()
+            ],
+            'employment_status_id' => [
+                "required",
+                'numeric',
+                new ValidateEmploymentStatus()
+            ],
 
-                     $business_times =    BusinessTime::where([
-                "is_weekend" => 1,
-                "business_id" => auth()->user()->business_id,
-            ])->get();
 
 
-                    $exists = WorkShift::where('id', $value)
-                    ->where([
-                        "work_shifts.business_id" => auth()->user()->business_id
-                    ])
-                    ->orWhere(function($query) use($business_times) {
-                        $query->where([
-                            "is_active" => 1,
-                            "business_id" => NULL,
-                            "is_default" => 1
-                        ])
-                    //     ->whereHas('details', function($query) use($business_times) {
+            'recruitment_processes' => "present|array",
+            'recruitment_processes.*.recruitment_process_id' => [
+                "required",
+                'numeric',
+                new ValidateRecruitmentProcessId()
+            ],
+            'recruitment_processes.*.description' => "nullable|string",
+            'recruitment_processes.*.attachments' => "present|array",
 
-                    //     foreach($business_times as $business_time) {
-                    //         $query->where([
-                    //             "day" => $business_time->day,
-                    //         ]);
-                    //         if($business_time["is_weekend"]) {
-                    //             $query->where([
-                    //                 "is_weekend" => 1,
-                    //             ]);
-                    //         } else {
-                    //             $query->where(function($query) use($business_time) {
-                    //                 $query->whereTime("start_at", ">=", $business_time->start_at);
-                    //                 $query->orWhereTime("end_at", "<=", $business_time->end_at);
-                    //             });
-                    //         }
 
-                    //     }
-                    // })
-                    ;
 
-                    })
 
-                    ->exists();
 
-                if (!$exists) {
-                    $fail($attribute . " is invalid.");
-                }
-                }
 
-            },
-        ],
+            'work_location_ids' => [
+                "present",
+                'array',
+            ],
 
-        'departments' => 'required|array|size:1',
-        'departments.*' =>  [
-            'numeric',
-            new ValidateDepartment($all_manager_department_ids)
-        ],
+            "work_location_ids.*" => [
+                "numeric",
+                new ValidateWorkLocation()
+            ],
 
 
 
 
-        'gender' => 'nullable|string|in:male,female,other',
-        'is_in_employee' => "required|boolean",
-        'designation_id' => [
-            "required",
-            'numeric',
-            new ValidateDesignationId()
-        ],
-        'employment_status_id' => [
-            "required",
-            'numeric',
-            new ValidateEmploymentStatus()
-        ],
+            'joining_date' => [
+                "required",
+                'date',
+                function ($attribute, $value, $fail) {
 
+                    $joining_date = Carbon::parse($value);
+                    $start_date = Carbon::parse(auth()->user()->business->start_date);
 
+                    if ($joining_date->lessThan($start_date)) {
+                        $fail("The $attribute must not be after the start date of the business.");
+                    }
+                },
+            ],
 
-        'recruitment_processes' => "present|array",
-        'recruitment_processes.*.recruitment_process_id' => [
-            "required",
-            'numeric',
-            new ValidateRecruitmentProcessId()
-        ],
-        'recruitment_processes.*.description' => "nullable|string",
-        'recruitment_processes.*.attachments' => "present|array",
 
+            'date_of_birth' => "required|date",
 
+            'salary_per_annum' => "required|numeric",
+            'weekly_contractual_hours' => 'required|numeric',
+            "minimum_working_days_per_week" => 'required|numeric|max:7',
+            "overtime_rate" => 'required|numeric',
+            'emergency_contact_details' => "present|array",
 
 
+            "immigration_status" => "required|in:british_citizen,ilr,immigrant,sponsored",
 
+            'is_sponsorship_offered' => "nullable|boolean",
 
-        'work_location_ids' => [
-            "present",
-            'array',
-        ],
 
-        "work_location_ids.*" =>[
-            "numeric",
-        new ValidateWorkLocation()],
+            'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
 
+            "is_active_visa_details" => 'required|boolean',
+            "is_active_right_to_works" => "required|boolean",
 
+            "sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
+            "sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
+            // "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',
+            "sponsorship_details.note" => 'nullable|required_if:immigration_status,sponsored|string',
+            "sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
+            "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal',
+            "sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
 
 
-        'joining_date' => [
-            "required",
-            'date',
-            function ($attribute, $value, $fail) {
 
-               $joining_date = Carbon::parse($value);
-               $start_date = Carbon::parse(auth()->user()->business->start_date);
+            'passport_details.passport_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+            'passport_details.passport_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+            'passport_details.passport_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+            'passport_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
 
-               if ($joining_date->lessThan($start_date)) {
-                   $fail("The $attribute must not be after the start date of the business.");
-               }
 
-            },
-        ],
 
 
-        'date_of_birth' => "required|date",
+            'visa_details.BRP_number' => 'nullable|required_if:is_active_visa_details,1|string',
+            'visa_details.visa_issue_date' => 'nullable|required_if:is_active_visa_details,1|date',
+            'visa_details.visa_expiry_date' => 'nullable|required_if:is_active_visa_details,1|date',
+            'visa_details.place_of_issue' => 'nullable|required_if:is_active_visa_details,1|string',
+            'visa_details.visa_docs' => 'nullable|required_if:is_active_visa_details,1|array',
+            'visa_details.visa_docs.*.file_name' => 'nullable|required_if:is_active_visa_details,1|string',
+            'visa_details.visa_docs.*.description' => 'nullable|string',
 
-        'salary_per_annum' => "required|numeric",
-        'weekly_contractual_hours' => 'required|numeric',
-        "minimum_working_days_per_week" => 'required|numeric|max:7',
-        "overtime_rate" => 'required|numeric',
-        'emergency_contact_details' => "present|array",
 
 
-        "immigration_status" => "required|in:british_citizen,ilr,immigrant,sponsored",
 
-        'is_sponsorship_offered' => "nullable|boolean",
+            'right_to_works.right_to_work_code' => 'nullable|required_if:is_active_right_to_works,1|string',
+            'right_to_works.right_to_work_check_date' => 'nullable|required_if:is_active_right_to_works,1|date',
+            'right_to_works.right_to_work_expiry_date' => 'nullable|required_if:is_active_right_to_works,1|date',
+            'right_to_works.right_to_work_docs' => 'nullable|required_if:is_active_right_to_works,1|array',
+            'right_to_works.right_to_work_docs.*.file_name' => 'nullable|required_if:is_active_right_to_works,1|string',
+            'right_to_works.right_to_work_docs.*.description' => 'nullable|string',
 
 
-        'date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
 
-        "is_active_visa_details" => 'required|boolean',
-        "is_active_right_to_works" => "required|boolean",
-
-        "sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
-        "sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
-        // "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',
-        "sponsorship_details.note" => 'nullable|required_if:immigration_status,sponsored|string',
-        "sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
-        "sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal',
-        "sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
-
-
-
-        'passport_details.passport_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
-        'passport_details.passport_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
-        'passport_details.passport_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
-        'passport_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
-
-
-
-
-        'visa_details.BRP_number' => 'nullable|required_if:is_active_visa_details,1|string',
-        'visa_details.visa_issue_date' => 'nullable|required_if:is_active_visa_details,1|date',
-        'visa_details.visa_expiry_date' => 'nullable|required_if:is_active_visa_details,1|date',
-        'visa_details.place_of_issue' => 'nullable|required_if:is_active_visa_details,1|string',
-        'visa_details.visa_docs' => 'nullable|required_if:is_active_visa_details,1|array',
-        'visa_details.visa_docs.*.file_name' => 'nullable|required_if:is_active_visa_details,1|string',
-        'visa_details.visa_docs.*.description' => 'nullable|string',
-
-
-
-
-        'right_to_works.right_to_work_code' => 'nullable|required_if:is_active_right_to_works,1|string',
-        'right_to_works.right_to_work_check_date' => 'nullable|required_if:is_active_right_to_works,1|date',
-        'right_to_works.right_to_work_expiry_date' => 'nullable|required_if:is_active_right_to_works,1|date',
-        'right_to_works.right_to_work_docs' => 'nullable|required_if:is_active_right_to_works,1|array',
-        'right_to_works.right_to_work_docs.*.file_name' => 'nullable|required_if:is_active_right_to_works,1|string',
-        'right_to_works.right_to_work_docs.*.description' => 'nullable|string',
-
-
-
-    ];
-
+        ];
     }
     public function messages()
     {
@@ -319,5 +308,4 @@ class UserCreateV2Request extends BaseFormRequest
             // ... other custom messages
         ];
     }
-
 }

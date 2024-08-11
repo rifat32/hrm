@@ -46,9 +46,6 @@ class AttendanceCreateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateUserAllowSelf($all_manager_department_ids),
             ],
-
-
-
             'note' => 'nullable|string',
             'in_geolocation' => 'nullable|string',
             'out_geolocation' => 'nullable|string',
@@ -69,14 +66,6 @@ class AttendanceCreateRequest extends BaseFormRequest
 
                 },
             ],
-
-
-
-
-
-
-
-
 
             'in_date' => [
                 'required',

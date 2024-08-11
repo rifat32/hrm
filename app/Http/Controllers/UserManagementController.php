@@ -58,15 +58,18 @@ use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\ExitInterview;
 use App\Models\LeaveRecord;
+use App\Models\Payroll;
 use App\Models\Role;
 use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserAssetHistory;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
+use App\Rules\ValidateBank;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDesignationId;
 use App\Rules\ValidateEmploymentStatus;
+use App\Rules\ValidateRecruitmentProcessId;
 use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 
@@ -690,42 +693,338 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function createUserTest(Request $request)
-     {
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function createUserTest(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             if (!$request->user()->hasPermissionTo('user_create')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $validatedData = $request->validate([
-                'employeeData' => 'required|array',
-                'attendanceData' => 'required|array',
-                'assetData' => 'required|array',
-                'documentData' => 'required|array',
-                'educationHistoryData' => 'required|array',
-                'jobHistoryData' => 'required|array',
-                'pensionData' => 'required|array',
-                'payslipData' => 'required|array',
-                'noteData' => 'required|array',
-                'bankData' => 'required|array',
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+
+            $validatedData = $request->validate([
+
+                'employeeData.first_Name' => 'required|string|max:255',
+                'employeeData.middle_Name' => 'nullable|string|max:255',
+                'employeeData.last_Name' => 'required|string|max:255',
+                "employeeData.NI_number" => "required|string",
+
+                'employeeData.user_id' => [
+                    "required",
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $user_id_exists =  User::where(
+                            [
+                                'user_id' => $value,
+                                "created_by" => auth()->user()->id
+                            ]
+                        )->exists();
+                        if ($user_id_exists) {
+                            $fail("The employee id has already been taken.");
+                        }
+                    },
+                ],
+
+                // 'email' => 'required|string|email|indisposable|max:255|unique:users',
+                'employeeData.email' => 'required|string|email|max:255|unique:users',
+
+                'employeeData.password' => 'required|string|min:6',
+                'employeeData.phone' => 'required|string',
+                'employeeData.image' => 'nullable|string',
+                'employeeData.address_line_1' => 'required|string',
+                'employeeData.address_line_2' => 'nullable',
+                'employeeData.country' => 'required|string',
+                'employeeData.city' => 'required|string',
+                'employeeData.postcode' => 'nullable|string',
+                'employeeData.lat' => 'nullable|string',
+                'employeeData.long' => 'nullable|string',
+
+                'employeeData.role' => [
+                    "required",
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $role  = Role::where(["name" => $value])->first();
+
+
+                        if (!$role) {
+                            // $fail($attribute . " is invalid.")
+                            $fail("Role does not exists.");
+                            return;
+                        }
+
+                        if (!empty(auth()->user()->business_id)) {
+                            if (empty($role->business_id)) {
+                                // $fail($attribute . " is invalid.")
+                                $fail("You don't have this role");
+                                return;
+                            }
+                            if ($role->business_id != auth()->user()->business_id) {
+                                // $fail($attribute . " is invalid.")
+                                $fail("You don't have this role");
+                                return;
+                            }
+                        } else {
+                            if (!empty($role->business_id)) {
+                                // $fail($attribute . " is invalid.")
+                                $fail("You don't have this role");
+                                return;
+                            }
+                        }
+                    },
+                ],
+
+
+                'employeeData.work_shift_id' => [
+                    "nullable",
+                    'numeric',
+                    function ($attribute, $value, $fail) {
+                        if (!empty($value)) {
+                            $business_times =    BusinessTime::where([
+                                "is_weekend" => 1,
+                                "business_id" => auth()->user()->business_id,
+                            ])->get();
+                            $exists = WorkShift::where('id', $value)
+                                ->where([
+                                    "work_shifts.business_id" => auth()->user()->business_id
+                                ])
+                                ->orWhere(function ($query) use ($business_times) {
+                                    $query->where([
+                                        "is_active" => 1,
+                                        "business_id" => NULL,
+                                        "is_default" => 1
+                                    ]);
+                                })
+
+                                ->exists();
+
+                            if (!$exists) {
+                                $fail($attribute . " is invalid.");
+                            }
+                        }
+                    },
+                ],
+
+                'employeeData.departments' => 'required|array|size:1',
+                'employeeData.departments.*' =>  [
+                    'numeric',
+                    new ValidateDepartment($all_manager_department_ids)
+                ],
+                'employeeData.gender' => 'nullable|string|in:male,female,other',
+                'employeeData.is_in_employee' => "required|boolean",
+                'employeeData.designation_id' => [
+                    "required",
+                    'numeric',
+                    new ValidateDesignationId()
+                ],
+                'employeeData.employment_status_id' => [
+                    "required",
+                    'numeric',
+                    new ValidateEmploymentStatus()
+                ],
+
+                'employeeData.recruitment_processes' => "present|array",
+                'employeeData.recruitment_processes.*.recruitment_process_id' => [
+                    "required",
+                    'numeric',
+                    new ValidateRecruitmentProcessId()
+                ],
+                'employeeData.recruitment_processes.*.description' => "nullable|string",
+                'employeeData.recruitment_processes.*.attachments' => "present|array",
+
+                'employeeData.work_location_ids' => [
+                    "present",
+                    'array',
+                ],
+
+                "employeeData.work_location_ids.*" => [
+                    "numeric",
+                    new ValidateWorkLocation()
+                ],
+                'employeeData.joining_date' => [
+                    "required",
+                    'date',
+                    function ($attribute, $value, $fail) {
+
+                        $joining_date = Carbon::parse($value);
+                        $start_date = Carbon::parse(auth()->user()->business->start_date);
+
+                        if ($joining_date->lessThan($start_date)) {
+                            $fail("The $attribute must not be after the start date of the business.");
+                        }
+                    },
+                ],
+
+
+                'employeeData.date_of_birth' => "required|date",
+
+                'employeeData.salary_per_annum' => "required|numeric",
+                'employeeData.weekly_contractual_hours' => 'required|numeric',
+                "employeeData.minimum_working_days_per_week" => 'required|numeric|max:7',
+                "employeeData.overtime_rate" => 'required|numeric',
+                'employeeData.emergency_contact_details' => "present|array",
+                "employeeData.immigration_status" => "required|in:british_citizen,ilr,immigrant,sponsored",
+                'employeeData.is_sponsorship_offered' => "nullable|boolean",
+                'employeeData.date' => 'nullable|required_if:leave_duration,single_day,half_day,hours|date',
+                "employeeData.is_active_visa_details" => 'required|boolean',
+                "employeeData.is_active_right_to_works" => "required|boolean",
+
+                "employeeData.sponsorship_details.date_assigned" => 'nullable|required_if:immigration_status,sponsored|date',
+                "employeeData.sponsorship_details.expiry_date" => 'nullable|required_if:immigration_status,sponsored|date',
+                // "sponsorship_details.status" => 'nullable|required_if:immigration_status,sponsored|in:pending,approved,denied,visa_granted',
+                "employeeData.sponsorship_details.note" => 'nullable|required_if:immigration_status,sponsored|string',
+                "employeeData.sponsorship_details.certificate_number" => 'nullable|required_if:immigration_status,sponsored|string',
+                "employeeData.sponsorship_details.current_certificate_status" => 'nullable|required_if:immigration_status,sponsored|in:unassigned,assigned,visa_applied,visa_rejected,visa_grantes,withdrawal',
+                "employeeData.sponsorship_details.is_sponsorship_withdrawn" => 'nullable|required_if:immigration_status,sponsored|boolean',
+
+
+
+                'employeeData.passport_details.passport_number' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+                'employeeData.passport_details.passport_issue_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+                'employeeData.passport_details.passport_expiry_date' => 'nullable|required_if:immigration_status,sponsored,immigrant|date',
+                'employeeData.passport_details.place_of_issue' => 'nullable|required_if:immigration_status,sponsored,immigrant|string',
+
+
+
+
+                'employeeData.visa_details.BRP_number' => 'nullable|required_if:is_active_visa_details,1|string',
+                'employeeData.visa_details.visa_issue_date' => 'nullable|required_if:is_active_visa_details,1|date',
+                'employeeData.visa_details.visa_expiry_date' => 'nullable|required_if:is_active_visa_details,1|date',
+                'employeeData.visa_details.place_of_issue' => 'nullable|required_if:is_active_visa_details,1|string',
+                'employeeData.visa_details.visa_docs' => 'nullable|required_if:is_active_visa_details,1|array',
+                'employeeData.visa_details.visa_docs.*.file_name' => 'nullable|required_if:is_active_visa_details,1|string',
+                'employeeData.visa_details.visa_docs.*.description' => 'nullable|string',
+
+                'employeeData.right_to_works.right_to_work_code' => 'nullable|required_if:is_active_right_to_works,1|string',
+                'employeeData.right_to_works.right_to_work_check_date' => 'nullable|required_if:is_active_right_to_works,1|date',
+                'employeeData.right_to_works.right_to_work_expiry_date' => 'nullable|required_if:is_active_right_to_works,1|date',
+                'employeeData.right_to_works.right_to_work_docs' => 'nullable|required_if:is_active_right_to_works,1|array',
+                'employeeData.right_to_works.right_to_work_docs.*.file_name' => 'nullable|required_if:is_active_right_to_works,1|string',
+                'employeeData.right_to_works.right_to_work_docs.*.description' => 'nullable|string',
+
+
+                "attendanceData.start_date" => "required|date",
+                "attendanceData.end_date" => "required|date|after_or_equal:start_date",
+                'attendanceData.work_location_id' => [
+                    "required",
+                    'numeric',
+                    new ValidateWorkLocation
+                ],
+
+                'assetData.name' => "required|string",
+                "assetData.is_working" => "required|boolean",
+                "assetData.status" => "required|string|in:available,assigned,returned,damaged,lost,reserved,repair_waiting",
+                'assetData.code' => "required|string",
+                'assetData.serial_number' => "required|string",
+                'assetData.type' => "required|string",
+                'assetData.image' => "nullable|string",
+                'assetData.date' => "required|date",
+                'assetData.note' => "required|string",
+
+                'documentData.name' => 'required|string',
+                'documentData.file_name' => 'required|string',
+
+
+                'educationHistoryData.degree' => 'required|string',
+                'educationHistoryData.major' => 'required|string',
+                'educationHistoryData.school_name' => 'required|string',
+                'educationHistoryData.start_date' => 'required|date',
+                'educationHistoryData.graduation_date' => 'required|date|after_or_equal:start_date',
+                'educationHistoryData.achievements' => 'nullable|string',
+                'educationHistoryData.description' => 'nullable|string',
+                'educationHistoryData.address' => 'nullable|string',
+                'educationHistoryData.country' => 'nullable|string',
+                'educationHistoryData.city' => 'nullable|string',
+                'educationHistoryData.postcode' => 'nullable|string',
+                'educationHistoryData.is_current' => 'required|boolean',
+                'educationHistoryData.attachments' => 'present|array',
+                'educationHistoryData.attachments.*' => 'string',
+
+                'jobHistoryData.company_name' => 'required|string',
+                'jobHistoryData.country' => 'required|string',
+                'jobHistoryData.job_title' => 'required|string',
+                'jobHistoryData.employment_start_date' => 'required|date',
+                'jobHistoryData.employment_end_date' => 'nullable|date|after_or_equal:employment_start_date',
+                'jobHistoryData.responsibilities' => 'nullable|string',
+                'jobHistoryData.supervisor_name' => 'nullable|string',
+                'jobHistoryData.contact_information' => 'nullable|string',
+                'jobHistoryData.work_location' => 'nullable|string',
+                'jobHistoryData.achievements' => 'nullable|string',
+
+
+                'pensionData.pension_eligible' => 'required|boolean',
+                'pensionData.pension_letters' => 'present|array',
+                'pensionData.pension_letters.*.file_name' => 'nullable|string',
+                'pensionData.pension_letters.*.description' => 'nullable|string',
+
+                'pensionData.pension_scheme_status' => 'required_if:pension_eligible,1|string|in:opt_in,opt_out',
+                'pensionData.pension_enrollment_issue_date' => 'required_if:pension_scheme_status,opt_in|date',
+                'pensionData.pension_scheme_opt_out_date' => 'required_if:pension_scheme_status,opt_out|date',
+                'pensionData.pension_re_enrollment_due_date' => 'required_if:pension_scheme_status,opt_in,opt_out|date',
+                'pensionData.from_date' => 'required|date',
+                'pensionData.to_date' => 'nullable|date|after_or_equal:from_date',
+
+
+                "payslipData.payroll_id" => [
+                    'nullable',
+                    'numeric',
+                    function ($attribute, $value, $fail) use ($all_manager_department_ids) {
+                        $exists =  Payroll::whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            })
+                            ->first();
+
+                        if (!$exists) {
+                            $fail($attribute . " is invalid.");
+                            return;
+                        }
+                    },
+                ],
+
+                'payslipData.month' => 'required|integer',
+                'payslipData.year' => 'required|integer',
+                'payslipData.payment_amount' => 'required|numeric',
+                'payslipData.payment_notes' => 'nullable|string',
+                'payslipData.payment_date' => 'required|date',
+                'payslipData.payslip_file' => 'nullable|string',
+                'payslipData.payment_record_file' => 'present|array',
+                'payslipData.payment_record_file.*' => 'string',
+                'payslipData.gross_pay' => 'required|numeric|min:0',
+                'payslipData.tax' => 'required|numeric|min:0',
+                'payslipData.employee_ni_deduction' => 'required|numeric|min:0',
+                'payslipData.employer_ni' => 'required|numeric|min:0',
+                'payslipData.payment_method' => ['required', 'string', 'in:bank_transfer,cash,cheque,other'],
+
+
+                'noteData.title' => 'required|string',
+                'noteData.description' => 'required|string',
+
+                'bankData.bank_id' => [
+                    "nullable",
+                    'numeric',
+                    new ValidateBank()
+
+                ],
+                'bankData.sort_code' => "required|string",
+                'bankData.account_number' => "required|string",
+                'bankData.account_name' => "required|string",
             ]);
 
-             $employeeData =  $request->employeeData;
-             $attendanceData =  $request->attendanceData;
+            $employeeData =  $request->employeeData;
+            $attendanceData =  $request->attendanceData;
 
-             $assetData =  $request->assetData;
-             $documentData =  $request->documentData;
-             $educationHistoryData =  $request->educationHistoryData;
-             $jobHistoryData =  $request->jobHistoryData;
-             $pensionData =  $request->pensionData;
-             $payslipData =  $request->payslipData;
-             $noteData =  $request->noteData;
-             $bankData =  $request->bankData;
+            $assetData =  $request->assetData;
+            $documentData =  $request->documentData;
+            $educationHistoryData =  $request->educationHistoryData;
+            $jobHistoryData =  $request->jobHistoryData;
+            $pensionData =  $request->pensionData;
+            $payslipData =  $request->payslipData;
+            $noteData =  $request->noteData;
+            $bankData =  $request->bankData;
 
 
 
@@ -828,18 +1127,18 @@ class UserManagementController extends Controller
 
 
 
-             $response = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(env('APP_URL') . '/api/v2.0/users', $employeeData);
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(env('APP_URL') . '/api/v2.0/users', $employeeData);
 
 
-             $responseData = $response->json();
+            $responseData = $response->json();
 
 
 
 
-             $employeeId = $responseData["id"];
+            $employeeId = $responseData["id"];
 
 
 
@@ -848,12 +1147,12 @@ class UserManagementController extends Controller
 
             $attendanceData["user_ids"] = [$employeeId];
 
-             $createAttendance = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(
-                     env('APP_URL') . '/api/v1.0/attendances/bypass/multiple',
-                     $attendanceData
+            $createAttendance = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/attendances/bypass/multiple',
+                    $attendanceData
                     //  [
                     //      "user_ids" => [$employeeId],
                     //      "work_location_id" => 113,
@@ -861,56 +1160,58 @@ class UserManagementController extends Controller
                     //      "start_date" => $start,
                     //      "end_date" => $end
                     //  ]
-                 );
+                );
 
 
-                 $assetData["user_id"] = $employeeId;
+            $assetData["user_id"] = $employeeId;
 
-             $createAsset = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(env('APP_URL') . '/api/v1.0/user-assets',
-                //   [
-                //      "user_id" => $employeeId,
-                //      "name" => "dyj",
-                //      "code" => "dyj",
-                //      "serial_number" => "45",
-                //      "type" => $asset_type,
-                //      "date" => "04-07-2024",
-                //      "note" => "hh dd hh uu gg hh ",
-                //      "image" => "/temporary_files/1722420046_Screenshot_from_2024-07-31_15-48-17.png",
-                //      "status" => "available",
-                //      "is_working" => 0
-                //  ]
+            $createAsset = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-assets',
+                    //   [
+                    //      "user_id" => $employeeId,
+                    //      "name" => "dyj",
+                    //      "code" => "dyj",
+                    //      "serial_number" => "45",
+                    //      "type" => $asset_type,
+                    //      "date" => "04-07-2024",
+                    //      "note" => "hh dd hh uu gg hh ",
+                    //      "image" => "/temporary_files/1722420046_Screenshot_from_2024-07-31_15-48-17.png",
+                    //      "status" => "available",
+                    //      "is_working" => 0
+                    //  ]
 
-                $assetData
+                    $assetData
 
                 );
-                $documentData["user_id"] = $employeeId;
+            $documentData["user_id"] = $employeeId;
 
 
-             $createDoc = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(env('APP_URL') . '/api/v1.0/user-documents',
-                //  [
-                //      "user_id" => $employeeId,
-                //      "name" => "fgjf",
-                //      "file_name" => "/temporary_files/1722419797_Screenshot_from_2024-07-30_20-28-53.png"
-                //  ]
-$documentData
+            $createDoc = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-documents',
+                    //  [
+                    //      "user_id" => $employeeId,
+                    //      "name" => "fgjf",
+                    //      "file_name" => "/temporary_files/1722419797_Screenshot_from_2024-07-30_20-28-53.png"
+                    //  ]
+                    $documentData
 
 
-            );
+                );
 
 
             $educationHistoryData["user_id"] = $employeeId;
 
-             $educationHistory = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(
-                     env('APP_URL') . '/api/v1.0/user-education-histories',
+            $educationHistory = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-education-histories',
                     //  [
                     //      "user_id" => $employeeId,
                     //      "degree" => "Primary education",
@@ -931,16 +1232,16 @@ $documentData
                     //  ]
 
                     $educationHistoryData
-                 );
+                );
 
-                 $jobHistoryData["user_id"] = $employeeId;
+            $jobHistoryData["user_id"] = $employeeId;
 
 
-             $jobHistory = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(
-                     env('APP_URL') . '/api/v1.0/user-job-histories',
+            $jobHistory = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-job-histories',
                     //  [
                     //      "user_id" => $employeeId,
                     //      "company_name" => "c",
@@ -956,26 +1257,26 @@ $documentData
                     //  ]
                     $jobHistoryData
 
-                 );
+                );
 
 
 
 
-             $getPension =  Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' . $employeeId);
+            $getPension =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' . $employeeId);
 
-             $pensionId =  $getPension->json()[0]["id"];
+            $pensionId =  $getPension->json()[0]["id"];
 
-             $pensionData["user_id"] = $employeeId;
-             $pensionData["id"] = $pensionId;
+            $pensionData["user_id"] = $employeeId;
+            $pensionData["id"] = $pensionId;
 
-             $pension = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->put(
-                     env('APP_URL') . '/api/v1.0/user-pension-histories',
+            $pension = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->put(
+                    env('APP_URL') . '/api/v1.0/user-pension-histories',
                     //  [
                     //      "pension_eligible" => 1,
                     //      "pension_enrollment_issue_date" => "01-07-2024",
@@ -992,17 +1293,17 @@ $documentData
                     //      "user_id" => $employeeId,
                     //      "id" => $pensionId
                     //  ]
-$pensionData
-                 );
+                    $pensionData
+                );
 
 
-                 $payslipData["user_id"] = $employeeId;
+            $payslipData["user_id"] = $employeeId;
 
-             $payslip = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(
-                     env('APP_URL') . '/api/v1.0/user-payslips',
+            $payslip = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-payslips',
                     //  [
                     //      "user_id" => $employeeId,
                     //      "payroll_id" => null,
@@ -1021,15 +1322,15 @@ $pensionData
                     //      "payment_notes" => "ff",
                     //      "payment_method" => "cash"
                     //  ]
-$payslipData
-                 );
+                    $payslipData
+                );
 
-                 $noteData["user_id"] = $employeeId;
-             $note = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(
-                     env('APP_URL') . '/api/v1.0/user-notes',
+            $noteData["user_id"] = $employeeId;
+            $note = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-notes',
                     //  [
                     //      "user_id" => $employeeId,
                     //      "title" => "tt",
@@ -1038,38 +1339,38 @@ $payslipData
 
                     $noteData
 
-                 );
+                );
 
 
 
-             $userSocialSites =  Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' . $employeeId);
+            $userSocialSites =  Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' . $employeeId);
 
-             $userSocialSitesId =  $userSocialSites->json()[0]["id"];
-
-
-             $userSocialSites = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->post(
-                     env('APP_URL') . '/api/v1.0/user-social-sites',
-                     [
-                         "social_site_id" => $userSocialSitesId,
-                         "user_id" => $employeeId,
-                         "profile_link" => "https://hg.com"
-                     ]
-                 );
+            $userSocialSitesId =  $userSocialSites->json()[0]["id"];
 
 
+            $userSocialSites = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->post(
+                    env('APP_URL') . '/api/v1.0/user-social-sites',
+                    [
+                        "social_site_id" => $userSocialSitesId,
+                        "user_id" => $employeeId,
+                        "profile_link" => "https://hg.com"
+                    ]
+                );
 
-                 $bankData["user_id"] = $employeeId;
-             $bank = Http::withHeaders([
-                 'Authorization' => 'Bearer ' . request()->bearerToken(),
-             ])
-                 ->put(
-                     env('APP_URL') . '/api/v1.0/users/update-bank-details',
+
+
+            $bankData["user_id"] = $employeeId;
+            $bank = Http::withHeaders([
+                'Authorization' => 'Bearer ' . request()->bearerToken(),
+            ])
+                ->put(
+                    env('APP_URL') . '/api/v1.0/users/update-bank-details',
                     //  [
                     //      "id" => $employeeId,
                     //      "bank_id" => $bankId,
@@ -1078,7 +1379,7 @@ $payslipData
                     //      "account_name" => "Name"
                     //  ]
                     $bankData
-                 );
+                );
 
 
 
@@ -1086,18 +1387,18 @@ $payslipData
 
 
 
-             DB::commit();
-             return response()->json(["ok" => $bank->json()], 201);
-         } catch (Exception $e) {
+            DB::commit();
+            return response()->json(["ok" => $bank->json()], 201);
+        } catch (Exception $e) {
 
-             DB::rollBack();
+            DB::rollBack();
 
 
 
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Post(
@@ -2305,13 +2606,13 @@ $payslipData
      *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
      *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
      * * @OA\Property(property="final_paycheck_date", type="string", format="string", example="final_paycheck_date"),
-* @OA\Property(property="final_paycheck_amount", type="string", format="string", example="final_paycheck_amount"),
-* @OA\Property(property="unused_vacation_compensation_amount", type="string", format="string", example="unused_vacation_compensation_amount"),
-* @OA\Property(property="unused_sick_leave_compensation_amount", type="string", format="string", example="unused_sick_leave_compensation_amount"),
-* @OA\Property(property="severance_pay_amount", type="string", format="string", example="severance_pay_amount"),
-* @OA\Property(property="continuation_of_benefits_offered", type="string", format="string", example="continuation_of_benefits_offered"),
-* @OA\Property(property="benefits_termination_date", type="string", format="string", example="benefits_termination_date"),
-*
+     * @OA\Property(property="final_paycheck_amount", type="string", format="string", example="final_paycheck_amount"),
+     * @OA\Property(property="unused_vacation_compensation_amount", type="string", format="string", example="unused_vacation_compensation_amount"),
+     * @OA\Property(property="unused_sick_leave_compensation_amount", type="string", format="string", example="unused_sick_leave_compensation_amount"),
+     * @OA\Property(property="severance_pay_amount", type="string", format="string", example="severance_pay_amount"),
+     * @OA\Property(property="continuation_of_benefits_offered", type="string", format="string", example="continuation_of_benefits_offered"),
+     * @OA\Property(property="benefits_termination_date", type="string", format="string", example="benefits_termination_date"),
+     *
      *     ),
      *     @OA\Property(
      *         property="exit_interview",
@@ -2414,9 +2715,9 @@ $payslipData
             $request_data["exit_interview"]["user_id"] = $request_data["id"];
             $request_data["access_revocation"]["user_id"] = $request_data["id"];
 
-        $termination =   Termination::create($request_data["termination"]);
+            $termination =   Termination::create($request_data["termination"]);
 
-        $request_data["termination_id"]  = $termination->id;
+            $request_data["termination_id"]  = $termination->id;
             ExitInterview::create($request_data["exit_interview"]);
 
 
@@ -2437,7 +2738,7 @@ $payslipData
 
             return response($user, 201);
         } catch (Exception $e) {
-      DB::rollBack();
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -2467,13 +2768,13 @@ $payslipData
      *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
      *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
      * * @OA\Property(property="final_paycheck_date", type="string", format="string", example="final_paycheck_date"),
-* @OA\Property(property="final_paycheck_amount", type="string", format="string", example="final_paycheck_amount"),
-* @OA\Property(property="unused_vacation_compensation_amount", type="string", format="string", example="unused_vacation_compensation_amount"),
-* @OA\Property(property="unused_sick_leave_compensation_amount", type="string", format="string", example="unused_sick_leave_compensation_amount"),
-* @OA\Property(property="severance_pay_amount", type="string", format="string", example="severance_pay_amount"),
-* @OA\Property(property="continuation_of_benefits_offered", type="string", format="string", example="continuation_of_benefits_offered"),
-* @OA\Property(property="benefits_termination_date", type="string", format="string", example="benefits_termination_date"),
-*
+     * @OA\Property(property="final_paycheck_amount", type="string", format="string", example="final_paycheck_amount"),
+     * @OA\Property(property="unused_vacation_compensation_amount", type="string", format="string", example="unused_vacation_compensation_amount"),
+     * @OA\Property(property="unused_sick_leave_compensation_amount", type="string", format="string", example="unused_sick_leave_compensation_amount"),
+     * @OA\Property(property="severance_pay_amount", type="string", format="string", example="severance_pay_amount"),
+     * @OA\Property(property="continuation_of_benefits_offered", type="string", format="string", example="continuation_of_benefits_offered"),
+     * @OA\Property(property="benefits_termination_date", type="string", format="string", example="benefits_termination_date"),
+     *
      *     ),
      *     @OA\Property(
      *         property="exit_interview",
@@ -2532,68 +2833,68 @@ $payslipData
      *     )
      */
 
-     public function updateUserExit(UserExitRequest $request)
-     {
+    public function updateUserExit(UserExitRequest $request)
+    {
 
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-
-
-
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-             $user =    $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-             if (empty($user->joining_date)) {
-                 throw new Exception("The employee does not have a joining date", 401);
-             }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user =    $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
 
 
 
-             $date_of_termination = Carbon::parse($request_data["termination"]["date_of_termination"]);
-             $joining_date = Carbon::parse($user->joining_date);
-
-             if ($joining_date->gt($date_of_termination)) {
-                 throw new Exception("Date of termination can not be before the joining date of the employee.", 401);
-             }
+            if (empty($user->joining_date)) {
+                throw new Exception("The employee does not have a joining date", 401);
+            }
 
 
-             $last_termination =  Termination::where([
+
+            $date_of_termination = Carbon::parse($request_data["termination"]["date_of_termination"]);
+            $joining_date = Carbon::parse($user->joining_date);
+
+            if ($joining_date->gt($date_of_termination)) {
+                throw new Exception("Date of termination can not be before the joining date of the employee.", 401);
+            }
+
+
+            $last_termination =  Termination::where([
                 "user_id" => $user->id
             ])
                 ->latest()
                 ->first();
 
-                if(empty($last_termination)){
-                   throw new Exception("The employee is not terminated. So you can not update termination");
-                }
+            if (empty($last_termination)) {
+                throw new Exception("The employee is not terminated. So you can not update termination");
+            }
 
-                if (Carbon::parse($last_termination->date_of_termination)->lt($joining_date)) {
-                    throw new Exception("The employee has been rejoined on " . $joining_date . " So you can not update termination date", 401);
-                }
+            if (Carbon::parse($last_termination->date_of_termination)->lt($joining_date)) {
+                throw new Exception("The employee has been rejoined on " . $joining_date . " So you can not update termination date", 401);
+            }
 
-                if ($date_of_termination->lt($joining_date)) {
-                    throw new Exception("The employee has been joined on " . $joining_date . " So you can not set a past termination date", 401);
-                }
-
-
-
-             $request_data["termination"]["joining_date"] = $user->joining_date;
+            if ($date_of_termination->lt($joining_date)) {
+                throw new Exception("The employee has been joined on " . $joining_date . " So you can not set a past termination date", 401);
+            }
 
 
-             $request_data["termination"]["user_id"] = $request_data["id"];
-             $request_data["exit_interview"]["user_id"] = $request_data["id"];
-             $request_data["access_revocation"]["user_id"] = $request_data["id"];
 
-             $last_termination->fill(collect($request_data["termination"])->only([
+            $request_data["termination"]["joining_date"] = $user->joining_date;
+
+
+            $request_data["termination"]["user_id"] = $request_data["id"];
+            $request_data["exit_interview"]["user_id"] = $request_data["id"];
+            $request_data["access_revocation"]["user_id"] = $request_data["id"];
+
+            $last_termination->fill(collect($request_data["termination"])->only([
                 'user_id',
                 'termination_type_id',
                 'termination_reason_id',
@@ -2612,12 +2913,12 @@ $payslipData
 
             $request_data["exit_interview"]["attachments"] = json_encode($request_data["exit_interview"]["attachments"]);
             $last_termination->exit_interview()->update(collect($request_data["exit_interview"])->only([
-        'exit_interview_conducted',
-        'date_of_exit_interview',
-        'interviewer_name',
-        'key_feedback_points',
-        'assets_returned',
-        'attachments',
+                'exit_interview_conducted',
+                'date_of_exit_interview',
+                'interviewer_name',
+                'key_feedback_points',
+                'assets_returned',
+                'attachments',
             ])->toArray());
 
 
@@ -2625,27 +2926,27 @@ $payslipData
 
 
 
-             if (empty($user->accessRevocation)) {
-                 AccessRevocation::create($request_data["access_revocation"]);
-             } else {
-                 $user->accessRevocation()->update(collect($request_data["access_revocation"])->only(
-                     "email_access_revoked",
-                     "system_access_revoked_date"
-                 )->toArray());
-             }
+            if (empty($user->accessRevocation)) {
+                AccessRevocation::create($request_data["access_revocation"]);
+            } else {
+                $user->accessRevocation()->update(collect($request_data["access_revocation"])->only(
+                    "email_access_revoked",
+                    "system_access_revoked_date"
+                )->toArray());
+            }
 
 
-             $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
+            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
 
 
-             DB::commit();
+            DB::commit();
 
-             return response($user, 201);
-         } catch (Exception $e) {
-       DB::rollBack();
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response($user, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -2686,7 +2987,7 @@ $payslipData
      * required=true,
      * example="2019-06-29"
      * ),
-    * *  @OA\Parameter(
+     * *  @OA\Parameter(
      * name="is_single_search",
      * in="query",
      * description="is_single_search",
@@ -2746,34 +3047,34 @@ $payslipData
      *     )
      */
 
-     public function getUserExists(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id =  auth()->user()->business_id;
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+    public function getUserExists(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  auth()->user()->business_id;
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $user_exists = Termination::where(function($query) use($all_manager_department_ids) {
-                $query->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
-                    $query->whereIn("departments.id",$all_manager_department_ids);
-                 });
+            $user_exists = Termination::where(function ($query) use ($all_manager_department_ids) {
+                $query->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                });
                 //  ->orWhereHas("mentions", function($query) {
                 //     $query->where("user_note_mentions.user_id",auth()->user()->id);
                 //  });
             })
 
-            // ->when(!empty($request->search_key), function ($query) use ($request) {
-            //         return $query->where(function ($query) use ($request) {
-            //             $term = $request->search_key;
-            //             $query->where("user_notes.name", "like", "%" . $term . "%");
-            //             //     ->orWhere("user_notes.description", "like", "%" . $term . "%");
-            //         });
-            //     })
+                // ->when(!empty($request->search_key), function ($query) use ($request) {
+                //         return $query->where(function ($query) use ($request) {
+                //             $term = $request->search_key;
+                //             $query->where("user_notes.name", "like", "%" . $term . "%");
+                //             //     ->orWhere("user_notes.description", "like", "%" . $term . "%");
+                //         });
+                //     })
 
 
                 ->when(!empty($request->user_id), function ($query) use ($request) {
@@ -2807,12 +3108,12 @@ $payslipData
             }
 
 
-                 return response()->json($user_exists, 200);
-                } catch (Exception $e) {
+            return response()->json($user_exists, 200);
+        } catch (Exception $e) {
 
-                    return $this->sendError($e, 500, $request);
-                }
-            }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -3146,182 +3447,182 @@ $payslipData
      *     )
      */
 
-     public function updateUserV2(UserUpdateV2Request $request)
-     {
-         DB::beginTransaction();
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+    public function updateUserV2(UserUpdateV2Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
-             $userQuery = User::where([
-                 "id" => $request["id"]
-             ]);
-             $updatableUser = $userQuery->first();
-             if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
-                 return response()->json([
-                     "message" => "You can not change the role of super admin"
-                 ], 401);
-             }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
-                 return response()->json([
-                     "message" => "You can not update this user"
-                 ], 401);
-             }
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
+            $userQuery = User::where([
+                "id" => $request["id"]
+            ]);
+            $updatableUser = $userQuery->first();
+            if ($updatableUser->hasRole("superadmin") && $request["role"] != "superadmin") {
+                return response()->json([
+                    "message" => "You can not change the role of super admin"
+                ], 401);
+            }
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+                return response()->json([
+                    "message" => "You can not update this user"
+                ], 401);
+            }
 
 
-             if (!empty($request_data['password'])) {
-                 $request_data['password'] = Hash::make($request_data['password']);
-             } else {
-                 unset($request_data['password']);
-             }
+            if (!empty($request_data['password'])) {
+                $request_data['password'] = Hash::make($request_data['password']);
+            } else {
+                unset($request_data['password']);
+            }
 
 
 
-             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
-             $this->makeFilePermanent($request_data["recruitment_processes"], "attachments", []);
+            $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"], "attachments", "recruitment_processes", []);
+            $this->makeFilePermanent($request_data["recruitment_processes"], "attachments", []);
 
 
-             $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
-             $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"], "file_name");
+            $request_data["right_to_works"]["right_to_work_docs"] = $this->storeUploadedFiles($request_data["right_to_works"]["right_to_work_docs"], "file_name", "right_to_work_docs");
+            $this->makeFilePermanent($request_data["right_to_works"]["right_to_work_docs"], "file_name");
 
-             $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
-             $this->makeFilePermanent($request_data["visa_details"]["visa_docs"], "file_name");
+            $request_data["visa_details"]["visa_docs"] = $this->storeUploadedFiles($request_data["visa_details"]["visa_docs"], "file_name", "visa_docs");
+            $this->makeFilePermanent($request_data["visa_details"]["visa_docs"], "file_name");
 
 
 
 
-             $request_data['remember_token'] = Str::random(10);
+            $request_data['remember_token'] = Str::random(10);
 
 
 
 
 
-             $userQueryTerms = [
-                 "id" => $request_data["id"],
-             ];
+            $userQueryTerms = [
+                "id" => $request_data["id"],
+            ];
 
 
-             if (!empty($request_data["joining_date"])) {
-                 $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
-             }
+            if (!empty($request_data["joining_date"])) {
+                $this->validateJoiningDate($request_data["joining_date"], $request_data["id"]);
+            }
 
-             $user = User::where($userQueryTerms)->first();
+            $user = User::where($userQueryTerms)->first();
 
-             if ($user) {
-                 $user->fill(collect($request_data)->only([
-                     'first_Name',
-                     'last_Name',
-                     'middle_Name',
-                     "NI_number",
+            if ($user) {
+                $user->fill(collect($request_data)->only([
+                    'first_Name',
+                    'last_Name',
+                    'middle_Name',
+                    "NI_number",
 
-                     "email",
-                     "color_theme_name",
-                     'emergency_contact_details',
-                     'gender',
+                    "email",
+                    "color_theme_name",
+                    'emergency_contact_details',
+                    'gender',
 
-                     // 'is_in_employee',
+                    // 'is_in_employee',
 
-                     'designation_id',
-                     'employment_status_id',
-                     'joining_date',
-                     "date_of_birth",
-                     'salary_per_annum',
-                     'weekly_contractual_hours',
-                     'minimum_working_days_per_week',
-                     'overtime_rate',
-                     'phone',
-                     'image',
-                     'address_line_1',
-                     'address_line_2',
-                     'country',
-                     'city',
-                     'postcode',
-                     "lat",
-                     "long",
-                     'is_active_visa_details',
-                     "is_active_right_to_works",
-                     'is_sponsorship_offered',
-                     "immigration_status",
+                    'designation_id',
+                    'employment_status_id',
+                    'joining_date',
+                    "date_of_birth",
+                    'salary_per_annum',
+                    'weekly_contractual_hours',
+                    'minimum_working_days_per_week',
+                    'overtime_rate',
+                    'phone',
+                    'image',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long",
+                    'is_active_visa_details',
+                    "is_active_right_to_works",
+                    'is_sponsorship_offered',
+                    "immigration_status",
 
 
-                 ])->toArray());
+                ])->toArray());
 
-                 $user->save();
-             }
-             if (!$user) {
+                $user->save();
+            }
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
-             $this->delete_old_histories();
+            $this->delete_old_histories();
 
 
-             if (!empty($request_data['departments'])) {
-                 $user->departments()->sync($request_data['departments']);
-             }
+            if (!empty($request_data['departments'])) {
+                $user->departments()->sync($request_data['departments']);
+            }
 
 
-             // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
-             //     // Fetch the first department ID and user ID
-             //     $departmentUser = DepartmentUser::where([
-             //         'department_id' => $user->departments[0]->id,
-             //         'user_id'       => $user->id
-             //     ])->first();
+            // if (!empty($user->departments) && !empty($request_data['departments'][0])) {
+            //     // Fetch the first department ID and user ID
+            //     $departmentUser = DepartmentUser::where([
+            //         'department_id' => $user->departments[0]->id,
+            //         'user_id'       => $user->id
+            //     ])->first();
 
-             //     // Check if the DepartmentUser relationship exists
-             //     if (!empty($departmentUser)) {
-             //         // Update the department_id to the new department ID from the request data
-             //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
-             //     }
-             // }
+            //     // Check if the DepartmentUser relationship exists
+            //     if (!empty($departmentUser)) {
+            //         // Update the department_id to the new department ID from the request data
+            //         $departmentUser->update(['department_id' => $request_data['departments'][0]]);
+            //     }
+            // }
 
 
-             // // Get the user's departments
-             // $departments = $user->departments->pluck("id");
+            // // Get the user's departments
+            // $departments = $user->departments->pluck("id");
 
 
-             // // Remove the first department from the collection
-             // $removedDepartment = $departments->shift();
+            // // Remove the first department from the collection
+            // $removedDepartment = $departments->shift();
 
-             // // Insert the department from $request_data at the beginning of the collection
-             // $departments->prepend($request_data['departments'][0]);
+            // // Insert the department from $request_data at the beginning of the collection
+            // $departments->prepend($request_data['departments'][0]);
 
-             // // Update the user's departments
-             // $user->departments()->sync($departments);
+            // // Update the user's departments
+            // $user->departments()->sync($departments);
 
-             $user->work_locations()->sync($request_data["work_location_ids"]);
+            $user->work_locations()->sync($request_data["work_location_ids"]);
 
-             $user->syncRoles([$request_data['role']]);
+            $user->syncRoles([$request_data['role']]);
 
-             $this->update_work_shift($request_data, $user);
-             $this->update_address_history($request_data, $user);
-             $this->update_recruitment_processes($request_data, $user);
+            $this->update_work_shift($request_data, $user);
+            $this->update_address_history($request_data, $user);
+            $this->update_recruitment_processes($request_data, $user);
 
 
 
-             if (in_array($request["immigration_status"], ['sponsored'])) {
-                 $this->update_sponsorship($request_data, $user);
-             }
+            if (in_array($request["immigration_status"], ['sponsored'])) {
+                $this->update_sponsorship($request_data, $user);
+            }
 
 
-             if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
-                 $this->update_passport_details($request_data, $user);
-                 $this->update_visa_details($request_data, $user);
-             }
+            if (in_array($request["immigration_status"], ['immigrant', 'sponsored'])) {
+                $this->update_passport_details($request_data, $user);
+                $this->update_visa_details($request_data, $user);
+            }
 
-             if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
-                 $this->update_right_to_works($request_data, $user);
-             }
+            if (in_array($request["immigration_status"], ['ilr', 'immigrant', 'sponsored'])) {
+                $this->update_right_to_works($request_data, $user);
+            }
 
-             $user->roles = $user->roles->pluck('name');
+            $user->roles = $user->roles->pluck('name');
 
 
 
@@ -3331,11 +3632,11 @@ $payslipData
 
 
 
-             // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
+            // $this->moveUploadedFiles(collect($request_data["recruitment_processes"])->pluck("attachments"),"recruitment_processes");
 
-             // $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
+            // $this->moveUploadedFiles(collect($request_data["right_to_works"]["right_to_work_docs"])->pluck("file_name"),"right_to_works");
 
-             // $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
+            // $this->moveUploadedFiles(collect($request_data["visa_details"]["visa_docs"])->pluck("file_name"),"visa_details");
 
 
 
@@ -3349,15 +3650,15 @@ $payslipData
 
 
 
-             DB::commit();
-             return response($user, 201);
-         } catch (Exception $e) {
-             DB::rollBack();
+            DB::commit();
+            return response($user, 201);
+        } catch (Exception $e) {
+            DB::rollBack();
 
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Put(

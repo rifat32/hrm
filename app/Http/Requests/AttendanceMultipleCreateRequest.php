@@ -70,9 +70,6 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                 },
             ],
 
-
-
-
             'attendance_details.*.in_date' => [
                  "required",
                  "date",
@@ -80,14 +77,9 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
 
             ],
 
-
             'attendance_details.*.is_present' => "required|boolean",
 
-
-
             'attendance_details.*.does_break_taken' => "required|boolean",
-
-
 
             "attendance_details.*.project_ids" => "present|array",
 
@@ -95,7 +87,6 @@ class AttendanceMultipleCreateRequest extends BaseFormRequest
                 'numeric',
                 new ValidateProject,
             ],
-
 
             'attendance_details.*.work_location_id' => [
                 "nullable",

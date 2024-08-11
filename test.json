@@ -1,3 +1,177 @@
-{"user_id":7255,
-"issue_date":"2024-08-05","letter_content":"<h1>Thank you for applying to [JOB_TITLE]!<\/h1><p>Dear [FULL_NAME],<\/p><p>We appreciate the time you took to apply for the [JOB_TITLE] position at []. We are excited to review your application and consider you for this opportunity.<\/p><p>Your application details are as follows:<\/p><ul><li><strong>Job Title:<\/strong> [JOB_TITLE]<\/li><li><strong>Company:<\/strong> [COMPANY_NAME]<\/li><li><strong>Application Date:<\/strong> [APPLICATION_DATE]<\/li><\/ul><p>We will review your application and be in touch with you soon to discuss the next steps. If you have any questions or concerns, please don't hesitate to reach out to us at [CONTACT_EMAIL].<\/p><p>Thank you again for your interest in joining our team!<\/p><p>Best regards,<\/p><p>[COMPANY_NAME] Team<\/p>","status":"pending_approval","sign_required":1,
-"attachments":["\/temporary_files\/1722622015_Screenshot_2024-07-14_180841.png"]}
+{
+    "employeeData": {
+        "first_Name": "",
+        "middle_Name": "",
+        "last_Name": "",
+        "NI_number": "",
+        "user_id": "",
+        "email": "",
+        "password": "",
+        "phone": "",
+        "image": "",
+        "address_line_1": "",
+        "address_line_2": "",
+        "country": "",
+        "city": "",
+        "postcode": "",
+        "lat": "",
+        "long": "",
+        "role": "",
+        "work_shift_id": "",
+        "departments": [
+            {
+                "id": 1
+            }
+        ],
+        "gender": "",
+        "is_in_employee": true,
+        "designation_id": 1,
+        "employment_status_id": 1,
+        "recruitment_processes": [
+            {
+                "recruitment_process_id": 1,
+                "description": "",
+                "attachments": []
+            }
+        ],
+        "work_location_ids": [1],
+        "joining_date": "",
+        "date_of_birth": "",
+        "salary_per_annum": 0,
+        "weekly_contractual_hours": 0,
+        "minimum_working_days_per_week": 0,
+        "overtime_rate": 0,
+        "emergency_contact_details": [],
+        "immigration_status": "",
+        "is_sponsorship_offered": true,
+        "date": "",
+        "is_active_visa_details": true,
+        "is_active_right_to_works": true,
+        "sponsorship_details": {
+            "date_assigned": "",
+            "expiry_date": "",
+            "note": "",
+            "certificate_number": "",
+            "current_certificate_status": "",
+            "is_sponsorship_withdrawn": true
+        },
+        "passport_details": {
+            "passport_number": "",
+            "passport_issue_date": "",
+            "passport_expiry_date": "",
+            "place_of_issue": ""
+        },
+        "visa_details": {
+            "BRP_number": "",
+            "visa_issue_date": "",
+            "visa_expiry_date": "",
+            "place_of_issue": "",
+            "visa_docs": [
+                {
+                    "file_name": "",
+                    "description": ""
+                }
+            ]
+        },
+        "right_to_works": {
+            "right_to_work_code": "",
+            "right_to_work_check_date": "",
+            "right_to_work_expiry_date": "",
+            "right_to_work_docs": [
+                {
+                    "file_name": "",
+                    "description": ""
+                }
+            ]
+        }
+    },
+
+    "attendanceData": {
+        "start_date": "",
+        "end_date": "",
+        "work_location_id": 1
+    },
+    "assetData": {
+        "name": "",
+        "is_working": true,
+        "status": "",
+        "code": "",
+        "serial_number": "",
+        "type": "",
+        "image": "",
+        "date": "",
+        "note": ""
+    },
+    "documentData": {
+        "name": "",
+        "file_name": ""
+    },
+    "educationHistoryData": {
+        "degree": "",
+        "major": "",
+        "school_name": "",
+        "start_date": "",
+        "graduation_date": "",
+        "achievements": "",
+        "description": "",
+        "address": "",
+        "country": "",
+        "city": "",
+        "postcode": "",
+        "is_current": true,
+        "attachments": [""]
+    },
+
+    "jobHistoryData": {
+        "company_name": "",
+        "country": "",
+        "job_title": "",
+        "employment_start_date": "",
+        "employment_end_date": "",
+        "responsibilities": "",
+        "supervisor_name": "",
+        "contact_information": "",
+        "work_location": "",
+        "achievements": ""
+    },
+    "pensionData": {
+        "pension_eligible": true,
+        "pension_letters": [
+            {
+                "file_name": "",
+                "description": ""
+            }
+        ],
+        "pension_scheme_status": "",
+        "pension_enrollment_issue_date": "",
+        "pension_scheme_opt_out_date": "",
+        "pension_re_enrollment_due_date": "",
+        "from_date": "",
+        "to_date": ""
+    },
+    "payslipData": {
+        "payroll_id": 1,
+        "month": 1,
+        "year": 2022,
+        "payment_amount": 1000.0,
+        "payment_notes": "",
+        "payment_date": "",
+        "payslip_file": "",
+        "payment_record_file": [""],
+        "gross_pay": 1000.0,
+        "tax": 200.0,
+        "employee_ni_deduction": 100.0,
+        "employer_ni": 200.0,
+        "payment_method": "bank_transfer"
+    },
+    "noteData": {
+        "title": "",
+        "description": ""
+    },
+    "bankData": {
+        "bank_id": 1,
+        "sort_code": "",
+        "account_number": "",
+        "account_name": ""
+    }
+}
