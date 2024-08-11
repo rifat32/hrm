@@ -885,7 +885,7 @@ class LeaveController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"], "", "leave_attachments");
             $this->makeFilePermanent($request_data["attachments"], "");
@@ -1217,7 +1217,7 @@ class LeaveController extends Controller
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
 
 
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
 
             $leavesQuery = Leave::where(
@@ -1909,7 +1909,7 @@ class LeaveController extends Controller
                 ], 401);
             }
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $employees = User::with(
                 [
                     'leaves' => function ($query) use ($request) {
@@ -2270,7 +2270,7 @@ class LeaveController extends Controller
                 ], 401);
             }
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $leave =  Leave::where([
                 "id" => $id,
                 "business_id" => $business_id
@@ -2451,7 +2451,7 @@ class LeaveController extends Controller
                 ], 401);
             }
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Leave::where([
                 "business_id" => $business_id

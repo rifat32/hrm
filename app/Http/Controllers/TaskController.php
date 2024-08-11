@@ -113,7 +113,7 @@ class TaskController extends Controller
                 $request_data = $request->validated();
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["assigned_by"] = auth()->user()->id;
@@ -260,7 +260,7 @@ Notification::create([
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -414,7 +414,7 @@ Notification::create([
                          "message" => "You can not perform this action"
                      ], 401);
                  }
-                 $business_id =  $request->user()->business_id;
+                 $business_id =  auth()->user()->business_id;
                  $request_data = $request->validated();
 
 
@@ -645,7 +645,7 @@ Notification::create([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $tasks = Task::with(
                 [
                     "assigned_by" => function ($query) {
@@ -799,7 +799,7 @@ Notification::create([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $task =  Task::with(
             [
@@ -919,7 +919,7 @@ Notification::create([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Task::where([
                 "business_id" => $business_id
@@ -941,7 +941,7 @@ Notification::create([
 
             Task::destroy($existingIds);
 
-            
+
 
 
             return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);

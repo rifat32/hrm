@@ -98,7 +98,7 @@ class AnnouncementController extends Controller
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
@@ -199,7 +199,7 @@ class AnnouncementController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -361,7 +361,7 @@ class AnnouncementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $announcements = Announcement::with([
                 "creator" => function ($query) {
@@ -505,7 +505,7 @@ class AnnouncementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $announcement =  Announcement::with([
                 "creator" => function ($query) {
                     $query->select('users.id', 'users.first_Name','users.middle_Name',
@@ -600,7 +600,7 @@ class AnnouncementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Announcement::where([
                 "business_id" => $business_id
@@ -721,7 +721,7 @@ class AnnouncementController extends Controller
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
 
-             $business_id =  $request->user()->business_id;
+             $business_id =  auth()->user()->business_id;
 
              $all_parent_departments_of_user = $this->all_parent_departments_of_user(auth()->user()->id);
 
@@ -884,7 +884,7 @@ class AnnouncementController extends Controller
 
              $this->addAnnouncementIfMissing($all_parent_departments_of_user);
 
-             $business_id =  $request->user()->business_id;
+             $business_id =  auth()->user()->business_id;
              $announcements = Announcement::with([
                  "creator" => function ($query) {
                      $query->select('users.id', 'users.first_Name','users.middle_Name',

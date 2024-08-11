@@ -125,9 +125,9 @@ class ProjectController extends Controller
             $request_data["is_active"] = 1;
             $request_data["is_default"] = 0;
             $request_data["created_by"] = $request->user()->id;
-            $request_data["business_id"] = $request->user()->business_id;
+            $request_data["business_id"] = auth()->user()->business_id;
 
-            if (empty($request->user()->business_id)) {
+            if (empty(auth()->user()->business_id)) {
                 $request_data["business_id"] = NULL;
                 if ($request->user()->hasRole('superadmin')) {
                     $request_data["is_default"] = 1;
@@ -285,7 +285,7 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
 
 
@@ -483,7 +483,7 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
 
 
@@ -649,7 +649,7 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
 
             $user_query_params = [
@@ -995,7 +995,7 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
 
 
@@ -1308,7 +1308,7 @@ class ProjectController extends Controller
                 ], 401);
             }
 
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $project =  Project::with("departments", "users")
                 ->where([
                     "id" => $id,
@@ -1403,7 +1403,7 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $projects = Project::where([
                 "business_id" => $business_id

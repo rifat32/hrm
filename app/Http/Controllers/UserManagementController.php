@@ -482,7 +482,7 @@ class UserManagementController extends Controller
                 ], 401);
             }
             $this->checkEmployeeCreationLimit(true);
-            $business_id = $request->user()->business_id;
+            $business_id = auth()->user()->business_id;
 
             $request_data = $request->validated();
 
@@ -2053,7 +2053,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -2231,7 +2231,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -2284,7 +2284,7 @@ $payslipData
      * @OA\Put(
      *      path="/v1.0/users/exit",
      *      operationId="exitUser",
-     *      tags={"user_management"},
+     *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
      *       },
@@ -2399,10 +2399,10 @@ $payslipData
             $date_of_termination = Carbon::parse($request_data["termination"]["date_of_termination"]);
             $joining_date = Carbon::parse($user->joining_date);
 
-            if ($joining_date->gt($date_of_termination)) {
-                throw new Exception("Date of termination can not be before the joining date of the employee.", 401);
-            }
 
+            if ($date_of_termination->lt($joining_date)) {
+                throw new Exception("The employee has been joined on " . $joining_date . " So you can not set a past termination date", 401);
+            }
 
 
 
@@ -2414,7 +2414,9 @@ $payslipData
             $request_data["exit_interview"]["user_id"] = $request_data["id"];
             $request_data["access_revocation"]["user_id"] = $request_data["id"];
 
-            Termination::create($request_data["termination"]);
+        $termination =   Termination::create($request_data["termination"]);
+
+        $request_data["termination_id"]  = $termination->id;
             ExitInterview::create($request_data["exit_interview"]);
 
 
@@ -2439,6 +2441,211 @@ $payslipData
             return $this->sendError($e, 500, $request);
         }
     }
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/users/update/exit",
+     *      operationId="updateUserExit",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to exit user",
+     *      description="This method is to exit user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"id","first_Name","last_Name","email","password","password_confirmation","phone","address_line_1","address_line_2","country","city","postcode","role"},
+     *     type="object",
+     *     @OA\Property(property="id", type="string", format="number", example="1"),
+     *     @OA\Property(
+     *         property="termination",
+     *         type="object",
+     *         @OA\Property(property="termination_type_id", type="integer", format="int64", example="1"),
+     *         @OA\Property(property="termination_reason_id", type="integer", format="int64", example="2"),
+     *         @OA\Property(property="date_of_termination", type="string", format="date", example="2024-07-13"),
+     *         @OA\Property(property="joining_date", type="string", format="date", example="2022-01-01"),
+     * * @OA\Property(property="final_paycheck_date", type="string", format="string", example="final_paycheck_date"),
+* @OA\Property(property="final_paycheck_amount", type="string", format="string", example="final_paycheck_amount"),
+* @OA\Property(property="unused_vacation_compensation_amount", type="string", format="string", example="unused_vacation_compensation_amount"),
+* @OA\Property(property="unused_sick_leave_compensation_amount", type="string", format="string", example="unused_sick_leave_compensation_amount"),
+* @OA\Property(property="severance_pay_amount", type="string", format="string", example="severance_pay_amount"),
+* @OA\Property(property="continuation_of_benefits_offered", type="string", format="string", example="continuation_of_benefits_offered"),
+* @OA\Property(property="benefits_termination_date", type="string", format="string", example="benefits_termination_date"),
+*
+     *     ),
+     *     @OA\Property(
+     *         property="exit_interview",
+     *         type="object",
+     *         @OA\Property(property="exit_interview_conducted", type="boolean", example=true),
+     *         @OA\Property(property="date_of_exit_interview", type="string", format="date", example="2024-07-10"),
+     *         @OA\Property(property="interviewer_name", type="string", example="John Doe"),
+     *         @OA\Property(property="key_feedback_points", type="string", example="Some key feedback points."),
+     *         @OA\Property(property="assets_returned", type="boolean", example=true),
+     *         @OA\Property(
+     *             property="attachments",
+     *             type="array",
+     *             @OA\Items(type="string", example="attachment1.jpg")
+     *         ),
+     *     ),
+     *     @OA\Property(
+     *         property="access_revocation",
+     *         type="object",
+     *         @OA\Property(property="email_access_revoked", type="boolean", example=true),
+     *         @OA\Property(property="system_access_revoked_date", type="string", format="date", example="2024-07-12"),
+     *     )
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserExit(UserExitRequest $request)
+     {
+
+         DB::beginTransaction();
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_update')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $request_data = $request->validated();
+
+
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $user =    $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
+
+
+
+             if (empty($user->joining_date)) {
+                 throw new Exception("The employee does not have a joining date", 401);
+             }
+
+
+
+             $date_of_termination = Carbon::parse($request_data["termination"]["date_of_termination"]);
+             $joining_date = Carbon::parse($user->joining_date);
+
+             if ($joining_date->gt($date_of_termination)) {
+                 throw new Exception("Date of termination can not be before the joining date of the employee.", 401);
+             }
+
+
+             $last_termination =  Termination::where([
+                "user_id" => $user->id
+            ])
+                ->latest()
+                ->first();
+
+                if(empty($last_termination)){
+                   throw new Exception("The employee is not terminated. So you can not update termination");
+                }
+
+                if (Carbon::parse($last_termination->date_of_termination)->lt($joining_date)) {
+                    throw new Exception("The employee has been rejoined on " . $joining_date . " So you can not update termination date", 401);
+                }
+
+                if ($date_of_termination->lt($joining_date)) {
+                    throw new Exception("The employee has been joined on " . $joining_date . " So you can not set a past termination date", 401);
+                }
+
+
+
+             $request_data["termination"]["joining_date"] = $user->joining_date;
+
+
+             $request_data["termination"]["user_id"] = $request_data["id"];
+             $request_data["exit_interview"]["user_id"] = $request_data["id"];
+             $request_data["access_revocation"]["user_id"] = $request_data["id"];
+
+             $last_termination->fill(collect($request_data["termination"])->only([
+                'user_id',
+                'termination_type_id',
+                'termination_reason_id',
+                'date_of_termination',
+                'joining_date',
+                'final_paycheck_date',
+                'final_paycheck_amount',
+                'unused_vacation_compensation_amount',
+                'unused_sick_leave_compensation_amount',
+                'severance_pay_amount',
+                'benefits_termination_date',
+                'continuation_of_benefits_offered',
+            ])->toArray());
+            $last_termination->save();
+
+
+            $request_data["exit_interview"]["attachments"] = json_encode($request_data["exit_interview"]["attachments"]);
+            $last_termination->exit_interview()->update(collect($request_data["exit_interview"])->only([
+        'exit_interview_conducted',
+        'date_of_exit_interview',
+        'interviewer_name',
+        'key_feedback_points',
+        'assets_returned',
+        'attachments',
+            ])->toArray());
+
+
+
+
+
+
+             if (empty($user->accessRevocation)) {
+                 AccessRevocation::create($request_data["access_revocation"]);
+             } else {
+                 $user->accessRevocation()->update(collect($request_data["access_revocation"])->only(
+                     "email_access_revoked",
+                     "system_access_revoked_date"
+                 )->toArray());
+             }
+
+
+             $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
+
+
+             DB::commit();
+
+             return response($user, 201);
+         } catch (Exception $e) {
+       DB::rollBack();
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
     /**
@@ -2548,7 +2755,7 @@ $payslipData
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $business_id =  $request->user()->business_id;
+             $business_id =  auth()->user()->business_id;
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
              $user_exists = Termination::where(function($query) use($all_manager_department_ids) {
@@ -2698,7 +2905,7 @@ $payslipData
                         "message" => "You can not change the role of super admin"
                     ], 401);
                 }
-                if (!$request->user()->hasRole('superadmin') && $user->business_id != $request->user()->business_id && $user->created_by != $request->user()->id) {
+                if (!$request->user()->hasRole('superadmin') && $user->business_id != auth()->user()->business_id && $user->created_by != $request->user()->id) {
                     return response()->json([
                         "message" => "You can not update this user"
                     ], 401);
@@ -2814,7 +3021,7 @@ $payslipData
                         "message" => "You can not change the role of super admin"
                     ], 401);
                 }
-                if (!$request->user()->hasRole('superadmin') && $user->business_id != $request->user()->business_id && $user->created_by != $request->user()->id) {
+                if (!$request->user()->hasRole('superadmin') && $user->business_id != auth()->user()->business_id && $user->created_by != $request->user()->id) {
                     return response()->json([
                         "message" => "You can not update this user"
                     ], 401);
@@ -2961,7 +3168,7 @@ $payslipData
                      "message" => "You can not change the role of super admin"
                  ], 401);
              }
-             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+             if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                  return response()->json([
                      "message" => "You can not update this user"
                  ], 401);
@@ -3228,7 +3435,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -3352,7 +3559,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -3537,7 +3744,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -3744,7 +3951,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -3945,7 +4152,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -4127,7 +4334,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -4249,7 +4456,7 @@ $payslipData
                 ], 401);
             }
 
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -4371,7 +4578,7 @@ $payslipData
                     "message" => "You can not change the role of super admin"
                 ], 401);
             }
-            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != $request->user()->business_id && $updatableUser->created_by != $request->user()->id) {
+            if (!$request->user()->hasRole('superadmin') && $updatableUser->business_id != auth()->user()->business_id && $updatableUser->created_by != $request->user()->id) {
                 return response()->json([
                     "message" => "You can not update this user"
                 ], 401);
@@ -9904,7 +10111,7 @@ $payslipData
             $user_id_exists =  DB::table('users')->where(
                 [
                     'user_id' => $user_id,
-                    "business_id" => $request->user()->business_id
+                    "business_id" => auth()->user()->business_id
                 ]
             )
                 ->when(

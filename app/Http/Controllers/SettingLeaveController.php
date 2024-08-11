@@ -95,7 +95,7 @@ class SettingLeaveController extends Controller
 
 
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
 
                     $request_data["business_id"] = NULL;
                     $request_data["is_default"] = 0;
@@ -236,7 +236,7 @@ class SettingLeaveController extends Controller
 
             $setting_leave = SettingLeave::with("special_users","special_roles","paid_leave_employment_statuses","unpaid_leave_employment_statuses")
 
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('setting_leaves.business_id', NULL)
                         ->where('setting_leaves.is_default', 1)
@@ -249,7 +249,7 @@ class SettingLeaveController extends Controller
                     ->where('setting_leaves.created_by', auth()->user()->id);
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
                  return   $query->where('setting_leaves.business_id', auth()->user()->business_id)
                     ->where('setting_leaves.is_default', 0);
 

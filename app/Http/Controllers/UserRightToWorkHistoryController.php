@@ -402,7 +402,7 @@ class UserRightToWorkHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $current_user_id = request()->user_id;
@@ -531,7 +531,7 @@ class UserRightToWorkHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_right_to_work_history =  EmployeeRightToWorkHistory::where([
                 "id" => $id,
@@ -622,7 +622,7 @@ class UserRightToWorkHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeRightToWorkHistory::whereIn('id', $idsArray)

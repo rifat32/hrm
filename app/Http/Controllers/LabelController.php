@@ -96,7 +96,7 @@ class LabelController extends Controller
                 $request_data = $request->validated();
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
@@ -191,7 +191,7 @@ class LabelController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -661,7 +661,7 @@ class LabelController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $label =  Label::where([
                 "id" => $id,
                 "business_id" => $business_id
@@ -752,7 +752,7 @@ class LabelController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Label::where([
                 "business_id" => $business_id

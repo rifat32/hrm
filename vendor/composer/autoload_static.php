@@ -1242,6 +1242,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Rules\\ValidateLetterTemplateName' => __DIR__ . '/../..' . '/app/Rules/ValidateLetterTemplateName.php',
         'App\\Rules\\ValidateModuleIds' => __DIR__ . '/../..' . '/app/Rules/ValidateModuleIds.php',
         'App\\Rules\\ValidateParentDepartmentId' => __DIR__ . '/../..' . '/app/Rules/ValidateParentDepartmentId.php',
+        'App\\Rules\\ValidateProject' => __DIR__ . '/../..' . '/app/Rules/ValidateProject.php',
         'App\\Rules\\ValidateRecruitmentProcessId' => __DIR__ . '/../..' . '/app/Rules/ValidateRecruitmentProcessId.php',
         'App\\Rules\\ValidateRecruitmentProcessIdClient' => __DIR__ . '/../..' . '/app/Rules/ValidateRecruitmentProcessIdClient.php',
         'App\\Rules\\ValidateRecruitmentProcessName' => __DIR__ . '/../..' . '/app/Rules/ValidateRecruitmentProcessName.php',

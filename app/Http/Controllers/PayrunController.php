@@ -104,7 +104,7 @@ class PayrunController extends Controller
                 $request_data = $request->validated();
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $payrun =  Payrun::create($request_data);
@@ -226,7 +226,7 @@ class PayrunController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
                 $payrun_query_params = [
@@ -542,7 +542,7 @@ class PayrunController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
@@ -807,7 +807,7 @@ class PayrunController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 

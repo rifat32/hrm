@@ -108,7 +108,7 @@ class HolidayController extends Controller
                  $request_data = $request->validated();
 
 
-                 $request_data["business_id"] = $request->user()->business_id;
+                 $request_data["business_id"] = auth()->user()->business_id;
                  $request_data["is_active"] = true;
                  $request_data["created_by"] = $request->user()->id;
                  $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
@@ -209,7 +209,7 @@ class HolidayController extends Controller
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["status"] = (auth()->user()->hasRole("business_owner") ? "approved" : "pending_approval");
@@ -299,7 +299,7 @@ class HolidayController extends Controller
                          "message" => "You can not perform this action"
                      ], 401);
                  }
-                 $business_id =  $request->user()->business_id;
+                 $business_id =  auth()->user()->business_id;
                  $request_data = $request->validated();
 
 
@@ -409,7 +409,7 @@ class HolidayController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -606,7 +606,7 @@ class HolidayController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);
@@ -934,7 +934,7 @@ class HolidayController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Holiday::where([
                 "business_id" => $business_id

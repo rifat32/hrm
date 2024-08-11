@@ -100,7 +100,7 @@ class JobListingController extends Controller
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
@@ -193,7 +193,7 @@ class JobListingController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -428,7 +428,7 @@ class JobListingController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $job_listings = JobListing::with("job_platforms","job_type","work_location","department")
             ->where(
                 [
@@ -769,7 +769,7 @@ class JobListingController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $job_listing =  JobListing::with("job_platforms","job_type","work_location","department")
             ->where([
                 "id" => $id,
@@ -938,7 +938,7 @@ class JobListingController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = JobListing::where([
                 "business_id" => $business_id
@@ -951,7 +951,7 @@ class JobListingController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-          
+
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);

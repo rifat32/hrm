@@ -66,7 +66,7 @@ public function delete{{ $names["plural_model_name"] }}ByIds(Request $request, $
        $idsArray = explode(',', $ids);
        $existingIds = {{ $names["singular_model_name"] }}::whereIn('id', $idsArray)
        @if ($is_active && $is_default)
-       ->when(empty($request->user()->business_id), function ($query) use ($request) {
+       ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
         if ($request->user()->hasRole("superadmin")) {
             return $query->where('{{ $names["table_name"] }}.business_id', NULL)
                 ->where('{{ $names["table_name"] }}.is_default', 1);
@@ -76,8 +76,8 @@ public function delete{{ $names["plural_model_name"] }}ByIds(Request $request, $
                 ->where('{{ $names["table_name"] }}.created_by', $request->user()->id);
         }
     })
-    ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-        return $query->where('{{ $names["table_name"] }}.business_id', $request->user()->business_id)
+    ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+        return $query->where('{{ $names["table_name"] }}.business_id', auth()->user()->business_id)
             ->where('{{ $names["table_name"] }}.is_default', 0);
     })
     @else

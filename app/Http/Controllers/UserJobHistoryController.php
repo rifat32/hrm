@@ -207,7 +207,7 @@ class UserJobHistoryController extends Controller
                           "message" => "You can not perform this action"
                       ], 401);
                   }
-                  $business_id =  $request->user()->business_id;
+                  $business_id =  auth()->user()->business_id;
                   $request_data = $request->validated();
 
 
@@ -417,7 +417,7 @@ class UserJobHistoryController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+              $business_id =  auth()->user()->business_id;
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_job_histories = UserJobHistory::with([
                   "creator" => function ($query) {
@@ -547,7 +547,7 @@ class UserJobHistoryController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+              $business_id =  auth()->user()->business_id;
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $user_job_history =  UserJobHistory::where([
                   "id" => $id,
@@ -636,7 +636,7 @@ class UserJobHistoryController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
-              $business_id =  $request->user()->business_id;
+              $business_id =  auth()->user()->business_id;
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
               $existingIds = UserJobHistory::whereIn('id', $idsArray)

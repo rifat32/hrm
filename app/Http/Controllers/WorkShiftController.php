@@ -199,7 +199,7 @@ if($request_data["type"] !== "flexible") {
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["is_default"] = false;
@@ -1231,7 +1231,7 @@ if($work_shift->type !== "flexible") {
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 

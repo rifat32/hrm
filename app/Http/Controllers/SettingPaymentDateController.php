@@ -92,7 +92,7 @@ class SettingPaymentDateController extends Controller
 
 
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
 
                     $request_data["business_id"] = NULL;
                     $request_data["is_default"] = 0;
@@ -228,7 +228,7 @@ class SettingPaymentDateController extends Controller
 
 
             $setting_payment_date = SettingPaymentDate::
-                when(empty($request->user()->business_id), function ($query) use ($request) {
+                when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if (auth()->user()->hasRole('superadmin')) {
                         return $query->where('setting_payment_dates.business_id', NULL)
                             ->where('setting_payment_dates.is_default', 1)
@@ -241,7 +241,7 @@ class SettingPaymentDateController extends Controller
                             ->where('setting_payment_dates.created_by', auth()->user()->id);
                     }
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
                     return   $query->where('setting_payment_dates.business_id', auth()->user()->business_id)
                         ->where('setting_payment_dates.is_default', 0);
                 })

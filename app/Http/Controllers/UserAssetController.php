@@ -122,7 +122,7 @@ class UserAssetController extends Controller
 
 
                   $request_data["created_by"] = $request->user()->id;
-                  $request_data["business_id"] = $request->user()->business_id;
+                  $request_data["business_id"] = auth()->user()->business_id;
 
 
                   if(empty($request_data["user_id"])) {
@@ -157,7 +157,7 @@ class UserAssetController extends Controller
                   ]
                   );
 
-                  
+
                   if($user_asset->status == "returned") {
                     $user_asset->user_id = NULL;
                     $user_asset->status = "";

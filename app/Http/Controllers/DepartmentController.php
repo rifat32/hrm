@@ -104,7 +104,7 @@ class DepartmentController extends Controller
                     $request_data["parent_id"] = $parent_department["id"];
                 }
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
@@ -196,7 +196,7 @@ class DepartmentController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -541,7 +541,7 @@ class DepartmentController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
@@ -699,7 +699,7 @@ class DepartmentController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $business_id =  $request->user()->business_id;
+             $business_id =  auth()->user()->business_id;
              $department = Department::with([
 
                 "manager" => function ($query) {
@@ -824,7 +824,7 @@ class DepartmentController extends Controller
                      "message" => "You can not perform this action"
                  ], 401);
              }
-             $business_id =  $request->user()->business_id;
+             $business_id =  auth()->user()->business_id;
 
              $departments = Department::with([
                 'manager',
@@ -934,7 +934,7 @@ class DepartmentController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
@@ -1037,7 +1037,7 @@ class DepartmentController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();

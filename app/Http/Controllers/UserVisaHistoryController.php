@@ -221,7 +221,7 @@ class UserVisaHistoryController extends Controller
 
 
                 $request_data = $request->validated();
-                
+
                 $request_data["visa_docs"] =   $this->storeUploadedFiles($request_data["visa_docs"],"file_name","visa_docs");
                 $this->makeFilePermanent($request_data["visa_docs"],"file_name");
 
@@ -402,7 +402,7 @@ class UserVisaHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
@@ -531,7 +531,7 @@ class UserVisaHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_visa_history =  EmployeeVisaDetailHistory::where([
                 "id" => $id,
@@ -622,7 +622,7 @@ class UserVisaHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeVisaDetailHistory::whereIn('id', $idsArray)

@@ -91,9 +91,9 @@ class TerminationReasonController extends Controller
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
@@ -496,7 +496,7 @@ class TerminationReasonController extends Controller
 
 
 
-            $termination_reasons = TerminationReason::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $termination_reasons = TerminationReason::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('termination_reasons.business_id', NULL)
                         ->where('termination_reasons.is_default', 1)
@@ -528,7 +528,7 @@ class TerminationReasonController extends Controller
                         });
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
                         ->where(function ($query) use ($request, $created_by) {
 
@@ -805,7 +805,7 @@ class TerminationReasonController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = TerminationReason::whereIn('id', $idsArray)
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
                         return $query->where('termination_reasons.business_id', NULL)
                             ->where('termination_reasons.is_default', 1);
@@ -815,8 +815,8 @@ class TerminationReasonController extends Controller
                             ->where('termination_reasons.created_by', $request->user()->id);
                     }
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('termination_reasons.business_id', $request->user()->business_id)
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where('termination_reasons.business_id', auth()->user()->business_id)
                         ->where('termination_reasons.is_default', 0);
                 })
                 ->select('id')

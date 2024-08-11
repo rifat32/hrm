@@ -373,7 +373,7 @@ class UserPassportHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
@@ -509,7 +509,7 @@ class UserPassportHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_passport_history =  EmployeePassportDetailHistory::where([
                 "id" => $id,
@@ -600,7 +600,7 @@ class UserPassportHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = EmployeePassportDetailHistory::whereIn('id', $idsArray)

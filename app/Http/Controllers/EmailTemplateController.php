@@ -348,10 +348,10 @@ $query = [
                 });
             }
 
-            if (!empty($request->user()->business_id)) {
+            if (!empty(auth()->user()->business_id)) {
                 $templateQuery = $templateQuery
                 ->where([
-                    'business_id'=>$request->user()->business_id,
+                    'business_id'=>auth()->user()->business_id,
                     "is_default" => 0
 
                 ])

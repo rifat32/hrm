@@ -88,11 +88,11 @@ class RolesController extends Controller
                 "guard_name" => "api",
             ];
 
-            if (empty($request->user()->business_id)) {
+            if (empty(auth()->user()->business_id)) {
                 $insertableRole["business_id"] = NULL;
                 $insertableRole["is_default"] = 1;
             } else {
-                $insertableRole["business_id"] = $request->user()->business_id;
+                $insertableRole["business_id"] = auth()->user()->business_id;
                 $insertableRole["is_default"] = 0;
                 $insertableRole["is_default_for_business"] = 0;
             }
@@ -185,12 +185,12 @@ class RolesController extends Controller
         }
 
             $role = Role::where(["id" => $request_data["id"]])
-                ->when((empty($request->user()->business_id)), function ($query) use ($request) {
+                ->when((empty(auth()->user()->business_id)), function ($query) use ($request) {
                     return $query->where('business_id', NULL)->where('is_default', 1);
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    // return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
-                    return $query->where('business_id', $request->user()->business_id);
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    // return $query->where('business_id', auth()->user()->business_id)->where('is_default', 0);
+                    return $query->where('business_id', auth()->user()->business_id);
                  })
                 ->first();
 
@@ -321,15 +321,15 @@ class RolesController extends Controller
             $roles = Role::with('permissions:name,id', "users")
             ->where("roles.id", ">", $currentUserRole->id)
 
-                ->when((empty($request->user()->business_id)), function ($query) use ($request) {
+                ->when((empty(auth()->user()->business_id)), function ($query) use ($request) {
                     return $query->where('business_id', NULL)->where('is_default', 1)
                         ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
                             return $query->where('name', '!=', 'superadmin')
                                 ->where("id", ">", $this->getMainRoleId());
                         });
                 })
-                ->when(!(empty($request->user()->business_id)), function ($query) use ($request) {
-                    return $query->where('business_id', $request->user()->business_id)
+                ->when(!(empty(auth()->user()->business_id)), function ($query) use ($request) {
+                    return $query->where('business_id', auth()->user()->business_id)
                         ->where("id", ">", $this->getMainRoleId());
                 })
 
@@ -495,11 +495,11 @@ class RolesController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = Role::whereIn('id', $idsArray)
                 ->where("is_system_default", "!=", 1)
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     return $query->where('business_id', NULL)->where('is_default', 1);
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('business_id', $request->user()->business_id)->where('is_default', 0);
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where('business_id', auth()->user()->business_id)->where('is_default', 0);
                 })
                 ->when(!($request->user()->hasRole('superadmin')), function ($query) use ($request) {
                     return $query->where('name', '!=', 'superadmin');
@@ -612,7 +612,7 @@ class RolesController extends Controller
                     continue;
                 }
 
-                if (!empty($request->user()->business_id)) {
+                if (!empty(auth()->user()->business_id)) {
                     if (in_array($roleAndPermissions["role"], ["superadmin", "reseller"])) {
                         // Skip specific roles
                         continue;

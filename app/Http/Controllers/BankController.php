@@ -92,9 +92,9 @@ class BankController extends Controller
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
@@ -505,7 +505,7 @@ class BankController extends Controller
 
 
 
-            $banks = Bank::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $banks = Bank::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('banks.business_id', NULL)
                         ->where('banks.is_default', 1)
@@ -539,7 +539,7 @@ class BankController extends Controller
                     });
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
                     ->where(function($query) use($request, $created_by) {
 
@@ -823,7 +823,7 @@ class BankController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = Bank::whereIn('id', $idsArray)
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
                         return $query->where('banks.business_id', NULL)
                             ->where('banks.is_default', 1);
@@ -833,8 +833,8 @@ class BankController extends Controller
                             ->where('banks.created_by', $request->user()->id);
                     }
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('banks.business_id', $request->user()->business_id)
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where('banks.business_id', auth()->user()->business_id)
                         ->where('banks.is_default', 0);
                 })
                 ->select('id')
@@ -861,7 +861,7 @@ class BankController extends Controller
                     "conflicting_users" => $conflictingUsers
                 ], 409);
             }
-            
+
 
             $conflictingPayslip = Payslip::whereIn("bank_id", $existingIds)->get([
                 'id'

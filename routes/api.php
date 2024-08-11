@@ -463,10 +463,10 @@ Route::put('/v1.0/users/profile-picture', [UserManagementController::class, "upd
 
 Route::put('/v1.0/users/toggle-active', [UserManagementController::class, "toggleActiveUser"]);
 Route::put('/v1.0/users/exit', [UserManagementController::class, "exitUser"]);
-Route::put('/v1.0/users/update/exit', [UserManagementController::class, "exitUser"]);
+Route::put('/v1.0/users/update/exit', [UserManagementController::class, "updateUserExit"]);
 // if current joining date gte last termination throw err (rejoined)
 // not rejoined
-// current joining date should be lte new termination date
+// current joining date can not be gt new termination date
 // no attendances gt new termination date
 
 Route::get('/v1.0/users/exists', [UserManagementController::class, "getUserExists"]);

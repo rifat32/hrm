@@ -103,7 +103,7 @@ class UserNoteController extends Controller
                 // Parse comment for mentions
                 preg_match_all('/@(\w+)/', $comment_text, $mentions);
                 $mentioned_users = $mentions[1];
-                $mentioned_users = User::where('business_id', $request->user()->business_id)
+                $mentioned_users = User::where('business_id', auth()->user()->business_id)
                 ->whereIn('user_name', $mentioned_users)
                 ->get();
 
@@ -202,7 +202,7 @@ $user_note->mentions()->createMany($mentions_data);
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
                 $request_data["updated_by"] = $request->user()->id;
@@ -212,7 +212,7 @@ $user_note->mentions()->createMany($mentions_data);
                 // Parse comment for mentions
                 preg_match_all('/@(\w+)/', $comment_text, $mentions);
                 $mentioned_users = $mentions[1];
-                $mentioned_users = User::where('business_id', $request->user()->business_id)
+                $mentioned_users = User::where('business_id', auth()->user()->business_id)
                 ->whereIn('user_name', $mentioned_users)
                 ->get();
 
@@ -357,7 +357,7 @@ $user_note->mentions()->createMany($mentions_data);
                          "message" => "You can not perform this action"
                      ], 401);
                  }
-                 $business_id =  $request->user()->business_id;
+                 $business_id =  auth()->user()->business_id;
                  $request_data = $request->validated();
                  $request_data["updated_by"] = $request->user()->id;
 
@@ -367,7 +367,7 @@ $user_note->mentions()->createMany($mentions_data);
                  // Parse comment for mentions
                  preg_match_all('/@(\w+)/', $comment_text, $mentions);
                  $mentioned_users = $mentions[1];
-                 $mentioned_users = User::where('business_id', $request->user()->business_id)
+                 $mentioned_users = User::where('business_id', auth()->user()->business_id)
                  ->whereIn('user_name', $mentioned_users)
                  ->get();
 
@@ -533,7 +533,7 @@ $user_note->mentions()->createMany($mentions_data);
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_notes = UserNote::with([
                 "creator" => function ($query) {
@@ -664,7 +664,7 @@ $user_note->mentions()->createMany($mentions_data);
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_note =  UserNote::
             with([
@@ -770,7 +770,7 @@ $user_note->mentions()->createMany($mentions_data);
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = UserNote::

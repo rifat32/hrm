@@ -3046,7 +3046,7 @@ $business->service_plan = $business->service_plan;
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Business::whereIn('id', $idsArray)
             ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {

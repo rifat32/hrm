@@ -158,7 +158,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
 
        ${{ $names["table_name"] }} = {{ $names["singular_model_name"] }}::
        @if ($is_active && $is_default)
-       when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+       when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
         if (auth()->user()->hasRole('superadmin')) {
             return $query->where('{{ $names["table_name"] }}.business_id', NULL)
                 ->where('{{ $names["table_name"] }}.is_default', 1)
@@ -192,7 +192,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
             });
         }
     })
-        ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+        ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
             return $query
             ->where(function($query) use($request, $created_by) {
 

@@ -118,9 +118,9 @@ class UserLetterController extends Controller
 
 
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;

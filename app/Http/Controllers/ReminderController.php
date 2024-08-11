@@ -122,7 +122,7 @@ class ReminderController extends Controller
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
@@ -212,7 +212,7 @@ class ReminderController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  $request->user()->business_id;
+                $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
                 $reminder_options = config("setup-config.reminder_options");
@@ -487,7 +487,7 @@ class ReminderController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $reminders = Reminder::where(
                 [
                     "reminders.business_id" => $business_id
@@ -593,7 +593,7 @@ class ReminderController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $reminder =  Reminder::where([
                 "id" => $id,
                 "business_id" => $business_id
@@ -679,7 +679,7 @@ class ReminderController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Reminder::where([
                 "business_id" => $business_id

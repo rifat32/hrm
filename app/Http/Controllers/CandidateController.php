@@ -119,7 +119,7 @@ class CandidateController extends Controller
                 $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"],"","candidate_files");
                 $this->makeFilePermanent($request_data["attachments"],"");
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $candidate =  Candidate::create($request_data);
@@ -656,7 +656,7 @@ class CandidateController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $candidates = Candidate::
             with("job_listing","job_platforms")
 
@@ -794,7 +794,7 @@ class CandidateController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $candidate =  Candidate:: with("job_listing","job_platforms","recruitment_processes")
             ->where([
                 "id" => $id,
@@ -881,7 +881,7 @@ class CandidateController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Candidate::where([
                 "business_id" => $business_id

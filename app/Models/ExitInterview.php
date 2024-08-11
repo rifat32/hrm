@@ -11,6 +11,7 @@ class ExitInterview extends Model
 
     protected $fillable = [
         'user_id',
+        'termination_id',
         'exit_interview_conducted',
         'date_of_exit_interview',
         'interviewer_name',

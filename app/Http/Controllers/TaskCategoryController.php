@@ -97,9 +97,9 @@ class TaskCategoryController extends Controller
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
@@ -203,7 +203,7 @@ class TaskCategoryController extends Controller
                          "message" => "You can not perform this action"
                      ], 401);
                  }
-                 // $business_id =  $request->user()->business_id;
+                 // $business_id =  auth()->user()->business_id;
                  $request_data = $request->validated();
 
 
@@ -223,7 +223,7 @@ class TaskCategoryController extends Controller
 
                  // }
                  // else {
-                 //     if(!($task_category_prev->business_id == $request->user()->business_id)) {
+                 //     if(!($task_category_prev->business_id == auth()->user()->business_id)) {
                  //         return response()->json([
                  //             "message" => "You do not have permission to update this task category due to role restrictions."
                  //         ], 403);
@@ -330,7 +330,7 @@ class TaskCategoryController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                // $business_id =  $request->user()->business_id;
+                // $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -689,7 +689,7 @@ class TaskCategoryController extends Controller
                 $created_by = auth()->user()->business->created_by;
             }
 
-            $task_categories = TaskCategory::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $task_categories = TaskCategory::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('task_categories.business_id', NULL)
                         ->where('task_categories.is_default', 1)
@@ -723,7 +723,7 @@ class TaskCategoryController extends Controller
                     });
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
                     ->where(function($query) use($request, $created_by) {
 
@@ -934,7 +934,7 @@ class TaskCategoryController extends Controller
                 }
              ])
 
-             ->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+             ->when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                  if (auth()->user()->hasRole('superadmin')) {
                      return $query->where('task_categories.business_id', NULL)
                          ->where('task_categories.is_default', 1)
@@ -970,7 +970,7 @@ class TaskCategoryController extends Controller
              })
 
 
-                 ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                 ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
                     ->where(function($query) use($request, $created_by) {
 
@@ -1034,7 +1034,7 @@ class TaskCategoryController extends Controller
              //                  ->where('task_categories.is_default', 1);
              // })
              // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-             //     return $query->where('task_categories.business_id', $request->user()->business_id);
+             //     return $query->where('task_categories.business_id', auth()->user()->business_id);
              // })
 
 
@@ -1147,7 +1147,7 @@ class TaskCategoryController extends Controller
             //                  ->where('task_categories.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('task_categories.business_id', $request->user()->business_id);
+            //     return $query->where('task_categories.business_id', auth()->user()->business_id);
             // })
                 ->first();
             if (!$task_category) {
@@ -1281,7 +1281,7 @@ class TaskCategoryController extends Controller
              //                  ->where('task_categories.is_default', 1);
              // })
              // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-             //     return $query->where('task_categories.business_id', $request->user()->business_id);
+             //     return $query->where('task_categories.business_id', auth()->user()->business_id);
              // })
                  ->first();
              if (!$task_category) {
@@ -1498,7 +1498,7 @@ class TaskCategoryController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = TaskCategory::whereIn('id', $idsArray)
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 if ($request->user()->hasRole("superadmin")) {
                     return $query->where('task_categories.business_id', NULL)
                         ->where('task_categories.is_default', 1);
@@ -1508,8 +1508,8 @@ class TaskCategoryController extends Controller
                         ->where('task_categories.created_by', $request->user()->id);
                 }
             })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('task_categories.business_id', $request->user()->business_id)
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                return $query->where('task_categories.business_id', auth()->user()->business_id)
                     ->where('task_categories.is_default', 0);
             })
                 ->select('id')

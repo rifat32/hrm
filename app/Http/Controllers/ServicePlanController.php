@@ -217,7 +217,7 @@ class ServicePlanController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                // $business_id =  $request->user()->business_id;
+                // $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -388,7 +388,7 @@ class ServicePlanController extends Controller
             //                  ->where('service_plans.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('service_plans.business_id', $request->user()->business_id);
+            //     return $query->where('service_plans.business_id', auth()->user()->business_id);
             // })
 
 
@@ -525,7 +525,7 @@ class ServicePlanController extends Controller
              //                  ->where('service_plans.is_default', 1);
              // })
              // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-             //     return $query->where('service_plans.business_id', $request->user()->business_id);
+             //     return $query->where('service_plans.business_id', auth()->user()->business_id);
              // })
 
 
@@ -631,7 +631,7 @@ class ServicePlanController extends Controller
             //                  ->where('service_plans.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('service_plans.business_id', $request->user()->business_id);
+            //     return $query->where('service_plans.business_id', auth()->user()->business_id);
             // })
                 ->first();
             if (!$service_plan) {
@@ -747,7 +747,7 @@ class ServicePlanController extends Controller
             //                  ->where('service_plans.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('service_plans.business_id', $request->user()->business_id)
+            //     return $query->where('service_plans.business_id', auth()->user()->business_id)
             //     ->where('service_plans.is_default', 0);
             // })
                 ->select('id')

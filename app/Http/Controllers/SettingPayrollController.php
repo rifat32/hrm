@@ -94,7 +94,7 @@ class SettingPayrollController extends Controller
 
 
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
 
                     $request_data["business_id"] = NULL;
                     $request_data["is_default"] = 0;
@@ -232,7 +232,7 @@ class SettingPayrollController extends Controller
 
 
             $setting_payrun = SettingPayrun::with("restricted_users", "restricted_departments")
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if (auth()->user()->hasRole('superadmin')) {
                         return $query->where('setting_payruns.business_id', NULL)
                             ->where('setting_payruns.is_default', 1)
@@ -245,7 +245,7 @@ class SettingPayrollController extends Controller
                             ->where('setting_payruns.created_by', auth()->user()->id);
                     }
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
                     return   $query->where('setting_payruns.business_id', auth()->user()->business_id)
                         ->where('setting_payruns.is_default', 0);
                 })
@@ -364,7 +364,7 @@ class SettingPayrollController extends Controller
                   }
 
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
 
                     $request_data["business_id"] = NULL;
                     $request_data["is_default"] = 1;
@@ -381,7 +381,7 @@ class SettingPayrollController extends Controller
 
                     );
                 } else {
-                    $request_data["business_id"] = $request->user()->business_id;
+                    $request_data["business_id"] = auth()->user()->business_id;
                     $request_data["is_default"] = 0;
                     $setting_payslip =     SettingPayslip::updateOrCreate(
                         [
@@ -510,12 +510,12 @@ class SettingPayrollController extends Controller
             }
 
 
-            $setting_payslip = SettingPayslip::when(empty($request->user()->business_id), function ($query) use ($request) {
+            $setting_payslip = SettingPayslip::when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_payslips.business_id', NULL)
                     ->where('setting_payslips.is_default', 1);
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('setting_payslips.business_id', $request->user()->business_id)
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where('setting_payslips.business_id', auth()->user()->business_id)
                         ->where('setting_payslips.is_default', 0);
                 })
                 ->when(!empty($request->search_key), function ($query) use ($request) {

@@ -29,6 +29,10 @@ class Termination extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function exit_interview() {
+        return $this->hasOne(ExitInterview::class,"termination_id","id");
+    }
+
     public function terminationType()
     {
         return $this->belongsTo(TerminationType::class);

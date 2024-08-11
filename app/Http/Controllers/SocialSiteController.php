@@ -102,7 +102,7 @@ class SocialSiteController extends Controller
                 // $request_data["created_by"] = $request->user()->id;
                 // }
                 // else {
-                //     $request_data["business_id"] = $request->user()->business_id;
+                //     $request_data["business_id"] = auth()->user()->business_id;
                 //     $request_data["is_active"] = 1;
                 //     $request_data["is_default"] = 0;
                 //     // $request_data["created_by"] = $request->user()->id;
@@ -193,7 +193,7 @@ class SocialSiteController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                // $business_id =  $request->user()->business_id;
+                // $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -220,7 +220,7 @@ class SocialSiteController extends Controller
 
                 // }
                 // else {
-                //     if(!($social_site_prev->business_id == $request->user()->business_id)) {
+                //     if(!($social_site_prev->business_id == auth()->user()->business_id)) {
                 //         return response()->json([
                 //             "message" => "You do not have permission to update this social site due to role restrictions."
                 //         ], 403);
@@ -366,7 +366,7 @@ class SocialSiteController extends Controller
             //                  ->where('social_sites.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('social_sites.business_id', $request->user()->business_id);
+            //     return $query->where('social_sites.business_id', auth()->user()->business_id);
             // })
 
 
@@ -472,7 +472,7 @@ class SocialSiteController extends Controller
             //                  ->where('social_sites.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('social_sites.business_id', $request->user()->business_id);
+            //     return $query->where('social_sites.business_id', auth()->user()->business_id);
             // })
                 ->first();
             if (!$social_site) {
@@ -557,12 +557,12 @@ class SocialSiteController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = SocialSite::whereIn('id', $idsArray)
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 return $query->where('social_sites.business_id', NULL)
                              ->where('social_sites.is_default', 1);
             })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('social_sites.business_id', $request->user()->business_id)
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                return $query->where('social_sites.business_id', auth()->user()->business_id)
                 ->where('social_sites.is_default', 0);
             })
                 ->select('id')
@@ -583,7 +583,7 @@ class SocialSiteController extends Controller
                 // $conflictingSocialSites = UserSocialSite::whereIn("social_site_id", $existingIds)->get([
                 //     'id',
                 // ]);
-          
+
                 return response()->json([
                     "message" => "Some user's are using some of these social sites.",
                     // "conflicting_users" => $conflictingSocialSites

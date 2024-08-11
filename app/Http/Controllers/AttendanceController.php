@@ -1663,7 +1663,7 @@ class AttendanceController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
@@ -2065,7 +2065,7 @@ class AttendanceController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $attendancesQuery = Attendance::with([
                 "employee" => function ($query) {
@@ -2215,7 +2215,7 @@ class AttendanceController extends Controller
                 ], 401);
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
 
             $attendance =  Attendance::with(
 
@@ -2434,7 +2434,7 @@ class AttendanceController extends Controller
                 ], 401);
             }
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Attendance::where([
                 "business_id" => $business_id

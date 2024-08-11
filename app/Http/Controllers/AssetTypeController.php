@@ -89,7 +89,7 @@ class AssetTypeController extends Controller
 
 
 
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
 
@@ -299,7 +299,7 @@ class AssetTypeController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $asset_types = AssetType::where(
                 [
                     "business_id" => $business_id
@@ -405,7 +405,7 @@ class AssetTypeController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $asset_type =  AssetType::where([
                 "id" => $id,
                 "business_id" => $business_id
@@ -492,7 +492,7 @@ class AssetTypeController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = AssetType::where([
                 "business_id" => $business_id

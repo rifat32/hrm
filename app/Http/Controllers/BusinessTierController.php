@@ -196,7 +196,7 @@ class BusinessTierController extends Controller
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                // $business_id =  $request->user()->business_id;
+                // $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
 
 
@@ -341,7 +341,7 @@ class BusinessTierController extends Controller
             //                  ->where('business_tiers.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('business_tiers.business_id', $request->user()->business_id);
+            //     return $query->where('business_tiers.business_id', auth()->user()->business_id);
             // })
 
 
@@ -447,7 +447,7 @@ class BusinessTierController extends Controller
             //                  ->where('business_tiers.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('business_tiers.business_id', $request->user()->business_id);
+            //     return $query->where('business_tiers.business_id', auth()->user()->business_id);
             // })
                 ->first();
             if (!$business_tier) {
@@ -537,7 +537,7 @@ class BusinessTierController extends Controller
             //                  ->where('business_tiers.is_default', 1);
             // })
             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-            //     return $query->where('business_tiers.business_id', $request->user()->business_id)
+            //     return $query->where('business_tiers.business_id', auth()->user()->business_id)
             //     ->where('business_tiers.is_default', 0);
             // })
                 ->select('id')

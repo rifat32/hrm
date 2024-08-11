@@ -107,7 +107,7 @@ class CommentController extends Controller
             $request_data = $request->validated();
 
 
-            $request_data["business_id"] = $request->user()->business_id;
+            $request_data["business_id"] = auth()->user()->business_id;
             $request_data["is_active"] = true;
             $request_data["created_by"] = $request->user()->id;
 
@@ -122,7 +122,7 @@ class CommentController extends Controller
 
             $mentioned_users = array_map('trim', $mentions[1]);;
 
-            $mentioned_users = User::where('business_id', $request->user()->business_id)
+            $mentioned_users = User::where('business_id', auth()->user()->business_id)
                 ->whereIn('user_name', $mentioned_users)
                 ->get();
 
@@ -254,7 +254,7 @@ class CommentController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
 
 
@@ -312,7 +312,7 @@ class CommentController extends Controller
             $mentioned_users = array_map('trim', $mentions[1]);;
 
 
-            $mentioned_users = User::where('business_id', $request->user()->business_id)
+            $mentioned_users = User::where('business_id', auth()->user()->business_id)
                 ->whereIn('user_name', $mentioned_users)
                 ->get();
 
@@ -652,7 +652,7 @@ class CommentController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $comment =  Comment::with("assigned_by", "assignees")
                 ->where([
                     "id" => $id,
@@ -744,7 +744,7 @@ class CommentController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Comment::where([
                 "business_id" => $business_id

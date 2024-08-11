@@ -530,6 +530,7 @@ return array(
     'App\\Rules\\ValidateLetterTemplateName' => $baseDir . '/app/Rules/ValidateLetterTemplateName.php',
     'App\\Rules\\ValidateModuleIds' => $baseDir . '/app/Rules/ValidateModuleIds.php',
     'App\\Rules\\ValidateParentDepartmentId' => $baseDir . '/app/Rules/ValidateParentDepartmentId.php',
+    'App\\Rules\\ValidateProject' => $baseDir . '/app/Rules/ValidateProject.php',
     'App\\Rules\\ValidateRecruitmentProcessId' => $baseDir . '/app/Rules/ValidateRecruitmentProcessId.php',
     'App\\Rules\\ValidateRecruitmentProcessIdClient' => $baseDir . '/app/Rules/ValidateRecruitmentProcessIdClient.php',
     'App\\Rules\\ValidateRecruitmentProcessName' => $baseDir . '/app/Rules/ValidateRecruitmentProcessName.php',

@@ -373,7 +373,7 @@ class UserSponsorshipHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
@@ -505,7 +505,7 @@ class UserSponsorshipHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $user_sponsorship_history =  EmployeeSponsorshipHistory::where([
                 "id" => $id,
@@ -596,7 +596,7 @@ class UserSponsorshipHistoryController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  $request->user()->business_id;
+            $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
             $existingIds = EmployeeSponsorshipHistory::whereIn('id', $idsArray)

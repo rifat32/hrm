@@ -92,9 +92,9 @@ class DesignationController extends Controller
                 $request_data["is_active"] = 1;
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
@@ -505,7 +505,7 @@ class DesignationController extends Controller
 
 
 
-            $designations = Designation::when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            $designations = Designation::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('designations.business_id', NULL)
                         ->where('designations.is_default', 1)
@@ -537,7 +537,7 @@ class DesignationController extends Controller
                         });
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
                         ->where(function ($query) use ($request, $created_by) {
 
@@ -817,7 +817,7 @@ class DesignationController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = Designation::whereIn('id', $idsArray)
-                ->when(empty($request->user()->business_id), function ($query) use ($request) {
+                ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                     if ($request->user()->hasRole("superadmin")) {
                         return $query->where('designations.business_id', NULL)
                             ->where('designations.is_default', 1);
@@ -827,8 +827,8 @@ class DesignationController extends Controller
                             ->where('designations.created_by', $request->user()->id);
                     }
                 })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                    return $query->where('designations.business_id', $request->user()->business_id)
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                    return $query->where('designations.business_id', auth()->user()->business_id)
                         ->where('designations.is_default', 0);
                 })
                 ->select('id')

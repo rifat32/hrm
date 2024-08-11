@@ -97,9 +97,9 @@ class SettingLeaveTypeController extends Controller
 
                 $request_data["is_default"] = 0;
                 $request_data["created_by"] = $request->user()->id;
-                $request_data["business_id"] = $request->user()->business_id;
+                $request_data["business_id"] = auth()->user()->business_id;
 
-                if (empty($request->user()->business_id)) {
+                if (empty(auth()->user()->business_id)) {
                     $request_data["business_id"] = NULL;
                     if ($request->user()->hasRole('superadmin')) {
                         $request_data["is_default"] = 1;
@@ -482,12 +482,12 @@ class SettingLeaveTypeController extends Controller
              $setting_leave_type =  SettingLeaveType::where([
                 "id" => $request_data["id"],
             ])
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 return $query->where('setting_leave_types.business_id', NULL)
                              ->where('setting_leave_types.is_default', 1);
             })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', $request->user()->business_id);
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', auth()->user()->business_id);
             })
                 ->first();
             if (!$setting_leave_type) {
@@ -618,7 +618,7 @@ class SettingLeaveTypeController extends Controller
 
 
             $setting_leave_types = SettingLeaveType::with("employment_statuses")
-            ->when(empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('setting_leave_types.business_id', NULL)
                         ->where('setting_leave_types.is_default', 1)
@@ -652,7 +652,7 @@ class SettingLeaveTypeController extends Controller
                     });
                 }
             })
-                ->when(!empty($request->user()->business_id), function ($query) use ($request, $created_by) {
+                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                     return $query
                     ->where(function($query) use($request, $created_by)  {
                         $query
@@ -953,7 +953,7 @@ class SettingLeaveTypeController extends Controller
 
             $idsArray = explode(',', $ids);
             $existingIds = SettingLeaveType::whereIn('id', $idsArray)
-            ->when(empty($request->user()->business_id), function ($query) use ($request) {
+            ->when(empty(auth()->user()->business_id), function ($query) use ($request) {
                 if ($request->user()->hasRole("superadmin")) {
                     return $query->where('setting_leave_types.business_id', NULL)
                         ->where('setting_leave_types.is_default', 1);
@@ -963,8 +963,8 @@ class SettingLeaveTypeController extends Controller
                         ->where('setting_leave_types.created_by', $request->user()->id);
                 }
             })
-            ->when(!empty($request->user()->business_id), function ($query) use ($request) {
-                return $query->where('setting_leave_types.business_id', $request->user()->business_id)
+            ->when(!empty(auth()->user()->business_id), function ($query) use ($request) {
+                return $query->where('setting_leave_types.business_id', auth()->user()->business_id)
                     ->where('setting_leave_types.is_default', 0);
             })
                 ->select('id')
