@@ -9,6 +9,7 @@ use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateWorkLocation;
+use App\Rules\ValidateWorkShiftName;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WorkShiftUpdateRequest extends BaseFormRequest
@@ -58,7 +59,11 @@ class WorkShiftUpdateRequest extends BaseFormRequest
                 },
             ],
 
-            'name' => 'required|string',
+            'name' => [
+                'required',
+                'string',
+              new  ValidateWorkShiftName()
+            ],
             'description' => 'nullable|string',
             'is_personal' => 'required|boolean',
 

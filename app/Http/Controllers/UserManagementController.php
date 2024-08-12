@@ -103,7 +103,7 @@ class UserManagementController extends Controller
     protected $workLocationComponent;
     protected $projectComponent;
 
-    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent,  LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent, UserManagementComponent $userManagementComponent, WorkLocationComponent $workLocationComponent, ProjectComponent $projectComponent)
+    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, HolidayComponent $holidayComponent, LeaveComponent $leaveComponent, AttendanceComponent $attendanceComponent, UserManagementComponent $userManagementComponent, WorkLocationComponent $workLocationComponent, ProjectComponent $projectComponent)
     {
 
         $this->workShiftHistoryComponent = $workShiftHistoryComponent;
@@ -241,10 +241,10 @@ class UserManagementController extends Controller
 
             $request_data = $request->validated();
 
-            return      DB::transaction(function () use ($request_data) {
+            return DB::transaction(function () use ($request_data) {
                 if (!auth()->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
 
-                    $error =  [
+                    $error = [
                         "message" => "You can not create superadmin.",
                     ];
                     throw new Exception(json_encode($error), 403);
@@ -261,7 +261,7 @@ class UserManagementController extends Controller
                 }
 
 
-                $user =  User::create($request_data);
+                $user = User::create($request_data);
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
                 $user->email_verified_at = now();
@@ -272,7 +272,7 @@ class UserManagementController extends Controller
 
 
                 if (!empty($request_data["handle_self_registered_businesses"])) {
-                    $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
+                    $permissions = Permission::whereIn('name', ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
                     $user->givePermissionTo($permissions);
                 }
 
@@ -516,7 +516,7 @@ class UserManagementController extends Controller
 
             if (!$request->user()->hasRole('superadmin') && $request_data["role"] == "superadmin") {
 
-                $error =  [
+                $error = [
                     "message" => "You can not create superadmin.",
                 ];
                 throw new Exception(json_encode($error), 403);
@@ -539,7 +539,7 @@ class UserManagementController extends Controller
             }
 
 
-            $user =  User::create($request_data);
+            $user = User::create($request_data);
             $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
             $user->user_name = $username;
             $token = Str::random(30);
@@ -718,7 +718,7 @@ class UserManagementController extends Controller
                     "required",
                     'string',
                     function ($attribute, $value, $fail) {
-                        $user_id_exists =  User::where(
+                        $user_id_exists = User::where(
                             [
                                 'user_id' => $value,
                                 "created_by" => auth()->user()->id
@@ -748,7 +748,7 @@ class UserManagementController extends Controller
                     "required",
                     'string',
                     function ($attribute, $value, $fail) {
-                        $role  = Role::where(["name" => $value])->first();
+                        $role = Role::where(["name" => $value])->first();
 
 
                         if (!$role) {
@@ -784,7 +784,7 @@ class UserManagementController extends Controller
                     'numeric',
                     function ($attribute, $value, $fail) {
                         if (!empty($value)) {
-                            $business_times =    BusinessTime::where([
+                            $business_times = BusinessTime::where([
                                 "is_weekend" => 1,
                                 "business_id" => auth()->user()->business_id,
                             ])->get();
@@ -810,7 +810,7 @@ class UserManagementController extends Controller
                 ],
 
                 'employeeData.departments' => 'required|array|size:1',
-                'employeeData.departments.*' =>  [
+                'employeeData.departments.*' => [
                     'numeric',
                     new ValidateDepartment($all_manager_department_ids)
                 ],
@@ -973,9 +973,9 @@ class UserManagementController extends Controller
                     'nullable',
                     'numeric',
                     function ($attribute, $value, $fail) use ($all_manager_department_ids) {
-                        $exists =  Payroll::whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
-                                $query->whereIn("departments.id", $all_manager_department_ids);
-                            })
+                        $exists = Payroll::whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        })
                             ->first();
 
                         if (!$exists) {
@@ -1014,17 +1014,17 @@ class UserManagementController extends Controller
                 'bankData.account_name' => "required|string",
             ]);
 
-            $employeeData =  $request->employeeData;
-            $attendanceData =  $request->attendanceData;
+            $employeeData = $request->employeeData;
+            $attendanceData = $request->attendanceData;
 
-            $assetData =  $request->assetData;
-            $documentData =  $request->documentData;
-            $educationHistoryData =  $request->educationHistoryData;
-            $jobHistoryData =  $request->jobHistoryData;
-            $pensionData =  $request->pensionData;
-            $payslipData =  $request->payslipData;
-            $noteData =  $request->noteData;
-            $bankData =  $request->bankData;
+            $assetData = $request->assetData;
+            $documentData = $request->documentData;
+            $educationHistoryData = $request->educationHistoryData;
+            $jobHistoryData = $request->jobHistoryData;
+            $pensionData = $request->pensionData;
+            $payslipData = $request->payslipData;
+            $noteData = $request->noteData;
+            $bankData = $request->bankData;
 
 
 
@@ -1262,12 +1262,12 @@ class UserManagementController extends Controller
 
 
 
-            $getPension =  Http::withHeaders([
+            $getPension = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' . $employeeId);
 
-            $pensionId =  $getPension->json()[0]["id"];
+            $pensionId = $getPension->json()[0]["id"];
 
             $pensionData["user_id"] = $employeeId;
             $pensionData["id"] = $pensionId;
@@ -1343,12 +1343,12 @@ class UserManagementController extends Controller
 
 
 
-            $userSocialSites =  Http::withHeaders([
+            $userSocialSites = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' . $employeeId);
 
-            $userSocialSitesId =  $userSocialSites->json()[0]["id"];
+            $userSocialSitesId = $userSocialSites->json()[0]["id"];
 
 
             $userSocialSites = Http::withHeaders([
@@ -1477,12 +1477,12 @@ class UserManagementController extends Controller
             $departments = $this->extractIdsFromJson($employeeFormData, 'departments');
 
 
-            $getrecruitmentProcess =  Http::withHeaders([
+            $getrecruitmentProcess = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/recruitment-processes?is_active=1');
 
-            $recruitmentProcessId =  $getrecruitmentProcess->json()[0]["id"];
+            $recruitmentProcessId = $getrecruitmentProcess->json()[0]["id"];
 
 
 
@@ -1617,12 +1617,12 @@ class UserManagementController extends Controller
                         "end_date" => $end
                     ]
                 );
-            $getAssetType =  Http::withHeaders([
+            $getAssetType = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/asset-types');
 
-            $asset_type =  $getAssetType->json()[0]["name"];
+            $asset_type = $getAssetType->json()[0]["name"];
 
             $createAsset = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
@@ -1701,12 +1701,12 @@ class UserManagementController extends Controller
 
 
 
-            $getPension =  Http::withHeaders([
+            $getPension = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/user-pension-histories?user_id=' . $employeeId);
 
-            $pensionId =  $getPension->json()[0]["id"];
+            $pensionId = $getPension->json()[0]["id"];
 
 
 
@@ -1779,12 +1779,12 @@ class UserManagementController extends Controller
 
 
 
-            $userSocialSites =  Http::withHeaders([
+            $userSocialSites = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/user-social-sites?user_id=' . $employeeId);
 
-            $userSocialSitesId =  $userSocialSites->json()[0]["id"];
+            $userSocialSitesId = $userSocialSites->json()[0]["id"];
 
 
             $userSocialSites = Http::withHeaders([
@@ -1799,12 +1799,12 @@ class UserManagementController extends Controller
                     ]
                 );
 
-            $banks =  Http::withHeaders([
+            $banks = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/banks');
 
-            $bankId =  $banks->json()[0]["id"];
+            $bankId = $banks->json()[0]["id"];
 
 
             $bank = Http::withHeaders([
@@ -1911,29 +1911,29 @@ class UserManagementController extends Controller
             $department_ids = $this->extractIdsFromJson($employeeFormData, 'departments');
 
 
-            $getrecruitmentProcess =  Http::withHeaders([
+            $getrecruitmentProcess = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/recruitment-processes?is_active=1');
 
-            $recruitment_processids =  collect($getrecruitmentProcess->json())->pluck("id")->toArray();
+            $recruitment_processids = collect($getrecruitmentProcess->json())->pluck("id")->toArray();
 
 
-            $getAssetType =  Http::withHeaders([
+            $getAssetType = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/asset-types');
 
-            $asset_type_names =  collect($getAssetType->json())->pluck("name");
+            $asset_type_names = collect($getAssetType->json())->pluck("name");
 
 
 
-            $banks =  Http::withHeaders([
+            $banks = Http::withHeaders([
                 'Authorization' => 'Bearer ' . request()->bearerToken(),
             ])
                 ->get(env('APP_URL') . '/api/v1.0/banks');
 
-            $bank_ids =  collect($banks->json())->pluck("id");
+            $bank_ids = collect($banks->json())->pluck("id");
 
             $responseData = [
                 "bank_ids" => $bank_ids,
@@ -2044,7 +2044,7 @@ class UserManagementController extends Controller
                 "id" => auth()->user()->business_id
 
             ])
-            ->first();
+                ->first();
 
             $work_shift = $this->getDefaultWorkShift();
             $department = $this->getDefaultDepartment();
@@ -2052,8 +2052,8 @@ class UserManagementController extends Controller
             $employment_status = $this->getDefaultEmploymentStatus();
             $designation = $this->getDefaultDesignation();
 
-            if(empty($department)) {
-    throw new Exception("You are not a manager of any department");
+            if (empty($department)) {
+                throw new Exception("You are not a manager of any department");
             }
 
 
@@ -2133,43 +2133,43 @@ class UserManagementController extends Controller
                 ]);
 
                 // Setting custom attribute names
-    $validator->setAttributeNames([
-        'First_Name' => 'first name',
-        'Middle_Name' => 'middle name',
-        'Last_Name' => 'last name',
-        'NI_Number' => 'NI number',
-        'Email' => 'email address',
-        'Phone' => 'phone number',
-        'Image' => 'image',
-        'Address_Line_1' => 'address line 1',
-        'Address_Line_2' => 'address line 2',
-        'Country' => 'country',
-        'City' => 'city',
-        'Postcode' => 'postcode',
-        'Gender' => 'gender',
-        'Joining_Date' => 'joining date',
-        'Date_Of_Birth' => 'date of birth',
-        'Salary_Per_Annum' => 'salary per annum',
-        'Weekly_Contractual_Hours' => 'weekly contractual hours',
-        'Minimum_Working_Days_Per_Week' => 'minimum working days per week',
-        'Overtime_Rate' => 'overtime rate',
-        'Immigration_Status' => 'immigration status',
-        'Emergency_Contact_First_Name' => 'emergency contact first name',
-        'Emergency_Contact_Last_Name' => 'emergency contact last name',
-        'Relationship' => 'relationship',
-        'Emergency_Contact_Address_line_1' => 'emergency contact address line 1',
-        'Emergency_Contact_Postcode' => 'emergency contact postcode',
-        'Emergency_Contact_Mobile_Number' => 'emergency contact mobile number',
-        'Emergency_Contact_Name' => 'emergency contact name',
-        'Emergency_Contact_Daytime_Tel_Number' => 'emergency contact daytime telephone number',
-        'Emergency_Contact_Evening_Tel_Number' => 'emergency contact evening telephone number',
-    ]);
+                $validator->setAttributeNames([
+                    'First_Name' => 'first name',
+                    'Middle_Name' => 'middle name',
+                    'Last_Name' => 'last name',
+                    'NI_Number' => 'NI number',
+                    'Email' => 'email address',
+                    'Phone' => 'phone number',
+                    'Image' => 'image',
+                    'Address_Line_1' => 'address line 1',
+                    'Address_Line_2' => 'address line 2',
+                    'Country' => 'country',
+                    'City' => 'city',
+                    'Postcode' => 'postcode',
+                    'Gender' => 'gender',
+                    'Joining_Date' => 'joining date',
+                    'Date_Of_Birth' => 'date of birth',
+                    'Salary_Per_Annum' => 'salary per annum',
+                    'Weekly_Contractual_Hours' => 'weekly contractual hours',
+                    'Minimum_Working_Days_Per_Week' => 'minimum working days per week',
+                    'Overtime_Rate' => 'overtime rate',
+                    'Immigration_Status' => 'immigration status',
+                    'Emergency_Contact_First_Name' => 'emergency contact first name',
+                    'Emergency_Contact_Last_Name' => 'emergency contact last name',
+                    'Relationship' => 'relationship',
+                    'Emergency_Contact_Address_line_1' => 'emergency contact address line 1',
+                    'Emergency_Contact_Postcode' => 'emergency contact postcode',
+                    'Emergency_Contact_Mobile_Number' => 'emergency contact mobile number',
+                    'Emergency_Contact_Name' => 'emergency contact name',
+                    'Emergency_Contact_Daytime_Tel_Number' => 'emergency contact daytime telephone number',
+                    'Emergency_Contact_Evening_Tel_Number' => 'emergency contact evening telephone number',
+                ]);
 
-    if ($validator->fails()) {
-        // Store errors and mark row as bad
-        $errors[$index] = $validator->errors()->getMessages();
+                if ($validator->fails()) {
+                    // Store errors and mark row as bad
+                    $errors[$index] = $validator->errors()->getMessages();
 
-    }
+                }
                 $usersData->push($employeeData);
             }
 
@@ -2203,8 +2203,13 @@ class UserManagementController extends Controller
                 $userData["city"] = $userData["City"] ?? '';
                 $userData["postcode"] = $userData["Postcode"] ?? '';
                 $userData["gender"] = $userData["Gender"] ?? '';
-                $userData["joining_date"] = $userData["Joining_Date"] ?? '';
-                $userData["date_of_birth"] = $userData["Date_Of_Birth"] ?? '';
+
+                $userData["joining_date"] = $userData["Joining_Date"]
+                    ? Carbon::parse($userData["Joining_Date"])->format('Y-m-d')
+                    : '';
+                $userData["date_of_birth"] = $userData["Date_Of_Birth"]
+                    ? Carbon::parse($userData["Date_Of_Birth"])->format('Y-m-d')
+                    : '';
                 $userData["salary_per_annum"] = $userData["Salary_Per_Annum"] ?? '';
                 $userData["weekly_contractual_hours"] = $userData["Weekly_Contractual_Hours"] ?? '';
                 $userData["minimum_working_days_per_week"] = $userData["Minimum_Working_Days_Per_Week"] ?? '';
@@ -2253,7 +2258,7 @@ class UserManagementController extends Controller
 
                 $userData['business_id'] = auth()->user()->business_id;
 
-                $user =  User::create($userData);
+                $user = User::create($userData);
 
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
@@ -2507,7 +2512,7 @@ class UserManagementController extends Controller
 
 
             if (!empty($request_data["handle_self_registered_businesses"])) {
-                $permissions = Permission::whereIn('name',  ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
+                $permissions = Permission::whereIn('name', ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
                 $user->givePermissionTo($permissions);
             }
 
@@ -2764,7 +2769,7 @@ class UserManagementController extends Controller
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
+            $user = $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
 
 
 
@@ -2792,9 +2797,9 @@ class UserManagementController extends Controller
             $request_data["exit_interview"]["user_id"] = $request_data["id"];
             $request_data["access_revocation"]["user_id"] = $request_data["id"];
 
-            $termination =   Termination::create($request_data["termination"]);
+            $termination = Termination::create($request_data["termination"]);
 
-            $request_data["termination_id"]  = $termination->id;
+            $request_data["termination_id"] = $termination->id;
             ExitInterview::create($request_data["exit_interview"]);
 
 
@@ -2926,7 +2931,7 @@ class UserManagementController extends Controller
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
+            $user = $this->validateUserQuery($request_data["id"], $all_manager_department_ids);
 
 
 
@@ -2944,7 +2949,7 @@ class UserManagementController extends Controller
             }
 
 
-            $last_termination =  Termination::where([
+            $last_termination = Termination::where([
                 "user_id" => $user->id
             ])
                 ->latest()
@@ -3133,7 +3138,7 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  auth()->user()->business_id;
+            $business_id = auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $user_exists = Termination::where(function ($query) use ($all_manager_department_ids) {
@@ -4538,14 +4543,14 @@ class UserManagementController extends Controller
 
 
 
-            $user_query  = User::where([
+            $user_query = User::where([
                 "id" => $request_data["id"],
             ]);
 
 
 
 
-            $user  =  tap($user_query)->update(
+            $user = tap($user_query)->update(
                 collect($request_data)->only([
                     'phone',
                     'address_line_1',
@@ -4582,8 +4587,8 @@ class UserManagementController extends Controller
                 'long' => $request_data["long"]
             ];
 
-            $employee_address_history  =  EmployeeAddressHistory::where([
-                "user_id" =>   $updatableUser->id,
+            $employee_address_history = EmployeeAddressHistory::where([
+                "user_id" => $updatableUser->id,
                 "to_date" => NULL
             ])
                 ->latest('created_at')
@@ -4720,14 +4725,14 @@ class UserManagementController extends Controller
 
 
 
-            $user_query  = User::where([
+            $user_query = User::where([
                 "id" => $request_data["id"],
             ]);
 
 
 
 
-            $user  =  tap($user_query)->update(
+            $user = tap($user_query)->update(
                 collect($request_data)->only([
                     'bank_id',
                     'sort_code',
@@ -4840,7 +4845,7 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
-            $user_query  = User::where([
+            $user_query = User::where([
                 "id" => $request_data["id"],
             ]);
 
@@ -4968,7 +4973,7 @@ class UserManagementController extends Controller
                 "id" => $request_data["id"],
             ];
 
-            $user  =  tap(User::where($userQueryTerms))->update(
+            $user = tap(User::where($userQueryTerms))->update(
                 collect($request_data)->only([
                     'emergency_contact_details'
 
@@ -5060,7 +5065,7 @@ class UserManagementController extends Controller
             }
             $request_data = $request->validated();
 
-            $userQuery  = User::where(["id" => $request_data["id"]]);
+            $userQuery = User::where(["id" => $request_data["id"]]);
             if (!auth()->user()->hasRole('superadmin')) {
                 $userQuery = $userQuery->where(function ($query) {
                     $query->where('business_id', auth()->user()->business_id)
@@ -5069,7 +5074,7 @@ class UserManagementController extends Controller
                 });
             }
 
-            $user =  $userQuery->first();
+            $user = $userQuery->first();
             if (!$user) {
 
                 return response()->json([
@@ -5184,7 +5189,7 @@ class UserManagementController extends Controller
 
             //  $request_data['is_active'] = true;
             //  $request_data['remember_token'] = Str::random(10);
-            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+            $user = tap(User::where(["id" => $request->user()->id]))->update(
                 collect($request_data)->only([
                     'first_Name',
                     'middle_Name',
@@ -5322,7 +5327,7 @@ class UserManagementController extends Controller
 
             //  $request_data['is_active'] = true;
             //  $request_data['remember_token'] = Str::random(10);
-            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+            $user = tap(User::where(["id" => $request->user()->id]))->update(
                 collect($request_data)->only([
                     'first_Name',
                     'middle_Name',
@@ -5444,7 +5449,7 @@ class UserManagementController extends Controller
 
             //  $request_data['is_active'] = true;
             //  $request_data['remember_token'] = Str::random(10);
-            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+            $user = tap(User::where(["id" => $request->user()->id]))->update(
                 collect($request_data)->only([
                     "image",
                 ])->toArray()
@@ -8610,7 +8615,7 @@ class UserManagementController extends Controller
                 ])
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
+                        return $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id);
                     });
@@ -8738,7 +8743,7 @@ class UserManagementController extends Controller
                 ])
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
                     return $query->where(function ($query) use ($all_manager_department_ids) {
-                        return  $query->where('created_by', auth()->user()->id)
+                        return $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id)
                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
@@ -8868,7 +8873,7 @@ class UserManagementController extends Controller
                 ])
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
                     return $query->where(function ($query) use ($all_manager_department_ids) {
-                        return  $query->where('created_by', auth()->user()->id)
+                        return $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id)
                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
@@ -8924,12 +8929,12 @@ class UserManagementController extends Controller
 
 
 
-            $lastAttendanceDate =  Attendance::where([
+            $lastAttendanceDate = Attendance::where([
                 "user_id" => $user->id
             ])->orderBy("in_date")->first();
 
 
-            $lastLeaveDate =    LeaveRecord::whereHas("leave", function ($query) use ($user) {
+            $lastLeaveDate = LeaveRecord::whereHas("leave", function ($query) use ($user) {
                 $query->where("leaves.user_id", $user->id);
             })->orderBy("leave_records.date")->first();
 
@@ -9049,7 +9054,7 @@ class UserManagementController extends Controller
                 ])
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
                     return $query->where(function ($query) use ($all_manager_department_ids) {
-                        return  $query->where('created_by', auth()->user()->id)
+                        return $query->where('created_by', auth()->user()->id)
                             ->orWhere('id', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id)
                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
@@ -9265,7 +9270,7 @@ class UserManagementController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
+            $user = $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
 
@@ -9281,7 +9286,7 @@ class UserManagementController extends Controller
             $blocked_dates_collection = $unique_blocked_dates_collection->values()->all();
 
 
-            $colored_dates =  $this->userManagementComponent->getHolodayDetailsV2($user->id, $start_date, $end_date, false);
+            $colored_dates = $this->userManagementComponent->getHolodayDetailsV2($user->id, $start_date, $end_date, false);
 
 
 
@@ -9398,13 +9403,13 @@ class UserManagementController extends Controller
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
+            $user = $this->validateUserQuery($user_id, $all_manager_department_ids);
 
             $disabled_days_for_attendance = $this->userManagementComponent->getDisableDatesForAttendance($user->id, $start_date, $end_date);
 
-            $holiday_details =  $this->userManagementComponent->getHolodayDetails($id, $start_date, $end_date, true);
+            $holiday_details = $this->userManagementComponent->getHolodayDetails($id, $start_date, $end_date, true);
 
-            $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
+            $work_shift = $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
 
 
             $responseArray = [
@@ -9524,7 +9529,7 @@ class UserManagementController extends Controller
 
 
 
-            $projects =   $this->projectComponent->getProjects();
+            $projects = $this->projectComponent->getProjects();
 
 
             $responseArray = [
@@ -9622,7 +9627,7 @@ class UserManagementController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
+            $user = $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
             $result_array = $this->userManagementComponent->getDisableDatesForAttendance($user->id, $start_date, $end_date);
@@ -9728,7 +9733,7 @@ class UserManagementController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
+            $user = $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
@@ -9841,7 +9846,7 @@ class UserManagementController extends Controller
             }
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $user =    $this->validateUserQuery($user_id, $all_manager_department_ids);
+            $user = $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
@@ -9969,7 +9974,7 @@ class UserManagementController extends Controller
 
             $this->validateUserQuery($user_id, $all_manager_department_ids);
 
-            $result_array =  $this->userManagementComponent->getHolodayDetails($id, $start_date, $end_date, true);
+            $result_array = $this->userManagementComponent->getHolodayDetails($id, $start_date, $end_date, true);
 
 
 
@@ -10104,7 +10109,7 @@ class UserManagementController extends Controller
 
 
 
-            $employees =    $employees->map(function ($employee) use ($start_date, $end_date) {
+            $employees = $employees->map(function ($employee) use ($start_date, $end_date) {
 
                 $data = $this->userManagementComponent->getScheduleInformationData($employee->id, $start_date, $end_date);
 
@@ -10316,7 +10321,7 @@ class UserManagementController extends Controller
             $existingIds = User::whereIn('id', $idsArray)
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) {
                     return $query->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
+                        return $query->where('created_by', auth()->user()->id)
                             ->orWhere('business_id', auth()->user()->business_id);
                     });
                 })
@@ -10412,7 +10417,7 @@ class UserManagementController extends Controller
     public function generateEmployeeId(Request $request)
     {
 
-        $user_id =   $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
+        $user_id = $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
 
         return response()->json(["user_id" => $user_id], 200);
     }
@@ -10486,7 +10491,7 @@ class UserManagementController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            $user_id_exists =  DB::table('users')->where(
+            $user_id_exists = DB::table('users')->where(
                 [
                     'user_id' => $user_id,
                     "business_id" => auth()->user()->business_id
@@ -10619,7 +10624,7 @@ class UserManagementController extends Controller
             //      ], 401);
             //  }
 
-            $user =     User::where(["id" => $request->user_id])
+            $user = User::where(["id" => $request->user_id])
                 ->when((!auth()->user()->hasRole("superadmin") && auth()->user()->id != $request->user_id), function ($query) use ($all_manager_department_ids) {
                     $query->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                         $query->whereIn("departments.id", $all_manager_department_ids);
@@ -10690,7 +10695,8 @@ class UserManagementController extends Controller
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });;
+                });
+            ;
 
             return response()->json($activity, 200);
         } catch (Exception $e) {

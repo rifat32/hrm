@@ -915,7 +915,7 @@ if($work_shift->type !== "flexible") {
 
             $work_shifts_query = WorkShift::with("details","departments","users","work_locations");
 
-            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($request,$all_manager_department_ids,$work_shifts_query)
+            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($all_manager_department_ids,$work_shifts_query)
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("work_shifts.id", $request->order_by);
@@ -1116,7 +1116,7 @@ if($work_shift->type !== "flexible") {
                 ]
             );
 
-            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($request,$all_manager_department_ids,$work_shifts_query)
+            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($all_manager_department_ids,$work_shifts_query)
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("work_shifts.id", $request->order_by);
