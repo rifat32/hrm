@@ -662,14 +662,26 @@ public function getDefaultDepartment() {
     $department = Department::where([
         "is_active" => 1,
         "business_id" => auth()->user()->business_id,
+        "manager_id" => auth()->user()->id
     ]
     )
-    ->whereNull("parent_id")
-    ->first();
 
+    ->first();
     if(empty($department)) {
-        throw new Exception("No default department found for the business",500);
-        }
+
+        $department = Department::where([
+            "is_active" => 1,
+            "business_id" => auth()->user()->business_id,
+        ]
+        )
+        ->whereNull("parent_id")
+        ->first();
+
+        if(empty($department)) {
+            throw new Exception("No default department found for the business",500);
+            }
+    }
+
         return $department;
 }
 

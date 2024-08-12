@@ -2033,8 +2033,6 @@ class UserManagementController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-
-
             if (!$request->user()->hasPermissionTo('user_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -2049,6 +2047,9 @@ class UserManagementController extends Controller
             $employment_status = $this->getDefaultEmploymentStatus();
             $designation = $this->getDefaultDesignation();
 
+            if(empty($department)) {
+    throw new Exception("You are not a manager of any department");
+            }
 
 
             $request_data = $request->validated();
@@ -2075,7 +2076,9 @@ class UserManagementController extends Controller
             $createdUsers = collect();
             // Validate and insert the CSV data
             $errors = [];
+
             foreach ($csv_data->toArray() as $index => $employeeData) {
+
                 $validator = Validator::make($employeeData, [
                     'First_Name' => 'required|string|max:255',
                     'Middle_Name' => 'nullable|string|max:255',
@@ -2100,7 +2103,7 @@ class UserManagementController extends Controller
                             $start_date = Carbon::parse(auth()->user()->business->start_date);
 
                             if ($joining_date->lessThan($start_date)) {
-                                $fail("The $attribute must not be after the start date of the business.");
+                                $fail("The joining date must not be after the start date of the business.");
                             }
                         },
                     ],
@@ -2124,32 +2127,95 @@ class UserManagementController extends Controller
 
                 ]);
 
-                if ($validator->fails()) {
-                    $errors[$index] = $validator->errors();
-                    continue; // Skip invalid rows
-                }
+                // Setting custom attribute names
+    $validator->setAttributeNames([
+        'First_Name' => 'first name',
+        'Middle_Name' => 'middle name',
+        'Last_Name' => 'last name',
+        'NI_Number' => 'NI number',
+        'Email' => 'email address',
+        'Phone' => 'phone number',
+        'Image' => 'image',
+        'Address_Line_1' => 'address line 1',
+        'Address_Line_2' => 'address line 2',
+        'Country' => 'country',
+        'City' => 'city',
+        'Postcode' => 'postcode',
+        'Gender' => 'gender',
+        'Joining_Date' => 'joining date',
+        'Date_Of_Birth' => 'date of birth',
+        'Salary_Per_Annum' => 'salary per annum',
+        'Weekly_Contractual_Hours' => 'weekly contractual hours',
+        'Minimum_Working_Days_Per_Week' => 'minimum working days per week',
+        'Overtime_Rate' => 'overtime rate',
+        'Immigration_Status' => 'immigration status',
+        'Emergency_Contact_First_Name' => 'emergency contact first name',
+        'Emergency_Contact_Last_Name' => 'emergency contact last name',
+        'Relationship' => 'relationship',
+        'Emergency_Contact_Address_line_1' => 'emergency contact address line 1',
+        'Emergency_Contact_Postcode' => 'emergency contact postcode',
+        'Emergency_Contact_Mobile_Number' => 'emergency contact mobile number',
+        'Emergency_Contact_Name' => 'emergency contact name',
+        'Emergency_Contact_Daytime_Tel_Number' => 'emergency contact daytime telephone number',
+        'Emergency_Contact_Evening_Tel_Number' => 'emergency contact evening telephone number',
+    ]);
 
+    if ($validator->fails()) {
+        // Store errors and mark row as bad
+        $errors[$index] = $validator->errors()->getMessages();
+
+    }
                 $usersData->push($employeeData);
             }
 
             if (!empty($errors)) {
-                return response()->json(['errors' => $errors, "csv_data" => $csv_data], 422);
+                return response()->json([
+                    "message" => "There were validation errors.",
+                    "errors" => $errors,
+                    "csv_data" => $csv_data,
+
+                ], 422);
             }
+
 
 
 
             $this->checkEmployeeCreationLimit(true, $usersData->count());
 
 
+
             $usersData->each(function ($userData) use (&$createdUsers, $work_location, $department, $work_shift, $employment_status, $designation) {
+                $userData["first_Name"] = $userData["First_Name"];
+                $userData["middle_Name"] = $userData["Middle_Name"];
+                $userData["last_Name"] = $userData["Last_Name"];
+                $userData["NI_number"] = $userData["NI_Number"];
+                $userData["email"] = $userData["Email"];
+                $userData["phone"] = $userData["Phone"];
+                $userData["image"] = $userData["Image"];
+                $userData["address_line_1"] = $userData["Address_Line_1"];
+                $userData["address_line_2"] = $userData["Address_Line_2"];
+                $userData["country"] = $userData["Country"];
+                $userData["city"] = $userData["City"];
+                $userData["postcode"] = $userData["Postcode"];
+                $userData["gender"] = $userData["Gender"];
+                $userData["joining_date"] = $userData["Joining_Date"];
+                $userData["date_of_birth"] = $userData["Date_Of_Birth"];
+                $userData["salary_per_annum"] = $userData["Salary_Per_Annum"];
+                $userData["weekly_contractual_hours"] = $userData["Weekly_Contractual_Hours"];
+                $userData["minimum_working_days_per_week"] = $userData["Minimum_Working_Days_Per_Week"];
+                $userData["overtime_rate"] = $userData["Overtime_Rate"];
+                $userData["immigration_status"] = $userData["Immigration_Status"];
+
+
+
+
                 $userData["user_id"] = $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
                 $userData["role"] = "business_employee#" . auth()->user()->business_id;
                 $userData['departments'] = [$department->id];
-                $userData['Work_Shift_Id'] = $work_shift->id;
-                $userData['Work_Location_Ids'] = [$work_location->id];
-
-                $userData['Employment_Status_Id'] = $employment_status->id;
-                $userData['Designation_id'] = $designation->id;
+                $userData['work_shift_id'] = $work_shift->id;
+                $userData['work_location_ids'] = [$work_location->id];
+                $userData['employment_status_id'] = $employment_status->id;
+                $userData['designation_id'] = $designation->id;
 
 
 
@@ -2182,13 +2248,16 @@ class UserManagementController extends Controller
                 $userData['business_id'] = auth()->user()->business_id;
 
                 $user =  User::create($userData);
+
                 $username = $this->generate_unique_username($user->first_Name, $user->middle_Name, $user->last_Name, $user->business_id);
                 $user->user_name = $username;
                 $token = Str::random(30);
                 $user->resetPasswordToken = $token;
                 $user->resetPasswordExpires = Carbon::now()->subDays(-1);
                 $user->pension_eligible = 0;
+
                 $user->save();
+
                 $this->delete_old_histories();
 
 
@@ -2220,6 +2289,8 @@ class UserManagementController extends Controller
                 }
 
                 $createdUsers->push($user);
+
+
             });
 
 
