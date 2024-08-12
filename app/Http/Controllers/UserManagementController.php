@@ -2040,10 +2040,15 @@ class UserManagementController extends Controller
             }
 
             //  $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $business = Business::where([
+                "id" => auth()->user()->business_id
+
+            ])
+            ->first();
 
             $work_shift = $this->getDefaultWorkShift();
             $department = $this->getDefaultDepartment();
-            $work_location = $this->getDefaultWorkLocation();
+            $work_location = $this->getDefaultWorkLocation($business);
             $employment_status = $this->getDefaultEmploymentStatus();
             $designation = $this->getDefaultDesignation();
 
@@ -2185,26 +2190,27 @@ class UserManagementController extends Controller
 
 
             $usersData->each(function ($userData) use (&$createdUsers, $work_location, $department, $work_shift, $employment_status, $designation) {
-                $userData["first_Name"] = $userData["First_Name"];
-                $userData["middle_Name"] = $userData["Middle_Name"];
-                $userData["last_Name"] = $userData["Last_Name"];
-                $userData["NI_number"] = $userData["NI_Number"];
-                $userData["email"] = $userData["Email"];
-                $userData["phone"] = $userData["Phone"];
-                $userData["image"] = $userData["Image"];
-                $userData["address_line_1"] = $userData["Address_Line_1"];
-                $userData["address_line_2"] = $userData["Address_Line_2"];
-                $userData["country"] = $userData["Country"];
-                $userData["city"] = $userData["City"];
-                $userData["postcode"] = $userData["Postcode"];
-                $userData["gender"] = $userData["Gender"];
-                $userData["joining_date"] = $userData["Joining_Date"];
-                $userData["date_of_birth"] = $userData["Date_Of_Birth"];
-                $userData["salary_per_annum"] = $userData["Salary_Per_Annum"];
-                $userData["weekly_contractual_hours"] = $userData["Weekly_Contractual_Hours"];
-                $userData["minimum_working_days_per_week"] = $userData["Minimum_Working_Days_Per_Week"];
-                $userData["overtime_rate"] = $userData["Overtime_Rate"];
-                $userData["immigration_status"] = $userData["Immigration_Status"];
+                $userData["first_Name"] = $userData["First_Name"] ?? '';
+                $userData["middle_Name"] = $userData["Middle_Name"] ?? '';
+                $userData["last_Name"] = $userData["Last_Name"] ?? '';
+                $userData["NI_number"] = $userData["NI_Number"] ?? '';
+                $userData["email"] = $userData["Email"] ?? '';
+                $userData["phone"] = $userData["Phone"] ?? '';
+                $userData["image"] = $userData["Image"] ?? '';
+                $userData["address_line_1"] = $userData["Address_Line_1"] ?? '';
+                $userData["address_line_2"] = $userData["Address_Line_2"] ?? '';
+                $userData["country"] = $userData["Country"] ?? '';
+                $userData["city"] = $userData["City"] ?? '';
+                $userData["postcode"] = $userData["Postcode"] ?? '';
+                $userData["gender"] = $userData["Gender"] ?? '';
+                $userData["joining_date"] = $userData["Joining_Date"] ?? '';
+                $userData["date_of_birth"] = $userData["Date_Of_Birth"] ?? '';
+                $userData["salary_per_annum"] = $userData["Salary_Per_Annum"] ?? '';
+                $userData["weekly_contractual_hours"] = $userData["Weekly_Contractual_Hours"] ?? '';
+                $userData["minimum_working_days_per_week"] = $userData["Minimum_Working_Days_Per_Week"] ?? '';
+                $userData["overtime_rate"] = $userData["Overtime_Rate"] ?? '';
+                $userData["immigration_status"] = $userData["Immigration_Status"] ?? '';
+
 
 
 

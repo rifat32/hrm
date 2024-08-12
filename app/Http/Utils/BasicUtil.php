@@ -685,7 +685,7 @@ public function getDefaultDepartment() {
         return $department;
 }
 
-public function getDefaultWorkLocation(){
+public function getDefaultWorkLocation($business){
     $work_location = WorkLocation::where([
         "is_active" => 1,
         "is_default" => 1,
@@ -693,8 +693,16 @@ public function getDefaultWorkLocation(){
     ])
     ->first();
 
-    if(empty($work_location)) {
-        throw new Exception("No default work location found for the business",500);
+        if(empty($work_location)) {
+        // throw new Exception("No default work location found for the business",500);
+        $work_location =  WorkLocation::create([
+            'name' => ($business->name . " " . "Office"),
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => $business->id,
+            "created_by" => $business->owner_id
+        ]);
+
         }
 return $work_location;
 }

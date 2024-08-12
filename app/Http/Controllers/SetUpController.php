@@ -488,57 +488,7 @@ return "swagger generated";
 
 
 
-        $default_work_location = [
-            [
-                'name' => "Office-Based",
-                'description' => "Employees who work primarily at the company's physical office location."
-            ],
-            [
-                'name' => "Remote",
-                'description' => "Employees who work from a location outside the office, such as from home or another remote setting."
-            ],
-            [
-                'name' => "Hybrid",
-                'description' => "Employees who split their work time between the office and remote locations, following a flexible schedule."
-            ],
-            [
-                'name' => "Client Site",
-                'description' => "Employees who work primarily at the location of a client or customer."
-            ],
-            [
-                'name' => "Field-Based",
-                'description' => "Employees whose work involves traveling to various locations, such as sales representatives or field service technicians."
-            ],
-            [
-                'name' => "On-Site",
-                'description' => "Employees who work at a specific site or project location, but not necessarily the main office."
-            ],
-            [
-                'name' => "Shop or Warehouse",
-                'description' => "Employees working in a physical location where products are stored, manufactured, or distributed."
-            ],
-            [
-                'name' => "Flexible Location",
-                'description' => "Employees with the flexibility to choose their work location based on the nature of their tasks or projects."
-            ],
-            // Add more work location types as needed
-        ];
-
-
-
-
-
-        // Iterate through the array and create records
-        foreach ($default_work_location as $data) {
-            WorkLocation::create([
-                'name' => $data['name'],
-                'description' => $data['description'],
-                "is_active" => 1,
-                "is_default" => 1,
-                "business_id" => NULL,
-                "created_by" => $admin->id
-            ]);
-        }
+       $this->storeWorkLocation();
 
         $default_job_platform = [
             [
