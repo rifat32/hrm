@@ -138,7 +138,7 @@ class TaskController extends Controller
 
                 // Create the task entry
 Comment::create([
-    'description' => ("Added this card to ". $task->name),
+    'description' => ("Added this card to ". $task->task_category->name),
     // 'attachments' => $attachments,
     'type' => 'history',
 
