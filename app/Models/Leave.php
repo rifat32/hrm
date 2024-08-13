@@ -29,33 +29,31 @@ class Leave extends Model
         "created_by",
     ];
 
-public function getIApprovedAttribute($value) {
-$leave_approval = LeaveApproval::where([
-    "created_by" => auth()->user()->id
-])
-->first();
+    public function getIApprovedAttribute($value)
+    {
+        $leave_approval = LeaveApproval::where([
+            "created_by" => auth()->user()->id
+        ])
+            ->first();
 
 
-if(!empty($leave_approval)){
-         return $leave_approval->is_approved;
-
-} else {
-    return -1;
-}
-
-
-}
+        if (!empty($leave_approval)) {
+            return $leave_approval->is_approved;
+        } else {
+            return -1;
+        }
+    }
 
 
     public function getIsInArrearsAttribute($value)
     {
-$is_in_arrears = false;
+        $is_in_arrears = false;
 
         // Retrieve IDs of related leave records
-     // Retrieve IDs of related leave records
-     $leave_records =LeaveRecord::where([
-        "leave_id" => $this->id
-    ])->get();
+        // Retrieve IDs of related leave records
+        $leave_records = LeaveRecord::where([
+            "leave_id" => $this->id
+        ])->get();
         $leave_record_ids = $leave_records->pluck("leave_records.id");
 
         // Check if leave status is approved or it's a paid leave type
@@ -96,12 +94,8 @@ $is_in_arrears = false;
                         $is_in_arrears = true;
                         break;
                     }
-
                 }
-
             }
-
-
         }
         // If leave status is not approved or it's not a paid leave type, delete arrears if any
 

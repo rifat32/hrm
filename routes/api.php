@@ -1458,6 +1458,8 @@ Route::post('/v1.0/setting-payrun', [SettingPayrollController::class, "createSet
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/payruns', [PayrunController::class, "createPayrun"]);
+Route::post('/v2.0/payruns', [PayrunController::class, "createPayrunV2"]);
+
 Route::put('/v1.0/payruns', [PayrunController::class, "updatePayrun"]);
 Route::put('/v1.0/payruns/toggle-active', [PayrunController::class, "toggleActivePayrun"]);
 Route::get('/v1.0/payruns', [PayrunController::class, "getPayruns"]);

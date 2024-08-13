@@ -36,8 +36,8 @@ class PayrunCreateRequest extends BaseFormRequest
 
         return [
             'period_type' => 'required|in:weekly,monthly,customized',
-            'start_date' => 'nullable|required_if:period_type,customized|date',
-            'end_date' => 'nullable|required_if:period_type,customized|date',
+            'start_date' => 'required',
+            'end_date' => 'required',
             'consider_type' => 'required|in:hour,daily_log,none',
             'consider_overtime' => 'required|boolean',
             'notes' => 'nullable|string',

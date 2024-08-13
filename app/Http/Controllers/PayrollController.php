@@ -742,6 +742,7 @@ class PayrollController extends Controller
                     $user_ids = explode(',', $request->user_ids);
                     $query->whereIn("users.id", $user_ids);
                 })
+                ->select("users.id", "users.first_Name", "users.middle_Name", "users.last_Name")
 
                 ->get();
 

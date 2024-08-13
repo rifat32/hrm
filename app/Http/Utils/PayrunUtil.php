@@ -222,6 +222,25 @@ trait PayrunUtil
         return $attendance_arrears;
     }
 
+    public function getAttendanceArrearsV2($start_date, $end_date, $employee)
+    {
+        $attendance_arrears = Attendance::whereDoesntHave("payroll_attendance")
+            ->where('attendances.user_id', $employee->id)
+
+            ->where(function ($query) use ($start_date, $end_date) {
+                $query->where(function ($query) use ($start_date, $end_date) {
+                    $query->whereNotIn("attendances.status", ["approved"])
+                        ->where('attendances.in_date', '<=', $end_date)
+                        ->where('attendances.in_date', '>=', $start_date);
+                })
+                    ->orWhere(function ($query) use ($start_date) {
+                        $query->whereDoesntHave("arrear")
+                            ->where('attendances.in_date', '<=', $start_date);
+                    });
+            })
+            ->get(["attendances.id"]);
+        return $attendance_arrears;
+    }
     public function getLeaveRecordArrears($start_date, $end_date, $employee)
     {
 
@@ -245,6 +264,31 @@ trait PayrunUtil
                     });
             })
             ->get();
+        return $leave_arrears;
+    }
+    public function getLeaveRecordArrearsV2($start_date, $end_date, $employee)
+    {
+
+        $leave_arrears = LeaveRecord::whereDoesntHave("payroll_leave_record")
+            ->whereHas('leave', function ($query) use ($employee) {
+                $query->where("leaves.user_id", $employee->id);
+            })
+
+            ->where(function ($query) use ($start_date, $end_date) {
+                $query->where(function ($query) use ($start_date, $end_date) {
+                    $query
+                        ->whereHas('leave', function ($query) {
+                            $query->whereNotIn("leaves.status", ["approved"]);
+                        })
+                        ->where('leave_records.date', '<=', $end_date)
+                        ->where('leave_records.date', '>=', $start_date);
+                })
+                    ->orWhere(function ($query) use ($start_date) {
+                        $query->whereDoesntHave("arrear")
+                            ->where('leave_records.date', '<=', $start_date);
+                    });
+            })
+            ->get(["leave_records.id"]);
         return $leave_arrears;
     }
 
@@ -318,6 +362,40 @@ trait PayrunUtil
             ->get();
         return $approved_leave_records;
     }
+    public function getApprovedLeaveRecordsV2($start_date, $end_date, $employee)
+    {
+        $approved_leave_records = LeaveRecord::
+        with([
+            "leave" => function ($query) use ($employee) {
+                $query->select('leaves.id', 'leaves.hourly_rate');
+            }
+        ])
+        ->whereDoesntHave("payroll_leave_record")
+            ->whereHas('leave.leave_type', function ($query) use ($employee) {
+                $query->where("leaves.user_id", $employee->id)
+                    ->where("leaves.status", "approved")
+                    ->where("setting_leave_types.name","paid");
+            })
+
+            ->where(function ($query) use ($start_date, $end_date) {
+                $query->where(function ($query) use ($start_date, $end_date) {
+                    $query
+                        ->where('leave_records.date', '<=', $end_date)
+                        ->where('leave_records.date', '>=', $start_date);
+                })
+                    ->orWhere(function ($query) {
+                        $query->whereHas("arrear", function ($query) {
+                            $query->where("leave_record_arrears.status", "approved");
+                        });
+                    });
+            })
+            ->select('leave_records.id', 'leave_records.leave_hours')
+            ->get();
+
+
+        return $approved_leave_records;
+    }
+
 
     public function get_salary_info($user_id, $date)
     {
@@ -464,6 +542,15 @@ trait PayrunUtil
 
         return $employees;
     }
+    public function process_payrun_v2($payrun, $employees, $start_date, $end_date)
+    {
+        $employees->each(function ($employee) use ($payrun, $start_date, $end_date) {
+            $employee->payroll = $this->generate_payroll_v2($payrun, $employee, $start_date, $end_date);
+            return $employee;
+        });
+
+        return $employees;
+    }
     public function estimate_payrun_data_v2($employees, $start_date, $end_date)
     {
 
@@ -487,13 +574,11 @@ trait PayrunUtil
         $approved_attendances = $this->getApprovedAttendancesV2($start_date, $end_date, $employee);
 
 
-        $approved_leave_records = $this->getApprovedLeaveRecords($start_date, $end_date, $employee);
+        $approved_leave_records = $this->getApprovedLeaveRecordsV2($start_date, $end_date, $employee);
 
 
         $holidays = $this->getHolidaysV2($all_parent_department_ids, $employee, $start_date, $end_date);
 
-
-        $payroll_leave_records_data = collect($this->getLeaveRecordData($approved_leave_records));
         $approved_holidays = collect($this->getHolidaysDataV2($holidays,$start_date, $end_date, $employee));
 
 
@@ -511,26 +596,20 @@ trait PayrunUtil
         ];
 
 
-        // $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
-        // $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
-
-        // $payroll->attendances()->attach($approved_attendancees);
-
-        $recalculate_payroll_values = $this->recalculate_payroll_values_v2($payroll,$approved_attendances,$approved_holidays);
+        $recalculate_payroll_values = $this->recalculate_payroll_values_v2($payroll,$approved_attendances,$approved_leave_records,$approved_holidays);
         if (!$recalculate_payroll_values) {
             throw new Exception("some thing went wrong");
         }
-        $temp_payroll = clone $recalculate_payroll_values;
 
 
 
-        return $temp_payroll;
+
+        return $recalculate_payroll_values;
     }
 
     // this function do all the task and returns transaction id or -1
     public function estimate_payrun_data($employees, $start_date, $end_date)
     {
-
         // Convert end_date to Carbon instance
         $end_date = Carbon::parse($end_date);
 
@@ -594,6 +673,102 @@ trait PayrunUtil
 
 
 
+    public function generate_payroll_v2($payrun, $employee, $start_date, $end_date)
+    {
+
+        $all_parent_department_ids = $this->all_parent_departments_of_user($employee->id);
+
+        $attendance_arrears_ids = collect($this->getAttendanceArrearsV2($start_date, $end_date, $employee));
+
+        $leave_arrears_ids = collect($this->getLeaveRecordArrearsV2($start_date, $end_date, $employee));
+
+
+        $approved_attendances = $this->getApprovedAttendances($start_date, $end_date, $employee);
+
+
+        $approved_leave_records = $this->getApprovedLeaveRecords($start_date, $end_date, $employee);
+
+
+
+        $holidays = $this->getHolidays($all_parent_department_ids, $employee, $start_date, $end_date);
+
+        $payroll_attendances_data = collect($this->getAttendanceData($approved_attendances));
+        $payroll_leave_records_data = collect($this->getLeaveRecordData($approved_leave_records));
+        $payroll_holidays_data = collect($this->getHolidaysData($holidays, $end_date, $employee));
+
+
+
+
+
+
+        $payroll_data = [
+            'user_id' => $employee->id,
+            "payrun_id" => $payrun->id,
+            'status' => "pending_approval",
+            'is_active' => 1,
+            'business_id' => $employee->business_id,
+
+            "start_date" => $start_date,
+            "end_date" => $end_date,
+        ];
+        $payroll_data['payroll_name'] = $this->generate_payroll_name($payrun);
+
+        $temp_payroll = null;
+
+
+            $payroll = Payroll::create($payroll_data);
+            $payroll->payroll_holidays()->createMany($payroll_holidays_data->toArray());
+            $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
+            $payroll->payroll_attendances()->createMany($payroll_attendances_data->toArray());
+
+            $attendance_arrears_data = $attendance_arrears_ids->map(function ($attendance_arrear) {
+                return [
+                    "status" => "pending_approval",
+                    "attendance_id" => $attendance_arrear->id,
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            })->toArray();
+
+            AttendanceArrear::insert($attendance_arrears_data);
+
+
+            $leave_arrears_data = $leave_arrears_ids->map(function ($leave_arrear) {
+                return [
+                    "status" => "pending_approval",
+                    "leave_record_id" => $leave_arrear->id,
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            })->toArray();
+
+            LeaveRecordArrear::insert($leave_arrears_data);
+
+
+            AttendanceArrear::where([
+                "status" => "pending_approval",
+
+            ])
+                ->whereIn("attendance_id", $payroll_attendances_data->pluck("id"))
+                ->update([
+                    "status" => "completed",
+                ]);
+            LeaveRecordArrear::whereIn("leave_record_id", $payroll_leave_records_data->pluck("id"))
+                ->update([
+                    "status" => "completed",
+                ]);
+
+            $recalculate_payroll_values = $this->recalculate_payroll_values($payroll);
+            if (!$recalculate_payroll_values) {
+                throw new Exception("some thing went wrong");
+            }
+            $temp_payroll = clone $recalculate_payroll_values;
+
+
+
+
+        return $temp_payroll;
+    }
     public function generate_payroll($payrun, $employee, $start_date, $end_date, $generate_payroll)
     {
 
@@ -1050,10 +1225,8 @@ trait PayrunUtil
     }
 
 
-    public function recalculate_payroll_values_v2($payroll,$attendances,$holidays)
+    public function recalculate_payroll_values_v2($payroll,$attendances,$leave_records,$holidays)
     {
-
-
         if (!empty($holidays)) {
             $total_holiday_hours = 0;
             $total_holiday_hours_salary = 0;
@@ -1062,36 +1235,31 @@ trait PayrunUtil
                 $total_holiday_hours += $holiday["hours"];
                 $total_holiday_hours_salary += ($holiday["hours"] * $holiday["hourly_salary"]);
             }
-            $payroll->total_holiday_hours = $total_holiday_hours;
-            $payroll->total_holiday_hours_salary = $total_holiday_hours_salary;
+            $payroll["total_holiday_hours"] = $total_holiday_hours;
+            $payroll["total_holiday_hours_salary"] = $total_holiday_hours_salary;
         } else {
             // Set total_paid_leave_hours to 0 if payroll_leave_records is empty
-            $payroll->total_holiday_hours = 0;
-            $payroll->total_holiday_hours_salary = 0;
+            $payroll["total_holiday_hours"] = 0;
+            $payroll["total_holiday_hours_salary"] = 0;
         }
 
 
-        if ($payroll->payroll_leave_records->isNotEmpty()) {
+        if (!empty($leave_records)) {
             $total_paid_leave_hours = 0;
             $leave_hours_salary = 0;
-            foreach ($payroll->payroll_leave_records as $payroll_leave_record) {
-                if ($payroll_leave_record->leave_record && $payroll_leave_record->leave_record->leave) {
-                    // Loop through each leave record
-                    foreach ($payroll_leave_record->leave_record->whereHas("leave.leave_type", function ($query) {
-                        $query->where("setting_leave_types.type", "paid");
-                    }) as $leave_record) {
+            foreach ($leave_records as $leave_record) {
+                if ($leave_record && $leave_record->leave) {
                         // Add leave hours to $total_paid_leave_hours
                         $total_paid_leave_hours += $leave_record->leave_hours;
                         $leave_hours_salary += $leave_record->leave->hourly_rate;
-                    }
                 }
             }
-            $payroll->total_paid_leave_hours = $total_paid_leave_hours;
-            $payroll->leave_hours_salary = $leave_hours_salary;
+            $payroll["total_paid_leave_hours"] = $total_paid_leave_hours;
+            $payroll["leave_hours_salary"] = $leave_hours_salary;
         } else {
             // Set total_paid_leave_hours to 0 if payroll_leave_records is empty
-            $payroll->total_paid_leave_hours = 0;
-            $payroll->leave_hours_salary = 0;
+            $payroll["total_paid_leave_hours"] = 0;
+            $payroll["leave_hours_salary"] = 0;
         }
 
         $total_attendance_salary = 0;
@@ -1105,9 +1273,7 @@ trait PayrunUtil
                 if ($attendance) {
                     $total_regular_attendance_hours += $attendance->regular_work_hours;
                     $overtime_hours += $attendance->overtime_hours;
-
                     $total_attendance_salary += ($attendance->regular_hours_salary + $attendance->overtime_hours_salary);
-
                     $regular_attendance_hours_salary += $attendance->regular_hours_salary;
                     $overtime_attendance_hours_salary += $attendance->overtime_hours_salary;
                 }
@@ -1121,11 +1287,11 @@ trait PayrunUtil
             $payroll["overtime_hours"] = 0;
         }
 
-        $payroll["regular_hours"] = $payroll->total_holiday_hours + $payroll->total_paid_leave_hours + $payroll->total_regular_attendance_hours;
-        $payroll->regular_hours_salary = $payroll->total_holiday_hours_salary + $payroll->leave_hours_salary + $regular_attendance_hours_salary;
-        $payroll->overtime_hours_salary = $overtime_attendance_hours_salary;
-        $payroll->regular_attendance_hours_salary = $regular_attendance_hours_salary;
-        $payroll->overtime_attendance_hours_salary = $overtime_attendance_hours_salary;
+        $payroll["regular_hours"] = $payroll["total_holiday_hours"] + $payroll["total_paid_leave_hours"] + $payroll["total_regular_attendance_hours"];
+        $payroll["regular_hours_salary"] = $payroll["total_holiday_hours_salary"] + $payroll["leave_hours_salary"] + $regular_attendance_hours_salary;
+        $payroll["overtime_hours_salary"] = $overtime_attendance_hours_salary;
+        $payroll["regular_attendance_hours_salary"] = $regular_attendance_hours_salary;
+        $payroll["overtime_attendance_hours_salary"] = $overtime_attendance_hours_salary;
 
 
         return $payroll;

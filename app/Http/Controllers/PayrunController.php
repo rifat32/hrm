@@ -26,8 +26,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class PayrunController extends Controller
 {
     use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, PayrunUtil;
-
-    /**
+ /**
      *
      * @OA\Post(
      *      path="/v1.0/payruns",
@@ -90,7 +89,132 @@ class PayrunController extends Controller
      *     )
      */
 
-    public function createPayrun(PayrunCreateRequest $request)
+     public function createPayrun(PayrunCreateRequest $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('payrun_create')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+
+                 $request_data = $request->validated();
+
+
+                 $request_data["business_id"] = auth()->user()->business_id;
+                 $request_data["is_active"] = true;
+                 $request_data["created_by"] = $request->user()->id;
+
+                 $payrun =  Payrun::create($request_data);
+
+                 $request_data['departments'] = Department::where([
+                     "business_id" => auth()->user()->business_id
+                 ])
+                 ->pluck("id");
+
+
+                 $payrun->departments()->sync($request_data['departments']);
+
+                 if(!empty($request_data['users'])){
+                     $employees = User::whereIn("id", $request_data["users"])
+                     ->whereDoesntHave("payrolls", function ($q) use ($payrun) {
+                         $q->where("payrolls.start_date", $payrun->start_date)
+                             ->where("payrolls.end_date", $payrun->end_date);
+                     })
+                     ->select("users.id", "users.first_Name", "users.middle_Name", "users.last_Name")
+                     ->get();
+
+                 $processed_employees =  $this->process_payrun_v2($payrun, $employees, $request_data["start_date"], $request_data["end_date"]);
+
+                 }
+
+
+
+
+
+
+                 // $payrun->departments()->sync($request_data['departments'], []);
+
+
+                 // $payrun->load([
+                 //   "payrolls"
+                 // ]);
+
+
+                 return response($payrun, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v2.0/payruns",
+     *      operationId="createPayrunV2",
+     *      tags={"administrator.payruns"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to store payrun",
+     *      description="This method is to store payrun",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *
+     *
+     * @OA\Property(property="period_type", type="string", format="string", example="weekly"),
+     * @OA\Property(property="start_date", type="string", format="date", example="2024-01-01"),
+     * @OA\Property(property="end_date", type="string", format="date", example="2024-01-31"),
+     * @OA\Property(property="consider_type", type="string", format="string", example="hour"),
+     * @OA\Property(property="consider_overtime", type="boolean", format="boolean", example=true),
+     * @OA\Property(property="notes", type="string", format="string", example="Some notes"),
+     *      *     @OA\Property(property="departments", type="string",  format="array", example={1,2,3}),
+     *     @OA\Property(property="users", type="string", format="array", example={1,2,3}),
+     *
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function createPayrunV2(PayrunCreateRequest $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
@@ -115,10 +239,7 @@ class PayrunController extends Controller
                 ->pluck("id");
 
 
-
-
                 $payrun->departments()->sync($request_data['departments']);
-
 
                 if(!empty($request_data['users'])){
                     $employees = User::whereIn("id", $request_data["users"])
@@ -126,9 +247,10 @@ class PayrunController extends Controller
                         $q->where("payrolls.start_date", $payrun->start_date)
                             ->where("payrolls.end_date", $payrun->end_date);
                     })
+                    ->select("users.id", "users.first_Name", "users.middle_Name", "users.last_Name")
                     ->get();
 
-                $processed_employees =  $this->process_payrun($payrun, $employees, $request_data["start_date"], $request_data["end_date"], true, true);
+                $processed_employees =  $this->process_payrun($payrun, $employees, $request_data["start_date"], $request_data["end_date"]);
                 $payrun->users()->sync($request_data['users'], []);
                 }
 
