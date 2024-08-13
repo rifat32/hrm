@@ -203,8 +203,6 @@ class DepartmentController extends Controller
 
 
 
-
-
                 $department_query_params = [
                     "id" => $request_data["id"],
                     "business_id" => $business_id
@@ -221,7 +219,7 @@ class DepartmentController extends Controller
                 ->where('departments.business_id', '=', auth()->user()->business_id)
                 ->first();
 
-                if (!$main_parent_department) {
+                if (empty($main_parent_department)) {
 
                     return response()->json([
                         "message" => "main parent not found."
@@ -233,7 +231,7 @@ class DepartmentController extends Controller
                     $request_data["parent_id"] = $main_parent_department->id;
                 } else {
                     $previous_parent_id =  $department_prev->parent_id;
-                    if($previous_parent_id !== $request_data["parent_id"]) {
+                    if(($previous_parent_id !== $request_data["parent_id"]) && !empty($department_prev->id)) {
                         $descendantIds = $department_prev->getAllDescendantIds();
                         if (in_array($request_data["parent_id"], $descendantIds)) {
                          Department::where([
@@ -251,11 +249,15 @@ class DepartmentController extends Controller
 
                 }
 
+                if(empty($department_prev->id)) {
+                  $request_data["parent_id"] = NULL;
+                  $request_data["manager_id"] = $department_prev->manager_id;
+
+                }
+
 
                 $department  =  tap(Department::where($department_query_params))->update(
                     collect($request_data)->only([
-
-
                         "name",
                         "work_location_id",
                         "description",
@@ -305,7 +307,6 @@ class DepartmentController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-            error_log($e->getMessage());
             return $this->sendError($e, 500, $request);
         }
     }

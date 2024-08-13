@@ -40,9 +40,9 @@ class AttendancesExport implements FromView
 
     public function collection()
     {
-        if ($this->users instanceof \Illuminate\Support\Collection) {
+        if ($this->attendances instanceof \Illuminate\Support\Collection) {
 
-            return collect($this->users)->map(function ($user, $index) {
+            return collect($this->attendances)->map(function ($user, $index) {
                 return [
                     // $index+1,
                     ($user->first_Name ." " . $user->last_Name . " " . $user->last_Name ),
@@ -61,7 +61,7 @@ class AttendancesExport implements FromView
 
 
         } else {
-            return collect($this->users->items())->map(function ($user, $index) {
+            return collect($this->attendances->items())->map(function ($user, $index) {
                 return [
                     // $index+1,
                     ($user->first_Name ." " . $user->last_Name . " " . $user->last_Name ),

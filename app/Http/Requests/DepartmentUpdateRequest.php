@@ -10,6 +10,7 @@ use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDepartmentName;
 use App\Rules\ValidateParentDepartmentId;
 use App\Rules\ValidateUser;
+use App\Rules\ValidateUserAllowSelf;
 use App\Rules\ValidateWorkLocation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -60,10 +61,10 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'manager_id' => [
                 'nullable',
                 'numeric',
-                new ValidateUser($all_manager_department_ids)
+                new ValidateUserAllowSelf($all_manager_department_ids)
             ],
             'parent_id' => [
-                'required',
+                'nullable',
                 'numeric',
                 new ValidateParentDepartmentId($all_manager_department_ids)
 

@@ -24712,6 +24712,131 @@
                 ]
             }
         },
+        "/v2.0/payruns": {
+            "post": {
+                "tags": [
+                    "administrator.payruns"
+                ],
+                "summary": "This method is to store payrun",
+                "description": "This method is to store payrun",
+                "operationId": "createPayrunV2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "period_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "weekly"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-01"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-31"
+                                    },
+                                    "consider_type": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "hour"
+                                    },
+                                    "consider_overtime": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Some notes"
+                                    },
+                                    "departments": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "users": {
+                                        "type": "string",
+                                        "format": "array",
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/payruns/toggle-active": {
             "put": {
                 "tags": [
@@ -40888,7 +41013,7 @@
                 ]
             }
         },
-        "/v1.0/users/exists": {
+        "/v1.0/users-exists": {
             "get": {
                 "tags": [
                     "user_management.employee"

@@ -27,15 +27,16 @@ class ValidateParentDepartmentId implements Rule
      */
     public function passes($attribute, $value)
     {
-        $parent_department = Department::where('id', $value)
-                        ->where('departments.business_id', '=', auth()->user()->business_id)
-                        ->first();
+        if(!empty($value)){
+            $parent_department = Department::where('id', $value)
+            ->where('departments.business_id', '=', auth()->user()->business_id)
+            ->first();
 
-                    if (!$parent_department || !in_array($parent_department->id,$this->all_manager_department_ids)) {
-                        return false;
-                    }
-return true;
-
+        if (!$parent_department || !in_array($parent_department->id,$this->all_manager_department_ids)) {
+            return false;
+        }
+        }
+        return true;
     }
 
     /**

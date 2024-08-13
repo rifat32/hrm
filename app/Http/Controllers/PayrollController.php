@@ -709,14 +709,10 @@ class PayrollController extends Controller
             }
 
 
-
-
             $employees = User::where([
                 "business_id" => auth()->user()->business_id,
                 "is_active" => 1
             ])
-
-
                 ->whereDoesntHave("payrolls", function ($q) use ($request) {
                     $q->where("payrolls.start_date", ">=", $request->start_date)
                         ->where("payrolls.end_date", "<=", $request->end_date);
@@ -727,9 +723,6 @@ class PayrollController extends Controller
                 ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-
-
-
 
                 ->when(!empty($request->departments), function ($query) use ($request) {
                     $department_ids = explode(',', $request->departments);
@@ -744,25 +737,26 @@ class PayrollController extends Controller
                 })
                 ->select("users.id", "users.first_Name", "users.middle_Name", "users.last_Name")
 
-                ->get();
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->paginate(10);
+                });
 
             $processed_employees = collect($this->estimate_payrun_data_v2($employees, $request->start_date, $request->end_date));
 
-            // Filter out users with both regular_hours_salary and overtime_hours_salary as 0
-            $filtered_employees = $processed_employees->filter(function ($employee) {
-                return $employee['payroll']['regular_hours_salary'] != 0 || $employee['payroll']['overtime_hours_salary'] != 0;
-            });
+            // // Filter out users with both regular_hours_salary and overtime_hours_salary as 0
+            // $filtered_employees = $processed_employees->items()->filter(function ($employee) {
+            //     return $employee['payroll']['regular_hours_salary'] != 0 || $employee['payroll']['overtime_hours_salary'] != 0;
+            // });
 
             // Convert the filtered collection back to an array if needed
-            $filtered_employees_array = $filtered_employees->values()->all();
-
-
-
+            // $filtered_employees_array = $filtered_employees->values()->all();
 
 
             DB::commit();
 
-            return response()->json($filtered_employees_array, 200);
+            return response()->json($processed_employees, 200);
         } catch (Exception $e) {
             DB::rollBack();
 
