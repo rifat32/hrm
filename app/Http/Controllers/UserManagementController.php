@@ -3034,7 +3034,7 @@ class UserManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/users/exists",
+     *      path="/v1.0/users-exists",
      *      operationId="getUserExists",
      *      tags={"user_management.employee"},
      *       security={
@@ -3138,6 +3138,7 @@ class UserManagementController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
             $business_id = auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 

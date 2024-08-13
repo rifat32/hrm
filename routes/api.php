@@ -466,7 +466,7 @@ Route::put('/v1.0/users/exit', [UserManagementController::class, "exitUser"]);
 Route::put('/v1.0/users/update/exit', [UserManagementController::class, "updateUserExit"]);
 
 
-Route::get('/v1.0/users/exists', [UserManagementController::class, "getUserExists"]);
+Route::get('/v1.0/users-exists', [UserManagementController::class, "getUserExists"]);
 
 
 

@@ -106,7 +106,7 @@ class EmailTemplateController extends Controller
                 }
 
 
-                error_log("template creating");
+
 
                 $template =  EmailTemplate::create($request_data);
 
