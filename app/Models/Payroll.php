@@ -70,6 +70,10 @@ class Payroll extends Model
     {
         return $this->hasMany(PayrollAttendance::class, "payroll_id" ,'id');
     }
+    public function attendances()
+    {
+        return $this->belongsToMany(Attendance::class, 'payroll_attendances', 'payroll_id', 'attendance_id');
+    }
 
     public function payroll_leave_records()
     {
