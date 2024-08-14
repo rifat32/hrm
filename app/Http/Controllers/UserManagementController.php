@@ -3034,8 +3034,8 @@ class UserManagementController extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v1.0/users-exists",
-     *      operationId="getUserExists",
+     *      path="/v1.0/users-exits",
+     *      operationId="getUserExits",
      *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}
@@ -3129,7 +3129,7 @@ class UserManagementController extends Controller
      *     )
      */
 
-    public function getUserExists(Request $request)
+    public function getUserExits(Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
@@ -3142,7 +3142,7 @@ class UserManagementController extends Controller
             $business_id = auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $user_exists = Termination::where(function ($query) use ($all_manager_department_ids) {
+            $user_exits = Termination::where(function ($query) use ($all_manager_department_ids) {
                 $query->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 });
@@ -3186,12 +3186,12 @@ class UserManagementController extends Controller
                     });
                 });
 
-            if ($request->filled("is_single_search") && empty($user_letters)) {
+            if ($request->filled("is_single_search") && empty($user_exits)) {
                 throw new Exception("No data found", 404);
             }
 
 
-            return response()->json($user_exists, 200);
+            return response()->json($user_exits, 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

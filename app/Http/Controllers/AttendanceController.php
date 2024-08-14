@@ -354,9 +354,9 @@ class AttendanceController extends Controller
                             // Handle the error as needed, e.g., throw an exception or return an error response
                             throw new Exception("User or business ID not found.");
                         }
+
             $request_data["user_id"] = $user->id;
             $request_data["does_break_taken"] = 0;
-
 
             $request_data["attendance_records"] = collect($request_data["attendance_records"])
                 ->map(function ($item) {
@@ -371,7 +371,6 @@ class AttendanceController extends Controller
 
             // Retrieve attendance setting
             $setting_attendance = $this->get_attendance_setting();
-
 
 
             $termination = $user->lastTermination;

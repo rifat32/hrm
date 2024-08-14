@@ -68,6 +68,7 @@ class SelfAttendanceCheckInCreateRequest extends FormRequest
                 'numeric',
                 new ValidateWorkLocation
             ],
+            
         ];
     }
 }

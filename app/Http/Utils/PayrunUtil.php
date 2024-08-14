@@ -557,7 +557,7 @@ trait PayrunUtil
         // Convert end_date to Carbon instance
         $end_date = Carbon::parse($end_date);
 
-        $employees->items()->each(function ($employee) use ($start_date, $end_date) {
+        collect($employees->items())->each(function ($employee) use ($start_date, $end_date) {
             $employee->payroll = $this->estimate_payroll_v2($employee, $start_date, $end_date);
             return $employee;
         });

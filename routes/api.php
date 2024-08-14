@@ -160,13 +160,6 @@ Route::post('/auth/check/business/email', [AuthController::class, "checkBusiness
 
 
 
-
-
-
-
-
-
-
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
 // Protected Routes
 // !!!!!!!@@@@@@@@@@@@$$$$$$$$$$$$%%%%%%%%%%%%%%%%^^^^^^^^^^
@@ -225,90 +218,26 @@ Route::get('/v2.0/business-employee-dashboard/leaves', [DashboardManagementContr
 
 
 Route::get('/v2.0/business-manager-dashboard', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardData"]);
-
 Route::get('/v1.0/business-manager-dashboard/other-widgets', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOtherWidgets"]);
-
-
-
-
-
-
-
 Route::get('/v1.0/business-manager-dashboard/sponsorship-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataSponsorshipExpiries"]);
-
-
 Route::get('/v1.0/business-manager-dashboard/right-to-work-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataRightToWorkExpiries"]);
-
-
 Route::get('/v1.0/business-manager-dashboard/visa-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataVisaExpiries"]);
-
 Route::get('/v1.0/business-manager-dashboard/passport-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPassportExpiries"]);
-
-
 Route::get('/v1.0/business-manager-dashboard/pension-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensionExpiries"]);
-
-
-
 Route::get('/v1.0/business-manager-dashboard/combined-expiries', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataCombinedExpiries"]);
-
-
-
-
-
-
-
 Route::get('/v1.0/business-manager-dashboard/holidays', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataHolidays"]);
 Route::get('/v1.0/business-manager-dashboard/leaves', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeaves"]);
-
-
-
 Route::get('/v1.0/business-manager-dashboard/leaves/{status}/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesByStatus"]);
-
 Route::get('/v1.0/business-manager-dashboard/holidays/{status}/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataHolidaysByStatus"]);
-
 Route::get('/v1.0/business-manager-dashboard/leaves-holidays', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataLeavesAndHolidays"]);
-
-
 Route::get('/v1.0/business-manager-dashboard/pensions/{status}/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensionsByStatus"]);
-
 Route::get('/v1.0/business-manager-dashboard/pensions', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPensions"]);
-
-
-
-
-
 Route::get('/v1.0/business-manager-dashboard/present', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresent"]);
-
 Route::get('/v1.0/business-manager-dashboard/absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataAbsent"]);
-
-
-
-
-
-
 Route::get('/v1.0/business-manager-dashboard/open-roles/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRoles"]);
-
-
 Route::get('/v1.0/business-manager-dashboard/total-employee/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataTotalEmployee"]);
-
-
 Route::get('/v1.0/business-manager-dashboard/open-roles-and-total-employee', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOpenRolesAndTotalEmployee"]);
-
-
-
-
-
-
-
-
-
-
-
-
-
 Route::get('/v2.0/business-manager-dashboard/present-absent', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresentAbsent"]);
-
-
 Route::get('/v2.0/business-manager-dashboard/present-absent-hours', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataPresentAbsentHours"]);
 
 
@@ -466,7 +395,7 @@ Route::put('/v1.0/users/exit', [UserManagementController::class, "exitUser"]);
 Route::put('/v1.0/users/update/exit', [UserManagementController::class, "updateUserExit"]);
 
 
-Route::get('/v1.0/users-exists', [UserManagementController::class, "getUserExists"]);
+Route::get('/v1.0/users-exits', [UserManagementController::class, "getUserExists"]);
 
 
 

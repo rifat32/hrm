@@ -258,7 +258,12 @@ class UserLetterController extends Controller
                         else if ($item == "[JOINING_DATE]") {
                             $joiningDate = isset($employee["joining_date"]) ? Carbon::parse($employee["joining_date"])->format("d-m-Y") : '--';
                             $template = str_replace($item, $joiningDate, $template);
-                        } else {
+                        }
+                        else if ($item == "[NI_NUMBER]") {
+                            $NI_number = isset($employee["NI_number"]) ? $employee["NI_number"] : '--';
+                            $template = str_replace($item, $NI_number, $template);
+                        }
+                         else {
                             $template = str_replace($item, $employee[$variableName], $template);
                         }
                     }
