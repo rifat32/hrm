@@ -54,7 +54,7 @@ class UpdateDatabaseController extends Controller
     {
 
 
-        $i = 6;
+        $i = 7;
 
 
 
@@ -193,6 +193,15 @@ class UpdateDatabaseController extends Controller
                 if (!Schema::hasColumn('attendance_histories', 'out_geolocation')) {
                     DB::statement("ALTER TABLE attendance_histories ADD COLUMN out_geolocation VARCHAR(255) NULL");
                 }
+            }
+
+               // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+               if ($i == 7) {
+              // Check if the 'feedback' column exists
+if (Schema::hasColumn('candidates', 'feedback')) {
+    // Make the 'feedback' column nullable
+    DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
+}
             }
         }
 

@@ -58,33 +58,41 @@ namespace App\Console\Commands;
 
                     // Check if any of the columns already exist
                     $skipMigration = false;
-                    foreach ($columns as $column) {
-                        if (Schema::hasColumn($table, $column)) {
-                            $message = "Column {$column} already exists in table {$table}. Skipping migration.\n";
-                            $this->info($message);
-                            $skipMigration = true;
-                            break;
-                        }
-                    }
+                    // foreach ($columns as $column) {
+                    //     if (Schema::hasColumn($table, $column)) {
+                    //         $message = "Column {$column} already exists in table {$table}. Skipping migration.\n";
+                    //         $this->info($message);
+                    //         $skipMigration = true;
+                    //         break;
+                    //     }
+                    // }
 
                     if (!$skipMigration) {
                         $message = "Modifying table {$table} with migration {$file}\n";
                         $this->info($message);
                         fwrite($logHandle, $message);
 
-                        // Run the specific migration
-                        Artisan::call('migrate', [
-                            '--path' => str_replace(base_path(), '', $file),
-                        ]);
+                        try {
+                            // Run the specific migration
+                            Artisan::call('migrate', [
+                                '--path' => str_replace(base_path(), '', $file),
+                            ]);
 
-                        // Log the successful migration
-                        $message = "Migrated {$file} successfully.\n";
-                        fwrite($logHandle, $message);
+                            // Log the successful migration
+                            $message = "Migrated {$file} successfully.\n";
+                            fwrite($logHandle, $message);
+                        } catch (\Exception $e) {
+                            // Log the error message
+                            $errorMessage = "Migration failed for {$file}. Error: " . $e->getMessage() . "\n";
+                            $this->error($errorMessage);
+                            fwrite($logHandle, $errorMessage);
+                        }
                     } else {
                         $message = "Column already exists in {$file}. Skipping.\n";
                         $this->warn($message);
                         fwrite($logHandle, $message);
                     }
+
                 }
                 // No create or table statement found
                 else {
