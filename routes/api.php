@@ -395,7 +395,7 @@ Route::put('/v1.0/users/exit', [UserManagementController::class, "exitUser"]);
 Route::put('/v1.0/users/update/exit', [UserManagementController::class, "updateUserExit"]);
 
 
-Route::get('/v1.0/users-exits', [UserManagementController::class, "getUserExists"]);
+Route::get('/v1.0/users-exits', [UserManagementController::class, "getUserExits"]);
 
 
 
@@ -757,8 +757,8 @@ Route::post('/v1.0/user-assets', [UserAssetController::class, "createUserAsset"]
 Route::put('/v1.0/user-assets/add-existing', [UserAssetController::class, "addExistingUserAsset"]);
 Route::put('/v1.0/user-assets', [UserAssetController::class, "updateUserAsset"]);
 Route::put('/v1.0/user-assets/return', [UserAssetController::class, "returnUserAsset"]);
-
 Route::get('/v1.0/user-assets', [UserAssetController::class, "getUserAssets"]);
+
 Route::get('/v1.0/user-assets/{id}', [UserAssetController::class, "getUserAssetById"]);
 Route::delete('/v1.0/user-assets/{ids}', [UserAssetController::class, "deleteUserAssetsByIds"]);
 

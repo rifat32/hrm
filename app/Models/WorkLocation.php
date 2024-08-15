@@ -16,7 +16,9 @@ class WorkLocation extends Model
 
         "is_geo_location_enabled",
         "is_ip_enabled",
-        "max_radius" ,
+
+        "max_radius",
+
         "ip_address",
 
         'latitude',

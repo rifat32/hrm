@@ -345,6 +345,7 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
+
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             $request_data = $request->validated();
@@ -355,8 +356,11 @@ class AttendanceController extends Controller
                             throw new Exception("User or business ID not found.");
                         }
 
+                        $this->validateWorkLocation($request_data["work_location_id"]);
+
             $request_data["user_id"] = $user->id;
             $request_data["does_break_taken"] = 0;
+
 
             $request_data["attendance_records"] = collect($request_data["attendance_records"])
                 ->map(function ($item) {

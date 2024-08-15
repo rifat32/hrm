@@ -695,7 +695,7 @@ trait PayrunUtil
         $payroll_attendances_data = $approved_attendances->map(function($attendance) {
             return      ["attendance_id" => $attendance->id];
         });
-        $payroll_leave_records_data =  $approved_attendances->map(function($leave_record) {
+        $payroll_leave_records_data =  $approved_leave_records->map(function($leave_record) {
             return      ["leave_record_id" => $leave_record->id];
                    });
 
@@ -709,13 +709,14 @@ trait PayrunUtil
             'status' => "pending_approval",
             'is_active' => 1,
             'business_id' => $employee->business_id,
-
             "start_date" => $start_date,
             "end_date" => $end_date,
         ];
         $payroll_data['payroll_name'] = $this->generate_payroll_name($payrun);
 
         $payroll_data = $this->recalculate_payroll_values_v2($payroll_data,$approved_attendances,$approved_leave_records,$payroll_holidays_data);
+
+
 
 
             $payroll = Payroll::create($payroll_data);

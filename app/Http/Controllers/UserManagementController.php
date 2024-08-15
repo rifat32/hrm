@@ -3142,7 +3142,15 @@ class UserManagementController extends Controller
             $business_id = auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $user_exits = Termination::where(function ($query) use ($all_manager_department_ids) {
+            $user_exits = Termination::with(
+                [
+                "terminationType",
+                "terminationReason",
+                "user",
+                "user.exitInterviews",
+                "user.accessRevocation"
+                ])
+            ->where(function ($query) use ($all_manager_department_ids) {
                 $query->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 });

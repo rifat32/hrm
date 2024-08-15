@@ -93,7 +93,7 @@ class PayrunController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             
+
              return DB::transaction(function () use ($request) {
                  if (!$request->user()->hasPermissionTo('payrun_create')) {
                      return response()->json([
@@ -124,7 +124,7 @@ class PayrunController extends Controller
                          $q->where("payrolls.start_date", $payrun->start_date)
                              ->where("payrolls.end_date", $payrun->end_date);
                      })
-                     ->select("users.id", "users.first_Name", "users.middle_Name", "users.last_Name")
+                     ->select("users.id", "users.first_Name", "users.middle_Name", "users.last_Name","users.business_id")
                      ->get();
 
                    $this->process_payrun_v2($payrun, $employees, $request_data["start_date"], $request_data["end_date"]);

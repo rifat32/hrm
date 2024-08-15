@@ -9,6 +9,7 @@ use App\Models\Holiday;
 use App\Models\LeaveRecord;
 use App\Models\Role;
 use App\Models\SettingAttendance;
+use App\Models\WorkLocation;
 use App\Models\WorkShiftHistory;
 use Carbon\Carbon;
 use Exception;
@@ -16,6 +17,23 @@ use Exception;
 trait AttendanceUtil
 {
     use PayrunUtil, BasicUtil;
+    public function validateWorkLocation($work_location_id)
+    {
+
+          $work_location = WorkLocation::find($work_location_id);
+
+          if (empty($work_location)) {
+            throw new Exception("No work location found");
+            }
+
+            "is_geo_location_enabled",
+            "is_ip_enabled",
+    
+
+
+        return $work_location_id;
+
+    }
 
     public function prepare_data_on_attendance_create($raw_data, $user_id)
     {
