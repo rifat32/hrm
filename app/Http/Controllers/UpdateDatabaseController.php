@@ -54,7 +54,7 @@ class UpdateDatabaseController extends Controller
     {
 
 
-        $i = 7;
+        $i = 6;
 
 
 
