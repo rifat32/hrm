@@ -55,13 +55,18 @@ class SelfAttendanceCheckOutCreateRequest extends FormRequest
 
             'attendance_records.*.note' => 'nullable|string',
 
-            'attendance_records.*.in_latitude' => 'nullable|string',
-            'attendance_records.*.in_longitude' => 'nullable|string',
-            'attendance_records.*.in_ip_address' => 'nullable|string',
-
             'attendance_records.*.out_latitude' => 'nullable|string',
             'attendance_records.*.out_longitude' => 'nullable|string',
-            'attendance_records.*.out_ip_address' => 'nullable|string',
+
+            'attendance_records.*.in_latitude' => 'nullable|string',
+            'attendance_records.*.in_longitude' => 'nullable|string',
+
+               'attendance_records.*.in_ip_address' => 'nullable|string',
+            // 'attendance_records.*.out_ip_address' => 'nullable|string',
+
+
+
+
 
 
             'attendance_records.*.in_time' => 'required|date_format:H:i:s',

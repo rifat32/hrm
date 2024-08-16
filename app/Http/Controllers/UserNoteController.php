@@ -10,6 +10,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\Notification;
 use App\Models\User;
 use App\Models\UserNote;
 use Carbon\Carbon;
@@ -100,12 +101,17 @@ class UserNoteController extends Controller
 
                 $comment_text = $request_data["description"];
 
+                $pattern = '/@\[.*?\]\((.*?)\)/';
+                // $pattern = '/@(\w+)/';
                 // Parse comment for mentions
-                preg_match_all('/@(\w+)/', $comment_text, $mentions);
-                $mentioned_users = $mentions[1];
+                preg_match_all($pattern, $comment_text, $mentions);
+
+
+                $mentioned_users = array_map('trim', $mentions[1]);;
+
                 $mentioned_users = User::where('business_id', auth()->user()->business_id)
-                ->whereIn('user_name', $mentioned_users)
-                ->get();
+                    ->whereIn('user_name', $mentioned_users)
+                    ->get();
 
 
                 $request_data["created_by"] = $request->user()->id;
@@ -120,6 +126,28 @@ $mentions_data = $mentioned_users->map(function ($mentioned_user) {
 });
 
 $user_note->mentions()->createMany($mentions_data);
+
+// Prepare notification data for each mentioned user
+$notification_data = $mentioned_users->map(function ($mentioned_user) use ($user_note) {
+    $notification_description = "You have been mentioned in a note.";
+    $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
+    return [
+        "entity_id" => $user_note->id,
+        "entity_name" => "Note",
+        'notification_title' => "Note Mention Notification",
+        'notification_description' => $notification_description,
+        'notification_link' => $notification_link,
+        "sender_id" => auth()->user()->id, // Assuming you have a variable for the mentioner's ID
+        "receiver_id" => $mentioned_user->id,
+        "business_id" => auth()->user()->business_id,
+        "is_system_generated" => 1,
+        "status" => "unread",
+        "created_at" => now(),
+        "updated_at" => now()
+    ];
+})->toArray();
+
+Notification::insert($notification_data);
 
 
 
@@ -209,13 +237,18 @@ $user_note->mentions()->createMany($mentions_data);
 
                 $comment_text = $request_data["description"];
 
+                $pattern = '/@\[.*?\]\((.*?)\)/';
+                // $pattern = '/@(\w+)/';
                 // Parse comment for mentions
-                preg_match_all('/@(\w+)/', $comment_text, $mentions);
-                $mentioned_users = $mentions[1];
-                $mentioned_users = User::where('business_id', auth()->user()->business_id)
-                ->whereIn('user_name', $mentioned_users)
-                ->get();
+                preg_match_all($pattern, $comment_text, $mentions);
 
+
+
+                $mentioned_users = array_map('trim', $mentions[1]);;
+
+                $mentioned_users = User::where('business_id', auth()->user()->business_id)
+                    ->whereIn('user_name', $mentioned_users)
+                    ->get();
 
 
                 $user_note_query_params = [
@@ -266,6 +299,7 @@ if (isset($request_data['updated_at'])) {
                 //     $user_note->hidden_note = $request_data["hidden_note"];
                 //     $user_note->save();
                 //  }
+                $current_mentions = $user_note->mentions();
                 $user_note->mentions()->delete();
 // Store mentions in user_note_mentions table using createMany
 $mentions_data = $mentioned_users->map(function ($mentioned_user) {
@@ -275,8 +309,55 @@ $mentions_data = $mentioned_users->map(function ($mentioned_user) {
 });
 
 
-
 $user_note->mentions()->createMany($mentions_data);
+
+  // Determine old and new mentions
+  $new_mentions = array_diff($mentions_data->toArray(), $current_mentions->toArray());
+  $old_mentions = array_intersect($mentions_data->toArray(), $current_mentions->toArray());
+
+  // Prepare notification data for newly added mentions
+  $new_notification_data = $mentioned_users->whereIn('id', $new_mentions)->map(function ($mentioned_user) use ($user_note) {
+      $notification_description = "You have been mentioned. The note has been updated.";
+      $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
+      return [
+          "entity_id" => $user_note->id,
+          "entity_name" => "Note",
+          'notification_title' => "New Mention in Updated Note",
+          'notification_description' => $notification_description,
+          'notification_link' => $notification_link,
+          "sender_id" => auth()->user()->id,
+          "receiver_id" => $mentioned_user->id,
+          "business_id" => auth()->user()->business_id,
+          "is_system_generated" => 1,
+          "status" => "unread",
+          "created_at" => now(),
+          "updated_at" => now()
+      ];
+  })->toArray();
+
+  // Prepare notification data for old mentions
+  $old_notification_data = $mentioned_users->whereIn('id', $old_mentions)->map(function ($mentioned_user) use ($user_note) {
+      $notification_description = "You have been mentioned. The note has been updated.";
+      $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
+      return [
+          "entity_id" => $user_note->id,
+          "entity_name" => "Note",
+          'notification_title' => "Re-mention in Updated Note",
+          'notification_description' => $notification_description,
+          'notification_link' => $notification_link,
+          "sender_id" => auth()->user()->id,
+          "receiver_id" => $mentioned_user->id,
+          "business_id" => auth()->user()->business_id,
+          "is_system_generated" => 1,
+          "status" => "unread",
+          "created_at" => now(),
+          "updated_at" => now()
+      ];
+  })->toArray();
+
+  // Insert notifications into the database
+  Notification::insert(array_merge($new_notification_data, $old_notification_data));
+
                 return response($user_note, 201);
             });
         } catch (Exception $e) {
@@ -364,13 +445,18 @@ $user_note->mentions()->createMany($mentions_data);
 
                  $comment_text = $request_data["description"];
 
-                 // Parse comment for mentions
-                 preg_match_all('/@(\w+)/', $comment_text, $mentions);
-                 $mentioned_users = $mentions[1];
-                 $mentioned_users = User::where('business_id', auth()->user()->business_id)
-                 ->whereIn('user_name', $mentioned_users)
-                 ->get();
+                 $pattern = '/@\[.*?\]\((.*?)\)/';
+            // $pattern = '/@(\w+)/';
+            // Parse comment for mentions
+            preg_match_all($pattern, $comment_text, $mentions);
 
+
+
+            $mentioned_users = array_map('trim', $mentions[1]);;
+
+            $mentioned_users = User::where('business_id', auth()->user()->business_id)
+                ->whereIn('user_name', $mentioned_users)
+                ->get();
                  $user_note_query_params = [
                      "id" => $request_data["id"],
                  ];
@@ -415,6 +501,7 @@ $user_note->mentions()->createMany($mentions_data);
                 //     $user_note->hidden_note = $request_data["hidden_note"];
                 //     $user_note->save();
                 //  }
+                $current_mentions = $user_note->mentions();
                  $user_note->mentions()->delete();
                  // Store mentions in user_note_mentions table using createMany
                  $mentions_data = $mentioned_users->map(function ($mentioned_user) {
@@ -424,6 +511,53 @@ $user_note->mentions()->createMany($mentions_data);
                  });
 
                  $user_note->mentions()->createMany($mentions_data);
+
+                   // Determine old and new mentions
+  $new_mentions = array_diff($mentions_data->toArray(), $current_mentions->toArray());
+  $old_mentions = array_intersect($mentions_data->toArray(), $current_mentions->toArray());
+
+  // Prepare notification data for newly added mentions
+  $new_notification_data = $mentioned_users->whereIn('id', $new_mentions)->map(function ($mentioned_user) use ($user_note) {
+      $notification_description = "You have been mentioned. The note has been updated.";
+      $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
+      return [
+          "entity_id" => $user_note->id,
+          "entity_name" => "Note",
+          'notification_title' => "New Mention in Updated Note",
+          'notification_description' => $notification_description,
+          'notification_link' => $notification_link,
+          "sender_id" => auth()->user()->id,
+          "receiver_id" => $mentioned_user->id,
+          "business_id" => auth()->user()->business_id,
+          "is_system_generated" => 1,
+          "status" => "unread",
+          "created_at" => now(),
+          "updated_at" => now()
+      ];
+  })->toArray();
+
+  // Prepare notification data for old mentions
+  $old_notification_data = $mentioned_users->whereIn('id', $old_mentions)->map(function ($mentioned_user) use ($user_note) {
+      $notification_description = "You have been mentioned. The note has been updated.";
+      $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
+      return [
+          "entity_id" => $user_note->id,
+          "entity_name" => "Note",
+          'notification_title' => "Re-mention in Updated Note",
+          'notification_description' => $notification_description,
+          'notification_link' => $notification_link,
+          "sender_id" => auth()->user()->id,
+          "receiver_id" => $mentioned_user->id,
+          "business_id" => auth()->user()->business_id,
+          "is_system_generated" => 1,
+          "status" => "unread",
+          "created_at" => now(),
+          "updated_at" => now()
+      ];
+  })->toArray();
+
+  // Insert notifications into the database
+  Notification::insert(array_merge($new_notification_data, $old_notification_data));
                  return response($user_note, 201);
              });
          } catch (Exception $e) {

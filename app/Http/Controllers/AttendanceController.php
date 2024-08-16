@@ -31,6 +31,7 @@ use App\Models\PayrollAttendance;
 
 use App\Models\User;
 use App\Models\UserProject;
+use App\Models\WorkLocation;
 use App\Observers\AttendanceObserver;
 use Carbon\Carbon;
 use Exception;
@@ -172,10 +173,30 @@ class AttendanceController extends Controller
             // Convert the attendance record to an array
             $attendance_data = $attendance->toArray();
 
+
             // Merge request data into the attendance data, overriding existing keys with request data
 
-
             $request_data_update = array_replace($attendance_data, $request_data);
+
+            $work_location = WorkLocation::find($request_data_update["work_location_id"]);
+
+            if (empty($work_location)) {
+              throw new Exception("No work location found");
+              }
+
+
+
+
+
+$request_data_update["attendance_records"] = collect($request_data_update["attendance_records"])
+    ->map(function ($item) use($work_location) {
+
+        $item["in_ip_address"] = request()->ip();
+        $item["out_ip_address"] = request()->ip();
+        $this->validateWorkLocation($work_location,$item["out_latitude"],$item["out_longitude"]);
+        return $item;
+    })
+    ->toArray();
 
 
 
@@ -206,7 +227,7 @@ class AttendanceController extends Controller
             if ($attendance) {
                 $attendance->fill(collect($attendance_data)->only([
                     'note',
-                    "in_geolocation",
+                    // "in_geolocation",
                     "out_geolocation",
                     'user_id',
                     'in_date',
@@ -356,14 +377,25 @@ class AttendanceController extends Controller
                             throw new Exception("User or business ID not found.");
                         }
 
-            $this->validateWorkLocation($request_data["work_location_id"]);
+                        $work_location = WorkLocation::find($request_data["work_location_id"]);
+
+                        if (empty($work_location)) {
+                          throw new Exception("No work location found");
+                          }
+
+
+
+
+
 
             $request_data["user_id"] = $user->id;
             $request_data["does_break_taken"] = 0;
 
             $request_data["attendance_records"] = collect($request_data["attendance_records"])
-                ->map(function ($item) {
+                ->map(function ($item) use($work_location) {
                     $item["out_time"] = $item["in_time"];
+                    $item["in_ip_address"] = request()->ip();
+                    $this->validateWorkLocation($work_location,$item["in_latitude"],$item["in_longitude"]);
                     return $item;
                 })
                 ->toArray();

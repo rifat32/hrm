@@ -16,28 +16,85 @@ use Exception;
 
 trait AttendanceUtil
 {
-    use PayrunUtil, BasicUtil;
-    public function validateWorkLocation($work_location_id)
+    use PayrunUtil, BasicUtil, ModuleUtil;
+
+
+
+
+
+  public  function isLocationWithinBounds($lat, $lon, $centerLat, $centerLon, $radiusInMeters) {
+        // Earth's radius in meters
+        $earthRadiusInMeters = 6371000;
+
+        // Convert the radius from meters to radians
+        $radiusInRadians = $radiusInMeters / $earthRadiusInMeters;
+
+        // Convert latitudes and longitudes from degrees to radians
+        $lat = deg2rad($lat);
+        $lon = deg2rad($lon);
+        $centerLat = deg2rad($centerLat);
+        $centerLon = deg2rad($centerLon);
+
+        // Calculate the bounds
+        $deltaLat = $radiusInRadians;
+        $deltaLon = $radiusInRadians / cos($centerLat);
+
+        $minLat = $centerLat - $deltaLat;
+        $maxLat = $centerLat + $deltaLat;
+        $minLon = $centerLon - $deltaLon;
+        $maxLon = $centerLon + $deltaLon;
+
+        // Convert back to degrees for comparison
+        $minLat = rad2deg($minLat);
+        $maxLat = rad2deg($maxLat);
+        $minLon = rad2deg($minLon);
+        $maxLon = rad2deg($maxLon);
+
+        // Check if the location is within the bounds
+        return $lat >= deg2rad($minLat) && $lat <= deg2rad($maxLat) && $lon >= deg2rad($minLon) && $lon <= deg2rad($maxLon);
+    }
+
+
+
+
+
+
+
+
+    public function validateWorkLocation($work_location, $latitude, $longitude)
     {
 
-          $work_location = WorkLocation::find($work_location_id);
+       $moduleEnabled = $this->isModuleEnabled("employee_location_attendance",false);
+       if(!$moduleEnabled) {
+             return true;
+       }
 
-          if (empty($work_location)) {
-            throw new Exception("No work location found");
+
+        if (!empty($work_location->is_geo_location_enabled)) {
+            if (empty($latitude) || empty($longitude)) {
+                throw new Exception("Geo-location mismatch: Latitude or longitude is missing for verification.", 401);
             }
 
-            if (!empty($work_location->is_geo_location_enabled)) {
-                  // match location
+            $isWithin = $this->isLocationWithinBounds($latitude, $longitude, $work_location->latitude, $work_location->longitude, $work_location->max_radius);
+
+            if (!$isWithin) {
+                throw new Exception("Geo-location mismatch: The provided latitude and longitude do not fall within the expected boundaries for this work location.", 401);
             }
+        }
+
+
             if (!empty($work_location->is_ip_enabled)) {
-                  // match ip
+                if ($work_location->ip_address != request()->ip()) {
+                    throw new Exception("IP address mismatch: The provided IP address does not match the expected IP address for this work location.", 401);
+                }
+
             }
 
 
 
 
 
-        return $work_location_id;
+        return true;
 
     }
 
