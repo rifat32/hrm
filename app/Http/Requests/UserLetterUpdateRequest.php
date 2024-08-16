@@ -5,6 +5,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\UserLetter;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateUserLetterName;
@@ -12,6 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UserLetterUpdateRequest extends BaseFormRequest
 {
+    use BasicUtil;
 /**
 * Determine if the user is authorized to make this request.
 *

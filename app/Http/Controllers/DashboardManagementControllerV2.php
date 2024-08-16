@@ -4375,24 +4375,26 @@ class DashboardManagementControllerV2 extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
+            if (!$request->user()->hasPermissionTo('job_listing_create')) {
+                $data["open_roles"] = $this->open_roles(
+                    $today,
+                    $start_date_of_next_month,
+                    $end_date_of_next_month,
+                    $start_date_of_this_month,
+                    $end_date_of_this_month,
+                    $start_date_of_previous_month,
+                    $end_date_of_previous_month,
+                    $start_date_of_next_week,
+                    $end_date_of_next_week,
+                    $start_date_of_this_week,
+                    $end_date_of_this_week,
+                    $start_date_of_previous_week,
+                    $end_date_of_previous_week,
+                    $all_manager_department_ids,
+                    "today"
+                );
 
-            $data["open_roles"] = $this->open_roles(
-                $today,
-                $start_date_of_next_month,
-                $end_date_of_next_month,
-                $start_date_of_this_month,
-                $end_date_of_this_month,
-                $start_date_of_previous_month,
-                $end_date_of_previous_month,
-                $start_date_of_next_week,
-                $end_date_of_next_week,
-                $start_date_of_this_week,
-                $end_date_of_this_week,
-                $start_date_of_previous_week,
-                $end_date_of_previous_week,
-                $all_manager_department_ids,
-                "today"
-            );
+            }
 
             $data["total_employee"] = $this->total_employee(
                 $today,

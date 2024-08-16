@@ -2033,6 +2033,7 @@ class UserManagementController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
+
             if (!$request->user()->hasPermissionTo('user_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -2062,8 +2063,6 @@ class UserManagementController extends Controller
             $path = $file->getRealPath();
             $data = collect(array_map('str_getcsv', file($path)));
 
-
-
             $header = $data->shift();
 
             // Split, trim, and join each header using collection
@@ -2071,16 +2070,36 @@ class UserManagementController extends Controller
                 return $this->split_trim_join($h);
             });
 
-            // Update the data array to reflect the new headers
-            $csv_data = $data->map(function ($row) use ($new_headers) {
-                return $new_headers->combine($row);
+            // Initialize an array to store errors and a collection for valid rows
+            $errors = [];
+            $csv_data = collect();
+
+            $data->each(function ($row, $index) use ($new_headers, &$csv_data, &$errors) {
+                $rowNumber = $index + 2; // +2 because the index is zero-based, and we need to account for the header row
+
+                if (count($row) !== $new_headers->count()) {
+                    $errorType = count($row) > $new_headers->count() ? 'extra' : 'missing';
+                    $errors[] = "Row $rowNumber has $errorType data. Expected " . $new_headers->count() . " columns, found " . count($row) . ".";
+                    return; // Skip this row
+                }
+
+                // Add the valid row to the collection
+                $csv_data->push($new_headers->combine($row));
             });
 
+            // Optionally, you can log or return the errors
+            if (!empty($errors)) {
+                foreach ($errors as $error) {
+                    // Log the error or handle it as needed
+                     Log::info($error . "\n"); // Example: printing the error
+                }
+            }
 
             $usersData = collect();
             $createdUsers = collect();
             // Validate and insert the CSV data
             $errors = [];
+
 
             foreach ($csv_data->toArray() as $index => $employeeData) {
 
@@ -2097,7 +2116,6 @@ class UserManagementController extends Controller
                     'Country' => 'required|string',
                     'City' => 'required|string',
                     'Postcode' => 'nullable|string',
-
                     'Gender' => 'nullable|string|in:male,female,other',
 
                     'Joining_Date' => [
@@ -2112,6 +2130,7 @@ class UserManagementController extends Controller
                             }
                         },
                     ],
+
                     'Date_Of_Birth' => 'required|date',
                     'Salary_Per_Annum' => 'required|numeric',
                     'Weekly_Contractual_Hours' => 'required|numeric',
@@ -2131,6 +2150,7 @@ class UserManagementController extends Controller
                     'Emergency_Contact_Evening_Tel_Number' => 'nullable|string|max:15',
 
                 ]);
+
 
                 // Setting custom attribute names
                 $validator->setAttributeNames([
@@ -2172,6 +2192,7 @@ class UserManagementController extends Controller
                 }
                 $usersData->push($employeeData);
             }
+
 
             if (!empty($errors)) {
                 return response()->json([
@@ -2799,7 +2820,7 @@ class UserManagementController extends Controller
 
             $termination = Termination::create($request_data["termination"]);
 
-            $request_data["termination_id"] = $termination->id;
+            $request_data["exit_interview"]["termination_id"] = $termination->id;
             ExitInterview::create($request_data["exit_interview"]);
 
 

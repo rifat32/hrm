@@ -26,7 +26,7 @@ trait PayrunUtil
     public function getLeaveRecordData($approved_leave_records)
     {
         $payroll_leave_records_data = collect();
-        $approved_leave_records->each(function ($approved_leave_record) use (&$payroll_leave_records_data) {
+        collect($approved_leave_records)->each(function ($approved_leave_record) use (&$payroll_leave_records_data) {
             if ($approved_leave_record->leave->leave_type->type == "paid") {
                 // $total_paid_leave_hours += $approved_leave_record->leave_hours;
                 $payroll_leave_records_data->push([
@@ -47,7 +47,7 @@ trait PayrunUtil
         $salaryHistories = $this->get_salary_infos($employee->id, $start_date, $end_date);
         $payroll_holidays_data = collect();
         $date_range = collect();
-        $holidays->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee, $salaryHistories) {
+        collect($holidays)->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee, $salaryHistories) {
             $holiday_start_date = Carbon::parse($holiday->start_date);
             $holiday_end_date = Carbon::parse($holiday->end_date);
             while ($holiday_start_date->lte($holiday_end_date)) {
@@ -84,7 +84,7 @@ trait PayrunUtil
     {
         $payroll_holidays_data = collect();
         $date_range = collect();
-        $holidays->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee) {
+        collect($holidays)->each(function ($holiday) use (&$date_range, &$payroll_holidays_data, $end_date, $employee) {
             $holiday_start_date = Carbon::parse($holiday->start_date);
             $holiday_end_date = Carbon::parse($holiday->end_date);
             while ($holiday_start_date->lte($holiday_end_date)) {
@@ -112,7 +112,7 @@ trait PayrunUtil
     public function getAttendanceData($approved_attendances)
     {
         $payroll_attendances_data = collect();
-        $approved_attendances->each(function ($approved_attendance) use (&$payroll_attendances_data) {
+        collect($approved_attendances)->each(function ($approved_attendance) use (&$payroll_attendances_data) {
             if ($approved_attendance->total_paid_hours > 0) {
 
                 $payroll_attendances_data->push([
@@ -535,7 +535,7 @@ trait PayrunUtil
             return false; // Skip to the next iteration
         }
 
-        $employees->each(function ($employee) use ($payrun, $generate_payroll, $start_date, $end_date) {
+        collect($employees)->each(function ($employee) use ($payrun, $generate_payroll, $start_date, $end_date) {
             $employee->payroll = $this->generate_payroll($payrun, $employee, $start_date, $end_date, $generate_payroll);
             return $employee;
         });
@@ -613,7 +613,7 @@ trait PayrunUtil
         // Convert end_date to Carbon instance
         $end_date = Carbon::parse($end_date);
 
-        $employees->each(function ($employee) use ($start_date, $end_date) {
+        collect($employees)->each(function ($employee) use ($start_date, $end_date) {
 
             $employee->payroll = $this->estimate_payroll($employee, $start_date, $end_date);
             return $employee;
@@ -819,7 +819,7 @@ trait PayrunUtil
             $payroll->payroll_leave_records()->createMany($payroll_leave_records_data->toArray());
             $payroll->payroll_attendances()->createMany($payroll_attendances_data->toArray());
 
-            $attendance_arrears->each(function ($attendance_arrear) {
+            collect($attendance_arrears)->each(function ($attendance_arrear) {
                 AttendanceArrear::create([
                     "status" => "pending_approval",
                     "attendance_id" => $attendance_arrear->id
@@ -827,7 +827,7 @@ trait PayrunUtil
             });
 
 
-            $leave_arrears->each(function ($leave_arrear) {
+            collect($leave_arrears)->each(function ($leave_arrear) {
                 LeaveRecordArrear::create([
                     "status" => "pending_approval",
                     "leave_record_id" => $leave_arrear->id
