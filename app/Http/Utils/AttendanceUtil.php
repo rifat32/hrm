@@ -26,9 +26,15 @@ trait AttendanceUtil
             throw new Exception("No work location found");
             }
 
-            "is_geo_location_enabled",
-            "is_ip_enabled",
-    
+            if (!empty($work_location->is_geo_location_enabled)) {
+                  // match location
+            }
+            if (!empty($work_location->is_ip_enabled)) {
+                  // match ip
+            }
+
+
+
 
 
         return $work_location_id;

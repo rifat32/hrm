@@ -8,6 +8,7 @@ use App\Http\Requests\CandidateUpdateRequest;
 use App\Http\Requests\MultipleFileUploadRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\JobApplicationReceivedMail;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Mail;
 
 class CandidateController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, EmailLogUtil;
 
 
 

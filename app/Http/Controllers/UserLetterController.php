@@ -20,6 +20,7 @@ use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\UserLetterGenerateRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
+use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\UserLetterMail;
@@ -38,7 +39,7 @@ use PDF;
 class UserLetterController extends Controller
 {
 
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, EmailLogUtil;
 
 
     /**

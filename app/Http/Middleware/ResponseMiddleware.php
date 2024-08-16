@@ -53,7 +53,8 @@ class ResponseMiddleware
                     $errorMessage = "Error ID: ".$error->id." - Status: ".$error->status_code." - Operation Failed, something is wrong! - Please call to the customer care.";
                     $response->setContent(json_encode(['message' => $errorMessage]));
 
-            } else if(($response->getStatusCode() >= 300 && $response->getStatusCode() < 500)) {
+            } 
+            else if(($response->getStatusCode() >= 300 && $response->getStatusCode() < 500)) {
                 $errorLog = [
                     "api_url" => $request->fullUrl(),
                     "fields" => json_encode(request()->all()),

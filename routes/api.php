@@ -742,13 +742,6 @@ Route::delete('/v1.0/user-pension-histories/{ids}', [UserPensionHistoryControlle
 
 
 
-
-
-
-
-
-
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // user asset  management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -758,7 +751,6 @@ Route::put('/v1.0/user-assets/add-existing', [UserAssetController::class, "addEx
 Route::put('/v1.0/user-assets', [UserAssetController::class, "updateUserAsset"]);
 Route::put('/v1.0/user-assets/return', [UserAssetController::class, "returnUserAsset"]);
 Route::get('/v1.0/user-assets', [UserAssetController::class, "getUserAssets"]);
-
 Route::get('/v1.0/user-assets/{id}', [UserAssetController::class, "getUserAssetById"]);
 Route::delete('/v1.0/user-assets/{ids}', [UserAssetController::class, "deleteUserAssetsByIds"]);
 
