@@ -254,7 +254,26 @@ DB::commit();
 
                 if ($current_pension && $current_pension->id == $request_data["id"]) {
                     $request_data["is_manual"] = 0;
-                    $user_pension_history =   EmployeePensionHistory::create($request_data);
+
+
+                    $fields_to_check = [
+                        'pension_eligible',
+                        'pension_enrollment_issue_date',
+                         'pension_letters',
+                        'pension_scheme_status',
+                        'pension_scheme_opt_out_date',
+                        'pension_re_enrollment_due_date'
+                    ];
+
+                    $date_fields = [
+                    ];
+
+                    $changedFields = $this->getChangedFields($fields_to_check, $current_pension, $request_data, $date_fields);
+
+                    if (
+                        !empty($changedFields)
+                    ) {
+                        $user_pension_history =   EmployeePensionHistory::create($request_data);
 
                         User::where([
                             "id" => $user_pension_history->user_id
@@ -263,35 +282,47 @@ DB::commit();
                             "pension_eligible" => $user_pension_history->pension_eligible
                         ]);
 
+                    }
+
+
+                    DB::commit();
+                    return response()->json($changedFields);
 
 
 
                 } else {
                     $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
                         collect($request_data)->only([
+
                             'pension_eligible',
                             'pension_enrollment_issue_date',
                             'pension_letters',
                             'pension_scheme_status',
                             'pension_scheme_opt_out_date',
                             'pension_re_enrollment_due_date',
+
                             "is_manual",
                             'user_id',
-
                             "from_date",
                             "to_date",
 
                         ])->toArray()
                     )
                         ->first();
+                        if ($user_pension_history) {
+                            return response()->json([
+                                "message" => "something went wrong."
+                            ], 500);
+                        }
+
+                        DB::commit();
+                        return response($user_pension_history, 201);
                 }
 
 
-                if (!$user_pension_history) {
-                    return response()->json([
-                        "message" => "something went wrong."
-                    ], 500);
-                }
+
+
+
 
 
 
@@ -302,8 +333,7 @@ DB::commit();
 
                 // $this->moveUploadedFiles(collect($request_data["pension_letters"])->pluck("file_name"),"pension_letters");
 
-                DB::commit();
-                return response($user_pension_history, 201);
+
 
         } catch (Exception $e) {
             DB::rollBack();

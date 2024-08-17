@@ -38,6 +38,8 @@ class CommentCreateRequest extends BaseFormRequest
                     'related_task_id' => 'nullable|exists:tasks,id',
                     'task_id' => 'required|exists:tasks,id',
                     'project_id' => 'required|exists:projects,id',
+                    'mentioned_ids' => 'present|array',
+                    'mentioned_ids.*' => "numeric"
 
                 ];
             }

@@ -111,20 +111,26 @@ class CommentController extends Controller
             $request_data["is_active"] = true;
             $request_data["created_by"] = $request->user()->id;
 
-            $comment_text = $request_data["description"];
-
-            $pattern = '/@\[.*?\]\((.*?)\)/';
-            // $pattern = '/@(\w+)/';
-            // Parse comment for mentions
-            preg_match_all($pattern, $comment_text, $mentions);
-
+            $mentions_data = collect($request_data["mentioned_ids"])->map(function ($mentioned_id) {
+                return [
+                    'user_id' => $mentioned_id,
+                ];
+            });
 
 
-            $mentioned_users = array_map('trim', $mentions[1]);;
 
-            $mentioned_users = User::where('business_id', auth()->user()->business_id)
-                ->whereIn('user_name', $mentioned_users)
-                ->get();
+            // $comment_text = $request_data["description"];
+
+            // $pattern = '/@\[.*?\]\((.*?)\)/';
+            // // $pattern = '/@(\w+)/';
+            // // Parse comment for mentions
+            // preg_match_all($pattern, $comment_text, $mentions);
+
+            // $mentioned_users = array_map('trim', $mentions[1]);;
+
+            // $mentioned_users = User::where('business_id', auth()->user()->business_id)
+            //     ->whereIn('user_name', $mentioned_users)
+            //     ->get();
 
 
 
@@ -132,12 +138,14 @@ class CommentController extends Controller
 
 
 
-            // Store mentions in user_note_mentions table using createMany
-            $mentions_data = $mentioned_users->map(function ($mentioned_user) {
-                return [
-                    'user_id' => $mentioned_user->id,
-                ];
-            });
+            // // Store mentions in user_note_mentions table using createMany
+            // $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+            //     return [
+            //         'user_id' => $mentioned_user->id,
+            //     ];
+            // });
+
+
 
             $comment->mentions()->createMany($mentions_data);
 
@@ -145,7 +153,7 @@ class CommentController extends Controller
 
 
             // Prepare notification data for each mentioned user
-            $notification_data = $mentioned_users->map(function ($mentioned_user) use ($comment) {
+            $notification_data = User::whereIn("id",$mentions_data->pluck("user_id")->toArray())->get(["id"])->map(function ($mentioned_user) use ($comment) {
                 $notification_description = "You have been mentioned in a comment.";
                 $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
                 return [
@@ -258,7 +266,11 @@ class CommentController extends Controller
             $request_data = $request->validated();
 
 
-
+            $mentions_data = collect($request_data["mentioned_ids"])->map(function ($mentioned_id) {
+                return [
+                    'user_id' => $mentioned_id,
+                ];
+            });
 
             $comment_query_params = [
                 "id" => $request_data["id"],
@@ -301,20 +313,20 @@ class CommentController extends Controller
                 $comment->save();
             }
 
-            $comment_text = $comment->description;
-            $pattern = '/@\[.*?\]\((.*?)\)/';
-            // $pattern = '/@(\w+)/';
-            // Parse comment for mentions
-            preg_match_all($pattern, $comment_text, $mentions);
+            // $comment_text = $comment->description;
+            // $pattern = '/@\[.*?\]\((.*?)\)/';
+            // // $pattern = '/@(\w+)/';
+            // // Parse comment for mentions
+            // preg_match_all($pattern, $comment_text, $mentions);
 
 
 
-            $mentioned_users = array_map('trim', $mentions[1]);;
+            // $mentioned_users = array_map('trim', $mentions[1]);;
 
 
-            $mentioned_users = User::where('business_id', auth()->user()->business_id)
-                ->whereIn('user_name', $mentioned_users)
-                ->get();
+            // $mentioned_users = User::where('business_id', auth()->user()->business_id)
+            //     ->whereIn('user_name', $mentioned_users)
+            //     ->get();
 
             // Store mentions in user_note_mentions table using createMany
 
@@ -325,20 +337,20 @@ class CommentController extends Controller
             // Fetch current mentions
             $current_mentions = $comment->mentions()->pluck('user_id')->toArray();
 
-            // Store mentions in user_note_mentions table and sync with new mentions
-            $mentions_data = $mentioned_users->map(function ($mentioned_user) {
-                return [
-                    'user_id' => $mentioned_user->id,
-                ];
-            });
+            // // Store mentions in user_note_mentions table and sync with new mentions
+            // $mentions_data = $mentioned_users->map(function ($mentioned_user) {
+            //     return [
+            //         'user_id' => $mentioned_user->id,
+            //     ];
+            // });
             $comment->mentions()->sync($mentions_data);
 
             // Determine old and new mentions
-            $new_mentions = array_diff($mentions_data->toArray(), $current_mentions->toArray());
-            $old_mentions = array_intersect($mentions_data->toArray(), $current_mentions->toArray());
+            $new_mentions = array_diff($mentions_data->pluck("user_id")->toArray(), $current_mentions);
+            $old_mentions = array_intersect($mentions_data->pluck("user_id")->toArray(), $current_mentions);
 
             // Prepare notification data for newly added mentions
-            $new_notification_data = $mentioned_users->whereIn('id', $new_mentions)->map(function ($mentioned_user) use ($comment) {
+            $new_notification_data = User::whereIn('id', $new_mentions)->get(["id"])->map(function ($mentioned_user) use ($comment) {
                 $notification_description = "You have been mentioned. The comment has been updated.";
                 $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
                 return [
@@ -358,7 +370,7 @@ class CommentController extends Controller
             })->toArray();
 
             // Prepare notification data for old mentions
-            $old_notification_data = $mentioned_users->whereIn('id', $old_mentions)->map(function ($mentioned_user) use ($comment) {
+            $old_notification_data = User::whereIn('id', $old_mentions)->get(["id"])->map(function ($mentioned_user) use ($comment) {
                 $notification_description = "You have been mentioned. The comment has been updated.";
                 $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
                 return [

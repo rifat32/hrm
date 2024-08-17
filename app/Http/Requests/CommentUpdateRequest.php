@@ -48,7 +48,8 @@ class CommentUpdateRequest extends BaseFormRequest
             'resolution' => 'nullable|string',
             'feedback' => 'nullable|array',
             'hidden_note' => 'nullable|string',
-
+            'mentioned_ids' => 'present|array',
+            'mentioned_ids.*' => "numeric"
 
         ];
     }

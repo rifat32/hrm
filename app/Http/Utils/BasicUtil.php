@@ -118,7 +118,36 @@ trait BasicUtil
         }
         return false;
     }
+    public function getChangedFields($fields_to_check, $entity1, $entity2, $date_fields) {
+        $changedFields = [];
 
+        foreach ($fields_to_check as $field) {
+            $value1 = $entity1->$field;
+            $value2 = $entity2[$field];
+
+            // Handle date fields
+            if (in_array($field, $date_fields)) {
+                $value1 = (new Carbon($value1))->format('Y-m-d');
+                $value2 = (new Carbon($value2))->format('Y-m-d');
+            }
+
+            // Handle array fields
+            if (is_array($value1) && is_array($value2)) {
+                $jsonValue1 = json_encode($value1);
+                $jsonValue2 = json_encode($value2);
+
+                if ($jsonValue1 !== $jsonValue2) {
+                    $changedFields[] = $field;
+                }
+            } else {
+                if ($value1 !== $value2) {
+                    $changedFields[] = $field;
+                }
+            }
+        }
+
+        return $changedFields;
+    }
     public function getCurrentPensionHistory(string $modelClass,$session_name ,$current_user_id, $issue_date_column, $expiry_date_column)
     {
         $model = new $modelClass;
