@@ -37,15 +37,7 @@ ADD CONSTRAINT `payrolls_payrun_id_foreign` FOREIGN KEY (`payrun_id`) REFERENCES
 6. ALTER TABLE `work_locations` ADD `latitude` VARCHAR(255) NULL DEFAULT NULL AFTER `updated_at`, ADD `longitude` VARCHAR(255) NULL DEFAULT NULL AFTER `latitude`, ADD `is_location_enabled` BOOLEAN NOT NULL AFTER `longitude`;
 
 
-7. run 2 queries in db,
--- Step 1: Drop the existing foreign key constraint
-ALTER TABLE `users` DROP FOREIGN KEY `users_designation_id_foreign`;
-step 2 ALTER TABLE `users`
-MODIFY `designation_id` INT NULL;
 
--- Step 2: Add the new foreign key constraint with ON DELETE CASCADE
-ALTER TABLE `users`
-ADD CONSTRAINT `users_designation_id_foreign` FOREIGN KEY (`designation_id`) REFERENCES `users`(`id`) ON DELETE set null;
 
 8 insert table user_work_locations
 9. run query
@@ -386,6 +378,16 @@ ALTER TABLE disabled_designations ADD CONSTRAINT business_id_foreign FOREIGN KEY
 ADD COLUMN template_variables VARCHAR(255) NULL;
 
 59. Import letter_templates db table and import disabled_letter_templates
+
+60. run 2 queries in db,
+-- Step 1: Drop the existing foreign key constraint
+ALTER TABLE `users` DROP FOREIGN KEY `users_designation_id_foreign`;
+step 2 ALTER TABLE `users`
+MODIFY `designation_id` INT NULL;
+
+-- Step 2: Add the new foreign key constraint with ON DELETE CASCADE
+ALTER TABLE `users`
+ADD CONSTRAINT `users_designation_id_foreign` FOREIGN KEY (`designation_id`) REFERENCES `designations`(`id`) ON DELETE set null;
 
 
 

@@ -24,6 +24,7 @@ use App\Models\Project;
 use App\Models\SalaryHistory;
 use App\Models\Termination;
 use App\Models\User;
+use App\Models\UserAsset;
 use App\Models\UserAssetHistory;
 use App\Models\UserHoliday;
 use App\Models\UserRecruitmentProcess;
@@ -688,7 +689,7 @@ trait UserDetailsUtil
     }
 
 
-    public function checkInformationsBasedOnExitDate($user_id, $date_of_termination)
+    public function checkInformationsBasedOnExitDate($user_id, $date_of_termination,$asset_returned)
     {
 
         $attendance_exists =  Attendance::where([
@@ -717,6 +718,34 @@ trait UserDetailsUtil
             ->where("leave_records.date", ">", $date_of_termination)
             ->delete();
 
+
+
+
+
+            if($asset_returned) {
+                UserAsset::where([
+                    "user_id" => $user_id,
+                    "business_id" => auth()->user()->business_id
+                    ])
+                    ->update([
+                        "user_id" => NULL,
+                        "status" => "available"
+                    ]);
+    
+    
+    
+    
+                  UserAssetHistory::where([
+                      'user_id' => $user_id,
+                      "to_date" => NULL
+                  ])
+                  ->update([
+                      "to_date" => now(),
+                      "status" => "returned",
+                  ]);
+    
+            }
+         
 
 
 

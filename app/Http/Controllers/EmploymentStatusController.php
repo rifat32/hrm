@@ -890,8 +890,7 @@ class EmploymentStatusController extends Controller
 
 
             $conflictingPaidEmploymentStatuses =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
+                'id'
             ]);
             if ($conflictingPaidEmploymentStatuses->isNotEmpty()) {
 
@@ -901,7 +900,9 @@ class EmploymentStatusController extends Controller
                 ], 409);
             }
 
-            $conflictingUnpaidEmploymentStatuses =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            $conflictingUnpaidEmploymentStatuses =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
+                'id'
+            ]);
             if ($conflictingUnpaidEmploymentStatuses->isNotEmpty()) {
 
 
@@ -911,7 +912,9 @@ class EmploymentStatusController extends Controller
                 ], 409);
             }
 
-            $conflictingLeaveTypeEmploymentStatuses =  LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            $conflictingLeaveTypeEmploymentStatuses =  LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
+                'id'
+            ]);
             if ($conflictingLeaveTypeEmploymentStatuses->isNotEmpty()) {
 
 

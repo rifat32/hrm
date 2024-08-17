@@ -22,6 +22,7 @@ class CreateLeaveTypeEmploymentStatusesTable extends Migration
 
             $table->unsignedBigInteger("setting_leave_type_id");
             $table->foreign('setting_leave_type_id')->references('id')->on('setting_leave_types')->onDelete('cascade');
+
             $table->unsignedBigInteger('employment_status_id')->nullable();
             $table->foreign('employment_status_id')->references('id')->on('employment_statuses')->onDelete('cascade');
 

@@ -2834,7 +2834,7 @@ class UserManagementController extends Controller
             }
 
 
-            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
+            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination,$request_data["exit_interview"]["assets_returned"]);
 
 
             DB::commit();
@@ -3039,7 +3039,7 @@ class UserManagementController extends Controller
             }
 
 
-            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination);
+            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination,$request_data["exit_interview"]["assets_returned"]);
 
 
             DB::commit();
