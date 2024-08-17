@@ -122,10 +122,7 @@ return [
     "payrun_delete",
 
 
-    "asset_type_create",
-    "asset_type_update",
-    "asset_type_view",
-    "asset_type_delete",
+
 
     "job_listing_create",
     "job_listing_update",
@@ -236,7 +233,11 @@ return [
     "recruitment_process_view",
     "recruitment_process_delete",
 
-
+    "asset_type_create",
+        "asset_type_update",
+        "asset_type_activate",
+        "asset_type_view",
+        "asset_type_delete",
 
 
     "employment_status_create",

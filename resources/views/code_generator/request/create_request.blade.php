@@ -7,6 +7,7 @@ namespace App\Http\Requests;
 
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\Validate{{ $names['singular_model_name'] }}Name;
 
 class {{ $names['singular_model_name'] }}CreateRequest extends BaseFormRequest
 {

@@ -112,6 +112,12 @@ return [
     "business_times_update",
     "business_times_view",
 
+    "asset_type_create",
+    "asset_type_update",
+    "asset_type_activate",
+    "asset_type_view",
+    "asset_type_delete",
+
     "employment_status_create",
     "employment_status_update",
     "employment_status_activate",

@@ -215,10 +215,7 @@ return [
         "payrun_view",
         "payrun_delete",
 
-        "asset_type_create",
-        "asset_type_update",
-        "asset_type_view",
-        "asset_type_delete",
+
 
         "job_listing_create",
         "job_listing_update",
@@ -341,6 +338,16 @@ return [
         "employment_status_view",
         "employment_status_delete",
 
+        
+        "asset_type_create",
+        "asset_type_update",
+        "asset_type_activate",
+        "asset_type_view",
+        "asset_type_delete",
+
+
+
+
         "letter_template_create",
         "letter_template_update",
         "letter_template_activate",
@@ -354,7 +361,7 @@ return [
         "setting_leave_type_delete",
 
         "setting_leave_create",
-        
+
 
 
 
@@ -384,342 +391,8 @@ return [
         "business_times_view",
 
     ],
+
     "permissions_titles" => [
-
-
-
-        "system_setting_update" => "",
-        "system_setting_view" => "",
-
-        "module_update" => "Can enable module",
-        "module_view" => "Can view module",
-
-
-        "business_tier_create" => "Can create business tier",
-        "business_tier_update" => "Can update business tier",
-        "business_tier_view" => "Can view business tier",
-        "business_tier_delete" => "Can delete business tier",
-
-        "service_plan_create" => "",
-        "service_plan_update" => "",
-        "service_plan_view" => "",
-        "service_plan_delete" => "",
-
-
-
-        "user_create" => "Can create user",
-        "user_update" => "Can update user",
-        "user_view" => "Can view user",
-        "user_delete" => "Can delete user",
-
-
-
-        "employee_document_create" => "",
-        "employee_document_update" => "",
-        "employee_document_view" => "",
-        "employee_document_delete" => "",
-
-        "employee_job_history_create" => "",
-        "employee_job_history_update" => "",
-        "employee_job_history_view" => "",
-        "employee_job_history_delete" => "",
-
-        "employee_education_history_create" => "",
-        "employee_education_history_update" => "",
-        "employee_education_history_view" => "",
-        "employee_education_history_delete" => "",
-
-
-        "user_letter_create" => "",
-        "user_letter_update" => "",
-        "user_letter_view" => "",
-        "user_letter_delete" => "",
-
-
-
-
-        "employee_payslip_create" => "",
-        "employee_payslip_update" => "",
-        "employee_payslip_view" => "",
-        "employee_payslip_delete" => "",
-
-        "employee_note_create" => "",
-        "employee_note_update" => "",
-        "employee_note_view" => "",
-        "employee_note_delete" => "",
-
-
-        "employee_address_history_create" => "",
-        "employee_address_history_update" => "",
-        "employee_address_history_view" => "",
-        "employee_address_history_delete" => "",
-
-        "employee_passport_history_create" => "",
-        "employee_passport_history_update" => "",
-        "employee_passport_history_view" => "",
-        "employee_passport_history_delete" => "",
-
-        "employee_visa_history_create" => "",
-        "employee_visa_history_update" => "",
-        "employee_visa_history_view" => "",
-        "employee_visa_history_delete" => "",
-
-        "employee_right_to_work_history_create" => "",
-        "employee_right_to_work_history_update" => "",
-        "employee_right_to_work_history_view" => "",
-        "employee_right_to_work_history_delete" => "",
-
-
-
-        "employee_sponsorship_history_create" => "",
-        "employee_sponsorship_history_update" => "",
-        "employee_sponsorship_history_view" => "",
-        "employee_sponsorship_history_delete" => "",
-
-        "employee_pension_history_create" => "",
-        "employee_pension_history_update" => "",
-        "employee_pension_history_view" => "",
-        "employee_pension_history_delete" => "",
-
-
-
-
-        "employee_asset_create" => "",
-        "employee_asset_update" => "",
-        "employee_asset_view" => "",
-        "employee_asset_delete" => "",
-
-        "employee_social_site_create" => "",
-        "employee_social_site_update" => "",
-        "employee_social_site_view" => "",
-        "employee_social_site_delete" => "",
-
-
-
-        "role_create" => "Can create role",
-        "role_update" => "Can update role",
-        "role_view" => "Can view role",
-        "role_delete" => "Can delete role",
-
-        "business_create" => "Can create business",
-        "business_update" => "Can update business",
-        "business_view" => "Can view business",
-        "business_delete" => "Can delete business",
-
-        "template_create" => "Can create template",
-        "template_update" => "Can update template",
-        "template_view" => "Can view template",
-        "template_delete" => "Can delete template",
-
-        "payment_type_create" => "Can create payment type",
-        "payment_type_update" => "Can update payment type",
-        "payment_type_view" => "Can view payment type",
-        "payment_type_delete" => "Can delete payment type",
-
-        "product_category_create" => "Can create product category",
-        "product_category_update" => "Can update product category",
-        "product_category_view" => "Can view product category",
-        "product_category_delete" => "Can delete product category",
-
-        "product_create" => "Can create product",
-        "product_update" => "Can update product",
-        "product_view" => "Can view product",
-        "product_delete" => "Can delete product",
-
-        "department_create" => "Can create department",
-        "department_update" => "Can update department",
-        "department_view" => "Can view department",
-        "department_delete" => "Can delete department",
-
-        "payrun_create" => "",
-        "payrun_update" => "",
-        "payrun_view" => "",
-        "payrun_delete" => "",
-
-        "asset_type_create" => "",
-        "asset_type_update" => "",
-        "asset_type_view" => "",
-        "asset_type_delete" => "",
-
-        "job_listing_create" => "Can create job listing",
-        "job_listing_update" => "Can update job listing",
-        "job_listing_view" => "Can view job listing",
-        "job_listing_delete" => "Can delete job listing",
-
-        "project_create" => "Can create project",
-        "project_update" => "Can update project",
-        "project_view" => "Can view project",
-        "project_delete" => "Can delete project",
-
-        "task_create" => "Can create task",
-        "task_update" => "Can update task",
-        "task_view" => "Can view task",
-        "task_delete" => "Can delete task",
-
-        "label_create" => "Can create task",
-        "label_update" => "Can update task",
-        "label_view" => "Can view task",
-        "label_delete" => "Can delete task",
-
-
-
-        "comment_create" => "",
-        "comment_update" => "",
-        "comment_view" => "",
-        "comment_delete" => "",
-
-
-
-
-
-
-        "holiday_create" => "Can create holiday",
-        "holiday_update" => "Can update holiday",
-        "holiday_view" => "Can view holiday",
-        "holiday_delete" => "Can delete holiday",
-
-        "work_shift_create" => "Can create work shift",
-        "work_shift_update" => "Can update work shift",
-        "work_shift_view" => "Can view work shift",
-        "work_shift_delete" => "Can delete work shift",
-
-        "employee_rota_create" => "",
-        "employee_rota_update" => "",
-        "employee_rota_view" => "",
-        "employee_rota_delete" => "",
-
-        "announcement_create" => "Can create announcement",
-        "announcement_update" => "Can update announcement",
-        "announcement_view" => "Can view announcement",
-        "announcement_delete" => "Can delete announcement",
-
-
-
-
-        "job_platform_create" => "Can create job platform",
-        "job_platform_update" => "Can update job platform",
-        "job_platform_activate" => "",
-        "job_platform_view" => "Can view job platform",
-        "job_platform_delete" => "Can delete job platform",
-
-
-        "task_category_create" => "",
-        "task_category_update" => "",
-        "task_category_activate" => "",
-        "task_category_view" => "",
-        "task_category_delete" => "",
-
-        "social_site_create" => "Can create social site",
-        "social_site_update"  => "Can update social site",
-        "social_site_view" => "Can view social site",
-        "social_site_delete" => "Can delete social site",
-
-
-
-        "designation_create" => "Can create designation",
-        "designation_update" => "Can update designation",
-        "designation_view" => "Can view designation",
-        "designation_delete" => "Can delete designation",
-        "designation_activate" => "",
-
-
-
-
-        "termination_type_create" => "",
-        "termination_type_update" => "",
-        "termination_type_view" => "",
-        "termination_type_activate" => "",
-        "termination_type_delete" => "",
-
-        "termination_reason_create" => "",
-        "termination_reason_update" => "",
-        "termination_reason_view" => "",
-        "termination_reason_activate" => "",
-        "termination_reason_delete" => "",
-
-
-
-
-
-        "bank_create" => "",
-        "bank_update" => "",
-        "bank_view" => "",
-        "bank_activate" => "",
-        "bank_delete" => "",
-
-
-        "job_type_create" => "",
-        "job_type_update" => "",
-        "job_type_activate" => "",
-        "job_type_view" => "",
-        "job_type_delete" => "",
-
-        "work_location_create" => "",
-        "work_location_update" => "",
-        "work_location_activate" => "",
-        "work_location_view" => "",
-        "work_location_delete" => "",
-
-        "recruitment_process_create" => "",
-        "recruitment_process_update" => "",
-        "recruitment_process_activate" => "",
-        "recruitment_process_view" => "",
-        "recruitment_process_delete" => "",
-
-        "employment_status_create" => "Can create employment status",
-        "employment_status_update" => "Can update employment status",
-        "employment_status_activate" => "",
-        "employment_status_view" => "Can view employment status",
-        "employment_status_delete" => "Can delete employment status",
-
-        "letter_template_create" => "",
-        "letter_template_update" => "",
-        "letter_template_activate" => "",
-        "letter_template_view" => "",
-        "letter_template_delete" => "",
-
-        "setting_leave_type_create" => "Can create setting leave type",
-        "setting_leave_type_update" => "Can update setting leave type",
-        "setting_leave_type_activate" => "",
-        "setting_leave_type_view" => "Can view setting leave type",
-        "setting_leave_type_delete" => "Can delete setting leave type",
-
-        "setting_leave_create" => "Can create setting leave",
-
-
-
-
-        "leave_create" => "Can create leave",
-        "leave_update" => "Can update leave",
-        "leave_approve" => "Can approve leave",
-
-        "leave_view" => "Can view leave",
-        "leave_delete" => "Can delete leave",
-
-
-        "candidate_create" => "Can create candidate",
-        "candidate_update" => "Can update candidate",
-        "candidate_view" => "Can view candidate",
-        "candidate_delete" => "Can delete candidate",
-
-
-
-
-        "setting_attendance_create" => "Can create setting attendance",
-
-
-        "attendance_create" => "Can create attendance",
-        "attendance_update" => "Can update attendance",
-        "attendance_approve" => "",
-        "attendance_view" => "Can view attendance",
-        "attendance_delete" => "Can delete attendance",
-
-
-        "setting_payroll_create" => "Can create setting payroll",
-
-
-
-
 
     ],
     "unchangeable_roles" => [
@@ -901,10 +574,6 @@ return [
         "payrun_view" => "view",
         "payrun_delete" => "delete",
 
-        "asset_type_create" => "create",
-        "asset_type_update" => "update",
-        "asset_type_view" => "view",
-        "asset_type_delete" => "delete",
 
 
         "job_listing_create" => "create",
@@ -1033,6 +702,12 @@ return [
         "employment_status_activate" => "activate",
         "employment_status_view" => "view",
         "employment_status_delete" => "delete",
+
+        "asset_type_create" => "create",
+        "asset_type_update" => "update",
+        "asset_type_activate" => "activate",
+        "asset_type_view" => "view",
+        "asset_type_delete" => "delete",
 
         "letter_template_create" => "create",
         "letter_template_update" => "update",
@@ -1395,15 +1070,7 @@ return [
                 "department_delete",
             ],
         ],
-        [
-            "header" => "asset_type",
-            "permissions" => [
-                "asset_type_create",
-                "asset_type_update",
-                "asset_type_view",
-                "asset_type_delete",
-            ],
-        ],
+
 
 
         [
@@ -1677,12 +1344,20 @@ return [
                 "employment_status_view",
                 "employment_status_delete",
 
-
-
-
-
             ],
         ],
+        [
+            "header" => "asset_type",
+            "permissions" => [
+                "asset_type_create",
+                "asset_type_update",
+                "asset_type_activate",
+                "asset_type_view",
+                "asset_type_delete",
+            ],
+        ],
+
+
         [
             "header" => "setting_leave_type",
             "permissions" => [

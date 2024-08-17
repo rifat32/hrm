@@ -17,6 +17,7 @@ class CreateAssetTypesTable extends Migration
             $table->id();
             $table->string("name");
             $table->boolean("is_active")->default(true);
+            $table->boolean('is_default')->default(false);
             $table->unsignedBigInteger("business_id");
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->unsignedBigInteger("created_by")->nullable();

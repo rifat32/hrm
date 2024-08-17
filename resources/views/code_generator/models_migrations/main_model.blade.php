@@ -33,7 +33,7 @@
 
           protected $casts = [
             @foreach ($fields->toArray() as $field)
-            @if ({{$field['type']}} == 'array')
+            @if ($field['type'] == 'array')
             '{{$field["name"]}}' => 'array',
             @endif
 

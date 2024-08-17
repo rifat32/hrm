@@ -1084,6 +1084,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Models\\DepartmentUser' => __DIR__ . '/../..' . '/app/Models/DepartmentUser.php',
         'App\\Models\\DepartmentWorkShift' => __DIR__ . '/../..' . '/app/Models/DepartmentWorkShift.php',
         'App\\Models\\Designation' => __DIR__ . '/../..' . '/app/Models/Designation.php',
+        'App\\Models\\DisabledAssetType' => __DIR__ . '/../..' . '/app/Models/DisabledAssetType.php',
         'App\\Models\\DisabledBank' => __DIR__ . '/../..' . '/app/Models/DisabledBank.php',
         'App\\Models\\DisabledDesignation' => __DIR__ . '/../..' . '/app/Models/DisabledDesignation.php',
         'App\\Models\\DisabledEmploymentStatus' => __DIR__ . '/../..' . '/app/Models/DisabledEmploymentStatus.php',

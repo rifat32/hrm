@@ -203,6 +203,16 @@ if (Schema::hasColumn('candidates', 'feedback')) {
     DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
 }
             }
+                // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+                if ($i == 8) {
+                    // // Check if the 'is_default' column exists
+                    // if (!Schema::hasColumn('asset_types', 'is_default')) {
+                    //     // Add the 'is_default' column as a boolean with a default value of 1
+                    //     DB::statement("ALTER TABLE asset_types ADD COLUMN is_default TINYINT(1) NOT NULL DEFAULT 1");
+                    // }
+                    $this->setupAssetTypes();
+                }
+
         }
 
         return "ok";

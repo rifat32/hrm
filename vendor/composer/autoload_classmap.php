@@ -372,6 +372,7 @@ return array(
     'App\\Models\\DepartmentUser' => $baseDir . '/app/Models/DepartmentUser.php',
     'App\\Models\\DepartmentWorkShift' => $baseDir . '/app/Models/DepartmentWorkShift.php',
     'App\\Models\\Designation' => $baseDir . '/app/Models/Designation.php',
+    'App\\Models\\DisabledAssetType' => $baseDir . '/app/Models/DisabledAssetType.php',
     'App\\Models\\DisabledBank' => $baseDir . '/app/Models/DisabledBank.php',
     'App\\Models\\DisabledDesignation' => $baseDir . '/app/Models/DisabledDesignation.php',
     'App\\Models\\DisabledEmploymentStatus' => $baseDir . '/app/Models/DisabledEmploymentStatus.php',

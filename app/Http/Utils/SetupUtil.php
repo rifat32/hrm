@@ -2,11 +2,13 @@
 
 namespace App\Http\Utils;
 
+use App\Models\AssetType;
 use App\Models\EmailTemplate;
 use App\Models\Module;
 use App\Models\Role;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
+use App\Models\SocialSite;
 use App\Models\WorkLocation;
 use Exception;
 use Spatie\Permission\Models\Permission;
@@ -75,6 +77,61 @@ trait SetupUtil
 
             // }
         }
+    }
+
+    public function setupAssetTypes() {
+        
+        $asset_types = [
+            ['name' => 'Mobile Phone'],
+            ['name' => 'Laptop']
+        ];
+
+
+        // Iterate through the array and create records
+        foreach ($asset_types as $data) {
+            AssetType::create([
+                'name' => $data['name'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => 1
+            ]);
+        }
+
+    }
+
+    public function setUpSocialMedia() {
+        $social_media_platforms = [
+            ['id' => 1, 'name' => 'Linkedin', 'icon' => 'FaLinkedin', 'link' => 'https://www.linkedin.com/'],
+            ['id' => 2, 'name' => 'Github', 'icon' => 'FaGithub', 'link' => 'https://github.com/'],
+            ['id' => 3, 'name' => 'Gitlab', 'icon' => 'FaGitlab', 'link' => 'https://gitlab.com/'],
+            ['id' => 4, 'name' => 'Facebook', 'icon' => 'FaSquareFacebook', 'link' => 'https://www.facebook.com/'],
+            ['id' => 5, 'name' => 'Instagram', 'icon' => 'FaInstagram', 'link' => 'https://www.instagram.com/'],
+            ['id' => 6, 'name' => 'Youtube', 'icon' => 'FaYoutube', 'link' => 'https://www.youtube.com/'],
+            ['id' => 7, 'name' => 'Twitter', 'icon' => 'FaSquareTwitter', 'link' => 'https://twitter.com/'],
+            ['id' => 8, 'name' => 'Dribbble', 'icon' => 'FaSquareDribbble', 'link' => 'https://dribbble.com/'],
+            ['id' => 9, 'name' => 'Behance', 'icon' => 'FaSquareBehance', 'link' => 'https://www.behance.net/'],
+            ['id' => 10, 'name' => 'Twitch', 'icon' => 'FaTwitch', 'link' => 'https://www.twitch.tv/'],
+            ['id' => 11, 'name' => 'Stack Overflow', 'icon' => 'FaStackOverflow', 'link' => 'https://stackoverflow.com/'],
+            ['id' => 12, 'name' => 'Slack', 'icon' => 'FaSlack', 'link' => 'https://slack.com/'],
+            ['id' => 13, 'name' => 'Other', 'icon' => 'FaGlobe', 'link' => ''],
+        ];
+
+
+        // Iterate through the array and create records
+        foreach ($social_media_platforms as $data) {
+            SocialSite::create([
+                'name' => $data['name'],
+                'icon' => $data['icon'],
+                'link' => $data['link'],
+                "is_active" => 1,
+                "is_default" => 1,
+                "business_id" => NULL,
+                "created_by" => 1
+            ]);
+        }
+
+
     }
     public function roleRefreshFunc()
     {

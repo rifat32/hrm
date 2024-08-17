@@ -898,19 +898,26 @@ Route::delete('/v1.0/payment-types/{id}', [PaymentTypeController::class, "delete
 
 
 
+
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// asset type  management section
+// asset types management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Route::post('/v1.0/asset-types', [AssetTypeController::class, "createAssetType"]);
 Route::put('/v1.0/asset-types', [AssetTypeController::class, "updateAssetType"]);
+
+Route::put('/v1.0/asset-types/toggle-active', [AssetTypeController::class, "toggleActiveAssetType"]);
+
 Route::get('/v1.0/asset-types', [AssetTypeController::class, "getAssetTypes"]);
-Route::get('/v1.0/asset-types/{id}', [AssetTypeController::class, "getAssetTypeById"]);
 Route::delete('/v1.0/asset-types/{ids}', [AssetTypeController::class, "deleteAssetTypesByIds"]);
 
+
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// end asset type  management section
+// end asset types management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      
 
 
 
