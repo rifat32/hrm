@@ -1578,7 +1578,7 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
                  return $this->userManagementComponent->getScheduleInformationData($user_id,$start_date,$end_date)["total_capacity_hours"];
             })->sum();
 
-
+            $data['data_highlights']['total_leave_hours'] = $data['data_highlights']['total_schedule_hours'] - $data['data_highlights']['total_active_hours'];
 
             return response()->json($data, 200);
         } catch (Exception $e) {

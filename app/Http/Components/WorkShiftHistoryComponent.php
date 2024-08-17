@@ -188,6 +188,10 @@ class WorkShiftHistoryComponent
             return $query->where('work_shifts.type', (request()->type));
         })
 
+        ->when(request()->boolean("is_active"), function ($query)  {
+            return $query->where('work_shifts.is_active', 1);
+    })
+
         ->when(isset(request()->is_personal), function ($query)  {
             return $query->where('work_shifts.is_personal', intval(request()->is_personal));
         })
