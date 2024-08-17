@@ -45,7 +45,7 @@ class JobPlatformUpdateRequest extends BaseFormRequest
                     if (empty(auth()->user()->business_id)) {
 
                         if(auth()->user()->hasRole('superadmin')) {
-                            if(($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                            if(($job_platform->business_id != NULL )) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this job platform due to role restrictions.");
 
@@ -68,7 +68,7 @@ class JobPlatformUpdateRequest extends BaseFormRequest
 
                 },
 
-                
+
             ],
             'name' => [
                 "required",

@@ -46,7 +46,7 @@ class SettingLeaveTypeUpdateRequest extends BaseFormRequest
                     if (empty(auth()->user()->business_id)) {
 
                         if(auth()->user()->hasRole('superadmin')) {
-                            if(($setting_leave_type->business_id != NULL || $setting_leave_type->is_default != 1)) {
+                            if(($setting_leave_type->business_id != NULL )) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this leave type due to role restrictions.");
 

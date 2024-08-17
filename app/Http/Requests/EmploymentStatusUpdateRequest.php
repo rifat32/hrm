@@ -46,7 +46,7 @@ class EmploymentStatusUpdateRequest extends BaseFormRequest
                     if (empty(auth()->user()->business_id)) {
 
                         if (auth()->user()->hasRole('superadmin')) {
-                            if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                            if (($employment_status->business_id != NULL )) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this employment statuses due to role restrictions.");
                             }

@@ -48,7 +48,7 @@ class LetterTemplateUpdateRequest extends BaseFormRequest
                   if (empty(auth()->user()->business_id)) {
 
                       if (auth()->user()->hasRole('superadmin')) {
-                          if (($letter_template->business_id != NULL || $letter_template->is_default != 1)) {
+                          if (($letter_template->business_id != NULL )) {
                               // $fail($attribute . " is invalid.");
                               $fail("You do not have permission to update this letter template due to role restrictions.");
                           }

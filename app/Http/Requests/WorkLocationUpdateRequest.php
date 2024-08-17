@@ -46,7 +46,7 @@ class WorkLocationUpdateRequest extends BaseFormRequest
                     if (empty(auth()->user()->business_id)) {
 
                         if(auth()->user()->hasRole('superadmin')) {
-                            if(($work_location->business_id != NULL || $work_location->is_default != 1)) {
+                            if(($work_location->business_id != NULL )) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this work location due to role restrictions.");
 

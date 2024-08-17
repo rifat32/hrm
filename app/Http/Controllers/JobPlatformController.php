@@ -342,7 +342,7 @@ class JobPlatformController extends Controller
              if (empty(auth()->user()->business_id)) {
 
                  if (auth()->user()->hasRole('superadmin')) {
-                     if (($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                     if (($job_platform->business_id != NULL)) {
 
                          return response()->json([
                              "message" => "You do not have permission to update this job platform due to role restrictions."
@@ -960,7 +960,7 @@ class JobPlatformController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($job_platform->business_id != NULL || $job_platform->is_default != 1)) {
+                    if (($job_platform->business_id != NULL)) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this job platform due to role restrictions."

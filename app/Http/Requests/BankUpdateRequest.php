@@ -46,7 +46,7 @@ class BankUpdateRequest extends BaseFormRequest
                     if (empty(auth()->user()->business_id)) {
 
                         if(auth()->user()->hasRole('superadmin')) {
-                            if(($bank->business_id != NULL || $bank->is_default != 1)) {
+                            if(($bank->business_id != NULL )) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this bank due to role restrictions.");
 

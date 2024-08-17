@@ -318,7 +318,7 @@ $should_disable = 0;
 if (empty(auth()->user()->business_id)) {
 
 if (auth()->user()->hasRole('superadmin')) {
-if (($asset_type->business_id != NULL || $asset_type->is_default != 1)) {
+if (($asset_type->business_id != NULL )) {
 
    return response()->json([
        "message" => "You do not have permission to update this asset type due to role restrictions."

@@ -88,7 +88,7 @@ public function toggleActive{{ $names["singular_model_name"] }}(GetIdRequest $re
        if (empty(auth()->user()->business_id)) {
 
            if (auth()->user()->hasRole('superadmin')) {
-               if ((${{ $names["singular_table_name"] }}->business_id != NULL || ${{ $names["singular_table_name"] }}->is_default != 1)) {
+               if ((${{ $names["singular_table_name"] }}->business_id != NULL )) {
 
                    return response()->json([
                        "message" => "You do not have permission to update this {{ $names["singular_comment_name"] }} due to role restrictions."

@@ -482,7 +482,7 @@ class TaskCategoryController extends Controller
              if (empty(auth()->user()->business_id)) {
 
                  if (auth()->user()->hasRole('superadmin')) {
-                     if (($task_category->business_id != NULL || $task_category->is_default != 1)) {
+                     if (($task_category->business_id != NULL )) {
 
                          return response()->json([
                              "message" => "You do not have permission to update this task category due to role restrictions."
@@ -1160,7 +1160,7 @@ class TaskCategoryController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($task_category->business_id != NULL || $task_category->is_default != 1)) {
+                    if (($task_category->business_id != NULL )) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this task category due to role restrictions."
@@ -1294,7 +1294,7 @@ class TaskCategoryController extends Controller
              if (empty(auth()->user()->business_id)) {
 
                  if (auth()->user()->hasRole('superadmin')) {
-                     if (($task_category->business_id != NULL || $task_category->is_default != 1)) {
+                     if (($task_category->business_id != NULL)) {
 
                          return response()->json([
                              "message" => "You do not have permission to update this task category due to role restrictions."

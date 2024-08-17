@@ -312,7 +312,7 @@ class RecruitmentProcessController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($recruitment_process->business_id != NULL || $recruitment_process->is_default != 1)) {
+                    if (($recruitment_process->business_id != NULL )) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this recruitment process  due to role restrictions."
@@ -964,7 +964,7 @@ class RecruitmentProcessController extends Controller
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
-                        if (($recruitment_process->business_id != NULL || $recruitment_process->is_default != 1)) {
+                        if (($recruitment_process->business_id != NULL)) {
 
                             return response()->json([
                                 "message" => "You do not have permission to update this recruitment process  due to role restrictions."

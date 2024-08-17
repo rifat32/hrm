@@ -313,7 +313,7 @@ class DesignationController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($designation->business_id != NULL || $designation->is_default != 1)) {
+                    if (($designation->business_id != NULL)) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this designation due to role restrictions."
@@ -700,7 +700,7 @@ class DesignationController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($designation->business_id != NULL || $designation->is_default != 1)) {
+                    if (($designation->business_id != NULL)) {
 
 
                         return response()->json([

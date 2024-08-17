@@ -307,7 +307,7 @@ class EmploymentStatusController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                    if (($employment_status->business_id != NULL)) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this employment status due to role restrictions."
@@ -732,7 +732,7 @@ class EmploymentStatusController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($employment_status->business_id != NULL || $employment_status->is_default != 1)) {
+                    if (($employment_status->business_id != NULL )) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this employment status due to role restrictions."

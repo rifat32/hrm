@@ -783,7 +783,7 @@ public function getLetterTemplateVariablesFunc () {
         '[OVERTIME_RATE]',
         'ADDRESS',
         '[ADDRESS_LINE_1]',
-        '[ADDRESS_LINE_2]',
+        // '[ADDRESS_LINE_2]',
         '[CITY]',
         '[POSTCODE]',
         '[COUNTRY]',

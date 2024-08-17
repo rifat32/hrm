@@ -303,7 +303,7 @@ class TerminationTypeController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($termination_type->business_id != NULL || $termination_type->is_default != 1)) {
+                    if (($termination_type->business_id != NULL)) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this termination type due to role restrictions."
@@ -688,7 +688,7 @@ class TerminationTypeController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($termination_type->business_id != NULL || $termination_type->is_default != 1)) {
+                    if (($termination_type->business_id != NULL )) {
 
 
                         return response()->json([

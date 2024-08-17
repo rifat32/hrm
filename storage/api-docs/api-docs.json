@@ -788,18 +788,32 @@
         "/v1.0/asset-types": {
             "get": {
                 "tags": [
-                    "administrator.asset_type"
+                    "asset_types"
                 ],
                 "summary": "This method is to get asset types  ",
                 "description": "This method is to get asset types ",
                 "operationId": "getAssetTypes",
                 "parameters": [
                     {
+                        "name": "name",
+                        "in": "query",
+                        "description": "name",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "per_page",
                         "required": true,
                         "example": "6"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": true,
+                        "example": "1"
                     },
                     {
                         "name": "start_date",
@@ -826,6 +840,20 @@
                         "name": "order_by",
                         "in": "query",
                         "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "id",
+                        "required": true,
+                        "example": "ASC"
+                    },
+                    {
+                        "name": "is_single_search",
+                        "in": "query",
+                        "description": "is_single_search",
                         "required": true,
                         "example": "ASC"
                     }
@@ -888,10 +916,10 @@
             },
             "put": {
                 "tags": [
-                    "administrator.asset_type"
+                    "asset_types"
                 ],
-                "summary": "This method is to update asset type ",
-                "description": "This method is to update asset type",
+                "summary": "This method is to update asset types ",
+                "description": "This method is to update asset types ",
                 "operationId": "updateAssetType",
                 "requestBody": {
                     "required": true,
@@ -973,10 +1001,10 @@
             },
             "post": {
                 "tags": [
-                    "administrator.asset_type"
+                    "asset_types"
                 ],
-                "summary": "This method is to store asset type",
-                "description": "This method is to store asset type",
+                "summary": "This method is to store asset types",
+                "description": "This method is to store asset types",
                 "operationId": "createAssetType",
                 "requestBody": {
                     "required": true,
@@ -1052,23 +1080,31 @@
                 ]
             }
         },
-        "/v1.0/asset-types/{id}": {
-            "get": {
+        "/v1.0/asset-types/toggle-active": {
+            "put": {
                 "tags": [
-                    "administrator.asset_type"
+                    "asset_types"
                 ],
-                "summary": "This method is to get asset type by id",
-                "description": "This method is to get asset type by id",
-                "operationId": "getAssetTypeById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "id",
-                        "required": true,
-                        "example": "6"
+                "summary": "This method is to toggle asset types",
+                "description": "This method is to toggle asset types",
+                "operationId": "toggleActiveAssetType",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
                     }
-                ],
+                },
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -1129,7 +1165,7 @@
         "/v1.0/asset-types/{ids}": {
             "delete": {
                 "tags": [
-                    "administrator.asset_type"
+                    "asset_types"
                 ],
                 "summary": "This method is to delete asset type by id",
                 "description": "This method is to delete asset type by id",
@@ -41013,14 +41049,14 @@
                 ]
             }
         },
-        "/v1.0/users-exists": {
+        "/v1.0/users-exits": {
             "get": {
                 "tags": [
                     "user_management.employee"
                 ],
                 "summary": "This method is to get user notes  ",
                 "description": "This method is to get user notes ",
-                "operationId": "getUserExists",
+                "operationId": "getUserExits",
                 "parameters": [
                     {
                         "name": "user_id",

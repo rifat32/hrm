@@ -303,7 +303,7 @@ class JobTypeController extends Controller
             $should_disable = 0;
             if (empty(auth()->user()->business_id)) {
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($job_type->business_id != NULL || $job_type->is_default != 1)) {
+                    if (($job_type->business_id != NULL )) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this job type due to role restrictions."
@@ -705,7 +705,7 @@ class JobTypeController extends Controller
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
-                        if (($job_type->business_id != NULL || $job_type->is_default != 1)) {
+                        if (($job_type->business_id != NULL )) {
 
                             return response()->json([
                                 "message" => "You do not have permission to update this job type due to role restrictions."

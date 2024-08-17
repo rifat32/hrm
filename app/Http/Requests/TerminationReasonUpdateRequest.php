@@ -49,7 +49,7 @@ class TerminationReasonUpdateRequest extends FormRequest
                     if (empty(auth()->user()->business_id)) {
 
                         if(auth()->user()->hasRole('superadmin')) {
-                            if(($termination_reason->business_id != NULL || $termination_reason->is_default != 1)) {
+                            if(($termination_reason->business_id != NULL )) {
                                 // $fail($attribute . " is invalid.");
                                 $fail("You do not have permission to update this termination reason due to role restrictions.");
 

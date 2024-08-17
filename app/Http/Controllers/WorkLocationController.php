@@ -347,7 +347,7 @@ class WorkLocationController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($work_location->business_id != NULL || $work_location->is_default != 1)) {
+                    if (($work_location->business_id != NULL )) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this work location due to role restrictions."
@@ -633,7 +633,7 @@ class WorkLocationController extends Controller
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
-                        if (($work_location->business_id != NULL || $work_location->is_default != 1)) {
+                        if (($work_location->business_id != NULL )) {
 
                             return response()->json([
                                 "message" => "You do not have permission to update this work location due to role restrictions."

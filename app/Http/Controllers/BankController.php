@@ -304,7 +304,7 @@ class BankController extends Controller
             if (empty(auth()->user()->business_id)) {
 
                 if (auth()->user()->hasRole('superadmin')) {
-                    if (($bank->business_id != NULL || $bank->is_default != 1)) {
+                    if (($bank->business_id != NULL)) {
 
                         return response()->json([
                             "message" => "You do not have permission to update this bank due to role restrictions."
@@ -706,7 +706,7 @@ class BankController extends Controller
                 if (empty(auth()->user()->business_id)) {
 
                     if (auth()->user()->hasRole('superadmin')) {
-                        if (($bank->business_id != NULL || $bank->is_default != 1)) {
+                        if (($bank->business_id != NULL )) {
 
                             return response()->json([
                                 "message" => "You do not have permission to update this bank due to role restrictions."

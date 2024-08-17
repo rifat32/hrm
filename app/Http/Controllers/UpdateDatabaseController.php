@@ -210,6 +210,11 @@ if (Schema::hasColumn('candidates', 'feedback')) {
                     //     // Add the 'is_default' column as a boolean with a default value of 1
                     //     DB::statement("ALTER TABLE asset_types ADD COLUMN is_default TINYINT(1) NOT NULL DEFAULT 1");
                     // }
+
+                        // Make the 'feedback' column nullable
+                        DB::statement('ALTER TABLE asset_types MODIFY business_id BIGINT(20) UNSIGNED NULL');
+
+
                     $this->setupAssetTypes();
                 }
 
