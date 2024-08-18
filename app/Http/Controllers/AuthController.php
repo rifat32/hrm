@@ -26,6 +26,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -140,6 +141,21 @@ class AuthController extends Controller
             if(env("SEND_EMAIL") == true) {
 
                 $this->checkEmailSender($user->id,0);
+
+                $business = $user->business;
+                if ($business && $business->emailSettings) {
+
+                    $emailSettings = $business->emailSettings;
+
+                    Config::set('mail.driver', $emailSettings->mail_driver);
+                    Config::set('mail.host', $emailSettings->mail_host);
+                    Config::set('mail.port', $emailSettings->mail_port);
+                    Config::set('mail.username', $emailSettings->mail_username);
+                    Config::set('mail.password', $emailSettings->mail_password);
+                    Config::set('mail.encryption', $emailSettings->mail_encryption);
+                    Config::set('mail.from.address', $emailSettings->mail_from_address);
+                    Config::set('mail.from.name', $emailSettings->mail_from_name);
+                }
 
                 Mail::to($user->email)->send(new EmailVerificationMail($user));
 
@@ -333,10 +349,26 @@ $datediff = $now - $user_created_date;
                 $email_token = Str::random(30);
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);
+
                 if(env("SEND_EMAIL") == true) {
 
 
                     $this->checkEmailSender($user->id,0);
+
+                    $business = $user->business;
+                    if ($business && $business->emailSettings) {
+
+                        $emailSettings = $business->emailSettings;
+
+                        Config::set('mail.driver', $emailSettings->mail_driver);
+                        Config::set('mail.host', $emailSettings->mail_host);
+                        Config::set('mail.port', $emailSettings->mail_port);
+                        Config::set('mail.username', $emailSettings->mail_username);
+                        Config::set('mail.password', $emailSettings->mail_password);
+                        Config::set('mail.encryption', $emailSettings->mail_encryption);
+                        Config::set('mail.from.address', $emailSettings->mail_from_address);
+                        Config::set('mail.from.name', $emailSettings->mail_from_name);
+                    }
 
                     Mail::to($user->email)->send(new EmailVerificationMail($user));
 
@@ -569,6 +601,21 @@ $datediff = $now - $user_created_date;
                 if(env("SEND_EMAIL") == true) {
 
                     $this->checkEmailSender($user->id,0);
+
+                    $business = $user->business;
+                    if ($business && $business->emailSettings) {
+
+                        $emailSettings = $business->emailSettings;
+
+                        Config::set('mail.driver', $emailSettings->mail_driver);
+                        Config::set('mail.host', $emailSettings->mail_host);
+                        Config::set('mail.port', $emailSettings->mail_port);
+                        Config::set('mail.username', $emailSettings->mail_username);
+                        Config::set('mail.password', $emailSettings->mail_password);
+                        Config::set('mail.encryption', $emailSettings->mail_encryption);
+                        Config::set('mail.from.address', $emailSettings->mail_from_address);
+                        Config::set('mail.from.name', $emailSettings->mail_from_name);
+                    }
 
                     Mail::to($user->email)->send(new EmailVerificationMail($user));
 
@@ -908,6 +955,21 @@ $responseData = [
             if(env("SEND_EMAIL") == true) {
             $this->checkEmailSender($user->id,1);
 
+            $business = $user->business;
+            if ($business && $business->emailSettings) {
+
+                $emailSettings = $business->emailSettings;
+
+                Config::set('mail.driver', $emailSettings->mail_driver);
+                Config::set('mail.host', $emailSettings->mail_host);
+                Config::set('mail.port', $emailSettings->mail_port);
+                Config::set('mail.username', $emailSettings->mail_username);
+                Config::set('mail.password', $emailSettings->mail_password);
+                Config::set('mail.encryption', $emailSettings->mail_encryption);
+                Config::set('mail.from.address', $emailSettings->mail_from_address);
+                Config::set('mail.from.name', $emailSettings->mail_from_name);
+            }
+
             $result = Mail::to($request_data["email"])->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
             $this->storeEmailSender($user->id,1);
@@ -1018,6 +1080,21 @@ $responseData = [
 
                 $this->checkEmailSender($user->id,1);
 
+                $business = $user->business;
+                if ($business && $business->emailSettings) {
+
+                    $emailSettings = $business->emailSettings;
+
+                    Config::set('mail.driver', $emailSettings->mail_driver);
+                    Config::set('mail.host', $emailSettings->mail_host);
+                    Config::set('mail.port', $emailSettings->mail_port);
+                    Config::set('mail.username', $emailSettings->mail_username);
+                    Config::set('mail.password', $emailSettings->mail_password);
+                    Config::set('mail.encryption', $emailSettings->mail_encryption);
+                    Config::set('mail.from.address', $emailSettings->mail_from_address);
+                    Config::set('mail.from.name', $emailSettings->mail_from_name);
+                }
+
                 $result = Mail::to($user->email)->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
                 $this->storeEmailSender($user->id,1);
@@ -1127,6 +1204,21 @@ $responseData = [
 
 
                 $this->checkEmailSender($user->id,0);
+
+                $business = $user->business;
+                if ($business && $business->emailSettings) {
+
+                    $emailSettings = $business->emailSettings;
+
+                    Config::set('mail.driver', $emailSettings->mail_driver);
+                    Config::set('mail.host', $emailSettings->mail_host);
+                    Config::set('mail.port', $emailSettings->mail_port);
+                    Config::set('mail.username', $emailSettings->mail_username);
+                    Config::set('mail.password', $emailSettings->mail_password);
+                    Config::set('mail.encryption', $emailSettings->mail_encryption);
+                    Config::set('mail.from.address', $emailSettings->mail_from_address);
+                    Config::set('mail.from.name', $emailSettings->mail_from_name);
+                }
 
                 Mail::to($user->email)->send(new EmailVerificationMail($user));
 

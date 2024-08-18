@@ -608,6 +608,7 @@ class UserManagementController extends Controller
                 $this->storeEmailSender(auth()->user()->id, 0);
             }
 
+
             DB::commit();
             return response($user, 201);
         } catch (Exception $e) {

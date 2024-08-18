@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateEmailSettingRequest;
 use App\Http\Requests\UpdateSystemSettingRequest;
+use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\UserActivityUtil;
 use App\Models\BusinessEmailSetting;
 use Exception;
 use Illuminate\Http\Request;
 
 class BusinessEmailSettingController extends Controller
 {
+    use ErrorUtil,UserActivityUtil;
  /**
      *
      * @OA\Put(

@@ -42,6 +42,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+
             \App\Http\Middleware\ResponseMiddleware::class,
             \App\Http\Middleware\FormatDatesInRequest::class,
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
@@ -59,6 +60,8 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'developer' => \App\Http\Middleware\DeveloperMiddleware::class,
+
+        'mail.setting' => \App\Http\Middleware\ConfigureMailSettings::class,
 
 
         'auth' => \App\Http\Middleware\Authenticate::class,
