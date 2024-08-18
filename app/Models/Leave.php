@@ -32,7 +32,8 @@ class Leave extends Model
     public function getIApprovedAttribute($value)
     {
         $leave_approval = LeaveApproval::where([
-            "created_by" => auth()->user()->id
+            "created_by" => auth()->user()->id,
+            "leave_id" => $this->id
         ])
             ->first();
 

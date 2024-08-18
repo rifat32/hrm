@@ -19,6 +19,7 @@ class WorkLocation extends Model
 
         "max_radius",
 
+        "address",
         "ip_address",
 
         'latitude',

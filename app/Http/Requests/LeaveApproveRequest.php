@@ -33,8 +33,6 @@ class LeaveApproveRequest extends BaseFormRequest
             'leave_id' => [
                 'required',
                 'numeric',
-
-
             ],
 
             "is_approved" => "required|boolean",

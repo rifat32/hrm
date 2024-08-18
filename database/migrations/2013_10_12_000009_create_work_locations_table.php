@@ -17,7 +17,7 @@ class CreateWorkLocationsTable extends Migration
             $table->id();
             $table->string('name');
 
-            $table->string('address');
+            $table->string('address')->nullable();
 
             $table->boolean('is_location_enabled');
 

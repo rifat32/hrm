@@ -507,6 +507,7 @@ class LeaveController extends Controller
 
 
 
+
             if (!$leave_approval) {
                 return response()->json([
                     "message" => "something went wrong."
