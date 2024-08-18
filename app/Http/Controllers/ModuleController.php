@@ -195,6 +195,19 @@ class ModuleController extends Controller
            ]);
         }
 
+        $disabled_modules = Module::where('modules.is_enabled', 1)
+        ->whereNotIn("id",$request_data["active_module_ids"])
+        ->pluck("id")->toArray();
+
+        foreach($disabled_modules as $inactive_module_id) {
+            BusinessModule::create([
+                "is_enabled" => 0,
+                "business_id" => $request_data["business_id"],
+                "module_id" => $active_module_id,
+                'created_by' => auth()->user()->id
+               ]);
+      }
+
 
 
              return response()->json(['message' => 'Module status updated successfully'], 200);
@@ -552,6 +565,12 @@ class ModuleController extends Controller
                  ], 404);
              }
 
+             $service_plan_modules =   ServicePlanModule::where([
+                "service_plan_id" => $business->service_plan_id
+             ])
+             ->get();
+
+
 
              $modules = Module::where('modules.is_enabled', 1)
                  ->orderBy("modules.name", "ASC")
@@ -559,8 +578,20 @@ class ModuleController extends Controller
                  ->select("id","name")
                 ->get()
 
-                ->map(function($item) use($business) {
+                ->map(function($item) use($business, $service_plan_modules) {
                     $item->is_enabled = 0;
+
+                    $service_plan_module = $service_plan_modules->first(function ($plan) use ($item) {
+                        return $plan->id == $item->id;
+                    });
+
+                    if(!empty($service_plan_module)) {
+                        if($service_plan_module->is_enabled) {
+                            $item->is_enabled = 1;
+                        }
+
+                    }
+
 
                 $businessModule =    BusinessModule::where([
                     "business_id" => $business->id,

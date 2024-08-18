@@ -14,6 +14,7 @@ use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\ServicePlanModule;
 use App\Models\SettingAttendance;
 use App\Models\SettingLeave;
 use App\Models\SettingLeaveType;
@@ -408,6 +409,10 @@ trait BusinessUtil
 
     public function storeDefaultsToBusiness($business)
     {
+        $business->service_plan_id;
+
+
+
 
 
         $work_location =  WorkLocation::create([

@@ -123,6 +123,19 @@ class ServicePlanController extends Controller
                ]);
             }
 
+            $disabled_modules = Module::where('modules.is_enabled', 1)
+            ->whereNotIn("id",$request_data["active_module_ids"])
+            ->pluck("id")->toArray();
+
+            foreach($disabled_modules as $inactive_module_id) {
+                ServicePlanModule::create([
+                    "is_enabled" => 0,
+                    "service_plan_id" => $service_plan->id,
+                    "module_id" => $inactive_module_id,
+                    'created_by' => auth()->user()->id
+                   ]);
+          }
+
 
 
                 return response($service_plan, 201);
@@ -261,7 +274,6 @@ class ServicePlanController extends Controller
                  ])
                  ->delete();
 
-
             foreach($request_data["active_module_ids"] as $active_module_id){
                 ServicePlanModule::create([
                 "is_enabled" => 1,
@@ -270,6 +282,24 @@ class ServicePlanController extends Controller
                 'created_by' => auth()->user()->id
                ]);
             }
+
+
+            $disabled_modules = Module::where('modules.is_enabled', 1)
+            ->whereNotIn("id",$request_data["active_module_ids"])
+            ->pluck("id")->toArray();
+
+            foreach($disabled_modules as $inactive_module_id) {
+                ServicePlanModule::create([
+                    "is_enabled" => 0,
+                    "service_plan_id" => $service_plan->id,
+                    "module_id" => $inactive_module_id,
+                    'created_by' => auth()->user()->id
+                   ]);
+          }
+
+
+
+
 
                 return response($service_plan, 201);
             });
