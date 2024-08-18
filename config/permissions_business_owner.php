@@ -3,7 +3,11 @@
 return [
     "permissions" => [
 
+
     'business_owner',
+
+    "email_setting_update",
+    "email_setting_view",
 
     "template_update",
     "template_view",

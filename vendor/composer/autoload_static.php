@@ -989,6 +989,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Http\\Requests\\UserLetterCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserLetterCreateRequest.php',
         'App\\Http\\Requests\\UserLetterGenerateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserLetterGenerateRequest.php',
         'App\\Http\\Requests\\UserLetterUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserLetterUpdateRequest.php',
+        'App\\Http\\Requests\\UserLetterUpdateViewRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserLetterUpdateViewRequest.php',
         'App\\Http\\Requests\\UserNoteCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserNoteCreateRequest.php',
         'App\\Http\\Requests\\UserNoteUpdateByBusinessOwnerRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserNoteUpdateByBusinessOwnerRequest.php',
         'App\\Http\\Requests\\UserNoteUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UserNoteUpdateRequest.php',

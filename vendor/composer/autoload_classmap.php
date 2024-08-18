@@ -277,6 +277,7 @@ return array(
     'App\\Http\\Requests\\UserLetterCreateRequest' => $baseDir . '/app/Http/Requests/UserLetterCreateRequest.php',
     'App\\Http\\Requests\\UserLetterGenerateRequest' => $baseDir . '/app/Http/Requests/UserLetterGenerateRequest.php',
     'App\\Http\\Requests\\UserLetterUpdateRequest' => $baseDir . '/app/Http/Requests/UserLetterUpdateRequest.php',
+    'App\\Http\\Requests\\UserLetterUpdateViewRequest' => $baseDir . '/app/Http/Requests/UserLetterUpdateViewRequest.php',
     'App\\Http\\Requests\\UserNoteCreateRequest' => $baseDir . '/app/Http/Requests/UserNoteCreateRequest.php',
     'App\\Http\\Requests\\UserNoteUpdateByBusinessOwnerRequest' => $baseDir . '/app/Http/Requests/UserNoteUpdateByBusinessOwnerRequest.php',
     'App\\Http\\Requests\\UserNoteUpdateRequest' => $baseDir . '/app/Http/Requests/UserNoteUpdateRequest.php',

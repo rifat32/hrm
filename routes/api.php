@@ -10,6 +10,7 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmailTemplateWrapperController;
 
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\BusinessEmailSettingController;
 use App\Http\Controllers\BusinessTierController;
 use App\Http\Controllers\BusinessTimesController;
 use App\Http\Controllers\CandidateController;
@@ -292,6 +293,24 @@ Route::get('/v1.0/system-settings', [SystemSettingController::class, "getSystemS
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end system management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// business email setting management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Route::put('/v1.0/email-settings', [BusinessEmailSettingController::class, "updateEmailSetting"]);
+Route::get('/v1.0/email-settings', [BusinessEmailSettingController::class, "getEmailSetting"]);
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// business email setting management section
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
 
 

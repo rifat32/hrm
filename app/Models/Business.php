@@ -58,7 +58,10 @@ class Business extends Model
     ];
 
 
-
+    public function emailSettings()
+    {
+        return $this->hasOne(BusinessEmailSetting::class);
+    }
 
     public function getIsSubscribedAttribute($value)
     {

@@ -45,6 +45,10 @@ return [
     ],
     "permissions" => [
 
+        "email_setting_update",
+        "email_setting_view",
+
+
         "handle_self_registered_businesses",
 
         "business_owner",
@@ -338,7 +342,7 @@ return [
         "employment_status_view",
         "employment_status_delete",
 
-        
+
         "asset_type_create",
         "asset_type_update",
         "asset_type_activate",
