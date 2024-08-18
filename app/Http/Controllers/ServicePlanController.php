@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\DiscountUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Business;
 use App\Models\Module;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
@@ -94,7 +95,7 @@ class ServicePlanController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('service_plan_create')) {
+                if (!$request->user()->hasPermissionTo('business_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -212,7 +213,7 @@ class ServicePlanController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
             return DB::transaction(function () use ($request) {
-                if (!$request->user()->hasPermissionTo('service_plan_update')) {
+                if (!$request->user()->hasPermissionTo('business_create')) {
                     return response()->json([
                         "message" => "You can not perform this action"
                     ], 401);
@@ -368,7 +369,8 @@ class ServicePlanController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('service_plan_view')) {
+
+            if (!$request->user()->hasPermissionTo('business_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -376,6 +378,13 @@ class ServicePlanController extends Controller
 
 
             $service_plans = ServicePlan::with("business_tier")
+            ->where('service_plans.created_by', ">=", auth()->user()->id)
+
+            // ->when(!auth()->user()->hasRole("superadmin"), function ($query) use ($request) {
+            //     return $query->where('service_plans.created_by', ">=", auth()->user()->id);
+            // }
+            // )
+
             ->when(!empty($request->search_key), function ($query) use ($request) {
                 return $query->where(function ($query) use ($request) {
                     $term = $request->search_key;
@@ -520,18 +529,11 @@ class ServicePlanController extends Controller
                  });
              })
 
-             //     when($request->user()->hasRole('superadmin'), function ($query) use ($request) {
-             //     return $query->where('service_plans.business_id', NULL)
-             //                  ->where('service_plans.is_default', 1);
-             // })
-             // ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-             //     return $query->where('service_plans.business_id', auth()->user()->business_id);
-             // })
 
+                 ->when(!empty($request->reseller_id), function ($query) use ($request) {
+                    return $query->where('service_plans.created_by', $request->reseller_id);
+                })
 
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
                  ->when(!empty($request->start_date), function ($query) use ($request) {
                      return $query->where('service_plans.created_at', ">=", $request->start_date);
                  })
@@ -617,7 +619,7 @@ class ServicePlanController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('service_plan_view')) {
+            if (!$request->user()->hasPermissionTo('business_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -734,7 +736,7 @@ class ServicePlanController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-            if (!$request->user()->hasPermissionTo('service_plan_delete')) {
+            if (!$request->user()->hasPermissionTo('business_create')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -763,7 +765,21 @@ class ServicePlanController extends Controller
                 ], 404);
             }
 
+            $conflictingBusinesses = Business::
 
+           whereIn("service_plan_id",$nonExistingIds)
+
+
+            ->get([
+                "id"
+            ]);
+
+            if ($conflictingBusinesses->isNotEmpty()) {
+                return response()->json([
+                    "message" => "Some businesses are associated with the specified service plans",
+                    "conflicting_users" => $conflictingBusinesses
+                ], 409);
+            }
 
             ServicePlan::destroy($existingIds);
 

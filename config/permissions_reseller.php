@@ -5,10 +5,7 @@ return [
 
     "role_view",
 
-    "service_plan_create",
-    "service_plan_update",
-    "service_plan_view",
-    "service_plan_delete",
+
 
     "user_create",
     "user_update",

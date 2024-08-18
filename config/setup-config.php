@@ -81,10 +81,7 @@ return [
         "business_tier_view",
         "business_tier_delete",
 
-        "service_plan_create",
-        "service_plan_update",
-        "service_plan_view",
-        "service_plan_delete",
+       
 
 
 
@@ -440,10 +437,7 @@ return [
         "business_tier_view" => "view",
         "business_tier_delete" => "delete",
 
-        "service_plan_create" => "create",
-        "service_plan_update" => "update",
-        "service_plan_view" => "view",
-        "service_plan_delete" => "delete",
+
 
 
 
@@ -800,16 +794,7 @@ return [
         ],
 
 
-        [
-            "header" => "service_plan",
-            "permissions" => [
-                "service_plan_create",
-                "service_plan_update",
-                "service_plan_view",
-                "service_plan_delete",
-            ],
 
-        ],
 
 
 

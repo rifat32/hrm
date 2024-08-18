@@ -27,14 +27,18 @@ class AuthorizationChecker
 
         if(!empty($business) && $business->owner_id != $user->id){
             if($user->hasRole(("business_employee#" . $business->id))) {
-                $this->isModuleEnabled("employee_login");
+            $moduleEnabled =  $this->isModuleEnabled("employee_login", false);
+            if(!$moduleEnabled){
+                return response(['message' => 'Module is not enabled'], 401);
+            }
+
             }
         }
 
 
         if(empty($user->is_active)) {
 
-            return response(['message' => 'User not active'], 403);
+            return response(['message' => 'User not active'], 401);
         }
 
         $accessRevocation = $user->accessRevocation;
@@ -43,20 +47,19 @@ class AuthorizationChecker
 
             if(!empty($accessRevocation->system_access_revoked_date)) {
                 if(Carbon::parse($accessRevocation->system_access_revoked_date)) {
-  return response(['message' => 'User access revoked active'], 403);
+  return response(['message' => 'User access revoked active'], 401);
                 }
             }
 
 
             if(!empty($accessRevocation->email_access_revoked)) {
-                return response(['message' => 'User access revoked active'], 403);
+                return response(['message' => 'User access revoked active'], 401);
             }
-
-
 
         }
 
 
         return $next($request);
     }
+
 }

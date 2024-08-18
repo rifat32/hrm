@@ -20,11 +20,7 @@ return [
     "business_tier_delete",
 
 
-    "service_plan_create",
-    "service_plan_update",
-    "service_plan_view",
-    "service_plan_delete",
-
+ 
 
     "work_shift_update",
     "work_shift_view",
