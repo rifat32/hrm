@@ -53,8 +53,12 @@ $rules = [
         'sign_required' => [
         'required',
         'boolean',
-
     ],
+    'letter_view_required' => [
+        'required',
+        'boolean',
+    ],
+
 
         'attachments' => [
         'present',

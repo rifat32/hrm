@@ -507,6 +507,7 @@ return array(
     'App\\Rules\\TimeValidation' => $baseDir . '/app/Rules/TimeValidation.php',
     'App\\Rules\\UniqueAttendanceDate' => $baseDir . '/app/Rules/UniqueAttendanceDate.php',
     'App\\Rules\\UniqueSettingLeaveTypeName' => $baseDir . '/app/Rules/UniqueSettingLeaveTypeName.php',
+    'App\\Rules\\ValidateAssetTypeName' => $baseDir . '/app/Rules/ValidateAssetTypeName.php',
     'App\\Rules\\ValidateBank' => $baseDir . '/app/Rules/ValidateBank.php',
     'App\\Rules\\ValidateDepartment' => $baseDir . '/app/Rules/ValidateDepartment.php',
     'App\\Rules\\ValidateDepartmentName' => $baseDir . '/app/Rules/ValidateDepartmentName.php',

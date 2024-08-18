@@ -1219,6 +1219,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Rules\\TimeValidation' => __DIR__ . '/../..' . '/app/Rules/TimeValidation.php',
         'App\\Rules\\UniqueAttendanceDate' => __DIR__ . '/../..' . '/app/Rules/UniqueAttendanceDate.php',
         'App\\Rules\\UniqueSettingLeaveTypeName' => __DIR__ . '/../..' . '/app/Rules/UniqueSettingLeaveTypeName.php',
+        'App\\Rules\\ValidateAssetTypeName' => __DIR__ . '/../..' . '/app/Rules/ValidateAssetTypeName.php',
         'App\\Rules\\ValidateBank' => __DIR__ . '/../..' . '/app/Rules/ValidateBank.php',
         'App\\Rules\\ValidateDepartment' => __DIR__ . '/../..' . '/app/Rules/ValidateDepartment.php',
         'App\\Rules\\ValidateDepartmentName' => __DIR__ . '/../..' . '/app/Rules/ValidateDepartmentName.php',

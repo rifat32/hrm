@@ -593,6 +593,8 @@ Route::post('/v1.0/user-letters/send', [UserLetterController::class, "sendUserLe
 
 
 Route::put('/v1.0/user-letters', [UserLetterController::class, "updateUserLetter"]);
+Route::put('/v1.0/user-letters/view', [UserLetterController::class, "updateUserLetterView"]);
+
 Route::get('/v1.0/user-letters', [UserLetterController::class, "getUserLetters"]);
 
 Route::get('/v1.0/user-letters-histories', [UserLetterController::class, "getUserLetterHistories"]);
@@ -917,7 +919,7 @@ Route::delete('/v1.0/asset-types/{ids}', [AssetTypeController::class, "deleteAss
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // end asset types management section
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-      
+
 
 
 

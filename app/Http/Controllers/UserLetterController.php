@@ -18,6 +18,7 @@ use App\Http\Requests\UserLetterCreateRequest;
 use App\Http\Requests\UserLetterUpdateRequest;
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\UserLetterGenerateRequest;
+use App\Http\Requests\UserLetterUpdateViewRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
@@ -27,6 +28,7 @@ use App\Mail\UserLetterMail;
 use App\Models\UserLetter;
 use App\Models\DisabledUserLetter;
 use App\Models\LetterTemplate;
+use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserLetterEmailHistory;
 use Carbon\Carbon;
@@ -61,6 +63,8 @@ class UserLetterController extends Controller
      * @OA\Property(property="letter_content", type="string", format="string", example="letter_content"),
      * @OA\Property(property="status", type="string", format="string", example="status"),
      * @OA\Property(property="sign_required", type="string", format="string", example="sign_required"),
+     * @OA\Property(property="letter_view_required", type="string", format="string", example="letter_view_required"),
+     *
      * @OA\Property(property="user_id", type="string", format="string", example="user_id"),
      * @OA\Property(property="attachments", type="string", format="string", example="attachments"),
      *
@@ -161,6 +165,7 @@ class UserLetterController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      * @OA\Property(property="letter_template_id", type="string", format="string", example="sign_required"),
+     * @OA\Property(property="letter_view_required", type="string", format="string", example="letter_view_required"),
      * @OA\Property(property="user_id", type="string", format="string", example="user_id"),
 
      *
@@ -216,11 +221,19 @@ class UserLetterController extends Controller
 
                 $request_data = $request->validated();
 
+                $business = auth()->user()->business;
+
 
                 $employee = User::where([
                     "id" => $request_data["user_id"]
                 ])
                     ->first();
+
+                    $last_termination = Termination::where([
+                        "user_id" => $employee->id
+                    ])
+                        ->latest()
+                        ->first();
 
                 $letter_template = LetterTemplate::where([
                     "id" => $request_data["letter_template_id"]
@@ -264,6 +277,46 @@ class UserLetterController extends Controller
                             $NI_number = isset($employee["NI_number"]) ? $employee["NI_number"] : '--';
                             $template = str_replace($item, $NI_number, $template);
                         }
+                        else if (!empty($last_termination)) {
+                             if ($item == "[TERMINATION_DATE]") {
+                                $date_of_termination = isset($last_termination["date_of_termination"]) ? Carbon::parse($last_termination["date_of_termination"])->format("d-m-Y") : '--';
+                                $template = str_replace($item, $date_of_termination, $template);
+                            }
+                            else if ($item == "[REASON_FOR_TERMINATION]") {
+                                $terminationReason = isset($last_termination->terminationReason->name) ? $last_termination->terminationReason->name : '--';
+                                $template = str_replace($item, $terminationReason, $template);
+                            }
+                            else if ($item == "[TERMINATION_TYPE]") {
+                                $terminationType = isset($last_termination->terminationType->name) ? $last_termination->terminationType->name : '--';
+                                $template = str_replace($item, $terminationType, $template);
+                            }
+
+
+                        }
+
+
+
+                        else if ($item == "[COMPANY_NAME]") {
+                            $NI_number = isset($business["name"]) ? $business["name"] : '[COMPANY_NAME]';
+                            $template = str_replace($item, $NI_number, $template);
+                        }
+                        else if ($item == "[COMPANY_ADDRESS_LINE_1]") {
+                            $NI_number = isset($business["address_line_1"]) ? $business["address_line_1"] : '[COMPANY_ADDRESS_LINE_1]';
+                            $template = str_replace($item, $NI_number, $template);
+                        }
+                        else if ($item == "[COMPANY_CITY]") {
+                            $NI_number = isset($business["city"]) ? $business["city"] : '[COMPANY_CITY]';
+                            $template = str_replace($item, $NI_number, $template);
+                        }
+                        else if ($item == "[COMPANY_POSTCODE]") {
+                            $NI_number = isset($business["postcode"]) ? $business["postcode"] : '[COMPANY_POSTCODE]';
+                            $template = str_replace($item, $NI_number, $template);
+                        }
+                        else if ($item == "[COMPANY_COUNTRY]") {
+                            $NI_number = isset($business["country"]) ? $business["country"] : '[COMPANY_COUNTRY]';
+                            $template = str_replace($item, $NI_number, $template);
+                        }
+
                          else {
                             $template = str_replace($item, $employee[$variableName], $template);
                         }
@@ -494,6 +547,8 @@ class UserLetterController extends Controller
      * @OA\Property(property="letter_content", type="string", format="string", example="letter_content"),
      * @OA\Property(property="status", type="string", format="string", example="status"),
      * @OA\Property(property="sign_required", type="string", format="string", example="sign_required"),
+     * @OA\Property(property="letter_view_required", type="string", format="string", example="letter_view_required"),
+     *
      * @OA\Property(property="user_id", type="string", format="string", example="user_id"),
      * @OA\Property(property="attachments", type="string", format="string", example="attachments"),
      *
@@ -561,6 +616,7 @@ class UserLetterController extends Controller
                         "letter_content",
                         "status",
                         "sign_required",
+                        "letter_view_required",
                         "user_id",
                         "attachments",
                         // "is_default",
@@ -585,6 +641,108 @@ class UserLetterController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+       /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/user-letters/view",
+     *      operationId="updateUserLetterView",
+     *      tags={"user_letters"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update user letters ",
+     *      description="This method is to update user letters ",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *      @OA\Property(property="id", type="number", format="number", example="1"),
+     * @OA\Property(property="letter_viewed", type="string", format="string", example="issue_date"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateUserLetterView(UserLetterUpdateViewRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             return DB::transaction(function () use ($request) {
+
+                //  if (!$request->user()->hasPermissionTo('user_letter_update')) {
+                //      return response()->json([
+                //          "message" => "You can not perform this action"
+                //      ], 401);
+                //  }
+                 $request_data = $request->validated();
+
+
+
+                 $user_letter_query_params = [
+                     "id" => $request_data["id"],
+                     "user_id" => auth()->user()->id,
+                 ];
+
+                 $user_letter = UserLetter::where($user_letter_query_params)->first();
+
+                 if ($user_letter) {
+                     $user_letter->fill(collect($request_data)->only([
+                         "letter_viewed",
+                         // "is_default",
+                         // "is_active",
+                         // "business_id",
+                         // "created_by"
+                     ])->toArray());
+                     $user_letter->save();
+                 } else {
+                     return response()->json([
+                         "message" => "something went wrong."
+                     ], 500);
+                 }
+
+
+
+
+                 return response($user_letter, 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
 
 

@@ -821,6 +821,29 @@ public function getLetterTemplateVariablesFunc () {
         '[ACCOUNT_NUMBER]',
         '[ACCOUNT_NAME]',
         '[BANK_NAME]',
+
+        'COMPANY DETAILS',
+        'COMPANY_NAME',
+        'COMPANY_ADDRESS_LINE_1',
+        'COMPANY_CITY',
+        'COMPANY_POSTCODE',
+        'COMPANY_COUNTRY',
+
+
+            'TERMINATION DETAILS',
+            'TERMINATION_DATE',
+            'REASON_FOR_TERMINATION',
+            'TERMINATION_TYPE',
+
+
+
+            'TYPE_OF_LEAVE',
+            'LEAVE_START_DATE',
+            'LEAVE_END_DATE',
+            'TOTAL_DAYS'
+
+
+
     ];
 
 

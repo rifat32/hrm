@@ -20,6 +20,8 @@ class UserLetter extends Model
         'letter_content',
         'sign_required',
         'attachments',
+        "letter_view_required",
+        // "letter_viewed",
         'user_id',
         "email_sent",
         "business_id",
