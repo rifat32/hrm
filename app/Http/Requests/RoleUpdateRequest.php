@@ -25,7 +25,7 @@ class RoleUpdateRequest extends BaseFormRequest
     {
         return [
             "id" => "required",
-            "name" => 'required|string|unique:roles,name,' . $this->user["id"] . ',id',
+            "name" => 'required|string|unique:roles,name,' . $this->id . ',id',
             "permissions" => "required",
             "description" => "nullable|string"
         ];

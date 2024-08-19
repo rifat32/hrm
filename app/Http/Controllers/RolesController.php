@@ -203,12 +203,12 @@ class RolesController extends Controller
                 }
 
 
-            if (!empty($request_data['description'])) {
+
 
                 $role->name = $request_data['name'];
-                $role->description = $request_data['description'];
+                $role->description = !empty($request_data['description'])?$request_data['description']:"";
                 $role->save();
-            }
+
 
             $role->syncPermissions($request_data["permissions"]);
 

@@ -47,7 +47,7 @@ class Comment extends Model
                     );
                 },
 
-                "mentions" => function ($query) {
+                "mentioned_users" => function ($query) {
                     $query->select(
                         'users.id',
                         'users.first_Name',
@@ -85,6 +85,13 @@ class Comment extends Model
     {
         return $this->hasMany(TaskCommentMention::class,'comment_id','id');
     }
+
+    public function mentioned_users()
+    {
+        return $this->belongsToMany(User::class,"task_comment_mentions",'comment_id','user_id');
+    }
+
+
 
 
     public function getHiddenNoteAttribute()

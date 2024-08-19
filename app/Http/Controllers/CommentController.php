@@ -539,7 +539,7 @@ class CommentController extends Controller
                 },
 
 
-                "mentions" => function ($query) {
+                "mentioned_users" => function ($query) {
                     $query->select(
                         'users.id',
                         'users.first_Name',
@@ -691,8 +691,8 @@ class CommentController extends Controller
                             'users.last_Name'
                         );
                     },
-          
-                    "mentions" => function ($query) {
+
+                    "mentioned_users" => function ($query) {
                         $query->select(
                             'users.id',
                             'users.first_Name',
