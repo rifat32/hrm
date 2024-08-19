@@ -537,8 +537,8 @@ class CommentController extends Controller
                         'users.last_Name'
                     );
                 },
-                "assigned_by",
-                "assignees",
+
+
                 "mentions" => function ($query) {
                     $query->select(
                         'users.id',
@@ -553,7 +553,7 @@ class CommentController extends Controller
 
 
             ])
-
+            ->whereNull("parent_comment_id")
                 ->whereHas(
                     "creator",
                     function ($query) {
@@ -691,8 +691,7 @@ class CommentController extends Controller
                             'users.last_Name'
                         );
                     },
-                    "assigned_by",
-                    "assignees",
+          
                     "mentions" => function ($query) {
                         $query->select(
                             'users.id',

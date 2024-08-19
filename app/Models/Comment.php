@@ -46,8 +46,7 @@ class Comment extends Model
                         'users.last_Name'
                     );
                 },
-                "assigned_by",
-                "assignees",
+
                 "mentions" => function ($query) {
                     $query->select(
                         'users.id',

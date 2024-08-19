@@ -119,9 +119,6 @@ class ProjectController extends Controller
 
             $request_data = $request->validated();
 
-
-
-
             $request_data["is_active"] = 1;
             $request_data["is_default"] = 0;
             $request_data["created_by"] = $request->user()->id;
